@@ -1447,6 +1447,8 @@ namespace System.Net.Http
                         catch (Exception e)
                         {
                             if (NetEventSource.IsEnabled) Trace($"SendRequestBody Task failed. {e}");
+                            // Observe exception (if any) on responseHeadersTask.
+                            _ = LogExceptionsAsync(responseHeadersTask);
                             throw;
                         }
 
