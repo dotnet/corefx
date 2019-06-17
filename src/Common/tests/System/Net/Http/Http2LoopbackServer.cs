@@ -157,6 +157,8 @@ namespace System.Net.Test.Common
             // Construct the correct frame type and return it.
             switch (header.Type)
             {
+                case FrameType.Settings:
+                    return SettingsFrame.ReadFrom(header, data);
                 case FrameType.Data:
                     return DataFrame.ReadFrom(header, data);
                 case FrameType.Headers:
@@ -246,7 +248,7 @@ namespace System.Net.Test.Common
         }
 
         // Accept connection and handle connection setup
-        public async Task EstablishConnectionAsync(params SettingsEntry[] settingsEntries)
+        public async Task<SettingsFrame> EstablishConnectionAsync(params SettingsEntry[] settingsEntries)
         {
             await AcceptConnectionAsync().ConfigureAwait(false);
 
@@ -255,6 +257,8 @@ namespace System.Net.Test.Common
             Assert.Equal(FrameType.Settings, receivedFrame.Type);
             Assert.Equal(FrameFlags.None, receivedFrame.Flags);
             Assert.Equal(0, receivedFrame.StreamId);
+
+            var clientSettingsFrame = (SettingsFrame)receivedFrame;
 
             // Receive the initial client window update frame.
             receivedFrame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
@@ -272,6 +276,8 @@ namespace System.Net.Test.Common
 
             // The client will send us a SETTINGS ACK eventually, but not necessarily right away.
             ExpectSettingsAck();
+
+            return clientSettingsFrame;
         }
 
         public void ShutdownSend()
