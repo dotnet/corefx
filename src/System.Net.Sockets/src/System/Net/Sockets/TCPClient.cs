@@ -17,7 +17,7 @@ namespace System.Net.Sockets
         private AddressFamily _family;
         private Socket _clientSocket;
         private NetworkStream _dataStream;
-        private int _cleanedUp;
+        private volatile int _cleanedUp;
         private bool _active;
 
         // Initializes a new instance of the System.Net.Sockets.TcpClient class.
@@ -124,11 +124,11 @@ namespace System.Net.Sockets
         {
             get
             {
-                var socket = Volatile.Read(ref _clientSocket);
+                Socket socket = Volatile.Read(ref _clientSocket);
 
                 if (socket == null)
                 {
-                    if (Volatile.Read(ref _cleanedUp) == 1)
+                    if (_cleanedUp == 1)
                     {
                         throw new ObjectDisposedException(GetType().FullName);
                     }
@@ -201,7 +201,7 @@ namespace System.Net.Sockets
                             {
                                 var socket = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                                 Volatile.Write(ref _clientSocket, socket);
-                                if (Volatile.Read(ref _cleanedUp) == 1)
+                                if (_cleanedUp == 1)
                                 {
                                     socket.Dispose();
                                 }
