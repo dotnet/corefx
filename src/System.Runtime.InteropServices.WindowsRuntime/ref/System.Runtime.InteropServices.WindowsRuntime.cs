@@ -24,6 +24,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
     public sealed partial class EventRegistrationTokenTable<T> where T : class
     {
         public EventRegistrationTokenTable() { }
+        [System.Diagnostics.CodeAnalysis.MaybeNullAttribute]
         public T InvocationList { get { throw null; } set { } }
         public System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken AddEventHandler(T handler) { throw null; }
         public static System.Runtime.InteropServices.WindowsRuntime.EventRegistrationTokenTable<T> GetOrCreateEventRegistrationTokenTable(ref System.Runtime.InteropServices.WindowsRuntime.EventRegistrationTokenTable<T>? refEventTable) { throw null; }
