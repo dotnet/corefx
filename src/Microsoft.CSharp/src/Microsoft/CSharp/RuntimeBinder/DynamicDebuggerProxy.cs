@@ -30,7 +30,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
     internal sealed class GetMemberValueBinder : GetMemberBinder
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public GetMemberValueBinder(string name, bool ignoreCase)
             : base(name, ignoreCase)
         {
@@ -55,18 +54,14 @@ namespace Microsoft.CSharp.RuntimeBinder
         internal class DynamicProperty
         {
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             readonly string name;
 
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             readonly object value;
 
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             readonly string type;
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
             public DynamicProperty(string name, object value)
             {
                 this.name = name;
@@ -84,7 +79,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         internal DynamicProperty[] Items
         {
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
             get
             {
                 if (results == null || results.Count == 0)
@@ -104,7 +98,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public DynamicMetaObjectProviderDebugView(object arg)
         {
             this.obj = arg;
@@ -113,7 +106,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private static readonly ParameterExpression parameter = Expression.Parameter(typeof(object), "debug");
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public static object TryEvalBinaryOperators<T1, T2>(
             T1 arg1, 
             T2 arg2, 
@@ -136,7 +128,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return site.Target(site, arg1, arg2);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public static object TryEvalUnaryOperators<T>(T obj, ExpressionType oper, Type accessibilityContext)
         {
             if (oper == ExpressionType.IsTrue || oper == ExpressionType.IsFalse)
@@ -157,7 +148,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return site.Target(site, obj);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public static K TryEvalCast<T, K>(T obj, Type type, CSharpBinderFlags kind, Type accessibilityContext)
         {
             var site = CallSite<Func<CallSite, T, K>>.Create(Binder.Convert(kind, type, accessibilityContext));
@@ -233,7 +223,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         /// <param name="accessibilityContext">Type that determines context in which method should be called.</param>
         /// <param name="typeArguments">Generic type arguments if there are any.</param>
         /// <returns>Result of method invocation.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public static object TryEvalMethodVarArgs(
             object[] methodArgs, 
             Type[] argTypes,
@@ -284,7 +273,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         /// <param name="accessibilityContext">Type that determines context in which method should be called.</param>
         /// <param name="isResultIndexed">Determines if COM binder should return a callable object.</param>
         /// <returns>Result of property invocation.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public static object TryGetMemberValue<T>(T obj, string propName, Type accessibilityContext, bool isResultIndexed)
         {
             // In most cases it's ok to use CSharpArgumentInfoFlags.None since target of property call is dynamic.
@@ -312,7 +300,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         /// <param name="argFlags">Flags describing each argument.</param>
         /// <param name="accessibilityContext">Type that determines context in which method should be called.</param>
         /// <returns>Result of property invocation.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public static object TryGetMemberValueVarArgs(
             object[] propArgs,
             Type[] argTypes,
@@ -346,7 +333,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         /// <param name="valueFlags"></param>
         /// <param name="accessibilityContext">Type that determines context in which method should be called.</param>
         /// <returns>Result of property invocation.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public static object TrySetMemberValue<TObject, TValue>(
             TObject obj, 
             string propName, 
@@ -378,7 +364,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         /// <param name="argFlags">Flags describing each argument.</param>
         /// <param name="accessibilityContext">Type that determines context in which method should be called.</param>
         /// <returns>Result of property invocation.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public static object TrySetMemberValueVarArgs(
             object[] propArgs,
             Type[] argTypes,
@@ -401,7 +386,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         }
 
         //Called when we don't know if the member is a property or a method
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal static object TryGetMemberValue(object obj, string name, bool ignoreException)
         {
             // if you want to ignore case for VB, this is how you set it .. make it a member and add a ctor to init it
@@ -431,7 +415,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return value;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         private static IList<KeyValuePair<string, object>> QueryDynamicObject(object obj)
         {
             IDynamicMetaObjectProvider ido = obj as IDynamicMetaObjectProvider;
@@ -471,7 +454,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             public string Empty
             {
-                [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
                 get
                 {
                     return SR.EmptyDynamicView;
