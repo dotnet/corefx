@@ -172,9 +172,9 @@ namespace System
 #nullable disable
             where T : System.IEquatable<T> { throw null; }
 #nullable restore
-        public static int ToLower(this System.ReadOnlySpan<char> source, System.Span<char> destination, System.Globalization.CultureInfo culture) { throw null; }
+        public static int ToLower(this System.ReadOnlySpan<char> source, System.Span<char> destination, System.Globalization.CultureInfo? culture) { throw null; }
         public static int ToLowerInvariant(this System.ReadOnlySpan<char> source, System.Span<char> destination) { throw null; }
-        public static int ToUpper(this System.ReadOnlySpan<char> source, System.Span<char> destination, System.Globalization.CultureInfo culture) { throw null; }
+        public static int ToUpper(this System.ReadOnlySpan<char> source, System.Span<char> destination, System.Globalization.CultureInfo? culture) { throw null; }
         public static int ToUpperInvariant(this System.ReadOnlySpan<char> source, System.Span<char> destination) { throw null; }
         public static System.Memory<char> Trim(this System.Memory<char> memory) { throw null; }
         public static System.ReadOnlyMemory<char> Trim(this System.ReadOnlyMemory<char> memory) { throw null; }
