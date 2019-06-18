@@ -230,6 +230,8 @@ namespace System.Text.Json
         private int _dummyPrimitive;
         public Utf8JsonReader(in System.Buffers.ReadOnlySequence<byte> jsonData, bool isFinalBlock, System.Text.Json.JsonReaderState state) { throw null; }
         public Utf8JsonReader(System.ReadOnlySpan<byte> jsonData, bool isFinalBlock, System.Text.Json.JsonReaderState state) { throw null; }
+        public Utf8JsonReader(System.ReadOnlySpan<byte> jsonData, JsonReaderOptions options = default) { throw null; }
+        public Utf8JsonReader(in System.Buffers.ReadOnlySequence<byte> jsonData, JsonReaderOptions options = default) { throw null; }
         public long BytesConsumed { get { throw null; } }
         public int CurrentDepth { get { throw null; } }
         public System.Text.Json.JsonReaderState CurrentState { get { throw null; } }
