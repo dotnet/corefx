@@ -79,9 +79,9 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDecimal"" : 3.3," +
                 @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
                 @"""MyDateTimeOffset"" : ""2019-01-30T12:01:02.0000000+01:00""," +
-                @"""MyEnum"" : 2,"+ // int by default
+                @"""MyEnum"" : 2," + // int by default
                 @"""MyInt64Enum"" : -9223372036854775808," +
-                @"""MyUInt64Enum"" : 18446744073709551615,"+
+                @"""MyUInt64Enum"" : 18446744073709551615," +
                 @"""MySimpleStruct"" : {""One"":11, ""Two"":1.9999, ""Three"":33}";
 
         private const string s_partialJsonArrays =

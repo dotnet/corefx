@@ -242,18 +242,19 @@ namespace System.Text.Json.Serialization.Tests
 
         [ActiveIssue(38414)]
         [Fact]
-        public static void ReadStructWithSimpleClassTest() {
-            SimpleStructWithClass testObject = new SimpleStructWithClass();
+        public static void ReadSimpleStructWithSimpleClass()
+        {
+            SimpleStructWithSimpleClass testObject = new SimpleStructWithSimpleClass();
             testObject.Initialize();
 
             string json = JsonSerializer.ToString(testObject, testObject.GetType());
-            SimpleStructWithClass obj = JsonSerializer.Parse<SimpleStructWithClass>(json);
+            SimpleStructWithSimpleClass obj = JsonSerializer.Parse<SimpleStructWithSimpleClass>(json);
             obj.Verify();
         }
 
         [ActiveIssue(38490)]
         [Fact]
-        public static void ReadStructObjectValueTest()
+        public static void ReadSimpleTestStructWithSimpleTestClass()
         {
             SimpleTestStruct testObject = new SimpleTestStruct();
             testObject.Initialize();
@@ -266,7 +267,7 @@ namespace System.Text.Json.Serialization.Tests
 
         [ActiveIssue(38490)]
         [Fact]
-        public static void ReadSimpleTestClassWithTestStruct()
+        public static void ReadSimpleTestClassWithSimpleTestStruct()
         {
             SimpleTestClass testObject = new SimpleTestClass();
             testObject.Initialize();

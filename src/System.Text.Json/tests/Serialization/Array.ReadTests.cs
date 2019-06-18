@@ -179,21 +179,11 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadInitializedArrayTest()
         {
             string serialized = "{\"Values\":[1,2,3]}";
-            AppState deserializedState = JsonSerializer.Parse<AppState>(serialized);
+            TestClassWithInitializedArray testClassWithInitializedArray = JsonSerializer.Parse<TestClassWithInitializedArray>(serialized);
 
-            Assert.Equal(1, deserializedState.Values[0]);
-            Assert.Equal(2, deserializedState.Values[1]);
-            Assert.Equal(3, deserializedState.Values[2]);
-        }
-
-        public class AppState
-        {
-            public int[] Values { get; set; }
-
-            public AppState()
-            {
-                Values = Array.Empty<int>();
-            }
+            Assert.Equal(1, testClassWithInitializedArray.Values[0]);
+            Assert.Equal(2, testClassWithInitializedArray.Values[1]);
+            Assert.Equal(3, testClassWithInitializedArray.Values[2]);
         }
 
         [Fact]

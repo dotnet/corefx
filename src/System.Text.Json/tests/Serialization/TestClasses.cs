@@ -75,7 +75,7 @@ namespace System.Text.Json.Serialization.Tests
         public double Two { get; set; }
     }
 
-    public struct SimpleStructWithClass: ITestClass
+    public struct SimpleStructWithSimpleClass: ITestClass
     {
         public short MyInt32 { get; set; }
         public SimpleTestClass MySimpleClass { get; set; }
@@ -608,6 +608,16 @@ namespace System.Text.Json.Serialization.Tests
             {
                 obj.Verify();
             }
+        }
+    }
+
+    public class TestClassWithInitializedArray
+    {
+        public int[] Values { get; set; }
+
+        public TestClassWithInitializedArray()
+        {
+            Values = Array.Empty<int>();
         }
     }
 
