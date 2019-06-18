@@ -30,10 +30,20 @@ namespace System.Buffers.Tests
         }
 
         [Fact]
-        public void WritingEmptyBufferToEmptyBufferWriterDoesNothing()
+        public void WritingEmptyBufferToSingleSegmentEmptyBufferWriterDoesNothing()
         {
             IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
                 new byte[][] { Array.Empty<byte>() }
+            );
+
+            bufferWriter.Write(Array.Empty<byte>()); // Span<byte>.Empty.CopyTo(Span<byte>.Empty);
+        }
+
+        [Fact]
+        public void WritingEmptyBufferToMultipleSegmentEmptyBufferWriterDoesNothing()
+        {
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] { Array.Empty<byte>(), Array.Empty<byte>() }
             );
 
             bufferWriter.Write(Array.Empty<byte>());
