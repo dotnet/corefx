@@ -15,6 +15,7 @@ namespace System.Text.Json.Serialization.Converters
             { typeof(DateTimeOffset), new JsonValueConverterDateTimeOffset() },
             { typeof(Guid), new JsonValueConverterGuid() },
             { typeof(JsonElement), new JsonValueConverterJsonElement() },
+            { typeof(Uri), new JsonValueConverterUri() },
         };
 
         internal static bool IsValueConvertable(Type type)

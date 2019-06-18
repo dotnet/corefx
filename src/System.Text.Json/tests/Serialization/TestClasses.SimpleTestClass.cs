@@ -29,6 +29,8 @@ namespace System.Text.Json.Serialization.Tests
         public double MyDouble { get; set; }
         public DateTime MyDateTime { get; set; }
         public DateTimeOffset MyDateTimeOffset { get; set; }
+        public Guid MyGuid { get; set; }
+        public Uri MyUri { get; set; }
         public SampleSByteEnum MySByteEnum { get; set; }
         public SampleByteEnum MyByteEnum { get; set; }
         public SampleEnum MyEnum { get; set; }
@@ -54,6 +56,8 @@ namespace System.Text.Json.Serialization.Tests
         public double[] MyDoubleArray { get; set; }
         public DateTime[] MyDateTimeArray { get; set; }
         public DateTimeOffset[] MyDateTimeOffsetArray { get; set; }
+        public Guid[] MyGuidArray { get; set; }
+        public Uri[] MyUriArray { get; set; }
         public SampleEnum[] MyEnumArray { get; set; }
         public int[][] MyInt16TwoDimensionArray { get; set; }
         public List<List<int>> MyInt16TwoDimensionList { get; set; }
@@ -114,6 +118,8 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDecimal"" : 3.3," +
                 @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
                 @"""MyDateTimeOffset"" : ""2019-01-30T12:01:02.0000000+01:00""," +
+                @"""MyGuid"" : ""1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6""," +
+                @"""MyUri"" : ""https:\/\/github.com\/dotnet\/corefx""," +
                 @"""MyEnum"" : 2," + // int by default
                 @"""MyStringToStringKeyValuePair"" : {""Key"" : ""myKey"", ""Value"" : ""myValue""}," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
@@ -142,6 +148,8 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDecimalArray"" : [3.3]," +
                 @"""MyDateTimeArray"" : [""2019-01-30T12:01:02.0000000Z""]," +
                 @"""MyDateTimeOffsetArray"" : [""2019-01-30T12:01:02.0000000+01:00""]," +
+                @"""MyGuidArray"" : [""1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6""]," +
+                @"""MyUriArray"" : [""https:\/\/github.com\/dotnet\/corefx""]," +
                 @"""MyEnumArray"" : [2]," + // int by default
                 @"""MyInt16TwoDimensionArray"" : [[10, 11],[20, 21]]," +
                 @"""MyInt16TwoDimensionList"" : [[10, 11],[20, 21]]," +
@@ -194,6 +202,8 @@ namespace System.Text.Json.Serialization.Tests
             MyDecimal = 3.3m;
             MyDateTime = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
             MyDateTimeOffset = new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0));
+            MyGuid = new Guid("1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6");
+            MyUri = new Uri("https://github.com/dotnet/corefx");
             MyEnum = SampleEnum.Two;
 
             MyInt16Array = new short[] { 1 };
@@ -213,6 +223,8 @@ namespace System.Text.Json.Serialization.Tests
             MyDecimalArray = new decimal[] { 3.3m };
             MyDateTimeArray = new DateTime[] { new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) };
             MyDateTimeOffsetArray = new DateTimeOffset[] { new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)) };
+            MyGuidArray = new Guid[] { new Guid("1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6") };
+            MyUriArray = new Uri[] { new Uri("https://github.com/dotnet/corefx") };
             MyEnumArray = new SampleEnum[] { SampleEnum.Two };
 
             MyInt16TwoDimensionArray = new int[2][];
@@ -303,6 +315,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2.2d, MyDouble);
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTime);
             Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), MyDateTimeOffset);
+            Assert.Equal(new Guid("1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6"), MyGuid);
+            Assert.Equal(new Uri("https://github.com/dotnet/corefx"), MyUri);
             Assert.Equal(SampleEnum.Two, MyEnum);
 
             Assert.Equal((short)1, MyInt16Array[0]);
@@ -322,6 +336,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2.2d, MyDoubleArray[0]);
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTimeArray[0]);
             Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), MyDateTimeOffsetArray[0]);
+            Assert.Equal(new Guid("1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6"), MyGuidArray[0]);
+            Assert.Equal(new Uri("https://github.com/dotnet/corefx"), MyUriArray[0]);
             Assert.Equal(SampleEnum.Two, MyEnumArray[0]);
 
             Assert.Equal(10, MyInt16TwoDimensionArray[0][0]);
