@@ -776,6 +776,17 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void DeserializeDictionaryWithDuplicateKeys()
         {
+            // Non-generic IDictionary case.
+            IDictionary iDeserialize = JsonSerializer.Parse<IDictionary>(@"{""Hello"":""World"", ""Hello"":""NewValue""}");
+            Assert.Equal("NewValue", iDeserialize["Hello"].ToString());
+
+            // Generic IDictionary case.
+            IDictionary<string, string> iNonGenericDeserialize = JsonSerializer.Parse<IDictionary<string, string>>(@"{""Hello"":""World"", ""Hello"":""NewValue""}");
+            Assert.Equal("NewValue", iNonGenericDeserialize["Hello"]);
+
+            IDictionary<string, object> iNonGenericDeserializeObject = JsonSerializer.Parse<IDictionary<string, object>>(@"{""Hello"":""World"", ""Hello"":""NewValue""}");
+            Assert.Equal("NewValue", iNonGenericDeserializeObject["Hello"].ToString());
+
             // Strongly-typed IDictionary<,> case.
             Dictionary<string, string> deserialize = JsonSerializer.Parse<Dictionary<string, string>>(@"{""Hello"":""World"", ""Hello"":""NewValue""}");
             Assert.Equal("NewValue", deserialize["Hello"]);
