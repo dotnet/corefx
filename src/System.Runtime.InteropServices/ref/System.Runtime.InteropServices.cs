@@ -163,9 +163,9 @@ namespace System.Runtime.InteropServices
     [System.ObsoleteAttribute("BStrWrapper and support for marshalling to the VARIANT type may be unavailable in future releases.")]
     public sealed partial class BStrWrapper
     {
-        public BStrWrapper(object value) { }
-        public BStrWrapper(string value) { }
-        public string WrappedObject { get { throw null; } }
+        public BStrWrapper(object? value) { }
+        public BStrWrapper(string? value) { }
+        public string? WrappedObject { get { throw null; } }
     }
     public enum CallingConvention
     {
@@ -215,16 +215,20 @@ namespace System.Runtime.InteropServices
         public override System.Reflection.Module Module { get { throw null; } }
         public override string Name { get { throw null; } }
         public override System.Type? ReflectedType { get { throw null; } }
+#pragma warning disable CS8610
         public override void AddEventHandler(object target, System.Delegate handler) { }
+#pragma warning restore CS8610
         public override System.Reflection.MethodInfo? GetAddMethod(bool nonPublic) { throw null; }
         public override object[] GetCustomAttributes(bool inherit) { throw null; }
         public override object[] GetCustomAttributes(System.Type attributeType, bool inherit) { throw null; }
         public override System.Collections.Generic.IList<System.Reflection.CustomAttributeData> GetCustomAttributesData() { throw null; }
-        public override System.Reflection.MethodInfo[]? GetOtherMethods(bool nonPublic) { throw null; }
+        public override System.Reflection.MethodInfo[] GetOtherMethods(bool nonPublic) { throw null; }
         public override System.Reflection.MethodInfo? GetRaiseMethod(bool nonPublic) { throw null; }
         public override System.Reflection.MethodInfo? GetRemoveMethod(bool nonPublic) { throw null; }
         public override bool IsDefined(System.Type attributeType, bool inherit) { throw null; }
+#pragma warning disable CS8610
         public override void RemoveEventHandler(object target, System.Delegate handler) { }
+#pragma warning restore CS8610
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly, Inherited=false)]
     public sealed partial class ComCompatibleVersionAttribute : System.Attribute
@@ -522,7 +526,7 @@ namespace System.Runtime.InteropServices
         public static void Copy(float[] source, int startIndex, System.IntPtr destination, int length) { }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public static System.IntPtr CreateAggregatedObject(System.IntPtr pOuter, object o) { throw null; }
-        public static System.IntPtr CreateAggregatedObject<T>(System.IntPtr pOuter, T o) where T : object { throw null; }
+        public static System.IntPtr CreateAggregatedObject<T>(System.IntPtr pOuter, T o) where T : notnull { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public static object? CreateWrapperOfType(object? o, System.Type t) { throw null; }
         public static TWrapper CreateWrapperOfType<T, TWrapper>([System.Diagnostics.CodeAnalysis.AllowNullAttribute] T o) { throw null; }
@@ -553,7 +557,7 @@ namespace System.Runtime.InteropServices
         public static System.IntPtr GetExceptionPointers() { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public static System.IntPtr GetFunctionPointerForDelegate(System.Delegate d) { throw null; }
-        public static System.IntPtr GetFunctionPointerForDelegate<TDelegate>(TDelegate d) where TDelegate : object { throw null; }
+        public static System.IntPtr GetFunctionPointerForDelegate<TDelegate>(TDelegate d) where TDelegate : notnull { throw null; }
         public static System.IntPtr GetHINSTANCE(System.Reflection.Module m) { throw null; }
         public static int GetHRForException(System.Exception? e) { throw null; }
         public static int GetHRForLastWin32Error() { throw null; }
