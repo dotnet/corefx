@@ -384,6 +384,7 @@ namespace System.Tests
             Assert.Equal(0, AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().Length);
         }
 
+        [ActiveIssue(38595, TargetFrameworkMonikers.Uap)]
         [Fact]
         public void MonitoringIsEnabled()
         {
