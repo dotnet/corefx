@@ -470,17 +470,20 @@ namespace System.Diagnostics
                 if (StartTimeUtc == default)
                     StartTimeUtc = GetUtcNow();
 
-                // Figure out what format to use.  
-                if (ForceDefaultIdFormat)
-                    IdFormat = DefaultIdFormat;
-                else if (Parent != null)
-                    IdFormat = Parent.IdFormat;
-                else if (_parentSpanId != null)
-                    IdFormat = ActivityIdFormat.W3C;
-                else if (_parentId != null)
-                    IdFormat = IsW3CId(_parentId) ? ActivityIdFormat.W3C : ActivityIdFormat.Hierarchical;
-                else
-                    IdFormat = DefaultIdFormat;
+                if (IdFormat == ActivityIdFormat.Unknown)
+                {
+                    // Figure out what format to use.  
+                    if (ForceDefaultIdFormat)
+                        IdFormat = DefaultIdFormat;
+                    else if (Parent != null)
+                        IdFormat = Parent.IdFormat;
+                    else if (_parentSpanId != null)
+                        IdFormat = ActivityIdFormat.W3C;
+                    else if (_parentId != null)
+                        IdFormat = IsW3CId(_parentId) ? ActivityIdFormat.W3C : ActivityIdFormat.Hierarchical;
+                    else
+                        IdFormat = DefaultIdFormat;
+                }
 
                 // Generate the ID in the appropriate format.  
                 if (IdFormat == ActivityIdFormat.W3C)
@@ -676,6 +679,23 @@ namespace System.Diagnostics
                     throw new ArgumentException($"value must be a valid ActivityIDFormat value");
                 s_defaultIdFormat = value;
             }
+        }
+
+        /// <summary>
+        /// Sets IdFormat on the Activity before it is started.  It takes precedence over
+        /// Parent.IdFormat, ParentId format, DefaultIdFormat and ForceDefaultIdFormat.
+        /// </summary>
+        public Activity SetIdFormat(ActivityIdFormat format)
+        {
+            if (_id != null || _spanId == null)
+            {
+                NotifyError(new InvalidOperationException("Can not change format for an activity that was already started"));
+            }
+            else
+            {
+                IdFormat = format;
+            }
+            return this;
         }
 
         /// <summary>

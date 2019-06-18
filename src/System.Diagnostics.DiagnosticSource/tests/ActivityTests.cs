@@ -670,6 +670,124 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        /****** SetIdFormat tests *****/
+        [Fact]
+        public void SetIdFormatTests()
+        {
+            try
+            {
+                Activity activity;
+
+                // can set format to Hierarchical before activity starts                
+                activity = new Activity("activity1");
+                Assert.Equal(ActivityIdFormat.Unknown, activity.IdFormat);
+                activity.SetIdFormat(ActivityIdFormat.Hierarchical);
+                Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+
+                // cannot change after activity starts
+                activity.SetIdFormat(ActivityIdFormat.W3C);
+                Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+                activity.Stop();
+
+                // can set format to W3C before activity starts
+                activity = new Activity("activity2");
+                Assert.Equal(ActivityIdFormat.Unknown, activity.IdFormat);
+                activity.SetIdFormat(ActivityIdFormat.W3C);
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+                Assert.True(IdIsW3CFormat(activity.Id));
+                activity.Stop();
+
+                // can set format to W3C after hierarchical ParentId is set
+                activity = new Activity("activity3");
+                activity.SetParentId("|foo.bar.");
+                activity.SetIdFormat(ActivityIdFormat.W3C);
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+                Assert.Equal("|foo.bar.", activity.ParentId);
+                Assert.True(IdIsW3CFormat(activity.Id));
+                activity.Stop();
+
+                // can set format to hierarchical after W3C ParentId is set
+                activity = new Activity("activity4");
+                activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-00");
+                activity.SetIdFormat(ActivityIdFormat.Hierarchical);
+                Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+                Assert.Equal("00-0123456789abcdef0123456789abcdef-0123456789abcdef-00", activity.ParentId);
+                Assert.True(activity.Id[0] == '|');
+                activity.Stop();
+
+                // can set and override format before activity starts                
+                activity = new Activity("activity5");
+                Assert.Equal(ActivityIdFormat.Unknown, activity.IdFormat);
+                activity.SetIdFormat(ActivityIdFormat.Hierarchical);
+                Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+                activity.SetIdFormat(ActivityIdFormat.W3C);
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+
+                // SetIdFormat overrides forced W3C DefaultIdFormat
+                Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+                Activity.ForceDefaultIdFormat = true;
+                activity = new Activity("activity7");
+                activity.SetIdFormat(ActivityIdFormat.Hierarchical);
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+                activity.Stop();
+                Activity.ForceDefaultIdFormat = false;
+                Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
+
+                // SetIdFormat overrides forced Hierarchical DefaultIdFormat 
+                Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
+                Activity.ForceDefaultIdFormat = true;
+                activity = new Activity("activity8");
+                activity.SetIdFormat(ActivityIdFormat.W3C);
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+                activity.Stop();
+                Activity.ForceDefaultIdFormat = false;
+                Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
+
+                // SetIdFormat overrides Hierarchical parent format 
+                Activity parent = new Activity("parent")
+                    .SetIdFormat(ActivityIdFormat.Hierarchical)
+                    .Start();
+
+                Activity child = new Activity("child")
+                    .SetIdFormat(ActivityIdFormat.W3C)
+                    .Start();
+
+                Assert.Equal(ActivityIdFormat.W3C, child.IdFormat);
+                child.Stop();
+                parent.Stop();
+
+                // SetIdFormat overrides W3C Parent format 
+                parent = new Activity("parent")
+                    .SetIdFormat(ActivityIdFormat.W3C)
+                    .Start();
+
+                child = new Activity("child")
+                    .SetIdFormat(ActivityIdFormat.Hierarchical)
+                    .Start();
+
+                Assert.Equal(ActivityIdFormat.Hierarchical, child.IdFormat);
+                child.Stop();
+                parent.Stop();
+            }
+            finally
+            {
+                // Set global settings back to the default, just to put the state back. 
+                Activity.ForceDefaultIdFormat = false;
+                Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
+                Activity.Current = null;
+            }
+        }
+
         [Fact]
         public void TraceIdBeforeStartTests()
         {
