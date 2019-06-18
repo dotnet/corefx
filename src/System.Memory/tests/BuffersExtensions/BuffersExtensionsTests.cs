@@ -36,7 +36,7 @@ namespace System.Buffers.Tests
                 new byte[][] { Array.Empty<byte>() }
             );
 
-            bufferWriter.Write(Array.Empty<byte>()); // Span<byte>.Empty.CopyTo(Span<byte>.Empty);
+            bufferWriter.Write(Array.Empty<byte>()); // This is equivalent to: Span<byte>.Empty.CopyTo(Span<byte>.Empty);
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace System.Buffers.Tests
 
             public Memory<T> GetMemory(int sizeHint = 0) => _segmentIndex < _segments.Length ? _segments[_segmentIndex] : Memory<T>.Empty;
 
-            public Span<T> GetSpan(int sizeHint) => _segmentIndex < _segments.Length ? _segments[_segmentIndex] : Span<T>.Empty;
+            public Span<T> GetSpan(int sizeHint = 0) => _segmentIndex < _segments.Length ? _segments[_segmentIndex] : Span<T>.Empty;
         }
 
         private class TestBufferWriterSingleSegment : IBufferWriter<byte>
