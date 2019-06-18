@@ -933,7 +933,8 @@ namespace System.Net.Http
                 if (pos == line.Length)
                 {
                     // Invalid header line that doesn't contain ':'.
-                    throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_header_line, Encoding.ASCII.GetString(line)));
+                    //throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_header_line, Encoding.ASCII.GetString(line)));
+                    return
                 }
             }
 
