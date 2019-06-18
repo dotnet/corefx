@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace System.Threading
@@ -45,7 +45,7 @@ namespace System.Threading
             }
         }
 
-        public static bool TryOpenExisting(string name, out EventWaitHandle? result) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        public static bool TryOpenExisting(string name, [NotNullWhen(true)] out EventWaitHandle? result)
         {
             return OpenExistingWorker(name, out result) == OpenExistingResult.Success;
         }

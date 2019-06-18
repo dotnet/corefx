@@ -19,7 +19,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#nullable enable
 using System.Collections.Generic;
 using System.Text;
 
@@ -222,8 +221,8 @@ namespace System.Globalization
                     AddIgnorableSymbols(".");
                     return;
                 }
-                string words;
-                if (KnownWords.TryGetValue(str, out words) == false)
+
+                if (KnownWords.TryGetValue(str, out _) == false)
                 {
                     if (m_dateWords == null)
                     {

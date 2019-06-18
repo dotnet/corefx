@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 //
 // Don't override IsAlwaysNormalized because it is just a Unicode Transformation and could be confused.
 //
@@ -520,7 +519,7 @@ namespace System.Text
 
                 // We mustn't have left over fallback data when not converting
                 if (encoder._throwOnOverflow && fallbackBuffer.Remaining > 0)
-                    throw new ArgumentException(SR.Format(SR.Argument_EncoderFallbackNotEmpty, this.EncodingName, encoder.Fallback!.GetType())); // TODO-NULLABLE: NullReferenceException
+                    throw new ArgumentException(SR.Format(SR.Argument_EncoderFallbackNotEmpty, this.EncodingName, encoder.Fallback?.GetType()));
             }
             else
             {

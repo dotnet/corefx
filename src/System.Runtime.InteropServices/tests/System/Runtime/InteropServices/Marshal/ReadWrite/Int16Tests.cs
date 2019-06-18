@@ -85,7 +85,6 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Equal("ABC", ((StructWithReferenceTypes)structure).stringValue);
             Assert.Equal(new short[10] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 100 }, ((StructWithReferenceTypes)structure).byValueArray);
             Assert.Equal(200, Marshal.ReadInt16(structure, pointerOffset));
-            Assert.NotEqual(0, Marshal.ReadInt16(structure, stringOffset));
             Assert.Equal(100, Marshal.ReadInt16(structure, arrayOffset + sizeof(short) * 9));
         }
 
@@ -120,20 +119,6 @@ namespace System.Runtime.InteropServices.Tests
             };
 
             Assert.Equal(100, Marshal.ReadInt16(structure, pointerOffset));
-
-            // The ReadInt16() for object types does an explicit marshal which requires
-            // an allocation on each read. It can occur that the allocation is aligned
-            // on a 16-bit boundary which would yield a value of 0. To mitigate the chance,
-            // marshal several times, choosing 20 as an arbitrary value. If this test
-            // fails, we should reconsider whether it is worth the flakiness.
-            int readShorts = 0;
-            for (int i = 0; i < 20; ++i)
-            {
-                readShorts += Marshal.ReadInt16(structure, stringOffset);
-            }
-
-            Assert.NotEqual(0, readShorts);
-
             Assert.Equal(3, Marshal.ReadInt16(structure, arrayOffset + sizeof(short) * 2));
         }
 
@@ -145,13 +130,11 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Exception is wrapped in a TargetInvocationException in the .NET Framework.")]
         public void ReadInt16_NullObject_ThrowsAccessViolationException()
         {
             Assert.Throws<AccessViolationException>(() => Marshal.ReadInt16(null, 2));
         }
 
-#if !netstandard // TODO: Enable for netstandard2.1
         [Fact]
         public void ReadInt16_NotReadable_ThrowsArgumentException()
         {
@@ -163,7 +146,6 @@ namespace System.Runtime.InteropServices.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () => Marshal.ReadInt16(collectibleObject, 0));
         }
-#endif
 
         [Fact]
         public void WriteInt16_ZeroPointer_ThrowsException()
@@ -173,13 +155,11 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Exception is wrapped in a TargetInvocationException in the .NET Framework.")]
         public void WriteInt16_NullObject_ThrowsAccessViolationException()
         {
             Assert.Throws<AccessViolationException>(() => Marshal.WriteInt16(null, 2, 0));
         }
 
-#if !netstandard // TODO: Enable for netstandard2.1
         [Fact]
         public void WriteInt16_NotReadable_ThrowsArgumentException()
         {
@@ -191,7 +171,6 @@ namespace System.Runtime.InteropServices.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () => Marshal.WriteInt16(collectibleObject, 0, 0));
         }
-#endif
 
         public struct BlittableStruct
         {

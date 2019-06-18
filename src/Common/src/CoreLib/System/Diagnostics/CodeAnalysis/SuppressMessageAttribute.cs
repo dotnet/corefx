@@ -12,7 +12,6 @@
 ** 
 ===========================================================*/
 
-#nullable enable
 namespace System.Diagnostics.CodeAnalysis
 {
     [AttributeUsage(
@@ -24,14 +23,14 @@ namespace System.Diagnostics.CodeAnalysis
     [Conditional("CODE_ANALYSIS")]
     public sealed class SuppressMessageAttribute : Attribute
     {
-        public SuppressMessageAttribute(string? category, string? checkId)
+        public SuppressMessageAttribute(string category, string checkId)
         {
             Category = category;
             CheckId = checkId;
         }
 
-        public string? Category { get; }
-        public string? CheckId { get; }
+        public string Category { get; }
+        public string CheckId { get; }
         public string? Scope { get; set; }
         public string? Target { get; set; }
         public string? MessageId { get; set; }

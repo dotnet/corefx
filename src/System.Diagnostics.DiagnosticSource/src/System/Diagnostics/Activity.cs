@@ -30,6 +30,8 @@ namespace System.Diagnostics
     /// </summary>
     public partial class Activity
     {
+        private static readonly IEnumerable<KeyValuePair<string, string>> s_emptyBaggageTags = new KeyValuePair<string, string>[0]; // Array.Empty<T>() doesn't exist in all configurations
+
         /// <summary>
         /// An operation name is a COARSEST name that is useful grouping/filtering. 
         /// The name is typically a compile-time constant.   Names of Rest APIs are
@@ -151,8 +153,20 @@ namespace System.Diagnostics
         {
             get
             {
-                for (var tags = _tags; tags != null; tags = tags.Next)
-                    yield return tags.keyValue;
+                KeyValueListNode tags = _tags;
+                return tags != null ?
+                    Iterate(tags) :
+                    s_emptyBaggageTags;
+
+                static IEnumerable<KeyValuePair<string, string>> Iterate(KeyValueListNode tags)
+                {
+                    do
+                    {
+                        yield return tags.keyValue;
+                        tags = tags.Next;
+                    }
+                    while (tags != null);
+                }
             }
         }
 
@@ -169,8 +183,28 @@ namespace System.Diagnostics
             get
             {
                 for (Activity activity = this; activity != null; activity = activity.Parent)
-                    for (var baggage = activity._baggage; baggage != null; baggage = baggage.Next)
-                        yield return baggage.keyValue;
+                {
+                    if (activity._baggage != null)
+                    {
+                        return Iterate(activity);
+                    }
+                }
+
+                return s_emptyBaggageTags;
+
+                static IEnumerable<KeyValuePair<string, string>> Iterate(Activity activity)
+                {
+                    do
+                    {
+                        for (KeyValueListNode baggage = activity._baggage; baggage != null; baggage = baggage.Next)
+                        {
+                            yield return baggage.keyValue;
+                        }
+
+                        activity = activity.Parent;
+                    }
+                    while (activity != null);
+                }
             }
         }
 
@@ -180,7 +214,7 @@ namespace System.Diagnostics
         /// </summary>
         public string GetBaggageItem(string key)
         {
-            foreach (var keyValue in Baggage)
+            foreach (KeyValuePair<string, string> keyValue in Baggage)
                 if (key == keyValue.Key)
                     return keyValue.Value;
             return null;
@@ -281,7 +315,7 @@ namespace System.Diagnostics
                 _traceIdSet = true;
                 _parentSpanId = spanId;
                 _parentSpanIdSet = true;
-                _w3CIdFlags = (byte) activityTraceFlags;
+                _w3CIdFlags = (byte)activityTraceFlags;
                 _w3CIdFlagsSet = true;
             }
             return this;
@@ -357,7 +391,7 @@ namespace System.Diagnostics
             {
                 if (_parentId == null && !_parentSpanIdSet)
                 {
-                    var parent = Current;
+                    Activity parent = Current;
                     if (parent != null)
                     {
                         // The parent change should not form a loop.   We are actually guaranteed this because
@@ -442,7 +476,7 @@ namespace System.Diagnostics
             {
                 for (Activity activity = this; activity != null; activity = activity.Parent)
                 {
-                    var val = activity._traceState;
+                    string val = activity._traceState;
                     if (val != null)
                         return val;
                 }
@@ -525,17 +559,9 @@ namespace System.Diagnostics
             {
                 if (!_w3CIdFlagsSet)
                 {
-                    if (Parent != null)
-                    {
-                        ActivityTraceFlags = Parent.ActivityTraceFlags;
-                    }
-                    else if (_parentId != null && IsW3CId(_parentId))
-                    {
-                        _w3CIdFlags = ActivityTraceId.HexByteFromChars(_parentId[53], _parentId[54]);
-                        _w3CIdFlagsSet = true;
-                    }
+                    _w3CIdFlagsSet = TrySetTraceFlagsFromParent();
                 }
-                return (ActivityTraceFlags) _w3CIdFlags;
+                return (ActivityTraceFlags)_w3CIdFlags;
             }
             set
             {
@@ -646,6 +672,12 @@ namespace System.Diagnostics
                     _traceIdSet = true;
                 }
             }
+
+            if (!_w3CIdFlagsSet)
+            {
+                _w3CIdFlagsSet = TrySetTraceFlagsFromParent();
+            }
+
             // Create a new SpanID. 
             _spanId = ActivitySpanId.CreateRandom();
             _spanIdSet = true;
@@ -792,6 +824,30 @@ namespace System.Diagnostics
 
             return _traceIdSet;
         }
+
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [System.Security.SecuritySafeCriticalAttribute]
+#endif
+        private bool TrySetTraceFlagsFromParent()
+        {
+            Debug.Assert(!_w3CIdFlagsSet);
+
+            if (!_w3CIdFlagsSet)
+            {
+                if (Parent != null)
+                {
+                    ActivityTraceFlags = Parent.ActivityTraceFlags;
+                }
+                else if (_parentId != null && IsW3CId(_parentId))
+                {
+                    _w3CIdFlags = ActivityTraceId.HexByteFromChars(_parentId[53], _parentId[54]);
+                    _w3CIdFlagsSet = true;
+                }
+            }
+
+            return _w3CIdFlagsSet;
+        }
+
 
         private string _rootId;
         private int _currentChildId;  // A unique number for all children of this activity.  

@@ -264,7 +264,7 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int count = m_array.Length;
+            int count = GetInt32ArrayLengthFromBitLength(Length);
 
             switch (count)
             {
@@ -310,7 +310,7 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int count = m_array.Length;
+            int count = GetInt32ArrayLengthFromBitLength(Length);
 
             switch (count)
             {
@@ -356,7 +356,7 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int count = m_array.Length;
+            int count = GetInt32ArrayLengthFromBitLength(Length);
 
             switch (count)
             {
@@ -781,7 +781,9 @@ namespace System.Collections
                 return false;
             }
 
+#pragma warning disable CS8612 // TODO-NULLABLE: Covariance in interfaces (https://github.com/dotnet/roslyn/issues/35227)
             public virtual object Current
+#pragma warning restore CS8612
             {
                 get
                 {

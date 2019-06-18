@@ -6,7 +6,6 @@
 // 
 // This class wraps a Type object and delegates all methods to that Type.
 
-#nullable enable
 using CultureInfo = System.Globalization.CultureInfo;
 
 namespace System.Reflection
@@ -36,7 +35,7 @@ namespace System.Reflection
         public override int MetadataToken => typeImpl.MetadataToken;
 
         public override object? InvokeMember(string name, BindingFlags invokeAttr, Binder? binder, object? target,
-            object[]? args, ParameterModifier[]? modifiers, CultureInfo? culture, string[]? namedParameters)
+            object?[]? args, ParameterModifier[]? modifiers, CultureInfo? culture, string[]? namedParameters)
         {
             return typeImpl.InvokeMember(name, invokeAttr, binder, target, args, modifiers, culture, namedParameters);
         }
@@ -102,6 +101,7 @@ namespace System.Reflection
 
         public override bool IsTypeDefinition => typeImpl.IsTypeDefinition;
         public override bool IsSZArray => typeImpl.IsSZArray;
+        public override bool IsVariableBoundArray => typeImpl.IsVariableBoundArray;
 
         protected override bool IsArrayImpl() => typeImpl.IsArray;
         protected override bool IsPrimitiveImpl() => typeImpl.IsPrimitive;

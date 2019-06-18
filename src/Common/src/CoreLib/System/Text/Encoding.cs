@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
@@ -1182,6 +1182,7 @@ namespace System.Text
             return Array.Empty<char>();
         }
 
+        [DoesNotReturn]
         internal void ThrowBytesOverflow()
         {
             // Special message to include fallback type in case fallback's GetMaxCharCount is broken
@@ -1205,12 +1206,15 @@ namespace System.Text
             encoder!.ClearMustFlush();
         }
 
+        [DoesNotReturn]
         [StackTraceHidden]
         internal static void ThrowConversionOverflow()
         {
             throw new ArgumentException(SR.Argument_ConversionOverflow);
         }
 
+        [DoesNotReturn]
+        [StackTraceHidden]
         internal void ThrowCharsOverflow()
         {
             // Special message to include fallback type in case fallback's GetMaxCharCount is broken

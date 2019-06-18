@@ -4,8 +4,9 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json.Serialization.Converters;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal struct WriteStack
     {
@@ -51,9 +52,16 @@ namespace System.Text.Json.Serialization
                 Current.PopStackOnEnd = true;
                 Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
             }
+            else if (classType == ClassType.IDictionaryConstructible)
+            {
+                Current.PopStackOnEnd = true;
+                Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
+
+                Current.IsIDictionaryConstructible = true;
+            }
             else
             {
-                Debug.Assert(nextClassInfo.ClassType == ClassType.Object || nextClassInfo.ClassType == ClassType.Unknown);
+                Debug.Assert(nextClassInfo.ClassType == ClassType.Object || nextClassInfo.ClassType == ClassType.KeyValuePair || nextClassInfo.ClassType == ClassType.Unknown);
                 Current.PopStackOnEndObject = true;
             }
         }

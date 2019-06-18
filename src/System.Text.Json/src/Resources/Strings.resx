@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -138,6 +137,9 @@
   <data name="CannotTranscodeInvalidUtf8" xml:space="preserve">
     <value>Cannot transcode invalid UTF-8 JSON text to UTF-16 string.</value>
   </data>
+  <data name="CannotDecodeInvalidBase64" xml:space="preserve">
+    <value>Cannot decode JSON text that is not encoded as valid Base64 to bytes.</value>
+  </data>
   <data name="CannotTranscodeInvalidUtf16" xml:space="preserve">
     <value>Cannot transcode invalid UTF-16 string to UTF-8 JSON text.</value>
   </data>
@@ -179,6 +181,9 @@
   </data>
   <data name="ExpectedJsonTokens" xml:space="preserve">
     <value>The input does not contain any JSON tokens. Expected the input to start with a valid JSON token, when isFinalBlock is true.</value>
+  </data>
+  <data name="ExpectedOneCompleteToken" xml:space="preserve">
+    <value>The input does not contain any complete JSON tokens. Expected the input to have at least one valid, complete, JSON token.</value>
   </data>
   <data name="ExpectedNextDigitEValueNotFound" xml:space="preserve">
     <value>'{0}' is an invalid end of a number. Expected 'E' or 'e'.</value>
@@ -283,13 +288,13 @@
     <value>Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed.</value>
   </data>
   <data name="DeserializeCannotBeNull" xml:space="preserve">
-    <value>The JSON value from {0} cannot be null.</value>
+    <value>The JSON value cannot be null.</value>
   </data>
   <data name="DeserializeDataRemaining" xml:space="preserve">
     <value>The provided data of length {0} has remaining bytes {1}.</value>
   </data>
   <data name="DeserializeUnableToConvertValue" xml:space="preserve">
-    <value>The JSON value from {0} could not be converted to {1}.</value>
+    <value>The JSON value could not be converted to {0}.</value>
   </data>
   <data name="DeserializeWrongType" xml:space="preserve">
     <value>The specified type {0} must derive from the specific value's type {1}.</value>
@@ -335,5 +340,41 @@
   </data>
   <data name="SerializerPropertyNameNull" xml:space="preserve">
     <value>The JSON property name for '{0}.{1}' cannot be null.</value>
+  </data>
+  <data name="DeserializeDuplicateKey" xml:space="preserve">
+    <value>An item with the same property name '{0}' has already been added.</value>
+  </data>
+  <data name="SerializationDataExtensionPropertyInvalid" xml:space="preserve">
+    <value>The data extension property '{0}.{1}' does not match the required signature of IDictionary&lt;string, JsonElement&gt; or IDictionary&lt;string, object&gt;.</value>
+  </data>
+  <data name="SerializationDuplicateAttribute" xml:space="preserve">
+    <value>A class cannot have more than one property that has the attribute '{0}'.</value>
+  </data>
+  <data name="SerializationNotSupportedCollectionType" xml:space="preserve">
+    <value>The collection type '{0}' is not supported.</value>
+  </data>
+  <data name="SerializationNotSupportedCollection" xml:space="preserve">
+    <value>The collection type '{0}' on '{1}' is not supported.</value>
+  </data>
+  <data name="InvalidCharacterAtStartOfComment" xml:space="preserve">
+    <value>'{0}' is invalid after '/' at the beginning of the comment. Expected either '/' or '*'.</value>
+  </data>
+  <data name="UnexpectedEndOfDataWhileReadingComment" xml:space="preserve">
+    <value>Unexpected end of data while reading a comment.</value>
+  </data>
+  <data name="CannotSkip" xml:space="preserve">
+    <value>Cannot skip tokens on partial JSON. Either get the whole payload and create a Utf8JsonReader instance where isFinalBlock is true or call TrySkip.</value>
+  </data>
+  <data name="NotEnoughData" xml:space="preserve">
+    <value>There is not enough data to read through the entire JSON array or object.</value>
+  </data>
+  <data name="JsonSerializerDoesNotSupportComments" xml:space="preserve">
+    <value>Comments cannot be stored when deserializing objects, only the Skip and Disallow comment handling modes are supported.</value>
+  </data>
+  <data name="DeserializeMissingParameterlessConstructor" xml:space="preserve">
+    <value>Deserialization of reference types without parameterless constructor is not supported. Type '{0}'</value>
+  </data>
+  <data name="DeserializePolymorphicInterface" xml:space="preserve">
+    <value>Deserialization of interface types is not supported. Type '{0}'</value>
   </data>
 </root>

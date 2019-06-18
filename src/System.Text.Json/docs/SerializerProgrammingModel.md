@@ -128,8 +128,8 @@ namespace System.Text.Json.Serialization
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = false)]
     public sealed class JsonPropertyNameAttribute : System.Text.Json.Serialization.JsonAttribute
     {
-        public JsonPropertyNameAttribute(string propertyName) { }
-        public string Name { get; set; }
+        public JsonPropertyNameAttribute(string name) { }
+        public string Name { get; }
     }
 
     public abstract partial class JsonNamingPolicy
@@ -168,7 +168,7 @@ Dates are not part of JSON, so an internal converter is supplied. Dates are typi
 
 If the internal converter is not sufficient, such as when the format has a custom format or is not ISO 8601 compatible, then a developer will be able to add a new value converter.
 
-## Enum Supprt
+## Enum Support
 By default, Enums are treated as longs in the JSON. This is most efficient. There will be future support to be based on strings; likely through an attribute to change the default for a given property and an option on `JsonSerializerOptions` to change the default globally.
 
 ## ICollection and Array Converter feature

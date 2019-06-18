@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -60,7 +59,7 @@ namespace System.Diagnostics.Tracing
 
                 var propertyType = propertyInfo.PropertyType;
                 var propertyTypeInfo = TraceLoggingTypeInfo.GetInstance(propertyType, recursionCheck);
-                var fieldAttribute = Statics.GetCustomAttribute<EventFieldAttribute?>(propertyInfo);
+                var fieldAttribute = Statics.GetCustomAttribute<EventFieldAttribute>(propertyInfo);
 
                 string propertyName =
                     fieldAttribute != null && fieldAttribute.Name != null

@@ -13,7 +13,64 @@ namespace System.Security.Cryptography.Rsa.Tests
         public static bool Supports384BitPrivateKey { get; } = RSAFactory.Supports384PrivateKey;
         public static bool SupportsLargeExponent { get; } = RSAFactory.SupportsLargeExponent;
 
-        public static bool Supports16384 { get; } = TestRsa16384();
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void UseAfterDispose(bool importKey)
+        {
+            RSA rsa = importKey ? RSAFactory.Create(TestData.RSA2048Params) : RSAFactory.Create(1024);
+            byte[] pkcs1Public;
+            byte[] pkcs1Private;
+            byte[] pkcs8Private;
+            byte[] pkcs8EncryptedPrivate;
+            byte[] subjectPublicKeyInfo;
+
+            string pwStr = "Hello";
+            // Because the PBE algorithm uses PBES2 the string->byte encoding is UTF-8.
+            byte[] pwBytes = TestData.HelloBytes;
+
+            PbeParameters pbeParameters = new PbeParameters(
+                PbeEncryptionAlgorithm.Aes192Cbc,
+                HashAlgorithmName.SHA256,
+                3072);
+
+            // Ensure the key was loaded, then dispose it.
+            // Also ensures all of the inputs are valid for the disposed tests.
+            using (rsa)
+            {
+                pkcs1Public = rsa.ExportRSAPublicKey();
+                pkcs1Private = rsa.ExportRSAPrivateKey();
+                pkcs8Private = rsa.ExportPkcs8PrivateKey();
+                pkcs8EncryptedPrivate = rsa.ExportEncryptedPkcs8PrivateKey(pwStr, pbeParameters);
+                subjectPublicKeyInfo = rsa.ExportSubjectPublicKeyInfo();
+            }
+
+            Assert.Throws<ObjectDisposedException>(() => rsa.ImportRSAPublicKey(pkcs1Public, out _));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ImportRSAPrivateKey(pkcs1Private, out _));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ImportPkcs8PrivateKey(pkcs8Private, out _));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ImportEncryptedPkcs8PrivateKey(pwStr, pkcs8EncryptedPrivate, out _));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ImportEncryptedPkcs8PrivateKey(pwBytes, pkcs8EncryptedPrivate, out _));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ImportSubjectPublicKeyInfo(subjectPublicKeyInfo, out _));
+
+            Assert.Throws<ObjectDisposedException>(() => rsa.ExportRSAPublicKey());
+            Assert.Throws<ObjectDisposedException>(() => rsa.TryExportRSAPublicKey(pkcs1Public, out _));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ExportRSAPrivateKey());
+            Assert.Throws<ObjectDisposedException>(() => rsa.TryExportRSAPrivateKey(pkcs1Private, out _));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ExportPkcs8PrivateKey());
+            Assert.Throws<ObjectDisposedException>(() => rsa.TryExportPkcs8PrivateKey(pkcs8Private, out _));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ExportEncryptedPkcs8PrivateKey(pwStr, pbeParameters));
+            Assert.Throws<ObjectDisposedException>(() => rsa.TryExportEncryptedPkcs8PrivateKey(pwStr, pbeParameters, pkcs8EncryptedPrivate, out _));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ExportEncryptedPkcs8PrivateKey(pwBytes, pbeParameters));
+            Assert.Throws<ObjectDisposedException>(() => rsa.TryExportEncryptedPkcs8PrivateKey(pwBytes, pbeParameters, pkcs8EncryptedPrivate, out _));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ExportSubjectPublicKeyInfo());
+            Assert.Throws<ObjectDisposedException>(() => rsa.TryExportSubjectPublicKeyInfo(subjectPublicKeyInfo, out _));
+
+            // Check encrypted import with the wrong password.
+            // It shouldn't do enough work to realize it was wrong.
+            pwBytes = Array.Empty<byte>();
+            Assert.Throws<ObjectDisposedException>(() => rsa.ImportEncryptedPkcs8PrivateKey("", pkcs8EncryptedPrivate, out _));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ImportEncryptedPkcs8PrivateKey(pwBytes, pkcs8EncryptedPrivate, out _));
+        }
 
         [ConditionalFact(nameof(SupportsLargeExponent))]
         public static void ReadWriteBigExponentPrivatePkcs1()
@@ -63,7 +120,7 @@ yZWUxoxAdjfrBGsx+U6BHM0Myqqe7fY7hjWzj4aBCw==",
                 TestData.DiminishedDPParameters);
         }
 
-        [ConditionalFact(nameof(Supports16384))]
+        [ConditionalFact(typeof(ImportExport), nameof(ImportExport.Supports16384))]
         public static void ReadWritePublicPkcs1()
         {
             ReadWriteBase64PublicPkcs1(
@@ -139,7 +196,7 @@ m5NTLEHDwUd7idstLzPXuah0WEjgao5oO1BEUR4byjYlJ+F89Cs4BhUCAwEAAQ==",
                 TestData.DiminishedDPParameters);
         }
 
-        [ConditionalFact(nameof(Supports16384))]
+        [ConditionalFact(typeof(ImportExport), nameof(ImportExport.Supports16384))]
         public static void ReadWriteRsa16384SubjectPublicKeyInfo()
         {
             ReadWriteBase64SubjectPublicKeyInfo(
@@ -191,7 +248,7 @@ rAigcwt6noH/hX5ZO5X869SV1WvLOvhCt4Ru7LOzqUULk+Y3+gSNHX34/+Jw+VCq
                 TestData.RSA16384Params);
         }
 
-        [ConditionalFact(nameof(Supports16384))]
+        [ConditionalFact(typeof(ImportExport), nameof(ImportExport.Supports16384))]
         public static void ReadWrite16384Pkcs8()
         {
             ReadWriteBase64Pkcs8(
@@ -466,7 +523,7 @@ rBZc";
                 TestData.RSA1032Parameters);
         }
 
-        [ConditionalFact(nameof(Supports16384))]
+        [ConditionalFact(typeof(ImportExport), nameof(ImportExport.Supports16384))]
         public static void ReadEncryptedRsa16384()
         {
             // PBES2: PBKDF2 + des (single DES, not 3DES).
@@ -1406,24 +1463,6 @@ pWre7nAO4O6sP1JzXvVmwrS5C/hw";
                         tooBig.AsSpan(WriteShift, bytesWritten).ByteArrayToHex(),
                         arrayExport.ByteArrayToHex());
                 }
-            }
-        }
-
-        private static bool TestRsa16384()
-        {
-            try
-            {
-                using (RSA rsa = RSAFactory.Create())
-                {
-                    rsa.ImportParameters(TestData.RSA16384Params);
-                }
-
-                return true;
-            }
-            catch (CryptographicException)
-            {
-                // The key is too big for this platform.
-                return false;
             }
         }
 

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
@@ -70,7 +69,7 @@ namespace System.Reflection
                     if (PositionImpl == -1)
                     {
                         if (MemberImpl.MemberType == MemberTypes.Method)
-                            return ((MethodInfo)MemberImpl).ReturnParameter!;
+                            return ((MethodInfo)MemberImpl).ReturnParameter;
                         else
                             throw new SerializationException(SR.Serialization_BadParameterInfo);
                     }

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Diagnostics;
 using System.Collections;
@@ -69,6 +68,7 @@ namespace System.Diagnostics.Tracing
                 payload.CounterType = "Sum";
                 payload.Metadata = GetMetadataString();
                 payload.Increment = _increment - _prevIncrement;
+                payload.DisplayUnits = DisplayUnits ?? "";
                 _prevIncrement = _increment;
                 EventSource.Write("EventCounters", new EventSourceOptions() { Level = EventLevel.LogAlways }, new IncrementingEventCounterPayloadType(payload));
             }

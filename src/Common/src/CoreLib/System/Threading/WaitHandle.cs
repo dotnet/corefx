@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Threading
@@ -79,7 +79,8 @@ namespace System.Threading
             }
         }
 
-        public SafeWaitHandle? SafeWaitHandle // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/2384
+        [AllowNull]
+        public SafeWaitHandle SafeWaitHandle
         {
             get
             {
@@ -182,13 +183,14 @@ namespace System.Threading
             // t_safeWaitHandlesForRent can be null when it was not initialized yet or
             // if a re-entrant wait is performed and the array is already rented. In
             // that case we just allocate a new one and reuse it as necessary.
-            if (safeWaitHandles == null || safeWaitHandles.Length < capacity)
+            int currentLength = (safeWaitHandles != null) ? safeWaitHandles.Length : 0;
+            if (currentLength < capacity)
             {
-                // Always allocate at least 4 slots to prevent unnecessary reallocations
-                safeWaitHandles = new SafeWaitHandle[Math.Max(capacity, 4)];
+                safeWaitHandles = new SafeWaitHandle[Math.Max(capacity,
+                    Math.Min(MaxWaitHandles, 2 * currentLength))];
             }
 
-            return safeWaitHandles;
+            return safeWaitHandles!;
         }
 
         private static void ReturnSafeWaitHandleArray(SafeWaitHandle?[]? safeWaitHandles)
@@ -335,7 +337,7 @@ namespace System.Threading
                 {
                     if (safeWaitHandles[i] != null)
                     {
-                        safeWaitHandles[i]!.DangerousRelease(); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                        safeWaitHandles[i]!.DangerousRelease(); // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
                         safeWaitHandles[i] = null;
                     }
                 }

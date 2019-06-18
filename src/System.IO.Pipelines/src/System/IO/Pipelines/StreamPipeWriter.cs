@@ -28,6 +28,7 @@ namespace System.IO.Pipelines
         private object _lockObject = new object();
 
         private BufferSegmentStack _bufferSegmentPool;
+        private bool _leaveOpen;
 
         private CancellationTokenSource InternalTokenSource
         {
@@ -56,6 +57,7 @@ namespace System.IO.Pipelines
             _minimumBufferSize = options.MinimumBufferSize;
             _pool = options.Pool == MemoryPool<byte>.Shared ? null : options.Pool;
             _bufferSegmentPool = new BufferSegmentStack(InitialSegmentPoolSize);
+            _leaveOpen = options.LeaveOpen;
         }
 
         /// <summary>
@@ -225,14 +227,15 @@ namespace System.IO.Pipelines
             _head = null;
             _tail = null;
 
-            // REVIEW: Do we need a leaveOpen to avoid this?
-            InnerStream.Dispose();
+            if (!_leaveOpen)
+            {
+                InnerStream.Dispose();
+            }
         }
 
         /// <inheritdoc />
         public override void OnReaderCompleted(Action<Exception, object> callback, object state)
         {
-            throw new NotSupportedException("OnReaderCompleted is not supported.");
         }
 
         /// <inheritdoc />
@@ -303,13 +306,13 @@ namespace System.IO.Pipelines
                         _internalTokenSource = null;
                     }
 
-                    if (cancellationToken.IsCancellationRequested)
+                    if (localToken.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
                     {
-                        throw;
+                        // Catch cancellation and translate it into setting isCanceled = true
+                        return new FlushResult(isCanceled: true, isCompleted: false);
                     }
 
-                    // Catch any cancellation and translate it into setting isCanceled = true
-                    return new FlushResult(isCanceled: true, isCompleted: false);
+                    throw;
                 }
             }
         }

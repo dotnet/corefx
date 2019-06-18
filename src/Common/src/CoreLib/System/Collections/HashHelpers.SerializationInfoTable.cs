@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 // Used by Hashtable and Dictionary's SeralizationInfo .ctor's to store the SeralizationInfo
 // object until OnDeserialization is called.
 
@@ -23,7 +22,7 @@ namespace System.Collections
                 if (s_serializationInfoTable == null)
                     Interlocked.CompareExchange(ref s_serializationInfoTable, new ConditionalWeakTable<object, SerializationInfo>(), null);
 
-                return s_serializationInfoTable!; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34901
+                return s_serializationInfoTable!; // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
             }
         }
     }

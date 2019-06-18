@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 //
 // Don't override IsAlwaysNormalized because it is just a Unicode Transformation and could be confused.
 //
@@ -391,7 +390,7 @@ namespace System.Text
                 {
                     fallbackBuffer = encoder.FallbackBuffer;
                     if (fallbackBuffer.Remaining > 0)
-                        throw new ArgumentException(SR.Format(SR.Argument_EncoderFallbackNotEmpty, this.EncodingName, encoder.Fallback!.GetType())); // TODO-NULLABLE: NullReferenceException
+                        throw new ArgumentException(SR.Format(SR.Argument_EncoderFallbackNotEmpty, this.EncodingName, encoder.Fallback?.GetType()));
 
                     // Set our internal fallback interesting things.
                     fallbackBuffer.InternalInitialize(charStart, charEnd, encoder, false);
@@ -680,7 +679,7 @@ namespace System.Text
                     // We always need the fallback buffer in get bytes so we can flush any remaining ones if necessary
                     fallbackBuffer = encoder.FallbackBuffer;
                     if (fallbackBuffer.Remaining > 0 && encoder._throwOnOverflow)
-                        throw new ArgumentException(SR.Format(SR.Argument_EncoderFallbackNotEmpty, this.EncodingName, encoder.Fallback!.GetType())); // TODO-NULLABLE: NullReferenceException
+                        throw new ArgumentException(SR.Format(SR.Argument_EncoderFallbackNotEmpty, this.EncodingName, encoder.Fallback?.GetType()));
 
                     // Set our internal fallback interesting things.
                     fallbackBuffer.InternalInitialize(charStart, charEnd, encoder, false);

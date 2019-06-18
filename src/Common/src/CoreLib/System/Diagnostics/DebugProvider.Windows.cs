@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
-
 namespace System.Diagnostics
 {
     public partial class DebugProvider
@@ -25,19 +23,7 @@ namespace System.Diagnostics
                 // In Core, we do not show a dialog.
                 // Fail in order to avoid anyone catching an exception and masking
                 // an assert failure.
-                DebugAssertException ex;
-                if (message == string.Empty) 
-                {
-                    ex = new DebugAssertException(stackTrace);
-                }
-                else if (detailMessage == string.Empty) 
-                {
-                    ex = new DebugAssertException(message, stackTrace);
-                }
-                else
-                {
-                    ex = new DebugAssertException(message, detailMessage, stackTrace);
-                }
+                DebugAssertException ex = new DebugAssertException(message, detailMessage, stackTrace);
                 Environment.FailFast(ex.Message, ex, errorSource);
             }
         }

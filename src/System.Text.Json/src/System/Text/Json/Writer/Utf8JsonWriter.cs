@@ -30,10 +30,8 @@ namespace System.Text.Json
     /// To be able to format the output with indentation and whitespace OR to skip validation, create an instance of 
     /// <see cref="JsonWriterOptions"/> and pass that in to the writer.
     /// </remarks>
-    public sealed partial class Utf8JsonWriter : IDisposable
-#if BUILDING_INBOX_LIBRARY
-        , IAsyncDisposable
-#endif
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    public sealed partial class Utf8JsonWriter : IDisposable, IAsyncDisposable
     {
         // Depending on OS, either '\r\n' OR '\n'
         private static readonly int s_newLineLength = Environment.NewLine.Length;
@@ -339,7 +337,6 @@ namespace System.Text.Json
             _output = null;
         }
 
-#if BUILDING_INBOX_LIBRARY
         /// <summary>
         /// Asynchronously commits any left over JSON text that has not yet been flushed and releases all resources used by the current instance.
         /// </summary>
@@ -368,7 +365,6 @@ namespace System.Text.Json
             _arrayBufferWriter = null;
             _output = null;
         }
-#endif
 
         /// <summary>
         /// Asynchronously commits the JSON text written so far which makes it visible to the output destination.
@@ -703,7 +699,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the beginning of a JSON array with a property name as the key.
         /// </summary>
-        /// <param name="propertyName">The UTF-16 encoded property name of the JSON array to be transcoded and written as UTF-8.</param>
+        /// <param name="propertyName">The property name of the JSON array to be transcoded and written as UTF-8.</param>
         /// <remarks>
         /// The property name is escaped before writing.
         /// </remarks>
@@ -720,7 +716,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the beginning of a JSON object with a property name as the key.
         /// </summary>
-        /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <remarks>
         /// The property name is escaped before writing.
         /// </remarks>
@@ -737,7 +733,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the beginning of a JSON array with a property name as the key.
         /// </summary>
-        /// <param name="propertyName">The UTF-16 encoded property name of the JSON array to be transcoded and written as UTF-8.</param>
+        /// <param name="propertyName">The property name of the JSON array to be transcoded and written as UTF-8.</param>
         /// <remarks>
         /// The property name is escaped before writing.
         /// </remarks>
@@ -763,7 +759,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the beginning of a JSON object with a property name as the key.
         /// </summary>
-        /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <remarks>
         /// The property name is escaped before writing.
         /// </remarks>
@@ -1091,5 +1087,7 @@ namespace System.Text.Json
         {
             _currentDepth |= 1 << 31;
         }
+
+        private string DebuggerDisplay => $"BytesCommitted = {BytesCommitted} BytesPending = {BytesPending} CurrentDepth = {CurrentDepth}";
     }
 }

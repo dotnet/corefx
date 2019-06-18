@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
@@ -27,9 +28,6 @@ namespace System.Text.Json
         private byte[] _extraRentedBytes;
         private (int, string) _lastIndexAndString = (-1, null);
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal bool IsDisposable { get; }
 
         /// <summary>
@@ -77,9 +75,6 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal JsonTokenType GetJsonTokenType(int index)
         {
             CheckNotDisposed();
@@ -87,9 +82,6 @@ namespace System.Text.Json
             return _parsedData.GetJsonTokenType(index);
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal int GetArrayLength(int index)
         {
             CheckNotDisposed();
@@ -101,9 +93,6 @@ namespace System.Text.Json
             return row.SizeOrLength;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal JsonElement GetArrayIndexElement(int currentIndex, int arrayIndex)
         {
             CheckNotDisposed();
@@ -152,9 +141,6 @@ namespace System.Text.Json
             throw new IndexOutOfRangeException();
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal int GetEndIndex(int index, bool includeEndElement)
         {
             CheckNotDisposed();
@@ -233,9 +219,6 @@ namespace System.Text.Json
             return _utf8Json.Slice(start, end - start);
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal string GetString(int index, JsonTokenType expectedType)
         {
             CheckNotDisposed();
@@ -275,18 +258,121 @@ namespace System.Text.Json
             return lastString;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
+        internal bool TextEquals(int index, ReadOnlySpan<char> otherText, bool isPropertyName)
+        {
+            CheckNotDisposed();
+
+            int matchIndex = isPropertyName ? index - DbRow.Size : index;
+
+            (int lastIdx, string lastString) = _lastIndexAndString;
+        
+            if (lastIdx == matchIndex)
+            {
+                return otherText.SequenceEqual(lastString.AsSpan());
+            }
+
+            byte[] otherUtf8TextArray = null;
+
+            int length = checked(otherText.Length * JsonConstants.MaxExpansionFactorWhileTranscoding);
+            Span<byte> otherUtf8Text = length <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[JsonConstants.StackallocThreshold] :
+                (otherUtf8TextArray = ArrayPool<byte>.Shared.Rent(length));
+
+            ReadOnlySpan<byte> utf16Text = MemoryMarshal.AsBytes(otherText);
+            OperationStatus status = JsonWriterHelper.ToUtf8(utf16Text, otherUtf8Text, out int consumed, out int written);
+            Debug.Assert(status != OperationStatus.DestinationTooSmall);
+            bool result;
+            if (status > OperationStatus.DestinationTooSmall)   // Equivalent to: (status == NeedMoreData || status == InvalidData)
+            {
+                result = false;
+            }
+            else
+            {
+                Debug.Assert(status == OperationStatus.Done);
+                Debug.Assert(consumed == utf16Text.Length);
+
+                result = TextEquals(index, otherUtf8Text.Slice(0, written), isPropertyName);
+            }
+
+            if (otherUtf8TextArray != null)
+            {
+                otherUtf8Text.Slice(0, written).Clear();
+                ArrayPool<byte>.Shared.Return(otherUtf8TextArray);
+            }
+
+            return result;
+        }
+
+        internal bool TextEquals(int index, ReadOnlySpan<byte> otherUtf8Text, bool isPropertyName)
+        {
+            CheckNotDisposed();
+
+            int matchIndex = isPropertyName ? index - DbRow.Size : index;
+
+            DbRow row = _parsedData.Get(matchIndex);
+
+            CheckExpectedType(
+                isPropertyName? JsonTokenType.PropertyName : JsonTokenType.String,
+                row.TokenType);
+
+            ReadOnlySpan<byte> data = _utf8Json.Span;
+            ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
+
+            if (otherUtf8Text.Length > segment.Length)
+            {
+                return false;
+            }
+
+            if (row.HasComplexChildren)
+            {
+                if (otherUtf8Text.Length < segment.Length / JsonConstants.MaxExpansionFactorWhileEscaping)
+                {
+                    return false;
+                }
+
+                int idx = segment.IndexOf(JsonConstants.BackSlash);
+                Debug.Assert(idx != -1);
+
+                if (!otherUtf8Text.StartsWith(segment.Slice(0, idx)))
+                {
+                    return false;
+                }
+
+                return JsonReaderHelper.UnescapeAndCompare(segment.Slice(idx), otherUtf8Text.Slice(idx));
+            }
+
+            return segment.SequenceEqual(otherUtf8Text);
+        }
+
         internal string GetNameOfPropertyValue(int index)
         {
             // The property name is one row before the property value
             return GetString(index - DbRow.Size, JsonTokenType.PropertyName);
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
+        internal bool TryGetValue(int index, out byte[] value)
+        {
+            CheckNotDisposed();
+
+            DbRow row = _parsedData.Get(index);
+
+            CheckExpectedType(JsonTokenType.String, row.TokenType);
+
+            ReadOnlySpan<byte> data = _utf8Json.Span;
+            ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
+
+            // Segment needs to be unescaped
+            if (row.HasComplexChildren)
+            {
+                int idx = segment.IndexOf(JsonConstants.BackSlash);
+                Debug.Assert(idx != -1);
+                return JsonReaderHelper.TryGetUnescapedBase64Bytes(segment, idx, out value);
+            }
+
+            Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
+            return JsonReaderHelper.TryDecodeBase64(segment, out value);
+        }
+
         internal bool TryGetValue(int index, out int value)
         {
             CheckNotDisposed();
@@ -305,13 +391,10 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal bool TryGetValue(int index, out uint value)
         {
             CheckNotDisposed();
@@ -330,13 +413,10 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal bool TryGetValue(int index, out long value)
         {
             CheckNotDisposed();
@@ -355,13 +435,10 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal bool TryGetValue(int index, out ulong value)
         {
             CheckNotDisposed();
@@ -380,13 +457,10 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal bool TryGetValue(int index, out double value)
         {
             CheckNotDisposed();
@@ -407,13 +481,10 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal bool TryGetValue(int index, out float value)
         {
             CheckNotDisposed();
@@ -434,13 +505,10 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal bool TryGetValue(int index, out decimal value)
         {
             CheckNotDisposed();
@@ -461,13 +529,10 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal bool TryGetValue(int index, out DateTime value)
         {
             CheckNotDisposed();
@@ -493,15 +558,18 @@ namespace System.Text.Json
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
 
+            if (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
+                && JsonHelpers.TryParseAsISO(segment, out DateTime tmp, out int bytesConsumed)
+                && segment.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(segment, out value, out int bytesConsumed)
-                && segment.Length == bytesConsumed;
+            return false;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal bool TryGetValue(int index, out DateTimeOffset value)
         {
             CheckNotDisposed();
@@ -527,15 +595,18 @@ namespace System.Text.Json
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
 
+            if (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
+                && JsonHelpers.TryParseAsISO(segment, out DateTimeOffset tmp, out int bytesConsumed)
+                && segment.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(segment, out value, out int bytesConsumed)
-                && segment.Length == bytesConsumed;
+            return false;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal bool TryGetValue(int index, out Guid value)
         {
             CheckNotDisposed();
@@ -561,31 +632,29 @@ namespace System.Text.Json
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
 
+            if (segment.Length == JsonConstants.MaximumFormatGuidLength
+                && Utf8Parser.TryParse(segment, out Guid tmp, out _, 'D'))
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (segment.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(segment, out value, out _, 'D');
+            return false;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal string GetRawValueAsString(int index)
         {
             ReadOnlyMemory<byte> segment = GetRawValue(index, includeQuotes: true);
             return JsonReaderHelper.TranscodeHelper(segment.Span);
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal string GetPropertyRawValueAsString(int valueIndex)
         {
             ReadOnlyMemory<byte> segment = GetPropertyRawValue(valueIndex);
             return JsonReaderHelper.TranscodeHelper(segment.Span);
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal JsonElement CloneElement(int index)
         {
             int endIndex = GetEndIndex(index, true);
@@ -598,9 +667,6 @@ namespace System.Text.Json
             return newDocument.RootElement;
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal void WriteElementTo(
             int index,
             Utf8JsonWriter writer,
@@ -642,9 +708,6 @@ namespace System.Text.Json
             Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal void WriteElementTo(
             int index,
             Utf8JsonWriter writer,
@@ -686,9 +749,6 @@ namespace System.Text.Json
             Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal void WriteElementTo(
             int index,
             Utf8JsonWriter writer)

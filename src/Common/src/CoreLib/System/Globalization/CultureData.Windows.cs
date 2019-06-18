@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 using Internal.Runtime.CompilerServices;
@@ -357,6 +356,7 @@ namespace System.Globalization
         ///
         /// We don't build the stringbuilder unless we find something to change
         /// </summary>
+        [return: NotNullIfNotNull("str")]
         internal static string? ReescapeWin32String(string? str)
         {
             // If we don't have data, then don't try anything
@@ -425,13 +425,14 @@ namespace System.Globalization
             return result.ToString();
         }
 
+        [return: NotNullIfNotNull("array")]
         internal static string[]? ReescapeWin32Strings(string[]? array)
         {
             if (array != null)
             {
                 for (int i = 0; i < array.Length; i++)
                 {
-                    array[i] = ReescapeWin32String(array[i])!; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                    array[i] = ReescapeWin32String(array[i])!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
                 }
             }
 

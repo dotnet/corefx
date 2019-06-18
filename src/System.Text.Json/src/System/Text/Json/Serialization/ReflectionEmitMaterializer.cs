@@ -7,32 +7,72 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal sealed class ReflectionEmitMaterializer : ClassMaterializer
     {
         public override JsonClassInfo.ConstructorDelegate CreateConstructor(Type type)
         {
             Debug.Assert(type != null);
-
             ConstructorInfo realMethod = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, binder: null, Type.EmptyTypes, modifiers: null);
-            if (realMethod == null)
+
+            if (realMethod == null && !type.IsValueType)
             {
                 return null;
             }
 
             var dynamicMethod = new DynamicMethod(
-                realMethod.Name,
-                type,
+                ConstructorInfo.ConstructorName,
+                typeof(object),
                 Type.EmptyTypes,
                 typeof(ReflectionEmitMaterializer).Module,
                 skipVisibility: true);
 
             ILGenerator generator = dynamicMethod.GetILGenerator();
-            generator.Emit(OpCodes.Newobj, realMethod);
+
+            if (realMethod == null)
+            {
+                LocalBuilder local = generator.DeclareLocal(type);
+
+                generator.Emit(OpCodes.Ldloca_S, local);
+                generator.Emit(OpCodes.Initobj, type);
+                generator.Emit(OpCodes.Ldloc, local);
+                generator.Emit(OpCodes.Box, type);
+            }
+            else
+            {
+                generator.Emit(OpCodes.Newobj, realMethod);
+            }
+
             generator.Emit(OpCodes.Ret);
 
             return (JsonClassInfo.ConstructorDelegate)dynamicMethod.CreateDelegate(typeof(JsonClassInfo.ConstructorDelegate));
+        }
+
+        public override object ImmutableCollectionCreateRange(Type constructingType, Type elementType)
+        {
+            MethodInfo createRange = ImmutableCollectionCreateRangeMethod(constructingType, elementType);
+
+            if (createRange == null)
+            {
+                return null;
+            }
+
+            return createRange.CreateDelegate(
+                typeof(JsonSerializerOptions.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
+        }
+
+        public override object ImmutableDictionaryCreateRange(Type constructingType, Type elementType)
+        {
+            MethodInfo createRange = ImmutableDictionaryCreateRangeMethod(constructingType, elementType);
+
+            if (createRange == null)
+            {
+                return null;
+            }
+
+            return createRange.CreateDelegate(
+                typeof(JsonSerializerOptions.ImmutableDictCreateRangeDelegate<,>).MakeGenericType(typeof(string), elementType), null);
         }
     }
 }

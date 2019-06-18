@@ -13,9 +13,8 @@
 ** 
 ===========================================================*/
 
-#nullable enable
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Collections.Generic
 {
@@ -39,6 +38,7 @@ namespace System.Collections.Generic
             return result;
         }
 
+        [DoesNotReturn]
         internal static void ThrowOrIgnoreBadComparer(object? comparer)
         {
             throw new ArgumentException(SR.Format(SR.Arg_BogusIComparer, comparer));

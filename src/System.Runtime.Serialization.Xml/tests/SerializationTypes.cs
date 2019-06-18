@@ -839,6 +839,18 @@ namespace SerializationTypes
         public string StringField2;
     }
 
+    [KnownType(typeof(List<SimpleType>))]
+    [KnownType(typeof(SimpleType[]))]
+    [DataContract]
+    public class TypeWithKnownTypesOfCollectionsWithConflictingXmlName
+    {
+        [DataMember]
+        public object Value1 = new List<SimpleType>();
+
+        [DataMember]
+        public object Value2 = new SimpleType[1];
+
+    }
 }
 
 public class TypeWithXmlElementProperty
@@ -1263,4 +1275,22 @@ public partial class MsgDocumentType
 
     [System.Xml.Serialization.XmlAttribute("refs", DataType = "IDREFS")]
     public string[] Refs { get; set; }
+}
+
+public class RootClass
+{
+    [XmlArray]
+    public List<Parameter> Parameters { get; set; }
+}
+
+[XmlInclude(typeof(Parameter<string>))]
+public class Parameter
+{
+    [XmlAttribute]
+    public string Name { get; set; }
+}
+
+public class Parameter<T> : Parameter
+{
+    public T Value { get; set; }
 }

@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections;
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal struct WriteStackFrame
     {
@@ -16,6 +15,10 @@ namespace System.Text.Json.Serialization
 
         // Support Dictionary keys.
         public string KeyName;
+
+        // Whether the current object can be constructed with IDictionary.
+        public bool IsIDictionaryConstructible;
+        public bool IsIDictionaryConstructibleProperty;
 
         // The current enumerator for the IEnumerable or IDictionary.
         public IEnumerator Enumerator;
@@ -42,40 +45,37 @@ namespace System.Text.Json.Serialization
             {
                 JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
             }
+            else if (JsonClassInfo.ClassType == ClassType.IDictionaryConstructible)
+            {
+                JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
+                IsIDictionaryConstructible = true;
+            }
+            else if (JsonClassInfo.ClassType == ClassType.KeyValuePair)
+            {
+                JsonPropertyInfo = JsonClassInfo.GetPolicyPropertyOfKeyValuePair();
+                // Advance to the next property, since the first one is the KeyValuePair type itself,
+                // not its first property (Key or Value).
+                PropertyIndex++;
+            }
         }
 
         public void WriteObjectOrArrayStart(ClassType classType, Utf8JsonWriter writer, bool writeNull = false)
         {
-            if (JsonPropertyInfo?._escapedName != null)
+            if (JsonPropertyInfo?.EscapedName.HasValue == true)
             {
-                WriteObjectOrArrayStart(classType, JsonPropertyInfo?._escapedName, writer, writeNull);
+                WriteObjectOrArrayStart(classType, JsonPropertyInfo.EscapedName.Value, writer, writeNull);
             }
             else if (KeyName != null)
             {
-                byte[] pooledKey = null;
-                byte[] utf8Key = Encoding.UTF8.GetBytes(KeyName);
-                int length = JsonWriterHelper.GetMaxEscapedLength(utf8Key.Length, 0);
-
-                Span<byte> escapedKey = length <= JsonConstants.StackallocThreshold ?
-                    stackalloc byte[length] :
-                    (pooledKey = ArrayPool<byte>.Shared.Rent(length));
-
-                JsonWriterHelper.EscapeString(utf8Key, escapedKey, 0, out int written);
-                Span<byte> propertyName = escapedKey.Slice(0, written);
-
+                JsonEncodedText propertyName = JsonEncodedText.Encode(KeyName);
                 WriteObjectOrArrayStart(classType, propertyName, writer, writeNull);
-
-                if (pooledKey != null)
-                {
-                    ArrayPool<byte>.Shared.Return(pooledKey);
-                }
             }
             else
             {
                 Debug.Assert(writeNull == false);
 
                 // Write start without a property name.
-                if (classType == ClassType.Object || classType == ClassType.Dictionary)
+                if (classType == ClassType.Object || classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible)
                 {
                     writer.WriteStartObject();
                     StartObjectWritten = true;
@@ -88,13 +88,15 @@ namespace System.Text.Json.Serialization
             }
         }
 
-        private void WriteObjectOrArrayStart(ClassType classType, ReadOnlySpan<byte> propertyName, Utf8JsonWriter writer, bool writeNull)
+        private void WriteObjectOrArrayStart(ClassType classType, JsonEncodedText propertyName, Utf8JsonWriter writer, bool writeNull)
         {
             if (writeNull)
             {
                 writer.WriteNull(propertyName);
             }
-            else if (classType == ClassType.Object || classType == ClassType.Dictionary)
+            else if (classType == ClassType.Object ||
+                classType == ClassType.Dictionary ||
+                classType == ClassType.IDictionaryConstructible)
             {
                 writer.WriteStartObject(propertyName);
                 StartObjectWritten = true;
@@ -114,6 +116,7 @@ namespace System.Text.Json.Serialization
             JsonClassInfo = null;
             JsonPropertyInfo = null;
             PropertyIndex = 0;
+            IsIDictionaryConstructible = false;
             PopStackOnEndObject = false;
             PopStackOnEnd = false;
             StartObjectWritten = false;
@@ -123,6 +126,7 @@ namespace System.Text.Json.Serialization
         {
             PropertyIndex = 0;
             PopStackOnEndObject = false;
+            IsIDictionaryConstructibleProperty = false;
             JsonPropertyInfo = null;
         }
 

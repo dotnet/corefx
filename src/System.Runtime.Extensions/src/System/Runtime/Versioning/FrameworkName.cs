@@ -6,12 +6,15 @@ using System.Diagnostics;
 
 namespace System.Runtime.Versioning
 {
-    public sealed class FrameworkName : IEquatable<FrameworkName>
+    public sealed class FrameworkName :
+#nullable disable
+        IEquatable<FrameworkName>
+#nullable restore
     {
         private readonly string _identifier;
-        private readonly Version _version;
+        private readonly Version _version = null!;
         private readonly string _profile;
-        private string _fullName;
+        private string? _fullName;
 
         private const char ComponentSeparator = ',';
         private const char KeyValueSeparator = '=';
@@ -71,19 +74,20 @@ namespace System.Runtime.Versioning
                             Profile;
                     }
                 }
+
                 Debug.Assert(_fullName != null);
                 return _fullName;
             }
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as FrameworkName);
         }
 
-        public bool Equals(FrameworkName other)
+        public bool Equals(FrameworkName? other)
         {
-            if (object.ReferenceEquals(other, null))
+            if (other is null)
             {
                 return false;
             }
@@ -108,7 +112,7 @@ namespace System.Runtime.Versioning
         {
         }
 
-        public FrameworkName(string identifier, Version version, string profile)
+        public FrameworkName(string identifier, Version version, string? profile)
         {
             if (identifier == null)
             {
@@ -227,16 +231,17 @@ namespace System.Runtime.Versioning
             }
         }
 
-        public static bool operator ==(FrameworkName left, FrameworkName right)
+        public static bool operator ==(FrameworkName? left, FrameworkName? right)
         {
-            if (object.ReferenceEquals(left, null))
+            if (left is null)
             {
-                return object.ReferenceEquals(right, null);
+                return right is null;
             }
+
             return left.Equals(right);
         }
 
-        public static bool operator !=(FrameworkName left, FrameworkName right)
+        public static bool operator !=(FrameworkName? left, FrameworkName? right)
         {
             return !(left == right);
         }

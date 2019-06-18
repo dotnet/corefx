@@ -36,7 +36,7 @@ namespace System.Security.Cryptography
 
             public RSASecurityTransforms(int keySize)
             {
-                KeySize = keySize;
+                base.KeySize = keySize;
             }
 
             internal RSASecurityTransforms(SafeSecKeyRefHandle publicKey)
@@ -77,6 +77,8 @@ namespace System.Security.Cryptography
                     // Set the KeySize before freeing the key so that an invalid value doesn't throw away the key
                     base.KeySize = value;
 
+                    ThrowIfDisposed();
+
                     if (_keys != null)
                     {
                         _keys.Dispose();
@@ -92,8 +94,7 @@ namespace System.Security.Cryptography
                 const string ExportPassword = "DotnetExportPassphrase";
                 SecKeyPair keys = GetKeys();
 
-                if (keys.PublicKey == null ||
-                    (includePrivateParameters && keys.PrivateKey == null))
+                if (includePrivateParameters && keys.PrivateKey == null)
                 { 
                     throw new CryptographicException(SR.Cryptography_OpenInvalidHandle);
                 }
@@ -150,6 +151,9 @@ namespace System.Security.Cryptography
 
             public override void ImportParameters(RSAParameters parameters)
             {
+                ValidateParameters(parameters);
+                ThrowIfDisposed();
+
                 bool isPrivateKey = parameters.D != null;
 
                 if (isPrivateKey)
@@ -190,6 +194,8 @@ namespace System.Security.Cryptography
                 ReadOnlySpan<byte> source,
                 out int bytesRead)
             {
+                ThrowIfDisposed();
+
                 fixed (byte* ptr = &MemoryMarshal.GetReference(source))
                 {
                     using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
@@ -209,6 +215,8 @@ namespace System.Security.Cryptography
 
             public override unsafe void ImportRSAPublicKey(ReadOnlySpan<byte> source, out int bytesRead)
             {
+                ThrowIfDisposed();
+
                 fixed (byte* ptr = &MemoryMarshal.GetReference(source))
                 {
                     using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
@@ -237,6 +245,24 @@ namespace System.Security.Cryptography
                 }
             }
 
+            public override void ImportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<byte> passwordBytes,
+                ReadOnlySpan<byte> source,
+                out int bytesRead)
+            {
+                ThrowIfDisposed();
+                base.ImportEncryptedPkcs8PrivateKey(passwordBytes, source, out bytesRead);
+            }
+
+            public override void ImportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<char> password,
+                ReadOnlySpan<byte> source,
+                out int bytesRead)
+            {
+                ThrowIfDisposed();
+                base.ImportEncryptedPkcs8PrivateKey(password, source, out bytesRead);
+            }
+
             public override byte[] Encrypt(byte[] data, RSAEncryptionPadding padding)
             {
                 if (data == null)
@@ -247,6 +273,8 @@ namespace System.Security.Cryptography
                 {
                     throw new ArgumentNullException(nameof(padding));
                 }
+
+                ThrowIfDisposed();
 
                 // The size of encrypt is always the keysize (in ceiling-bytes)
                 int outputSize = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
@@ -268,6 +296,8 @@ namespace System.Security.Cryptography
                 {
                     throw new ArgumentNullException(nameof(padding));
                 }
+
+                ThrowIfDisposed();
 
                 int rsaSize = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
 
@@ -310,7 +340,7 @@ namespace System.Security.Cryptography
                         throw new CryptographicException(SR.Cryptography_InvalidPaddingMode);
                 }
 
-                byte[] rented = ArrayPool<byte>.Shared.Rent(rsaSize);
+                byte[] rented = CryptoPool.Rent(rsaSize);
                 Span<byte> tmp = new Span<byte>(rented, 0, rsaSize);
 
                 try
@@ -333,8 +363,8 @@ namespace System.Security.Cryptography
                 }
                 finally
                 {
-                    tmp.Clear();
-                    ArrayPool<byte>.Shared.Return(rented);
+                    CryptographicOperations.ZeroMemory(tmp);
+                    CryptoPool.Return(rented, clearSize: 0);
                 }
             }
 
@@ -369,24 +399,23 @@ namespace System.Security.Cryptography
                 }
 
                 int maxOutputSize = RsaPaddingProcessor.BytesRequiredForBitCount(KeySize);
-                byte[] rented = ArrayPool<byte>.Shared.Rent(maxOutputSize);
-                Span<byte> contentsSpan = Span<byte>.Empty;
+                byte[] rented = CryptoPool.Rent(maxOutputSize);
+                int bytesWritten = 0;
 
                 try
                 {
-                    if (!TryDecrypt(keys.PrivateKey, data, rented, padding, out int bytesWritten))
+                    if (!TryDecrypt(keys.PrivateKey, data, rented, padding, out bytesWritten))
                     {
                         Debug.Fail($"TryDecrypt returned false with a modulus-sized destination");
                         throw new CryptographicException();
                     }
 
-                    contentsSpan = new Span<byte>(rented, 0, bytesWritten);
+                    Span<byte> contentsSpan = new Span<byte>(rented, 0, bytesWritten);
                     return contentsSpan.ToArray();
                 }
                 finally
                 {
-                    CryptographicOperations.ZeroMemory(contentsSpan);
-                    ArrayPool<byte>.Shared.Return(rented);
+                    CryptoPool.Return(rented, bytesWritten);
                 }
             }
 
@@ -438,7 +467,7 @@ namespace System.Security.Cryptography
                 Debug.Assert(padding.Mode == RSAEncryptionPaddingMode.Oaep);
                 RsaPaddingProcessor processor = RsaPaddingProcessor.OpenProcessor(padding.OaepHashAlgorithm);
 
-                byte[] rented = ArrayPool<byte>.Shared.Rent(modulusSizeInBytes);
+                byte[] rented = CryptoPool.Rent(modulusSizeInBytes);
                 Span<byte> unpaddedData = Span<byte>.Empty;
 
                 try
@@ -456,7 +485,7 @@ namespace System.Security.Cryptography
                 finally
                 {
                     CryptographicOperations.ZeroMemory(unpaddedData);
-                    ArrayPool<byte>.Shared.Return(rented);
+                    CryptoPool.Return(rented, clearSize: 0);
                 }
             }
 
@@ -468,6 +497,8 @@ namespace System.Security.Cryptography
                     throw HashAlgorithmNameNullOrEmpty();
                 if (padding == null)
                     throw new ArgumentNullException(nameof(padding));
+
+                ThrowIfDisposed();
 
                 if (padding == RSASignaturePadding.Pkcs1)
                 {
@@ -524,6 +555,8 @@ namespace System.Security.Cryptography
                 {
                     throw new ArgumentNullException(nameof(padding));
                 }
+
+                ThrowIfDisposed();
 
                 RsaPaddingProcessor processor = null;
 
@@ -585,7 +618,7 @@ namespace System.Security.Cryptography
                     return false;
                 }
 
-                byte[] rented = ArrayPool<byte>.Shared.Rent(rsaSize);
+                byte[] rented = CryptoPool.Rent(rsaSize);
                 Span<byte> buf = new Span<byte>(rented, 0, rsaSize);
                 processor.EncodePss(hash, buf, keySize);
 
@@ -596,7 +629,7 @@ namespace System.Security.Cryptography
                 finally
                 {
                     CryptographicOperations.ZeroMemory(buf);
-                    ArrayPool<byte>.Shared.Return(rented);
+                    CryptoPool.Return(rented, clearSize: 0);
                 }
             }
 
@@ -629,6 +662,8 @@ namespace System.Security.Cryptography
                     throw new ArgumentNullException(nameof(padding));
                 }
 
+                ThrowIfDisposed();
+
                 if (padding == RSASignaturePadding.Pkcs1)
                 {
                     Interop.AppleCrypto.PAL_HashAlgorithm palAlgId =
@@ -653,7 +688,7 @@ namespace System.Security.Cryptography
                         return false;
                     }
 
-                    byte[] rented = ArrayPool<byte>.Shared.Rent(rsaSize);
+                    byte[] rented = CryptoPool.Rent(rsaSize);
                     Span<byte> unwrapped = new Span<byte>(rented, 0, rsaSize);
 
                     try
@@ -673,8 +708,8 @@ namespace System.Security.Cryptography
                     }
                     finally
                     {
-                        unwrapped.Clear();
-                        ArrayPool<byte>.Shared.Return(rented);
+                        CryptographicOperations.ZeroMemory(unwrapped);
+                        CryptoPool.Return(rented, clearSize: 0);
                     }
                 }
 
@@ -696,8 +731,8 @@ namespace System.Security.Cryptography
                 {
                     if (_keys != null)
                     {
+                        // Do not set _keys to null, in order to prevent rehydration.
                         _keys.Dispose();
-                        _keys = null;
                     }
                 }
 
@@ -737,8 +772,19 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithmName.Name);
             }
 
+            private void ThrowIfDisposed()
+            {
+                SecKeyPair current = _keys;
+
+                if (current != null && current.PublicKey == null)
+                {
+                    throw new ObjectDisposedException(nameof(RSA));
+                }
+            }
+
             internal SecKeyPair GetKeys()
             {
+                ThrowIfDisposed();
                 SecKeyPair current = _keys;
 
                 if (current != null)
@@ -758,6 +804,8 @@ namespace System.Security.Cryptography
 
             private void SetKey(SecKeyPair newKeyPair)
             {
+                ThrowIfDisposed();
+
                 SecKeyPair current = _keys;
                 _keys = newKeyPair;
                 current?.Dispose();
@@ -784,6 +832,43 @@ namespace System.Security.Cryptography
                         return Interop.AppleCrypto.ImportEphemeralKey(pkcs1PublicKey.EncodeAsSpan(), false);
                     }
                 }
+            }
+
+            private static void ValidateParameters(in RSAParameters parameters)
+            {
+                if (parameters.Modulus == null || parameters.Exponent == null)
+                    throw new CryptographicException(SR.Argument_InvalidValue);
+
+                if (!HasConsistentPrivateKey(parameters))
+                    throw new CryptographicException(SR.Argument_InvalidValue);
+            }
+
+            private static bool HasConsistentPrivateKey(in RSAParameters parameters)
+            {
+                if (parameters.D == null)
+                {
+                    if (parameters.P != null ||
+                        parameters.DP != null ||
+                        parameters.Q != null ||
+                        parameters.DQ != null ||
+                        parameters.InverseQ != null)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (parameters.P == null ||
+                        parameters.DP == null ||
+                        parameters.Q == null ||
+                        parameters.DQ == null ||
+                        parameters.InverseQ == null)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
             }
         }
 
