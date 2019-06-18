@@ -20,5 +20,8 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
     <ReferenceFromRuntime Include="System.Runtime.InteropServices.RuntimeInformation" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="StackTraceSymbolsTests.cs" />
+  </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
