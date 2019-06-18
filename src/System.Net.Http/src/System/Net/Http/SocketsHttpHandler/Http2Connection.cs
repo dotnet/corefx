@@ -777,20 +777,12 @@ namespace System.Net.Http
 
         private async Task SendRstStreamAsync(int streamId, Http2ProtocolErrorCode errorCode)
         {
-            try
-            {
-                await StartWriteAsync(FrameHeader.Size + FrameHeader.RstStreamLength).ConfigureAwait(false);
-                WriteFrameHeader(new FrameHeader(FrameHeader.RstStreamLength, FrameType.RstStream, FrameFlags.None, streamId));
-                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, (int)errorCode);
-                _outgoingBuffer.Commit(FrameHeader.RstStreamLength);
+            await StartWriteAsync(FrameHeader.Size + FrameHeader.RstStreamLength).ConfigureAwait(false);
+            WriteFrameHeader(new FrameHeader(FrameHeader.RstStreamLength, FrameType.RstStream, FrameFlags.None, streamId));
+            BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, (int)errorCode);
+            _outgoingBuffer.Commit(FrameHeader.RstStreamLength);
 
-                FinishWrite(mustFlush: true);
-            }
-            catch (Exception e)
-            {
-                // Log failure but ignore any error while trying to propagate error to server.
-                if (NetEventSource.IsEnabled) Trace($"Exception from SendRstStreamAsync: {e}");
-            }
+            FinishWrite(mustFlush: true);
         }
 
         private static (ReadOnlyMemory<byte> first, ReadOnlyMemory<byte> rest) SplitBuffer(ReadOnlyMemory<byte> buffer, int maxSize) =>
