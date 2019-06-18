@@ -411,6 +411,13 @@ namespace System
                 int toIndex = NumberOfLabels - 1;
                 int fromIndex = index - 1;
 
+                // if fromIndex and toIndex are the same 0 bits are already in the correct place
+                // it happens for leading and trailing compression
+                if (fromIndex == toIndex)
+                {
+                    return;
+                }
+
                 for (int i = index - compressorIndex; i > 0; --i)
                 {
                     numbers[toIndex--] = numbers[fromIndex];
