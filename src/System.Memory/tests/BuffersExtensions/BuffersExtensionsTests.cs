@@ -29,6 +29,16 @@ namespace System.Buffers.Tests
             Assert.Equal("Hello World!", bufferWriter.ToString());
         }
 
+        [Fact]
+        public void WritingEmptyBufferToEmptyBufferWriterDoesNothing()
+        {
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] { Array.Empty<byte>() }
+            );
+
+            bufferWriter.Write(Array.Empty<byte>());
+        }
+
         [Theory]
         [InlineData(1, 0)]
         [InlineData(10, 9)]

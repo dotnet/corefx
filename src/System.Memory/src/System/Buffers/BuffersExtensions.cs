@@ -115,9 +115,6 @@ namespace System.Buffers
         {
             Span<T> destination = writer.GetSpan();
 
-            if (destination.IsEmpty)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.writer);
-
             // Fast path, try copying to the available memory directly
             if (value.Length <= destination.Length)
             {
