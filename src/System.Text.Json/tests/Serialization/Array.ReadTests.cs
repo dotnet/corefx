@@ -71,27 +71,12 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, arr[1][1]);
         }
 
-        [Fact]
-        public static void ReadByteArrayFail()
-        {
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(@"""1"""));
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(@"""A==="""));
-        }
-
         [Theory]
-        [InlineData(typeof(int[]), @"[{}]")]
-        [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": [{}]}")]
-        public static void InvalidJsonForArrayShouldFail(Type type, string json)
+        [InlineData(@"""1""")]
+        [InlineData(@"""A===""")]
+        [InlineData(@"[1, 2]")]  // Currently not support deserializing JSON arrays as byte[] - only Base64 string.
+        public static void ReadByteArrayFail(string json)
         {
-            // These fail because the int converter sees the StartObject token.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse(json, type));
-        }
-
-        [Fact]
-        public static void ReadByteArrayAsJsonArrayFail()
-        {
-            string json = $"[1, 2]";
-            // Currently no support deserializing JSON arrays as byte[] - only Base64 string.
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(json));
         }
 
