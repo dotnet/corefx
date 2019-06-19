@@ -403,7 +403,7 @@ namespace System.Reflection.Tests
 
             string expected = "MyAssemblyName, Version=" + versionString;
 
-            Assert.Equal(assemblyName.FullName, expected);
+            Assert.Equal(expected, assemblyName.FullName);
         }
 
         [Fact]
