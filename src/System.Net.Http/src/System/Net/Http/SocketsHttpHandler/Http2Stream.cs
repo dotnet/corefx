@@ -123,7 +123,7 @@ namespace System.Net.Http
                         if (_abortException == null)
                         {
                             // If we still processing response after receiving response headers, this will give us chance to propagate exception up.
-                            // Since we failed while Copying stream, wrapp it as IOException if needed.
+                            // Since we failed while Copying stream, wrap it as IOException if needed.
                             _abortException = e;
                         }
 

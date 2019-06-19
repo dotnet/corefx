@@ -1374,7 +1374,6 @@ namespace System.Net.Http.Functional.Tests
                     response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token);
                     using (Stream stream = await response.Content.ReadAsStreamAsync())
                     {
-                        Console.WriteLine("Strema created~!!!");
                         if (doRead)
                         {
                             try
@@ -1424,6 +1423,124 @@ namespace System.Net.Http.Functional.Tests
                     Assert.NotNull(frame); // We should get Rst before closing connection.
                     Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
                  } while (frame.Type != FrameType.RstStream);
+            });
+        }
+
+        [ConditionalFact(nameof(SupportsAlpn))]
+        public async Task Dispose_ProcessingResponse_OK()
+        {
+            HttpClient client =  CreateHttpClient();
+            bool diposeCalled = false;
+           int totalSent = 0;
+            int totalReceived = 0;
+
+            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Version = new Version(2,0);
+                HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                using (Stream stream = await response.Content.ReadAsStreamAsync())
+                {
+                    // Dispose client after receiving response headers.
+                    client.Dispose();
+                    diposeCalled = true;
+
+                    int readLength;
+                    byte[] buffer = new byte[100];
+                    do {
+                        readLength = await stream.ReadAsync(buffer);
+                        totalReceived += readLength;
+                    } while (readLength != 0);
+                }
+
+                Assert.Equal(totalSent, totalReceived);
+            },
+            async server =>
+            {
+                await server.EstablishConnectionAsync();
+
+                (int streamId, HttpRequestData requestData) = await server.ReadAndParseRequestHeaderAsync(readBody : true);
+                await server.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.OK);
+
+                // Start streaming response and wait for client to be disposed.
+                byte[] responseBody = new byte[100];
+                while (!diposeCalled)
+                {
+                    await server.SendResponseDataAsync(streamId, responseBody, endStream: false);
+                    totalSent += responseBody.Length;
+                    await Task.Delay(100);
+                }
+
+                // Send final data block.
+                await server.SendResponseDataAsync(streamId, responseBody, endStream: true);
+                totalSent += responseBody.Length;
+
+                await server.SendGoAway(streamId);
+                await server.WaitForConnectionShutdownAsync();
+            });
+        }
+
+        [ConditionalFact(nameof(SupportsAlpn))]
+        public async Task Dispose_ProcessingRequest_Throws()
+        {
+            HttpClient client =  CreateHttpClient();
+            bool stopSending = false;
+
+            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                string content = new string('*', 300);
+                var request = new HttpRequestMessage(HttpMethod.Post, url);
+                request.Version = new Version(2,0);
+                request.Content = new StreamContent(new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(content), null, count: 20));
+                HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                Exception innerException = null;
+
+                using (Stream stream = await response.Content.ReadAsStreamAsync())
+                {
+                    // Dispose client after receiving response headers.
+                    client.Dispose();
+
+                    byte[] buffer = new byte[100];
+                    try
+                    {
+                        do
+                        {
+                            int readLength = await stream.ReadAsync(buffer);
+                            Assert.NotEqual(0, readLength);
+                        } while (true);
+                    }
+                    catch (System.IO.IOException e)
+                    {
+                        Assert.NotNull(e.InnerException);
+                        innerException = e.InnerException;
+                    }
+                    finally
+                    {
+                        stopSending = true;
+                    }
+                    Assert.True(innerException is HttpRequestException);
+                }
+            },
+            async server =>
+            {
+                await server.EstablishConnectionAsync();
+
+                (int streamId, HttpRequestData requestData) = await server.ReadAndParseRequestHeaderAsync(readBody : false);
+                await server.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.OK);
+
+                // Start streaming response and wait for client to be disposed.
+                byte[] responseBody = new byte[100];
+                while (!stopSending)
+                {
+                    await server.SendResponseDataAsync(streamId, responseBody, endStream: false);
+                    await Task.Delay(100);
+                }
+
+                await server.SendGoAway(streamId);
             });
         }
 

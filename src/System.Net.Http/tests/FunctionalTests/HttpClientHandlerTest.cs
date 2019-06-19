@@ -1523,14 +1523,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task Dispose_DisposingHandlerCancelsActiveOperationsWithoutResponses()
         {
-            if (UseSocketsHttpHandler)
-            {
-                // TODO #23131: The SocketsHttpHandler isn't correctly handling disposal of the handler.
-                // It should cause the outstanding requests to be canceled with OperationCanceledExceptions,
-                // whereas currently it's resulting in ObjectDisposedExceptions.
-                return;
-            }
-
             await LoopbackServer.CreateServerAsync(async (server1, url1) =>
             {
                 await LoopbackServer.CreateServerAsync(async (server2, url2) =>

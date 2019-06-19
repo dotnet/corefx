@@ -990,12 +990,22 @@ namespace System.Net.Http
 
         private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken, bool mustFlush = false)
         {
-            // Ensure we don't exceed the max concurrent streams setting.
-            await _concurrentStreams.RequestCreditAsync(1, cancellationToken).ConfigureAwait(false);
-
-            // We serialize usage of the header encoder and the header buffer separately from the
-            // write lock
-            await _headerSerializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                // Ensure we don't exceed the max concurrent streams setting.
+                await _concurrentStreams.RequestCreditAsync(1, cancellationToken).ConfigureAwait(false);
+                // We serialize usage of the header encoder and the header buffer separately from the
+                // write lock
+                await _headerSerializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (ObjectDisposedException)
+            {
+                // We have race condition between receiving GOAWAY and processing requests.
+                // Throw a retryable request exception if this is not result of some other error.
+                // This will cause retry logic to kick in and perform another connection attempt.
+                // The user should never see this exception.  Same logic lives in AddStream.
+                throw _abortException ?? new HttpRequestException(null, null, allowRetry: true);
+            }
 
             Http2Stream http2Stream = null;
 
@@ -1269,6 +1279,9 @@ namespace System.Net.Http
 
             // Do shutdown.
             _stream.Close();
+
+            _connectionWindow.Dispose();
+            _concurrentStreams.Dispose();
         }
 
         public void Dispose()
@@ -1280,17 +1293,6 @@ namespace System.Net.Http
                     _disposed = true;
 
                     CheckForShutdown();
-
-                    _connectionWindow.Dispose();
-                    _concurrentStreams.Dispose();
-
-                    // ISSUE #35466
-                    // We can't dispose the writer lock here, because there's a timing issue where this can occur
-                    // before a writer that has completed writing has actually release the lock.
-                    // It's not clear that we actually need to dispose this object, since it shouldn't
-                    // actually hold any unmanaged resources. However, we should ensure we have a clear understanding
-                    // of shutdown semantics and object lifetimes in general, even if we don't actually dispose this.
-                    // _writerLock.Dispose();
                 }
             }
         }
