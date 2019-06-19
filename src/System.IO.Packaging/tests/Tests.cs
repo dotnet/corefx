@@ -3224,6 +3224,7 @@ namespace System.IO.Packaging.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop doesn't support Package.Open with FileAccess.Write and FileMode.CreateNew")]
         public void T113_String_CreateNew_Write_Open_Read()
         {
             var tempGuidName = GetTempFileInfoWithExtension(".docx");
@@ -3244,6 +3245,7 @@ namespace System.IO.Packaging.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop doesn't support Package.Open with FileAccess.Write and FileMode.Create")]
         public void T111_String_Create_Write_Star()
         {
             var tempGuidName = GetTempFileInfoWithExtension(".docx");
