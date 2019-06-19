@@ -15,6 +15,5 @@ namespace System.IO.Packaging
         public static System.Uri Create(System.Uri packageUri, System.Uri partUri, string fragment) { throw null; }
         public static int ComparePackUri(Uri firstPackUri, Uri secondPackUri) { throw null; }
         public static System.Uri GetPartUri(System.Uri packUri) { throw null; }
-
     }
 }
