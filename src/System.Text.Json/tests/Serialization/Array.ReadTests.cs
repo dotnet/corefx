@@ -78,6 +78,15 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(@"""A==="""));
         }
 
+        [Theory]
+        [InlineData(typeof(int[]), @"[{}]")]
+        [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": [{}]}")]
+        public static void InvalidJsonForArrayShouldFail(Type type, string json)
+        {
+            // These fail because the int converter sees the StartObject token.
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse(json, type));
+        }
+
         [Fact]
         public static void ReadByteArrayAsJsonArrayFail()
         {
