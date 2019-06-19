@@ -3227,10 +3227,8 @@ namespace System.IO.Packaging.Tests
         public void T113_String_CreateNew_Write_Open_Read()
         {
             var tempGuidName = GetTempFileInfoWithExtension(".docx");
-            AssertExtensions.Throws<ArgumentException>(null, () =>
-            {
-                Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.Write);
-            });
+            Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.Write);
+            package.Close();
             tempGuidName.Delete();
         }
 
@@ -3250,7 +3248,8 @@ namespace System.IO.Packaging.Tests
         {
             var tempGuidName = GetTempFileInfoWithExtension(".docx");
             // opening the package attempts to read the package, and no permissions.
-            AssertExtensions.Throws<ArgumentException>(null, () => Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.Write));
+            Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.Write);
+            package.Close();
             tempGuidName.Delete();
         }
 
