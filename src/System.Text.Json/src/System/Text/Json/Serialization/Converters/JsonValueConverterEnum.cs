@@ -18,7 +18,7 @@ namespace System.Text.Json.Serialization.Converters
 
         private readonly EnumConverterOptions _converterOptions;
         private readonly JsonNamingPolicy _namingPolicy;
-        private Dictionary<string, string> _nameCache;
+        private readonly Dictionary<string, string> _nameCache;
 
         public override bool CanConvert(Type type)
         {
