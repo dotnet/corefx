@@ -411,7 +411,7 @@ namespace System
                 int toIndex = NumberOfLabels - 1;
                 int fromIndex = index - 1;
 
-                // if fromIndex and toIndex are the same 0 bits are already in the correct place
+                // if fromIndex and toIndex are the same mean that "zero bits" are already in the correct place
                 // it happens for leading and trailing compression
                 if (fromIndex == toIndex)
                 {
