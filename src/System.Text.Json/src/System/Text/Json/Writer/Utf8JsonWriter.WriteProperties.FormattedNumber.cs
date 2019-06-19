@@ -14,9 +14,6 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="utf8FormattedNumber">The value to be written as a JSON number as part of the name/value pair.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -27,7 +24,12 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        ///   <para>
+        ///     The property name is escaped before writing.
+        ///   </para>
+        ///   <para>
+        ///     Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        ///   </para>
         /// </remarks>
         internal void WriteNumber(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> utf8FormattedNumber)
         {
@@ -46,9 +48,6 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
         /// <param name="utf8FormattedNumber">The value to be written as a JSON number as part of the name/value pair.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -59,7 +58,12 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        ///   <para>
+        ///     The property name is escaped before writing.
+        ///   </para>
+        ///   <para>
+        ///     Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        ///   </para>
         /// </remarks>
         internal void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> utf8FormattedNumber)
         {
