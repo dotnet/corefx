@@ -905,6 +905,32 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("1", actual.Child["1"].A);
         }
 
+        [Fact]
+        public static void Regression38565_Serialize()
+        {
+            var value = new Regression38565_Parent()
+            {
+                Test = "value1",
+                Child = new Regression38565_Child()
+            };
+
+            var actual = JsonSerializer.ToString(value, new JsonSerializerOptions { IgnoreNullValues = true });
+            Assert.Equal("{\"Test\":\"value1\",\"Dict\":null,\"Child\":{\"Dict\":null}}", actual);
+        }
+
+        [Fact]
+        public static void Regression38565_Deserialize()
+        {
+            var json = "{\"Test\":\"value1\",\"Dict\":null,\"Child\":{\"Dict\":null}}";
+            var actual = JsonSerializer.Parse<Regression38565_Parent>(json);
+
+            Assert.True(actual.Test == "value1");
+            Assert.Null(actual.Dict);
+            Assert.NotNull(actual.Child);
+            Assert.Null(actual.Child.Dict);
+            Assert.Null(actual.Child.Test);
+        }
+
         public class ClassWithDictionaryButNoSetter
         {
             public Dictionary<string, string> MyDictionary { get; } = new Dictionary<string, string>();
@@ -938,6 +964,19 @@ namespace System.Text.Json.Serialization.Tests
             public int? I { get; set; }
             public int? J { get; set; }
             public string[] K { get; set; }
+        }
+
+        public class Regression38565_Parent
+        {
+            public string Test { get; set; }
+            public Dictionary<string, string> Dict { get; set; }
+            public Regression38565_Child Child { get; set; }
+        }
+
+        public class Regression38565_Child
+        {
+            public string Test { get; set; }
+            public Dictionary<string, string> Dict { get; set; }
         }
     }
 }
