@@ -75,7 +75,6 @@ namespace System.Net.Test.Common
             _connections.RemoveAll((c) => c.IsInvalid);
         }
 
-        // Returns the first 24 bytes read, which should be the connection preface.
         public async Task<Http2LoopbackConnection> AcceptConnectionAsync()
         {
             RemoveInvalidConnections();
@@ -93,8 +92,13 @@ namespace System.Net.Test.Common
             return connection;
         }
 
-        // Accept connection and handle connection setup
         public async Task<Http2LoopbackConnection> EstablishConnectionAsync(params SettingsEntry[] settingsEntries)
+        {
+            (Http2LoopbackConnection connection, _) = await EstablishConnectionGetSettingsAsync();
+            return connection;
+        }
+
+        public async Task<(Http2LoopbackConnection, SettingsFrame)> EstablishConnectionGetSettingsAsync(params SettingsEntry[] settingsEntries)
         {
             Http2LoopbackConnection connection = await AcceptConnectionAsync().ConfigureAwait(false);
 
@@ -103,6 +107,8 @@ namespace System.Net.Test.Common
             Assert.Equal(FrameType.Settings, receivedFrame.Type);
             Assert.Equal(FrameFlags.None, receivedFrame.Flags);
             Assert.Equal(0, receivedFrame.StreamId);
+
+            var clientSettingsFrame = (SettingsFrame)receivedFrame;
 
             // Receive the initial client window update frame.
             receivedFrame = await connection.ReadFrameAsync(Timeout).ConfigureAwait(false);
@@ -121,7 +127,7 @@ namespace System.Net.Test.Common
             // The client will send us a SETTINGS ACK eventually, but not necessarily right away.
             connection.ExpectSettingsAck();
 
-            return connection;
+            return (connection, clientSettingsFrame);
         }
 
         public override void Dispose()

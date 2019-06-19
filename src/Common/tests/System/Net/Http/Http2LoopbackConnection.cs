@@ -34,8 +34,8 @@ namespace System.Net.Test.Common
 
             if (httpOptions.UseSsl)
             {
-                var sslStream = new SslStream(_connectionStream, false, delegate
-                { return true; });
+                var sslStream = new SslStream(_connectionStream, false, delegate { return true; });
+
                 using (var cert = Configuration.Certificates.GetServerCertificate())
                 {
                     SslServerAuthenticationOptions options = new SslServerAuthenticationOptions();
@@ -113,15 +113,18 @@ namespace System.Net.Test.Common
 
         public async Task<Frame> ReadFrameAsync(TimeSpan timeout)
         {
-            // Prep the timeout cancellation token.
-            CancellationTokenSource timeoutCts = new CancellationTokenSource(timeout);
+            using CancellationTokenSource timeoutCts = new CancellationTokenSource(timeout);
+            return await ReadFrameAsync(timeoutCts.Token);
+        }
 
+        private async Task<Frame> ReadFrameAsync(CancellationToken cancellationToken)
+        {
             // First read the frame headers, which should tell us how long the rest of the frame is.
             byte[] headerBytes = new byte[Frame.FrameHeaderLength];
 
             try
             {
-                if (!await FillBufferAsync(headerBytes, timeoutCts.Token).ConfigureAwait(false))
+                if (!await FillBufferAsync(headerBytes, cancellationToken).ConfigureAwait(false))
                 {
                     return null;
                 }
@@ -136,7 +139,7 @@ namespace System.Net.Test.Common
 
             // Read the data segment of the frame, if it is present.
             byte[] data = new byte[header.Length];
-            if (header.Length > 0 && !await FillBufferAsync(data, timeoutCts.Token).ConfigureAwait(false))
+            if (header.Length > 0 && !await FillBufferAsync(data, cancellationToken).ConfigureAwait(false))
             {
                 throw new Exception("Connection stream closed while attempting to read frame body.");
             }
@@ -144,17 +147,19 @@ namespace System.Net.Test.Common
             if (_ignoreSettingsAck && header.Type == FrameType.Settings && header.Flags == FrameFlags.Ack)
             {
                 _ignoreSettingsAck = false;
-                return await ReadFrameAsync(timeout).ConfigureAwait(false);
+                return await ReadFrameAsync(cancellationToken).ConfigureAwait(false);
             }
 
             if (_ignoreWindowUpdates && header.Type == FrameType.WindowUpdate)
             {
-                return await ReadFrameAsync(timeout).ConfigureAwait(false);
+                return await ReadFrameAsync(cancellationToken).ConfigureAwait(false);
             }
 
             // Construct the correct frame type and return it.
             switch (header.Type)
             {
+                case FrameType.Settings:
+                    return SettingsFrame.ReadFrom(header, data);
                 case FrameType.Data:
                     return DataFrame.ReadFrom(header, data);
                 case FrameType.Headers:

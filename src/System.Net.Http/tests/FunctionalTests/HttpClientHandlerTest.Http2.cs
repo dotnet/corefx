@@ -1615,7 +1615,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     try
                     {
-                        SettingsFrame clientSettings = await server.EstablishConnectionAsync();
+                        (Http2LoopbackConnection connection, SettingsFrame clientSettings) = await server.EstablishConnectionGetSettingsAsync();
 
                         SettingsEntry clientWindowSizeSetting = clientSettings.Entries.SingleOrDefault(x => x.SettingId == SettingId.InitialWindowSize);
                         int clientWindowSize = clientWindowSizeSetting.SettingId == SettingId.InitialWindowSize ? (int)clientWindowSizeSetting.Value : 65535;
@@ -1623,10 +1623,10 @@ namespace System.Net.Http.Functional.Tests
                         // Exceed the window size by 1 byte.
                         ++clientWindowSize; 
 
-                        int streamId = await server.ReadRequestHeaderAsync();
+                        int streamId = await connection.ReadRequestHeaderAsync();
 
                         // Write the response.
-                        await server.SendDefaultResponseHeadersAsync(streamId);
+                        await connection.SendDefaultResponseHeadersAsync(streamId);
 
                         byte[] buffer = new byte[4096];
                         int totalSent = 0;
@@ -1636,7 +1636,7 @@ namespace System.Net.Http.Functional.Tests
                             int sendSize = Math.Min(buffer.Length, clientWindowSize - totalSent);
                             ReadOnlyMemory<byte> sendBuf = buffer.AsMemory(0, sendSize);
 
-                            await server.SendResponseDataAsync(streamId, sendBuf, endStream: false);
+                            await connection.SendResponseDataAsync(streamId, sendBuf, endStream: false);
                             totalSent += sendSize;
                         }
 
@@ -1644,7 +1644,7 @@ namespace System.Net.Http.Functional.Tests
                         // If client is misbehaving, we'll get an OperationCanceledException due to timeout.
                         try
                         {
-                            Frame clientFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(5));
+                            Frame clientFrame = await connection.ReadFrameAsync(TimeSpan.FromSeconds(5));
                             Assert.True(clientFrame == null || (clientFrame.Type == FrameType.RstStream && clientFrame.StreamId == streamId),
                                 "Unexpected frame received from HttpClient; Expected either RST_STREAM or connection reset.");
                         }
