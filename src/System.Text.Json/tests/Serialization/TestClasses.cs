@@ -15,14 +15,14 @@ namespace System.Text.Json.Serialization.Tests
         void Verify();
     }
 
-    public enum SampleByteEnum : byte
+    public enum SampleEnumByte : byte
     {
         One = 0,
         Two = 1,
         Max = byte.MaxValue
     }
 
-    public enum SampleSByteEnum : sbyte
+    public enum SampleEnumSByte : sbyte
     {
         One = 0,
         Two = 1,
@@ -49,20 +49,20 @@ namespace System.Text.Json.Serialization.Tests
         Max = ushort.MaxValue
     }
 
-    public enum SampleInt64Enum : long
+    public enum SampleEnumInt64 : long
     {
         Min = long.MinValue,
         Max = long.MaxValue
     }
 
-    public enum SampleUInt32Enum : UInt32
+    public enum SampleEnumUInt32 : UInt32
     {
         One = 0,
         Two = 1,
         Max = UInt32.MaxValue
     }
 
-    public enum SampleUInt64Enum : ulong
+    public enum SampleEnumUInt64 : ulong
     {
         One = 0,
         Two = 1,
