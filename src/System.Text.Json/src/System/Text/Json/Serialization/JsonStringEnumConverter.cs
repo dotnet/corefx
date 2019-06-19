@@ -10,15 +10,20 @@ namespace System.Text.Json.Serialization
     /// <summary>
     /// Converter to convert enums to and from strings.
     /// </summary>
+    /// <remarks>
+    /// Reading is case insensitive, writing can be customized via a <see cref="JsonNamingPolicy" />.
+    /// </remarks>
     public sealed class JsonStringEnumConverter : JsonConverterFactory
     {
-        private JsonNamingPolicy _namingPolicy;
-        private EnumConverterOptions _converterOptions;
+        private readonly JsonNamingPolicy _namingPolicy;
+        private readonly EnumConverterOptions _converterOptions;
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="namingPolicy">Optional naming policy for enum values.</param>
+        /// <param name="namingPolicy">
+        /// Optional naming policy for writing enum values.
+        /// </param>
         /// <param name="allowIntegerValues">
         /// True to allow undefined enum values. When true, if an enum value isn't
         /// defined it will output as a number rather than a string.

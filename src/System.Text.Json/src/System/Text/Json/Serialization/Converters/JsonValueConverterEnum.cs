@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
@@ -13,10 +14,11 @@ namespace System.Text.Json.Serialization.Converters
         private static readonly TypeCode s_enumTypeCode = Type.GetTypeCode(typeof(T));
 
         // Odd type codes are conveniently signed types (for enum backing types).
-        private static string s_negativeSign = ((int)s_enumTypeCode % 2) == 0 ? null : NumberFormatInfo.CurrentInfo.NegativeSign;
+        private static readonly string s_negativeSign = ((int)s_enumTypeCode % 2) == 0 ? null : NumberFormatInfo.CurrentInfo.NegativeSign;
 
-        private EnumConverterOptions _converterOptions;
-        private JsonNamingPolicy _namingPolicy;
+        private readonly EnumConverterOptions _converterOptions;
+        private readonly JsonNamingPolicy _namingPolicy;
+        private Dictionary<string, string> _nameCache;
 
         public override bool CanConvert(Type type)
         {
@@ -31,7 +33,15 @@ namespace System.Text.Json.Serialization.Converters
         public JsonConverterEnum(EnumConverterOptions options, JsonNamingPolicy namingPolicy)
         {
             _converterOptions = options;
-            _namingPolicy = namingPolicy ?? JsonNamingPolicy.Default;
+            if (namingPolicy != null)
+            {
+                _nameCache = new Dictionary<string, string>();
+            }
+            else
+            {
+                namingPolicy = JsonNamingPolicy.Default;
+            }
+            _namingPolicy = namingPolicy;
         }
 
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -147,10 +157,21 @@ namespace System.Text.Json.Serialization.Converters
             // If strings are allowed, attempt to write it out as a string value
             if (_converterOptions.HasFlag(EnumConverterOptions.AllowStrings))
             {
-                string output = value.ToString();
-                if (IsValidIdentifier(output))
+                string original = value.ToString();
+                if (_nameCache != null && _nameCache.TryGetValue(original, out string transformed))
                 {
-                    writer.WriteStringValue(_namingPolicy.ConvertName(output));
+                    writer.WriteStringValue(transformed);
+                    return;
+                }
+
+                if (IsValidIdentifier(original))
+                {
+                    transformed = _namingPolicy.ConvertName(original);
+                    writer.WriteStringValue(transformed);
+                    if (_nameCache != null)
+                    {
+                        _nameCache.Add(original, transformed);
+                    }
                     return;
                 }
             }
@@ -197,10 +218,21 @@ namespace System.Text.Json.Serialization.Converters
             // If strings are allowed, attempt to write it out as a string value
             if (_converterOptions.HasFlag(EnumConverterOptions.AllowStrings))
             {
-                string output = value.ToString();
-                if (IsValidIdentifier(output))
+                string original = value.ToString();
+                if (_nameCache != null && _nameCache.TryGetValue(original, out string transformed))
                 {
-                    writer.WriteString(propertyName, output);
+                    writer.WriteString(propertyName, transformed);
+                    return;
+                }
+
+                if (IsValidIdentifier(original))
+                {
+                    transformed = _namingPolicy.ConvertName(original);
+                    writer.WriteString(propertyName, transformed);
+                    if (_nameCache != null)
+                    {
+                        _nameCache.Add(original, transformed);
+                    }
                     return;
                 }
             }
