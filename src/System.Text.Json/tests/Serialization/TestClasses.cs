@@ -49,10 +49,11 @@ namespace System.Text.Json.Serialization.Tests
         Max = ushort.MaxValue
     }
 
-    public enum SampleEnumInt64 : long
+    public enum SampleEnumInt32 : Int32
     {
-        Min = long.MinValue,
-        Max = long.MaxValue
+        One = 1,
+        Two = 2,
+        Max = Int32.MaxValue
     }
 
     public enum SampleEnumUInt32 : UInt32
@@ -60,6 +61,12 @@ namespace System.Text.Json.Serialization.Tests
         One = 0,
         Two = 1,
         Max = UInt32.MaxValue
+    }
+
+    public enum SampleEnumInt64 : long
+    {
+        Min = long.MinValue,
+        Max = long.MaxValue
     }
 
     public enum SampleEnumUInt64 : ulong
