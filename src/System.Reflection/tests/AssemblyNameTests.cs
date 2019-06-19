@@ -301,8 +301,8 @@ namespace System.Reflection.Tests
         {
             AssemblyName assemblyName = new AssemblyName(name);
 
-            expectedName = expectedName.ToLowerInvariant();
-            string afn = assemblyName.FullName.ToLowerInvariant();
+            expectedName = expectedName;
+            string afn = assemblyName.FullName;
 
             Assert.True(afn == expectedName, $"Expected\n{afn} == {expectedName}");
         }
