@@ -425,8 +425,8 @@ namespace System.Collections.Immutable.Tests
             Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
-        ////[Fact] // not really a functional test -- but very useful to enable when collecting perf traces.
-        public void EnumerationPerformance()
+        // [Fact] // not really a functional test -- but very useful to enable when collecting perf traces.
+        private void EnumerationPerformance()
         {
             var dictionary = Enumerable.Range(1, 1000).ToImmutableSortedDictionary(k => k, k => k);
 
@@ -450,8 +450,8 @@ namespace System.Collections.Immutable.Tests
             Debug.WriteLine("Timing:{0}{1}", Environment.NewLine, timingText);
         }
 
-        ////[Fact] // not really a functional test -- but very useful to enable when collecting perf traces.
-        public void EnumerationPerformance_Empty()
+        // [Fact] // not really a functional test -- but very useful to enable when collecting perf traces.
+        private void EnumerationPerformance_Empty()
         {
             var dictionary = ImmutableSortedDictionary<int, int>.Empty;
 
