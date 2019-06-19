@@ -20,6 +20,8 @@ namespace System.Net.Sockets
         private volatile int _cleanedUp;
         private bool _active;
 
+        private bool CleanedUp => _cleanedUp == 1;
+
         // Initializes a new instance of the System.Net.Sockets.TcpClient class.
         public TcpClient() : this(AddressFamily.Unknown)
         {
@@ -107,7 +109,7 @@ namespace System.Net.Sockets
             set { _active = value; }
         }
 
-        public int Available => _clientSocket?.Available ?? 0;
+        public int Available => CleanedUp ? 0 : _clientSocket.Available;
 
         // Used by the class to provide the underlying network socket.
         public Socket Client
@@ -116,33 +118,15 @@ namespace System.Net.Sockets
             set
             {
                 _clientSocket = value;
-                _family = _clientSocket?.AddressFamily ?? AddressFamily.Unknown;
+                _family = CleanedUp ? AddressFamily.Unknown : _clientSocket.AddressFamily;
             }
         }
 
-        internal Socket NonDisposedClient
-        {
-            get
-            {
-                Socket socket = Volatile.Read(ref _clientSocket);
-
-                if (socket == null)
-                {
-                    if (_cleanedUp == 1)
-                    {
-                        throw new ObjectDisposedException(GetType().FullName);
-                    }
-                }
-
-                return socket;
-            }
-        }
-
-        public bool Connected => _clientSocket?.Connected ?? false;
+        public bool Connected => CleanedUp ? false : _clientSocket.Connected;
 
         public bool ExclusiveAddressUse
         {
-            get { return _clientSocket?.ExclusiveAddressUse ?? false; }
+            get { return CleanedUp ? false : _clientSocket.ExclusiveAddressUse; }
             set
             {
                 if (_clientSocket != null)
@@ -157,7 +141,7 @@ namespace System.Net.Sockets
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, hostname);
 
-            if (_cleanedUp == 1)
+            if (CleanedUp)
             {
                 throw new ObjectDisposedException(GetType().FullName);
             }
@@ -201,7 +185,7 @@ namespace System.Net.Sockets
                             {
                                 var socket = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                                 Volatile.Write(ref _clientSocket, socket);
-                                if (_cleanedUp == 1)
+                                if (CleanedUp)
                                 {
                                     socket.Dispose();
                                 }
@@ -253,7 +237,7 @@ namespace System.Net.Sockets
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, address);
 
-            if (_cleanedUp == 1)
+            if (CleanedUp)
             {
                 throw new ObjectDisposedException(GetType().FullName);
             }
@@ -277,14 +261,13 @@ namespace System.Net.Sockets
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, remoteEP);
 
-            var client = NonDisposedClient;
             if (remoteEP == null)
             {
                 throw new ArgumentNullException(nameof(remoteEP));
             }
 
-            client.Connect(remoteEP);
-            _family = client.AddressFamily;
+            Client.Connect(remoteEP);
+            _family = Client.AddressFamily;
             _active = true;
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
@@ -294,9 +277,8 @@ namespace System.Net.Sockets
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, ipAddresses);
 
-            var client = NonDisposedClient;
-            client.Connect(ipAddresses, port);
-            _family = client.AddressFamily;
+            Client.Connect(ipAddresses, port);
+            _family = Client.AddressFamily;
             _active = true;
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
@@ -324,7 +306,7 @@ namespace System.Net.Sockets
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, address);
 
-            IAsyncResult result = NonDisposedClient.BeginConnect(address, port, requestCallback, state);
+            IAsyncResult result = Client.BeginConnect(address, port, requestCallback, state);
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
             return result;
@@ -334,7 +316,7 @@ namespace System.Net.Sockets
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, (string)host);
 
-            IAsyncResult result = NonDisposedClient.BeginConnect(host, port, requestCallback, state);
+            IAsyncResult result = Client.BeginConnect(host, port, requestCallback, state);
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
             return result;
@@ -344,7 +326,7 @@ namespace System.Net.Sockets
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, addresses);
 
-            IAsyncResult result = NonDisposedClient.BeginConnect(addresses, port, requestCallback, state);
+            IAsyncResult result = Client.BeginConnect(addresses, port, requestCallback, state);
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
             return result;
@@ -354,7 +336,7 @@ namespace System.Net.Sockets
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, asyncResult);
 
-            NonDisposedClient.EndConnect(asyncResult);
+            Client.EndConnect(asyncResult);
             _active = true;
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
@@ -365,7 +347,10 @@ namespace System.Net.Sockets
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
 
-            var client = NonDisposedClient;
+            if (CleanedUp)
+            {
+                throw new ObjectDisposedException(GetType().FullName);
+            }
             if (!Connected)
             {
                 throw new InvalidOperationException(SR.net_notconnected);
@@ -373,7 +358,7 @@ namespace System.Net.Sockets
 
             if (_dataStream == null)
             {
-                _dataStream = new NetworkStream(client, true);
+                _dataStream = new NetworkStream(Client, true);
             }
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this, _dataStream);
@@ -412,7 +397,6 @@ namespace System.Net.Sockets
                             finally
                             {
                                 chkClientSocket.Close();
-                                _clientSocket = null;
                             }
                         }
                     }
