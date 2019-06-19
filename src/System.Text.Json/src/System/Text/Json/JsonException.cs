@@ -90,6 +90,7 @@ namespace System.Text.Json
             LineNumber = (long?)info.GetValue("LineNumber", typeof(long?));
             BytePositionInLine = (long?)info.GetValue("BytePositionInLine", typeof(long?));
             Path = info.GetString("Path");
+            SetMessage(info.GetString("ActualMessage"));
         }
 
         /// <summary>
@@ -103,6 +104,7 @@ namespace System.Text.Json
             info.AddValue("LineNumber", LineNumber, typeof(long?));
             info.AddValue("BytePositionInLine", BytePositionInLine, typeof(long?));
             info.AddValue("Path", Path, typeof(string));
+            info.AddValue("ActualMessage", Message, typeof(string));
         }
 
         /// <summary>
