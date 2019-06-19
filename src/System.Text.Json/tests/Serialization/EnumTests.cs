@@ -395,117 +395,119 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(SampleEnumSByte.Max, obj.MySByteEnum);
         }
 
-        [Fact]
-        public static void ToString_ZeroEnum_ReturnsZero()
+        [Theory]
+        [InlineData("0", (long)byte.MaxValue + 1)]
+        [InlineData("0", ((long)byte.MaxValue + 1) * 2)]
+        [InlineData("0", ((long)byte.MaxValue + 1) * 3)]
+        [InlineData("0", ((long)byte.MaxValue + 1) * 4)]
+        public static void ToString_Byte_TakesModulo(string expected, long enumValue)
         {
-            string json = JsonSerializer.ToString((SampleEnumByte)0);
-            Assert.Equal("0", json);
-            json = JsonSerializer.ToString((SampleEnumSByte)0);
-            Assert.Equal("0", json);
-            json = JsonSerializer.ToString((SampleEnumUInt16)0);
-            Assert.Equal("0", json);
-            json = JsonSerializer.ToString((SampleEnumUInt32)0);
-            Assert.Equal("0", json);
-            json = JsonSerializer.ToString((SampleEnumUInt64)0);
-            Assert.Equal("0", json);
-            json = JsonSerializer.ToString((SampleEnumInt64)0);
-            Assert.Equal("0", json);
-        }
-
-        [Fact]
-        public static void ToString_MaxValue_ReturnsMaxValue()
-        {
-            string json = JsonSerializer.ToString((SampleEnumByte)byte.MaxValue);
-            Assert.Equal(byte.MaxValue.ToString(), json);
-            json = JsonSerializer.ToString((SampleEnumSByte)sbyte.MaxValue);
-            Assert.Equal(sbyte.MaxValue.ToString(), json);
-            json = JsonSerializer.ToString((SampleEnumUInt16)ushort.MaxValue);
-            Assert.Equal(ushort.MaxValue.ToString(), json);
-            json = JsonSerializer.ToString((SampleEnumUInt32)UInt32.MaxValue);
-            Assert.Equal(UInt32.MaxValue.ToString(), json);
-            json = JsonSerializer.ToString((SampleEnumUInt64)UInt64.MaxValue);
-            Assert.Equal(UInt64.MaxValue.ToString(), json);
-            json = JsonSerializer.ToString((SampleEnumInt64)long.MaxValue);
-            Assert.Equal(long.MaxValue.ToString(), json);
-        }
-
-        [Fact]
-        public static void ToString_MinValue_ReturnsMinValue()
-        {
-            string json = JsonSerializer.ToString((SampleEnumByte)byte.MinValue);
-            Assert.Equal(byte.MinValue.ToString(), json);
-            json = JsonSerializer.ToString((SampleEnumSByte)sbyte.MinValue);
-            Assert.Equal(sbyte.MinValue.ToString(), json);
-            json = JsonSerializer.ToString((SampleEnumUInt16)ushort.MinValue);
-            Assert.Equal(ushort.MinValue.ToString(), json);
-            json = JsonSerializer.ToString((SampleEnumUInt32)UInt32.MinValue);
-            Assert.Equal(UInt32.MinValue.ToString(), json);
-            json = JsonSerializer.ToString((SampleEnumUInt64)UInt64.MinValue);
-            Assert.Equal(UInt64.MinValue.ToString(), json);
-            json = JsonSerializer.ToString((SampleEnumInt64)long.MinValue);
-            Assert.Equal(long.MinValue.ToString(), json);
+            string json = JsonSerializer.ToString((SampleEnumByte)enumValue);
+            Assert.Equal(expected.ToString(), json);
         }
 
         [Theory]
-        [InlineData(byte.MaxValue + 1, (SampleEnumByte)0)]
-        [InlineData(byte.MaxValue + 2, (SampleEnumByte)1)]
-        [InlineData(byte.MaxValue + 13, (SampleEnumByte)12)]
-        [InlineData(byte.MaxValue * 2, (SampleEnumByte)byte.MaxValue - 1)]
-        public static void ToString_Byte(ulong i, SampleEnumByte enumValue)
+        [InlineData("0", (long)UInt16.MaxValue + 1)]
+        [InlineData("0", ((long)UInt16.MaxValue + 1) * 2)]
+        [InlineData("0", ((long)UInt16.MaxValue + 1) * 3)]
+        [InlineData("0", ((long)UInt16.MaxValue + 1) * 4)]
+        public static void ToString_UInt16_TakesModulo(string expected, long enumValue)
         {
-            string json = JsonSerializer.ToString(enumValue);
-            Assert.Equal(((i - 1) % byte.MaxValue).ToString(), json);
-        }
-
-        //[Theory]
-        [InlineData(sbyte.MaxValue + 1, (SampleEnumSByte)0)]
-        [InlineData(sbyte.MaxValue + 2, (SampleEnumSByte)1)]
-        [InlineData(sbyte.MaxValue + 13, (SampleEnumSByte)12)]
-        [InlineData(sbyte.MaxValue * 2, (SampleEnumSByte)sbyte.MaxValue - 1)]
-        public static void ToString_SByte(sbyte i, SampleEnumSByte enumValue)
-        {
-            string json = JsonSerializer.ToString(enumValue);
-            Assert.Equal(((i - 1) % sbyte.MaxValue).ToString(), json);
-        }
-
-        //[Theory]
-        [InlineData((ulong)UInt16.MaxValue + 1, (SampleEnumUInt16)0)]
-        [InlineData((ulong)UInt16.MaxValue + 2, (SampleEnumUInt16)1)]
-        [InlineData((ulong)UInt16.MaxValue + 13, (SampleEnumUInt16)12)]
-        [InlineData((ulong)UInt16.MaxValue * 2, (SampleEnumUInt16)UInt16.MaxValue - 1)]
-        public static void ToString_UInt16(ulong i, SampleEnumUInt32 enumValue)
-        {
-            string json = JsonSerializer.ToString(enumValue);
-            Assert.Equal(((i - 1) % UInt16.MaxValue).ToString(), json);
-        }
-
-        //[Theory]
-        [InlineData((ulong)UInt32.MaxValue + 1, (SampleEnumUInt32)0)]
-        [InlineData((ulong)UInt32.MaxValue + 2, (SampleEnumUInt32)1)]
-        [InlineData((ulong)UInt32.MaxValue + 13, (SampleEnumUInt32)12)]
-        [InlineData((ulong)UInt32.MaxValue * 2, (SampleEnumUInt32)UInt32.MaxValue - 1)]
-        public static void ToString_UInt32(ulong i, SampleEnumUInt32 enumValue)
-        {
-            string json = JsonSerializer.ToString(enumValue);
-            Assert.Equal(((i - 1) % UInt32.MaxValue).ToString(), json);
+            string json = JsonSerializer.ToString((SampleEnumUInt16)enumValue);
+            Assert.Equal(expected.ToString(), json);
         }
 
         [Theory]
-        [InlineData("2", SampleEnum.Two)]
-        [InlineData("2", SampleEnumInt16.Two)]
-        public static void ToString_Two(string expected, object enumValue)
-
+        [InlineData("0", (long)UInt32.MaxValue + 1)]
+        [InlineData("0", ((long)UInt32.MaxValue + 1) * 2)]
+        [InlineData("0", ((long)UInt32.MaxValue + 1) * 3)]
+        [InlineData("0", ((long)UInt32.MaxValue + 1) * 4)]
+        public static void ToString_UInt32_TakesModulo(string expected, long enumValue)
         {
-            string json = JsonSerializer.ToString(enumValue);
-            Assert.Equal(expected, json);
+            string json = JsonSerializer.ToString((SampleEnumUInt32)enumValue);
+            Assert.Equal(expected.ToString(), json);
         }
 
         [Theory]
+        [InlineData(SampleEnumSByte.Min, ((long)SByte.MaxValue + 1))]
+        [InlineData(SampleEnumSByte.Zero, ((long)SByte.MaxValue + 1) * 2)]
+        [InlineData(SampleEnumSByte.Min, ((long)SByte.MaxValue + 1) * 3)]
+        [InlineData(SampleEnumSByte.Zero, ((long)SByte.MaxValue + 1) * 4)]
+        public static void ToString_SByte_TakesModulo(SampleEnumSByte expected, long enumValue)
+        {
+            string expectedString = ((long) expected).ToString();
+            string json = JsonSerializer.ToString((SampleEnumSByte)enumValue);
+            Assert.Equal(expectedString.ToString(), json);
+        }
+
+        [Theory]
+        [InlineData(SampleEnumInt16.Min, ((long)Int16.MaxValue + 1))]
+        [InlineData(SampleEnumInt16.Zero, ((long)Int16.MaxValue + 1) * 2)]
+        [InlineData(SampleEnumInt16.Min, ((long)Int16.MaxValue + 1) * 3)]
+        [InlineData(SampleEnumInt16.Zero, ((long)Int16.MaxValue + 1) * 4)]
+        public static void ToString_Int16_TakesModulo(SampleEnumInt16 expected, long enumValue)
+        {
+            string expectedString = ((long) expected).ToString();
+            string json = JsonSerializer.ToString((SampleEnumInt16)enumValue);
+            Assert.Equal(expectedString.ToString(), json);
+        }
+
+        [Theory]
+        [InlineData(SampleEnumInt32.Min, ((long)Int32.MaxValue + 1))]
+        [InlineData(SampleEnumInt32.Zero, ((long)Int32.MaxValue + 1) * 2)]
+        [InlineData(SampleEnumInt32.Min, ((long)Int32.MaxValue + 1) * 3)]
+        [InlineData(SampleEnumInt32.Zero, ((long)Int32.MaxValue + 1) * 4)]
+        public static void ToString_Int32_TakesModulo(SampleEnumInt32 expected, long enumValue)
+        {
+            string expectedString = ((long) expected).ToString();
+            string json = JsonSerializer.ToString((SampleEnumInt32)enumValue);
+            Assert.Equal(expectedString, json);
+        }
+
+        [Theory]
+        [InlineData(byte.MinValue, SampleEnumByte.Min)]
+        [InlineData(sbyte.MinValue, SampleEnumSByte.Min)]
+        [InlineData(short.MinValue, SampleEnumInt16.Min)]
+        [InlineData(ushort.MinValue, SampleEnumUInt16.Min)]
+        [InlineData(int.MinValue, SampleEnumInt32.Min)]
+        [InlineData(uint.MinValue, SampleEnumUInt32.Min)]
+        [InlineData(long.MinValue, SampleEnumInt64.Min)]
+        [InlineData(ulong.MinValue, SampleEnumUInt64.Min)]
+        [InlineData(0, (SampleEnum)0)]
+        [InlineData(0, (SampleEnumByte)0)]
+        [InlineData(0, (SampleEnumSByte)0)]
+        [InlineData(0, (SampleEnumInt16)0)]
+        [InlineData(0, (SampleEnumUInt16)0)]
+        [InlineData(0, (SampleEnumInt32)0)]
+        [InlineData(0, (SampleEnumUInt32)0)]
+        [InlineData(0, (SampleEnumInt64)0)]
+        [InlineData(0, (SampleEnumUInt64)0)]
+        [InlineData(1, SampleEnum.One)]
+        [InlineData(1, SampleEnumByte.One)]
+        [InlineData(1, SampleEnumSByte.One)]
+        [InlineData(1, SampleEnumInt16.One)]
+        [InlineData(1, SampleEnumUInt16.One)]
+        [InlineData(1, SampleEnumInt32.One)]
+        [InlineData(1, SampleEnumUInt32.One)]
+        [InlineData(1, SampleEnumInt64.One)]
+        [InlineData(1, SampleEnumUInt64.One)]
+        [InlineData(2, SampleEnum.Two)]
+        [InlineData(2, SampleEnumByte.Two)]
+        [InlineData(2, SampleEnumSByte.Two)]
+        [InlineData(2, SampleEnumInt16.Two)]
+        [InlineData(2, SampleEnumUInt16.Two)]
+        [InlineData(2, SampleEnumInt32.Two)]
+        [InlineData(2, SampleEnumUInt32.Two)]
+        [InlineData(2, SampleEnumInt64.Two)]
+        [InlineData(2, SampleEnumUInt64.Two)]
+        [InlineData(byte.MaxValue, SampleEnumByte.Max)]
+        [InlineData(sbyte.MaxValue, SampleEnumSByte.Max)]
+        [InlineData(short.MaxValue, SampleEnumInt16.Max)]
+        [InlineData(ushort.MaxValue, SampleEnumUInt16.Max)]
+        [InlineData(int.MaxValue, SampleEnumInt32.Max)]
+        [InlineData(uint.MaxValue, SampleEnumUInt32.Max)]
         [InlineData(long.MaxValue, SampleEnumInt64.Max)]
         [InlineData(ulong.MaxValue, SampleEnumUInt64.Max)]
-        [InlineData(ushort.MaxValue, SampleEnumUInt16.Max)]
-        [InlineData(sbyte.MaxValue, SampleEnumSByte.Max)]
-        [InlineData(byte.MaxValue, SampleEnumByte.Max)]
         public static void ToString_Max(object expected, object enumValue)
         {
             string json = JsonSerializer.ToString(enumValue);

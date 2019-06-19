@@ -26,6 +26,7 @@ namespace System.Text.Json.Serialization.Tests
     public enum SampleEnumSByte : sbyte
     {
         Min = sbyte.MinValue,
+        Zero = 0,
         One = 1,
         Two = 2,
         Max = sbyte.MaxValue
@@ -40,6 +41,7 @@ namespace System.Text.Json.Serialization.Tests
     public enum SampleEnumInt16 : short
     {
         Min = short.MinValue,
+        Zero = 0,
         One = 1,
         Two = 2,
         Max = short.MaxValue
@@ -56,6 +58,7 @@ namespace System.Text.Json.Serialization.Tests
     public enum SampleEnumInt32 : Int32
     {
         Min = Int32.MinValue,
+        Zero = 0,
         One = 1,
         Two = 2,
         Max = Int32.MaxValue
