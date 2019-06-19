@@ -1567,7 +1567,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task InboundWindowSize_Exceeded_Throw()
         {
-            using var semaphore = new SemaphoreSlim(0);
+            var semaphore = new SemaphoreSlim(0);
 
             await Http2LoopbackServer.CreateClientAndServerAsync(
                 async uri =>
@@ -1603,14 +1603,22 @@ namespace System.Net.Http.Functional.Tests
                             int sendSize = Math.Min(buffer.Length, clientWindowSize - totalSent);
                             ReadOnlyMemory<byte> sendBuf = buffer.AsMemory(0, sendSize);
 
-                            await server.SendResponseDataAsync(streamId, sendBuf, false);
+                            await server.SendResponseDataAsync(streamId, sendBuf, endStream: false);
                             totalSent += sendSize;
                         }
 
                         // Try to read a frame. Should get null if connection reset or RST_STREAM if stream reset.
                         // If client is misbehaving, we'll get an OperationCanceledException due to timeout.
-                        Frame clientFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(5));
-                        Assert.True(clientFrame == null || (clientFrame.Type == FrameType.RstStream && clientFrame.StreamId == streamId));
+                        try
+                        {
+                            Frame clientFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(5));
+                            Assert.True(clientFrame == null || (clientFrame.Type == FrameType.RstStream && clientFrame.StreamId == streamId),
+                                "Unexpected frame received from HttpClient; Expected either RST_STREAM or connection reset.");
+                        }
+                        catch (OperationCanceledException ex)
+                        {
+                            Assert.True(ex == null, "Stream unexpectedly left open by HttpClient; Expected either RST_STREAM or connection reset.");
+                        }
                     }
                     finally
                     {
