@@ -300,11 +300,7 @@ namespace System.Reflection.Tests
         public void FullName(string name, string expectedName)
         {
             AssemblyName assemblyName = new AssemblyName(name);
-
-            expectedName = expectedName;
-            string afn = assemblyName.FullName;
-
-            Assert.True(afn == expectedName, $"Expected\n{afn} == {expectedName}");
+            Assert.Equal(expectedName, assemblyName.FullName);
         }
 
         [Fact]
