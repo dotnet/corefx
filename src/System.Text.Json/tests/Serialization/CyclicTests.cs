@@ -10,13 +10,50 @@ namespace System.Text.Json.Serialization.Tests
     public static class CyclicTests
     {
         [Fact]
-        public static void WriteCyclicFail()
+        public static void WriteCyclicFailDefault()
         {
             TestClassWithCycle obj = new TestClassWithCycle();
             obj.Parent = obj;
 
             // We don't allow graph cycles; we throw JsonException instead of an unrecoverable StackOverflow.
             Assert.Throws<JsonException>(() => JsonSerializer.ToString(obj));
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(10)]
+        [InlineData(70)]
+        public static void WriteCyclicFail(int depth)
+        {
+            var rootObj = new TestClassWithCycle("root");
+            CreateObjectHierarchy(1, depth, rootObj);
+
+            {
+                var options = new JsonSerializerOptions();
+                options.MaxDepth = depth + 1;
+
+                // No exception
+                JsonSerializer.ToString(rootObj, options);
+            }
+
+            {
+                var options = new JsonSerializerOptions();
+                options.MaxDepth = depth;
+                Assert.Throws<JsonException>(() => JsonSerializer.ToString(rootObj, options));
+            }
+        }
+
+        private static TestClassWithCycle CreateObjectHierarchy(int i, int max, TestClassWithCycle previous)
+        {
+            if (i == max)
+            {
+                return null;
+            }
+
+            var obj = new TestClassWithCycle(i.ToString());
+            previous.Parent = obj;
+            return CreateObjectHierarchy(++i, max, obj);
         }
 
         [Fact]

@@ -170,8 +170,11 @@ namespace System.Text.Json
             {
                 VerifyMutable();
                 _maxDepth = value;
+                EffectiveMaxDepth = (value == 0 ? JsonReaderOptions.DefaultMaxDepth : value);
             }
         }
+
+        internal int EffectiveMaxDepth { get; private set; } = JsonReaderOptions.DefaultMaxDepth;
 
         /// <summary>
         /// Specifies the policy used to convert a property's name on an object to another format, such as camel-casing.
