@@ -1493,7 +1493,7 @@ namespace System.Net.Http.Functional.Tests
                 string content = new string('*', 300);
                 var request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Version = new Version(2,0);
-                request.Content = new StreamContent(new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(content), null, count: 20));
+                request.Content = new StreamContent(new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(content), null, count : 20));
                 HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
@@ -1588,7 +1588,7 @@ namespace System.Net.Http.Functional.Tests
             TaskCompletionSource<bool> tsc = new TaskCompletionSource<bool>();
             string content = new string('*', 300);
 
-            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(content), tsc, trigger:3, count: 30);
+            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(content), tsc, trigger : 3, count : 30);
 
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
@@ -1638,7 +1638,7 @@ namespace System.Net.Http.Functional.Tests
             TaskCompletionSource<bool> tsc = new TaskCompletionSource<bool>();
             string requestContent = new string('*', 300);
             const string responseContent = "SendAsync_ConcurentSendReceive_Ok";
-            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(requestContent), tsc, trigger:1, count: 10);
+            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(requestContent), tsc, trigger : 1, count : 10);
 
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
@@ -1695,7 +1695,8 @@ namespace System.Net.Http.Functional.Tests
             TaskCompletionSource<bool> tsc = new TaskCompletionSource<bool>();
             string requestContent = new string('*', 300);
             const string responseContent = "SendAsync_ConcurentSendReceive_Fail";
-            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(requestContent), tsc, trigger:1, count: 10);
+            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(requestContent), tsc, trigger : 1, count : 50);
+            bool stopSending = false;
 
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
@@ -1709,7 +1710,7 @@ namespace System.Net.Http.Functional.Tests
                     HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                     // Wait for request body start streaming.
                     await tsc.Task.ConfigureAwait(false);
-                    // and inject distinct exception on ReqeuestStream.
+                    // and inject distinct exception on request stream.
                     stream.SetException(new ArithmeticException("Injected test exception"));
                     try
                     {
@@ -1721,7 +1722,11 @@ namespace System.Net.Http.Functional.Tests
                         // Exception should be wrapped and inner should be what ever we injected on request stream.
                         Assert.True(e.InnerException is IOException);
                         Assert.True(e.InnerException.InnerException is ArithmeticException);
-                    };
+                    }
+                    finally
+                    {
+                        stopSending = true;
+                    }
                 }
             },
             async server =>
@@ -1734,10 +1739,15 @@ namespace System.Net.Http.Functional.Tests
                 // Wait for client so start sending body.
                 await tsc.Task.ConfigureAwait(false);
 
-                await server.SendResponseDataAsync(streamId, Encoding.ASCII.GetBytes(responseContent), endStream: false);
-                // Wait and send more data, just in case to give Client chance to read.
-                await Task.Delay(500);
-                await server.SendResponseDataAsync(streamId, Encoding.ASCII.GetBytes(responseContent), endStream: false);
+                int maxCount = 120;
+                while (!stopSending && maxCount != 0)
+                {
+                    await server.SendResponseDataAsync(streamId, Encoding.ASCII.GetBytes(responseContent), endStream: false);
+                    await Task.Delay(500);
+                    maxCount --;
+                }
+                // We should not reach retry limit without failing.
+                Assert.NotEqual(0, maxCount);
 
                 var headers = new HttpHeaderData[] { new HttpHeaderData("x-last", "done") };
                 await server.SendResponseHeadersAsync(streamId, endStream: true, isTrailingHeader : true, headers: headers);
