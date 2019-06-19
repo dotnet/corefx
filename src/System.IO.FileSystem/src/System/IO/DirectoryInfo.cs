@@ -20,7 +20,7 @@ namespace System.IO
 {
     public sealed partial class DirectoryInfo : FileSystemInfo
     {
-        private bool _isNormalized = false;
+        private bool _isNormalized;
 
         public DirectoryInfo(string path)
         {
@@ -179,18 +179,16 @@ namespace System.IO
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            options.IsNormalized = _isNormalized;
-
-            FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options);
+            _isNormalized &= FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options);
 
             switch (searchTarget)
             {
                 case SearchTarget.Directories:
-                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, options);
+                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, _isNormalized, options);
                 case SearchTarget.Files:
-                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, options);
+                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, _isNormalized, options);
                 case SearchTarget.Both:
-                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, options);
+                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, _isNormalized, options);
                 default:
                     throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(searchTarget));
             }

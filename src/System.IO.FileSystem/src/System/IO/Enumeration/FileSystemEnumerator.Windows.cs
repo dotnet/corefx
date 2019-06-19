@@ -47,21 +47,23 @@ namespace System.IO.Enumeration
         /// <param name="directory">The directory to search in.</param>
         /// <param name="options">Enumeration options to use.</param>
         public FileSystemEnumerator(string directory, EnumerationOptions options = null)
+            : this(directory, isNormalized: false, options)
+        {
+        }
+
+        /// <summary>
+        /// Encapsulates a find operation.
+        /// </summary>
+        /// <param name="directory">The directory to search in.</param>
+        /// <param name="isNormalized">Whether the directory path is already normalized or not.</param>
+        /// <param name="options">Enumeration options to use.</param>
+        internal FileSystemEnumerator(string directory, bool isNormalized, EnumerationOptions options = null)
         {
             _originalRootDirectory = directory ?? throw new ArgumentNullException(nameof(directory));
 
-            string path;
-            if (options != null)
-            {
-                _options = options;
-                path = options.IsNormalized ? directory : Path.GetFullPath(directory);
-            }
-            else
-            {
-                _options = EnumerationOptions.Default;
-                path = Path.GetFullPath(directory);
-            }
+            string path = isNormalized ? directory : Path.GetFullPath(directory);
             _rootDirectory = Path.TrimEndingDirectorySeparator(path);
+            _options = options ?? EnumerationOptions.Default;
 
             // We'll only suppress the media insertion prompt on the topmost directory as that is the
             // most likely scenario and we don't want to take the perf hit for large enumerations.

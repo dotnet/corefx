@@ -20,7 +20,7 @@ namespace System.IO.Enumeration
         // which is not true in Windows and as such we'll escape any that occur on the input string.
         private readonly static char[] s_unixEscapeChars = { '\\', '"', '<', '>' };
 
-        internal static void NormalizeInputs(ref string directory, ref string expression, EnumerationOptions options)
+        internal static bool NormalizeInputs(ref string directory, ref string expression, EnumerationOptions options)
         {
             if (Path.IsPathRooted(expression))
                 throw new ArgumentException(SR.Arg_Path2IsRooted, nameof(expression));
@@ -40,6 +40,8 @@ namespace System.IO.Enumeration
 
             ReadOnlySpan<char> directoryName = Path.GetDirectoryName(expression.AsSpan());
 
+            bool isNormalized = true;
+
             if (directoryName.Length != 0)
             {
                 // Need to fix up the input paths
@@ -48,7 +50,7 @@ namespace System.IO.Enumeration
 
                 // Directory came in here normalized, but because it was just modified,
                 // it cannot be considered normalized anymore
-                options.IsNormalized = false;
+                isNormalized = false;
             }
 
             switch (options.MatchType)
@@ -86,6 +88,8 @@ namespace System.IO.Enumeration
                 default:
                     throw new ArgumentOutOfRangeException(nameof(options));
             }
+
+            return isNormalized;
         }
 
         private static bool MatchesPattern(string expression, ReadOnlySpan<char> name, EnumerationOptions options)
@@ -149,11 +153,13 @@ namespace System.IO.Enumeration
         internal static IEnumerable<FileInfo> FileInfos(
             string directory,
             string expression,
+            bool isNormalized,
             EnumerationOptions options)
         {
              return new FileSystemEnumerable<FileInfo>(
                 directory,
                 (ref FileSystemEntry entry) => (FileInfo)entry.ToFileSystemInfo(),
+                isNormalized,
                 options)
              {
                  ShouldIncludePredicate = (ref FileSystemEntry entry) =>
@@ -164,11 +170,13 @@ namespace System.IO.Enumeration
         internal static IEnumerable<DirectoryInfo> DirectoryInfos(
             string directory,
             string expression,
+            bool isNormalized,
             EnumerationOptions options)
         {
             return new FileSystemEnumerable<DirectoryInfo>(
                directory,
                (ref FileSystemEntry entry) => (DirectoryInfo)entry.ToFileSystemInfo(),
+               isNormalized,
                options)
             {
                 ShouldIncludePredicate = (ref FileSystemEntry entry) =>
@@ -179,11 +187,13 @@ namespace System.IO.Enumeration
         internal static IEnumerable<FileSystemInfo> FileSystemInfos(
             string directory,
             string expression,
+            bool isNormalized,
             EnumerationOptions options)
         {
             return new FileSystemEnumerable<FileSystemInfo>(
                directory,
                (ref FileSystemEntry entry) => entry.ToFileSystemInfo(),
+               isNormalized,
                options)
             {
                 ShouldIncludePredicate = (ref FileSystemEntry entry) =>
