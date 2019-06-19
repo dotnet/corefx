@@ -19,12 +19,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
-        ///   </para>
+        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(JsonEncodedText propertyName, ulong value)
@@ -52,12 +48,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
-        ///   </para>
+        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(string propertyName, ulong value)
@@ -75,12 +67,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
-        ///   </para>
+        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<char> propertyName, ulong value)
@@ -105,12 +93,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
-        ///   </para>
+        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, ulong value)
@@ -132,12 +116,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
-        ///   </para>
+        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(JsonEncodedText propertyName, uint value)
@@ -155,12 +135,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
-        ///   </para>
+        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(string propertyName, uint value)
@@ -178,12 +154,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
-        ///   </para>
+        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<char> propertyName, uint value)
@@ -201,12 +173,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
-        ///   </para>
+        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, uint value)

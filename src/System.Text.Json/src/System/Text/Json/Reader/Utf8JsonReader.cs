@@ -91,12 +91,8 @@ namespace System.Text.Json
         /// within the given UTF-8 encoded input text, skipping any white space.
         /// </summary>
         /// <remarks>
-        ///   <para>
-        ///     For JSON strings (including property names), this points to before the start quote.
-        ///   </para>
-        ///   <para>
-        ///     For comments, this points to before the first comment delimiter (i.e. '/').
-        ///   </para>
+        /// For JSON strings (including property names), this points to before the start quote.
+        /// For comments, this points to before the first comment delimiter (i.e. '/').
         /// </remarks>
         public long TokenStartIndex { get; private set; }
 

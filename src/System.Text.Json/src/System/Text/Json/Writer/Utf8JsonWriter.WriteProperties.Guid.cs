@@ -19,12 +19,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
-        ///   </para>
+        /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
+        /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
         /// </remarks>
         public void WriteString(JsonEncodedText propertyName, Guid value)
             => WriteStringHelper(propertyName.EncodedUtf8Bytes, value);
@@ -51,12 +47,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
-        ///   </para>
+        /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteString(string propertyName, Guid value)
             => WriteString(propertyName.AsSpan(), value);
@@ -73,12 +65,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
-        ///   </para>
+        /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteString(ReadOnlySpan<char> propertyName, Guid value)
         {
@@ -102,12 +90,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
-        ///   </para>
+        /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteString(ReadOnlySpan<byte> utf8PropertyName, Guid value)
         {

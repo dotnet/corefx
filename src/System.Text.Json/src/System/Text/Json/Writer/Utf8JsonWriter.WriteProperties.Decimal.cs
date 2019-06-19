@@ -19,12 +19,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
-        ///   </para>
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
         /// </remarks>
         public void WriteNumber(JsonEncodedText propertyName, decimal value)
             => WriteNumberHelper(propertyName.EncodedUtf8Bytes, value);
@@ -51,12 +47,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
-        ///   </para>
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(string propertyName, decimal value)
             => WriteNumber(propertyName.AsSpan(), value);
@@ -73,12 +65,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
-        ///   </para>
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, decimal value)
         {
@@ -102,12 +90,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        ///   <para>
-        ///     The property name is escaped before writing.
-        ///   </para>
-        ///   <para>
-        ///     Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
-        ///   </para>
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, decimal value)
         {

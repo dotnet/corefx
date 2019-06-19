@@ -183,12 +183,7 @@ namespace System.Text.Json
         /// Converts the value of this instance to a <see cref="string"/>.
         /// </summary>
         /// <remarks>
-        ///   <para>
-        ///     Returns the underlying UTF-16 encoded string.
-        ///   </para>
-        ///   <para>
-        ///     Returns an empty string on a default instance of <see cref="JsonEncodedText"/>.
-        ///   </para>
+        /// Returns an empty string on a default instance of <see cref="JsonEncodedText"/>.
         /// </remarks>
         public override string ToString()
             => _value ?? string.Empty;
