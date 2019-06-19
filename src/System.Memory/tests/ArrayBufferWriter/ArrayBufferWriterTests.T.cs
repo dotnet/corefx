@@ -34,7 +34,7 @@ namespace System.Buffers.Tests
 
             {
                 ArrayBufferWriter<T> output = default;
-                Assert.Equal(null, output);
+                Assert.Null(output);
             }
         }
 
@@ -155,7 +155,7 @@ namespace System.Buffers.Tests
 
         [Theory]
         [MemberData(nameof(SizeHints))]
-        public void GetSpan_DefaultCtor(int sizeHint)
+        public void GetSpan_DefaultCtor_WithSizeHint(int sizeHint)
         {
             var output = new ArrayBufferWriter<T>();
             Span<T> span = output.GetSpan(sizeHint);
@@ -172,7 +172,7 @@ namespace System.Buffers.Tests
 
         [Theory]
         [MemberData(nameof(SizeHints))]
-        public void GetSpan_InitSizeCtor(int sizeHint)
+        public void GetSpan_InitSizeCtor_WithSizeHint(int sizeHint)
         {
             {
                 var output = new ArrayBufferWriter<T>(256);
@@ -197,7 +197,7 @@ namespace System.Buffers.Tests
 
         [Theory]
         [MemberData(nameof(SizeHints))]
-        public void GetMemory_DefaultCtor(int sizeHint)
+        public void GetMemory_DefaultCtor_WithSizeHint(int sizeHint)
         {
             var output = new ArrayBufferWriter<T>();
             Memory<T> memory = output.GetMemory(sizeHint);
@@ -214,7 +214,7 @@ namespace System.Buffers.Tests
 
         [Theory]
         [MemberData(nameof(SizeHints))]
-        public void GetMemory_InitSizeCtor(int sizeHint)
+        public void GetMemory_InitSizeCtor_WithSizeHint(int sizeHint)
         {
             {
                 var output = new ArrayBufferWriter<T>(256);

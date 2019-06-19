@@ -357,7 +357,7 @@ namespace System.Memory.Tests
                 sizes.Add(memory.Length);
             }
 
-            Assert.Equal(1, sizes.Count);
+            Assert.Single(sizes);
             Assert.Equal(new[] { 100 }, sizes);
         }
 

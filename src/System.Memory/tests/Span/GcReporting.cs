@@ -14,7 +14,9 @@ namespace System.SpanTests
         /// </summary>
         [Fact]
         [OuterLoop]
+#pragma warning disable xUnit1024 // Test methods cannot have overloads
         public static void DelegateTest()
+#pragma warning restore xUnit1024 // Test methods cannot have overloads
         {
             DelegateTest(100000, 10000);
         }
@@ -24,12 +26,16 @@ namespace System.SpanTests
         /// <see cref="DelegateTest"/> are too high for running that test in a reasonable amount of time. This one runs in a
         /// reasonable amount of time for a long-duration stress run.
         /// </summary>
+#pragma warning disable xUnit1013 // Public method should be marked as test - entry point, I think it's fair to ignore
         public static void DelegateTest_Stress()
+#pragma warning restore xUnit1013 // Public method should be marked as test
         {
             DelegateTest(100, 100);
         }
 
+#pragma warning disable xUnit1024 // Test methods cannot have overloads
         private static void DelegateTest(int iterationCount, int objectCount)
+#pragma warning restore xUnit1024 // Test methods cannot have overloads
         {
             object[] objects = new object[objectCount];
             Random rng = new Random();

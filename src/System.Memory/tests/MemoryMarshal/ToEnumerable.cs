@@ -44,7 +44,7 @@ namespace System.MemoryTests
         {
             Memory<int> memory = Memory<int>.Empty;
             IEnumerable<int> copy = MemoryMarshal.ToEnumerable<int>(memory);
-            Assert.Equal(0, copy.Count());
+            Assert.Empty(copy);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace System.MemoryTests
         {
             Memory<int> memory = default;
             IEnumerable<int> copy = MemoryMarshal.ToEnumerable<int>(memory);
-            Assert.Equal(0, copy.Count());
+            Assert.Empty(copy);
         }
 
         [Fact]

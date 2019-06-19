@@ -90,7 +90,9 @@ namespace System.MemoryTests
         [InlineData(new int[0], new int[0], new int[0])]
         [InlineData(new int[0], new int[] { 1 }, new int[0])]
         [InlineData(new int[] { 1 }, new int[0], new int[] { 1 })]
+#pragma warning disable xUnit1025 // InlineData duplicates
         [InlineData(new int[] { 1 }, new int[] { 1 }, new int[0])]
+#pragma warning restore xUnit1025 // InlineData duplicates
         [InlineData(new int[] { 2 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, new int[] { 1 }, new int[] { 2, 1 })]
         [InlineData(new int[] { 1, 1, 2, 1 }, new int[] { 1 }, new int[] { 2, 1 })]
@@ -120,7 +122,9 @@ namespace System.MemoryTests
         [InlineData(new int[0], new int[0], new int[0])]
         [InlineData(new int[0], new int[] { 1 }, new int[0])]
         [InlineData(new int[] { 1 }, new int[0], new int[] { 1 })]
+#pragma warning disable xUnit1025 // InlineData duplicates
         [InlineData(new int[] { 1 }, new int[] { 1 }, new int[0])]
+#pragma warning restore xUnit1025 // InlineData duplicates
         [InlineData(new int[] { 2 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, new int[] { 1 }, new int[] { 1, 2 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 1 }, new int[] { 1, 2 })]
@@ -150,13 +154,17 @@ namespace System.MemoryTests
         [InlineData(new int[0], new int[0], new int[0])]
         [InlineData(new int[0], new int[] { 1 }, new int[0])]
         [InlineData(new int[] { 1 }, new int[0], new int[] { 1 })]
+#pragma warning disable xUnit1025 // InlineData duplicates
         [InlineData(new int[] { 1 }, new int[] { 1 }, new int[0])]
+#pragma warning restore xUnit1025 // InlineData duplicates
         [InlineData(new int[] { 2 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 2 }, new int[] { 1, 2, 1, 1 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 3 }, new int[] { 1, 2, 1, 1 })]
+#pragma warning disable xUnit1025 // InlineData duplicates
         [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 1, 2 }, new int[0])]
+#pragma warning restore xUnit1025 // InlineData duplicates
         [InlineData(new int[] { 2, 1, 3, 2, 1, 1 }, new int[] { 1, 2 }, new int[] { 3 })]
         [InlineData(new int[] { 2, 1, 3, 2, 1, 1 }, new int[] { 1, 2, 4 }, new int[] { 3 })]
         [InlineData(new int[] { 1, 2, 1, 1, 1 }, new int[] { 1 }, new int[] { 2 })]

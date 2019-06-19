@@ -29,7 +29,7 @@ namespace System.MemoryTests
         {
             ReadOnlyMemory<int> memory = default;
             Assert.True(MemoryMarshal.TryGetArray(memory, out ArraySegment<int> segment));
-            Assert.Equal(0, segment.Array.Length);
+            Assert.Empty(segment.Array);
         }
 
         [Fact]
@@ -55,10 +55,10 @@ namespace System.MemoryTests
 
             Assert.True(MemoryMarshal.TryGetArray(memory, out ArraySegment<int> segment));
             Assert.Same(array, segment.Array);
-            Assert.Equal(0, segment.Array.Length);
+            Assert.Empty(segment.Array);
 
             Assert.True(MemoryMarshal.TryGetArray(ReadOnlyMemory<byte>.Empty, out ArraySegment<byte> byteSegment));
-            Assert.Equal(0, byteSegment.Array.Length);
+            Assert.Empty(byteSegment.Array);
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace System.MemoryTests
 
             Assert.True(MemoryMarshal.TryGetArray(manager.Memory, out ArraySegment<int> segment));
             Assert.Same(array, segment.Array);
-            Assert.Equal(0, segment.Array.Length);
+            Assert.Empty(segment.Array);
         }
 
         [Fact]
@@ -78,7 +78,7 @@ namespace System.MemoryTests
             using (var manager = new NativeMemoryManager(0))
             {
                 Assert.True(MemoryMarshal.TryGetArray(manager.Memory, out ArraySegment<byte> segment));
-                Assert.Equal(0, segment.Array.Length);
+                Assert.Empty(segment.Array);
             }
         }
     }

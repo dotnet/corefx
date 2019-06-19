@@ -42,7 +42,7 @@ namespace System.MemoryTests
         {
             ReadOnlyMemory<int> memory = ReadOnlyMemory<int>.Empty;
             int[] copy = memory.ToArray();
-            Assert.Equal(0, copy.Length);
+            Assert.Empty(copy);
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace System.MemoryTests
         {
             ReadOnlyMemory<int> memory = default;
             int[] copy = memory.ToArray();
-            Assert.Equal(0, copy.Length);
+            Assert.Empty(copy);
         }
     }
 }

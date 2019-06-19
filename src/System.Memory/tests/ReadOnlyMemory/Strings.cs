@@ -90,7 +90,12 @@ namespace System.MemoryTests
             Assert.False(MemoryMarshal.TryGetArray(m, out ArraySegment<char> array));
             Assert.Null(array.Array);
             Assert.Equal(0, array.Offset);
+#pragma warning disable xUnit2013 // Do not use Assert.Equal() to check collection size
+            // Although ArraySegment<T> implements IEnumerable, it throws InvalidOperationException upon GetEnumerator() call
+            // if the underlying array is null. This means that the suggested fix of Assert.Empty(array) will fail for this case
+            // since Assert.Empty calls IEnumerable.GetEnumerator() to see whether it returns any element or not.
             Assert.Equal(0, array.Count);
+#pragma warning restore xUnit2013 // Do not use Assert.Equal() to check collection size
         }
 
         [Fact]

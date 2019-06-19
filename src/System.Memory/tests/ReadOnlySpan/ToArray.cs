@@ -42,7 +42,7 @@ namespace System.SpanTests
         {
             ReadOnlySpan<int> span = ReadOnlySpan<int>.Empty;
             int[] copy = span.ToArray();
-            Assert.Equal(0, copy.Length);
+            Assert.Empty(copy);
         }
     }
 }
