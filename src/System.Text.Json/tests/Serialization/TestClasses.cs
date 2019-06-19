@@ -17,7 +17,7 @@ namespace System.Text.Json.Serialization.Tests
 
     public enum SampleEnumByte : byte
     {
-        Min = byte.MinValue,
+        MinZero = byte.MinValue,
         One = 1,
         Two = 2,
         Max = byte.MaxValue
@@ -25,7 +25,7 @@ namespace System.Text.Json.Serialization.Tests
 
     public enum SampleEnumSByte : sbyte
     {
-        Min = sbyte.MinValue,
+        MinNegative = sbyte.MinValue,
         Zero = 0,
         One = 1,
         Two = 2,
@@ -34,13 +34,14 @@ namespace System.Text.Json.Serialization.Tests
 
     public enum SampleEnum
     {
+        MinZero = 0,
         One = 1,
         Two = 2
     }
 
     public enum SampleEnumInt16 : short
     {
-        Min = short.MinValue,
+        MinNegative = short.MinValue,
         Zero = 0,
         One = 1,
         Two = 2,
@@ -49,7 +50,7 @@ namespace System.Text.Json.Serialization.Tests
 
     public enum SampleEnumUInt16 : ushort
     {
-        Min = ushort.MinValue,
+        MinZero = ushort.MinValue,
         One = 1,
         Two = 2,
         Max = ushort.MaxValue
@@ -57,7 +58,7 @@ namespace System.Text.Json.Serialization.Tests
 
     public enum SampleEnumInt32 : Int32
     {
-        Min = Int32.MinValue,
+        MinNegative = Int32.MinValue,
         Zero = 0,
         One = 1,
         Two = 2,
@@ -66,7 +67,7 @@ namespace System.Text.Json.Serialization.Tests
 
     public enum SampleEnumUInt32 : UInt32
     {
-        Min = UInt32.MinValue,
+        MinZero = UInt32.MinValue,
         One = 1,
         Two = 2,
         Max = UInt32.MaxValue
@@ -74,7 +75,8 @@ namespace System.Text.Json.Serialization.Tests
 
     public enum SampleEnumInt64 : long
     {
-        Min = long.MinValue,
+        MinNegative = long.MinValue,
+        Zero = 0,
         One = 1,
         Two = 2,
         Max = long.MaxValue
@@ -82,7 +84,7 @@ namespace System.Text.Json.Serialization.Tests
 
     public enum SampleEnumUInt64 : ulong
     {
-        Min = ulong.MinValue,
+        MinZero = ulong.MinValue,
         One = 1,
         Two = 2,
         Max = ulong.MaxValue
