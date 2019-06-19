@@ -159,7 +159,7 @@ namespace System.Text.Json.Serialization.Tests
                 JsonSerializer.Parse<Level1>(json, options);
                 Assert.True(false, "Expected exception");
             }
-            catch(JsonException ex)
+            catch (JsonException ex)
             {
                 Assert.Contains("$.Level2.Level3s[0]", ex.ToString());
                 Assert.Equal(ex.Path, "$.Level2.Level3s[0]");

@@ -197,7 +197,7 @@ namespace System.Text.Json.Serialization.Tests
             {
                 if (reader.TokenType != JsonTokenType.StartObject)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 ClassWithStringProperties obj = new ClassWithStringProperties();
@@ -207,7 +207,7 @@ namespace System.Text.Json.Serialization.Tests
                     reader.Read();
                     if (reader.TokenType != JsonTokenType.PropertyName)
                     {
-                        throw new FormatException();
+                        throw new JsonException();
                     }
 
                     string propertyName = reader.GetString();
@@ -247,14 +247,14 @@ namespace System.Text.Json.Serialization.Tests
                             obj.MyString9 = val;
                             break;
                         default:
-                            throw new FormatException();
+                            throw new JsonException();
                     }
                 }
 
                 reader.Read();
                 if (reader.TokenType != JsonTokenType.EndObject)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 return obj;

@@ -22,11 +22,6 @@ namespace System.Text.Json.Serialization.Tests
 
             public override MyBoolEnum Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
-                if (reader.TokenType != JsonTokenType.String)
-                {
-                    throw new FormatException();
-                }
-
                 string enumValue = reader.GetString();
                 if (enumValue == "TRUE")
                 {
@@ -43,7 +38,7 @@ namespace System.Text.Json.Serialization.Tests
                     return MyBoolEnum.Unknown;
                 }
 
-                throw new FormatException();
+                throw new JsonException();
             }
 
             public override void Write(Utf8JsonWriter writer, MyBoolEnum value, JsonSerializerOptions options)

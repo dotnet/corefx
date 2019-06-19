@@ -9,6 +9,9 @@ namespace System.Text.Json
 {
     internal static partial class ThrowHelper
     {
+        // If the exception source is this value, the serializer will re-throw as JsonException.
+        public const string ExceptionSourceValueToRethrowAsJsonException = "System.Text.Json";
+
         public static ArgumentException GetArgumentException_MaxDepthMustBePositive()
         {
             return GetArgumentException(SR.MaxDepthMustBePositive);
@@ -413,22 +416,29 @@ namespace System.Text.Json
 
         public static void ThrowInvalidOperationException_ReadInvalidUTF16(int charAsInt)
         {
-            throw new InvalidOperationException(SR.Format(SR.CannotReadInvalidUTF16, $"0x{charAsInt:X2}"));
+            throw GetInvalidOperationException(SR.Format(SR.CannotReadInvalidUTF16, $"0x{charAsInt:X2}"));
         }
 
         public static void ThrowInvalidOperationException_ReadInvalidUTF16()
         {
-            throw new InvalidOperationException(SR.CannotReadIncompleteUTF16);
+            throw GetInvalidOperationException(SR.CannotReadIncompleteUTF16);
         }
 
         public static InvalidOperationException GetInvalidOperationException_ReadInvalidUTF8(DecoderFallbackException innerException)
         {
-            return new InvalidOperationException(SR.CannotTranscodeInvalidUtf8, innerException);
+            return GetInvalidOperationException(SR.CannotTranscodeInvalidUtf8, innerException);
         }
 
         public static ArgumentException GetArgumentException_ReadInvalidUTF16(EncoderFallbackException innerException)
         {
             return new ArgumentException(SR.CannotTranscodeInvalidUtf16, innerException);
+        }
+
+        public static InvalidOperationException GetInvalidOperationException(string message, Exception innerException)
+        {
+            InvalidOperationException ex = new InvalidOperationException(message, innerException);
+            ex.Source = ExceptionSourceValueToRethrowAsJsonException;
+            return ex;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -475,6 +485,13 @@ namespace System.Text.Json
             return message;
         }
 
+        public static FormatException GetFormatException()
+        {
+            FormatException ex = new FormatException();
+            ex.Source = ExceptionSourceValueToRethrowAsJsonException;
+            return ex;
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static FormatException GetFormatException(NumericType numericType)
         {
@@ -507,7 +524,10 @@ namespace System.Text.Json
                     Debug.Fail($"The NumericType enum value: {numericType} is not part of the switch. Add the appropriate case and exception message.");
                     break;
             }
-            return new FormatException(message);
+
+            FormatException ex = new FormatException(message);
+            ex.Source = ExceptionSourceValueToRethrowAsJsonException;
+            return ex;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -530,7 +550,10 @@ namespace System.Text.Json
                     Debug.Fail($"The DateType enum value: {dateType} is not part of the switch. Add the appropriate case and exception message.");
                     break;
             }
-            return new FormatException(message);
+
+            FormatException ex = new FormatException(message);
+            ex.Source = ExceptionSourceValueToRethrowAsJsonException;
+            return ex;
         }
     }
 

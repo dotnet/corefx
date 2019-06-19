@@ -331,50 +331,21 @@ namespace System.Text.Json
 
         public PropertyInfo PropertyInfo { get; private set; }
 
-        private void RethrowAsJsonException(Exception ex, in WriteStack state)
-        {
-            ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, state.PropertyPath, ex);
-        }
-
-        private void RethrowAsJsonException(Exception ex, in ReadStack state, in Utf8JsonReader reader)
-        {
-            ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath, ex);
-        }
-
         public void Read(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader)
         {
             Debug.Assert(ShouldDeserialize);
 
-            try
+            if (ElementClassInfo != null)
             {
-                if (ElementClassInfo != null)
-                {
-                    // Forward the setter to the value-based JsonPropertyInfo.
-                    JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
-                    propertyInfo.OnReadEnumerable(tokenType, ref state, ref reader);
-                }
-                else
-                {
-                    GetOriginalValues(ref reader, out JsonTokenType originalTokenType, out int originalDepth);
-                    OnRead(tokenType, ref state, ref reader);
-                    VerifyRead(originalTokenType, originalDepth, ref state, ref reader);
-                }
+                // Forward the setter to the value-based JsonPropertyInfo.
+                JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
+                propertyInfo.OnReadEnumerable(tokenType, ref state, ref reader);
             }
-            catch (ArgumentException ex)
+            else
             {
-                RethrowAsJsonException(ex, state, reader);
-            }
-            catch (FormatException ex)
-            {
-                RethrowAsJsonException(ex, state, reader);
-            }
-            catch (InvalidOperationException ex)
-            {
-                RethrowAsJsonException(ex, state, reader);
-            }
-            catch (OverflowException ex)
-            {
-                RethrowAsJsonException(ex, state, reader);
+                GetOriginalValues(ref reader, out JsonTokenType originalTokenType, out int originalDepth);
+                OnRead(tokenType, ref state, ref reader);
+                VerifyRead(originalTokenType, originalDepth, ref state, ref reader);
             }
         }
 
@@ -382,28 +353,9 @@ namespace System.Text.Json
         {
             Debug.Assert(ShouldDeserialize);
 
-            try
-            {
-                GetOriginalValues(ref reader, out JsonTokenType originalTokenType, out int originalDepth);
-                OnReadEnumerable(tokenType, ref state, ref reader);
-                VerifyRead(originalTokenType, originalDepth, ref state, ref reader);
-            }
-            catch (ArgumentException ex)
-            {
-                RethrowAsJsonException(ex, state, reader);
-            }
-            catch (FormatException ex)
-            {
-                RethrowAsJsonException(ex, state, reader);
-            }
-            catch (InvalidOperationException ex)
-            {
-                RethrowAsJsonException(ex, state, reader);
-            }
-            catch (OverflowException ex)
-            {
-                RethrowAsJsonException(ex, state, reader);
-            }
+            GetOriginalValues(ref reader, out JsonTokenType originalTokenType, out int originalDepth);
+            OnReadEnumerable(tokenType, ref state, ref reader);
+            VerifyRead(originalTokenType, originalDepth, ref state, ref reader);
         }
 
         public JsonClassInfo RuntimeClassInfo
@@ -472,36 +424,17 @@ namespace System.Text.Json
         {
             Debug.Assert(ShouldSerialize);
 
-            try
+            if (state.Current.Enumerator != null)
             {
-                if (state.Current.Enumerator != null)
-                {
-                    // Forward the setter to the value-based JsonPropertyInfo.
-                    JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
-                    propertyInfo.OnWriteEnumerable(ref state.Current, writer);
-                }
-                else
-                {
-                    int originalDepth = writer.CurrentDepth;
-                    OnWrite(ref state.Current, writer);
-                    VerifyWrite(originalDepth, ref state, ref writer);
-                }
+                // Forward the setter to the value-based JsonPropertyInfo.
+                JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
+                propertyInfo.OnWriteEnumerable(ref state.Current, writer);
             }
-            catch (ArgumentException ex)
+            else
             {
-                RethrowAsJsonException(ex, state);
-            }
-            catch (FormatException ex)
-            {
-                RethrowAsJsonException(ex, state);
-            }
-            catch (InvalidOperationException ex)
-            {
-                RethrowAsJsonException(ex, state);
-            }
-            catch (OverflowException ex)
-            {
-                RethrowAsJsonException(ex, state);
+                int originalDepth = writer.CurrentDepth;
+                OnWrite(ref state.Current, writer);
+                VerifyWrite(originalDepth, ref state, ref writer);
             }
         }
 
@@ -509,56 +442,18 @@ namespace System.Text.Json
         {
             Debug.Assert(ShouldSerialize);
 
-            try
-            {
-                int originalDepth = writer.CurrentDepth;
-                OnWriteDictionary(ref state.Current, writer);
-                VerifyWrite(originalDepth, ref state, ref writer);
-            }
-            catch (ArgumentException ex)
-            {
-                RethrowAsJsonException(ex, state);
-            }
-            catch (FormatException ex)
-            {
-                RethrowAsJsonException(ex, state);
-            }
-            catch (InvalidOperationException ex)
-            {
-                RethrowAsJsonException(ex, state);
-            }
-            catch (OverflowException ex)
-            {
-                RethrowAsJsonException(ex, state);
-            }
+            int originalDepth = writer.CurrentDepth;
+            OnWriteDictionary(ref state.Current, writer);
+            VerifyWrite(originalDepth, ref state, ref writer);
         }
 
         public void WriteEnumerable(ref WriteStack state, Utf8JsonWriter writer)
         {
             Debug.Assert(ShouldSerialize);
 
-            try
-            {
-                int originalDepth = writer.CurrentDepth;
-                OnWriteEnumerable(ref state.Current, writer);
-                VerifyWrite(originalDepth, ref state, ref writer);
-            }
-            catch (ArgumentException ex)
-            {
-                RethrowAsJsonException(ex, state);
-            }
-            catch (FormatException ex)
-            {
-                RethrowAsJsonException(ex, state);
-            }
-            catch (InvalidOperationException ex)
-            {
-                RethrowAsJsonException(ex, state);
-            }
-            catch (OverflowException ex)
-            {
-                RethrowAsJsonException(ex, state);
-            }
+            int originalDepth = writer.CurrentDepth;
+            OnWriteEnumerable(ref state.Current, writer);
+            VerifyWrite(originalDepth, ref state, ref writer);
         }
     }
 }

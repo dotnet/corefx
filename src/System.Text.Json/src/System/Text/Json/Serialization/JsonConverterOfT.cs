@@ -31,13 +31,7 @@ namespace System.Text.Json.Serialization
         /// <summary>
         /// Read and convert the JSON to T.
         /// </summary>
-        /// <remarks>
-        /// The following exceptions are caught and re-thrown as <see cref="JsonException"/>:
-        /// <see cref="ArgumentException"/>
-        /// <see cref="FormatException"/>
-        /// <see cref="InvalidOperationException"/>
-        /// <see cref="OverflowException"/>
-        /// </remarks>
+        /// A converter may throw any Exception, but should throw <cref>JsonException</cref> when the JSON is invalid.
         /// <param name="reader">The <see cref="Utf8JsonReader"/> to read from.</param>
         /// <param name="typeToConvert">The <see cref="Type"/> being converted.</param>
         /// <param name="options">The <see cref="JsonSerializerOptions"/> being used.</param>
@@ -45,14 +39,11 @@ namespace System.Text.Json.Serialization
         public abstract T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options);
 
         /// <summary>
-        /// Write the value to JSON.
+        /// Write the value as JSON.
         /// </summary>
         /// <remarks>
-        /// The following exceptions are caught and re-thrown as <see cref="JsonException"/>:
-        /// <see cref="ArgumentException"/>
-        /// <see cref="FormatException"/>
-        /// <see cref="InvalidOperationException"/>
-        /// <see cref="OverflowException"/>
+        /// A converter may throw any Exception, but should throw <cref>JsonException</cref> when the JSON
+        /// cannot be created.
         /// </remarks>
         /// <param name="writer">The <see cref="Utf8JsonWriter"/> to write to.</param>
         /// <param name="value">The value to convert.</param>

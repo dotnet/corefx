@@ -4,6 +4,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Converters;
@@ -16,32 +17,52 @@ namespace System.Text.Json
     public sealed partial class JsonSerializerOptions
     {
         // The global list of built-in simple converters.
-        static private readonly Dictionary<Type, JsonConverter> s_defaultSimpleConverters = new Dictionary<Type, JsonConverter>();
+        private static readonly Dictionary<Type, JsonConverter> s_defaultSimpleConverters = GetDefaultSimpleConverters();
 
         // The global list of built-in converters that override CanConvert().
-        static private readonly List<JsonConverter> s_defaultConverters = new List<JsonConverter>();
+        private static readonly List<JsonConverter> s_defaultFactoryConverters = GetDefaultConverters();
 
         // The cached converters (custom or built-in).
         private readonly ConcurrentDictionary<Type, JsonConverter> _converters = new ConcurrentDictionary<Type, JsonConverter>();
 
-        static JsonSerializerOptions()
+        private static Dictionary<Type, JsonConverter> GetDefaultSimpleConverters()
         {
+            var converters = new Dictionary<Type, JsonConverter>(NumberOfSimpleConverters);
+
             // Use a dictionary for simple converters.
             foreach (JsonConverter converter in DefaultSimpleConverters)
             {
-                s_defaultSimpleConverters.Add(converter.TypeToConvert, converter);
+                converters.Add(converter.TypeToConvert, converter);
             }
 
+            Debug.Assert(NumberOfSimpleConverters == converters.Count);
+
+            return converters;
+        }
+
+        private static List<JsonConverter> GetDefaultConverters()
+        {
+            const int NumberOfConverters = 1;
+
+            var converters = new List<JsonConverter>(NumberOfConverters);
+
             // Use a list for converters that implement CanConvert().
-            s_defaultConverters.Add(new JsonConverterEnum(treatAsString: false));
-            // todo: s_defaultConverters.Add(new JsonConverterKeyValuePair());
+            converters.Add(new JsonConverterEnum(treatAsString: false));
+            // todo: converters.Add(new JsonConverterKeyValuePair());
 
             // We will likely add collection converters here in the future.
+
+            Debug.Assert(NumberOfConverters == converters.Count);
+
+            return converters;
         }
 
         /// <summary>
         /// The list of custom converters.
         /// </summary>
+        /// <remarks>
+        /// Once serialization or deserialization occurs, the list cannot be modified.
+        /// </remarks>
         public IList<JsonConverter> Converters { get; }
 
         internal JsonConverter DetermineConverterForProperty(Type parentClassType, Type runtimePropertyType, PropertyInfo propertyInfo)
@@ -72,7 +93,9 @@ namespace System.Text.Json
         /// Returns the converter for the specified type.
         /// </summary>
         /// <param name="typeToConvert">The type to return a converter for.</param>
-        /// <returns>The first converter that supports the given type, or null if there is no converter.</returns>
+        /// <returns>
+        /// The first converter that supports the given type, or null if there is no converter.
+        /// </returns>
         public JsonConverter GetConverter(Type typeToConvert)
         {
             if (_converters.TryGetValue(typeToConvert, out JsonConverter converter))
@@ -112,7 +135,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    foreach (JsonConverter item in s_defaultConverters)
+                    foreach (JsonConverter item in s_defaultFactoryConverters)
                     {
                         if (item.CanConvert(typeToConvert))
                         {
@@ -144,10 +167,14 @@ namespace System.Text.Json
                 }
             }
 
-            // A null converter is allowed here and cached.
+            // Only cache the value once (de)serialization has occurred since new converters can be added that may change the result.
+            if (_haveTypesBeenCreated)
+            {
+                // A null converter is allowed here and cached.
 
-            // Ignore failure case here in multi-threaded cases since the cached item will be equivalent.
-            _converters.TryAdd(typeToConvert, converter);
+                // Ignore failure case here in multi-threaded cases since the cached item will be equivalent.
+                _converters.TryAdd(typeToConvert, converter);
+            }
 
             return converter;
         }
@@ -169,7 +196,7 @@ namespace System.Text.Json
             JsonConverter converter = converterAttribute.CreateConverter(typeToConvert);
             if (converter == null)
             {
-                ConstructorInfo ctor = type.GetConstructor(new Type[] { });
+                ConstructorInfo ctor = type.GetConstructor(Type.EmptyTypes);
                 if (!typeof(JsonConverter).IsAssignableFrom(type) || ctor.IsPrivate)
                 {
                     ThrowHelper.ThrowInvalidOperationException_SerializationConverterOnAttributeInvalid(classType, propertyInfo);
@@ -214,10 +241,14 @@ namespace System.Text.Json
             return default;
         }
 
+        private const int NumberOfSimpleConverters = 20;
+
         private static IEnumerable<JsonConverter> DefaultSimpleConverters
         {
             get
             {
+                // When adding to this, update NumberOfSimpleConverters above.
+
                 yield return new JsonConverterBoolean();
                 yield return new JsonConverterByte();
                 yield return new JsonConverterByteArray();

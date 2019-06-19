@@ -122,6 +122,9 @@ namespace System.Text.Json
     public partial class JsonException : System.Exception
     {
         protected JsonException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        public JsonException() { }
+        public JsonException(string message) { }
+        public JsonException(string message, System.Exception innerException) { }
         public JsonException(string message, string path, long? lineNumber, long? bytePositionInLine) { }
         public JsonException(string message, string path, long? lineNumber, long? bytePositionInLine, System.Exception innerException) { }
         public long? BytePositionInLine { get { throw null; } }
@@ -419,6 +422,7 @@ namespace System.Text.Json.Serialization
     public partial class JsonConverterAttribute : System.Text.Json.Serialization.JsonAttribute
     {
         public JsonConverterAttribute(System.Type converterType) { }
+        protected JsonConverterAttribute() { }
         public System.Type ConverterType { get { throw null; } }
         public virtual System.Text.Json.Serialization.JsonConverter CreateConverter(System.Type typeToConvert) { throw null; }
     }

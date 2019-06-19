@@ -9,71 +9,6 @@ namespace System.Text.Json.Serialization.Tests
 {
     public static partial class CustomConverterTests
     {
-        public static void ConverterFailJsonException<TException>() where TException: Exception, new()
-        {
-            var options = new JsonSerializerOptions();
-            JsonConverter converter = new FailConverter<TException>();
-            options.Converters.Add(converter);
-
-            try
-            {
-                JsonSerializer.Parse<int>("0", options);
-                Assert.True(false, "Expected exception");
-            }
-            catch (JsonException ex)
-            {
-                Assert.NotNull(ex.InnerException);
-                Assert.IsType<TException>(ex.InnerException);
-            }
-
-            try
-            {
-                JsonSerializer.Parse<int[]>("[0]", options);
-                Assert.True(false, "Expected exception");
-            }
-            catch (JsonException ex)
-            {
-                Assert.NotNull(ex.InnerException);
-                Assert.IsType<TException>(ex.InnerException);
-            }
-
-            try
-            {
-                JsonSerializer.ToString(0, options);
-                Assert.True(false, "Expected exception");
-            }
-            catch (JsonException ex)
-            {
-                Assert.NotNull(ex.InnerException);
-                Assert.IsType<TException>(ex.InnerException);
-            }
-
-            try
-            {
-                JsonSerializer.ToString(new int[] { 0 }, options);
-                Assert.True(false, "Expected exception");
-            }
-            catch (JsonException ex)
-            {
-                Assert.NotNull(ex.InnerException);
-                Assert.IsType<TException>(ex.InnerException);
-            }
-
-            try
-            {
-                var obj = new Dictionary<string, int>();
-                obj["key"] = 0;
-
-                JsonSerializer.ToString(obj, options);
-                Assert.True(false, "Expected exception");
-            }
-            catch (JsonException ex)
-            {
-                Assert.NotNull(ex.InnerException);
-                Assert.IsType<TException>(ex.InnerException);
-            }
-        }
-
         private class FailConverter<TException> : JsonConverter<int> where TException: Exception, new()
         {
             public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -90,15 +25,6 @@ namespace System.Text.Json.Serialization.Tests
             {
                 throw new TException();
             }
-        }
-
-        [Fact]
-        public static void ConverterExceptionsRethrownAsJsonExceptionFail()
-        {
-            ConverterFailJsonException<ArgumentException>();
-            ConverterFailJsonException<FormatException>();
-            ConverterFailJsonException<InvalidOperationException>();
-            ConverterFailJsonException<OverflowException>();
         }
 
         public static void ConverterFailNoRethrow<TException>() where TException : Exception, new()
@@ -121,11 +47,13 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ConverterExceptionsNotRethrownFail()
         {
-            ConverterFailNoRethrow<Exception>();
+            // We should not catch these unless thrown from the reader\document.
+            ConverterFailNoRethrow<FormatException>();
+            ConverterFailNoRethrow<ArgumentException>();
 
-            // Some misc exceptions not re-thrown as JsonException:
-            ConverterFailNoRethrow<SystemException>();
-            ConverterFailNoRethrow<StackOverflowException>();
+            // Other misc exception we should not catch:
+            ConverterFailNoRethrow<Exception>();
+            ConverterFailNoRethrow<InvalidOperationException>();
             ConverterFailNoRethrow<IndexOutOfRangeException>();
             ConverterFailNoRethrow<NotSupportedException>();
         }

@@ -21,9 +21,7 @@ namespace System.Text.Json.Serialization.Tests
             public int Y { get;}
         }
 
-        /// <summary>
-        /// Converter for a custom data type that has additional state (coordinateOffset).
-        /// </summary>
+        // Converter for a custom data type that has additional state (coordinateOffset).
         private class PointConverter : JsonConverter<Point>
         {
             private int _coordinateOffset;
@@ -39,18 +37,18 @@ namespace System.Text.Json.Serialization.Tests
             {
                 if (reader.TokenType != JsonTokenType.String)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 string[] stringValues = reader.GetString().Split(',');
                 if (stringValues.Length != 2)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 if (!int.TryParse(stringValues[0], out int x) || !int.TryParse(stringValues[1], out int y))
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 var value = new Point(x + _coordinateOffset, y + _coordinateOffset);
@@ -170,30 +168,30 @@ namespace System.Text.Json.Serialization.Tests
             {
                 if (reader.TokenType != JsonTokenType.StartObject)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 reader.Read();
                 if (reader.TokenType != JsonTokenType.PropertyName)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 if (reader.GetString() != "COORD")
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 reader.Read();
                 string[] stringValues = reader.GetString().Split(',');
                 if (stringValues.Length != 2)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 if (!int.TryParse(stringValues[0], out int x) || !int.TryParse(stringValues[1], out int y))
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 var value = new Point(x, y);
@@ -201,7 +199,7 @@ namespace System.Text.Json.Serialization.Tests
                 reader.Read();
                 if (reader.TokenType != JsonTokenType.EndObject)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 return value;

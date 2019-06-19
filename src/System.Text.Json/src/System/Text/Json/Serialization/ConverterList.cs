@@ -40,7 +40,7 @@ namespace System.Text.Json.Serialization
 
         public int Count => _list.Count;
 
-        public bool IsReadOnly => ((IList)_list).IsReadOnly;
+        public bool IsReadOnly => false;
 
         public void Add(JsonConverter item)
         {

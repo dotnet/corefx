@@ -10,7 +10,7 @@ namespace System.Text.Json.Serialization
     /// Supports converting several types by using a factory pattern.
     /// </summary>
     /// <remarks>
-    /// This is useful for converters supporting an open generic, such as a converter for <see cref="System.Collections.Generic.List{T}"/>.
+    /// This is useful for converters supporting generics, such as a converter for <see cref="System.Collections.Generic.List{T}"/>.
     /// </remarks>
     public abstract class JsonConverterFactory : JsonConverter
     {

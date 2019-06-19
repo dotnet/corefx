@@ -39,6 +39,11 @@ namespace System.Text.Json
 
         protected override void OnReadEnumerable(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader)
         {
+            if (Converter == null)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+            }
+
             if (state.Current.KeyName == null && (state.Current.IsProcessingDictionary || state.Current.IsProcessingIDictionaryConstructibleOrKeyValuePair))
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
@@ -50,11 +55,6 @@ namespace System.Text.Json
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
                 return;
-            }
-
-            if (Converter == null)
-            {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
             }
 
             TConverter value = Converter.Read(ref reader, RuntimePropertyType, Options);

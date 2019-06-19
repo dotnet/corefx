@@ -69,7 +69,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowFormatException()
         {
-            throw new FormatException();
+            throw ThrowHelper.GetFormatException();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -153,11 +153,12 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ReThrowWithPath(JsonException exception, string path)
+        public static void ReThrowWithPath(in ReadStack readStack, JsonReaderException ex)
         {
-            Debug.Assert(exception.Path == null);
+            Debug.Assert(ex.Path == null);
 
-            string message = exception.Message;
+            string path = readStack.JsonPath;
+            string message = ex.Message;
 
             // Insert the "Path" portion before "LineNumber" and "BytePositionInLine".
             int iPos = message.LastIndexOf(" LineNumber: ", StringComparison.InvariantCulture);
@@ -170,7 +171,59 @@ namespace System.Text.Json
                 message += $" Path: {path}.";
             }
 
-            throw new JsonException(message, path, exception.LineNumber, exception.BytePositionInLine, exception);
+            throw new JsonException(message, path, ex.LineNumber, ex.BytePositionInLine, ex);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ReThrowWithPath(in ReadStack readStack, in Utf8JsonReader reader, Exception ex)
+        {
+            JsonException jsonException = new JsonException("", ex);
+            AddExceptionInformation(readStack, reader, jsonException);
+            throw jsonException;
+        }
+
+        public static void AddExceptionInformation(in ReadStack readStack, in Utf8JsonReader reader, JsonException ex)
+        {
+            long lineNumber = reader.CurrentState._lineNumber;
+            ex.LineNumber = lineNumber;
+
+            long bytePositionInLine = reader.CurrentState._bytePositionInLine;
+            ex.BytePositionInLine = bytePositionInLine;
+
+            string path = readStack.JsonPath;
+            ex.Path = path;
+
+            // If the message is empty, use a default message with Path, LineNumber and BytePositionInLine.
+            if (string.IsNullOrEmpty(ex.Message))
+            {
+                Type propertyType = readStack.Current.JsonPropertyInfo?.RuntimePropertyType;
+                if (propertyType == null)
+                {
+                    propertyType = readStack.Current.JsonClassInfo.Type;
+                }
+
+                ex.SetMessage($"{SR.Format(SR.DeserializeUnableToConvertValue, propertyType)} Path: {path} | LineNumber: {lineNumber} | BytePositionInLine: {bytePositionInLine}.");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ReThrowWithPath(in WriteStack writeStack, Exception ex)
+        {
+            JsonException jsonException = new JsonException("", ex);
+            AddExceptionInformation(writeStack, jsonException);
+            throw jsonException;
+        }
+
+        public static void AddExceptionInformation(in WriteStack writeStack, JsonException ex)
+        {
+            string path = writeStack.PropertyPath;
+            ex.Path = path;
+
+            // If the message is empty, use a default message with the Path.
+            if (string.IsNullOrEmpty(ex.Message))
+            {
+                ex.SetMessage(SR.Format(SR.SerializeUnableToSerialize, path));
+            }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

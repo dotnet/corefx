@@ -96,19 +96,19 @@ namespace System.Text.Json.Serialization.Tests
             {
                 if (reader.TokenType != JsonTokenType.String)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 string[] stringValues = reader.GetString().Split(',');
                 if (stringValues.Length != 2)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 AttributedPoint value = new AttributedPoint();
                 if (!int.TryParse(stringValues[0], out int x) || !int.TryParse(stringValues[1], out int y))
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 value.X = x + _offset;

@@ -11,9 +11,7 @@ namespace System.Text.Json.Serialization.Tests
 {
     public static partial class CustomConverterTests
     {
-        /// <summary>
-        /// Demonstrates a List{T} converter that used CreateConverter().
-        /// </summary>
+        // A List{T} converter that used CreateConverter().
         private class ListConverter : JsonConverterFactory
         {
             int _offset;
@@ -65,7 +63,7 @@ namespace System.Text.Json.Serialization.Tests
             {
                 if (reader.TokenType != JsonTokenType.StartArray)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 var value = new List<T>();
@@ -79,7 +77,7 @@ namespace System.Text.Json.Serialization.Tests
 
                     if (reader.TokenType != JsonTokenType.Number)
                     {
-                        throw new FormatException();
+                        throw new JsonException();
                     }
 
                     if (typeof(T) == typeof(int))
@@ -96,7 +94,7 @@ namespace System.Text.Json.Serialization.Tests
                     }
                 }
 
-                throw new FormatException();
+                throw new JsonException();
             }
 
             public override void Write(Utf8JsonWriter writer, List<T> value, JsonSerializerOptions options)
@@ -183,7 +181,7 @@ namespace System.Text.Json.Serialization.Tests
             {
                 if (reader.TokenType != JsonTokenType.StartArray)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 var value = new List<int>();
@@ -199,7 +197,7 @@ namespace System.Text.Json.Serialization.Tests
                     value.Add(element + 10);
                 }
 
-                throw new FormatException();
+                throw new JsonException();
             }
 
             public override void Write(Utf8JsonWriter writer, IList value, JsonSerializerOptions options)

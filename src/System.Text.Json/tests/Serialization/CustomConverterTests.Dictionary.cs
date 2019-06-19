@@ -23,7 +23,7 @@ namespace System.Text.Json.Serialization.Tests
             {
                 if (reader.TokenType != JsonTokenType.StartObject)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 var value = new Dictionary<string, long>();
@@ -37,7 +37,7 @@ namespace System.Text.Json.Serialization.Tests
 
                     if (reader.TokenType != JsonTokenType.PropertyName)
                     {
-                        throw new FormatException();
+                        throw new JsonException();
                     }
 
                     string key = reader.GetString();
@@ -45,7 +45,7 @@ namespace System.Text.Json.Serialization.Tests
                     reader.Read();
                     if (reader.TokenType != JsonTokenType.Number)
                     {
-                        throw new FormatException();
+                        throw new JsonException();
                     }
 
                     long longValue = reader.GetInt64() + _offset;
@@ -53,7 +53,7 @@ namespace System.Text.Json.Serialization.Tests
                     value.Add(key, longValue);
                 }
 
-                throw new FormatException();
+                throw new JsonException();
             }
 
             public override void Write(Utf8JsonWriter writer, Dictionary<string, long> value, JsonSerializerOptions options)

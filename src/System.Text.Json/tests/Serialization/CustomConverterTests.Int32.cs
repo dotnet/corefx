@@ -28,7 +28,7 @@ namespace System.Text.Json.Serialization.Tests
                     return reader.GetInt32();
                 }
 
-                throw new FormatException();
+                throw new JsonException();
             }
 
             public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)

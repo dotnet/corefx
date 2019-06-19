@@ -8,9 +8,7 @@ namespace System.Text.Json.Serialization.Tests
 {
     public static partial class CustomConverterTests
     {
-        /// <summary>
-        /// A polymorphic POCO converter using a type discriminator.
-        /// </summary>
+        // A polymorphic POCO converter using a type discriminator.
         private class PersonConverter : JsonConverter<Person>
         {
             enum TypeDiscriminator
@@ -28,25 +26,25 @@ namespace System.Text.Json.Serialization.Tests
             {
                 if (reader.TokenType != JsonTokenType.StartObject)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 reader.Read();
                 if (reader.TokenType != JsonTokenType.PropertyName)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 string propertyName = reader.GetString();
                 if (propertyName != "TypeDiscriminator")
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 reader.Read();
                 if (reader.TokenType != JsonTokenType.Number)
                 {
-                    throw new FormatException();
+                    throw new JsonException();
                 }
 
                 Person value;
@@ -62,7 +60,7 @@ namespace System.Text.Json.Serialization.Tests
                         break;
 
                     default:
-                        throw new FormatException();
+                        throw new JsonException();
                 }
 
                 while (reader.Read())
@@ -94,7 +92,7 @@ namespace System.Text.Json.Serialization.Tests
                     }
                 }
 
-                throw new FormatException();
+                throw new JsonException();
             }
 
             public override void Write(Utf8JsonWriter writer, Person value, JsonSerializerOptions options)

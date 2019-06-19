@@ -22,7 +22,11 @@ namespace System.Text.Json.Serialization.Tests
 
                 foreach (string str in json.Split(','))
                 {
-                    long l = long.Parse(str);
+                    if (!long.TryParse(str, out long l))
+                    {
+                        throw new JsonException("Too big for a long");
+                    }
+
                     list.Add(l);
                 }
 
@@ -82,7 +86,7 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void CustomArrayConverterFailOverflow()
+        public static void CustomArrayConverterFail()
         {
             string json = $"\"{Int64.MaxValue.ToString()}0\"";
 
@@ -96,9 +100,9 @@ namespace System.Text.Json.Serialization.Tests
             }
             catch (JsonException ex)
             {
-                // The inner exception should be OverFlowException due to the Int64Parse() in the converter.
-                Assert.NotNull(ex.InnerException);
-                Assert.IsType<OverflowException>(ex.InnerException);
+                Assert.Null(ex.InnerException);
+                Assert.Equal("$", ex.Path);
+                Assert.Equal("Too big for a long", ex.Message);
             }
         }
 
