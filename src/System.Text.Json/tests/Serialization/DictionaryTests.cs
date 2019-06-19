@@ -915,12 +915,14 @@ namespace System.Text.Json.Serialization.Tests
             };
 
             var actual = JsonSerializer.ToString(value, new JsonSerializerOptions { IgnoreNullValues = true });
-            Assert.Equal("{\"Test\":\"value1\",\"Dict\":null,\"Child\":{\"Dict\":null}}", actual);
+            Assert.Equal("{\"Test\":\"value1\",\"Child\":{}}", actual);
         }
 
         [Fact]
         public static void Regression38565_Deserialize()
         {
+            // The json contains nulls to ensure that the dictionary is properly closed
+
             var json = "{\"Test\":\"value1\",\"Dict\":null,\"Child\":{\"Dict\":null}}";
             var actual = JsonSerializer.Parse<Regression38565_Parent>(json);
 
