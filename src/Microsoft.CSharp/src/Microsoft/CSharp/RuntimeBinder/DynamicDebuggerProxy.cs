@@ -54,13 +54,13 @@ namespace Microsoft.CSharp.RuntimeBinder
         internal class DynamicProperty
         {
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            readonly string name;
+            private readonly string name;
 
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            readonly object value;
+            private readonly object value;
 
             [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-            readonly string type;
+            private readonly string type;
 
             public DynamicProperty(string name, object value)
             {
