@@ -73,12 +73,17 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowJsonException()
+        {
+            throw new JsonException();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowFormatException(string message)
         {
             throw new FormatException(message);
         }
 
-        
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowInvalidOperationException_SerializationConverterNotCompatible(Type converterType, Type type)
         {
@@ -137,6 +142,7 @@ namespace System.Text.Json
             ThrowJsonException(SR.Format(SR.DeserializeDuplicateKey, key), in reader, path);
         }
 
+        // todo: since we now catch and re-throw JsonException and add Path etc, we can clean up callers to this to not pass the reader and path.
         private static void ThrowJsonException(string message, in Utf8JsonReader reader, string path, Exception innerException = null)
         {
             long lineNumber = reader.CurrentState._lineNumber;
@@ -177,7 +183,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ReThrowWithPath(in ReadStack readStack, in Utf8JsonReader reader, Exception ex)
         {
-            JsonException jsonException = new JsonException("", ex);
+            JsonException jsonException = new JsonException(null, ex);
             AddExceptionInformation(readStack, reader, jsonException);
             throw jsonException;
         }
@@ -209,7 +215,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ReThrowWithPath(in WriteStack writeStack, Exception ex)
         {
-            JsonException jsonException = new JsonException("", ex);
+            JsonException jsonException = new JsonException(null, ex);
             AddExceptionInformation(writeStack, jsonException);
             throw jsonException;
         }

@@ -10,7 +10,7 @@ namespace System.Text.Json.Serialization.Converters
         {
             if (reader.TokenType != JsonTokenType.Number)
             {
-                ThrowHelper.ThrowFormatException();
+                ThrowHelper.ThrowJsonException();
             }
 
             return reader.GetSingle();

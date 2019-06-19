@@ -14,7 +14,7 @@ namespace System.Text.Json.Serialization.Tests
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false)]
         private class PointConverterAttribute : JsonConverterAttribute
         {
-            public PointConverterAttribute(int coordinateOffset = 0) : base(typeof(Point))
+            public PointConverterAttribute(int coordinateOffset = 0)
             {
                 CoordinateOffset = coordinateOffset;
             }
@@ -22,7 +22,7 @@ namespace System.Text.Json.Serialization.Tests
             public int CoordinateOffset { get; private set; }
 
             /// <summary>
-            /// If overriden, allows a custom attribute to create the converter in order to pass additional state.
+            /// If overridden, allows a custom attribute to create the converter in order to pass additional state.
             /// </summary>
             /// <returns>The custom converter, or null if the serializer should create the custom converter.</returns>
             public override JsonConverter CreateConverter(Type typeToConvert)
@@ -146,7 +146,7 @@ namespace System.Text.Json.Serialization.Tests
         [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
         private class AttributedPointConverterAttribute : JsonConverterAttribute
         {
-            public AttributedPointConverterAttribute(int offset = 0) : base(typeof(Point))
+            public AttributedPointConverterAttribute(int offset = 0)
             {
                 Offset = offset;
             }
@@ -154,7 +154,7 @@ namespace System.Text.Json.Serialization.Tests
             public int Offset { get; private set; }
 
             /// <summary>
-            /// If overriden, allows a custom attribute to create the converter in order to pass additional state.
+            /// If overridden, allows a custom attribute to create the converter in order to pass additional state.
             /// </summary>
             /// <returns>The custom converter, or null if the serializer should create the custom converter.</returns>
             public override JsonConverter CreateConverter(Type typeToConvert)

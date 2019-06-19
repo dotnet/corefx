@@ -30,21 +30,21 @@ namespace System.Text.Json.Serialization.Converters
                 // Assume the token is a string
                 if (reader.TokenType != JsonTokenType.String)
                 {
-                    ThrowHelper.ThrowFormatException();
+                    ThrowHelper.ThrowJsonException();
                     return default;
                 }
 
                 string enumString = reader.GetString();
                 if (!Enum.TryParse(enumString, out T value))
                 {
-                    ThrowHelper.ThrowFormatException();
+                    ThrowHelper.ThrowJsonException();
                     return default;
                 }
             }
 
             if (reader.TokenType != JsonTokenType.Number)
             {
-                ThrowHelper.ThrowFormatException();
+                ThrowHelper.ThrowJsonException();
                 return default;
             }
 
@@ -123,7 +123,7 @@ namespace System.Text.Json.Serialization.Converters
                     }
             }
 
-            ThrowHelper.ThrowFormatException();
+            ThrowHelper.ThrowJsonException();
             return default;
         }
 

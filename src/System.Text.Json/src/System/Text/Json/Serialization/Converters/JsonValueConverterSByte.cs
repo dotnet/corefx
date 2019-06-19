@@ -12,7 +12,7 @@ namespace System.Text.Json.Serialization.Converters
                 !reader.TryGetInt32(out int rawValue) ||
                 !JsonHelpers.IsInRangeInclusive(rawValue, sbyte.MinValue, sbyte.MaxValue))
             {
-                ThrowHelper.ThrowFormatException();
+                ThrowHelper.ThrowJsonException();
                 return default;
             }
 

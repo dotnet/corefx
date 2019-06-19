@@ -32,19 +32,15 @@ namespace System.Text.Json.Serialization
         protected JsonConverterAttribute() { }
 
         /// <summary>
-        /// The type of the converter.
+        /// The type of the converter to create, or null if <see cref="CreateConverter(Type)"/> should be used to obtain the converter.
         /// </summary>
-        /// <remarks>
-        /// An instance of this type will be created automatically unless <see cref="CreateConverter"/> returns a
-        /// non-null value.
-        /// </remarks>
         public Type ConverterType { get; private set; }
 
         /// <summary>
-        /// If overriden, allows a custom attribute to create the converter in order to pass additional state.
+        /// If overridden and <see cref="ConverterType"/> is null, allows a custom attribute to create the converter in order to pass additional state.
         /// </summary>
         /// <returns>
-        /// The custom converter, or null if the serializer should create the custom converter.
+        /// The custom converter.
         /// </returns>
         public virtual JsonConverter CreateConverter(Type typeToConvert)
         {

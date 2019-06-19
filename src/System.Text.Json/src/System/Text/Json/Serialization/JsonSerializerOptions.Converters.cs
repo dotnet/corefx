@@ -186,18 +186,22 @@ namespace System.Text.Json
 
         private JsonConverter GetConverterFromAttribute(JsonConverterAttribute converterAttribute, Type typeToConvert, Type classType, PropertyInfo propertyInfo)
         {
+            JsonConverter converter;
+
             Type type = converterAttribute.ConverterType;
             if (type == null)
             {
-                ThrowHelper.ThrowInvalidOperationException_SerializationConverterOnAttributeInvalid(classType, propertyInfo);
+                // Allow the attribute to create the converter.
+                converter = converterAttribute.CreateConverter(typeToConvert);
+                if (converter == null)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_SerializationConverterOnAttributeNotCompatible(classType, propertyInfo);
+                }
             }
-
-            // Allow the attribute to create the converter.
-            JsonConverter converter = converterAttribute.CreateConverter(typeToConvert);
-            if (converter == null)
+            else
             {
                 ConstructorInfo ctor = type.GetConstructor(Type.EmptyTypes);
-                if (!typeof(JsonConverter).IsAssignableFrom(type) || ctor.IsPrivate)
+                if (!typeof(JsonConverter).IsAssignableFrom(type) || !ctor.IsPublic)
                 {
                     ThrowHelper.ThrowInvalidOperationException_SerializationConverterOnAttributeInvalid(classType, propertyInfo);
                 }
