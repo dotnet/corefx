@@ -22,13 +22,13 @@ namespace System.Text.Json.Serialization.Converters
         public override void Write(Utf8JsonWriter writer, Uri value, JsonSerializerOptions options)
         {
             // TODO: remove preprocessing when https://github.com/dotnet/corefx/issues/38647 is implemented.
-            writer.WriteStringValue(value.OriginalString);
+            writer.WriteStringValue(value.ToString());
         }
 
         public override void Write(Utf8JsonWriter writer, Uri value, JsonEncodedText propertyName, JsonSerializerOptions options)
         {
             // TODO: remove preprocessing when https://github.com/dotnet/corefx/issues/38647 is implemented.
-            writer.WriteString(propertyName, value.OriginalString);
+            writer.WriteString(propertyName, value.ToString());
         }
     }
 }

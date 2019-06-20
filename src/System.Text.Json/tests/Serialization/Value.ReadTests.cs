@@ -284,14 +284,22 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<DateTimeOffset>(unexpectedString));
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<DateTimeOffset?>(unexpectedString));
 
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Uri>("myURI"));
-
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<string>("1"));
 
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<char>("1"));
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<char?>("1"));
 
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<Enum>(unexpectedString));
+        }
+
+        [Fact]
+        public static void ReadPrimitiveUri()
+        {
+            Uri uri = JsonSerializer.Parse<Uri>(@"""https://domain/path""");
+            Assert.Equal("https:\u002f\u002fdomain\u002fpath", uri.ToString());
+
+            uri = JsonSerializer.Parse<Uri>(@"""~/path""");
+            Assert.Equal("~/path", uri.ToString());
         }
    }
 }
