@@ -33,8 +33,9 @@ namespace System.Text.Json.Serialization.Tests
                 var options = new JsonSerializerOptions();
                 options.MaxDepth = depth + 1;
 
-                // No exception
-                JsonSerializer.ToString(rootObj, options);
+                // No exception since depth was not passed.
+                string json = JsonSerializer.ToString(rootObj, options);
+                Assert.False(string.IsNullOrEmpty(json));
             }
 
             {

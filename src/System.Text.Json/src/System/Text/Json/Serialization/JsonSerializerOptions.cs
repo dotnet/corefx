@@ -174,6 +174,7 @@ namespace System.Text.Json
             }
         }
 
+        // The default is 64 because that is what the reader uses, so re-use the same JsonReaderOptions.DefaultMaxDepth constant.
         internal int EffectiveMaxDepth { get; private set; } = JsonReaderOptions.DefaultMaxDepth;
 
         /// <summary>
