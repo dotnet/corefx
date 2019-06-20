@@ -107,7 +107,7 @@ namespace System.Net.Http
                         }
 
                         // Don't wait for completion, which could happen asynchronously.
-                        _ = _connection.SendEndStreamAsync(_streamId);
+                        _ = _connection.LogExceptionsAsync(_connection.SendEndStreamAsync(_streamId));
                     }
                     catch (Exception e)
                     {
@@ -466,24 +466,8 @@ namespace System.Net.Http
                 (wait, emptyResponse) = TryEnsureHeaders();
                 if (wait)
                 {
-                    using (cancellationToken.Register(s => {
-                            bool signalWaiter;
-                            Http2Stream stream = (Http2Stream)s;
-                            lock (stream.SyncObject)
-                            {
-                                signalWaiter = stream._hasWaiter;
-                                stream._hasWaiter = false;
-                            }
-                            if (signalWaiter) stream._waitSource.SetResult(false);
-                        }, this))
-                    {
-                        await GetWaiterTask().ConfigureAwait(false);
-                    }
+                    await GetWaiterTask(cancellationToken).ConfigureAwait(false);
 
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        throw new OperationCanceledException();
-                    }
                     (wait, emptyResponse) = TryEnsureHeaders();
                     Debug.Assert(!wait);
                 }
@@ -521,7 +505,7 @@ namespace System.Net.Http
                 int windowUpdateSize = _pendingWindowUpdate;
                 _pendingWindowUpdate = 0;
 
-                _ = _connection.SendWindowUpdateAsync(_streamId, windowUpdateSize);
+                _ = _connection.LogExceptionsAsync(_connection.SendWindowUpdateAsync(_streamId, windowUpdateSize));
             }
 
             private (bool wait, int bytesRead) TryReadFromBuffer(Span<byte> buffer)
@@ -561,7 +545,7 @@ namespace System.Net.Http
                 }
             }
 
-            public int ReadData(Span<byte> buffer)
+            public int ReadData(Span<byte> buffer, CancellationToken cancellationToken)
             {
                 if (buffer.Length == 0)
                 {
@@ -573,7 +557,8 @@ namespace System.Net.Http
                 {
                     // Synchronously block waiting for data to be produced.
                     Debug.Assert(bytesRead == 0);
-                    GetWaiterTask().AsTask().GetAwaiter().GetResult();
+                    GetWaiterTask(cancellationToken).GetAwaiter().GetResult();
+                    CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
                     (wait, bytesRead) = TryReadFromBuffer(buffer);
                     Debug.Assert(!wait);
                 }
@@ -598,7 +583,7 @@ namespace System.Net.Http
                 if (wait)
                 {
                     Debug.Assert(bytesRead == 0);
-                    await GetWaiterTask().ConfigureAwait(false);
+                    await GetWaiterTask(cancellationToken).ConfigureAwait(false);
                     (wait, bytesRead) = TryReadFromBuffer(buffer.Span);
                     Debug.Assert(!wait);
                 }
@@ -666,10 +651,29 @@ namespace System.Net.Http
             // This object is itself usable as a backing source for ValueTask.  Since there's only ever one awaiter
             // for this object's state transitions at a time, we allow the object to be awaited directly. All functionality
             // associated with the implementation is just delegated to the ManualResetValueTaskSourceCore.
-            private ValueTask GetWaiterTask() => new ValueTask(this, _waitSource.Version);
             ValueTaskSourceStatus IValueTaskSource.GetStatus(short token) => _waitSource.GetStatus(token);
             void IValueTaskSource.OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags) => _waitSource.OnCompleted(continuation, state, token, flags);
             void IValueTaskSource.GetResult(short token) => _waitSource.GetResult(token);
+            private async Task GetWaiterTask(CancellationToken cancellationToken)
+            {
+                var vt = new ValueTask(this, _waitSource.Version).AsTask();
+                using (cancellationToken.Register(s =>
+                {
+                    Http2Stream stream = (Http2Stream)s;
+                    bool signalWaiter;
+                    lock (stream.SyncObject)
+                    {
+                        signalWaiter = stream._hasWaiter;
+                        stream._hasWaiter = false;
+                    }
+                    if (signalWaiter) stream._waitSource.SetException(new OperationCanceledException());
+                }, this))
+                {
+
+                    await vt;
+                }
+
+            }
 
             private sealed class Http2ReadStream : HttpBaseStream
             {
@@ -714,7 +718,7 @@ namespace System.Net.Http
                         ExceptionDispatchInfo.Throw(new IOException(SR.net_http_client_execution_error, http2Stream._abortException));
                     }
 
-                    return http2Stream.ReadData(destination);
+                    return http2Stream.ReadData(destination, CancellationToken.None);
                 }
 
                 public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)

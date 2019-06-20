@@ -10,6 +10,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.HPack;
 using System.Net.Security;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -486,7 +487,7 @@ namespace System.Net.Http
 
                 // Send acknowledgement
                 // Don't wait for completion, which could happen asynchronously.
-                _ = SendSettingsAckAsync();
+                _ = LogExceptionsAsync(SendSettingsAckAsync());
             }
         }
 
@@ -555,7 +556,7 @@ namespace System.Net.Http
 
             // Send PING ACK
             // Don't wait for completion, which could happen asynchronously.
-            _ = SendPingAckAsync(_incomingBuffer.ActiveMemory.Slice(0, FrameHeader.PingLength));
+            _ = LogExceptionsAsync(SendPingAckAsync(_incomingBuffer.ActiveMemory.Slice(0, FrameHeader.PingLength)));
 
             _incomingBuffer.Discard(frameHeader.Length);
         }
@@ -735,44 +736,22 @@ namespace System.Net.Http
 
         private async Task SendSettingsAckAsync()
         {
-            try
-            {
-                await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
-                WriteFrameHeader(new FrameHeader(0, FrameType.Settings, FrameFlags.Ack, 0));
+            await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
+            WriteFrameHeader(new FrameHeader(0, FrameType.Settings, FrameFlags.Ack, 0));
 
-                FinishWrite(mustFlush: true);
-            }
-            catch (Exception e)
-            {
-                if (!_disposed && _abortException == null)
-                {
-                    // Abort if needed.
-                    Abort(e);
-                }
-            }
+            FinishWrite(mustFlush: true);
         }
 
         private async Task SendPingAckAsync(ReadOnlyMemory<byte> pingContent)
         {
-            try
-            {
-                Debug.Assert(pingContent.Length == FrameHeader.PingLength);
+            Debug.Assert(pingContent.Length == FrameHeader.PingLength);
 
-                await StartWriteAsync(FrameHeader.Size + FrameHeader.PingLength).ConfigureAwait(false);
-                WriteFrameHeader(new FrameHeader(FrameHeader.PingLength, FrameType.Ping, FrameFlags.Ack, 0));
-                pingContent.CopyTo(_outgoingBuffer.AvailableMemory);
-                _outgoingBuffer.Commit(FrameHeader.PingLength);
+            await StartWriteAsync(FrameHeader.Size + FrameHeader.PingLength).ConfigureAwait(false);
+            WriteFrameHeader(new FrameHeader(FrameHeader.PingLength, FrameType.Ping, FrameFlags.Ack, 0));
+            pingContent.CopyTo(_outgoingBuffer.AvailableMemory);
+            _outgoingBuffer.Commit(FrameHeader.PingLength);
 
-                FinishWrite(mustFlush: false);
-            }
-            catch (Exception e)
-            {
-                if (!_disposed && _abortException == null)
-                {
-                    // Abort if needed.
-                    Abort(e);
-                }
-            }
+            FinishWrite(mustFlush: false);
         }
 
         private async Task SendRstStreamAsync(int streamId, Http2ProtocolErrorCode errorCode)
@@ -1004,7 +983,7 @@ namespace System.Net.Http
                 // Throw a retryable request exception if this is not result of some other error.
                 // This will cause retry logic to kick in and perform another connection attempt.
                 // The user should never see this exception.  Same logic lives in AddStream.
-                throw _abortException ?? new HttpRequestException(null, null, allowRetry: true);
+                ExceptionDispatchInfo.Throw(_abortException ?? new HttpRequestException(null, null, allowRetry: true));
             }
 
             Http2Stream http2Stream = null;
@@ -1109,23 +1088,11 @@ namespace System.Net.Http
 
         private async Task SendEndStreamAsync(int streamId)
         {
-            try
-            {
-                await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
+            await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
 
-                WriteFrameHeader(new FrameHeader(0, FrameType.Data, FrameFlags.EndStream, streamId));
+            WriteFrameHeader(new FrameHeader(0, FrameType.Data, FrameFlags.EndStream, streamId));
 
-                FinishWrite(mustFlush: true);
-            }
-            catch (Exception e)
-            {
-                if (!_disposed && _abortException == null)
-                {
-                    // Abort if needed.
-                    Abort(e);
-                }
-            }
-
+            FinishWrite(mustFlush: true);
         }
 
         private async Task SendWindowUpdateAsync(int streamId, int amount)

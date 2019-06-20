@@ -1712,21 +1712,11 @@ namespace System.Net.Http.Functional.Tests
                     await tsc.Task.ConfigureAwait(false);
                     // and inject distinct exception on request stream.
                     stream.SetException(new ArithmeticException("Injected test exception"));
-                    try
-                    {
-                         string responseBody = await response.Content.ReadAsStringAsync();
-                         Assert.True(false, "Should not be here");
-                    }
-                    catch (HttpRequestException e)
-                    {
-                        // Exception should be wrapped and inner should be what ever we injected on request stream.
-                        Assert.True(e.InnerException is IOException);
-                        Assert.True(e.InnerException.InnerException is ArithmeticException);
-                    }
-                    finally
-                    {
-                        stopSending = true;
-                    }
+
+                    Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => response.Content.ReadAsStringAsync());
+                    Assert.True(e.InnerException is IOException);
+                    Assert.True(e.InnerException.InnerException is ArithmeticException);
+                    stopSending = true;
                 }
             },
             async server =>
@@ -1788,17 +1778,10 @@ namespace System.Net.Http.Functional.Tests
                         await sslStream.WriteAsync(Encoding.ASCII.GetBytes("HTTP/1.1 400 Unrecognized request\r\n\r\n"), CancellationToken.None);
                     });
 
-                    try
-                    {
-                        await requestTask;
-                        throw new Exception("Should not be here");
-                    }
-                    catch (HttpRequestException e)
-                    {
-                        Assert.NotNull(e.InnerException);
-                        // TBD expect Http2ProtocolException when/if exposed
-                        Assert.False(e.InnerException is ObjectDisposedException);
-                    }
+
+                    Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => requestTask);
+                    Assert.NotNull(e.InnerException);
+                    Assert.False(e.InnerException is ObjectDisposedException);
                 });
             }
         }
