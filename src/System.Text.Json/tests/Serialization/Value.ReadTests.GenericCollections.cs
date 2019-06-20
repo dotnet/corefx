@@ -729,6 +729,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<KeyValuePair<string, int>>(@"{""Key"": ""Key"", ""Val"": 123"));
         }
 
+       [Fact]
         public static void ReadListOfKeyValuePair()
         {
             List<KeyValuePair<string, int>> input = JsonSerializer.Deserialize<List<KeyValuePair<string, int>>>(@"""Key"":""Key"", ""Value"":[{""123"":123},{""456"": 456}]");
@@ -740,6 +741,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(456, input[1].Value);
         }
 
+        [Fact]
         public static void ReadKeyValuePairOfList()
         {
             KeyValuePair<string, List<int>> input = JsonSerializer.Deserialize<KeyValuePair<string, List<int>>>(@"{""Key"":""Key"", Value:[1, 2, 3]}");
