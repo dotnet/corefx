@@ -16,7 +16,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
     /// </summary>
     public static partial class MiscWithEncodingTests
     {
-        public static void TestInitialize()
+        private static void TestInitialize()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         }
