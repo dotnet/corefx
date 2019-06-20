@@ -41,6 +41,7 @@ namespace System.IO.Enumeration
 
             Init();
         }
+
         /// <summary>
         /// Return true if the given file system entry should be included in the results.
         /// </summary>

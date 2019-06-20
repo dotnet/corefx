@@ -24,11 +24,11 @@ namespace System.IO.Enumeration
         private readonly string _directory;
 
         public FileSystemEnumerable(string directory, FindTransform transform, EnumerationOptions options = null)
-            : this(directory, transform, isNormalized: false, options)
+            : this(directory, transform, options, isNormalized: false)
         {
         }
 
-        internal FileSystemEnumerable(string directory, FindTransform transform, bool isNormalized, EnumerationOptions options = null)
+        internal FileSystemEnumerable(string directory, FindTransform transform, EnumerationOptions options, bool isNormalized)
         {
             _directory = directory ?? throw new ArgumentNullException(nameof(directory));
             _transform = transform ?? throw new ArgumentNullException(nameof(transform));

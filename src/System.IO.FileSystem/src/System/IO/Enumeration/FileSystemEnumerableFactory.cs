@@ -20,7 +20,22 @@ namespace System.IO.Enumeration
         // which is not true in Windows and as such we'll escape any that occur on the input string.
         private readonly static char[] s_unixEscapeChars = { '\\', '"', '<', '>' };
 
-        internal static bool NormalizeInputs(ref string directory, ref string expression, EnumerationOptions options)
+        /// <summary>
+        /// Validates the directory and expression strings to check that they have no invalid characters, any special DOS wildcard characters in Win32 in the expression get replaced with their proper escaped representation, and if the expression string begins with a directory name, the directory name is moved and appended at the end of the directory string.
+        /// </summary>
+        /// <param name="directory">A reference to a directory string that we will be checking for normalization.</param>
+        /// <param name="expression">A reference to a expression string that we will be checking for normalization.</param>
+        /// <param name="matchType">The kind of matching we want to check in the expression. If the value is Win32, we will replace special DOS wild characters to their safely escaped representation. This replacement does not affect the normalization status of the expression.</param>
+        /// <returns><cref langword="false" /> if the directory reference string get modified inside this function due to the expression beginning with a directory name. <cref langword="true" /> if the directory reference string was not modified.</returns>
+        /// <exception cref="ArgumentException">
+        /// The expression is a rooted path.
+        /// -or-
+        /// The directory or the expression reference strings contain a null character.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The match type is out of the range of the valid MatchType enum values.
+        /// </exception>
+        internal static bool NormalizeInputs(ref string directory, ref string expression, MatchType matchType)
         {
             if (Path.IsPathRooted(expression))
                 throw new ArgumentException(SR.Arg_Path2IsRooted, nameof(expression));
@@ -40,7 +55,7 @@ namespace System.IO.Enumeration
 
             ReadOnlySpan<char> directoryName = Path.GetDirectoryName(expression.AsSpan());
 
-            bool isNormalized = true;
+            bool isDirectoryModified = true;
 
             if (directoryName.Length != 0)
             {
@@ -48,12 +63,10 @@ namespace System.IO.Enumeration
                 directory = Path.Join(directory.AsSpan(), directoryName);
                 expression = expression.Substring(directoryName.Length + 1);
 
-                // Directory came in here normalized, but because it was just modified,
-                // it cannot be considered normalized anymore
-                isNormalized = false;
+                isDirectoryModified = false;
             }
 
-            switch (options.MatchType)
+            switch (matchType)
             {
                 case MatchType.Win32:
                     if (expression == "*")
@@ -86,10 +99,10 @@ namespace System.IO.Enumeration
                 case MatchType.Simple:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(options));
+                    throw new ArgumentOutOfRangeException(nameof(matchType));
             }
 
-            return isNormalized;
+            return isDirectoryModified;
         }
 
         private static bool MatchesPattern(string expression, ReadOnlySpan<char> name, EnumerationOptions options)
@@ -159,8 +172,8 @@ namespace System.IO.Enumeration
              return new FileSystemEnumerable<FileInfo>(
                 directory,
                 (ref FileSystemEntry entry) => (FileInfo)entry.ToFileSystemInfo(),
-                isNormalized,
-                options)
+                options,
+                isNormalized)
              {
                  ShouldIncludePredicate = (ref FileSystemEntry entry) =>
                      !entry.IsDirectory && MatchesPattern(expression, entry.FileName, options)
@@ -176,8 +189,8 @@ namespace System.IO.Enumeration
             return new FileSystemEnumerable<DirectoryInfo>(
                directory,
                (ref FileSystemEntry entry) => (DirectoryInfo)entry.ToFileSystemInfo(),
-               isNormalized,
-               options)
+               options,
+               isNormalized)
             {
                 ShouldIncludePredicate = (ref FileSystemEntry entry) =>
                     entry.IsDirectory && MatchesPattern(expression, entry.FileName, options)
@@ -193,8 +206,8 @@ namespace System.IO.Enumeration
             return new FileSystemEnumerable<FileSystemInfo>(
                directory,
                (ref FileSystemEntry entry) => entry.ToFileSystemInfo(),
-               isNormalized,
-               options)
+               options,
+               isNormalized)
             {
                 ShouldIncludePredicate = (ref FileSystemEntry entry) =>
                     MatchesPattern(expression, entry.FileName, options)
