@@ -639,10 +639,6 @@ namespace System.IO.Tests
                 switch (invalidChar)
                 {
                     case '\\':
-                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(TestDirectory, string.Format("te{0}st", invalidChar.ToString())));
-                        break;
-
-                    case '/':
                         if (PlatformDetection.IsWindows)
                         {
                             Assert.Throws<DirectoryNotFoundException>(() => GetEntries(TestDirectory, string.Format("te{0}st", invalidChar.ToString())));
@@ -651,6 +647,10 @@ namespace System.IO.Tests
                         {
                             GetEntries(TestDirectory, string.Format("te{0}st", invalidChar.ToString()));
                         }
+                        break;
+
+                    case '/':
+                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(TestDirectory, string.Format("te{0}st", invalidChar.ToString())));
                         break;
 
                     case '\0':
