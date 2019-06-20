@@ -59,9 +59,9 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Throws<PlatformNotSupportedException>(() => Marshal.ChangeWrapperHandleStrength(null, fIsWeak: false));
         }
 
-        public static void NonGenericMethod(int i) { }
-        public delegate void NonGenericDelegate(int i);
+        private static void NonGenericMethod(int i) { }
+        private delegate void NonGenericDelegate(int i);
 
-        public enum Int32Enum : int { Value1, Value2 }
+        internal enum Int32Enum : int { Value1, Value2 }
     }
 }

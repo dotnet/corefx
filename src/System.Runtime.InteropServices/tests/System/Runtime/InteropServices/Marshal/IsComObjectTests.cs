@@ -67,7 +67,9 @@ namespace System.Runtime.InteropServices.Tests
             AssertExtensions.Throws<ArgumentNullException>("o", () => Marshal.IsComObject(null));
         }
 
+#pragma warning disable xUnit1013 // Public method should be marked as test
         public static void NonGenericMethod(int i) { }
+#pragma warning restore xUnit1013 // Public method should be marked as test
         public delegate void NonGenericDelegate(int i);
 
         public enum Int32Enum : int { Value1, Value2 }

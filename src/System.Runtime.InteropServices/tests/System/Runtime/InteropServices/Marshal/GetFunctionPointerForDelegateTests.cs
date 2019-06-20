@@ -91,6 +91,8 @@ namespace System.Runtime.InteropServices.Tests
         public delegate void GenericDelegate<T>(T t);
         public delegate void NonGenericDelegate(string t);
 
+#pragma warning disable xUnit1013 // Public method should be marked as test
         public static void Method(string s) { }
+#pragma warning restore xUnit1013 // Public method should be marked as test
     }
 }
