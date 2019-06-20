@@ -442,65 +442,36 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Theory]
-        [InlineData(1, (long)byte.MaxValue + 1, typeof(SampleEnumByte))]
-        [InlineData(2, (long)byte.MaxValue + 1, typeof(SampleEnumByte))]
-        [InlineData(3, (long)byte.MaxValue + 1, typeof(SampleEnumByte))]
-        [InlineData(4, (long)byte.MaxValue + 1, typeof(SampleEnumByte))]
-        [InlineData(1, (long)UInt16.MaxValue + 1, typeof(SampleEnumUInt16))]
-        [InlineData(2, (long)UInt16.MaxValue + 1, typeof(SampleEnumUInt16))]
-        [InlineData(3, (long)UInt16.MaxValue + 1, typeof(SampleEnumUInt16))]
-        [InlineData(4, (long)UInt16.MaxValue + 1, typeof(SampleEnumUInt16))]
-        [InlineData(1, (long)UInt32.MaxValue + 1, typeof(SampleEnumUInt32))]
-        [InlineData(2, (long)UInt32.MaxValue + 1, typeof(SampleEnumUInt32))]
-        [InlineData(3, (long)UInt32.MaxValue + 1, typeof(SampleEnumUInt32))]
-        [InlineData(4, (long)UInt32.MaxValue + 1, typeof(SampleEnumUInt32))]
-        public static void ToString_ExceedsMax_ResetsBackToZero(int timesOverflow, long maxTypeSize, Type type)
+        [InlineData(1, (long)byte.MaxValue + 1, typeof(SampleEnumByte), SampleEnumByte.MinZero)]
+        [InlineData(2, (long)byte.MaxValue + 1, typeof(SampleEnumByte), SampleEnumByte.MinZero)]
+        [InlineData(3, (long)byte.MaxValue + 1, typeof(SampleEnumByte), SampleEnumByte.MinZero)]
+        [InlineData(4, (long)byte.MaxValue + 1, typeof(SampleEnumByte), SampleEnumByte.MinZero)]
+        [InlineData(1, (long)UInt16.MaxValue + 1, typeof(SampleEnumUInt16), SampleEnumUInt16.MinZero)]
+        [InlineData(2, (long)UInt16.MaxValue + 1, typeof(SampleEnumUInt16), SampleEnumUInt16.MinZero)]
+        [InlineData(3, (long)UInt16.MaxValue + 1, typeof(SampleEnumUInt16), SampleEnumUInt16.MinZero)]
+        [InlineData(4, (long)UInt16.MaxValue + 1, typeof(SampleEnumUInt16), SampleEnumUInt16.MinZero)]
+        [InlineData(1, (long)UInt32.MaxValue + 1, typeof(SampleEnumUInt32), SampleEnumUInt32.MinZero)]
+        [InlineData(2, (long)UInt32.MaxValue + 1, typeof(SampleEnumUInt32), SampleEnumUInt32.MinZero)]
+        [InlineData(3, (long)UInt32.MaxValue + 1, typeof(SampleEnumUInt32), SampleEnumUInt32.MinZero)]
+        [InlineData(4, (long)UInt32.MaxValue + 1, typeof(SampleEnumUInt32), SampleEnumUInt32.MinZero)]
+        [InlineData(1, (long)sbyte.MaxValue + 1, typeof(SampleEnumSByte), SampleEnumSByte.MinNegative)]
+        [InlineData(2, (long)sbyte.MaxValue + 1, typeof(SampleEnumSByte), SampleEnumSByte.Zero)]
+        [InlineData(3, (long)sbyte.MaxValue + 1, typeof(SampleEnumSByte), SampleEnumSByte.MinNegative)]
+        [InlineData(4, (long)sbyte.MaxValue + 1, typeof(SampleEnumSByte), SampleEnumSByte.Zero)]
+        [InlineData(1, (long)Int16.MaxValue + 1, typeof(SampleEnumInt16), SampleEnumInt16.MinNegative)]
+        [InlineData(2, (long)Int16.MaxValue + 1, typeof(SampleEnumInt16), SampleEnumInt16.Zero)]
+        [InlineData(3, (long)Int16.MaxValue + 1, typeof(SampleEnumInt16), SampleEnumInt16.MinNegative)]
+        [InlineData(4, (long)Int16.MaxValue + 1, typeof(SampleEnumInt16), SampleEnumInt16.Zero)]
+        [InlineData(1, (long)Int32.MaxValue + 1, typeof(SampleEnumInt32), SampleEnumInt32.MinNegative)]
+        [InlineData(2, (long)Int32.MaxValue + 1, typeof(SampleEnumInt32), SampleEnumInt32.Zero)]
+        [InlineData(3, (long)Int32.MaxValue + 1, typeof(SampleEnumInt32), SampleEnumInt32.MinNegative)]
+        [InlineData(4, (long)Int32.MaxValue + 1, typeof(SampleEnumInt32), SampleEnumInt32.Zero)]
+        public static void ToString_ExceedMaxCapacity_ResetsBackToMinimum(int timesOverflow, long maxCapacity, Type type, long expected)
         {
-            object enumValue = Enum.ToObject(type, maxTypeSize * timesOverflow);
+            object enumValue = Enum.ToObject(type, maxCapacity * timesOverflow);
             string json = JsonSerializer.ToString(enumValue);
-            Assert.Equal("0", json);
-        }
-
-        [Theory]
-        [InlineData(1, SampleEnumSByte.MinNegative)]
-        [InlineData(2, SampleEnumSByte.Zero)]
-        [InlineData(3, SampleEnumSByte.MinNegative)]
-        [InlineData(4, SampleEnumSByte.Zero)]
-        public static void ToString_SByte_ResetsBackToMinimum(int timesOverflow, SampleEnumSByte expected)
-        {
-            long moduloBase = (long)sbyte.MaxValue + 1;
-            long enumValue = moduloBase * timesOverflow;
-            string json = JsonSerializer.ToString((SampleEnumSByte)enumValue);
             string expectedString = ((long) expected).ToString();
             Assert.Equal(expectedString.ToString(), json);
-        }
-
-        [Theory]
-        [InlineData(1, SampleEnumInt16.MinNegative)]
-        [InlineData(2, SampleEnumInt16.Zero)]
-        [InlineData(3, SampleEnumInt16.MinNegative)]
-        [InlineData(4, SampleEnumInt16.Zero)]
-        public static void ToString_Int16_ResetsBackToMinimum(int timesOverflow, SampleEnumInt16 expected)
-        {
-            long moduloBase = (long)Int16.MaxValue + 1;
-            long enumValue = moduloBase * timesOverflow;
-            string json = JsonSerializer.ToString((SampleEnumInt16)enumValue);
-            string expectedString = ((long) expected).ToString();
-            Assert.Equal(expectedString.ToString(), json);
-        }
-
-        [Theory]
-        [InlineData(1, SampleEnumInt32.MinNegative)]
-        [InlineData(2, SampleEnumInt32.Zero)]
-        [InlineData(3, SampleEnumInt32.MinNegative)]
-        [InlineData(4, SampleEnumInt32.Zero)]
-        public static void ToString_Int32_ResetsBackToMinimum(int timesOverflow, SampleEnumInt32 expected)
-        {
-            long moduloBase = (long)Int32.MaxValue + 1;
-            long enumValue = moduloBase * timesOverflow;
-            string json = JsonSerializer.ToString((SampleEnumInt32)enumValue);
-            string expectedString = ((long) expected).ToString();
-            Assert.Equal(expectedString, json);
         }
     }
 }
