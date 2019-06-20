@@ -10,8 +10,9 @@ namespace System.IO.Tests
 {
     public abstract class InfoGetSetTimes<T> : BaseGetSetTimes<T> where T : FileSystemInfo
     {
-        public abstract void InvokeCreate(T item);
+        protected abstract void InvokeCreate(T item);
 
+        [Fact]
         public void DoesntExistThenCreate_ReturnsDefaultValues()
         {
             T item = GetMissingItem();
@@ -27,6 +28,7 @@ namespace System.IO.Tests
             });
         }
 
+        [Fact]
         public void ExistsThenDelete_ReturnsDefaultValues()
         {
             // Because we haven't hit the property the item should be in
