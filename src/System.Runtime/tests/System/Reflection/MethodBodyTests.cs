@@ -72,6 +72,7 @@ namespace System.Reflection.Tests
             Assert.True(false, "Expected to find CatchType clause.");
         }
     
+#pragma warning disable xUnit1013 // Public method should be marked as test
         public static void MethodBodyExample(object arg)
         {
             int var1 = 2;
@@ -98,5 +99,6 @@ namespace System.Reflection.Tests
                 var2 = "I am a new string!";
             }
         }
+#pragma warning restore xUnit1013 // Public method should be marked as test
     }
 }

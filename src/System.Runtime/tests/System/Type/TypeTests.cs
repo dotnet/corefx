@@ -278,6 +278,7 @@ namespace System.Tests
             Assert.Equal(typeCode, Type.GetTypeCode(t));
         }
 
+        [Fact]
         public void ReflectionOnlyGetType()
         {
             AssertExtensions.Throws<ArgumentNullException>("typeName", () => Type.ReflectionOnlyGetType(null, true, false));

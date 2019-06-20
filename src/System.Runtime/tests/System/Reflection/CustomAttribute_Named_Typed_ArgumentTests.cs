@@ -54,7 +54,9 @@ namespace System.Reflection.Tests
         }
         
         [MyAttr(MyKinds.First, Desc = "This is a description on a method")]
+#pragma warning disable xUnit1013 // Public method should be marked as test
         public static void MyMethod() { }
+#pragma warning restore xUnit1013 // Public method should be marked as test
     }
     
     internal enum MyKinds {

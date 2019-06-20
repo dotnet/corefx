@@ -37,8 +37,10 @@ namespace System.Reflection.Tests
             Assert.Equal("T", m.GetGenericArguments()[0].Name);
         }
 
+#pragma warning disable xUnit1013 // Public method should be marked as test
         public void MyFakeGenericMethod<T>()
         {
         }
+#pragma warning restore xUnit1013 // Public method should be marked as test
     }
 }

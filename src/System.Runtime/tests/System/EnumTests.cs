@@ -224,6 +224,7 @@ namespace System.Tests
             parseMethod.Invoke(null, new object[] { enumType, value, ignoreCase, exceptionType });
         }
 
+#pragma warning disable xUnit1013 // Public method should be marked as test
         public static void Parse_Generic_Invalid<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
         {
             T result;
@@ -240,6 +241,7 @@ namespace System.Tests
 
             Assert.Throws(exceptionType, () => Enum.Parse(enumType, value, ignoreCase));
         }
+#pragma warning restore xUnit1013 // Public method should be marked as test
 
         public static IEnumerable<object[]> GetName_TestData()
         {

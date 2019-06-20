@@ -39,6 +39,7 @@ namespace System.Tests
             parseMethod.Invoke(null, new object[] { enumType, value, ignoreCase, exceptionType });
         }
 
+#pragma warning disable xUnit1013 // Public method should be marked as test
         public static void Parse_Generic_Invalid_NetCoreApp11<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
         {
             object result = null;
@@ -71,6 +72,7 @@ namespace System.Tests
                 Assert.Equal(default(object), result);
             }
         }
+#pragma warning restore xUnit1013 // Public method should be marked as test
 
         public static IEnumerable<object[]> UnsupportedEnumType_TestData()
         {

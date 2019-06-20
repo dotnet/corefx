@@ -42,6 +42,7 @@ namespace System.Runtime.InteropServices.Tests
             Assert.Equal(COR_E_EXTERNAL, exception.HResult);
         }
 
+        [Fact]
         public static void Ctor_String_int()
         {
             string msg = "Created ExternalException";
