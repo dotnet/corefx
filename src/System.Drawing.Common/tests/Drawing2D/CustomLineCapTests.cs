@@ -169,6 +169,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(LineCap.NoAnchor)]
         [InlineData(LineCap.SquareAnchor)]
         [InlineData(LineCap.RoundAnchor)]
