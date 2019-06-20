@@ -1997,11 +1997,11 @@
     "Name": "System.Text.Json",
     "Description": "Provides a fast, non-cached, forward-only way to read UTF-8 encoded JavaScript Object Notation (JSON) text.",
     "CommonTypes": [
+      "System.Text.Json.JsonSerializer",
       "System.Text.Json.JsonDocument",
-      "System.Text.Json.Utf8JsonReader",
-      "System.Text.Json.Utf8JsonWriter",
       "System.Text.Json.JsonElement",
-      "System.Text.Json.Serialization.JsonSerializer"
+      "System.Text.Json.Utf8JsonWriter",
+      "System.Text.Json.Utf8JsonReader"
     ]
   },
   {
