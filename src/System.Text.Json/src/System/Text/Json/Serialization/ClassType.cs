@@ -13,7 +13,7 @@ namespace System.Text.Json
         Unknown = 0,
         // POCO or rich data type
         Object = 1,
-        // Data type with single value
+        // Value or object with a converter.
         Value = 2,
         // IEnumerable
         Enumerable = 3,
@@ -22,9 +22,5 @@ namespace System.Text.Json
         // Is deserialized by passing a IDictionary to its constructor
         // i.e. immutable dictionaries, Hashtable, SortedList,
         IDictionaryConstructible = 5,
-        // KeyValuePair
-        // TODO: Utilize converter mechanism to handle (de)serialization of KeyValuePair
-        // when it goes through: https://github.com/dotnet/corefx/issues/36639.
-        KeyValuePair = 6,
     }
 }

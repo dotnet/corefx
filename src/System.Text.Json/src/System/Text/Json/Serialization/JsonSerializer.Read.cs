@@ -66,7 +66,7 @@ namespace System.Text.Json
                                 break;
                             }
                         }
-                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingIDictionaryConstructibleOrKeyValuePair)
+                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingIDictionaryConstructible)
                         {
                             HandleStartDictionary(options, ref reader, ref readStack);
                         }
@@ -81,7 +81,7 @@ namespace System.Text.Json
                         {
                             readStack.Pop();
                         }
-                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingIDictionaryConstructibleOrKeyValuePair)
+                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingIDictionaryConstructible)
                         {
                             HandleEndDictionary(options, ref reader, ref readStack);
                         }
@@ -112,10 +112,23 @@ namespace System.Text.Json
                     }
                 }
             }
-            catch (JsonReaderException e)
+            catch (JsonReaderException ex)
             {
                 // Re-throw with Path information.
-                ThrowHelper.ReThrowWithPath(e, readStack.JsonPath);
+                ThrowHelper.ReThrowWithPath(readStack, ex);
+            }
+            catch (FormatException ex) when (ex.Source == ThrowHelper.ExceptionSourceValueToRethrowAsJsonException)
+            {
+                ThrowHelper.ReThrowWithPath(readStack, reader, ex);
+            }
+            catch (InvalidOperationException ex) when (ex.Source == ThrowHelper.ExceptionSourceValueToRethrowAsJsonException)
+            {
+                ThrowHelper.ReThrowWithPath(readStack, reader, ex);
+            }
+            catch (JsonException ex)
+            {
+                ThrowHelper.AddExceptionInformation(readStack, reader, ex);
+                throw;
             }
 
             readStack.BytesConsumed += reader.BytesConsumed;

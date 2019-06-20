@@ -49,13 +49,14 @@
     <Compile Include="System\Text\Json\Reader\Utf8JsonReader.TryGet.cs" />
     <Compile Include="System\Text\Json\Serialization\ClassMaterializer.cs" />
     <Compile Include="System\Text\Json\Serialization\ClassType.cs" />
+    <Compile Include="System\Text\Json\Serialization\ConverterList.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultArrayConverter.cs" />
-    <Compile Include="System\Text\Json\Serialization\Converters\DefaultConverters.cs" />
-    <Compile Include="System\Text\Json\Serialization\Converters\DefaultConvertersOfTValue.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultICollectionConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultIDictionaryConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultImmutableEnumerableConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultImmutableDictionaryConverter.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\JsonEnumConverter.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\JsonKeyValuePairConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterBoolean.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterByte.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterByteArray.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterInt32.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterInt64.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterJsonElement.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterKeyValuePair.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterObject.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterSByte.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterSingle.cs" />
@@ -82,6 +84,10 @@
     <Compile Include="System\Text\Json\Serialization\JsonCamelCaseNamePolicy.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonClassInfo.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonClassInfo.AddProperty.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonConverter.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonConverterAttribute.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonConverterFactory.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonConverterOfT.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonDictionaryConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonEnumerableConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonExtensionDataAttribute.cs" />
@@ -90,6 +96,7 @@
     <Compile Include="System\Text\Json\Serialization\JsonPropertyInfo.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoCommon.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoNotNullable.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoNotNullableContravariant.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoNullable.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonPropertyNameAttribute.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Read.HandleArray.cs" />
@@ -112,9 +119,10 @@
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Write.Helpers.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Write.Stream.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Write.String.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonSerializer.Write.Utf8JsonWriter.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializerOptions.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonSerializerOptions.Converters.cs" />
     <Compile Include="System\Text\Json\Serialization\MemberAccessor.cs" />
-    <Compile Include="System\Text\Json\Serialization\Policies\JsonValueConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\PooledByteBufferWriter.cs" />
     <Compile Include="System\Text\Json\Serialization\PropertyRef.cs" />
     <Compile Include="System\Text\Json\Serialization\ReadStack.cs" />

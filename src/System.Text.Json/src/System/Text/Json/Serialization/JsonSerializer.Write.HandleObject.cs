@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -18,6 +17,11 @@ namespace System.Text.Json
             if (!state.Current.StartObjectWritten)
             {
                 state.Current.WriteObjectOrArrayStart(ClassType.Object, writer);
+            }
+
+            if (state.Current.MoveToNextProperty)
+            {
+                state.Current.NextProperty();
             }
 
             // Determine if we are done enumerating properties.
@@ -51,13 +55,12 @@ namespace System.Text.Json
         {
             Debug.Assert(
                 state.Current.JsonClassInfo.ClassType == ClassType.Object ||
-                state.Current.JsonClassInfo.ClassType == ClassType.KeyValuePair ||
                 state.Current.JsonClassInfo.ClassType == ClassType.Unknown);
 
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(state.Current.PropertyIndex);
             if (!jsonPropertyInfo.ShouldSerialize)
             {
-                state.Current.NextProperty();
+                state.Current.MoveToNextProperty = true;
                 return true;
             }
 
@@ -76,8 +79,8 @@ namespace System.Text.Json
 
             if (jsonPropertyInfo.ClassType == ClassType.Value)
             {
-                jsonPropertyInfo.Write(ref state.Current, writer);
-                state.Current.NextProperty();
+                jsonPropertyInfo.Write(ref state, writer);
+                state.Current.MoveToNextProperty = true;
                 return true;
             }
 
@@ -87,7 +90,7 @@ namespace System.Text.Json
                 bool endOfEnumerable = HandleEnumerable(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {
-                    state.Current.NextProperty();
+                    state.Current.MoveToNextProperty = true;
                 }
 
                 return endOfEnumerable;
@@ -99,7 +102,7 @@ namespace System.Text.Json
                 bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {
-                    state.Current.NextProperty();
+                    state.Current.MoveToNextProperty = true;
                 }
 
                 return endOfEnumerable;
@@ -113,7 +116,7 @@ namespace System.Text.Json
                 bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {
-                    state.Current.NextProperty();
+                    state.Current.MoveToNextProperty = true;
                 }
 
                 return endOfEnumerable;
@@ -129,21 +132,13 @@ namespace System.Text.Json
             {
                 // A new stack frame is required.
                 JsonPropertyInfo previousPropertyInfo = state.Current.JsonPropertyInfo;
-
-                state.Current.NextProperty();
+                state.Current.MoveToNextProperty = true;
 
                 JsonClassInfo nextClassInfo = jsonPropertyInfo.RuntimeClassInfo;
                 state.Push(nextClassInfo, currentValue);
 
                 // Set the PropertyInfo so we can obtain the property name in order to write it.
                 state.Current.JsonPropertyInfo = previousPropertyInfo;
-
-                if (state.Current.JsonPropertyInfo.ClassType == ClassType.KeyValuePair)
-                {
-                    // Advance to the next property, since the first one is the KeyValuePair type itself,
-                    // not its first property (Key or Value).
-                    state.Current.PropertyIndex++;
-                }
             }
             else
             {
@@ -152,7 +147,7 @@ namespace System.Text.Json
                     writer.WriteNull(jsonPropertyInfo.EscapedName.Value);
                 }
 
-                state.Current.NextProperty();
+                state.Current.MoveToNextProperty = true;
             }
 
             return true;
