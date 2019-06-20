@@ -2633,6 +2633,7 @@ public static partial class XmlSerializerTests
         Assert.Equal(intValue, (int)actual[1]);
     }
 
+    [Fact]
     public static void Xml_TypeWithReadOnlyMyCollectionProperty()
     {
         var value = new TypeWithReadOnlyMyCollectionProperty();
