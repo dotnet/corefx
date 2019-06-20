@@ -1182,7 +1182,7 @@ namespace System.Linq.Tests
             Assert.Equal(source.Count(), timesRun);
         }
 
-        // [Theory]
+        [Theory]
         [MemberData(nameof(RunSelectorDuringCountData))]
         public void RunSelectorDuringPartitionCount(IEnumerable<int> source)
         {
