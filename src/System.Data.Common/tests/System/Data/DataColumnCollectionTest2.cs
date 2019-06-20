@@ -326,12 +326,13 @@ namespace System.Data.Tests
             Assert.Equal(false, dt.Columns.Contains("String1"));
             Assert.Equal(true, dt.Columns.Contains("Temp1"));
         }
+
+        [Fact]
         public void NotReadyTestContains_S2() // FIXME: fails in MS
         {
             DataTable dt = DataProvider.CreateParentDataTable();
             Assert.Equal(false, dt.Columns.Contains(null));
         }
-
 
         [Fact]
         public void Count()
