@@ -58,7 +58,6 @@
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultIDictionaryConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultImmutableEnumerableConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultImmutableDictionaryConverter.cs" />
-    <Compile Include="System\Text\Json\Serialization\Converters\JsonEnumConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonKeyValuePairConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterBoolean.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterByte.cs" />
