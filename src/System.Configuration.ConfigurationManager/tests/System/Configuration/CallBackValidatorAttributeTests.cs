@@ -92,11 +92,11 @@ namespace System.Configuration
             Assert.Equal("12345", testCallBackValidatorAttribute.CallbackMethodName);
         }
 
-        public static void CallBackValidatorTestMethod(object o)
+        private static void CallBackValidatorTestMethod(object o)
         {
         }
 
-        public static void CallBackValidatorTestMethodNumberTwo(object o, object p)
+        private static void CallBackValidatorTestMethodNumberTwo(object o, object p)
         {
         }
     }
