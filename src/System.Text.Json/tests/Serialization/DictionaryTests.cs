@@ -914,23 +914,119 @@ namespace System.Text.Json.Serialization.Tests
                 Child = new Regression38565_Child()
             };
 
-            var actual = JsonSerializer.ToString(value, new JsonSerializerOptions { IgnoreNullValues = true });
-            Assert.Equal("{\"Test\":\"value1\",\"Child\":{}}", actual);
+            var actual = JsonSerializer.ToString(value);
+            Assert.Equal("{\"Test\":\"value1\",\"Dict\":null,\"Child\":{\"Test\":null,\"Dict\":null}}", actual);
         }
 
         [Fact]
         public static void Regression38565_Deserialize()
         {
-            // The json contains nulls to ensure that the dictionary is properly closed
+            var json = "{\"Test\":\"value1\",\"Dict\":null,\"Child\":{\"Test\":null,\"Dict\":null}}";
+            Regression38565_Parent actual = JsonSerializer.Parse<Regression38565_Parent>(json);
 
-            var json = "{\"Test\":\"value1\",\"Dict\":null,\"Child\":{\"Dict\":null}}";
-            var actual = JsonSerializer.Parse<Regression38565_Parent>(json);
-
-            Assert.True(actual.Test == "value1");
+            Assert.Equal("value1", actual.Test);
             Assert.Null(actual.Dict);
             Assert.NotNull(actual.Child);
             Assert.Null(actual.Child.Dict);
             Assert.Null(actual.Child.Test);
+        }
+
+        [Fact]
+        public static void Regression38565_Serialize_IgnoreNullValues()
+        {
+            var value = new Regression38565_Parent()
+            {
+                Test = "value1",
+                Child = new Regression38565_Child()
+            };
+
+            var actual = JsonSerializer.ToString(value, new JsonSerializerOptions { IgnoreNullValues = true });
+            Assert.Equal("{\"Test\":\"value1\",\"Child\":{}}", actual);
+        }
+
+        [Fact]
+        public static void Regression38565_Deserialize_IgnoreNullValues()
+        {
+            var json = "{\"Test\":\"value1\",\"Child\":{}}";
+            Regression38565_Parent actual = JsonSerializer.Parse<Regression38565_Parent>(json);
+
+            Assert.Equal("value1", actual.Test);
+            Assert.Null(actual.Dict);
+            Assert.NotNull(actual.Child);
+            Assert.Null(actual.Child.Dict);
+            Assert.Null(actual.Child.Test);
+        }
+
+        [Fact]
+        public static void Regression38557_Serialize()
+        {
+            var dictionaryFirst = new Regression38557_DictionaryFirst()
+            {
+                Test = "value1"
+            };
+
+            var actual = JsonSerializer.ToString(dictionaryFirst);
+            Assert.Equal("{\"Dict\":null,\"Test\":\"value1\"}", actual);
+
+            var dictionaryLast = new Regression38557_DictionaryLast()
+            {
+                Test = "value1"
+            };
+
+            actual = JsonSerializer.ToString(dictionaryLast);
+            Assert.Equal("{\"Test\":\"value1\",\"Dict\":null}", actual);
+        }
+
+        [Fact]
+        public static void Regression38557_Deserialize()
+        {
+            var json = "{\"Dict\":null,\"Test\":\"value1\"}";
+            Regression38557_DictionaryFirst dictionaryFirst = JsonSerializer.Parse<Regression38557_DictionaryFirst>(json);
+
+            Assert.Equal("value1", dictionaryFirst.Test);
+            Assert.Null(dictionaryFirst.Dict);
+
+            json = "{\"Test\":\"value1\",\"Dict\":null}";
+            Regression38557_DictionaryLast dictionaryLast = JsonSerializer.Parse<Regression38557_DictionaryLast>(json);
+
+            Assert.Equal("value1", dictionaryLast.Test);
+            Assert.Null(dictionaryLast.Dict);
+        }
+
+        [Fact]
+        public static void Regression38557_Serialize_IgnoreNullValues()
+        {
+            var dictionaryFirst = new Regression38557_DictionaryFirst()
+            {
+                Test = "value1"
+            };
+
+            var actual = JsonSerializer.ToString(dictionaryFirst, new JsonSerializerOptions { IgnoreNullValues = true });
+            Assert.Equal("{\"Test\":\"value1\"}", actual);
+
+            var dictionaryLast = new Regression38557_DictionaryLast()
+            {
+                Test = "value1"
+            };
+
+            actual = JsonSerializer.ToString(dictionaryLast, new JsonSerializerOptions { IgnoreNullValues = true });
+            Assert.Equal("{\"Test\":\"value1\"}", actual);
+        }
+
+        [Fact]
+        public static void Regression38557_Deserialize_IgnoreNullValues()
+        {
+            var json = "{\"Test\":\"value1\"}";
+            Regression38557_DictionaryFirst dictionaryFirst = JsonSerializer.Parse<Regression38557_DictionaryFirst>(json);
+
+            Assert.Equal("value1", dictionaryFirst.Test);
+            Assert.Null(dictionaryFirst.Dict);
+
+            json = "{\"Test\":\"value1\"}";
+            Regression38557_DictionaryLast dictionaryLast = JsonSerializer.Parse<Regression38557_DictionaryLast>(json);
+
+            Assert.Equal("value1", dictionaryLast.Test);
+            Assert.Null(dictionaryLast.Dict);
         }
 
         public class ClassWithDictionaryButNoSetter
@@ -979,6 +1075,18 @@ namespace System.Text.Json.Serialization.Tests
         {
             public string Test { get; set; }
             public Dictionary<string, string> Dict { get; set; }
+        }
+
+        public class Regression38557_DictionaryLast
+        {
+            public string Test { get; set; }
+            public Dictionary<string, string> Dict { get; set; }
+        }
+
+        public class Regression38557_DictionaryFirst
+        {
+            public Dictionary<string, string> Dict { get; set; }
+            public string Test { get; set; }
         }
     }
 }
