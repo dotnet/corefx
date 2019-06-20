@@ -471,7 +471,7 @@ namespace System.Text.Json.Serialization.Tests
             object enumValue = Enum.ToObject(type, maxCapacity * timesOverflow);
             string json = JsonSerializer.ToString(enumValue);
             string expectedString = expected.ToString();
-            Assert.Equal(expectedString.ToString(), json);
+            Assert.Equal(expectedString, json);
         }
     }
 }
