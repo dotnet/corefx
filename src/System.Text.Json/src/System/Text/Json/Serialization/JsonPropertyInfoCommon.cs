@@ -6,20 +6,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Converters;
-using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json
 {
     /// <summary>
     /// Represents a strongly-typed property to prevent boxing and to create a direct delegate to the getter\setter.
     /// </summary>
-    internal abstract class JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty> : JsonPropertyInfo
+    internal abstract class JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty, TConverter> : JsonPropertyInfo
     {
         public Func<object, TDeclaredProperty> Get { get; private set; }
         public Action<object, TDeclaredProperty> Set { get; private set; }
 
-        public JsonValueConverter<TRuntimeProperty> ValueConverter { get; internal set; }
+        public JsonConverter<TConverter> Converter { get; internal set; }
 
         public override void Initialize(
             Type parentClassType,
@@ -27,9 +27,10 @@ namespace System.Text.Json
             Type runtimePropertyType,
             PropertyInfo propertyInfo,
             Type elementType,
+            JsonConverter converter,
             JsonSerializerOptions options)
         {
-            base.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, propertyInfo, elementType, options);
+            base.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, propertyInfo, elementType, converter, options);
 
             if (propertyInfo != null)
             {
@@ -55,9 +56,23 @@ namespace System.Text.Json
             GetPolicies();
         }
 
+        public override JsonConverter ConverterBase
+        {
+            get
+            {
+                return Converter;
+            }
+            set
+            {
+                Debug.Assert(Converter == null);
+                Debug.Assert(value is JsonConverter<TConverter>);
+
+                Converter = (JsonConverter<TConverter>)value;
+            }
+        }
+
         public override void GetPolicies()
         {
-            ValueConverter = DefaultConverters<TRuntimeProperty>.s_converter;
             base.GetPolicies();
         }
 
@@ -194,29 +209,6 @@ namespace System.Text.Json
                 (JsonSerializerOptions.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty>)createRangeDelegateObj);
 
             return (IDictionary)createRangeDelegate.Invoke(CreateGenericIEnumerableFromDictionary(sourceDictionary));
-        }
-
-        public override ValueType CreateKeyValuePairInstance(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
-        {
-            Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-
-            // Form {"MyKey": 1}.
-            if (sourceDictionary.Count == 1)
-            {
-                IDictionaryEnumerator enumerator = sourceDictionary.GetEnumerator();
-                enumerator.MoveNext();
-                return new KeyValuePair<string, TRuntimeProperty>((string)enumerator.Key, (TRuntimeProperty)enumerator.Value);
-            }
-            // Form {"Key": "MyKey", "Value": 1}.
-            else if (sourceDictionary.Count == 2 &&
-                sourceDictionary["Key"] is string key &&
-                sourceDictionary["Value"] is TRuntimeProperty value
-                )
-            {
-                return new KeyValuePair<string, TRuntimeProperty>(key, value);
-            }
-
-            throw ThrowHelper.GetJsonException_DeserializeUnableToConvertValue(enumerableType, state.JsonPath);
         }
 
         private IEnumerable<TRuntimeProperty> CreateGenericTRuntimePropertyIEnumerable(IList sourceList)
