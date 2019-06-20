@@ -1343,14 +1343,14 @@ namespace System.Diagnostics.Tests
         }
 
         // [Fact] // uncomment for diagnostic purposes to list processes to console
-        public void TestDiagnosticsWithConsoleWriteLine()
-        {
-            foreach (var p in Process.GetProcesses().OrderBy(p => p.Id))
-            {
-                Console.WriteLine("{0} : \"{1}\" (Threads: {2})", p.Id, p.ProcessName, p.Threads.Count);
-                p.Dispose();
-            }
-        }
+        // public void TestDiagnosticsWithConsoleWriteLine()
+        // {
+        //     foreach (var p in Process.GetProcesses().OrderBy(p => p.Id))
+        //     {
+        //         Console.WriteLine("{0} : \"{1}\" (Threads: {2})", p.Id, p.ProcessName, p.Threads.Count);
+        //         p.Dispose();
+        //     }
+        // }
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "GC has different behavior on Mono")]
