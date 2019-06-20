@@ -348,14 +348,14 @@ namespace System.Net.Test.Common
         public byte[] Data;
 
         public PingFrame(byte[] data, FrameFlags flags, int streamId) :
-            base(Frame.FrameHeaderLength + 8, FrameType.Ping, flags, streamId)
+            base(8, FrameType.Ping, flags, streamId)
         {
             Data = data;
         }
 
         public static PingFrame ReadFrom(Frame header, ReadOnlySpan<byte> buffer)
         {
-            byte[] data = buffer.Slice(Frame.FrameHeaderLength).ToArray();
+            byte[] data = buffer.ToArray();
 
             return new PingFrame(data, header.Flags, header.StreamId);
         }
@@ -363,8 +363,9 @@ namespace System.Net.Test.Common
         public override void WriteTo(Span<byte> buffer)
         {
             base.WriteTo(buffer);
+            buffer = buffer.Slice(Frame.FrameHeaderLength, 8);
 
-            Data.CopyTo(buffer.Slice(Frame.FrameHeaderLength));
+            Data.CopyTo(buffer);
         }
 
         public override string ToString()
@@ -413,10 +414,15 @@ namespace System.Net.Test.Common
     {
         public List<SettingsEntry> Entries;
 
-        public SettingsFrame(params SettingsEntry[] entries) :
-            base(entries.Length * 6, FrameType.Settings, FrameFlags.None, 0)
+        public SettingsFrame(FrameFlags flags, SettingsEntry[] entries) :
+            base(entries.Length * 6, FrameType.Settings, flags, 0)
         {
             Entries = new List<SettingsEntry>(entries);
+        }
+
+        public SettingsFrame(params SettingsEntry[] entries) :
+            this(FrameFlags.None, entries)
+        {
         }
 
         public static SettingsFrame ReadFrom(Frame header, ReadOnlySpan<byte> buffer)
@@ -433,7 +439,7 @@ namespace System.Net.Test.Common
                 entries.Add(new SettingsEntry { SettingId = id, Value = value });
             }
 
-            return new SettingsFrame(entries.ToArray());
+            return new SettingsFrame(header.Flags, entries.ToArray());
         }
 
         public override void WriteTo(Span<byte> buffer)

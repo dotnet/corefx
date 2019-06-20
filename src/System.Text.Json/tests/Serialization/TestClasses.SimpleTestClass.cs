@@ -29,17 +29,17 @@ namespace System.Text.Json.Serialization.Tests
         public double MyDouble { get; set; }
         public DateTime MyDateTime { get; set; }
         public DateTimeOffset MyDateTimeOffset { get; set; }
-        public SampleSByteEnum MySByteEnum { get; set; }
-        public SampleByteEnum MyByteEnum { get; set; }
+        public SampleEnumSByte MySByteEnum { get; set; }
+        public SampleEnumByte MyByteEnum { get; set; }
         public SampleEnum MyEnum { get; set; }
         public SampleEnumInt16 MyInt16Enum { get; set; }
-        public SampleInt64Enum MyInt64Enum { get; set; }
-        public SampleUInt32Enum MyUInt32Enum { get; set; }
+        public SampleEnumInt64 MyInt64Enum { get; set; }
         public SampleEnumUInt16 MyUInt16Enum { get; set; }
-        public SampleUInt64Enum MyUInt64Enum { get; set; }
+        public SampleEnumUInt32 MyUInt32Enum { get; set; }
+        public SampleEnumUInt64 MyUInt64Enum { get; set; }
         public SimpleStruct MySimpleStruct {get; set;}
         public SimpleTestStruct MySimpleTestStruct { get; set; }
-
+       
         public short[] MyInt16Array { get; set; }
         public int[] MyInt32Array { get; set; }
         public long[] MyInt64Array { get; set; }
@@ -72,7 +72,8 @@ namespace System.Text.Json.Serialization.Tests
         public IReadOnlyCollection<string> MyStringIReadOnlyCollectionT { get; set; }
         public IReadOnlyList<string> MyStringIReadOnlyListT { get; set; }
         public ISet<string> MyStringISetT { get; set; }
-        public KeyValuePair<string, string> MyStringToStringKeyValuePair { get; set; }
+        //todo: enable once we can write a custom converter for KeyValuePair:
+        // public KeyValuePair<string, string> MyStringToStringKeyValuePair { get; set; }
         public IDictionary MyStringToStringIDict { get; set; }
         public Dictionary<string, string> MyStringToStringGenericDict { get; set; }
         public IDictionary<string, string> MyStringToStringGenericIDict { get; set; }
@@ -121,7 +122,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyInt64Enum"" : -9223372036854775808," +
                 @"""MyUInt64Enum"" : 18446744073709551615," +
                 @"""MyStringToStringDict"" : {""key"" : ""value""}," +
-                @"""MyStringToStringKeyValuePair"" : {""Key"" : ""myKey"", ""Value"" : ""myValue""}," +
+                //@"""MyStringToStringKeyValuePair"" : {""Key"" : ""myKey"", ""Value"" : ""myValue""}," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringGenericDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringGenericIDict"" : {""key"" : ""value""}," +
@@ -203,8 +204,8 @@ namespace System.Text.Json.Serialization.Tests
             MyDateTime = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
             MyDateTimeOffset = new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0));
             MyEnum = SampleEnum.Two;
-            MyInt64Enum = SampleInt64Enum.Min;
-            MyUInt64Enum = SampleUInt64Enum.Max;
+            MyInt64Enum = SampleEnumInt64.MinNegative;
+            MyUInt64Enum = SampleEnumUInt64.Max;
             MyInt16Array = new short[] { 1 };
             MyInt32Array = new int[] { 2 };
             MyInt64Array = new long[] { 3 };
@@ -265,7 +266,7 @@ namespace System.Text.Json.Serialization.Tests
             MyStringIReadOnlyListT = new string[] { "Hello" };
             MyStringISetT = new HashSet<string> { "Hello" };
 
-            MyStringToStringKeyValuePair = new KeyValuePair<string, string>("myKey", "myValue");
+            //MyStringToStringKeyValuePair = new KeyValuePair<string, string>("myKey", "myValue");
             MyStringToStringIDict = new Dictionary<string, string> { { "key", "value" } };
 
             MyStringToStringGenericDict = new Dictionary<string, string> { { "key", "value" } };
@@ -315,8 +316,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTime);
             Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), MyDateTimeOffset);
             Assert.Equal(SampleEnum.Two, MyEnum);
-            Assert.Equal(SampleInt64Enum.Min, MyInt64Enum);
-            Assert.Equal(SampleUInt64Enum.Max, MyUInt64Enum);
+            Assert.Equal(SampleEnumInt64.MinNegative, MyInt64Enum);
+            Assert.Equal(SampleEnumUInt64.Max, MyUInt64Enum);
             Assert.Equal(11, MySimpleStruct.One);
             Assert.Equal(1.9999, MySimpleStruct.Two);
             Assert.Equal(64, MySimpleTestStruct.MyInt64);
@@ -461,8 +462,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("value", MyStringToStringIImmutableDict["key"]);
             Assert.Equal("value", MyStringToStringImmutableSortedDict["key"]);
 
-            Assert.Equal("myKey", MyStringToStringKeyValuePair.Key);
-            Assert.Equal("myValue", MyStringToStringKeyValuePair.Value);
+            //Assert.Equal("myKey", MyStringToStringKeyValuePair.Key);
+            //Assert.Equal("myValue", MyStringToStringKeyValuePair.Value);
 
             Assert.Equal(2, MyStringStackT.Count);
             Assert.True(MyStringStackT.Contains("Hello"));

@@ -28,8 +28,8 @@ namespace System.Text.Json.Serialization.Tests
         public DateTime MyDateTime { get; set; }
         public DateTimeOffset MyDateTimeOffset { get; set; }
         public SampleEnum MyEnum { get; set; }
-        public SampleInt64Enum MyInt64Enum { get; set; }
-        public SampleUInt64Enum MyUInt64Enum { get; set; }
+        public SampleEnumInt64 MyInt64Enum { get; set; }
+        public SampleEnumUInt64 MyUInt64Enum { get; set; }
         public SimpleStruct MySimpleStruct { get; set; }
         public SimpleTestClass MySimpleTestClass { get; set; }
         public short[] MyInt16Array { get; set; }
@@ -133,8 +133,8 @@ namespace System.Text.Json.Serialization.Tests
             MyDateTime = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
             MyDateTimeOffset = new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0));
             MyEnum = SampleEnum.Two;
-            MyInt64Enum = SampleInt64Enum.Min;
-            MyUInt64Enum = SampleUInt64Enum.Max;
+            MyInt64Enum = SampleEnumInt64.MinNegative;
+            MyUInt64Enum = SampleEnumUInt64.Max;
             MySimpleStruct = new SimpleStruct { One = 11, Two = 1.9999 };
 
             MyInt16Array = new short[] { 1 };
@@ -185,8 +185,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTime);
             Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), MyDateTimeOffset);
             Assert.Equal(SampleEnum.Two, MyEnum);
-            Assert.Equal(SampleInt64Enum.Min, MyInt64Enum);
-            Assert.Equal(SampleUInt64Enum.Max, MyUInt64Enum);
+            Assert.Equal(SampleEnumInt64.MinNegative, MyInt64Enum);
+            Assert.Equal(SampleEnumUInt64.Max, MyUInt64Enum);
             Assert.Equal(11, MySimpleStruct.One);
             Assert.Equal(1.9999, MySimpleStruct.Two);
 

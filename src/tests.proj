@@ -8,14 +8,12 @@
     <CoverageReportDir>$(ArtifactsDir)coverage</CoverageReportDir>
     <!-- For UAP we are using an APPX that is registered with a unique ID. Because of that we need to run tests sequentially -->
     <SerializeProjects Condition="'$(BuildingUAPVertical)' == 'true' or '$(Coverage)' == 'true'">true</SerializeProjects>
+    <TraversalBuildDependsOn Condition="'$(BuildingUAPVertical)' == 'true' and '$(BuildAllConfigurations)' != 'true'">MakeCommonResourcesPriFile;$(TraversalBuildDependsOn)</TraversalBuildDependsOn>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(BuildAllConfigurations)' != 'true'">
+    <!-- We currently only test with C# projects. -->
     <Project Include="$(SourceDir)*\tests\**\*.Tests.csproj" />
-
-    <!-- Harcoded list of non-csproj test projects to reduce time spent on file globbing. -->
-    <Project Include="$(SourceDir)System.Runtime\tests\TestStructs\System.TestStructs.ilproj" />
-    <Project Include="$(SourceDir)System.Runtime\tests\TestModule\System.Reflection.TestModule.ilproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAllConfigurations)' == 'true'">
@@ -31,7 +29,7 @@
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
   
   <Target Name="Build" DependsOnTargets="BuildAllProjects" />
-  <Target Name="BuildAllProjects" DependsOnTargets="FilterProjects">
+  <Target Name="BuildAllProjects" DependsOnTargets="$(TraversalBuildDependsOn);FilterProjects">
     <MSBuild Targets="Build"
              Projects="@(Project)"
              Properties="BuildAllProjects=true;BuildConfiguration=$(BuildConfiguration);%(Project.AdditionalProperties)"

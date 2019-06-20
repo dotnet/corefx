@@ -262,7 +262,7 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.ToString(testObject);
             SimpleTestStruct parsedObject = JsonSerializer.Parse<SimpleTestStruct>(json);
-            parsedObject.Verify();            
+            parsedObject.Verify();          
         }
 
         [ActiveIssue(38490)]
@@ -275,7 +275,8 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.ToString(testObject);
             SimpleTestClass parsedObject = JsonSerializer.Parse<SimpleTestClass>(json);
-            parsedObject.Verify();
+            Assert.Equal("Hello", parsedObject.MySimpleTestStruct.MyString);
+            Assert.Equal("World", parsedObject.MySimpleTestStruct.MySimpleTestClass.MyString);
         }
     }
 }
