@@ -135,11 +135,6 @@ namespace System.Text.Json
                 args: null,
                 culture: null);
 
-            if (converter is JsonConverterFactory factory)
-            {
-                converter = factory.GetConverterInternal(runtimePropertyType);
-            }
-
             jsonInfo.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, propertyInfo, collectionElementType, converter, options);
 
             return jsonInfo;
