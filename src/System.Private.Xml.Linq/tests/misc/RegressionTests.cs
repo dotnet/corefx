@@ -37,17 +37,17 @@ namespace System.Xml.Linq.Tests
         }
 
         //[Variation(Desc = "Replace content")]
-        public void ReplaceContent()
-        {
-            XElement a = XElement.Parse("<A><B><C/></B></A>");
-            a.Element("B").ReplaceNodes(a.Nodes());
-            XElement x = a;
-            foreach (string s in (new string[] { "A", "B", "B" }))
-            {
-                TestLog.Compare(x.Name.LocalName, s, s);
-                x = x.FirstNode as XElement;
-            }
-        }
+        // public void ReplaceContent()
+        // {
+        //     XElement a = XElement.Parse("<A><B><C/></B></A>");
+        //     a.Element("B").ReplaceNodes(a.Nodes());
+        //     XElement x = a;
+        //     foreach (string s in (new string[] { "A", "B", "B" }))
+        //     {
+        //         TestLog.Compare(x.Name.LocalName, s, s);
+        //         x = x.FirstNode as XElement;
+        //     }
+        // }
 
         [Fact]
         public void DuplicateNamespaceDeclarationIsAllowed()
