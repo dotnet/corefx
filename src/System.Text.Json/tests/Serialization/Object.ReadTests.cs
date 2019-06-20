@@ -181,14 +181,6 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void ParseUntyped()
-        {
-            // Not supported until we are able to deserialize into JsonElement.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>("[]"));
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<object>("[]"));
-        }
-
-        [Fact]
         public static void ReadClassWithStringToPrimitiveDictionary()
         {
             TestClassWithStringToPrimitiveDictionary obj = JsonSerializer.Parse<TestClassWithStringToPrimitiveDictionary>(TestClassWithStringToPrimitiveDictionary.s_data);
