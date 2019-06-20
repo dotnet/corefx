@@ -1387,8 +1387,7 @@ namespace System.Net.Http.Functional.Tests
                 await connection.ReadBodyAsync();
                 await connection.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.OK);
                 await connection.SendResponseBodyAsync(streamId, Encoding.ASCII.GetBytes("OK"));
-                await connection.SendGoAway(streamId);
-                await connection.WaitForConnectionShutdownAsync();
+                await connection.ShutdownIgnoringErrorsAsync(streamId);
             });
         }
 
@@ -1399,8 +1398,6 @@ namespace System.Net.Http.Functional.Tests
             string content = new string('*', 300);
 
             var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(content), tsc, trigger:3, count: 30);
-
-            var clientKeepAlive = new ManualResetEventSlim(false);
 
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
@@ -1414,10 +1411,6 @@ namespace System.Net.Http.Functional.Tests
 
                     HttpResponseMessage response = await client.SendAsync(request);
                     Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-
-                    // otherwise client might get disposed before we send GOAWAY which might cause
-                    // unexpected exception
-                    clientKeepAlive.Wait(TimeSpan.FromSeconds(10));
                 }
             },
             async server =>
@@ -1440,10 +1433,7 @@ namespace System.Net.Http.Functional.Tests
                 }
                 catch (IOException) { };
 
-                await connection.SendGoAway(streamId);
-                await connection.WaitForConnectionShutdownAsync();
-
-                clientKeepAlive.Set();
+                await connection.ShutdownIgnoringErrorsAsync(streamId);
             });
         }
 
@@ -1503,8 +1493,7 @@ namespace System.Net.Http.Functional.Tests
                 }
                 var headers = new HttpHeaderData[] { new HttpHeaderData("x-last", "done") };
                 await connection.SendResponseHeadersAsync(streamId, endStream: true, isTrailingHeader : true, headers: headers);
-                await connection.SendGoAway(streamId);
-                await connection.WaitForConnectionShutdownAsync();
+                await connection.ShutdownIgnoringErrorsAsync(streamId);
             });
         }
 
