@@ -451,7 +451,7 @@ namespace System.Diagnostics
             // Has the ID already been set (have we called Start()).  
             if (_id != null || _spanId != null)
             {
-                NotifyError(new InvalidOperationException(SR.ActivityAlreadyStarted));
+                NotifyError(new InvalidOperationException(SR.ActivityStartAlreadyStarted));
             }
             else
             {
@@ -473,18 +473,15 @@ namespace System.Diagnostics
                 if (IdFormat == ActivityIdFormat.Unknown)
                 {
                     // Figure out what format to use.  
-                    if (ForceDefaultIdFormat)
-                        IdFormat = DefaultIdFormat;
-                    else if (Parent != null)
-                        IdFormat = Parent.IdFormat;
-                    else if (_parentSpanId != null)
-                        IdFormat = ActivityIdFormat.W3C;
-                    else if (_parentId != null)
-                        IdFormat = IsW3CId(_parentId) ? ActivityIdFormat.W3C : ActivityIdFormat.Hierarchical;
-                    else
-                        IdFormat = DefaultIdFormat;
+                    IdFormat =
+                        ForceDefaultIdFormat ? DefaultIdFormat :
+                        Parent != null ? Parent.IdFormat :
+                        _parentSpanId != null ? ActivityIdFormat.W3C :
+                        _parentId == null ? DefaultIdFormat :
+                        IsW3CId(_parentId) ? ActivityIdFormat.W3C :
+                        ActivityIdFormat.Hierarchical;
                 }
-
+               
                 // Generate the ID in the appropriate format.  
                 if (IdFormat == ActivityIdFormat.W3C)
                     GenerateW3CId();

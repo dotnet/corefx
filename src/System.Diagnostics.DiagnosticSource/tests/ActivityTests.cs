@@ -621,7 +621,7 @@ namespace System.Diagnostics.Tests
         {
             Activity parent = new Activity("parent");
             parent.SetIdFormat(ActivityIdFormat.W3C);
-            string testString = "MyTestString";
+            const string testString = "MyTestString";
             parent.TraceStateString = testString;
             parent.Start();
             Assert.Equal(testString, parent.TraceStateString);
