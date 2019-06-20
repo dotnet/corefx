@@ -129,8 +129,8 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Parses the current JSON token value from the source as a <see cref="sbyte"/>.
-        /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="sbyte"/>
+        /// Parses the current JSON token value from the source as an <see cref="sbyte"/>.
+        /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to an <see cref="sbyte"/>
         /// value.
         /// Throws exceptions otherwise.
         /// </summary>

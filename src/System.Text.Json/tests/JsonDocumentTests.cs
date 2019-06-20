@@ -1003,10 +1003,10 @@ namespace System.Text.Json.Tests
                 Assert.Equal(0, byteVal);
 
                 Assert.Equal((value == 0), root.TryGetInt16(out short shortVal));
-                Assert.Equal(0, sbyteVal);
+                Assert.Equal(0, shortVal);
 
                 Assert.Equal((value == 0), root.TryGetUInt16(out ushort ushortVal));
-                Assert.Equal(0, byteVal);
+                Assert.Equal(0, ushortVal);
 
                 Assert.True(root.TryGetInt32(out int intVal));
                 Assert.Equal(value, intVal);
@@ -1097,10 +1097,10 @@ namespace System.Text.Json.Tests
                 Assert.Equal(0, byteVal);
 
                 Assert.False(root.TryGetInt16(out short shortVal));
-                Assert.Equal(0, sbyteVal);
+                Assert.Equal(0, shortVal);
 
                 Assert.False(root.TryGetUInt16(out ushort ushortVal));
-                Assert.Equal(0, byteVal);
+                Assert.Equal(0, ushortVal);
 
                 Assert.False(root.TryGetInt32(out int intVal));
                 Assert.Equal(0, intVal);
@@ -1197,10 +1197,10 @@ namespace System.Text.Json.Tests
                 Assert.Equal(0, byteVal);
 
                 Assert.False(root.TryGetInt16(out short shortVal));
-                Assert.Equal(0, sbyteVal);
+                Assert.Equal(0, shortVal);
 
                 Assert.False(root.TryGetUInt16(out ushort ushortVal));
-                Assert.Equal(0, byteVal);
+                Assert.Equal(0, ushortVal);
 
                 Assert.False(root.TryGetInt32(out int intVal));
                 Assert.Equal(0, intVal);
@@ -1271,10 +1271,10 @@ namespace System.Text.Json.Tests
                 Assert.Equal(0, byteVal);
 
                 Assert.False(root.TryGetInt16(out short shortVal));
-                Assert.Equal(0, sbyteVal);
+                Assert.Equal(0, shortVal);
 
                 Assert.False(root.TryGetUInt16(out ushort ushortVal));
-                Assert.Equal(0, byteVal);
+                Assert.Equal(0, ushortVal);
 
                 Assert.False(root.TryGetInt32(out int intVal));
                 Assert.Equal(0, intVal);
@@ -1336,6 +1336,10 @@ namespace System.Text.Json.Tests
                 Assert.Equal(expectedDateTime, root.GetDateTime());
                 Assert.Equal(expectedDateTimeOffset, root.GetDateTimeOffset());
 
+                Assert.Throws<InvalidOperationException>(() => root.GetSByte());
+                Assert.Throws<InvalidOperationException>(() => root.GetByte());
+                Assert.Throws<InvalidOperationException>(() => root.GetInt16());
+                Assert.Throws<InvalidOperationException>(() => root.GetUInt16());
                 Assert.Throws<InvalidOperationException>(() => root.GetInt32());
                 Assert.Throws<InvalidOperationException>(() => root.GetUInt32());
                 Assert.Throws<InvalidOperationException>(() => root.GetInt64());
@@ -1415,6 +1419,10 @@ namespace System.Text.Json.Tests
 
                 Assert.Equal(expected, root.GetGuid());
 
+                Assert.Throws<InvalidOperationException>(() => root.GetSByte());
+                Assert.Throws<InvalidOperationException>(() => root.GetByte());
+                Assert.Throws<InvalidOperationException>(() => root.GetInt16());
+                Assert.Throws<InvalidOperationException>(() => root.GetUInt16());
                 Assert.Throws<InvalidOperationException>(() => root.GetInt32());
                 Assert.Throws<InvalidOperationException>(() => root.GetUInt32());
                 Assert.Throws<InvalidOperationException>(() => root.GetInt64());
@@ -1476,8 +1484,23 @@ namespace System.Text.Json.Tests
                 Assert.True(root.TryGetDecimal(out decimal decimalVal));
                 Assert.Equal(expectedDecimal, decimalVal);
 
+                Assert.False(root.TryGetSByte(out sbyte sbyteVal));
+                Assert.Equal(0, sbyteVal);
+
+                Assert.False(root.TryGetByte(out byte byteVal));
+                Assert.Equal(0, byteVal);
+
+                Assert.False(root.TryGetInt16(out short shortVal));
+                Assert.Equal(0, shortVal);
+
+                Assert.False(root.TryGetUInt16(out ushort ushortVal));
+                Assert.Equal(0, ushortVal);
+
                 Assert.False(root.TryGetInt32(out int intVal));
                 Assert.Equal(0, intVal);
+
+                Assert.False(root.TryGetUInt32(out uint uintVal));
+                Assert.Equal(0U, uintVal);
 
                 Assert.False(root.TryGetInt64(out long longVal));
                 Assert.Equal(0L, longVal);
@@ -1488,7 +1511,12 @@ namespace System.Text.Json.Tests
                 Assert.Equal(expectedFloat, root.GetSingle());
                 Assert.Equal(expectedDouble, root.GetDouble());
                 Assert.Equal(expectedDecimal, root.GetDecimal());
+                Assert.Throws<FormatException>(() => root.GetSByte());
+                Assert.Throws<FormatException>(() => root.GetByte());
+                Assert.Throws<FormatException>(() => root.GetInt16());
+                Assert.Throws<FormatException>(() => root.GetUInt16());
                 Assert.Throws<FormatException>(() => root.GetInt32());
+                Assert.Throws<FormatException>(() => root.GetUInt32());
                 Assert.Throws<FormatException>(() => root.GetInt64());
                 Assert.Throws<FormatException>(() => root.GetUInt64());
 
@@ -1539,8 +1567,23 @@ namespace System.Text.Json.Tests
                 Assert.False(root.TryGetDecimal(out decimal decimalVal));
                 Assert.Equal(0m, decimalVal);
 
+                Assert.False(root.TryGetSByte(out sbyte sbyteVal));
+                Assert.Equal(0, sbyteVal);
+
+                Assert.False(root.TryGetByte(out byte byteVal));
+                Assert.Equal(0, byteVal);
+
+                Assert.False(root.TryGetInt16(out short shortVal));
+                Assert.Equal(0, shortVal);
+
+                Assert.False(root.TryGetUInt16(out ushort ushortVal));
+                Assert.Equal(0, ushortVal);
+
                 Assert.False(root.TryGetInt32(out int intVal));
                 Assert.Equal(0, intVal);
+
+                Assert.False(root.TryGetUInt32(out uint uintVal));
+                Assert.Equal(0U, uintVal);
 
                 Assert.False(root.TryGetInt64(out long longVal));
                 Assert.Equal(0L, longVal);
@@ -1560,7 +1603,12 @@ namespace System.Text.Json.Tests
                 }
 
                 Assert.Throws<FormatException>(() => root.GetDecimal());
+                Assert.Throws<FormatException>(() => root.GetSByte());
+                Assert.Throws<FormatException>(() => root.GetByte());
+                Assert.Throws<FormatException>(() => root.GetInt16());
+                Assert.Throws<FormatException>(() => root.GetUInt16());
                 Assert.Throws<FormatException>(() => root.GetInt32());
+                Assert.Throws<FormatException>(() => root.GetUInt32());
                 Assert.Throws<FormatException>(() => root.GetInt64());
                 Assert.Throws<FormatException>(() => root.GetUInt64());
 
@@ -1614,8 +1662,18 @@ namespace System.Text.Json.Tests
 
                 Assert.Throws<InvalidOperationException>(() => root.GetDouble());
                 Assert.Throws<InvalidOperationException>(() => root.TryGetDouble(out double _));
+                Assert.Throws<InvalidOperationException>(() => root.GetSByte());
+                Assert.Throws<InvalidOperationException>(() => root.TryGetSByte(out sbyte _));
+                Assert.Throws<InvalidOperationException>(() => root.GetByte());
+                Assert.Throws<InvalidOperationException>(() => root.TryGetByte(out byte _));
+                Assert.Throws<InvalidOperationException>(() => root.GetInt16());
+                Assert.Throws<InvalidOperationException>(() => root.TryGetInt16(out short _));
+                Assert.Throws<InvalidOperationException>(() => root.GetUInt16());
+                Assert.Throws<InvalidOperationException>(() => root.TryGetUInt16(out ushort _));
                 Assert.Throws<InvalidOperationException>(() => root.GetInt32());
                 Assert.Throws<InvalidOperationException>(() => root.TryGetInt32(out int _));
+                Assert.Throws<InvalidOperationException>(() => root.GetUInt32());
+                Assert.Throws<InvalidOperationException>(() => root.TryGetUInt32(out uint _));
                 Assert.Throws<InvalidOperationException>(() => root.GetInt64());
                 Assert.Throws<InvalidOperationException>(() => root.TryGetInt64(out long _));
                 Assert.Throws<InvalidOperationException>(() => root.GetUInt64());
@@ -1649,8 +1707,18 @@ namespace System.Text.Json.Tests
                 Assert.Throws<ObjectDisposedException>(() => root.EnumerateObject());
                 Assert.Throws<ObjectDisposedException>(() => root.GetDouble());
                 Assert.Throws<ObjectDisposedException>(() => root.TryGetDouble(out double _));
+                Assert.Throws<ObjectDisposedException>(() => root.GetSByte());
+                Assert.Throws<ObjectDisposedException>(() => root.TryGetSByte(out sbyte _));
+                Assert.Throws<ObjectDisposedException>(() => root.GetByte());
+                Assert.Throws<ObjectDisposedException>(() => root.TryGetByte(out byte _));
+                Assert.Throws<ObjectDisposedException>(() => root.GetInt16());
+                Assert.Throws<ObjectDisposedException>(() => root.TryGetInt16(out short _));
+                Assert.Throws<ObjectDisposedException>(() => root.GetUInt16());
+                Assert.Throws<ObjectDisposedException>(() => root.TryGetUInt16(out ushort _));
                 Assert.Throws<ObjectDisposedException>(() => root.GetInt32());
                 Assert.Throws<ObjectDisposedException>(() => root.TryGetInt32(out int _));
+                Assert.Throws<ObjectDisposedException>(() => root.GetUInt32());
+                Assert.Throws<ObjectDisposedException>(() => root.TryGetUInt32(out uint _));
                 Assert.Throws<ObjectDisposedException>(() => root.GetInt64());
                 Assert.Throws<ObjectDisposedException>(() => root.TryGetInt64(out long _));
                 Assert.Throws<ObjectDisposedException>(() => root.GetUInt64());
@@ -1697,8 +1765,18 @@ namespace System.Text.Json.Tests
             Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
             Assert.Throws<InvalidOperationException>(() => root.GetDouble());
             Assert.Throws<InvalidOperationException>(() => root.TryGetDouble(out double _));
+            Assert.Throws<InvalidOperationException>(() => root.GetSByte());
+            Assert.Throws<InvalidOperationException>(() => root.TryGetSByte(out sbyte _));
+            Assert.Throws<InvalidOperationException>(() => root.GetByte());
+            Assert.Throws<InvalidOperationException>(() => root.TryGetByte(out byte _));
+            Assert.Throws<InvalidOperationException>(() => root.GetInt16());
+            Assert.Throws<InvalidOperationException>(() => root.TryGetInt16(out short _));
+            Assert.Throws<InvalidOperationException>(() => root.GetUInt16());
+            Assert.Throws<InvalidOperationException>(() => root.TryGetUInt16(out ushort _));
             Assert.Throws<InvalidOperationException>(() => root.GetInt32());
             Assert.Throws<InvalidOperationException>(() => root.TryGetInt32(out int _));
+            Assert.Throws<InvalidOperationException>(() => root.GetUInt32());
+            Assert.Throws<InvalidOperationException>(() => root.TryGetUInt32(out uint _));
             Assert.Throws<InvalidOperationException>(() => root.GetInt64());
             Assert.Throws<InvalidOperationException>(() => root.TryGetInt64(out long _));
             Assert.Throws<InvalidOperationException>(() => root.GetUInt64());

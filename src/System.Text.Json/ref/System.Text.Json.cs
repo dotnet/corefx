@@ -45,7 +45,7 @@ namespace System.Text.Json
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
         public System.Guid GetGuid() { throw null; }
-        public int GetInt16() { throw null; }
+        public short GetInt16() { throw null; }
         public int GetInt32() { throw null; }
         public long GetInt64() { throw null; }
         public System.Text.Json.JsonElement GetProperty(System.ReadOnlySpan<byte> utf8PropertyName) { throw null; }
@@ -57,7 +57,7 @@ namespace System.Text.Json
         public float GetSingle() { throw null; }
         public string GetString() { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public uint GetUInt16() { throw null; }
+        public ushort GetUInt16() { throw null; }
         [System.CLSCompliantAttribute(false)]
         public uint GetUInt32() { throw null; }
         [System.CLSCompliantAttribute(false)]
@@ -305,7 +305,7 @@ namespace System.Text.Json
         public bool TrySkip() { throw null; }
         public bool ValueTextEquals(System.ReadOnlySpan<byte> utf8Text) { throw null; }
         public bool ValueTextEquals(System.ReadOnlySpan<char> text) { throw null; }
-        public bool ValueTextEquals(string utf8Text) { throw null; }
+        public bool ValueTextEquals(string text) { throw null; }
     }
     public sealed partial class Utf8JsonWriter : System.IAsyncDisposable, System.IDisposable
     {

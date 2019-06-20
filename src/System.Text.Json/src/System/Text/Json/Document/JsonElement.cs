@@ -538,7 +538,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public int GetInt16()
+        public short GetInt16()
         {
             if (TryGetInt16(out short value))
             {
@@ -590,7 +590,7 @@ namespace System.Text.Json
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
         [CLSCompliant(false)]
-        public uint GetUInt16()
+        public ushort GetUInt16()
         {
             if (TryGetUInt16(out ushort value))
             {

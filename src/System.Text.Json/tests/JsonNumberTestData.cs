@@ -57,7 +57,7 @@ namespace System.Text.Json.Tests
 
             Bytes.AddRange(byteArr);
 
-            foreach (var item in byteArr)
+            foreach (byte item in byteArr)
             {
                 SBytes.Add((sbyte)item);
             }
@@ -72,10 +72,11 @@ namespace System.Text.Json.Tests
                 short.MaxValue,
                 short.MinValue
             };
-            byte[] b16 = new byte[2];
+            byte[] b16 = new byte[2 * numberOfItems];
+            random.NextBytes(b16);
             for (int i = 0; i < numberOfItems; i++)
             {
-                Shorts.Add(BitConverter.ToInt16(b16));
+                Shorts.Add(BitConverter.ToInt16(b16, i * 2));
             }
             #endregion
 
@@ -115,7 +116,7 @@ namespace System.Text.Json.Tests
             }
             #endregion
 
-            #region generate shorts
+            #region generate ushorts
             UShorts = new List<ushort>
             {
                 ushort.MaxValue,
@@ -124,10 +125,11 @@ namespace System.Text.Json.Tests
                 34567,
                 64321
             };
-            byte[] ub16 = new byte[2];
+            byte[] ub16 = new byte[2 * numberOfItems];
+            random.NextBytes(ub16);
             for (int i = 0; i < numberOfItems; i++)
             {
-                UShorts.Add(BitConverter.ToUInt16(ub16));
+                UShorts.Add(BitConverter.ToUInt16(ub16, i * 2));
             }
             #endregion
 
