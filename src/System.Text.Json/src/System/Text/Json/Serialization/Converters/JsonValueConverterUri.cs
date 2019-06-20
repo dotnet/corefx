@@ -8,11 +8,6 @@ namespace System.Text.Json.Serialization.Converters
     {
         public override Uri Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType != JsonTokenType.String)
-            {
-                ThrowHelper.ThrowJsonException();
-            }
-
             // TODO: use reader.GetUri() when https://github.com/dotnet/corefx/issues/38647 is implemented.
             string uriString = reader.GetString();
             if (Uri.TryCreate(uriString, UriKind.RelativeOrAbsolute, out Uri value))
@@ -27,27 +22,13 @@ namespace System.Text.Json.Serialization.Converters
         public override void Write(Utf8JsonWriter writer, Uri value, JsonSerializerOptions options)
         {
             // TODO: remove preprocessing when https://github.com/dotnet/corefx/issues/38647 is implemented.
-            string uriString = value.OriginalString;
-
-            if (uriString == string.Empty)
-            {
-                uriString = value.ToString();
-            }
-
-            writer.WriteStringValue(uriString);
+            writer.WriteStringValue(value.OriginalString);
         }
 
         public override void Write(Utf8JsonWriter writer, Uri value, JsonEncodedText propertyName, JsonSerializerOptions options)
         {
             // TODO: remove preprocessing when https://github.com/dotnet/corefx/issues/38647 is implemented.
-            string uriString = value.OriginalString;
-
-            if (uriString == string.Empty)
-            {
-                uriString = value.ToString();
-            }
-
-            writer.WriteString(propertyName, uriString);
+            writer.WriteString(propertyName, value.OriginalString);
         }
     }
 }
