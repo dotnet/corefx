@@ -482,6 +482,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             });
         }
 
+        [Fact]
         public void CreateExportDefinition_NullAsMetadata_Allowed()
         {
             PropertyInfo property = typeof(TestPart).GetProperties().First();
