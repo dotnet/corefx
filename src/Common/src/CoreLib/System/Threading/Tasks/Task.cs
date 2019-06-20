@@ -194,12 +194,10 @@ namespace System.Threading.Tasks
         {
             Debug.Assert(task != null, "Null Task objects can't be added to the ActiveTasks collection");
 
-#pragma warning disable CS8634 // TODO-NULLABLE: Remove warning disable when nullable attributes are respected
             LazyInitializer.EnsureInitialized(ref s_currentActiveTasks, () => new Dictionary<int, Task>());
-#pragma warning restore CS8634
 
             int taskId = task.Id;
-            lock (s_currentActiveTasks!) // TODO-NULLABLE: Remove ! when nullable attributes are respected
+            lock (s_currentActiveTasks)
             {
                 s_currentActiveTasks[taskId] = task;
             }
@@ -1345,9 +1343,7 @@ namespace System.Threading.Tasks
         /// <returns>The initialized contingent properties object.</returns>
         internal ContingentProperties EnsureContingentPropertiesInitialized()
         {
-#pragma warning disable CS8634 // TODO-NULLABLE: Remove warning disable when nullable attributes are respected
-            return LazyInitializer.EnsureInitialized(ref m_contingentProperties, () => new ContingentProperties())!;
-#pragma warning restore CS8634
+            return LazyInitializer.EnsureInitialized(ref m_contingentProperties, () => new ContingentProperties());
         }
 
         /// <summary>

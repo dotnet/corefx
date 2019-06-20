@@ -303,9 +303,7 @@ namespace System.Resources
 
             lock (localResourceSets)
             {
-#pragma warning disable CS8619 // TODO-NULLABLE: Deconstruct KeyValuePair (https://github.com/dotnet/roslyn/issues/35131)
                 foreach ((_, ResourceSet resourceSet) in localResourceSets)
-#pragma warning restore CS8619
                 {
                     resourceSet.Close();
                 }
@@ -402,7 +400,7 @@ namespace System.Resources
                 throw new ArgumentNullException(nameof(culture));
 
             Dictionary<string, ResourceSet>? localResourceSets = _resourceSets;
-            ResourceSet rs;
+            ResourceSet? rs;
             if (localResourceSets != null)
             {
                 lock (localResourceSets)
@@ -489,7 +487,7 @@ namespace System.Resources
                 // that had resources.
                 foreach (CultureInfo updateCultureInfo in mgr)
                 {
-                    AddResourceSet(localResourceSets, updateCultureInfo.Name, ref rs!); // TODO-NULLABLE: Pass non-null string? to string ref (https://github.com/dotnet/roslyn/issues/34874)
+                    AddResourceSet(localResourceSets, updateCultureInfo.Name, ref rs);
 
                     // stop when we've added current or reached invariant (top of chain)
                     if (updateCultureInfo == foundCulture)
@@ -511,7 +509,7 @@ namespace System.Resources
             lock (localResourceSets)
             {
                 // If another thread added this culture, return that.
-                ResourceSet lostRace;
+                ResourceSet? lostRace;
                 if (localResourceSets.TryGetValue(cultureName, out lostRace))
                 {
                     if (!object.ReferenceEquals(lostRace, rs))

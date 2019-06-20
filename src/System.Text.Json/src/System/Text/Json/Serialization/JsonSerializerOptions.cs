@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
@@ -11,7 +12,7 @@ namespace System.Text.Json
     /// <summary>
     /// Provides options to be used with <see cref="JsonSerializer"/>.
     /// </summary>
-    public sealed class JsonSerializerOptions
+    public sealed partial class JsonSerializerOptions
     {
         internal const int BufferSizeDefault = 16 * 1024;
 
@@ -19,6 +20,7 @@ namespace System.Text.Json
 
         private readonly ConcurrentDictionary<Type, JsonClassInfo> _classes = new ConcurrentDictionary<Type, JsonClassInfo>();
         private readonly ConcurrentDictionary<Type, JsonPropertyInfo> _objectJsonProperties = new ConcurrentDictionary<Type, JsonPropertyInfo>();
+        private static ConcurrentDictionary<string, object> s_createRangeDelegates = new ConcurrentDictionary<string, object>();
         private ClassMaterializer _classMaterializerStrategy;
         private JsonNamingPolicy _dictionayKeyPolicy;
         private JsonNamingPolicy _jsonPropertyNamingPolicy;
@@ -35,7 +37,10 @@ namespace System.Text.Json
         /// <summary>
         /// Constructs a new <see cref="JsonSerializerOptions"/> instance.
         /// </summary>
-        public JsonSerializerOptions() { }
+        public JsonSerializerOptions()
+        {
+            Converters = new ConverterList(this);
+        }
 
         /// <summary>
         /// Defines whether an extra comma at the end of a list of JSON values in an object or array
@@ -165,8 +170,12 @@ namespace System.Text.Json
             {
                 VerifyMutable();
                 _maxDepth = value;
+                EffectiveMaxDepth = (value == 0 ? JsonReaderOptions.DefaultMaxDepth : value);
             }
         }
+
+        // The default is 64 because that is what the reader uses, so re-use the same JsonReaderOptions.DefaultMaxDepth constant.
+        internal int EffectiveMaxDepth { get; private set; } = JsonReaderOptions.DefaultMaxDepth;
 
         /// <summary>
         /// Specifies the policy used to convert a property's name on an object to another format, such as camel-casing.
@@ -276,7 +285,7 @@ namespace System.Text.Json
         {
             _haveTypesBeenCreated = true;
 
-            // todo: for performance, consider obtaining the type from s_defaultOptions and then cloning.
+            // todo: for performance and reduced instances, consider using the converters and JsonClassInfo from s_defaultOptions by cloning (or reference directly if no changes).
             if (!_classes.TryGetValue(classType, out JsonClassInfo result))
             {
                 result = _classes.GetOrAdd(classType, new JsonClassInfo(classType, this));
@@ -306,13 +315,11 @@ namespace System.Text.Json
             };
         }
 
+        internal delegate object ImmutableCreateRangeDelegate<T>(IEnumerable<T> items);
+        internal delegate object ImmutableDictCreateRangeDelegate<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> items);
+
         internal JsonPropertyInfo GetJsonPropertyInfoFromClassInfo(JsonClassInfo classInfo, JsonSerializerOptions options)
         {
-            if (classInfo.ClassType != ClassType.Object)
-            {
-                return classInfo.GetPolicyProperty();
-            }
-
             Type objectType = classInfo.Type;
 
             if (!_objectJsonProperties.TryGetValue(objectType, out JsonPropertyInfo propertyInfo))
@@ -324,7 +331,23 @@ namespace System.Text.Json
             return propertyInfo;
         }
 
-        private void VerifyMutable()
+        internal bool CreateRangeDelegatesContainsKey(string key)
+        {
+            return s_createRangeDelegates.ContainsKey(key);
+        }
+
+        internal bool TryGetCreateRangeDelegate(string delegateKey, out object createRangeDelegate)
+        {
+            return s_createRangeDelegates.TryGetValue(delegateKey, out createRangeDelegate) && createRangeDelegate != null;
+        }
+
+        internal bool TryAddCreateRangeDelegate(string key, object createRangeDelegate)
+        {
+            return s_createRangeDelegates.TryAdd(key, createRangeDelegate);
+        }
+
+
+        internal void VerifyMutable()
         {
             // The default options are hidden and thus should be immutable.
             Debug.Assert(this != s_defaultOptions);

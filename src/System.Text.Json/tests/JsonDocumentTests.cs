@@ -1141,7 +1141,9 @@ namespace System.Text.Json.Tests
                 Assert.Equal(JsonValueType.String, root.Type);
 
                 Assert.False(root.TryGetDateTime(out DateTime DateTimeVal));
+                Assert.Equal(default, DateTimeVal);
                 Assert.False(root.TryGetDateTimeOffset(out DateTimeOffset DateTimeOffsetVal));
+                Assert.Equal(default, DateTimeOffsetVal);
 
                 Assert.Throws<FormatException>(() => root.GetDateTime());
                 Assert.Throws<FormatException>(() => root.GetDateTimeOffset());
@@ -1192,6 +1194,7 @@ namespace System.Text.Json.Tests
                 Assert.Equal(JsonValueType.String, root.Type);
 
                 Assert.False(root.TryGetGuid(out Guid GuidVal));
+                Assert.Equal(default, GuidVal);
 
                 Assert.Throws<FormatException>(() => root.GetGuid());
             }
@@ -1641,10 +1644,15 @@ namespace System.Text.Json.Tests
                 const string NotPresent = "Not Present";
                 byte[] notPresentUtf8 = Encoding.UTF8.GetBytes(NotPresent);
 
-                Assert.False(root.TryGetProperty(NotPresent, out _));
-                Assert.False(root.TryGetProperty(NotPresent.AsSpan(), out _));
-                Assert.False(root.TryGetProperty(notPresentUtf8, out _));
-                Assert.False(root.TryGetProperty(new string('z', 512), out _));
+                JsonElement element;
+                Assert.False(root.TryGetProperty(NotPresent, out element));
+                Assert.Equal(default, element);
+                Assert.False(root.TryGetProperty(NotPresent.AsSpan(), out element));
+                Assert.Equal(default, element);
+                Assert.False(root.TryGetProperty(notPresentUtf8, out element));
+                Assert.Equal(default, element);
+                Assert.False(root.TryGetProperty(new string('z', 512), out element));
+                Assert.Equal(default, element);
 
                 Assert.Throws<KeyNotFoundException>(() => root.GetProperty(NotPresent));
                 Assert.Throws<KeyNotFoundException>(() => root.GetProperty(NotPresent.AsSpan()));
@@ -3157,7 +3165,6 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [ActiveIssue(38178)]
         [InlineData("\"hello\"", new char[1] { (char)0xDC01 })]    // low surrogate - invalid
         [InlineData("\"hello\"", new char[1] { (char)0xD801 })]    // high surrogate - missing pair
         public static void InvalidUTF16Search(string jsonString, char[] lookup)

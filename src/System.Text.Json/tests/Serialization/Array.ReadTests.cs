@@ -71,18 +71,12 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, arr[1][1]);
         }
 
-        [Fact]
-        public static void ReadByteArrayFail()
+        [Theory]
+        [InlineData(@"""1""")]
+        [InlineData(@"""A===""")]
+        [InlineData(@"[1, 2]")]  // Currently not support deserializing JSON arrays as byte[] - only Base64 string.
+        public static void ReadByteArrayFail(string json)
         {
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(@"""1"""));
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(@"""A==="""));
-        }
-
-        [Fact]
-        public static void ReadByteArrayAsJsonArrayFail()
-        {
-            string json = $"[1, 2]";
-            // Currently no support deserializing JSON arrays as byte[] - only Base64 string.
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(json));
         }
 
@@ -268,6 +262,27 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ReadClassWithObjectIEnumerable()
+        {
+            TestClassWithObjectIEnumerable obj = JsonSerializer.Parse<TestClassWithObjectIEnumerable>(TestClassWithObjectIEnumerable.s_data);
+            obj.Verify();
+        }
+
+        [Fact]
+        public static void ReadClassWithObjectIList()
+        {
+            TestClassWithObjectIList obj = JsonSerializer.Parse<TestClassWithObjectIList>(TestClassWithObjectIList.s_data);
+            obj.Verify();
+        }
+
+        [Fact]
+        public static void ReadClassWithObjectICollection()
+        {
+            TestClassWithObjectICollection obj = JsonSerializer.Parse<TestClassWithObjectICollection>(TestClassWithObjectICollection.s_data);
+            obj.Verify();
+        }
+
+        [Fact]
         public static void ReadClassWithObjectIEnumerableT()
         {
             TestClassWithObjectIEnumerableT obj = JsonSerializer.Parse<TestClassWithObjectIEnumerableT>(TestClassWithObjectIEnumerableT.s_data);
@@ -303,6 +318,32 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ReadClassWithGenericIEnumerable()
+        {
+            TestClassWithGenericIEnumerable obj = JsonSerializer.Parse<TestClassWithGenericIEnumerable>(TestClassWithGenericIEnumerable.s_data);
+            obj.Verify();
+        }
+
+        [Fact]
+        public static void ReadClassWithGenericIList()
+        {
+            TestClassWithGenericIList obj = JsonSerializer.Parse<TestClassWithGenericIList>(TestClassWithGenericIList.s_data);
+            obj.Verify();
+        }
+
+        [Fact]
+        public static void ReadClassWithGenericICollection()
+        {
+            TestClassWithGenericICollection obj = JsonSerializer.Parse<TestClassWithGenericICollection>(TestClassWithGenericICollection.s_data);
+        }
+
+        public static void ReadClassWithObjectISetT()
+        {
+            TestClassWithObjectISetT obj = JsonSerializer.Parse<TestClassWithObjectISetT>(TestClassWithObjectISetT.s_data);
+            obj.Verify();
+        }
+
+        [Fact]
         public static void ReadClassWithGenericIEnumerableT()
         {
             TestClassWithGenericIEnumerableT obj = JsonSerializer.Parse<TestClassWithGenericIEnumerableT>(TestClassWithGenericIEnumerableT.s_data);
@@ -334,6 +375,13 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadClassWithGenericIReadOnlyListT()
         {
             TestClassWithGenericIReadOnlyListT obj = JsonSerializer.Parse<TestClassWithGenericIReadOnlyListT>(TestClassWithGenericIReadOnlyListT.s_data);
+            obj.Verify();
+        }
+
+        [Fact]
+        public static void ReadClassWithGenericISetT()
+        {
+            TestClassWithGenericISetT obj = JsonSerializer.Parse<TestClassWithGenericISetT>(TestClassWithGenericISetT.s_data);
             obj.Verify();
         }
 

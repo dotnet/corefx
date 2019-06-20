@@ -157,11 +157,6 @@ namespace System
                                 {
                                     goto case '/';
                                 }
-                                else if (name[i] < '0' || name[i] > '9')
-                                {
-                                    // scope ID must only contain digits
-                                    return false;
-                                }
                             }
                             break;
                         case ']':
@@ -416,10 +411,15 @@ namespace System
                 int toIndex = NumberOfLabels - 1;
                 int fromIndex = index - 1;
 
-                for (int i = index - compressorIndex; i > 0; --i)
+                // if fromIndex and toIndex are the same, it means that "zero bits" are already in the correct place
+                // it happens for leading and trailing compression
+                if (fromIndex != toIndex)
                 {
-                    numbers[toIndex--] = numbers[fromIndex];
-                    numbers[fromIndex--] = 0;
+                    for (int i = index - compressorIndex; i > 0; --i)
+                    {
+                        numbers[toIndex--] = numbers[fromIndex];
+                        numbers[fromIndex--] = 0;
+                    }
                 }
             }
         }

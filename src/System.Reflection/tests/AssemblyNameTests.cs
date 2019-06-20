@@ -48,7 +48,7 @@ namespace System.Reflection.Tests
         public void Ctor_String(string name, string expectedName)
         {
             AssemblyName assemblyName = new AssemblyName(name);
-            Assert.Equal(expectedName.ToLowerInvariant(), assemblyName.Name.ToLowerInvariant());
+            Assert.Equal(expectedName, assemblyName.Name);
             Assert.Equal(ProcessorArchitecture.None, assemblyName.ProcessorArchitecture);
         }
 
@@ -224,7 +224,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UWP")]
         public static void GetAssemblyName()
         {
             AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => AssemblyName.GetAssemblyName(null));
@@ -246,7 +246,7 @@ namespace System.Reflection.Tests
         }        
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UWP")]
         public static void GetAssemblyName_LockedFile()
         {
             using (var tempFile = new TempFile(Path.GetTempFileName(), 100))
@@ -300,12 +300,7 @@ namespace System.Reflection.Tests
         public void FullName(string name, string expectedName)
         {
             AssemblyName assemblyName = new AssemblyName(name);
-
-            expectedName = expectedName.ToLowerInvariant();
-            string extended = $"{expectedName}, Culture=neutral, PublicKeyToken=null".ToLowerInvariant();
-            string afn = assemblyName.FullName.ToLowerInvariant();
-
-            Assert.True(afn == expectedName || afn == extended, $"Expected\n{afn} == {expectedName}\nor\n{afn} == {extended}");
+            Assert.Equal(expectedName, assemblyName.FullName);
         }
 
         [Fact]
@@ -407,10 +402,8 @@ namespace System.Reflection.Tests
             assemblyName.Version = version;
 
             string expected = "MyAssemblyName, Version=" + versionString;
-            string extended = expected + ", Culture=neutral, PublicKeyToken=null";
 
-            Assert.True(assemblyName.FullName == expected || assemblyName.FullName == extended,
-                        $"Expected\n{assemblyName.FullName} == {expected}\nor\n{assemblyName.FullName} == {extended}");
+            Assert.Equal(expected, assemblyName.FullName);
         }
 
         [Fact]
@@ -575,15 +568,6 @@ namespace System.Reflection.Tests
                 Assert.Throws<FileNotFoundException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_0, Version=1.1.1.1")));
             Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_3, Version=1.1.1.1")));
 
-            Constructor_String_LoadVersionTest_ReferenceVersionAssemblies();
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)] // delay type loading so that the test above can run first
-        private static void Constructor_String_LoadVersionTest_ReferenceVersionAssemblies()
-        {
-            // The purpose of this function is only to have a static reference to each of the test assemblies required by
-            // Constructor_String_LoadVersionTest so that the compiler does not optimize away the project references and ILC can
-            // include them in the closure. Otherwise, the test does not work on UapAot.
             Assert.NotNull(typeof(AssemblyVersion.Program_0_0_0_0));
             Assert.NotNull(typeof(AssemblyVersion.Program_1_0_0_0));
             Assert.NotNull(typeof(AssemblyVersion.Program_1_1_0_0));

@@ -2,16 +2,16 @@
   <PropertyGroup>
     <ProjectGuid>{A7922FA3-306A-41B9-B8DC-CC4DBE685A85}</ProjectGuid>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
-    <Configurations>netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition=" '$(TargetsNetFx)' != 'true'">
     <Compile Include="DiagnosticSourceEventSourceBridgeTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DiagnosticSourceTests.cs" />
     <Compile Include="ActivityTests.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition=" '$(TargetsNetFx)' == 'true'">
     <Compile Include="HttpHandlerDiagnosticListenerTests.cs" />
     <Compile Include="ActivityDateTimeTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.cs">
