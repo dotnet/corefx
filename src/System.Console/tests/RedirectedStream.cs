@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.DotNet.RemoteExecutor;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 
 public class RedirectedStream
@@ -43,7 +44,8 @@ public class RedirectedStream
         result = Console.IsErrorRedirected;
     }
 
-    //[Fact] // the CI system redirects stdout, so we can only really test the redirected behavior.
+    [Fact]
+    [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // the CI system redirects stdout, so we can't easily test non-redirected behavior
     public static void CheckNonRedirectedBehavior()
     {
         Assert.False(Console.IsInputRedirected);

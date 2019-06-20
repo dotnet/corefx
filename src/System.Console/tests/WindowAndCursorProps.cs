@@ -270,12 +270,14 @@ public class WindowAndCursorProps
         }, lengthOfTitle.ToString()).Dispose();
     }
 
+    [Fact]
     public static void Title_GetWindowsUap_ThrowsIOException()
     {
         Assert.Throws<IOException>(() => Console.Title);
     }
 
-    public static void Title_SetWindowsUap_ThrowsIOException(int lengthOfTitle)
+    [Fact]
+    public static void Title_SetWindowsUap_ThrowsIOException()
     {
         Assert.Throws<IOException>(() => Console.Title = "x");
     }
