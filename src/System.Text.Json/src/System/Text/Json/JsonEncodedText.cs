@@ -185,6 +185,9 @@ namespace System.Text.Json
         /// <remarks>
         /// Returns an empty string on a default instance of <see cref="JsonEncodedText"/>.
         /// </remarks>
+        /// <returns>
+        /// Returns the underlying UTF-16 encoded string.
+        /// </returns>
         public override string ToString()
             => _value ?? string.Empty;
 
