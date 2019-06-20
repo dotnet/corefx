@@ -528,6 +528,7 @@ namespace System.Reflection.Tests
         }
 
         [Theory]
+        [MemberData(nameof(ToString_TestData))]
         public void ToString(Assembly assembly, string expected)
         {
             Assert.Contains(expected, assembly.ToString());
@@ -657,6 +658,7 @@ namespace System.Reflection.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.ReflectionOnlyLoad() not supported on UWP")]
+        [Fact]
         public void AssemblyReflectionOnlyLoadFromString()
         {
             AssemblyName an = typeof(AssemblyTests).Assembly.GetName();
@@ -664,6 +666,7 @@ namespace System.Reflection.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.ReflectionOnlyLoad() not supported on UWP")]
+        [Fact]
         public void AssemblyReflectionOnlyLoadFromBytes()
         {
             Assembly assembly = typeof(AssemblyTests).Assembly;
@@ -672,6 +675,7 @@ namespace System.Reflection.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.ReflectionOnlyLoad() not supported on UWP")]
+        [Fact]
         public void AssemblyReflectionOnlyLoadFromNeg()
         {
             Assert.Throws<ArgumentNullException>(() => Assembly.ReflectionOnlyLoad((string)null));
