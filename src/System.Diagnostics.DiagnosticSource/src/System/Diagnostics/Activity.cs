@@ -292,7 +292,7 @@ namespace System.Diagnostics
         {
             if (string.IsNullOrEmpty(operationName))
             {
-                NotifyError(new ArgumentException($"{nameof(operationName)} must not be null or empty"));
+                NotifyError(new ArgumentException(SR.OperationNameInvalid));
                 return;
             }
 
@@ -354,15 +354,15 @@ namespace System.Diagnostics
         {
             if (Parent != null)
             {
-                NotifyError(new InvalidOperationException($"Trying to set {nameof(ParentId)} on activity which has {nameof(Parent)}"));
+                NotifyError(new InvalidOperationException(SR.SetParentIdOnActivityWithParent));
             }
             else if (ParentId != null || _parentSpanId != null)
             {
-                NotifyError(new InvalidOperationException($"{nameof(ParentId)} is already set"));
+                NotifyError(new InvalidOperationException(SR.ParentIdAlreadySet));
             }
             else if (string.IsNullOrEmpty(parentId))
             {
-                NotifyError(new ArgumentException($"{nameof(parentId)} must not be null or empty"));
+                NotifyError(new ArgumentException(SR.ParentIdInvalid));
             }
             else
             {
@@ -379,11 +379,11 @@ namespace System.Diagnostics
         {
             if (Parent != null)
             {
-                NotifyError(new InvalidOperationException($"Trying to set {nameof(ParentId)} on activity which has {nameof(Parent)}"));
+                NotifyError(new InvalidOperationException(SR.SetParentIdOnActivityWithParent));
             }
             else if (ParentId != null || _parentSpanId != null)
             {
-                NotifyError(new InvalidOperationException($"{nameof(ParentId)} is already set"));
+                NotifyError(new InvalidOperationException(SR.ParentIdAlreadySet));
             }
             else
             {
@@ -403,7 +403,7 @@ namespace System.Diagnostics
         {
             if (startTimeUtc.Kind != DateTimeKind.Utc)
             {
-                NotifyError(new InvalidOperationException($"{nameof(startTimeUtc)} is not UTC"));
+                NotifyError(new InvalidOperationException(SR.StartTimeNotUtc));
             }
             else
             {
@@ -423,7 +423,7 @@ namespace System.Diagnostics
         {
             if (endTimeUtc.Kind != DateTimeKind.Utc)
             {
-                NotifyError(new InvalidOperationException($"{nameof(endTimeUtc)} is not UTC"));
+                NotifyError(new InvalidOperationException(SR.EndTimeNotUtc));
             }
             else
             {
@@ -451,7 +451,7 @@ namespace System.Diagnostics
             // Has the ID already been set (have we called Start()).  
             if (_id != null || _spanId != null)
             {
-                NotifyError(new InvalidOperationException("Trying to start an Activity that was already started"));
+                NotifyError(new InvalidOperationException(SR.ActivityAlreadyStarted));
             }
             else
             {
@@ -507,7 +507,7 @@ namespace System.Diagnostics
         {
             if (Id == null)
             {
-                NotifyError(new InvalidOperationException("Trying to stop an Activity that was not started"));
+                NotifyError(new InvalidOperationException(SR.ActivityNotStarted));
                 return;
             }
 
@@ -676,7 +676,7 @@ namespace System.Diagnostics
             set
             {
                 if (!(ActivityIdFormat.Hierarchical <= value && value <= ActivityIdFormat.W3C))
-                    throw new ArgumentException($"value must be a valid ActivityIDFormat value");
+                    throw new ArgumentException(SR.ActivityIdFormatInvalid);
                 s_defaultIdFormat = value;
             }
         }
@@ -689,7 +689,7 @@ namespace System.Diagnostics
         {
             if (_id != null || _spanId == null)
             {
-                NotifyError(new InvalidOperationException("Can not change format for an activity that was already started"));
+                NotifyError(new InvalidOperationException(SR.SetFormatOnStartedActivity));
             }
             else
             {
