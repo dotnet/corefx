@@ -630,8 +630,7 @@ namespace System.IO.Tests
         private static char[] NewWildcards = new char[] { '<', '>', '\"' };
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void WindowsSearchPatternInvalid_Core()
+        public void SearchPatternInvalid_Core()
         {
             GetEntries(TestDirectory, "|");
 
@@ -640,39 +639,42 @@ namespace System.IO.Tests
                 switch (invalidChar)
                 {
                     case '\\':
-                    case '/':
-                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
+                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(TestDirectory, string.Format("te{0}st", invalidChar.ToString())));
                         break;
+
+                    case '/':
+                        if (PlatformDetection.IsWindows)
+                        {
+                            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(TestDirectory, string.Format("te{0}st", invalidChar.ToString())));
+                        }
+                        else
+                        {
+                            GetEntries(TestDirectory, string.Format("te{0}st", invalidChar.ToString()));
+                        }
+                        break;
+
                     case '\0':
                         Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "\0"));
                         break;
+
                     default:
-                        GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
+                        GetEntries(TestDirectory, string.Format("te{0}st", invalidChar.ToString()));
                         break;
                 }
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid search patterns throw
+        [Fact] // .NET Core doesn't throw on wildcards
         public void WindowsSearchPatternInvalid_Wildcards_netcoreapp()
         {
             Assert.All(OldWildcards, invalidChar =>
             {
-                GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
+                GetEntries(TestDirectory, string.Format("te{0}st", invalidChar.ToString()));
             });
             Assert.All(NewWildcards, invalidChar =>
             {
-                GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
+                GetEntries(TestDirectory, string.Format("te{0}st", invalidChar.ToString()));
             });
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid search patterns throws no exception 
-        public void UnixSearchPatternInvalid()
-        {
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "\0"));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, string.Format("te{0}st", "\0".ToString())));
         }
 
         [Fact]

@@ -184,11 +184,11 @@ namespace System.IO
             switch (searchTarget)
             {
                 case SearchTarget.Directories:
-                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, _isNormalized, options);
+                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, options, _isNormalized);
                 case SearchTarget.Files:
-                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, _isNormalized, options);
+                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, options, _isNormalized);
                 case SearchTarget.Both:
-                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, _isNormalized, options);
+                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, options, _isNormalized);
                 default:
                     throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(searchTarget));
             }

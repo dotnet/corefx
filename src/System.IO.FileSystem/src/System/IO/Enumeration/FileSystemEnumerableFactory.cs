@@ -166,8 +166,8 @@ namespace System.IO.Enumeration
         internal static IEnumerable<FileInfo> FileInfos(
             string directory,
             string expression,
-            bool isNormalized,
-            EnumerationOptions options)
+            EnumerationOptions options,
+            bool isNormalized)
         {
              return new FileSystemEnumerable<FileInfo>(
                 directory,
@@ -183,8 +183,8 @@ namespace System.IO.Enumeration
         internal static IEnumerable<DirectoryInfo> DirectoryInfos(
             string directory,
             string expression,
-            bool isNormalized,
-            EnumerationOptions options)
+            EnumerationOptions options,
+            bool isNormalized)
         {
             return new FileSystemEnumerable<DirectoryInfo>(
                directory,
@@ -200,8 +200,8 @@ namespace System.IO.Enumeration
         internal static IEnumerable<FileSystemInfo> FileSystemInfos(
             string directory,
             string expression,
-            bool isNormalized,
-            EnumerationOptions options)
+            EnumerationOptions options,
+            bool isNormalized)
         {
             return new FileSystemEnumerable<FileSystemInfo>(
                directory,
