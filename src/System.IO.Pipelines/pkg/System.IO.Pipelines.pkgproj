@@ -1,5 +1,13 @@
 ﻿<Project DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
+  <PropertyGroup>
+<!--     This package will intentionally have a ref for netcoreapp3.0 only, in order to avoid problems when targetting dektop with RAR.
+    For more info, please check issues:
+     - https://github.com/dotnet/corefx/issues/32457  -> Why reference assets were removed from the package
+     - https://github.com/aspnet/AspNetCore/issues/11206  -> Why ASP.NET required a ref to be added back for netcoreapp
+     - https://github.com/dotnet/corefx/issues/38729  -> Issue tracking to work of readding a ref to netcoreapp -->
+    <SkipExcludeCompileCheck>true</SkipExcludeCompileCheck>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ref\System.IO.Pipelines.csproj">
       <SupportedFramework>net461;netcoreapp2.0;uap10.0.16299;$(AllXamarinFrameworks)</SupportedFramework>
@@ -7,10 +15,5 @@
     <ProjectReference Include="..\src\System.IO.Pipelines.csproj" />
     <HarvestIncludePaths Include="lib/netstandard1.3" />
   </ItemGroup>
-  <PropertyGroup>
-    <!-- Excluding the reference assets on the package so that RAR will see the run-time conflicts at build time in order to
-    generate the right binding redirects when targeting Desktop. https://github.com/dotnet/corefx/issues/32457 -->
-    <ExcludeReferenceAssets>true</ExcludeReferenceAssets>
-  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>

@@ -55,7 +55,7 @@
           Returns="$(DocumentationFile)"/>
 
   <!-- This target will be moved into buildtools. Checked in here for now to add validationand in order not to block buildtools ingestion. -->
-  <Target Name="ValidateExcludeCompileDesktop" AfterTargets="GetPackageDependencies" Inputs="%(Dependency.Identity);%(Dependency.TargetFramework)" Outputs="unused">
+  <Target Name="ValidateExcludeCompileDesktop" Condition="'$(SkipExcludeCompileCheck)' != 'true'" AfterTargets="GetPackageDependencies" Inputs="%(Dependency.Identity);%(Dependency.TargetFramework)" Outputs="unused">
     <PropertyGroup>
       <_excludeCompile Condition="@(Dependency->WithMetadataValue('Exclude', 'Compile')->Count()) == @(Dependency->Count())">true</_excludeCompile>
     </PropertyGroup>
