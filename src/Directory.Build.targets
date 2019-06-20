@@ -54,6 +54,4 @@
   <Target Name="GetDocumentationFile"
           Returns="$(DocumentationFile)"/>
 
-  <Import Project="..\eng\Packaging.targets" />
-
 </Project>
