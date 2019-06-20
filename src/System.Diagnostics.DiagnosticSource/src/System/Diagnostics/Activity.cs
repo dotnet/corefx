@@ -684,7 +684,7 @@ namespace System.Diagnostics
         /// </summary>
         public Activity SetIdFormat(ActivityIdFormat format)
         {
-            if (_id != null || _spanId == null)
+            if (_id != null || _spanId != null)
             {
                 NotifyError(new InvalidOperationException(SR.SetFormatOnStartedActivity));
             }
