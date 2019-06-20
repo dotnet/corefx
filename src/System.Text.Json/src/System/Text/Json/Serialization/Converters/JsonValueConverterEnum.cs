@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
@@ -18,7 +18,7 @@ namespace System.Text.Json.Serialization.Converters
 
         private readonly EnumConverterOptions _converterOptions;
         private readonly JsonNamingPolicy _namingPolicy;
-        private readonly Dictionary<string, string> _nameCache;
+        private readonly ConcurrentDictionary<string, string> _nameCache;
 
         public override bool CanConvert(Type type)
         {
@@ -35,7 +35,7 @@ namespace System.Text.Json.Serialization.Converters
             _converterOptions = options;
             if (namingPolicy != null)
             {
-                _nameCache = new Dictionary<string, string>();
+                _nameCache = new ConcurrentDictionary<string, string>();
             }
             else
             {
@@ -170,7 +170,7 @@ namespace System.Text.Json.Serialization.Converters
                     writer.WriteStringValue(transformed);
                     if (_nameCache != null)
                     {
-                        _nameCache.Add(original, transformed);
+                        _nameCache.TryAdd(original, transformed);
                     }
                     return;
                 }
@@ -178,7 +178,7 @@ namespace System.Text.Json.Serialization.Converters
 
             if (!_converterOptions.HasFlag(EnumConverterOptions.AllowNumbers))
             {
-                ThrowHelper.ThrowFormatException();
+                ThrowHelper.ThrowJsonException();
             }
 
             switch (s_enumTypeCode)
@@ -208,7 +208,7 @@ namespace System.Text.Json.Serialization.Converters
                     writer.WriteNumberValue(Unsafe.As<T, sbyte>(ref value));
                     break;
                 default:
-                    ThrowHelper.ThrowFormatException();
+                    ThrowHelper.ThrowJsonException();
                     break;
             }
         }
@@ -231,7 +231,7 @@ namespace System.Text.Json.Serialization.Converters
                     writer.WriteString(propertyName, transformed);
                     if (_nameCache != null)
                     {
-                        _nameCache.Add(original, transformed);
+                        _nameCache.TryAdd(original, transformed);
                     }
                     return;
                 }
@@ -239,7 +239,7 @@ namespace System.Text.Json.Serialization.Converters
 
             if (!_converterOptions.HasFlag(EnumConverterOptions.AllowNumbers))
             {
-                ThrowHelper.ThrowFormatException();
+                ThrowHelper.ThrowJsonException();
             }
 
             switch (s_enumTypeCode)
@@ -269,7 +269,7 @@ namespace System.Text.Json.Serialization.Converters
                     writer.WriteNumber(propertyName, Unsafe.As<T, sbyte>(ref value));
                     break;
                 default:
-                    ThrowHelper.ThrowFormatException();
+                    ThrowHelper.ThrowJsonException();
                     break;
             }
         }

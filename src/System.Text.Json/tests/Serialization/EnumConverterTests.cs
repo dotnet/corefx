@@ -45,7 +45,7 @@ namespace System.Text.Json.Serialization.Tests
             // Not permitting integers should throw
             options = new JsonSerializerOptions();
             options.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false));
-            Assert.Throws<FormatException>(() => JsonSerializer.ToString((DayOfWeek)(-1), options));
+            Assert.Throws<JsonException>(() => JsonSerializer.ToString((DayOfWeek)(-1), options));
         }
 
         public class ToLower : JsonNamingPolicy
@@ -106,7 +106,7 @@ namespace System.Text.Json.Serialization.Tests
             // Not permitting integers should throw
             options = new JsonSerializerOptions();
             options.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false));
-            Assert.Throws<FormatException>(() => JsonSerializer.ToString((FileAttributes)(-1), options));
+            Assert.Throws<JsonException>(() => JsonSerializer.ToString((FileAttributes)(-1), options));
         }
 
         public class FileState
