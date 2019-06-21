@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 
 using Xunit;
 using Xunit.Abstractions;
-using System.Collections;
 
 namespace System.Net.Http.Functional.Tests
 {
