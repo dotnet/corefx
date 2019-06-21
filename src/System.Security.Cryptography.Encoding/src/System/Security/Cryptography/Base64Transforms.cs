@@ -121,7 +121,8 @@ namespace System.Security.Cryptography
         }
 
         // Converting from Base64 generates 3 bytes output from each 4 bytes input block
-        public int InputBlockSize => 4;
+        private const int Base64InputBlockSize = 4;
+        public int InputBlockSize => 1;
         public int OutputBlockSize => 3;
         public bool CanTransformMultipleBlocks => false;
         public virtual bool CanReuseTransform => true;
@@ -137,10 +138,10 @@ namespace System.Security.Cryptography
             if (outputBuffer == null)
                 ThrowHelper.ThrowArgumentNull(ThrowHelper.ExceptionArgument.outputBuffer);
 
-            // The common case is inputCount = 4
+            // The common case is inputCount = InputBlockSize
             byte[] tmpBufferArray = null;
-            Span<byte> tmpBuffer = stackalloc byte[4];
-            if (inputCount > 4)
+            Span<byte> tmpBuffer = stackalloc byte[InputBlockSize];
+            if (inputCount > InputBlockSize)
             {
                 tmpBuffer = tmpBufferArray = CryptoPool.Rent(inputCount);
             }
@@ -149,7 +150,7 @@ namespace System.Security.Cryptography
             int bytesToTransform = _inputIndex + tmpBuffer.Length;
 
             // To little data to decode: save data to _inputBuffer, so it can be transformed later
-            if (bytesToTransform < InputBlockSize)
+            if (bytesToTransform < Base64InputBlockSize)
             {
                 tmpBuffer.CopyTo(_inputBuffer.AsSpan(_inputIndex));
 
@@ -181,10 +182,10 @@ namespace System.Security.Cryptography
                 return Array.Empty<byte>();
             }
 
-            // The common case is inputCount <= 4
+            // The common case is inputCount <= Base64InputBlockSize
             byte[] tmpBufferArray = null;
-            Span<byte> tmpBuffer = stackalloc byte[4];
-            if (inputCount > 4)
+            Span<byte> tmpBuffer = stackalloc byte[Base64InputBlockSize];
+            if (inputCount > Base64InputBlockSize)
             {
                 tmpBuffer = tmpBufferArray = CryptoPool.Rent(inputCount);
             }
@@ -193,7 +194,7 @@ namespace System.Security.Cryptography
             int bytesToTransform = _inputIndex + tmpBuffer.Length;
 
             // To little data to decode
-            if (bytesToTransform < InputBlockSize)
+            if (bytesToTransform < Base64InputBlockSize)
             {
                 // reinitialize the transform
                 Reset();
