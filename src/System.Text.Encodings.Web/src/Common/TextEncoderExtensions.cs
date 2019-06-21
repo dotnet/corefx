@@ -32,9 +32,8 @@ namespace System.Text.Encodings.Web
             // Now invoke the delegate once. The reason for this is that the delegate probably
             // points to the pre-jit stub rather than the final codegen for the method, which
             // means that invocations of this delegate will incur an unnecessary call back into
-            // the VM. Invoking the delegate forces JIT to take place, and since the method is
-            // marked with "aggressive inlining" it should result in the most optimal codegen
-            // possible.
+            // the VM. Invoking the delegate forces JIT to take place now, so a future delegate
+            // will point directly to the codegen rather than the pre-jit stub.
 
             del(HtmlEncoder.Default, ReadOnlySpan<byte>.Empty, Span<byte>.Empty, out _, out _, false);
 

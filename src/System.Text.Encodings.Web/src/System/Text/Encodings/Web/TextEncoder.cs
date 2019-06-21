@@ -503,12 +503,8 @@ namespace System.Text.Encodings.Web
         /// <summary>
         /// Shim function which can call virtual method <see cref="EncodeUtf8"/> using fast dispatch.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         internal static OperationStatus EncodeUtf8Shim(TextEncoder encoder, ReadOnlySpan<byte> utf8Source, Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock)
         {
-            // This method is marked with "aggressive optimization" so that when the delegate
-            // is created to it, it'll point directly to the codegen rather than the pre-jit stub.
-
             return encoder.EncodeUtf8(utf8Source, utf8Destination, out bytesConsumed, out bytesWritten, isFinalBlock);
         }
 
@@ -616,12 +612,8 @@ namespace System.Text.Encodings.Web
         /// <summary>
         /// Shim function which can call virtual method <see cref="FindFirstCharacterToEncodeUtf8"/> using fast dispatch.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         internal static int FindFirstCharacterToEncodeUtf8Shim(TextEncoder encoder, ReadOnlySpan<byte> utf8Text)
         {
-            // This method is marked with "aggressive optimization" so that when the delegate
-            // is created to it, it'll point directly to the codegen rather than the pre-jit stub.
-
             return encoder.FindFirstCharacterToEncodeUtf8(utf8Text);
         }
 
