@@ -3,11 +3,11 @@ namespace System.Diagnostics.Tracing
     public abstract partial class DiagnosticCounter : System.IDisposable
     {
         internal DiagnosticCounter() { }
-        public string? DisplayName { get { throw null; } set { } }
-        public string? DisplayUnits { get { throw null; } set { } }
+        public string DisplayName { get { throw null; } set { } }
+        public string DisplayUnits { get { throw null; } set { } }
         public System.Diagnostics.Tracing.EventSource EventSource { get { throw null; } }
         public string Name { get { throw null; } }
-        public void AddMetadata(string key, string value) { }
+        public void AddMetadata(string key, string? value) { }
         public void Dispose() { }
     }
     public partial class PollingCounter : System.Diagnostics.Tracing.DiagnosticCounter

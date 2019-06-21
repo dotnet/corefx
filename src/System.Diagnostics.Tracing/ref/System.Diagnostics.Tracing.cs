@@ -48,7 +48,7 @@ namespace System.Diagnostics.Tracing
     public partial class EventCommandEventArgs : System.EventArgs
     {
         internal EventCommandEventArgs() { }
-        public System.Collections.Generic.IDictionary<string, string>? Arguments { get { throw null; } }
+        public System.Collections.Generic.IDictionary<string, string?>? Arguments { get { throw null; } }
         public System.Diagnostics.Tracing.EventCommand Command { get { throw null; } }
         public bool DisableEvent(int eventId) { throw null; }
         public bool EnableEvent(int eventId) { throw null; }
@@ -118,7 +118,7 @@ namespace System.Diagnostics.Tracing
         public virtual void Dispose() { }
         public void EnableEvents(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventLevel level) { }
         public void EnableEvents(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords matchAnyKeyword) { }
-        public void EnableEvents(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords matchAnyKeyword, System.Collections.Generic.IDictionary<string, string>? arguments) { }
+        public void EnableEvents(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords matchAnyKeyword, System.Collections.Generic.IDictionary<string, string?>? arguments) { }
         protected static int EventSourceIndex(System.Diagnostics.Tracing.EventSource eventSource) { throw null; }
         protected internal virtual void OnEventSourceCreated(System.Diagnostics.Tracing.EventSource eventSource) { }
         protected internal virtual void OnEventWritten(System.Diagnostics.Tracing.EventWrittenEventArgs eventData) { }
@@ -174,12 +174,12 @@ namespace System.Diagnostics.Tracing
         public bool IsEnabled(System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords keywords) { throw null; }
         public bool IsEnabled(System.Diagnostics.Tracing.EventLevel level, System.Diagnostics.Tracing.EventKeywords keywords, System.Diagnostics.Tracing.EventChannel channel) { throw null; }
         protected virtual void OnEventCommand(System.Diagnostics.Tracing.EventCommandEventArgs command) { }
-        public static void SendCommand(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventCommand command, System.Collections.Generic.IDictionary<string, string>? commandArguments) { }
+        public static void SendCommand(System.Diagnostics.Tracing.EventSource eventSource, System.Diagnostics.Tracing.EventCommand command, System.Collections.Generic.IDictionary<string, string?>? commandArguments) { }
         public static void SetCurrentThreadActivityId(System.Guid activityId) { }
         public static void SetCurrentThreadActivityId(System.Guid activityId, out System.Guid oldActivityThatWillContinue) { throw null; }
         public override string ToString() { throw null; }
-        public void Write(string eventName) { }
-        public void Write(string eventName, System.Diagnostics.Tracing.EventSourceOptions options) { }
+        public void Write(string? eventName) { }
+        public void Write(string? eventName, System.Diagnostics.Tracing.EventSourceOptions options) { }
         protected void WriteEvent(int eventId) { }
         protected void WriteEvent(int eventId, byte[]? arg1) { }
         protected void WriteEvent(int eventId, int arg1) { }
@@ -191,7 +191,7 @@ namespace System.Diagnostics.Tracing
         protected void WriteEvent(int eventId, long arg1, long arg2) { }
         protected void WriteEvent(int eventId, long arg1, long arg2, long arg3) { }
         protected void WriteEvent(int eventId, long arg1, string? arg2) { }
-        protected void WriteEvent(int eventId, params object[] args) { }
+        protected void WriteEvent(int eventId, params object?[] args) { }
         protected void WriteEvent(int eventId, string? arg1) { }
         protected void WriteEvent(int eventId, string? arg1, int arg2) { }
         protected void WriteEvent(int eventId, string? arg1, int arg2, int arg3) { }
@@ -200,7 +200,7 @@ namespace System.Diagnostics.Tracing
         protected void WriteEvent(int eventId, string? arg1, string? arg2, string? arg3) { }
         [System.CLSCompliantAttribute(false)]
         protected unsafe void WriteEventCore(int eventId, int eventDataCount, System.Diagnostics.Tracing.EventSource.EventData* data) { }
-        protected void WriteEventWithRelatedActivityId(int eventId, System.Guid relatedActivityId, params object[] args) { }
+        protected void WriteEventWithRelatedActivityId(int eventId, System.Guid relatedActivityId, params object?[] args) { }
         [System.CLSCompliantAttribute(false)]
         protected unsafe void WriteEventWithRelatedActivityIdCore(int eventId, System.Guid* relatedActivityId, int eventDataCount, System.Diagnostics.Tracing.EventSource.EventData* data) { }
         public void Write<T>(string? eventName, System.Diagnostics.Tracing.EventSourceOptions options, T data) { }
