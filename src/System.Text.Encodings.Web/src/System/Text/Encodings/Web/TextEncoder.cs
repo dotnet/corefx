@@ -324,138 +324,19 @@ namespace System.Text.Encodings.Web
             }
         }
 
-        public unsafe virtual OperationStatus Encode(ReadOnlySpan<char> source, Span<char> destination, out int charsConsumed, out int charsWritten, bool isFinalBlock = true)
-        {
-            // Optimization: Detect how much "doesn't require escaping" data exists at the beginning of the buffer,
-            // and memcpy it directly to the destination.
-
-            int idx = FindFirstCharacterToEncode(source);
-
-            int numCharsToCopy = idx;
-            if (numCharsToCopy < 0)
-            {
-                numCharsToCopy = source.Length;
-            }
-
-            if (!source.Slice(0, numCharsToCopy).TryCopyTo(destination))
-            {
-                // There wasn't enough room in the destination to copy over the entire source buffer.
-                // We'll instead copy over as much as we can and return Incomplete. We do need to
-                // account for the fact that we don't want to truncate a multi-char UTF-16 subsequence
-                // mid-sequence (since a subsequent slice and call to Encode would produce invalid
-                // data).
-
-                source = source.Slice(destination.Length);
-                if (!source.IsEmpty && UnicodeUtility.IsHighSurrogateCodePoint(source[source.Length - 1]))
-                {
-                    source = source.Slice(0, source.Length - 1);
-                }
-
-                source.CopyTo(destination); // guaranteed not to fail since we sliced earlier
-                charsConsumed = source.Length;
-                charsWritten = source.Length;
-                return OperationStatus.DestinationTooSmall;
-            }
-
-            // If we copied over all of the input data, success!
-
-            if (numCharsToCopy == source.Length)
-            {
-                charsConsumed = numCharsToCopy;
-                charsWritten = numCharsToCopy;
-                return OperationStatus.Done;
-            }
-
-            // There's data that must be encoded. Fall back to the scalar-by-scalar slow path.
-
-            int originalSourceLength = source.Length;
-            int originalDestinationLength = destination.Length;
-
-            source = source.Slice(numCharsToCopy);
-            destination = destination.Slice(numCharsToCopy);
-
-            while (!source.IsEmpty)
-            {
-                OperationStatus opStatus = UnicodeHelpers.DecodeScalarValueFromUtf16(source, out uint nextScalarValue, out int charsConsumedThisIteration);
-
-                switch (opStatus)
-                {
-                    case OperationStatus.Done:
-
-                        if (WillEncode((int)nextScalarValue))
-                        {
-                            goto default; // source data must be transcoded
-                        }
-                        else
-                        {
-                            // Source data can be copied as-is. Attempt to memcpy it to the destination buffer.
-
-                            if (source.Slice(0, charsConsumedThisIteration).TryCopyTo(destination))
-                            {
-                                destination = destination.Slice(charsConsumedThisIteration);
-                            }
-                            else
-                            {
-                                goto ReturnDestinationTooSmall;
-                            }
-                        }
-
-                        break;
-
-                    case OperationStatus.NeedMoreData:
-
-                        if (isFinalBlock)
-                        {
-                            goto default; // treat this as a normal invalid subsequence
-                        }
-                        else
-                        {
-                            goto ReturnNeedMoreData;
-                        }
-
-                    default:
-
-                        // This code path is hit for ill-formed input data (where decoding has replaced it with U+FFFD)
-                        // and for well-formed input data that must be escaped.
-
-                        fixed (char* pDestination = &MemoryMarshal.GetReference(destination))
-                        {
-                            if (TryEncodeUnicodeScalar((int)nextScalarValue, pDestination, destination.Length, out int charsWrittenJustNow))
-                            {
-                                destination = destination.Slice(charsWrittenJustNow); // advance destination buffer
-                            }
-                            else
-                            {
-                                goto ReturnDestinationTooSmall; // Not enough room in the destination buffer to write the transcoded output.
-                            }
-                        }
-
-                        break;
-                }
-
-                source = source.Slice(charsConsumedThisIteration);
-            }
-
-            // Input buffer has been fully processed!
-
-            charsConsumed = originalSourceLength;
-            charsWritten = originalDestinationLength - destination.Length;
-            return OperationStatus.Done;
-
-        ReturnDestinationTooSmall:
-
-            charsConsumed = originalSourceLength - source.Length;
-            charsWritten = originalDestinationLength - destination.Length;
-            return OperationStatus.DestinationTooSmall;
-
-        ReturnNeedMoreData:
-
-            charsConsumed = originalSourceLength - source.Length;
-            charsWritten = originalDestinationLength - destination.Length;
-            return OperationStatus.NeedMoreData;
-        }
-
-        public unsafe virtual OperationStatus EncodeUtf8(ReadOnlySpan<byte> utf8Source, Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock = true)
+        /// <summary>
+        /// Encodes the supplied UTF-8 text.
+        /// </summary>
+        /// <param name="utf8Source">A source buffer containing the UTF-8 text to encode.</param>
+        /// <param name="utf8Destination">The destination buffer to which the encoded form of <paramref name="utf8Source"/>
+        /// will be written.</param>
+        /// <param name="bytesConsumed">The number of bytes consumed from the <paramref name="utf8Source"/> buffer.</param>
+        /// <param name="bytesWritten">The number of bytes written to the <paramref name="utf8Destination"/> buffer.</param>
+        /// <param name="isFinalBlock"><see langword="true"/> if there is further source data that needs to be encoded;
+        /// <see langword="false"/> if there is no further source data that needs to be encoded.</param>
+        /// <returns>An <see cref="OperationStatus"/> describing the result of the encoding operation.</returns>
+        /// <remarks>The buffers <paramref name="utf8Source"/> and <paramref name="utf8Destination"/> must not overlap.</remarks>
+        internal unsafe virtual OperationStatus EncodeUtf8(ReadOnlySpan<byte> utf8Source, Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock = true)
         {
             // Optimization: Detect how much "doesn't require escaping" data exists at the beginning of the buffer,
             // and memcpy it directly to the destination.
@@ -469,7 +350,7 @@ namespace System.Text.Encodings.Web
             if (!utf8Source.Slice(0, numBytesToCopy).TryCopyTo(utf8Destination))
             {
                 // There wasn't enough room in the destination to copy over the entire source buffer.
-                // We'll instead copy over as much as we can and return Incomplete. We do need to
+                // We'll instead copy over as much as we can and return DestinationTooSmall. We do need to
                 // account for the fact that we don't want to truncate a multi-byte UTF-8 subsequence
                 // mid-sequence (since a subsequent slice and call to EncodeUtf8 would produce invalid
                 // data).
@@ -489,7 +370,9 @@ namespace System.Text.Encodings.Web
                 // If we got to this point, either somebody mutated the input buffer out from under us, or
                 // the FindFirstCharacterToEncodeUtf8 method was overridden incorrectly such that it attempted
                 // to skip over ill-formed data. In either case we don't know how to perform a partial memcpy
-                // so we shouldn't do anything at all.
+                // so we shouldn't do anything at all. We'll return DestinationTooSmall here since the caller
+                // can resolve the issue by increasing the size of the destination buffer so that it's at least
+                // as large as the input buffer, which would skip over this entire code path.
 
                 bytesConsumed = 0;
                 bytesWritten = 0;
@@ -617,6 +500,18 @@ namespace System.Text.Encodings.Web
             return OperationStatus.InvalidData;
         }
 
+        /// <summary>
+        /// Shim function which can call virtual method <see cref="EncodeUtf8"/> using fast dispatch.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        internal static OperationStatus EncodeUtf8Shim(TextEncoder encoder, ReadOnlySpan<byte> utf8Source, Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock)
+        {
+            // This method is marked with "aggressive optimization" so that when the delegate
+            // is created to it, it'll point directly to the codegen rather than the pre-jit stub.
+
+            return encoder.EncodeUtf8(utf8Source, utf8Destination, out bytesConsumed, out bytesWritten, isFinalBlock);
+        }
+
         private unsafe void EncodeCore(TextWriter output, char* value, int valueLength)
         {
             Debug.Assert(value != null & output != null);
@@ -685,8 +580,17 @@ namespace System.Text.Encodings.Web
             }
         }
 
+        /// <summary>
+        /// Given a UTF-8 text input buffer, finds the first element in the input buffer which would be
+        /// escaped by the current encoder instance.
+        /// </summary>
+        /// <param name="utf8Text">The UTF-8 text input buffer to search.</param>
+        /// <returns>
+        /// The index of the first element in <paramref name="utf8Text"/> which would be escaped by the
+        /// current encoder instance, or -1 if no data in <paramref name="utf8Text"/> requires escaping.
+        /// </returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public virtual int FindFirstCharacterToEncodeUtf8(ReadOnlySpan<byte> utf8Text)
+        internal virtual int FindFirstCharacterToEncodeUtf8(ReadOnlySpan<byte> utf8Text)
         {
             int originalUtf8TextLength = utf8Text.Length;
 
@@ -707,6 +611,18 @@ namespace System.Text.Encodings.Web
             }
 
             return -1; // no input data needs to be escaped
+        }
+
+        /// <summary>
+        /// Shim function which can call virtual method <see cref="FindFirstCharacterToEncodeUtf8"/> using fast dispatch.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        internal static int FindFirstCharacterToEncodeUtf8Shim(TextEncoder encoder, ReadOnlySpan<byte> utf8Text)
+        {
+            // This method is marked with "aggressive optimization" so that when the delegate
+            // is created to it, it'll point directly to the codegen rather than the pre-jit stub.
+
+            return encoder.FindFirstCharacterToEncodeUtf8(utf8Text);
         }
 
         internal static unsafe bool TryCopyCharacters(char[] source, char* destination, int destinationLength, out int numberOfCharactersWritten)
