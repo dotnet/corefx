@@ -57,6 +57,20 @@ namespace System.Net.Http
             return false;
         }
 
+        internal static bool IsSessionAuthenticationChallenge(HttpResponseMessage response)
+        {
+            HttpHeaderValueCollection<AuthenticationHeaderValue> authenticationHeaderValues = GetResponseAuthenticationHeaderValues(response, false);
+            foreach (AuthenticationHeaderValue ahv in authenticationHeaderValues)
+            {
+                if (StringComparer.OrdinalIgnoreCase.Equals(NegotiateScheme, ahv.Scheme) || StringComparer.OrdinalIgnoreCase.Equals(NtlmScheme, ahv.Scheme))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static bool TryGetValidAuthenticationChallengeForScheme(string scheme, AuthenticationType authenticationType, Uri uri, ICredentials credentials,
             HttpHeaderValueCollection<AuthenticationHeaderValue> authenticationHeaderValues, out AuthenticationChallenge challenge)
         {
