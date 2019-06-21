@@ -15,13 +15,15 @@ using Xunit;
 
 namespace System.Net.Test.Common
 {
-    public class Http2LoopbackConnection
+    public class Http2LoopbackConnection : GenericLoopbackConnection
     {
         private Socket _connectionSocket;
         private Stream _connectionStream;
         private bool _ignoreSettingsAck;
         private bool _ignoreWindowUpdates;
         public static TimeSpan Timeout => Http2LoopbackServer.Timeout;
+        private bool _shutdownDone;
+        private int _lastStreamId;
 
         private readonly byte[] _prefix;
         public string PrefixString => Encoding.UTF8.GetString(_prefix, 0, _prefix.Length);
@@ -215,6 +217,12 @@ namespace System.Net.Test.Common
         // Only call this after sending a GOAWAY.
         public async Task WaitForConnectionShutdownAsync()
         {
+            if (_shutdownDone)
+            {
+                return;
+            }
+
+            _shutdownDone = true;
             // Shutdown our send side, so the client knows there won't be any more frames coming.
             ShutdownSend();
 
@@ -507,6 +515,7 @@ namespace System.Net.Test.Common
             Assert.Equal(FrameFlags.EndHeaders, FrameFlags.EndHeaders & headersFrame.Flags);
 
             int streamId = headersFrame.StreamId;
+            requestData.Handle = (IntPtr)streamId;
 
             Memory<byte> data = headersFrame.Data;
             int i = 0;
@@ -563,7 +572,7 @@ namespace System.Net.Test.Common
             await WriteFrameAsync(headersFrame).ConfigureAwait(false);
         }
 
-        public async Task SendResponseHeadersAsync(int streamId, bool endStream = true, HttpStatusCode statusCode = HttpStatusCode.OK, bool isTrailingHeader = false, IList<HttpHeaderData> headers = null)
+        public async Task SendResponseHeadersAsync(int streamId, bool endStream = true, HttpStatusCode statusCode = HttpStatusCode.OK, bool isTrailingHeader = false, bool endHeaders = true, IList<HttpHeaderData> headers = null)
         {
             // For now, only support headers that fit in a single frame
             byte[] headerBlock = new byte[Frame.MaxFrameLength];
@@ -583,7 +592,7 @@ namespace System.Net.Test.Common
                 }
             }
 
-            FrameFlags flags = FrameFlags.EndHeaders;
+            FrameFlags flags = endHeaders ? FrameFlags.EndHeaders : FrameFlags.None;
             if (endStream)
             {
                 flags |= FrameFlags.EndStream;
@@ -599,7 +608,7 @@ namespace System.Net.Test.Common
             await WriteFrameAsync(dataFrame).ConfigureAwait(false);
         }
 
-        public async Task SendResponseBodyAsync(int streamId, ReadOnlyMemory<byte> responseBody)
+        public async Task SendResponseBodyAsync(int streamId, ReadOnlyMemory<byte> responseBody, bool isFinal = true)
         {
             // Only support response body if it fits in a single frame, for now
             // In the future we should separate the body into chunks as needed,
@@ -609,7 +618,42 @@ namespace System.Net.Test.Common
                 throw new Exception("Response body too long");
             }
 
-            await SendResponseDataAsync(streamId, responseBody, true).ConfigureAwait(false);
+            await SendResponseDataAsync(streamId, responseBody, isFinal).ConfigureAwait(false);
+        }
+
+        public override void Dispose()
+        {
+            WaitForConnectionShutdownAsync().GetAwaiter().GetResult();
+        }
+
+        //
+        // GenericLoopbackServer implementation
+        //
+
+        public override async Task<HttpRequestData> ReadRequestDataAsync(bool readBody = true)
+        {
+            (int streamId, HttpRequestData requestData) = await ReadAndParseRequestHeaderAsync(readBody).ConfigureAwait(false);
+            _lastStreamId = streamId;
+
+            return requestData;
+        }
+
+        public override Task<Byte[]> ReadRequestBodyAsync()
+        {
+            return ReadBodyAsync();
+        }
+
+        public override Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string body = null, bool isFinal = true, IntPtr handle = default(IntPtr))
+        {
+            int streamId = handle == (IntPtr)0 ? _lastStreamId : (int)handle;
+            bool endHeaders = body != null || isFinal;
+            return SendResponseHeadersAsync(streamId, endStream: isFinal, statusCode, isTrailingHeader : false, endHeaders : endHeaders, headers);
+        }
+
+        public override Task SendResponseBodyAsync(byte[] body, bool isFinal = true, IntPtr handle = default(IntPtr))
+        {
+            int streamId = handle == (IntPtr)0 ? _lastStreamId : (int)handle;
+            return SendResponseBodyAsync(streamId, body, isFinal);
         }
     }
 }

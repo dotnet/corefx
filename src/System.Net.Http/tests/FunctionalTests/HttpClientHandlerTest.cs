@@ -1523,11 +1523,11 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task Dispose_DisposingHandlerCancelsActiveOperationsWithoutResponses()
         {
-            await LoopbackServer.CreateServerAsync(async (server1, url1) =>
+            await LoopbackServerFactory.CreateServerAsync(async (server1, url1) =>
             {
-                await LoopbackServer.CreateServerAsync(async (server2, url2) =>
+                await LoopbackServerFactory.CreateServerAsync(async (server2, url2) =>
                 {
-                    await LoopbackServer.CreateServerAsync(async (server3, url3) =>
+                    await LoopbackServerFactory.CreateServerAsync(async (server3, url3) =>
                     {
                         var unblockServers = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -1540,18 +1540,19 @@ namespace System.Net.Http.Functional.Tests
                         // Second server connects and sends some but not all headers
                         Task serverTask2 = server2.AcceptConnectionAsync(async connection2 =>
                         {
-                            await connection2.ReadRequestHeaderAndSendCustomResponseAsync($"HTTP/1.1 200 OK\r\n");
+                            await connection2.ReadRequestDataAsync();
+                            await connection2.SendResponseAsync(HttpStatusCode.OK, isFinal : false);
                             await unblockServers.Task;
                         });
 
                         // Third server connects and sends all headers and some but not all of the body
                         Task serverTask3 = server3.AcceptConnectionAsync(async connection3 =>
                         {
-                            await connection3.ReadRequestHeaderAndSendCustomResponseAsync($"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 20\r\n\r\n");
-                            await connection3.Writer.WriteAsync("1234567890");
+                            await connection3.ReadRequestDataAsync();
+                            await connection3.SendResponseAsync(HttpStatusCode.OK, new HttpHeaderData[] { new HttpHeaderData("Content-Length", "20") }, body : "", isFinal : false);
+                            await connection3.SendResponseBodyAsync("1234567890", isFinal : false);
                             await unblockServers.Task;
-                            await connection3.Writer.WriteAsync("1234567890");
-                            connection3.Socket.Shutdown(SocketShutdown.Send);
+                            await connection3.SendResponseBodyAsync("1234567890", isFinal : true);
                         });
 
                         // Make three requests
@@ -1565,8 +1566,16 @@ namespace System.Net.Http.Functional.Tests
                         } // Dispose the handler while requests are still outstanding
 
                         // Requests 1 and 2 should be canceled as we haven't finished receiving their headers
-                        await Assert.ThrowsAsync<TaskCanceledException>(() => get1);
-                        await Assert.ThrowsAsync<TaskCanceledException>(() => get2);
+                        if (LoopbackServerFactory.IsHttp2)
+                        {
+                            await Assert.ThrowsAsync<OperationCanceledException>(() => get1);
+                            await Assert.ThrowsAsync<OperationCanceledException>(() => get2);
+                        }
+                        else
+                        {
+                            await Assert.ThrowsAsync<TaskCanceledException>(() => get1);
+                            await Assert.ThrowsAsync<TaskCanceledException>(() => get2);
+                        }
 
                         // Request 3 should still be active, and we should be able to receive all of the data.
                         unblockServers.SetResult(true);
