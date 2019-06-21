@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
+using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -238,6 +239,29 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     X509Chain chain = new X509Chain();
                     Assert.False(chain.Build(ee));
                     Assert.Equal(1, chain.ChainElements.Count);
+                }
+            }
+        }
+
+        [Fact]
+        public static void VerifyNumericStringSubject()
+        {
+            X500DistinguishedName dn = new X500DistinguishedName(
+                "302431133011060100120C313233203635342037383930310D300B0603550403130454657374".HexToByteArray());
+
+            using (RSA key = RSA.Create())
+            {
+                CertificateRequest req = new CertificateRequest(
+                    dn,
+                    key,
+                    HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+
+                DateTimeOffset now = DateTimeOffset.UtcNow;
+
+                using (X509Certificate2 cert = req.CreateSelfSigned(now.AddDays(-1), now.AddDays(1)))
+                {
+                    Assert.Equal("CN=Test, OID.0.0=123 654 7890", cert.Subject);
                 }
             }
         }

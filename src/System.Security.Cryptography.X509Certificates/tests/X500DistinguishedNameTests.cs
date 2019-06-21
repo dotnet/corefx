@@ -201,6 +201,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal("TPMManufacturer=id:564D5700, TPMModel=\"\", TPMVersion=id:0020065", dn2.Decode(X500DistinguishedNameFlags.None));
         }
 
+        [Fact]
+        public static void NameWithNumericString()
+        {
+            X500DistinguishedName dn = new X500DistinguishedName(
+                "302431133011060100120C313233203635342037383930310D300B0603550403130454657374".HexToByteArray());
+
+            Assert.Equal("OID.0.0=123 654 7890, CN=Test", dn.Decode(X500DistinguishedNameFlags.None));
+        }
+
         public static readonly object[][] WhitespaceBeforeCases =
         {
             // Regular space.
