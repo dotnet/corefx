@@ -280,7 +280,7 @@ namespace System.Text.Json.Serialization.Tests
 
         [ActiveIssue(38414)]
         [Fact]
-        public static void NestedClassWithSamePropertyName()
+        public static void OuterClassHavingPropertiesDefinedAfterClassWithDictionaryTest()
         {
             OuterClassHavingPropertiesDefinedAfterClassWithDictionary testObject = new OuterClassHavingPropertiesDefinedAfterClassWithDictionary { MyInt = 10, MyIntArray = new int[] { 3 },
                 MyDouble= 3.14, MyList =new List<string> { "Hello" }, MyString = "World",  MyInnerTestClass = new SimpleClassWithDictionary { MyInt = 2 } };
