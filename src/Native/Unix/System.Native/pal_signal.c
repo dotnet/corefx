@@ -248,15 +248,16 @@ static bool CreateSignalHandlerThread(int* readFdPtr)
     }
 
     bool success = false;
-
+#ifdef DEBUG
     // Set the thread stack size to 512kB. This is to fix a problem on Alpine
     // Linux where the default secondary thread stack size is just about 85kB
     // and our testing have hit cases when that was not enough in debug
     // and checked builds due to some large frames in JIT code.
     if (pthread_attr_setstacksize(&attr, 512 * 1024) == 0)
+#endif
     {
         pthread_t handlerThread;
-        if (pthread_create(&handlerThread, NULL, SignalHandlerLoop, readFdPtr) == 0)
+        if (pthread_create(&handlerThread, &attr, SignalHandlerLoop, readFdPtr) == 0)
         {
             success = true;
         }
