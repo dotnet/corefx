@@ -48,7 +48,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
                 @"""MyGuid"" : ""5BB9D872-DA8A-471E-AA70-08E19102683D""," +
                 @"""MyEnum"" : 2," + // int by default
-                @"""MyStruct"":{ ""One"" : 1, ""Two"" : 3.14 }" +
+                @"""MyStruct"" : { ""One"" : 1, ""Two"" : 3.14 }" +
             @"}";
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);

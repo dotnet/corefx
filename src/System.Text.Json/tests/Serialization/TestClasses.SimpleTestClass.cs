@@ -37,9 +37,8 @@ namespace System.Text.Json.Serialization.Tests
         public SampleEnumUInt16 MyUInt16Enum { get; set; }
         public SampleEnumUInt32 MyUInt32Enum { get; set; }
         public SampleEnumUInt64 MyUInt64Enum { get; set; }
-        public SimpleStruct MySimpleStruct {get; set;}
-        public SimpleTestStruct MySimpleTestStruct { get; set; }
-       
+        public SimpleStruct MySimpleStruct { get; set; }
+        public SimpleTestStruct MySimpleTestStruct { get; set; }      
         public short[] MyInt16Array { get; set; }
         public int[] MyInt32Array { get; set; }
         public long[] MyInt64Array { get; set; }
@@ -121,8 +120,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyEnum"" : 2," + // int by default
                 @"""MyInt64Enum"" : -9223372036854775808," +
                 @"""MyUInt64Enum"" : 18446744073709551615," +
-                @"""MyStringToStringDict"" : {""key"" : ""value""}," +
-                //@"""MyStringToStringKeyValuePair"" : {""Key"" : ""myKey"", ""Value"" : ""myValue""}," +
+                 //@"""MyStringToStringKeyValuePair"" : {""Key"" : ""myKey"", ""Value"" : ""myValue""}," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringGenericDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringGenericIDict"" : {""key"" : ""value""}," +
@@ -224,7 +222,7 @@ namespace System.Text.Json.Serialization.Tests
             MyDateTimeArray = new DateTime[] { new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) };
             MyDateTimeOffsetArray = new DateTimeOffset[] { new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)) };
             MyEnumArray = new SampleEnum[] { SampleEnum.Two };
-            MySimpleStruct = new SimpleStruct { One = 11, Two = 1.9999};
+            MySimpleStruct = new SimpleStruct { One = 11, Two = 1.9999 };
             MySimpleTestStruct = new SimpleTestStruct { MyInt64 = 64, MyString = "Hello", MyInt32Array = new int[] { 32 } };
 
             MyInt16TwoDimensionArray = new int[2][];

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using Xunit;
 
@@ -262,21 +263,45 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.ToString(testObject);
             SimpleTestStruct parsedObject = JsonSerializer.Parse<SimpleTestStruct>(json);
-            parsedObject.Verify();          
+            parsedObject.Verify();
         }
 
-        [ActiveIssue(38490)]
         [Fact]
         public static void ReadSimpleTestClassWithSimpleTestStruct()
         {
             SimpleTestClass testObject = new SimpleTestClass();
             testObject.Initialize();
-            testObject.MySimpleTestStruct = new SimpleTestStruct { MyString = "Hello", MyDouble = 3.14, MySimpleTestClass = new SimpleTestClass { MyString = "World"} };
-
+            testObject.MySimpleTestStruct = new SimpleTestStruct { MyInt64 = 64, MyString = "Hello", MyInt32Array = new int[] { 32 } };
+            
             string json = JsonSerializer.ToString(testObject);
             SimpleTestClass parsedObject = JsonSerializer.Parse<SimpleTestClass>(json);
-            Assert.Equal("Hello", parsedObject.MySimpleTestStruct.MyString);
-            Assert.Equal("World", parsedObject.MySimpleTestStruct.MySimpleTestClass.MyString);
+            parsedObject.Verify();
+        }
+
+        [ActiveIssue(38414)]
+        [Fact]
+        public static void NestedClassWithSamePropertyName()
+        {
+            OuterClassHavingPropertiesDefinedAfterClassWithDictionary testObject = new OuterClassHavingPropertiesDefinedAfterClassWithDictionary { MyInt = 10, MyIntArray = new int[] { 3 },
+                MyDouble= 3.14, MyList =new List<string> { "Hello" }, MyString = "World",  MyInnerTestClass = new SimpleClassWithDictionary { MyInt = 2 } };
+            string json = JsonSerializer.ToString(testObject);
+
+            OuterClassHavingPropertiesDefinedAfterClassWithDictionary parsedObject = JsonSerializer.Parse<OuterClassHavingPropertiesDefinedAfterClassWithDictionary>(json);
+
+            Assert.Equal(3.14, parsedObject.MyDouble);
+            Assert.Equal(10, parsedObject.MyInt);
+            Assert.Equal("World", parsedObject.MyString);
+            Assert.Equal("Hello", parsedObject.MyList[0]);
+            Assert.Equal(3, parsedObject.MyIntArray[0]);
+            Assert.Equal(2, parsedObject.MyInnerTestClass.MyInt);
+        }
+
+        [ActiveIssue(38435)]
+        [Fact]
+        public static void ReadStructWithSimpleClassValueTest()
+        {
+            string json = "{\"MySimpleTestClass\":{\"MyInt32Array\":[1],\"MyStringToStringDict\":null,\"MyStringToStringIDict\":null},\"MyInt32Array\":[2]}";
+            SimpleTestStruct obj3 = JsonSerializer.Parse<SimpleTestStruct>(json);
         }
     }
 }

@@ -95,7 +95,7 @@ namespace System.Text.Json.Serialization.Tests
         public int One { get; set; }
         public double Two { get; set; }
     }
-
+    
     public struct SimpleStructWithSimpleClass: ITestClass
     {
         public short MyInt32 { get; set; }
@@ -104,9 +104,9 @@ namespace System.Text.Json.Serialization.Tests
 
         public static readonly string s_json =
             @"{" +
-                @"""MySimpleClass"":{""MyString"":""Hello"", ""MyDouble"": 3.14}," +
-                @"""MyInt32"":32," +
-                @"""MyInt32Array"":[32]" +
+                @"""MySimpleClass"" : {""MyString"" : ""Hello"", ""MyDouble"" : 3.14}," +
+                @"""MyInt32"" : 32," +
+                @"""MyInt32Array"" : [32]" +
             @"}";
 
         public void Initialize()
@@ -640,6 +640,21 @@ namespace System.Text.Json.Serialization.Tests
         {
             Values = Array.Empty<int>();
         }
+    }
+
+    public class SimpleClassWithDictionary
+    {
+        public int MyInt { get; set; }
+        public Dictionary<string, string> MyDictionary { get; set; }
+    }
+    public class OuterClassHavingPropertiesDefinedAfterClassWithDictionary
+    {
+        public double MyDouble { get; set; }
+        public SimpleClassWithDictionary MyInnerTestClass { get; set; }
+        public int MyInt { get; set; }
+        public string MyString { get; set; }
+        public List<string> MyList { get; set; }
+        public int[] MyIntArray { get; set; }
     }
 
     public class TestClassWithStringArray : ITestClass

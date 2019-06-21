@@ -82,7 +82,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyEnum"" : 2," + // int by default
                 @"""MyInt64Enum"" : -9223372036854775808," +
                 @"""MyUInt64Enum"" : 18446744073709551615," +
-                @"""MySimpleStruct"" : {""One"":11, ""Two"":1.9999, ""Three"":33}";
+                @"""MySimpleStruct"" : {""One"" : 11, ""Two"" : 1.9999, ""Three"" : 33}";
 
         private const string s_partialJsonArrays =
                 @"""MyInt16Array"" : [1]," +
