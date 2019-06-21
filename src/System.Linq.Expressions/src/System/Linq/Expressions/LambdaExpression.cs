@@ -126,10 +126,20 @@ namespace System.Linq.Expressions
                 return new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
             }
 #endif
-            return Compiler.LambdaCompiler.Compile(this);
+            return Compiler.LambdaCompiler.Compile(this, null);
 #else
             return new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
 #endif
+        }
+
+        /// <summary>
+        /// Produces a delegate that represents the lambda expression.
+        /// </summary>
+        /// <param name="debugInfoGenerator">Debugging information generator used by the compiler to mark sequence points and annotate local variables.</param>
+        /// <returns>A delegate containing the compiled version of the lambda.</returns>
+        public Delegate Compile(DebugInfoGenerator debugInfoGenerator)
+        {
+            return Compiler.LambdaCompiler.Compile(this, debugInfoGenerator);
         }
 
 #if FEATURE_COMPILE_TO_METHODBUILDER
@@ -139,12 +149,22 @@ namespace System.Linq.Expressions
         /// <param name="method">A <see cref="Emit.MethodBuilder"/> which will be used to hold the lambda's IL.</param>
         public void CompileToMethod(System.Reflection.Emit.MethodBuilder method)
         {
+            CompileToMethod(method, null);
+        }
+
+        /// <summary>
+        /// Compiles the lambda into a method definition.
+        /// </summary>
+        /// <param name="method">A <see cref="Emit.MethodBuilder"/> which will be used to hold the lambda's IL.</param>
+        /// <param name="debugInfoGenerator">Debugging information generator used by the compiler to mark sequence points and annotate local variables.</param>
+        public void CompileToMethod(System.Reflection.Emit.MethodBuilder method, DebugInfoGenerator debugInfoGenerator)
+        {
             ContractUtils.RequiresNotNull(method, nameof(method));
             ContractUtils.Requires(method.IsStatic, nameof(method));
             var type = method.DeclaringType as System.Reflection.Emit.TypeBuilder;
             if (type == null) throw Error.MethodBuilderDoesNotHaveTypeBuilder();
 
-            Compiler.LambdaCompiler.Compile(this, method);
+            Compiler.LambdaCompiler.Compile(this, method, debugInfoGenerator);
         }
 #endif
 
@@ -152,16 +172,6 @@ namespace System.Linq.Expressions
 #if FEATURE_COMPILE
         internal abstract LambdaExpression Accept(Compiler.StackSpiller spiller);
 #endif
-
-        /// <summary>
-        /// Produces a delegate that represents the lambda expression.
-        /// </summary>
-        /// <param name="debugInfoGenerator">Debugging information generator used by the compiler to mark sequence points and annotate local variables.</param>
-        /// <returns>A delegate containing the compiled version of the lambda.</returns>
-        public Delegate Compile(DebugInfoGenerator debugInfoGenerator)
-        {
-            return Compile();
-        }
     }
 
     /// <summary>
@@ -206,7 +216,7 @@ namespace System.Linq.Expressions
                 return (TDelegate)(object)new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
             }
 #endif
-            return (TDelegate)(object)Compiler.LambdaCompiler.Compile(this);
+            return (TDelegate)(object)Compiler.LambdaCompiler.Compile(this, null);
 #else
             return (TDelegate)(object)new Interpreter.LightCompiler().CompileTop(this).CreateDelegate();
 #endif

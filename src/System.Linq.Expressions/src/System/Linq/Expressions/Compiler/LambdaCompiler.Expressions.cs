@@ -918,6 +918,11 @@ namespace System.Linq.Expressions.Compiler
 
         private void EmitDebugInfoExpression(Expression expr)
         {
+            var debugInfo = (DebugInfoExpression)expr;
+            if (_debugInfoGenerator != null)
+            {
+                _debugInfoGenerator.MarkSequencePoint(_lambda, _ilg.ILOffset, debugInfo);
+            }
             return;
         }
 

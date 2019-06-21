@@ -33,6 +33,8 @@ namespace System.Linq.Expressions.Compiler
 
         private readonly ILGenerator _ilg;
 
+        private readonly DebugInfoGenerator _debugInfoGenerator = null;
+
 #if FEATURE_COMPILE_TO_METHODBUILDER
         // The TypeBuilder backing this method, if any
         private readonly TypeBuilder _typeBuilder;
@@ -63,7 +65,7 @@ namespace System.Linq.Expressions.Compiler
         /// <summary>
         /// Creates a lambda compiler that will compile to a dynamic method
         /// </summary>
-        private LambdaCompiler(AnalyzedTree tree, LambdaExpression lambda)
+        private LambdaCompiler(AnalyzedTree tree, LambdaExpression lambda, DebugInfoGenerator debugInfoGenerator)
         {
             Type[] parameterTypes = GetParameterTypes(lambda, typeof(Closure));
 
@@ -80,6 +82,7 @@ namespace System.Linq.Expressions.Compiler
             // TODO: This API is not available, is there an alternative way to achieve the same.
             // method.ProfileAPICheck = true;
 
+            _debugInfoGenerator = debugInfoGenerator;
             _ilg = method.GetILGenerator();
 
             _hasClosureArgument = true;
@@ -95,7 +98,7 @@ namespace System.Linq.Expressions.Compiler
         /// <summary>
         /// Creates a lambda compiler that will compile into the provided MethodBuilder
         /// </summary>
-        private LambdaCompiler(AnalyzedTree tree, LambdaExpression lambda, MethodBuilder method)
+        private LambdaCompiler(AnalyzedTree tree, LambdaExpression lambda, MethodBuilder method, DebugInfoGenerator debugInfoGenerator)
         {
             var scope = tree.Scopes[lambda];
             var hasClosureArgument = scope.NeedsClosure;
@@ -118,6 +121,7 @@ namespace System.Linq.Expressions.Compiler
             _method = method;
             _hasClosureArgument = hasClosureArgument;
 
+            _debugInfoGenerator = debugInfoGenerator;
             _ilg = method.GetILGenerator();
 
             // These are populated by AnalyzeTree/VariableBinder
@@ -170,8 +174,9 @@ namespace System.Linq.Expressions.Compiler
         /// Compiler entry point
         /// </summary>
         /// <param name="lambda">LambdaExpression to compile.</param>
+        /// <param name="debugInfoGenerator">Debugging information generator used by the compiler to mark sequence points and annotate local variables.</param>
         /// <returns>The compiled delegate.</returns>
-        internal static Delegate Compile(LambdaExpression lambda)
+        internal static Delegate Compile(LambdaExpression lambda, DebugInfoGenerator debugInfoGenerator)
         {
             lambda.ValidateArgumentCount();
 
@@ -179,7 +184,7 @@ namespace System.Linq.Expressions.Compiler
             AnalyzedTree tree = AnalyzeLambda(ref lambda);
 
             // 2. Create lambda compiler
-            LambdaCompiler c = new LambdaCompiler(tree, lambda);
+            LambdaCompiler c = new LambdaCompiler(tree, lambda, debugInfoGenerator);
 
             // 3. Emit
             c.EmitLambdaBody();
@@ -195,13 +200,13 @@ namespace System.Linq.Expressions.Compiler
         ///
         /// (probably shouldn't be modifying parameters/return type...)
         /// </summary>
-        internal static void Compile(LambdaExpression lambda, MethodBuilder method)
+        internal static void Compile(LambdaExpression lambda, MethodBuilder method, DebugInfoGenerator debugInfoGenerator)
         {
             // 1. Bind lambda
             AnalyzedTree tree = AnalyzeLambda(ref lambda);
 
             // 2. Create lambda compiler
-            LambdaCompiler c = new LambdaCompiler(tree, lambda, method);
+            LambdaCompiler c = new LambdaCompiler(tree, lambda, method, debugInfoGenerator);
 
             // 3. Emit
             c.EmitLambdaBody();

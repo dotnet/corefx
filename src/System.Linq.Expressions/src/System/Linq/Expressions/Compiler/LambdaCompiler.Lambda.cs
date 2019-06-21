@@ -134,7 +134,7 @@ namespace System.Linq.Expressions.Compiler
             Debug.Assert(_method is DynamicMethod);
 #endif
             {
-                impl = new LambdaCompiler(_tree, lambda);
+                impl = new LambdaCompiler(_tree, lambda, _debugInfoGenerator);
             }
 #if FEATURE_COMPILE_TO_METHODBUILDER
             else
@@ -142,7 +142,7 @@ namespace System.Linq.Expressions.Compiler
                 // When the lambda does not have a name or the name is empty, generate a unique name for it.
                 string name = String.IsNullOrEmpty(lambda.Name) ? GetUniqueMethodName() : lambda.Name;
                 MethodBuilder mb = _typeBuilder.DefineMethod(name, MethodAttributes.Private | MethodAttributes.Static);
-                impl = new LambdaCompiler(_tree, lambda, mb);
+                impl = new LambdaCompiler(_tree, lambda, mb, _debugInfoGenerator);
             }
 #endif
 
