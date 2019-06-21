@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -1566,16 +1567,8 @@ namespace System.Net.Http.Functional.Tests
                         } // Dispose the handler while requests are still outstanding
 
                         // Requests 1 and 2 should be canceled as we haven't finished receiving their headers
-                        if (LoopbackServerFactory.IsHttp2)
-                        {
-                            await Assert.ThrowsAsync<OperationCanceledException>(() => get1);
-                            await Assert.ThrowsAsync<OperationCanceledException>(() => get2);
-                        }
-                        else
-                        {
-                            await Assert.ThrowsAsync<TaskCanceledException>(() => get1);
-                            await Assert.ThrowsAsync<TaskCanceledException>(() => get2);
-                        }
+                        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => get1);
+                        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => get2);
 
                         // Request 3 should still be active, and we should be able to receive all of the data.
                         unblockServers.SetResult(true);
