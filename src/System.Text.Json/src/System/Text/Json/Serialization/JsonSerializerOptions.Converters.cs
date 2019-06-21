@@ -47,7 +47,7 @@ namespace System.Text.Json
             var converters = new List<JsonConverter>(NumberOfConverters);
 
             // Use a list for converters that implement CanConvert().
-            converters.Add(new JsonConverterEnum(treatAsString: false));
+            converters.Add(new JsonConverterEnum());
             converters.Add(new JsonKeyValuePairConverter());
 
             // We will likely add collection converters here in the future.
@@ -84,6 +84,11 @@ namespace System.Text.Json
             if (converter == null)
             {
                 converter = GetConverter(runtimePropertyType);
+            }
+
+            if (converter is JsonConverterFactory factory)
+            {
+                converter = factory.GetConverterInternal(runtimePropertyType);
             }
 
             return converter;
@@ -245,7 +250,7 @@ namespace System.Text.Json
             return default;
         }
 
-        private const int NumberOfSimpleConverters = 20;
+        private const int NumberOfSimpleConverters = 21;
 
         private static IEnumerable<JsonConverter> DefaultSimpleConverters
         {
@@ -273,6 +278,7 @@ namespace System.Text.Json
                 yield return new JsonConverterUInt16();
                 yield return new JsonConverterUInt32();
                 yield return new JsonConverterUInt64();
+                yield return new JsonConverterUri();
             }
         }
     }
