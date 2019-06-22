@@ -537,12 +537,12 @@ namespace MonoTests.System.Drawing
             {
                 var g = b.Graphics;
                 g.Clip = new Region(new Rectangle(0, 0, 8, 8));
-                g.TranslateTransform(8, 8);
-                CheckBounds("translate.ClipBounds", g.ClipBounds, -8, -8, 8, 8);
-                CheckBounds("translate.Clip.GetBounds", g.Clip.GetBounds(g), -8, -8, 8, 8);
-
                 using (Region clone = g.Clip.Clone())
                 {
+                    g.TranslateTransform(8, 8);
+                    CheckBounds("translate.ClipBounds", g.ClipBounds, -8, -8, 8, 8);
+                    CheckBounds("translate.Clip.GetBounds", g.Clip.GetBounds(g), -8, -8, 8, 8);
+
                     g.SetClip(clone, CombineMode.Replace);
                     CheckBounds("setclip.ClipBounds", g.Clip.GetBounds(g), 0, 0, 8, 8);
                     CheckBounds("setclip.Clip.GetBounds", g.Clip.GetBounds(g), 0, 0, 8, 8);
@@ -1057,7 +1057,6 @@ namespace MonoTests.System.Drawing
             using (Bitmap bitmap = new Bitmap(20, 20))
             using (Graphics g = Graphics.FromImage(bitmap))
             {
-
                 CheckDefaultProperties("default", g);
                 Assert.Equal(new Point(0, 0), g.RenderingOrigin);
 
