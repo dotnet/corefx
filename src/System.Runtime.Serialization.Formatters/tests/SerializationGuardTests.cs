@@ -73,7 +73,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             ms.Position = 0;
 
             BinaryFormatter reader = new BinaryFormatter();
-            Assert.Throws(SerializationGuard.DeserializationBlockedExceptionType, () => reader.Deserialize(ms));
+            Assert.ThrowsAny<SerializationException>(() => reader.Deserialize(ms));
         }
     }
 

@@ -15,11 +15,6 @@ namespace System.Runtime.Serialization
         private static readonly ThrowIfDeserializationInProgressWithSwitchDel s_throwIfDeserializationInProgressWithSwitch = CreateThrowIfDeserializationInProgressWithSwitchDelegate();
 
         /// <summary>
-        /// Equivalent to typeof(DeserializationBlockedException).
-        /// </summary>
-        public static readonly Type DeserializationBlockedExceptionType = GetDeserializationBlockedExceptionType();
-
-        /// <summary>
         /// Builds a wrapper delegate for SerializationInfo.ThrowIfDeserializationInProgress(string, ref int),
         /// since it is not exposed via contracts.
         /// </summary>
@@ -35,11 +30,6 @@ namespace System.Runtime.Serialization
             }
 
             return throwIfDeserializationInProgressDelegate;
-        }
-
-        private static Type GetDeserializationBlockedExceptionType()
-        {
-            return typeof(SerializationInfo).Assembly.GetType("System.Runtime.Serialization.DeserializationBlockedException", throwOnError: false);
         }
 
         /// <summary>
