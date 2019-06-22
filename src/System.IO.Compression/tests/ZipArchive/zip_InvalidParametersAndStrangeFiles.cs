@@ -149,7 +149,7 @@ namespace System.IO.Compression.Tests
                 {
                     using (Stream source = e.Open())
                     {
-                        await source.CopyToAsync(ms, bufferSize);
+                        source.CopyTo(ms);
                         Assert.True(e.Length == ms.Length);     // Only allow to decompress up to uncompressed size
                         byte[] buffer = new byte[bufferSize];
                         Assert.Equal(0, source.Read(buffer, 0, buffer.Length)); // shouldn't be able read more                        

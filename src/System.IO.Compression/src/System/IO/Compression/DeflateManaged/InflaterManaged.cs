@@ -108,9 +108,26 @@ namespace System.IO.Compression
             int count = 0;
             do
             {
-                int copied = _output.CopyTo(bytes, offset, length);
-                copied = RestrictStreamWithUnCompressedSize(copied);
-
+                int copied;
+                if (_uncompressedSize == -1)
+                {
+                    copied = _output.CopyTo(bytes, offset, length);
+                }
+                else
+                {
+                    if (_uncompressedSize > _currentInflatedCount)
+                    {
+                        copied = _output.CopyTo(bytes, offset, length);
+                        copied = Math.Min(copied, (int)(_uncompressedSize - _currentInflatedCount));
+                        _currentInflatedCount += copied;
+                    }
+                    else
+                    {
+                        copied = 0;
+                        _state = InflaterState.Done;
+                        _output._bytesUsed = 0;
+                    }
+                }
                 if (copied > 0)
                 {
                     if (_hasFormatReader)
@@ -141,18 +158,6 @@ namespace System.IO.Compression
             }
             
             return count;
-        }
-
-        private int RestrictStreamWithUnCompressedSize(int bytesRead)
-        {
-            if (_uncompressedSize > -1 && _uncompressedSize - _currentInflatedCount < bytesRead)
-            {
-                bytesRead = (int)(_uncompressedSize - _currentInflatedCount);
-                _state = InflaterState.Done;
-                _output._bytesUsed = 0;
-            }
-            _currentInflatedCount += bytesRead;
-            return bytesRead;
         }
 
         //Each block of compressed data begins with 3 header bits

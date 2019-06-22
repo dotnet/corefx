@@ -87,18 +87,27 @@ namespace System.IO.Compression
             try
             {
                 int bytesRead;
-                if (ReadInflateOutput(bufPtr, length, ZLibNative.FlushCode.NoFlush, out bytesRead) == ZLibNative.ErrorCode.StreamEnd)
+                if (_uncompressedSize == -1)
                 {
-                    if (!NeedsInput() && IsGzipStream() && _inputBufferHandle.IsAllocated)
+                    ReadOutput(bufPtr, length, out bytesRead);
+                }
+                else
+                {
+                    if (_uncompressedSize > _currentInflatedCount)
                     {
-                        _finished = ResetStreamForLeftoverInput();
+                        ReadOutput(bufPtr, length, out bytesRead);
+                        bytesRead = Math.Min(bytesRead, (int)(_uncompressedSize - _currentInflatedCount));
+                        _currentInflatedCount += bytesRead;
                     }
                     else
                     {
+                        bytesRead = 0;
                         _finished = true;
+                        _zlibStream.AvailIn = 0;
                     }
-                }
-                return RestrictStreamWithUnCompressedSize(bytesRead);
+                }             
+
+                return bytesRead;
             }
             finally
             {
@@ -110,16 +119,19 @@ namespace System.IO.Compression
             }
         }
 
-        private int RestrictStreamWithUnCompressedSize(int bytesRead)
+        private unsafe void ReadOutput(byte* bufPtr, int length, out int bytesRead)
         {
-            if (_uncompressedSize > -1 && _uncompressedSize - _currentInflatedCount < bytesRead)
+            if (ReadInflateOutput(bufPtr, length, ZLibNative.FlushCode.NoFlush, out bytesRead) == ZLibNative.ErrorCode.StreamEnd)
             {
-                bytesRead = (int)(_uncompressedSize - _currentInflatedCount);
-                _finished = true;
-                _zlibStream.AvailIn = 0;
+                if (!NeedsInput() && IsGzipStream() && _inputBufferHandle.IsAllocated)
+                {
+                    _finished = ResetStreamForLeftoverInput();
+                }
+                else
+                {
+                    _finished = true;
+                }
             }
-            _currentInflatedCount += bytesRead;
-            return bytesRead;
         }
 
         /// <summary>

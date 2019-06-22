@@ -1017,7 +1017,7 @@ namespace System.IO.Compression
                 }
 
                 // Feed the data from base stream into the decompression engine.
-                    _deflateStream._inflater.SetInput(buffer, offset, count);
+                _deflateStream._inflater.SetInput(buffer, offset, count);
 
                 // While there's more decompressed data available, forward it to the buffer stream.
                 while (true)
