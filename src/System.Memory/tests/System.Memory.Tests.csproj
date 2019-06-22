@@ -148,6 +148,7 @@
     <Compile Include="ReadOnlySpan\LastIndexOf.T.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfSequence.byte.cs" />
     <Compile Include="ReadOnlySpan\LastIndexOfSequence.T.cs" />
+    <Compile Include="ReadOnlySpan\MemoryExtensions.Overlaps.cs" />
     <Compile Include="ReadOnlySpan\Overflow.cs" />
     <Compile Include="ReadOnlySpan\Overlaps.cs" />
     <Compile Include="ReadOnlySpan\SequenceCompareTo.bool.cs" />
