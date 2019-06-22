@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
@@ -170,8 +171,16 @@ internal static partial class Interop
             Debug.Assert(chain != null, "X509Chain should not be null");
             Debug.Assert(chain.ChainElements.Count > 0, "chain.Build should have already been called");
 
-            // Don't count the last item (the root)
-            int stop = chain.ChainElements.Count - 1;
+            // If not trusted then include the last item (root). Otherwise, don't include it.
+            int stop;
+            if (chain.ChainStatus.Any(s => (s.Status & X509ChainStatusFlags.PartialChain) != 0))
+            {
+                stop = chain.ChainElements.Count;
+            }
+            else
+            {
+                stop = chain.ChainElements.Count - 1;
+            }
 
             // Don't include the first item (the cert whose private key we have)
             for (int i = 1; i < stop; i++)
