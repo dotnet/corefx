@@ -12,18 +12,21 @@ using Xunit;
 
 public partial class CancelKeyPressTests
 {
+    [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invokes
     public void HandlerInvokedForSigInt()
     {
         HandlerInvokedForSignal(SIGINT);
     }
 
+    [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.OSX)] // Jenkins blocks SIGQUIT on OS X, causing the test to fail in CI
     public void HandlerInvokedForSigQuit()
     {
         HandlerInvokedForSignal(SIGQUIT);
     }
 
+    [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // events are triggered by Unix signals (SIGINT, SIGQUIT, SIGCHLD).
     public void ExitDetectionNotBlockedByHandler()
     {
