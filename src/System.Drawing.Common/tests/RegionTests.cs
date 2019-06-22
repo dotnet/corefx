@@ -592,7 +592,7 @@ namespace System.Drawing.Tests
             };
 
             var createdRegion = new Region();
-            yield return new object[] { new Region(), createdRegion, true };
+            yield return new object[] { createdRegion, createdRegion, true };
             yield return new object[] { new Region(), new Region(), true };
             yield return new object[] { new Region(), empty(), false };
             yield return new object[] { new Region(), new Region(new Rectangle(1, 2, 3, 4)), false };
