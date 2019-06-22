@@ -254,7 +254,9 @@ namespace System.Drawing.Tests
         {
             // Don't allocate anything as this would leak memory.
             // This makes sure than finalization doesn't cause any errors or debug assertions.
-            var context = new BufferedGraphicsContext();
+            using (var context = new BufferedGraphicsContext())
+            {
+            }
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
