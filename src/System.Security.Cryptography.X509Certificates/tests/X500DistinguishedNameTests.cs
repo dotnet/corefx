@@ -205,9 +205,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         public static void NameWithNumericString()
         {
             X500DistinguishedName dn = new X500DistinguishedName(
-                "302431133011060100120C313233203635342037383930310D300B0603550403130454657374".HexToByteArray());
+                "30283117301506052901020203120C313233203635342037383930310D300B0603550403130454657374".HexToByteArray());
 
-            Assert.Equal("OID.0.0=123 654 7890, CN=Test", dn.Decode(X500DistinguishedNameFlags.None));
+            Assert.Equal("OID.1.1.1.2.2.3=123 654 7890, CN=Test", dn.Decode(X500DistinguishedNameFlags.None));
         }
 
         public static readonly object[][] WhitespaceBeforeCases =
