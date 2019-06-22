@@ -244,6 +244,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        // macOS (10.14) will not load certificates with NumericString in their subject
+        // if the 0x12 (NumericString) is changed to 0x13 (PrintableString) then the cert
+        // import doesn't fail.
+        [PlatformSpecific(~TestPlatforms.OSX)]
         public static void VerifyNumericStringSubject()
         {
             X500DistinguishedName dn = new X500DistinguishedName(
