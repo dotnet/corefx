@@ -122,9 +122,34 @@ namespace System.Net.Test.Common
 
         public async Task AcceptConnectionAsync(Func<Connection, Task> funcAsync)
         {
-            using (Connection connection = await EstablishConnectionAsync())
+            using (Socket s = await _listenSocket.AcceptAsync().ConfigureAwait(false))
             {
-                await funcAsync(connection).ConfigureAwait(false);
+                s.NoDelay = true;
+
+                Stream stream = new NetworkStream(s, ownsSocket: false);
+                if (_options.UseSsl)
+                {
+                    var sslStream = new SslStream(stream, false, delegate { return true; });
+                    using (var cert = Configuration.Certificates.GetServerCertificate())
+                    {
+                        await sslStream.AuthenticateAsServerAsync(
+                            cert,
+                            clientCertificateRequired: true, // allowed but not required
+                            enabledSslProtocols: _options.SslProtocols,
+                            checkCertificateRevocation: false).ConfigureAwait(false);
+                    }
+                    stream = sslStream;
+                }
+
+                if (_options.StreamWrapper != null)
+                {
+                    stream = _options.StreamWrapper(stream);
+                }
+
+                using (var connection = new Connection(s, stream))
+                {
+                    await funcAsync(connection).ConfigureAwait(false);
+                }
             }
         }
 
