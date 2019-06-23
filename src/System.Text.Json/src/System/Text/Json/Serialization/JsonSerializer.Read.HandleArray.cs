@@ -62,8 +62,7 @@ namespace System.Text.Json
             }
             else
             {
-                // If current property is already set (from a constructor, for example) leave as-is.
-                if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) == null)
+                if (jsonPropertyInfo.HasSetter)
                 {
                     // Create the enumerable.
                     object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state, options);
@@ -184,7 +183,7 @@ namespace System.Text.Json
                 else
                 {
                     IList list = (IList)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
-                    if (list == null)
+                    if (list == null || list.IsFixedSize)
                     {
                         state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
                     }

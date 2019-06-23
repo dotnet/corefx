@@ -168,7 +168,6 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, i.Length);
         }
 
-        [ActiveIssue(38435)]
         [Fact]
         public static void ReadInitializedArrayTest()
         {
