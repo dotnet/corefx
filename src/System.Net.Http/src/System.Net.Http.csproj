@@ -707,7 +707,6 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Reference Include="System.Diagnostics.StackTrace" />
-    <Reference Include="System.Linq" />
     <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Encoding" />

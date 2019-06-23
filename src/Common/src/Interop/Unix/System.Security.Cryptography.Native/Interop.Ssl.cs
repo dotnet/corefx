@@ -4,7 +4,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
@@ -172,14 +171,14 @@ internal static partial class Interop
             Debug.Assert(chain.ChainElements.Count > 0, "chain.Build should have already been called");
 
             // If the last certificate is a root certificate, don't send it. PartialChain means the last cert wasn't a root.
-            int stop;
-            if (chain.ChainStatus.Any(s => (s.Status & X509ChainStatusFlags.PartialChain) != 0))
+            int stop = chain.ChainElements.Count - 1;
+            foreach (X509ChainStatus s in chain.ChainStatus)
             {
-                stop = chain.ChainElements.Count;
-            }
-            else
-            {
-                stop = chain.ChainElements.Count - 1;
+                if ((s.Status & X509ChainStatusFlags.PartialChain) != 0)
+                {
+                    stop++;
+                    break;
+                }
             }
 
             // Don't include the first item (the cert whose private key we have)
