@@ -123,6 +123,19 @@ namespace System.Security.Cryptography.Rsa.Tests
         }
 
         [Fact]
+        public static void VulnerableRsaKeyWithExponentOfOne()
+        {
+            RSAParameters vulnerableKeyPublicExponentOne = TestData.VulnerableKeyPublicExponentOne;
+
+            using (RSA rsa = RSAFactory.Create())
+            {
+                Assert.ThrowsAny<CryptographicException>(() => {
+                    rsa.ImportParameters(vulnerableKeyPublicExponentOne);
+                });
+            }
+        }
+
+        [Fact]
         public static void ImportExport1032()
         {
             RSAParameters imported = TestData.RSA1032Parameters;
