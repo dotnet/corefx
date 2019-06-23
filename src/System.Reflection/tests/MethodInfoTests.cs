@@ -567,7 +567,7 @@ namespace System.Reflection.Tests
         {
         }
 
-        public void DummyMethod2()
+        private void DummyMethod2()
         {
         }        
 
