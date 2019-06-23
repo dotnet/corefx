@@ -5,9 +5,9 @@
 using Xunit;
 using System.Collections.Generic;
 
-namespace System.Memory.Tests.ReadOnlySpan
+namespace System.SpanTests
 {
-    public class ReadOnlySpanTests
+    public partial class ReadOnlySpanTests
     {
         public static IEnumerable<object[]> MemoryExtensionsToUpperLowerOverlapping()
         {

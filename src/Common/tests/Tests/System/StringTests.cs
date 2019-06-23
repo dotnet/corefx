@@ -5174,7 +5174,6 @@ namespace System.Tests
         [Fact]
         public static void ToLowerOverlapping()
         {
-            var expectedSource = new char[3] { 'B', 'c', 'b' };
             var expectedDestination = new char[3] { 'b', 'c', 'b' };
 
             {                
@@ -5388,7 +5387,6 @@ namespace System.Tests
         [Fact]
         public static void ToUpperOverlapping()
         {
-            var expectedSource = new char[3] { 'b', 'C', 'B' };
             var expectedDestination = new char[3] { 'B', 'C', 'B' };
 
             {                
