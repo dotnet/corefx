@@ -176,7 +176,8 @@ namespace System
         {
             get
             {
-                return new DateTimeOffset(DateTime.Now);
+                DateTime utcNow = DateTime.UtcNow;
+                return new DateTimeOffset(utcNow.Ticks, TimeZoneInfo.GetLocalUtcOffset(utcNow, TimeZoneInfoOptions.NoThrowOnInvalidTime));
             }
         }
 
@@ -559,7 +560,8 @@ namespace System
         //
         public static DateTimeOffset FromFileTime(long fileTime)
         {
-            return new DateTimeOffset(DateTime.FromFileTime(fileTime));
+            DateTime utcDateTime = DateTime.FromFileTimeUtc(fileTime);
+            return new DateTimeOffset(utcDateTime.Ticks, TimeZoneInfo.GetLocalUtcOffset(utcDateTime, TimeZoneInfoOptions.NoThrowOnInvalidTime));
         }
 
         public static DateTimeOffset FromUnixTimeSeconds(long seconds)
@@ -792,7 +794,20 @@ namespace System
 
         internal DateTimeOffset ToLocalTime(bool throwOnOverflow)
         {
-            return new DateTimeOffset(UtcDateTime.ToLocalTime(throwOnOverflow));
+            DateTime utcDateTime = UtcDateTime;
+            TimeSpan offset = TimeZoneInfo.GetLocalUtcOffset(utcDateTime, TimeZoneInfoOptions.NoThrowOnInvalidTime);
+            long tick = utcDateTime.Ticks + offset.Ticks;
+            if (tick < DateTime.MinTicks)
+                tick = DateTime.MinTicks;
+            else if (tick > DateTime.MaxTicks)
+                tick = DateTime.MaxTicks;
+            else
+                return new DateTimeOffset(utcDateTime, offset);
+
+            if (throwOnOverflow)
+                throw new ArgumentException(SR.Arg_ArgumentOutOfRangeException);
+
+            return new DateTimeOffset(tick, TimeSpan.Zero);
         }
 
         public override string ToString()
