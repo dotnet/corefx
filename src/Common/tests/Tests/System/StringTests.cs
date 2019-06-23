@@ -5195,7 +5195,7 @@ namespace System.Tests
                 char[] a = { 'a', 'B', 'c', 'B', 'c', 'B' };
 
                 string s1 = new string(a, 1, 3);
-                Assert.Equal(expectedDestination, s1.ToLower(CultureInfo.CurrentCulture).ToArray());
+                Assert.Equal(expectedDestination, s1.ToLowerInvariant().ToArray());
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
 
