@@ -171,7 +171,7 @@ internal static partial class Interop
             Debug.Assert(chain != null, "X509Chain should not be null");
             Debug.Assert(chain.ChainElements.Count > 0, "chain.Build should have already been called");
 
-            // If not trusted then include the last item (root). Otherwise, don't include it.
+            // If the last certificate is a root certificate, don't send it. PartialChain means the last cert wasn't a root.
             int stop;
             if (chain.ChainStatus.Any(s => (s.Status & X509ChainStatusFlags.PartialChain) != 0))
             {
