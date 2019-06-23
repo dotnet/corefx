@@ -22,7 +22,7 @@ namespace System.Runtime.InteropServices.Tests
             yield return new NonGenericStruct();
             yield return Int32Enum.Value1;
 
-            MethodInfo method = typeof(GetTypedObjectForIUnknownTests).GetMethod(nameof(NonGenericMethod));
+            MethodInfo method = typeof(GetTypedObjectForIUnknownTests).GetMethod(nameof(NonGenericMethod), BindingFlags.NonPublic | BindingFlags.Static);
             Delegate d = method.CreateDelegate(typeof(NonGenericDelegate));
             yield return d;
         }
@@ -201,9 +201,7 @@ namespace System.Runtime.InteropServices.Tests
         public class ClassWithInterface : NonGenericInterface { }
         public struct StructWithInterface : NonGenericInterface { }
 
-#pragma warning disable xUnit1013 // Public method should be marked as test
-        public static void NonGenericMethod(int i) { }
-#pragma warning restore xUnit1013 // Public method should be marked as test
+        private static void NonGenericMethod(int i) { }
         public delegate void NonGenericDelegate(int i);
 
         public enum Int32Enum : int { Value1, Value2 }

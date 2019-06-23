@@ -729,7 +729,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<KeyValuePair<string, int>>(@"{""Key"": ""Key"", ""Val"": 123"));
         }
 
-       [Fact]
+        [Fact]
         public static void ReadListOfKeyValuePair()
         {
             List<KeyValuePair<string, int>> input = JsonSerializer.Deserialize<List<KeyValuePair<string, int>>>(@"""Key"":""Key"", ""Value"":[{""123"":123},{""456"": 456}]");

@@ -44,15 +44,6 @@ public class RedirectedStream
         result = Console.IsErrorRedirected;
     }
 
-    [Fact]
-    [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // the CI system redirects stdout, so we can't easily test non-redirected behavior
-    public static void CheckNonRedirectedBehavior()
-    {
-        Assert.False(Console.IsInputRedirected);
-        Assert.False(Console.IsOutputRedirected);
-        Assert.False(Console.IsErrorRedirected);
-    }
-
     private static void RunRemote(Func<int> func, ProcessStartInfo psi = null)
     {
         var options = new RemoteInvokeOptions();

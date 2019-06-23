@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if netcoreapp
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,19 +13,6 @@ namespace System.Tests
     public class TupleTests
     {
         [Fact]
-        public void Test()
-        {
-            // Subset of the Tuple tests related to ITuple
-            OneTuples();
-            TwoTuples();
-            ThreeTuples();
-            FourTuples();
-            FiveTuples();
-            SixTuples();
-            SevenTuples();
-            EightTuples();
-        }
-
         private static void OneTuples()
         {
             ITuple it = Tuple.Create(1);
@@ -35,6 +21,7 @@ namespace System.Tests
             Assert.Throws<IndexOutOfRangeException>(() => it[1].ToString());
         }
 
+        [Fact]
         private static void TwoTuples()
         {
             ITuple it = Tuple.Create(1, 2);
@@ -44,6 +31,7 @@ namespace System.Tests
             Assert.Throws<IndexOutOfRangeException>(() => it[2].ToString());
         }
 
+        [Fact]
         private static void ThreeTuples()
         {
             ITuple it = Tuple.Create(1, 2, 3);
@@ -54,6 +42,7 @@ namespace System.Tests
             Assert.Throws<IndexOutOfRangeException>(() => it[3].ToString());
         }
 
+        [Fact]
         private static void FourTuples()
         {
             ITuple it = Tuple.Create(1, 2, 3, 4);
@@ -64,6 +53,7 @@ namespace System.Tests
             Assert.Equal(4, it[3]);
             Assert.Throws<IndexOutOfRangeException>(() => it[4].ToString());
         }
+        [Fact]
 
         private static void FiveTuples()
         {
@@ -77,6 +67,7 @@ namespace System.Tests
             Assert.Throws<IndexOutOfRangeException>(() => it[5].ToString());
         }
 
+        [Fact]
         private static void SixTuples()
         {
             ITuple it = Tuple.Create(1, 2, 3, 4, 5, 6);
@@ -90,6 +81,7 @@ namespace System.Tests
             Assert.Throws<IndexOutOfRangeException>(() => it[6].ToString());
         }
 
+        [Fact]
         private static void SevenTuples()
         {
             ITuple it = Tuple.Create(1, 2, 3, 4, 5, 6, 7);
@@ -109,6 +101,7 @@ namespace System.Tests
             return new Tuple<T1, T2, T3, T4, T5, T6, T7, TRest>(item1, item2, item3, item4, item5, item6, item7, rest);
         }
 
+        [Fact]
         private static void EightTuples()
         {
             ITuple it = CreateLongRef(1, 2, 3, 4, 5, 6, 7, Tuple.Create(8));
@@ -125,4 +118,3 @@ namespace System.Tests
         }
     }
 }
-#endif

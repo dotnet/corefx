@@ -20,11 +20,11 @@ namespace System.Security.Cryptography.Rsa.Tests
             GenerateKey(rsa => GetSecondMin(rsa.LegalKeySizes));
         }
 
-        // This test method takes approximately 1600 seconds to execute, so it is not on by default.
-        // public static void GenerateMaxKey()
-        // {
-        //     GenerateKey(rsa => GetMax(rsa.LegalKeySizes));
-        // }
+        [Fact(Skip = "Takes approximately 1600 seconds to execute")]
+        public static void GenerateMaxKey()
+        {
+            GenerateKey(rsa => GetMax(rsa.LegalKeySizes));
+        }
 
         [Fact]
         public static void GenerateKey_2048()

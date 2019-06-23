@@ -35,12 +35,11 @@ namespace System.Tests
         public static void Parse_Invalid_NetCoreApp11(Type enumType, string value, bool ignoreCase, Type exceptionType)
         {
             Type typeArgument = enumType == null || !enumType.IsValueType ? typeof(SimpleEnum) : enumType;
-            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid_NetCoreApp11)).MakeGenericMethod(typeArgument);
+            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid_NetCoreApp11), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeArgument);
             parseMethod.Invoke(null, new object[] { enumType, value, ignoreCase, exceptionType });
         }
 
-#pragma warning disable xUnit1013 // Public method should be marked as test
-        public static void Parse_Generic_Invalid_NetCoreApp11<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
+        private static void Parse_Generic_Invalid_NetCoreApp11<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
         {
             object result = null;
             if (!ignoreCase)
@@ -72,7 +71,6 @@ namespace System.Tests
                 Assert.Equal(default(object), result);
             }
         }
-#pragma warning restore xUnit1013 // Public method should be marked as test
 
         public static IEnumerable<object[]> UnsupportedEnumType_TestData()
         {

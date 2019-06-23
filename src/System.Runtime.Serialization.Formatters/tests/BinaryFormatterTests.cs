@@ -58,22 +58,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
             EqualityExtensions.CheckEquals(obj, clone, isSamePlatform: true);
         }
 
-        // Used for updating blobs in BinaryFormatterTestData.cs
-        // [Fact]
-        // public void UpdateBlobs()
-        // {
-        //     string testDataFilePath = GetTestDataFilePath();
-        //     string[] coreTypeBlobs = SerializableEqualityComparers_MemberData()
-        //         .Concat(SerializableObjects_MemberData())
-        //         .Select(record => BinaryFormatterHelpers.ToBase64String(record[0]))
-        //         .ToArray();
-
-        //     var (numberOfBlobs, numberOfFoundBlobs, numberOfUpdatedBlobs) = UpdateCoreTypeBlobs(testDataFilePath, coreTypeBlobs);
-        //     Console.WriteLine($"{numberOfBlobs} existing blobs" +
-        //         $"{Environment.NewLine}{numberOfFoundBlobs} found blobs with regex search" +
-        //         $"{Environment.NewLine}{numberOfUpdatedBlobs} updated blobs with regex replace");
-        // }
-
         [Theory]
         [MemberData(nameof(SerializableObjects_MemberData))]
         public void ValidateAgainstBlobs(object obj, TypeSerializableValue[] blobs)
@@ -438,42 +422,40 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.Equal(42, real);
         }
 
-        // Test is disabled becaues it can cause improbable memory allocations leading to interminable paging.
-        // We're keeping the code because it could be useful to a dev making local changes to binary formatter code.
-        //[OuterLoop]
-        //[Theory]
-        //[MemberData(nameof(FuzzInputs_MemberData))]
-        // public void Deserialize_FuzzInput(object obj, Random rand)
-        // {
-        //     // Get the serialized data for the object
-        //     byte[] data = BinaryFormatterHelpers.ToByteArray(obj, FormatterAssemblyStyle.Simple);
+        [OuterLoop]
+        [Theory(Skip = "Can cause improbable memory allocations leading to interminable paging")]
+        [MemberData(nameof(FuzzInputs_MemberData))]
+        public void Deserialize_FuzzInput(object obj, Random rand)
+        {
+            // Get the serialized data for the object
+            byte[] data = BinaryFormatterHelpers.ToByteArray(obj, FormatterAssemblyStyle.Simple);
 
-        //     // Make some "random" changes to it
-        //     for (int i = 1; i < rand.Next(1, 100); i++)
-        //     {
-        //         data[rand.Next(data.Length)] = (byte)rand.Next(256);
-        //     }
+            // Make some "random" changes to it
+            for (int i = 1; i < rand.Next(1, 100); i++)
+            {
+                data[rand.Next(data.Length)] = (byte)rand.Next(256);
+            }
 
-        //     // Try to deserialize that.
-        //     try
-        //     {
-        //         BinaryFormatterHelpers.FromByteArray(data, FormatterAssemblyStyle.Simple);
-        //         // Since there's no checksum, it's possible we changed data that didn't corrupt the instance
-        //     }
-        //     catch (ArgumentOutOfRangeException) { }
-        //     catch (ArrayTypeMismatchException) { }
-        //     catch (DecoderFallbackException) { }
-        //     catch (FormatException) { }
-        //     catch (IndexOutOfRangeException) { }
-        //     catch (InvalidCastException) { }
-        //     catch (OutOfMemoryException) { }
-        //     catch (OverflowException) { }
-        //     catch (NullReferenceException) { }
-        //     catch (SerializationException) { }
-        //     catch (TargetInvocationException) { }
-        //     catch (ArgumentException) { }
-        //     catch (FileLoadException) { }
-        // }
+            // Try to deserialize that.
+            try
+            {
+                BinaryFormatterHelpers.FromByteArray(data, FormatterAssemblyStyle.Simple);
+                // Since there's no checksum, it's possible we changed data that didn't corrupt the instance
+            }
+            catch (ArgumentOutOfRangeException) { }
+            catch (ArrayTypeMismatchException) { }
+            catch (DecoderFallbackException) { }
+            catch (FormatException) { }
+            catch (IndexOutOfRangeException) { }
+            catch (InvalidCastException) { }
+            catch (OutOfMemoryException) { }
+            catch (OverflowException) { }
+            catch (NullReferenceException) { }
+            catch (SerializationException) { }
+            catch (TargetInvocationException) { }
+            catch (ArgumentException) { }
+            catch (FileLoadException) { }
+        }
 
         [Fact]
         public void Deserialize_EndOfStream_ThrowsException()

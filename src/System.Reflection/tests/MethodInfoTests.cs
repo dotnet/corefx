@@ -563,15 +563,11 @@ namespace System.Reflection.Tests
 
 
         //Methods for Reflection Metadata  
-#pragma warning disable xUnit1013 // Public method should be marked as test
-        public void DummyMethod1(string str, int iValue, long lValue)
-#pragma warning restore xUnit1013 // Public method should be marked as test
+        private void DummyMethod1(string str, int iValue, long lValue)
         {
         }
 
-#pragma warning disable xUnit1013 // Public method should be marked as test
         public void DummyMethod2()
-#pragma warning restore xUnit1013 // Public method should be marked as test
         {
         }        
 

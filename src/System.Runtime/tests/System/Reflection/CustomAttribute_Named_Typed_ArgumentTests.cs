@@ -15,7 +15,7 @@ namespace System.Reflection.Tests
         {
             AssertExtensions.Throws<ArgumentNullException>("memberInfo", () => new CustomAttributeNamedArgument(null, null));
 
-            MethodInfo m = typeof(CustomAttribute_Named_Typed_ArgumentTests).GetMethod("MyMethod");
+            MethodInfo m = typeof(CustomAttribute_Named_Typed_ArgumentTests).GetMethod("MyMethod", BindingFlags.Static | BindingFlags.NonPublic);
             foreach (CustomAttributeData cad in CustomAttributeData.GetCustomAttributes(m))
             {
                 foreach (CustomAttributeTypedArgument cata in cad.ConstructorArguments)
@@ -54,9 +54,7 @@ namespace System.Reflection.Tests
         }
         
         [MyAttr(MyKinds.First, Desc = "This is a description on a method")]
-#pragma warning disable xUnit1013 // Public method should be marked as test
-        public static void MyMethod() { }
-#pragma warning restore xUnit1013 // Public method should be marked as test
+        private static void MyMethod() { }
     }
     
     internal enum MyKinds {

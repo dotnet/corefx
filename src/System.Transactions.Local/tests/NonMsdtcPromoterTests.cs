@@ -78,9 +78,7 @@ namespace System.Transactions.Tests
             cloneToComplete.Complete();
         }
 
-#pragma warning disable xUnit1013 // Public method should be marked as test
-        public static void Promote(string testCaseDescription, byte[] promotedTokenToCompare, Transaction txToPromote = null)
-#pragma warning restore xUnit1013 // Public method should be marked as test
+        private static void Promote(string testCaseDescription, byte[] promotedTokenToCompare, Transaction txToPromote = null)
         {
             if (txToPromote == null)
             {

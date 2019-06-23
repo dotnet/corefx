@@ -220,12 +220,11 @@ namespace System.Tests
         public static void Parse_Invalid(Type enumType, string value, bool ignoreCase, Type exceptionType)
         {
             Type typeArgument = enumType == null || !enumType.GetTypeInfo().IsEnum ? typeof(SimpleEnum) : enumType;
-            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid)).MakeGenericMethod(typeArgument);
+            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeArgument);
             parseMethod.Invoke(null, new object[] { enumType, value, ignoreCase, exceptionType });
         }
 
-#pragma warning disable xUnit1013 // Public method should be marked as test
-        public static void Parse_Generic_Invalid<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
+        private static void Parse_Generic_Invalid<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
         {
             T result;
             if (!ignoreCase)
@@ -241,7 +240,6 @@ namespace System.Tests
 
             Assert.Throws(exceptionType, () => Enum.Parse(enumType, value, ignoreCase));
         }
-#pragma warning restore xUnit1013 // Public method should be marked as test
 
         public static IEnumerable<object[]> GetName_TestData()
         {

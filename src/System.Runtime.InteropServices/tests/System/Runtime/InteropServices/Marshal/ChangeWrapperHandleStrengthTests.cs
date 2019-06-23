@@ -29,7 +29,7 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { new int[][] { new int[] { 10 } } };
             yield return new object[] { new int[,] { { 10 } } };
 
-            MethodInfo method = typeof(ChangeWrapperHandleStrengthTests).GetMethod(nameof(NonGenericMethod));
+            MethodInfo method = typeof(ChangeWrapperHandleStrengthTests).GetMethod(nameof(NonGenericMethod), BindingFlags.Static | BindingFlags.NonPublic);
             Delegate d = method.CreateDelegate(typeof(NonGenericDelegate));
             yield return new object[] { d };
         }
