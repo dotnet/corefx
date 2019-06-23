@@ -26,28 +26,44 @@ namespace System.Net.Http
         }
 
         /// <summary>Awaits a task, ignoring any resulting exceptions.</summary>
-        internal static async Task IgnoreExceptionsAsync(ValueTask<int> task)
+        internal static void IgnoreExceptions(ValueTask<int> task)
         {
-            try { await task.ConfigureAwait(false); } catch { }
+            _ = IgnoreExceptionsAsync(task);
+
+            async Task IgnoreExceptionsAsync(ValueTask<int> task)
+            {
+                try { await task.ConfigureAwait(false); } catch { }
+            }
         }
 
         /// <summary>Awaits a task, ignoring any resulting exceptions.</summary>
-        internal static async Task IgnoreExceptionsAsync(Task task)
+        internal static void IgnoreExceptions(Task task)
         {
-            try { await task.ConfigureAwait(false); } catch { }
+            _ = IgnoreExceptionsAsync(task);
+
+            async Task IgnoreExceptionsAsync(Task task)
+            {
+                try { await task.ConfigureAwait(false); } catch { }
+            }
         }
 
         /// <summary>Awaits a task, logging any resulting exceptions (which are otherwise ignored).</summary>
-        internal async Task LogExceptionsAsync(Task task)
+        internal void LogExceptions(Task task)
         {
-            try
+            _ = LogExceptionsAsync(task);
+
+            async Task LogExceptionsAsync(Task task)
             {
-                await task.ConfigureAwait(false);
+                try
+                {
+                    await task.ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    if (NetEventSource.IsEnabled) Trace($"Exception from asynchronous processing: {e}");
+                }
             }
-            catch (Exception e)
-            {
-                if (NetEventSource.IsEnabled) Trace($"Exception from asynchronous processing: {e}");
-            }
-        }
+    }
+
     }
 }

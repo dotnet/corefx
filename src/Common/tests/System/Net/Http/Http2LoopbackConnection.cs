@@ -22,7 +22,6 @@ namespace System.Net.Test.Common
         private bool _ignoreSettingsAck;
         private bool _ignoreWindowUpdates;
         public static TimeSpan Timeout => Http2LoopbackServer.Timeout;
-        private bool _shutdownDone;
         private int _lastStreamId;
 
         private readonly byte[] _prefix;
@@ -217,12 +216,6 @@ namespace System.Net.Test.Common
         // Only call this after sending a GOAWAY.
         public async Task WaitForConnectionShutdownAsync()
         {
-            if (_shutdownDone)
-            {
-                return;
-            }
-
-            _shutdownDone = true;
             // Shutdown our send side, so the client knows there won't be any more frames coming.
             ShutdownSend();
 
@@ -242,7 +235,7 @@ namespace System.Net.Test.Common
             _ignoreWindowUpdates = false;
         }
 
-        // This is similiar to WaitForConnectionShutdownAsync but will send GOAWAY for you
+        // This is similar to WaitForConnectionShutdownAsync but will send GOAWAY for you
         // and will ignore any errors if client has already shutdown
         public async Task ShutdownIgnoringErrorsAsync(int lastStreamId)
         {
@@ -530,7 +523,7 @@ namespace System.Net.Test.Common
             Assert.Equal(FrameFlags.EndHeaders, FrameFlags.EndHeaders & headersFrame.Flags);
 
             int streamId = headersFrame.StreamId;
-            requestData.Handle = (IntPtr)streamId;
+            requestData.RequestId = streamId;
 
             Memory<byte> data = headersFrame.Data;
             int i = 0;
@@ -638,7 +631,7 @@ namespace System.Net.Test.Common
 
         public override void Dispose()
         {
-            WaitForConnectionShutdownAsync().GetAwaiter().GetResult();
+            ShutdownIgnoringErrorsAsync(_lastStreamId).GetAwaiter().GetResult();
         }
 
         //
@@ -658,16 +651,16 @@ namespace System.Net.Test.Common
             return ReadBodyAsync();
         }
 
-        public override Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string body = null, bool isFinal = true, IntPtr handle = default(IntPtr))
+        public override Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string body = null, bool isFinal = true, int requestId = 0)
         {
-            int streamId = handle == (IntPtr)0 ? _lastStreamId : (int)handle;
+            int streamId = requestId == 0 ? _lastStreamId : requestId;
             bool endHeaders = body != null || isFinal;
-            return SendResponseHeadersAsync(streamId, endStream: isFinal, statusCode, isTrailingHeader : false, endHeaders : endHeaders, headers);
+            return SendResponseHeadersAsync(streamId, endStream : isFinal, statusCode, isTrailingHeader : false, endHeaders : endHeaders, headers);
         }
 
-        public override Task SendResponseBodyAsync(byte[] body, bool isFinal = true, IntPtr handle = default(IntPtr))
+        public override Task SendResponseBodyAsync(byte[] body, bool isFinal = true, int requestId = 0)
         {
-            int streamId = handle == (IntPtr)0 ? _lastStreamId : (int)handle;
+            int streamId = requestId == 0 ? _lastStreamId : requestId;
             return SendResponseBodyAsync(streamId, body, isFinal);
         }
     }

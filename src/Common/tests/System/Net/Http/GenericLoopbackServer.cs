@@ -54,14 +54,14 @@ namespace System.Net.Test.Common
         public abstract Task<Byte[]> ReadRequestBodyAsync();
 
         // Sends Response back with provided statusCode, headers and content. Can be called multiple times on same response if isFinal was set to false before.
-        public abstract Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string body = null, bool isFinal = true, IntPtr handle = default(IntPtr));
+        public abstract Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string body = null, bool isFinal = true, int requestId = 0);
         // Sends Response body after SendResponse was called with isFinal: false.
-        public abstract Task SendResponseBodyAsync(byte[] data, bool isFinal = true, IntPtr handle = default(IntPtr));
+        public abstract Task SendResponseBodyAsync(byte[] data, bool isFinal = true, int requestId = 0);
 
         // Helper function to make it easier to convert old test with strings.
-        public async Task SendResponseBodyAsync(string data, bool isFinal = true, IntPtr handle = default(IntPtr))
+        public async Task SendResponseBodyAsync(string data, bool isFinal = true, int requestId = 0)
         {
-            await SendResponseBodyAsync(String.IsNullOrEmpty(data) ? new byte[0] : Encoding.ASCII.GetBytes(data), isFinal, handle);
+            await SendResponseBodyAsync(String.IsNullOrEmpty(data) ? new byte[0] : Encoding.ASCII.GetBytes(data), isFinal, requestId);
         }
     }
 
@@ -88,7 +88,7 @@ namespace System.Net.Test.Common
         public string Method;
         public string Path;
         public List<HttpHeaderData> Headers { get; }
-        public IntPtr Handle;
+        public int RequestId;       // Generic request ID. Currently only used for HTTP/2 to hold StreamId.
 
         public HttpRequestData()
         {

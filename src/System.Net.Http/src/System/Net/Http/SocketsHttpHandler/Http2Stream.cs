@@ -100,19 +100,19 @@ namespace System.Net.Http
                         {
                             // TODO: until #9071 is fixed, cancellation on content.CopyToAsync does not work.
                             // To work around it, register delegate and set _abortException as needed.
-                            using (cancellationToken.Register(stream => { if (((Http2Stream)stream)._abortException == null) ((Http2Stream)stream)._abortException = new OperationCanceledException(); }, this))
+                            using (cancellationToken.UnsafeRegister(stream => { if (((Http2Stream)stream)._abortException == null) ((Http2Stream)stream)._abortException = new OperationCanceledException(); }, this))
                             {
                                 await _request.Content.CopyToAsync(writeStream, null, cancellationToken).ConfigureAwait(false);
                             }
                         }
 
                         // Don't wait for completion, which could happen asynchronously.
-                        _ = _connection.LogExceptionsAsync(_connection.SendEndStreamAsync(_streamId));
+                        _connection.LogExceptions(_connection.SendEndStreamAsync(_streamId));
                     }
                     catch (Exception e)
                     {
                          // Try to notify server if we did not finish sending request body.
-                         _ = IgnoreExceptionsAsync(_connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel));
+                         IgnoreExceptions(_connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel));
 
                         // if we decided abandon sending request and we get ObjectDisposed as result of it, just eat exception.
                         if (!_shouldSendRequestBody && (e is ObjectDisposedException || e.InnerException is ObjectDisposedException))
@@ -122,7 +122,7 @@ namespace System.Net.Http
 
                         if (_abortException == null)
                         {
-                            // If we still processing response after receiving response headers, this will give us chance to propagate exception up.
+                            // If we are still the response after receiving response headers, this will give us a chance to propagate exception up.
                             // Since we failed while Copying stream, wrap it as IOException if needed.
                             _abortException = e;
                         }
@@ -162,7 +162,7 @@ namespace System.Net.Http
                     // We received negative response from server so we will not send body and we will reset stream.
                     _shouldSendRequestBody = false;
                     _shouldSendRequestBodyWaiter = null;
-                    _ = IgnoreExceptionsAsync(_connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel));
+                    IgnoreExceptions(_connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel));
                 }
 
                 // Finish reading response.
@@ -505,7 +505,7 @@ namespace System.Net.Http
                 int windowUpdateSize = _pendingWindowUpdate;
                 _pendingWindowUpdate = 0;
 
-                _ = _connection.LogExceptionsAsync(_connection.SendWindowUpdateAsync(_streamId, windowUpdateSize));
+                _connection.LogExceptions(_connection.SendWindowUpdateAsync(_streamId, windowUpdateSize));
             }
 
             private (bool wait, int bytesRead) TryReadFromBuffer(Span<byte> buffer)
@@ -633,7 +633,7 @@ namespace System.Net.Http
                 bool signalWaiter;
                 lock (SyncObject)
                 {
-                    _ = IgnoreExceptionsAsync(_connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel));
+                    IgnoreExceptions(_connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel));
                     _abortException = new OperationCanceledException();
                     _state = StreamState.Aborted;
 
@@ -670,9 +670,10 @@ namespace System.Net.Http
                 }, this))
                 {
 
-                    await vt;
+                    await vt.ConfigureAwait(false);
                 }
 
+                CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
             }
 
             private sealed class Http2ReadStream : HttpBaseStream
@@ -698,7 +699,7 @@ namespace System.Net.Http
                         if (http2Stream._state != StreamState.Aborted && http2Stream._state != StreamState.Complete)
                         {
                             // If we abort response stream before endOfStream, let server know.
-                            _ = IgnoreExceptionsAsync(http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel));
+                            IgnoreExceptions(http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel));
                         }
 
                         http2Stream.Dispose();
@@ -736,7 +737,7 @@ namespace System.Net.Http
 
                     if (cancellationToken.IsCancellationRequested)
                     {
-                        return new ValueTask<int>(Task.FromException<int>(new OperationCanceledException()));
+                        return new ValueTask<int>(Task.FromCanceled<int>(cancellationToken));
                     }
 
                     return http2Stream.ReadDataAsync(destination, cancellationToken);
@@ -787,7 +788,7 @@ namespace System.Net.Http
                     // TODO: until #9071 is fixed
                     if (http2Stream._abortException is OperationCanceledException)
                     {
-                        throw http2Stream._abortException;
+                        ExceptionDispatchInfo.Throw(http2Stream._abortException);
                     }
 
                     return new ValueTask(http2Stream.SendDataAsync(buffer, cancellationToken));

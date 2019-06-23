@@ -487,7 +487,7 @@ namespace System.Net.Http
 
                 // Send acknowledgement
                 // Don't wait for completion, which could happen asynchronously.
-                _ = LogExceptionsAsync(SendSettingsAckAsync());
+                LogExceptions(SendSettingsAckAsync());
             }
         }
 
@@ -556,7 +556,7 @@ namespace System.Net.Http
 
             // Send PING ACK
             // Don't wait for completion, which could happen asynchronously.
-            _ = LogExceptionsAsync(SendPingAckAsync(_incomingBuffer.ActiveMemory.Slice(0, FrameHeader.PingLength)));
+            LogExceptions(SendPingAckAsync(_incomingBuffer.ActiveMemory.Slice(0, FrameHeader.PingLength)));
 
             _incomingBuffer.Discard(frameHeader.Length);
         }
@@ -983,7 +983,12 @@ namespace System.Net.Http
                 // Throw a retryable request exception if this is not result of some other error.
                 // This will cause retry logic to kick in and perform another connection attempt.
                 // The user should never see this exception.  Same logic lives in AddStream.
-                ExceptionDispatchInfo.Throw(_abortException ?? new HttpRequestException(null, null, allowRetry: true));
+                if (_abortException != null)
+                {
+                    ExceptionDispatchInfo.Throw(_abortException);
+                }
+
+                throw new HttpRequestException(null, null, allowRetry: true);
             }
 
             Http2Stream http2Stream = null;
@@ -1128,7 +1133,7 @@ namespace System.Net.Http
                 _pendingWindowUpdate = 0;
             }
 
-            _ = LogExceptionsAsync(SendWindowUpdateAsync(0, windowUpdateSize));
+            LogExceptions(SendWindowUpdateAsync(0, windowUpdateSize));
         }
 
         private void WriteFrameHeader(FrameHeader frameHeader)
@@ -1398,7 +1403,7 @@ namespace System.Net.Http
                         {
                             if (NetEventSource.IsEnabled) Trace($"SendRequestBody Task failed. {e}");
                             // Observe exception (if any) on responseHeadersTask.
-                            _ = LogExceptionsAsync(responseHeadersTask);
+                            LogExceptions(responseHeadersTask);
                             throw;
                         }
 
@@ -1409,7 +1414,7 @@ namespace System.Net.Http
                         // We received the response headers but the request body hasn't yet finished.
                         // If the connection is aborted or if we get RST or GOAWAY from server, exception will be
                         // stored in stream._abortException and propagated to up to caller if possible while processing response.
-                        _ = LogExceptionsAsync(bodyTask);
+                        LogExceptions(bodyTask);
                         bodyTask = null;
                         // Pick up any exceptions from the header Task.
                         await responseHeadersTask.ConfigureAwait(false);

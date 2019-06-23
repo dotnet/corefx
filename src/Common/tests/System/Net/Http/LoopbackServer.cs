@@ -736,7 +736,7 @@ namespace System.Net.Test.Common
                 return buffer;
             }
 
-            public override async Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null, bool isFinal = true, IntPtr handle = default(IntPtr))
+            public override async Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null, bool isFinal = true, int requestId = 0)
             {
                 string headerString = null;
                 int contentLength = -1;
@@ -768,7 +768,7 @@ namespace System.Net.Test.Common
                 await SendResponseAsync(content);
             }
 
-            public override async Task SendResponseBodyAsync(byte[] body, bool isFinal = true, IntPtr handle = default(IntPtr))
+            public override async Task SendResponseBodyAsync(byte[] body, bool isFinal = true, int requestId = 0)
             {
                 await SendResponseAsync(Encoding.UTF8.GetString(body));
             }

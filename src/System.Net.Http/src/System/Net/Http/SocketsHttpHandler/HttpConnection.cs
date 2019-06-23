@@ -149,7 +149,7 @@ namespace System.Net.Http
                     ValueTask<int>? readAheadTask = ConsumeReadAheadTask();
                     if (readAheadTask != null)
                     {
-                        _ = IgnoreExceptionsAsync(readAheadTask.GetValueOrDefault());
+                        IgnoreExceptions(readAheadTask.GetValueOrDefault());
                     }
                 }
             }
@@ -702,7 +702,7 @@ namespace System.Net.Http
                 // hook up a continuation that will log it.
                 if (sendRequestContentTask != null && !sendRequestContentTask.IsCompletedSuccessfully)
                 {
-                    _ = LogExceptionsAsync(sendRequestContentTask);
+                    LogExceptions(sendRequestContentTask);
                 }
 
                 // Now clean up the connection.
