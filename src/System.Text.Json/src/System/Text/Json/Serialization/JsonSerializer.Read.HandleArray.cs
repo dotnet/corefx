@@ -81,6 +81,22 @@ namespace System.Text.Json
                         }
                     }
                 }
+                else
+                {
+                    // Ignore read only and fixed size collections
+                    bool skip = jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) switch
+                    {
+                        IList list => list.IsFixedSize || list.IsReadOnly,
+                        IDictionary list => list.IsFixedSize || list.IsReadOnly,
+                        _ => true
+                    };
+
+                    if (skip)
+                    {
+                        state.Push();
+                        state.Current.Drain = true;
+                    }
+                }
             }
         }
 
