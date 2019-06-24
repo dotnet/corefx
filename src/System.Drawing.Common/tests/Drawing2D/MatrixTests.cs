@@ -374,7 +374,7 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Multiply_Disposed_ThrowsArgumentException()
         {
-            var disposedMatrix = CreateDisposedMatrix();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
             using (var other = new Matrix())
             {
@@ -386,7 +386,7 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Multiply_DisposedMatrix_ThrowsArgumentException()
         {
-            var disposedMatrix = CreateDisposedMatrix();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
             using (var matrix = new Matrix())
             {
@@ -531,7 +531,7 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void RotateAt_Disposed_ThrowsArgumentException()
         {
-            var disposedMatrix = CreateDisposedMatrix();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.RotateAt(1, PointF.Empty));
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.RotateAt(1, PointF.Empty, MatrixOrder.Append));
@@ -619,7 +619,7 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Scale_Disposed_ThrowsArgumentException()
         {
-            var disposedMatrix = CreateDisposedMatrix();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Scale(1, 2));
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Scale(1, 2, MatrixOrder.Append));
@@ -697,7 +697,7 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Shear_Disposed_ThrowsArgumentException()
         {
-            var disposedMatrix = CreateDisposedMatrix();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Shear(1, 2));
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Shear(1, 2, MatrixOrder.Append));
@@ -765,7 +765,7 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Translate_Disposed_ThrowsArgumentException()
         {
-            var disposedMatrix = CreateDisposedMatrix();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Translate(1, 2));
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.Translate(1, 2, MatrixOrder.Append));
@@ -824,7 +824,7 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformPoints_Disposed_ThrowsArgumentException()
         {
-            var disposedMatrix = CreateDisposedMatrix();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.TransformPoints(new Point[1]));
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.TransformPoints(new PointF[1]));
@@ -896,7 +896,7 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TransformVectors_Disposed_ThrowsArgumentException()
         {
-            var disposedMatrix = CreateDisposedMatrix();
+            Matrix disposedMatrix = CreateDisposedMatrix();
 
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.VectorTransformPoints(new Point[1]));
             AssertExtensions.Throws<ArgumentException>(null, () => disposedMatrix.TransformPoints(new Point[1]));

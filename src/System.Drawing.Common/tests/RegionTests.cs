@@ -572,7 +572,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Complement_Disposed_ThrowsArgumentException()
         {
-            var disposedRegion = CreateDisposedRegion();
+            Region disposedRegion = CreateDisposedRegion();
 
             using (var graphicPath = new GraphicsPath())
             using (var other = new Region())
@@ -682,7 +682,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Equals_Disposed_ThrowsArgumentException()
         {
-            var disposedRegion = CreateDisposedRegion();
+            Region disposedRegion = CreateDisposedRegion();
 
             AssertExtensions.Throws<ArgumentException>(null, () => disposedRegion.Equals(new Region(), s_graphic));
             AssertExtensions.Throws<ArgumentException>(null, () => new Region().Equals(disposedRegion, s_graphic));
@@ -992,7 +992,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Exclude_Disposed_ThrowsArgumentException()
         {
-            var disposedRegion = CreateDisposedRegion();
+            Region disposedRegion = CreateDisposedRegion();
 
             using (var graphicsPath = new GraphicsPath())
             using (var other = new Region())
@@ -1407,7 +1407,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Intersect_Disposed_ThrowsArgumentException()
         {
-            var disposedRegion = CreateDisposedRegion();
+            Region disposedRegion = CreateDisposedRegion();
 
             using (var graphicsPath = new GraphicsPath())
             using (var other = new Region())
@@ -1573,7 +1573,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void IsVisible_Disposed_ThrowsArgumentException()
         {
-            var disposedRegion = CreateDisposedRegion();
+            Region disposedRegion = CreateDisposedRegion();
 
             AssertExtensions.Throws<ArgumentException>(null, () => disposedRegion.IsVisible(1f, 2f));
             AssertExtensions.Throws<ArgumentException>(null, () => disposedRegion.IsVisible(new PointF(1, 2)));
@@ -1981,7 +1981,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Union_Disposed_ThrowsArgumentException()
         {
-            var disposedRegion = CreateDisposedRegion();
+            Region disposedRegion = CreateDisposedRegion();
 
             using (var graphicsPath = new GraphicsPath())
             using (var other = new Region())
@@ -2181,7 +2181,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Translate_Disposed_ThrowsArgumentException()
         {
-            var disposedRegion = CreateDisposedRegion();
+            Region disposedRegion = CreateDisposedRegion();
 
             AssertExtensions.Throws<ArgumentException>(null, () => disposedRegion.Translate(1, 2));
             AssertExtensions.Throws<ArgumentException>(null, () => disposedRegion.Translate(1f, 2f));
@@ -2397,7 +2397,7 @@ namespace System.Drawing.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Xor_Disposed_ThrowsArgumentException()
         {
-            var disposedRegion = CreateDisposedRegion();
+            Region disposedRegion = CreateDisposedRegion();
 
             using (var graphicsPath = new GraphicsPath())
             using (var other = new Region())
