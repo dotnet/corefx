@@ -21,6 +21,11 @@ namespace Internal.Cryptography
     internal static partial class PkcsHelpers
     {
         private static readonly byte[] s_pSpecifiedDefaultParameters = { 0x04, 0x00 };
+        private static readonly string[] s_rsaAndMd5WithRsa = new string[] { Oids.Rsa, Oids.RsaPkcs1Md5 };
+        private static readonly string[] s_rsaAndSha1WithRsa = new string[] { Oids.Rsa, Oids.RsaPkcs1Sha1 };
+        private static readonly string[] s_rsaAndSha256WithRsa = new string[] { Oids.Rsa, Oids.RsaPkcs1Sha256 };
+        private static readonly string[] s_rsaAndSha384WithRsa = new string[] { Oids.Rsa, Oids.RsaPkcs1Sha384 };
+        private static readonly string[] s_rsaAndSha512WithRsa = new string[] { Oids.Rsa, Oids.RsaPkcs1Sha512 };
 
 #if !netcoreapp && !netstandard21
         // Compatibility API.
@@ -44,27 +49,27 @@ namespace Internal.Cryptography
                 case Oids.Md5:
                     return HashAlgorithmName.MD5;
                 case Oids.RsaPkcs1Md5 when forVerification:
-                    expectedSignatureOids = new string[] { Oids.Rsa, Oids.RsaPkcs1Md5 };
+                    expectedSignatureOids = s_rsaAndMd5WithRsa;
                     return HashAlgorithmName.MD5;
                 case Oids.Sha1:
                     return HashAlgorithmName.SHA1;
                 case Oids.RsaPkcs1Sha1 when forVerification:
-                    expectedSignatureOids = new string[] { Oids.Rsa, Oids.RsaPkcs1Sha1 };
+                    expectedSignatureOids = s_rsaAndSha1WithRsa;
                     return HashAlgorithmName.SHA1;
                 case Oids.Sha256:
                     return HashAlgorithmName.SHA256;
                 case Oids.RsaPkcs1Sha256 when forVerification:
-                    expectedSignatureOids = new string[] { Oids.Rsa, Oids.RsaPkcs1Sha256 };
+                    expectedSignatureOids = s_rsaAndSha256WithRsa;
                     return HashAlgorithmName.SHA256;
                 case Oids.Sha384:
                     return HashAlgorithmName.SHA384;
                 case Oids.RsaPkcs1Sha384 when forVerification:
-                    expectedSignatureOids = new string[] { Oids.Rsa, Oids.RsaPkcs1Sha384 };
+                    expectedSignatureOids = s_rsaAndSha384WithRsa;
                     return HashAlgorithmName.SHA384;
                 case Oids.Sha512:
                     return HashAlgorithmName.SHA512;
                 case Oids.RsaPkcs1Sha512 when forVerification:
-                    expectedSignatureOids = new string[] { Oids.Rsa, Oids.RsaPkcs1Sha512 };
+                    expectedSignatureOids = s_rsaAndSha512WithRsa;
                     return HashAlgorithmName.SHA512;
                 default:
                     throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, oidValue);

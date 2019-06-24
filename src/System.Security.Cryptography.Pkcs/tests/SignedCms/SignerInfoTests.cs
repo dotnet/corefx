@@ -213,7 +213,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
             signer.CheckSignature(true);
         }
 
-
         [Fact]
         public static void CheckSignature_SHA1WithRSA()
         {
