@@ -254,6 +254,7 @@ namespace System.Net.Sockets
             // Check for synchronous exception
             if (!CheckErrorAndUpdateStatus(errorCode))
             {
+                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
                 throw new SocketException((int)errorCode);
             }
 
@@ -286,11 +287,12 @@ namespace System.Net.Sockets
                 _remoteEndPoint = null;
             }
 
-            if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
+            SocketError errorCode = (SocketError)castedAsyncResult.ErrorCode;
+            if (errorCode != SocketError.Success)
             {
-                UpdateStatusAfterSocketErrorAndThrowException((SocketError)castedAsyncResult.ErrorCode);
+                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
-
         }
 
         internal ThreadPoolBoundHandle GetOrAllocateThreadPoolBoundHandle() =>
