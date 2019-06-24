@@ -257,7 +257,6 @@ namespace System.Drawing.Tests
         [Fact]
         public void Finalize_Invoke_Success()
         {
-            // Don't allocate anything as this would leak memory.
             // This makes sure than finalization doesn't cause any errors or debug assertions.
             AllocateBufferedGraphicsContext();
 
