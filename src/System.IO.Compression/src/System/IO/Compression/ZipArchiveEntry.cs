@@ -751,7 +751,7 @@ namespace System.IO.Compression
                     return false;
                 }
                 _archive.ArchiveStream.Seek(_offsetOfLocalHeader, SeekOrigin.Begin);
-                if (needToUncompress && !needToLoadIntoMemory && _archive.Mode != ZipArchiveMode.Create)
+                if (needToUncompress && !needToLoadIntoMemory)
                 {
                     if (!ZipLocalFileHeader.TryValidateBlock(_archive.ArchiveReader, this))
                     {

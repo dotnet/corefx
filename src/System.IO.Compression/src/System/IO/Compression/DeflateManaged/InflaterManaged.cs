@@ -156,7 +156,7 @@ namespace System.IO.Compression
                     _formatReader.Validate();
                 }
             }
-            
+
             return count;
         }
 

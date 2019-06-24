@@ -442,7 +442,7 @@ namespace System.IO.Compression
 
             uint minimumVersion = reader.ReadUInt16();
             uint dataDescriptorBit = reader.ReadUInt16() & (uint)ZipArchiveEntry.BitFlagValues.DataDescriptor;
-            reader.BaseStream.Seek(10, SeekOrigin.Current); // skipping bytes used for Compression method (2 bytes), File last modification time and date (4 bytes) and CRC (4 bytes)
+            reader.BaseStream.Seek(10, SeekOrigin.Current); // skipping bytes used for Compression method (2 bytes), last modification time and date (4 bytes) and CRC (4 bytes)
             long compressedSize = reader.ReadUInt32();
             long uncompressedSize = reader.ReadUInt32();
             int filenameLength = reader.ReadUInt16();

@@ -105,8 +105,7 @@ namespace System.IO.Compression
                         _finished = true;
                         _zlibStream.AvailIn = 0;
                     }
-                }             
-
+                }
                 return bytesRead;
             }
             finally
