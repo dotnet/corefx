@@ -1316,6 +1316,21 @@ namespace System.Text.Json.Tests
             AssertContents(sb.ToString(), output);
         }
 
+        [Fact]
+        public void WriteSeparateProperties()
+        {
+            var options = new JsonWriterOptions { Indented = false, SkipValidation = true };
+            var output = new ArrayBufferWriter<byte>(1024);
+
+            var jsonUtf8 = new Utf8JsonWriter(output, options);
+            jsonUtf8.WriteStartObject();
+            jsonUtf8.WritePropertyName(Encoding.UTF8.GetBytes("foo"));
+            jsonUtf8.WriteStringValue("bar");
+            jsonUtf8.WriteEndObject();
+            jsonUtf8.Flush();
+            Assert.Equal("{\"foo\":\"bar\"}", Encoding.UTF8.GetString(output.WrittenMemory.ToArray()));
+        }
+
         [Theory]
         [InlineData(true, true)]
         [InlineData(true, false)]

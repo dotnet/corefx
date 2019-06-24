@@ -30,6 +30,7 @@ namespace System.Text.Json
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
+            _isProperty = false;
         }
 
         private void WriteBase64ByOptions(ReadOnlySpan<byte> bytes)

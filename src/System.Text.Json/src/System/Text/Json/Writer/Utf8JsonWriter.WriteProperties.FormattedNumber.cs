@@ -37,6 +37,7 @@ namespace System.Text.Json
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Number;
+            _isProperty = false;
         }
 
         /// <summary>
@@ -67,6 +68,7 @@ namespace System.Text.Json
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Number;
+            _isProperty = false;
         }
 
         private void WriteNumberEscape(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)

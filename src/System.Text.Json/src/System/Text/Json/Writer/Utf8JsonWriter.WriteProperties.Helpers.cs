@@ -37,7 +37,7 @@ namespace System.Text.Json
         {
             if (!Options.SkipValidation)
             {
-                if (!_inObject)
+                if (!_inObject || _isProperty)
                 {
                     Debug.Assert(_tokenType != JsonTokenType.StartObject);
                     ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWritePropertyWithinArray, currentDepth: default, token: default, _tokenType);
@@ -50,7 +50,7 @@ namespace System.Text.Json
         {
             if (!Options.SkipValidation)
             {
-                if (!_inObject)
+                if (!_inObject || _isProperty)
                 {
                     Debug.Assert(_tokenType != JsonTokenType.StartObject);
                     ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWritePropertyWithinArray, currentDepth: default, token: default, _tokenType);
