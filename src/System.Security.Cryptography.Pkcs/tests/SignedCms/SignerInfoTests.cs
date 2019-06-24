@@ -200,6 +200,19 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        public static void CheckSignature_MD5WithRSA()
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.MD5WithRSADigestAlgorithm);
+            SignerInfo signer = cms.SignerInfos[0];
+
+            Assert.Equal(Oids.RsaPkcs1Md5, signer.DigestAlgorithm.Value);
+
+            //Assert.NotThrows
+            signer.CheckSignature(true);
+        }
+
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetFx bug in matching logic")]
         public static void RemoveCounterSignature_MatchesIssuerAndSerialNumber()
         {
