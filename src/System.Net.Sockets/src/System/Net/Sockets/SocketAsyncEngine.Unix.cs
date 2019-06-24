@@ -112,7 +112,7 @@ namespace System.Net.Sockets
 
         private const int BatchThreshold = 2;
 
-        private readonly ThreadPoolResetEvent _batchProcessed = new ThreadPoolResetEvent(initialState: false);
+        private readonly ThreadPoolResetEvent _batchProcessed = new ThreadPoolResetEvent();
 
         //
         // The next handle value to be allocated for this event port.
@@ -401,10 +401,8 @@ namespace System.Net.Sockets
             return error == Interop.Error.SUCCESS;
         }
 
-        private class ThreadPoolResetEvent : ManualResetEventSlim, IThreadPoolWorkItem
+        private sealed class ThreadPoolResetEvent : ManualResetEventSlim, IThreadPoolWorkItem
         {
-            public ThreadPoolResetEvent(bool initialState = false) : base(initialState) { }
-
             void IThreadPoolWorkItem.Execute() => Set();
         }
     }
