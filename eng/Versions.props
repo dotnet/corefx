@@ -42,6 +42,7 @@
     <MicrosoftNETCoreAppPackageVersion>3.0.0-preview7-27822-05</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreDotNetHostPackageVersion>3.0.0-preview7-27822-05</MicrosoftNETCoreDotNetHostPackageVersion>
     <MicrosoftNETCoreDotNetHostPolicyPackageVersion>3.0.0-preview7-27822-05</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
+    <MicrosoftWindowsDesktopAppRefPackageVersion>3.0.0-preview7-27822-05</MicrosoftWindowsDesktopAppRefPackageVersion>
     <!-- Coreclr dependencies -->
     <MicrosoftNETCoreILAsmPackageVersion>3.0.0-preview7.19320.3</MicrosoftNETCoreILAsmPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview7.19320.3</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
@@ -80,6 +81,8 @@
     <MicrosoftPrivateIntellisensePackageVersion>3.0.0-preview3-190305-0</MicrosoftPrivateIntellisensePackageVersion>
     <!-- ILLink -->
     <ILLinkTasksPackageVersion>0.1.5-preview-1461378</ILLinkTasksPackageVersion>
+    <!-- ASP.Net -->
+    <MicrosoftAspNetCoreAppRefPackageVersion>3.0.0-preview7.19322.3</MicrosoftAspNetCoreAppRefPackageVersion>
   </PropertyGroup>
   <!-- Override isolated build dependency versions with versions from Repo API. -->
   <Import Project="$(DotNetPackageVersionPropsPath)" Condition="'$(DotNetPackageVersionPropsPath)' != ''" />

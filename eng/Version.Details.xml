@@ -14,7 +14,15 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
+    <Dependency Name="Microsoft.AspNetCore.App.Ref" Version="3.0.0-preview7.19322.3">
+      <Uri>https://github.com/aspnet/AspNetCore</Uri>
+      <Sha>6761dec9c69ffb4cd5b14a0a663ab73aa01fc7e2</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview7-27822-05">
+      <Uri>https://github.com/dotnet/core-setup</Uri>
+      <Sha>1af2ba41a56e09064091dc82264057289b56bd15</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="3.0.0-preview7-27822-05">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>1af2ba41a56e09064091dc82264057289b56bd15</Sha>
     </Dependency>

@@ -1,10 +1,3 @@
-param (
-$frameworkVersion = "3.0",
-$runtimeVersion = "3.0.0-*",
-$refDirName = "netcoreapp30_compat",
-$rid = "win7-x64"
-)
-
 function _getPackageVersion($packageName)
 {
 	$searchPattern = -join($localPackageSourcePath, $packageName, ".[0-9].[0-9].[0-9]*.nupkg")
@@ -33,9 +26,8 @@ $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 1
 $repoRoot = ((get-item $PSScriptRoot).parent.parent.parent.FullName)
 $dotnetPath = -join($repoRoot, "\.dotnet\dotnet.exe")
 $csprojPath = -join($PSScriptRoot, "\", (Get-ChildItem $PSScriptRoot"\*.csproj" | Select-Object -ExpandProperty Name))
-$packagesCachePath = -join($repoRoot, "\packages")
 $localPackageSourcePath = -join($repoRoot, "\artifacts\packages\Debug\")
-$targetFramework = -join("netcoreapp", $frameworkVersion)
+$restoreOutputPath = -join($repoRoot, "\artifacts\ApiCatalogLayout\")
 
 if (!(Test-Path $localPackageSourcePath))
 {
@@ -47,34 +39,22 @@ if (!(Test-Path $localPackageSourcePath))
 	}
 }
 
-$restoreSources = -join("https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;https://api.nuget.org/v3/index.json;https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;", $localPackageSourcePath)
+$restoreSources = -join("https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore/index.json;", $localPackageSourcePath)
 
 $compatPackageVersion = _getPackageVersion "Microsoft.Windows.Compatibility"
-$privatePackageVersion = _getPackageVersion "Microsoft.Private.CoreFx.NETCoreApp"
+$privateNetcoreappPackageVersion = _getPackageVersion "Microsoft.Private.CoreFx.NETCoreApp"
+$privateUAPPackageVersion = _getPackageVersion "Microsoft.Private.CoreFx.UAP"
+$systemWindowsExtensionsVersion = _getPackageVersion "System.Windows.Extensions"
 
-Write-Output "Calling dotnet restore"
-& $dotnetPath restore --packages $packagesCachePath /p:RestoreSources="$restoreSources" /p:TargetFramework=$targetFramework /p:CompatibilityPackageVersion=$compatPackageVersion /p:PrivateCorefxPackageVersion=$privatePackageVersion /p:RuntimeIdentifiers=$rid $csprojPath
+Write-Output "Generating APICatalog Layout"
+& $dotnetPath msbuild /t:GetReferences /p:RestoreSources="$restoreSources" /p:CompatibilityPackageVersion=$compatPackageVersion /p:PrivateCorefxNetCoreAppPackageVersion=$privateNetcoreappPackageVersion /p:PrivateCorefxUAPPackageVersion=$privateUAPPackageVersion /p:SystemWindowsExtensionsVersion=$systemWindowsExtensionsVersion /p:RestoreOutputPath=$restoreOutputPath $csprojPath
 
-$outputPath = -join($PSScriptRoot, "\bin\Debug\", $targetFramework, "\", $rid, "\publish\")
-
-Write-Output "Calling dotnet publish"
-& $dotnetPath publish -r $rid -o $outputPath /p:NugetMonikerVersion=$frameworkVersion /p:RestoreSources="$restoreSources" /p:TargetFramework=$targetFramework /p:CompatibilityPackageVersion=$compatPackageVersion /p:RuntimeFrameworkVersion=$runtimeFramework /p:PrivateCorefxPackageVersion=$privatePackageVersion /p:RuntimeIdentifiers=$rid $csprojPath
-
-if (!(Test-Path $outputPath))
+if (!(Test-Path $restoreOutputPath))
 {
-	Write-Error -Message (-join("There was an error while publishing for framework: ", $targetFramework))
+	Write-Error -Message "There was an error while generating the APICatalog layout"
 	Exit;
 }
 
-Write-Output (-join("Published succedded for: ", $targetFramework))
+Write-Output "Successfully generated APICatalog Layout"
 
 $refPath = -join($repoRoot, "\artifacts\bin\ref\", $refDirName)
-
-if (Test-Path $refPath)
-{
-	Remove-Item $refPath -r -force
-}
-
-New-Item $refPath -ItemType directory
-Remove-Item (-join($outputPath, "Microsoft.Windows.Compatibility.Validation.dll")) -force
-Copy-Item (-join($outputPath,"\refs\", "*.dll")) $refPath
