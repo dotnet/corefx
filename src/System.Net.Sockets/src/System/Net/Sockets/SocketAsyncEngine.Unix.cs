@@ -111,9 +111,9 @@ namespace System.Net.Sockets
         private static readonly IntPtr ShutdownHandle = (IntPtr)(-1);
 
         private const int BatchThreshold = 2;
-        private static readonly WaitCallback s_releaseBatch = (mres) => ((ManualResetEventSlim)mres).Set();
 
-        private readonly ManualResetEventSlim _batchProcessed = new ManualResetEventSlim(initialState: false);
+        private readonly ThreadPoolResetEvent _batchProcessed = new ThreadPoolResetEvent(initialState: false);
+
         //
         // The next handle value to be allocated for this event port.
         // Must be accessed under s_lock.
@@ -348,7 +348,7 @@ namespace System.Net.Sockets
                         // as well as not overloading the system with events at a higher rate than they can actually be 
                         // processed, which breaks any back pressure on the sockets.
                         _batchProcessed.Reset();
-                        ThreadPool.UnsafeQueueUserWorkItem(s_releaseBatch, _batchProcessed);
+                        ThreadPool.UnsafeQueueUserWorkItem(_batchProcessed, preferLocal: false);
                         _batchProcessed.Wait();
                     }
                 }
@@ -399,6 +399,13 @@ namespace System.Net.Sockets
             error = Interop.Sys.TryChangeSocketEventRegistration(_port, socket, Interop.Sys.SocketEvents.None, 
                 Interop.Sys.SocketEvents.Read | Interop.Sys.SocketEvents.Write, handle);
             return error == Interop.Error.SUCCESS;
+        }
+
+        private class ThreadPoolResetEvent : ManualResetEventSlim, IThreadPoolWorkItem
+        {
+            public ThreadPoolResetEvent(bool initialState = false) : base(initialState) { }
+
+            void IThreadPoolWorkItem.Execute() => Set();
         }
     }
 }
