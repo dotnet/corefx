@@ -46,6 +46,9 @@ $privateNetcoreappPackageVersion = _getPackageVersion "Microsoft.Private.CoreFx.
 $privateUAPPackageVersion = _getPackageVersion "Microsoft.Private.CoreFx.UAP"
 $systemWindowsExtensionsVersion = _getPackageVersion "System.Windows.Extensions"
 
+Write-Output "Restoring packages for APICatalog Layout"
+& $dotnetPath restore --packages $restoreOutputPath /p:RestoreSources="$restoreSources" /p:CompatibilityPackageVersion=$compatPackageVersion /p:PrivateCorefxNetCoreAppPackageVersion=$privateNetcoreappPackageVersion /p:PrivateCorefxUAPPackageVersion=$privateUAPPackageVersion /p:SystemWindowsExtensionsVersion=$systemWindowsExtensionsVersion /p:RestoreOutputPath=$restoreOutputPath $csprojPath
+
 Write-Output "Generating APICatalog Layout"
 & $dotnetPath msbuild /t:GetReferences /p:RestoreSources="$restoreSources" /p:CompatibilityPackageVersion=$compatPackageVersion /p:PrivateCorefxNetCoreAppPackageVersion=$privateNetcoreappPackageVersion /p:PrivateCorefxUAPPackageVersion=$privateUAPPackageVersion /p:SystemWindowsExtensionsVersion=$systemWindowsExtensionsVersion /p:RestoreOutputPath=$restoreOutputPath $csprojPath
 

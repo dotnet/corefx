@@ -8,5 +8,8 @@
     <NETCoreAppMaximumVersion>99.9</NETCoreAppMaximumVersion>
     <PackageConflictPreferredPackages Condition="'$(TargetFramework)' != 'netcoreapp2.0'">Microsoft.Private.CoreFx.NETCoreApp;runtime.$(RuntimeIdentifiers).Microsoft.Private.CoreFx.NETCoreApp;$(PackageConflictPreferredPackages)</PackageConflictPreferredPackages>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <IntermediateOutputPath Condition="'$(RestoreOutputPath)' != ''">$(RestoreOutputPath)</IntermediateOutputPath>
+    <OutputPath Condition="'$(RestoreOutputPath)' != ''">$(RestoreOutputPath)</OutputPath>
+    <MSBuildProjectExtensionsPath Condition="'$(RestoreOutputPath)' != ''">$(RestoreOutputPath)</MSBuildProjectExtensionsPath>
   </PropertyGroup>
 </Project>

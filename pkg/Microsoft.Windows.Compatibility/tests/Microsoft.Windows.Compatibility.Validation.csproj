@@ -8,10 +8,9 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <PackageReference Include="Microsoft.Private.CoreFx.NETCoreApp" Version="$(PrivateCorefxNetCoreAppPackageVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.App.Ref" Version="$(MicrosoftAspNetCoreAppRefPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true" />
-    <Reference Include="$(PkgMicrosoftAspNetCoreAppRef)\ref\$(TargetFramework)\*.dll" />
+    <Reference Include="$(PkgMicrosoft_AspNetCore_App_Ref)\ref\$(TargetFramework)\*.dll" />
     <PackageReference Include="Microsoft.WindowsDesktop.App.Ref" Version="$(MicrosoftWindowsDesktopAppRefPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true"  />
-    <Reference Include="$(PkgMicrosoftWindowsDesktopAppRef)\ref\$(TargetFramework)\*.dll" />
-    <!-- CoreFx -->
+    <Reference Include="$(PkgMicrosoft_WindowsDesktop_App_Ref)\ref\$(TargetFramework)\*.dll" />
     <PackageReference Include="System.Windows.Extensions" Version="$(SystemWindowsExtensionsVersion)" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'uap10.0.16300'">
@@ -28,9 +27,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>uap10.0.16300;netcoreapp3.0</TargetFrameworks>
-    <IntermediateOutputPath Condition="'$(RestoreOutputPath)' != ''">$(RestoreOutputPath)</IntermediateOutputPath>
-    <OutputPath Condition="'$(RestoreOutputPath)' != ''">$(RestoreOutputPath)</OutputPath>
-    <MSBuildProjectExtensionsPath Condition="'$(RestoreOutputPath)' != ''">$(RestoreOutputPath)</MSBuildProjectExtensionsPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('uap'))">
@@ -39,7 +35,7 @@
     <DisableStandardFrameworkResolution>true</DisableStandardFrameworkResolution>
   </PropertyGroup>
 
-  <Target Name="GetReferences" DependsOnTargets="Restore">
+  <Target Name="GetReferences">
     <ItemGroup>
       <_targetFrameworks Include="$(TargetFrameworks)" />
     </ItemGroup>
