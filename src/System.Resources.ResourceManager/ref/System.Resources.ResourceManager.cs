@@ -48,14 +48,14 @@ namespace System.Resources
         public ResourceManager(string baseName, System.Reflection.Assembly assembly) { }
         public ResourceManager(string baseName, System.Reflection.Assembly assembly, System.Type? usingResourceSet) { }
         public ResourceManager(System.Type resourceSource) { }
-        public virtual string? BaseName { get { throw null; } }
+        public virtual string BaseName { get { throw null; } }
         protected System.Resources.UltimateResourceFallbackLocation FallbackLocation { get { throw null; } set { } }
         public virtual bool IgnoreCase { get { throw null; } set { } }
         public virtual System.Type ResourceSetType { get { throw null; } }
-        public static System.Resources.ResourceManager CreateFileBasedResourceManager(string baseName, string resourceDir, System.Type usingResourceSet) { throw null; }
+        public static System.Resources.ResourceManager CreateFileBasedResourceManager(string baseName, string resourceDir, System.Type? usingResourceSet) { throw null; }
         protected static System.Globalization.CultureInfo GetNeutralResourcesLanguage(System.Reflection.Assembly a) { throw null; }
         public virtual object? GetObject(string name) { throw null; }
-        public virtual object? GetObject(string name, System.Globalization.CultureInfo culture) { throw null; }
+        public virtual object? GetObject(string name, System.Globalization.CultureInfo? culture) { throw null; }
         protected virtual string GetResourceFileName(System.Globalization.CultureInfo culture) { throw null; }
         public virtual System.Resources.ResourceSet? GetResourceSet(System.Globalization.CultureInfo culture, bool createIfNotExists, bool tryParents) { throw null; }
         protected static System.Version? GetSatelliteContractVersion(System.Reflection.Assembly a) { throw null; }
