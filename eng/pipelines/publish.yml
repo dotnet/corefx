@@ -190,6 +190,6 @@ jobs:
           - task: CopyFiles@2
             displayName: Copy API Catalog Layout to CPVSBuild
             inputs:
-              sourceFolder: ${{ parameters.artifactsDir }}/ApiCatalogLayout
+              sourceFolder: ${{ parameters.artifactsDir }}/ApiCatalogLayout/GeneratedLayout
               contents: '**\*'
               targetFolder: \\cpvsbuild\drops\DotNetCore\DotNet-CoreFx-APICatalog-LayoutDrop\$(Build.BuildNumber)
