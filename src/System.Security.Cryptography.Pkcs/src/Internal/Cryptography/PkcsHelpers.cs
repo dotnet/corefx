@@ -33,27 +33,38 @@ namespace Internal.Cryptography
         internal static HashAlgorithmName GetDigestAlgorithm(Oid oid)
         {
             Debug.Assert(oid != null);
-            return GetDigestAlgorithm(oid.Value);
+            return GetDigestAlgorithm(oid.Value, out _);
         }
 
-        internal static HashAlgorithmName GetDigestAlgorithm(string oidValue, bool forVerification = false)
+        internal static HashAlgorithmName GetDigestAlgorithm(string oidValue, out string expectedSignatureOid, bool forVerification = false)
         {
+            expectedSignatureOid = null;
             switch (oidValue)
             {
                 case Oids.Md5:
+                    return HashAlgorithmName.MD5;
                 case Oids.RsaPkcs1Md5 when forVerification:
+                    expectedSignatureOid = Oids.Rsa;
                     return HashAlgorithmName.MD5;
                 case Oids.Sha1:
+                    return HashAlgorithmName.SHA1;
                 case Oids.RsaPkcs1Sha1 when forVerification:
+                    expectedSignatureOid = Oids.Rsa;
                     return HashAlgorithmName.SHA1;
                 case Oids.Sha256:
+                    return HashAlgorithmName.SHA256;
                 case Oids.RsaPkcs1Sha256 when forVerification:
+                    expectedSignatureOid = Oids.Rsa;
                     return HashAlgorithmName.SHA256;
                 case Oids.Sha384:
+                    return HashAlgorithmName.SHA384;
                 case Oids.RsaPkcs1Sha384 when forVerification:
+                    expectedSignatureOid = Oids.Rsa;
                     return HashAlgorithmName.SHA384;
                 case Oids.Sha512:
+                    return HashAlgorithmName.SHA512;
                 case Oids.RsaPkcs1Sha512 when forVerification:
+                    expectedSignatureOid = Oids.Rsa;
                     return HashAlgorithmName.SHA512;
                 default:
                     throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, oidValue);

@@ -734,7 +734,20 @@ namespace System.Security.Cryptography.Pkcs
 
         private HashAlgorithmName GetDigestAlgorithm()
         {
-            return PkcsHelpers.GetDigestAlgorithm(DigestAlgorithm.Value);
+            HashAlgorithmName digestAlgorithm = PkcsHelpers.GetDigestAlgorithm(
+                DigestAlgorithm.Value,
+                out string expectedSignatureAlgorithmOid,
+                forVerification: true);
+            if (expectedSignatureAlgorithmOid != null && expectedSignatureAlgorithmOid != _signatureAlgorithm.Value)
+            {
+                throw new CryptographicException(
+                        SR.Format(
+                            SR.Cryptography_Cms_InvalidSignerHashForSignatureAlg,
+                            DigestAlgorithm.Value,
+                            _signatureAlgorithm.Value));
+            }
+
+            return digestAlgorithm;
         }
 
         internal static CryptographicAttributeObjectCollection MakeAttributeCollection(AttributeAsn[] attributes)
