@@ -16,7 +16,6 @@ namespace System.Reflection.Emit
         public override bool GlobalAssemblyCache { get { throw null; } }
         public override long HostContext { get { throw null; } }
         public override string ImageRuntimeVersion { get { throw null; } }
-        public override bool IsCollectible { get { throw null; } }
         public override bool IsDynamic { get { throw null; } }
         public override string Location { get { throw null; } }
         public override System.Reflection.Module ManifestModule { get { throw null; } }
