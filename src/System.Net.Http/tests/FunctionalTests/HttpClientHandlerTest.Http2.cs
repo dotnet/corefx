@@ -1661,8 +1661,9 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [MemberData(nameof(MaxResponseHeadersLength_ExactData))]
-        public async Task MaxResponseHeadersLength_Exact_Success(string _, byte[] headerData)
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task MaxResponseHeadersLength_Exact_Success(bool huffmanEncode)
         {
             await Http2LoopbackServer.CreateClientAndServerAsync(
                 async uri =>
@@ -1678,16 +1679,21 @@ namespace System.Net.Http.Functional.Tests
                     Http2LoopbackConnection con = await server.EstablishConnectionAsync();
                     int streamId = await con.ReadRequestHeaderAsync();
 
-                    HeadersFrame frame = new HeadersFrame(headerData, FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId);
-                    await con.WriteFrameAsync(frame);
+                    await con.SendResponseHeadersAsync(streamId, isTrailingHeader: true, headers: new[]
+                    {
+                        // 1000 + other strings = 1024
+                        new HttpHeaderData(":status", "200", huffmanEncoded: huffmanEncode),
+                        new HttpHeaderData("padding-header", new string(' ', 1000), huffmanEncoded: huffmanEncode)
+                    });
 
                     await con.ShutdownIgnoringErrorsAsync(streamId);
                 });
         }
 
         [Theory]
-        [MemberData(nameof(MaxResponseHeadersLength_TooLargeData))]
-        public async Task MaxResponseHeadersLength_TooLarge_Throws(string _, byte[] headerData)
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task MaxResponseHeadersLength_Exceeded_Throws(bool huffmanEncode)
         {
             await Http2LoopbackServer.CreateClientAndServerAsync(
                 async uri =>
@@ -1703,38 +1709,41 @@ namespace System.Net.Http.Functional.Tests
                     Http2LoopbackConnection con = await server.EstablishConnectionAsync();
                     int streamId = await con.ReadRequestHeaderAsync();
 
-                    HeadersFrame frame = new HeadersFrame(headerData, FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId);
-                    await con.WriteFrameAsync(frame);
+                    await con.SendResponseHeadersAsync(streamId, isTrailingHeader: true, headers: new[]
+                    {
+                        // 1001 + other strings = 1025
+                        new HttpHeaderData(":status", "200", huffmanEncoded: huffmanEncode),
+                        new HttpHeaderData("padding-header", new string(' ', 1001), huffmanEncoded: huffmanEncode)
+                    });
+
+                    await con.ShutdownIgnoringErrorsAsync(streamId);
                 });
         }
 
-        // All of these should take exactly 1024 bytes of header decode budget. This includes Huffman-coded strings expanding.
-        // Strategy is to prefix with 0x88 (:status:200) and a dummy header of whatever length in order to fill whatever space is remaining from each test variant.
-        public static TheoryData<string, byte[]> MaxResponseHeadersLength_ExactData => new TheoryData<string, byte[]>
+        [Fact]
+        public async Task MaxResponseHeadersLength_Malicious_Throws()
         {
-            { "plaintext", new byte[]{ 0x88,0x00,0x0C,0x64,0x75,0x6D,0x6D,0x79,0x2D,0x68,0x65,0x61,0x64,0x65,0x72,0x7F,0xD8,0x06 }.Concat(Enumerable.Repeat((byte)0x78, 983)).Concat(_headerPlaintext).ToArray() },
-            { "compressed", new byte[]{ 0x88,0x00,0x0C,0x64,0x75,0x6D,0x6D,0x79,0x2D,0x68,0x65,0x61,0x64,0x65,0x72,0x7F,0xD1,0x06 }.Concat(Enumerable.Repeat((byte)0x78, 976)).Concat(_headerCompressedHuffman).ToArray() },
-            { "expanded", new byte[]{ 0x88,0x00,0x0C,0x64,0x75,0x6D,0x6D,0x79,0x2D,0x68,0x65,0x61,0x64,0x65,0x72,0x7F,0xCF,0x06 }.Concat(Enumerable.Repeat((byte)0x78, 974)).Concat(_headerExpandedHuffman).ToArray() }
-        };
+            await Http2LoopbackServer.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    HttpClientHandler handler = CreateHttpClientHandler();
+                    handler.MaxResponseHeadersLength = 1;
 
-        public static TheoryData<string, byte[]> MaxResponseHeadersLength_TooLargeData => new TheoryData<string, byte[]>
-        {
-            // Same as MaxResponseHeadersLength_ExactData, but with 1 byte more of dummy header length to exceed our budget.
-            { "plaintext", new byte[]{ 0x88,0x00,0x0C,0x64,0x75,0x6D,0x6D,0x79,0x2D,0x68,0x65,0x61,0x64,0x65,0x72,0x7F,0xD9,0x06 }.Concat(Enumerable.Repeat((byte)0x78, 984)).Concat(_headerPlaintext).ToArray() },
-            { "compressed", new byte[]{ 0x88,0x00,0x0C,0x64,0x75,0x6D,0x6D,0x79,0x2D,0x68,0x65,0x61,0x64,0x65,0x72,0x7F,0xD2,0x06 }.Concat(Enumerable.Repeat((byte)0x78, 977)).Concat(_headerCompressedHuffman).ToArray() },
-            { "expanded", new byte[]{ 0x88,0x00,0x0C,0x64,0x75,0x6D,0x6D,0x79,0x2D,0x68,0x65,0x61,0x64,0x65,0x72,0x7F,0xD0,0x06 }.Concat(Enumerable.Repeat((byte)0x78, 975)).Concat(_headerExpandedHuffman).ToArray() },
+                    using HttpClient client = CreateHttpClient(handler);
+                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(uri));
+                },
+                async server =>
+                {
+                    Http2LoopbackConnection con = await server.EstablishConnectionAsync();
+                    int streamId = await con.ReadRequestHeaderAsync();
 
-            // A small malicious/corrupt payload that expands into two 1GB strings. Don't want HPackDecoder to allocate 1GB buffers.
-            { "malicious", new byte[] { 0x88, 0x00, 0x7F, 0x81, 0xFF, 0xFF, 0xFF, 0x03, 0x70, 0x6C, 0x61, 0x69, 0x6E, 0x2D, 0x74, 0x65, 0x78, 0x74, 0x7F, 0x81, 0xFF, 0xFF, 0xFF, 0x03, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61 } }
-        };
+                    // A small malicious/corrupt payload that expands into two 1GB strings. We don't want HPackDecoder to allocate buffers when they exceed MaxResponseHeadersLength.
+                    byte[] headerData = new byte[] { 0x88, 0x00, 0x7F, 0x81, 0xFF, 0xFF, 0xFF, 0x03, 0x70, 0x6C, 0x61, 0x69, 0x6E, 0x2D, 0x74, 0x65, 0x78, 0x74, 0x7F, 0x81, 0xFF, 0xFF, 0xFF, 0x03, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61 };
+                    HeadersFrame frame = new HeadersFrame(headerData, FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId);
 
-        // Plain-text: takes 23 bytes to decode.
-        static readonly byte[] _headerPlaintext = new byte[23] { 0x00, 0x0A, 0x70, 0x6C, 0x61, 0x69, 0x6E, 0x2D, 0x74, 0x65, 0x78, 0x74, 0x0A, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61 };
-
-        // Optimal Huffman-coding: takes 30 bytes to decode, because the decoded value is 3 bytes larger than the encoded value.
-        static readonly byte[] _headerCompressedHuffman = new byte[27] { 0x00, 0x11, 0x73, 0x68, 0x72, 0x69, 0x6E, 0x6B, 0x69, 0x6E, 0x67, 0x2D, 0x68, 0x75, 0x66, 0x66, 0x6D, 0x61, 0x6E, 0x87, 0x18, 0xC6, 0x31, 0x8C, 0x63, 0x18, 0xFF };
-
-        // Non-optimal Huffman-coding: takes 32 bytes to decode, because the decoded version is not larger than the encoded value.
-        static readonly byte[] _headerExpandedHuffman = new byte[32] { 0x00, 0x11, 0x65, 0x78, 0x70, 0x61, 0x6E, 0x64, 0x69, 0x6E, 0x67, 0x2D, 0x68, 0x75, 0x66, 0x66, 0x6D, 0x61, 0x6E, 0x8C, 0xFF, 0xFE, 0x1F, 0xFF, 0xC3, 0xFF, 0xF8, 0x7F, 0xFF, 0x0F, 0xFF, 0xE1 };
+                    await con.WriteFrameAsync(frame);
+                    await con.ShutdownIgnoringErrorsAsync(streamId);
+                });
+        }
     }
 }

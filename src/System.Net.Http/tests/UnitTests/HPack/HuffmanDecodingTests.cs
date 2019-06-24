@@ -332,9 +332,8 @@ namespace System.Net.Http.Unit.Tests.HPack
             // Worst case decoding is an output byte per 5 input bits, so make the decoded buffer 2 times as big
             byte[] decoded = new byte[encoded.Length * 2];
 
-            bool success = Huffman.TryDecode(new ReadOnlySpan<byte>(encoded, 0, encodedByteCount), ref decoded, int.MaxValue, out int decodedByteCount);
+            int decodedByteCount = Huffman.Decode(new ReadOnlySpan<byte>(encoded, 0, encodedByteCount), ref decoded);
 
-            Assert.True(success);
             Assert.Equal(input.Length, decodedByteCount);
             Assert.Equal(input, decoded.Take(decodedByteCount));
         }
@@ -348,7 +347,7 @@ namespace System.Net.Http.Unit.Tests.HPack
             // Worst case decoding is an output byte per 5 input bits, so make the decoded buffer 2 times as big
             byte[] decoded = new byte[encoded.Length * 2];
 
-            Assert.Throws(s_huffmanDecodingExceptionType, () => Huffman.TryDecode(encoded, ref decoded, int.MaxValue, out int _));
+            Assert.Throws(s_huffmanDecodingExceptionType, () => Huffman.Decode(encoded, ref decoded));
         }
 
         // This input sequence will encode to 17 bits, thus offsetting the next character to encode

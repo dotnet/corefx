@@ -59,6 +59,8 @@ namespace System.Net.Http
             private TaskCompletionSource<bool> _shouldSendRequestBodyWaiter;
             private bool _shouldSendRequestBody;
 
+            private int _headerBudgetRemaining;
+
             private const int StreamWindowSize = DefaultInitialWindowSize;
 
             // See comment on ConnectionWindowThreshold.
@@ -82,7 +84,7 @@ namespace System.Net.Http
 
                 _streamWindow = new CreditManager(initialWindowSize);
 
-                HeaderBudgetRemaining = connection._pool.Settings._maxResponseHeadersLength * 1024;
+                _headerBudgetRemaining = connection._pool.Settings._maxResponseHeadersLength * 1024;
             }
 
             private object SyncObject => _streamWindow;
@@ -90,12 +92,6 @@ namespace System.Net.Http
             public int StreamId => _streamId;
             public HttpRequestMessage Request => _request;
             public HttpResponseMessage Response => _response;
-
-            /// <summary>
-            /// The length, in bytes, of budget remaining for header decode.
-            /// Set initially via MaxResponseHeadersLength.
-            /// </summary>
-            public int HeaderBudgetRemaining { get; set; }
 
             public async Task SendRequestBodyAsync(CancellationToken cancellationToken)
             {
@@ -177,6 +173,13 @@ namespace System.Net.Http
             public void OnResponseHeader(ReadOnlySpan<byte> name, ReadOnlySpan<byte> value)
             {
                 Debug.Assert(name != null && name.Length > 0);
+
+                _headerBudgetRemaining -= name.Length + value.Length;
+                if (_headerBudgetRemaining < 0)
+                {
+                    throw new HttpRequestException(SR.Format(SR.net_http_response_headers_exceeded_length, _connection._pool.Settings._maxResponseHeadersLength));
+                }
+
                 // TODO: ISSUE 31309: Optimize HPACK static table decoding
 
                 lock (SyncObject)

@@ -314,17 +314,12 @@ namespace System.Net.Http
 
             http2Stream.OnResponseHeadersStart();
 
-            int headerBudgetRemaining = http2Stream.HeaderBudgetRemaining;
-
-            int uncompressedLength = _hpackDecoder.Decode(
+            _hpackDecoder.Decode(
                 GetFrameData(_incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length), frameHeader.PaddedFlag, frameHeader.PriorityFlag),
                 frameHeader.EndHeadersFlag,
                 s_http2StreamOnResponseHeader,
-                http2Stream,
-                headerBudgetRemaining);
+                http2Stream);
             _incomingBuffer.Discard(frameHeader.Length);
-
-            headerBudgetRemaining -= uncompressedLength;
 
             while (!frameHeader.EndHeadersFlag)
             {
@@ -335,20 +330,15 @@ namespace System.Net.Http
                     throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                 }
 
-                uncompressedLength = _hpackDecoder.Decode(
+                _hpackDecoder.Decode(
                     _incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length),
                     frameHeader.EndHeadersFlag,
                     s_http2StreamOnResponseHeader,
-                    http2Stream,
-                    headerBudgetRemaining);
+                    http2Stream);
                 _incomingBuffer.Discard(frameHeader.Length);
-
-                headerBudgetRemaining -= uncompressedLength;
             }
 
             _hpackDecoder.CompleteDecode();
-
-            http2Stream.HeaderBudgetRemaining = headerBudgetRemaining;
 
             http2Stream.OnResponseHeadersComplete(endStream);
 

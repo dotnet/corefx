@@ -27,7 +27,7 @@ namespace System.Net.Http.HPack
 
         public const int DefaultHeaderTableSize = 4096;
         public const int DefaultStringOctetsSize = 4096;
-        public const int DefaultMaxResponseHeadersLength = 65536;
+        public const int DefaultMaxResponseHeadersLength = HttpHandlerDefaults.DefaultMaxResponseHeadersLength * 1024;
 
         // http://httpwg.org/specs/rfc7541.html#rfc.section.6.1
         //   0   1   2   3   4   5   6   7
@@ -100,7 +100,6 @@ namespace System.Net.Http.HPack
         private bool _index;
         private bool _huffman;
         private bool _headersObserved;
-        private int _headerDecodeBudgetRemaining;
 
         public HPackDecoder(int maxDynamicTableSize = DefaultHeaderTableSize, int maxResponseHeadersLength = DefaultMaxResponseHeadersLength)
             : this(maxDynamicTableSize, maxResponseHeadersLength, new DynamicTable(maxDynamicTableSize))
@@ -115,30 +114,11 @@ namespace System.Net.Http.HPack
             _dynamicTable = dynamicTable;
         }
 
-        /// <summary>
-        /// Decodes a block of HPACK data.
-        /// </summary>
-        /// <param name="data">The data to decode.</param>
-        /// <param name="endHeaders">If true, this is the last header block and should finish decoding.</param>
-        /// <param name="onHeader">Called whenever a header has been fully decoded.</param>
-        /// <param name="onHeaderState">State passed to the header <paramref name="onHeader"/>.</param>
-        /// <param name="headerDecodeBudget">The maximum length of data to process, including any compressed data.</param>
-        /// <returns>
-        /// Returns the uncompressed length of data processed. If a header is Huffman-coded, the
-        /// length processed will be the maximum of the encoded and decoded length of data.
-        /// </returns>
-        public int Decode(ReadOnlySpan<byte> data, bool endHeaders, HeaderCallback onHeader, object onHeaderState, int headerDecodeBudget = int.MaxValue)
+        public void Decode(ReadOnlySpan<byte> data, bool endHeaders, HeaderCallback onHeader, object onHeaderState)
         {
-            _headerDecodeBudgetRemaining = headerDecodeBudget;
-
             for (int i = 0; i < data.Length; i++)
             {
                 byte b = data[i];
-
-                if (_state != State.HeaderName && _state != State.HeaderValue && --_headerDecodeBudgetRemaining < 0)
-                {
-                    throw new HttpRequestException(SR.Format(SR.net_http_response_headers_exceeded_length, _maxResponseHeadersLength));
-                }
 
                 switch (_state)
                 {
@@ -365,8 +345,6 @@ namespace System.Net.Http.HPack
 
                 _headersObserved = false;
             }
-
-            return headerDecodeBudget - _headerDecodeBudgetRemaining;
         }
 
         public void CompleteDecode()
@@ -395,15 +373,13 @@ namespace System.Net.Http.HPack
 
         private void OnStringLength(int length, State nextState)
         {
-            _headerDecodeBudgetRemaining -= length;
-
-            if (_headerDecodeBudgetRemaining < 0)
-            {
-                throw new HttpRequestException(SR.Format(SR.net_http_response_headers_exceeded_length, _maxResponseHeadersLength));
-            }
-
             if (length > _stringOctets.Length)
             {
+                if (length > _maxResponseHeadersLength)
+                {
+                    throw new HPackDecodingException(SR.Format(SR.net_http_response_headers_exceeded_length, _maxResponseHeadersLength));
+                }
+
                 _stringOctets = new byte[Math.Max(length, _stringOctets.Length * 2)];
             }
 
@@ -418,19 +394,7 @@ namespace System.Net.Http.HPack
             {
                 if (_huffman)
                 {
-                    int budget = _headerDecodeBudgetRemaining + _stringLength;
-
-                    if (!Huffman.TryDecode(new ReadOnlySpan<byte>(_stringOctets, 0, _stringLength), ref dst, budget, out int decodedSymbolsLength))
-                    {
-                        throw new HttpRequestException(SR.Format(SR.net_http_response_headers_exceeded_length, _maxResponseHeadersLength));
-                    }
-
-                    if (decodedSymbolsLength > _stringLength)
-                    {
-                        _headerDecodeBudgetRemaining = budget - decodedSymbolsLength;
-                    }
-
-                    return decodedSymbolsLength;
+                    return Huffman.Decode(new ReadOnlySpan<byte>(_stringOctets, 0, _stringLength), ref dst);
                 }
                 else
                 {

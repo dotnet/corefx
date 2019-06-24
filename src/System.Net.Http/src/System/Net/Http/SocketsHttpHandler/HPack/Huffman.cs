@@ -305,14 +305,11 @@ namespace System.Net.Http.HPack
         /// </summary>
         /// <param name="src">The source byte array containing the encoded data.</param>
         /// <param name="dstArray">The destination byte array to store the decoded data.  This may grow if its size is insufficient.</param>
-        /// <param name="maximumDecodeLength">The maximum number of symbols to decode.</param>
-        /// <param name="decodedSymbolsLength">Receives the number of decoded symbols.</param>
         /// <returns>The number of decoded symbols.</returns>
-        public static bool TryDecode(ReadOnlySpan<byte> src, ref byte[] dstArray, int maximumDecodeLength, out int decodedSymbolsLength)
+        public static int Decode(ReadOnlySpan<byte> src, ref byte[] dstArray)
         {
-            Debug.Assert(dstArray != null && dstArray.Length > 0);
-
-            Span<byte> dst = dstArray.Length <= maximumDecodeLength ? dstArray.AsSpan() : dstArray.AsSpan(0, maximumDecodeLength);
+            Span<byte> dst = dstArray;
+            Debug.Assert(dst != null && dst.Length > 0);
 
             int i = 0;
             int j = 0;
@@ -359,14 +356,8 @@ namespace System.Net.Http.HPack
 
                 if (j == dst.Length)
                 {
-                    if (j == maximumDecodeLength)
-                    {
-                        decodedSymbolsLength = default;
-                        return false;
-                    }
-
                     Array.Resize(ref dstArray, dst.Length * 2);
-                    dst = dstArray.Length <= maximumDecodeLength ? dstArray.AsSpan() : dstArray.AsSpan(0, maximumDecodeLength);
+                    dst = dstArray;
                 }
 
                 dst[j++] = (byte)ch;
@@ -379,8 +370,7 @@ namespace System.Net.Http.HPack
                 lastDecodedBits %= 8;
             }
 
-            decodedSymbolsLength = j;
-            return true;
+            return j;
         }
 
         /// <summary>
