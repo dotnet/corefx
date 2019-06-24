@@ -8,6 +8,6 @@ namespace System.Text.Json.Serialization.Converters
 {
     internal abstract class JsonDictionaryConverter
     {
-        public abstract IDictionary CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options);
+        public abstract object CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options);
     }
 }

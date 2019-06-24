@@ -21,6 +21,15 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.ToString(input);
             Assert.Equal("[[1,2],[3,4]]", json);
+
+            IEnumerableWrapper input2 = new IEnumerableWrapper(new List<object>
+            {
+                new List<object>() { 1, 2 },
+                new List<object>() { 3, 4 },
+            });
+
+            json = JsonSerializer.ToString(input2);
+            Assert.Equal("[[1,2],[3,4]]", json);
         }
 
         public static void WriteGenericIEnumerableOfIEnumerable()
@@ -65,6 +74,15 @@ namespace System.Text.Json.Serialization.Tests
             };
 
             string json = JsonSerializer.ToString(input);
+            Assert.Equal("[[1,2],[3,4]]", json);
+
+            IListWrapper input2 = new IListWrapper
+            {
+                new List<object>() { 1, 2 },
+                new List<object>() { 3, 4 },
+            };
+
+            json = JsonSerializer.ToString(input2);
             Assert.Equal("[[1,2],[3,4]]", json);
         }
 
@@ -123,6 +141,15 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.ToString(input);
             Assert.Equal("[[1,2],[3,4]]", json);
+
+            GenericICollectionWrapper<ICollectionWrapper> input2 = new GenericICollectionWrapper<ICollectionWrapper>
+            {
+                new ICollectionWrapper(new List<object> { 1, 2 }),
+                new ICollectionWrapper(new List<object> { 3, 4 }),
+            };
+
+            json = JsonSerializer.ToString(input2);
+            Assert.Equal("[[1,2],[3,4]]", json);
         }
 
         [Fact]
@@ -163,6 +190,13 @@ namespace System.Text.Json.Serialization.Tests
             input.Push(new Stack(new List<int>() { 3, 4 }));
 
             string json = JsonSerializer.ToString(input);
+            Assert.Equal("[[4,3],[2,1]]", json);
+
+            GenericStackWrapper<StackWrapper> input2 = new GenericStackWrapper<StackWrapper>();
+            input.Push(new StackWrapper(new List<object> { 1, 2 }));
+            input.Push(new StackWrapper(new List<object> { 1, 2 }));
+
+            json = JsonSerializer.ToString(input2);
             Assert.Equal("[[4,3],[2,1]]", json);
         }
 
@@ -205,6 +239,13 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.ToString(input);
             Assert.Equal("[[1,2],[3,4]]", json);
+
+            GenericQueueWrapper<QueueWrapper> input2 = new GenericQueueWrapper<QueueWrapper>();
+            input.Enqueue(new QueueWrapper(new List<object>() { 1, 2 }));
+            input.Enqueue(new QueueWrapper(new List<object>() { 3, 4 }));
+
+            json = JsonSerializer.ToString(input2);
+            Assert.Equal("[[1,2],[3,4]]", json);
         }
 
         [Fact]
@@ -238,6 +279,15 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.ToString(input);
             Assert.Equal("[[1,2],[3,4]]", json);
+
+            ArrayListWrapper input2 = new ArrayListWrapper(new List<object>
+            {
+                new ArrayListWrapper(new List<object>() { 1, 2 }),
+                new ArrayListWrapper(new List<object>() { 3, 4 })
+            });
+
+            json = JsonSerializer.ToString(input2);
+            Assert.Equal("[[1,2],[3,4]]", json);
         }
 
         [Fact]
@@ -258,6 +308,37 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.ToString(input);
             Assert.Equal("[1,2]", json);
+        }
+
+        [Fact]
+        public static void WriteNonGenericCollectionWrappers()
+        {
+            SimpleTestClassWithNonGenericCollectionWrappers obj1 = new SimpleTestClassWithNonGenericCollectionWrappers();
+            SimpleTestClassWithIEnumerableWrapper obj2 = new SimpleTestClassWithIEnumerableWrapper();
+            SimpleTestClassWithICollectionWrapper obj3 = new SimpleTestClassWithICollectionWrapper();
+            SimpleTestClassWithStackWrapper obj4 = new SimpleTestClassWithStackWrapper();
+            SimpleTestClassWithQueueWrapper obj5 = new SimpleTestClassWithQueueWrapper();
+
+            obj1.Initialize();
+            obj2.Initialize();
+            obj3.Initialize();
+            obj4.Initialize();
+            obj5.Initialize();
+
+            Assert.Equal(SimpleTestClassWithNonGenericCollectionWrappers.s_json.StripWhitespace(), JsonSerializer.ToString(obj1));
+            Assert.Equal(SimpleTestClassWithNonGenericCollectionWrappers.s_json.StripWhitespace(), JsonSerializer.ToString<object>(obj1));
+
+            Assert.Equal(SimpleTestClassWithIEnumerableWrapper.s_json.StripWhitespace(), JsonSerializer.ToString(obj2));
+            Assert.Equal(SimpleTestClassWithIEnumerableWrapper.s_json.StripWhitespace(), JsonSerializer.ToString<object>(obj2));
+
+            Assert.Equal(SimpleTestClassWithICollectionWrapper.s_json.StripWhitespace(), JsonSerializer.ToString(obj3));
+            Assert.Equal(SimpleTestClassWithICollectionWrapper.s_json.StripWhitespace(), JsonSerializer.ToString<object>(obj3));
+
+            Assert.Equal(SimpleTestClassWithStackWrapper.s_json.StripWhitespace(), JsonSerializer.ToString(obj4));
+            Assert.Equal(SimpleTestClassWithStackWrapper.s_json.StripWhitespace(), JsonSerializer.ToString<object>(obj4));
+
+            Assert.Equal(SimpleTestClassWithQueueWrapper.s_json.StripWhitespace(), JsonSerializer.ToString(obj5));
+            Assert.Equal(SimpleTestClassWithQueueWrapper.s_json.StripWhitespace(), JsonSerializer.ToString<object>(obj5));
         }
     }
 }
