@@ -70,6 +70,8 @@ namespace System.Net.Sockets
         private static readonly SocketAsyncEngine[] s_currentEngines = new SocketAsyncEngine[EngineCount];
         private static int s_allocateFromEngine = 0;
 
+        private readonly IOQueue _ioQueue = new IOQueue();
+
         private readonly IntPtr _port;
         private readonly Interop.Sys.SocketEvent* _buffer;
 
@@ -330,8 +332,7 @@ namespace System.Net.Sockets
                             _handleToContextMap.TryGetValue(handle, out SocketAsyncContext context);
                             if (context != null)
                             {
-                                context.HandleEvents(_buffer[i].Events);
-                                context = null;
+                                _ioQueue.Schedule(context, _buffer[i].Events);
                             }
                         }
                     }
@@ -383,6 +384,73 @@ namespace System.Net.Sockets
             error = Interop.Sys.TryChangeSocketEventRegistration(_port, socket, Interop.Sys.SocketEvents.None, 
                 Interop.Sys.SocketEvents.Read | Interop.Sys.SocketEvents.Write, handle);
             return error == Interop.Error.SUCCESS;
+        }
+
+        private class IOQueue : IThreadPoolWorkItem
+        {
+            private readonly ConcurrentQueue<Work> _workItems = new ConcurrentQueue<Work>();
+            private int _doingWork;
+
+            public void Schedule(SocketAsyncContext context, Interop.Sys.SocketEvents events)
+            {
+                _workItems.Enqueue(new Work(context, events));
+
+                // Set working if it wasn't (via atomic Interlocked).
+                if (Interlocked.CompareExchange(ref _doingWork, 1, 0) == 0)
+                {
+                    // Wasn't working, schedule.
+                    System.Threading.ThreadPool.UnsafeQueueUserWorkItem(this, preferLocal: false);
+                }
+            }
+
+            void IThreadPoolWorkItem.Execute()
+            {
+                while (true)
+                {
+                    while (_workItems.TryDequeue(out Work item))
+                    {
+                        item.Context.HandleEvents(item.Events);
+                    }
+
+                    // All work done.
+
+                    // Set _doingWork (0 == false) prior to checking IsEmpty to catch any missed work in interim.
+                    // This doesn't need to be volatile due to the following barrier (i.e. it is volatile).
+                    _doingWork = 0;
+
+                    // Ensure _doingWork is written before IsEmpty is read.
+                    // As they are two different memory locations, we insert a barrier to guarantee ordering.
+                    Interlocked.MemoryBarrier();
+
+                    // Check if there is work to do
+                    if (_workItems.IsEmpty)
+                    {
+                        // Nothing to do, exit.
+                        break;
+                    }
+
+                    // Is work, can we set it as active again (via atomic Interlocked), prior to scheduling?
+                    if (Interlocked.Exchange(ref _doingWork, 1) == 1)
+                    {
+                        // Execute has been rescheduled already, exit.
+                        break;
+                    }
+
+                    // Is work, wasn't already scheduled so continue loop.
+                }
+            }
+
+            private readonly struct Work
+            {
+                public readonly SocketAsyncContext Context;
+                public readonly Interop.Sys.SocketEvents Events;
+
+                public Work(SocketAsyncContext context, Interop.Sys.SocketEvents events)
+                {
+                    Events = events;
+                    Context = context;
+                }
+            }
         }
     }
 }

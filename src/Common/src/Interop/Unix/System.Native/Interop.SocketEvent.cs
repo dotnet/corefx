@@ -21,11 +21,11 @@ internal static partial class Interop
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct SocketEvent
+        internal readonly struct SocketEvent
         {
-            public IntPtr Data;
-            public SocketEvents Events;
-            private int _padding;
+            public readonly IntPtr Data;
+            public readonly SocketEvents Events;
+            private readonly int _padding;
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_CreateSocketEventPort")]
