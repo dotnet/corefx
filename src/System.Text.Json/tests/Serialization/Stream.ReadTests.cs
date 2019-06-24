@@ -86,7 +86,7 @@ namespace System.Text.Json.Serialization.Tests
         {
             using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes("null")))
             {
-                IList<object> referenceTypeCollection  = await JsonSerializer.ReadAsync<IList<object>>(stream);
+                IList<object> referenceTypeCollection = await JsonSerializer.ReadAsync<IList<object>>(stream);
                 Assert.Null(referenceTypeCollection);
             }
         }
@@ -101,26 +101,24 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
-        public class TestDataGenerator : TheoryData<byte[], JsonSerializerOptions, ulong>
-        {
-            public TestDataGenerator()
+        public static IEnumerable<object[]> BOMTestData =>
+            new List<object[]>
             {
-                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, default, 1);
-                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 1 }, 1);
-                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 2 }, 1);
-                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 3 }, 1);
-                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 4 }, 1);
-                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 15 }, 1);
-                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49 }, new JsonSerializerOptions { DefaultBufferSize = 15 }, 1111111111111111111);
-                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 16 }, 1);
-                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49 }, new JsonSerializerOptions { DefaultBufferSize = 16 }, 1111111111111111111);
-                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 17 }, 1);
-                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49 }, new JsonSerializerOptions { DefaultBufferSize = 17 }, 1111111111111111111);
-            }
-        }
+                new object[] {new byte[] { 0xEF, 0xBB, 0xBF, 49 }, default, 1 },
+                new object[] {new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 1 }, 1 },
+                new object[] {new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 2 }, 1 },
+                new object[] {new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 3 }, 1 },
+                new object[] {new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 4 }, 1 },
+                new object[] {new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 15 }, 1 },
+                new object[] {new byte[] { 0xEF, 0xBB, 0xBF, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49 }, new JsonSerializerOptions { DefaultBufferSize = 15 }, 1111111111111111111 },
+                new object[] {new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 16 }, 1 },
+                new object[] {new byte[] { 0xEF, 0xBB, 0xBF, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49 }, new JsonSerializerOptions { DefaultBufferSize = 16 }, 1111111111111111111 },
+                new object[] {new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 17 }, 1 },
+                new object[] {new byte[] { 0xEF, 0xBB, 0xBF, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49 }, new JsonSerializerOptions { DefaultBufferSize = 17 }, 1111111111111111111 },
+            };
 
         [Theory]
-        [ClassData(typeof(TestDataGenerator))]
+        [MemberData(nameof(BOMTestData))]
         public static async Task TestBOMWithSingleJsonValue(byte[] utf8BomAndValueArray, JsonSerializerOptions options, ulong expected)
         {
             ulong value;
@@ -135,17 +133,10 @@ namespace System.Text.Json.Serialization.Tests
         public static async Task TestBOMWithNoJsonValue()
         {
             byte[] utf8BomAndValueArray = new byte[] { 0xEF, 0xBB, 0xBF };
-            byte value;
             using (Stream stream = new MemoryStream(utf8BomAndValueArray))
             {
-                try
-                {
-                    value = await JsonSerializer.ReadAsync<byte>(stream);
-                    Assert.True(false, "Expected exception was not thrown");
-                }
-                catch (JsonException)
-                {
-                }
+                await Assert.ThrowsAsync<JsonException>(
+                    async () => await JsonSerializer.ReadAsync<byte>(stream));
             }
         }
     }

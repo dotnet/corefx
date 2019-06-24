@@ -172,7 +172,6 @@ namespace System.Text.Json
                         byte[] dest = ArrayPool<byte>.Shared.Rent((buffer.Length < (int.MaxValue / 2)) ? buffer.Length * 2 : int.MaxValue);
 
                         // Copy the unprocessed data to the new buffer while shifting the processed bytes.
-                        Debug.Assert(start > 0);
                         Buffer.BlockCopy(buffer, bytesConsumed + start, dest, 0, bytesInBuffer);
 
                         new Span<byte>(buffer, 0, clearMax).Clear();

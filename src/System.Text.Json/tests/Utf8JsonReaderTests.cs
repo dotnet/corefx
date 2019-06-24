@@ -1797,20 +1797,6 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false)]
-        public static void TestBOMWithSingleJsonValue(byte[] utf8BomAndValue, bool isFinalBlock)
-        {
-            Assert.ThrowsAny<JsonException>(() =>
-            {
-                var json = new Utf8JsonReader(utf8BomAndValue, isFinalBlock: isFinalBlock, state: default);
-                json.Read();
-            });
-        }
-
-        [Theory]
         [MemberData(nameof(SingleValueJson))]
         public static void SingleJsonValue(string jsonString, string expectedString)
         {
