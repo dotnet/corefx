@@ -1866,13 +1866,13 @@ int32_t SystemNative_GetSockOpt(
     {
         if (socketOptionName == SocketOptionName_SO_TYPE)
         {
-            if (*optionLen != sizeof(int) ||
-                sizeof(int32_t) < sizeof(int) ||
+            if (optLen != sizeof(int) ||             // getsockopt didn't return an int.
+                *optionLen < (int)sizeof(int32_t) || // optionValue can't fit an int32_t.
                 !TryConvertSocketTypePlatformToPal(*(int*)optionValue, (int32_t*)optionValue))
             {
                 return Error_ENOTSUP;
             }
-            *optionLen = sizeof(int32_t);
+            optLen = sizeof(int32_t);
         }
     }
 
