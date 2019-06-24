@@ -21,6 +21,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         public const string RsaPkcs1Md5 = "1.2.840.113549.1.1.4";
         public const string RsaPkcs1Sha1 = "1.2.840.113549.1.1.5";
         public const string RsaPkcs1Sha256 = "1.2.840.113549.1.1.11";
+        public const string RsaPkcs1Sha384 = "1.2.840.113549.1.1.12";
         public const string Esdh = "1.2.840.113549.1.9.16.3.5";
         public const string Dh = "1.2.840.10046.2.1";
 
