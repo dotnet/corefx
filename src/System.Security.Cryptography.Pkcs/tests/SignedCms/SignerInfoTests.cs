@@ -227,6 +227,19 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        public static void CheckSignature_SHA256WithRSA()
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.SHA256WithRSADigestAlgorithm);
+            SignerInfo signer = cms.SignerInfos[0];
+
+            Assert.Equal(Oids.RsaPkcs1Sha256, signer.DigestAlgorithm.Value);
+
+            //Assert.NotThrows
+            signer.CheckSignature(true);
+        }
+
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetFx bug in matching logic")]
         public static void RemoveCounterSignature_MatchesIssuerAndSerialNumber()
         {
