@@ -110,6 +110,7 @@ namespace System.Net.Sockets
         //
         private static readonly IntPtr ShutdownHandle = (IntPtr)(-1);
 
+        private readonly ManualResetEventSlim _batchProcessed = new ManualResetEventSlim(initialState: false);
         //
         // The next handle value to be allocated for this event port.
         // Must be accessed under s_lock.
@@ -335,6 +336,14 @@ namespace System.Net.Sockets
                             }
                         }
                     }
+
+                    // HandleEvents queues to the ThreadPool; so we queue the next read 
+                    // after all the events have been picked up by the ThreadPool (but not necessarily complete)
+                    // This makes it more likely there are events and the batches are larger (less syscalls)
+                    // as well as not overloading the system with events at a higher rate than they can actually be 
+                    // processed, which breaks any back pressure on the sockets.
+                    ThreadPool.UnsafeQueueUserWorkItem((mres) => ((ManualResetEventSlim)mres).Set(), _batchProcessed);
+                    _batchProcessed.Wait();
                 }
 
                 FreeNativeResources();
