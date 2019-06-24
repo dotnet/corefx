@@ -736,9 +736,10 @@ namespace System.Security.Cryptography.Pkcs
         {
             HashAlgorithmName digestAlgorithm = PkcsHelpers.GetDigestAlgorithm(
                 DigestAlgorithm.Value,
-                out string expectedSignatureAlgorithmOid,
+                out string[] expectedSignatureAlgorithmOids,
                 forVerification: true);
-            if (expectedSignatureAlgorithmOid != null && expectedSignatureAlgorithmOid != _signatureAlgorithm.Value)
+            if (expectedSignatureAlgorithmOids != null &&
+                !expectedSignatureAlgorithmOids.Contains(_signatureAlgorithm.Value, StringComparer.Ordinal))
             {
                 throw new CryptographicException(
                         SR.Format(

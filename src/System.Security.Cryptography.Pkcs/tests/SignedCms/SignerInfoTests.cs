@@ -207,6 +207,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             SignerInfo signer = cms.SignerInfos[0];
 
             Assert.Equal(Oids.RsaPkcs1Md5, signer.DigestAlgorithm.Value);
+            Assert.Equal(Oids.Rsa, signer.SignatureAlgorithm.Value);
 
             //Assert.NotThrows
             signer.CheckSignature(true);
@@ -221,6 +222,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             SignerInfo signer = cms.SignerInfos[0];
 
             Assert.Equal(Oids.RsaPkcs1Sha1, signer.DigestAlgorithm.Value);
+            Assert.Equal(Oids.Rsa, signer.SignatureAlgorithm.Value);
 
             //Assert.NotThrows
             signer.CheckSignature(true);
@@ -234,6 +236,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             SignerInfo signer = cms.SignerInfos[0];
 
             Assert.Equal(Oids.RsaPkcs1Sha256, signer.DigestAlgorithm.Value);
+            Assert.Equal(Oids.Rsa, signer.SignatureAlgorithm.Value);
 
             //Assert.NotThrows
             signer.CheckSignature(true);
@@ -247,6 +250,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             SignerInfo signer = cms.SignerInfos[0];
 
             Assert.Equal(Oids.RsaPkcs1Sha384, signer.DigestAlgorithm.Value);
+            Assert.Equal(Oids.Rsa, signer.SignatureAlgorithm.Value);
 
             //Assert.NotThrows
             signer.CheckSignature(true);
@@ -260,6 +264,21 @@ namespace System.Security.Cryptography.Pkcs.Tests
             SignerInfo signer = cms.SignerInfos[0];
 
             Assert.Equal(Oids.RsaPkcs1Sha512, signer.DigestAlgorithm.Value);
+            Assert.Equal(Oids.Rsa, signer.SignatureAlgorithm.Value);
+
+            //Assert.NotThrows
+            signer.CheckSignature(true);
+        }
+
+        [Fact]
+        public static void CheckSignature_SHA256WithRSADigest_And_RSA256WithRSASignature()
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.SHA256withRSADigestAndSHA256WithRSASignatureAlgorithm);
+            SignerInfo signer = cms.SignerInfos[0];
+
+            Assert.Equal(Oids.RsaPkcs1Sha256, signer.DigestAlgorithm.Value);
+            Assert.Equal(Oids.RsaPkcs1Sha256, signer.SignatureAlgorithm.Value);
 
             //Assert.NotThrows
             signer.CheckSignature(true);
