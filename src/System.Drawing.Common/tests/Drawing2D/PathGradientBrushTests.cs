@@ -239,7 +239,7 @@ namespace System.Drawing.Drawing2D.Tests
         {
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints))
             {
-                AssertExtensions.Throws<ArgumentNullException>(null, () => brush.SurroundColors = null);
+                AssertExtensions.Throws<NullReferenceException>(null, () => brush.SurroundColors = null);
             }
         }
 
