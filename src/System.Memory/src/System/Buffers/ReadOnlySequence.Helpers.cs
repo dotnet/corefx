@@ -331,7 +331,7 @@ namespace System.Buffers
             return new SequencePosition(currentSegment, (int)offset);
         }
 
-        private void BoundsCheck(in SequencePosition position)
+        private void BoundsCheck(in SequencePosition position, bool positionIsNotNull)
         {
             uint sliceStartIndex = (uint)GetIndex(position);
 
@@ -354,7 +354,12 @@ namespace System.Buffers
                 // Multi-Segment Sequence
                 // Storing this in a local since it is used twice within InRange()
                 ulong startRange = (ulong)(((ReadOnlySequenceSegment<T>)startObject!).RunningIndex + startIndex);
-                long runningIndex = ((ReadOnlySequenceSegment<T>?)position.GetObject())?.RunningIndex ?? 0;
+                long runningIndex = 0;
+                if (positionIsNotNull)
+                {
+                    Debug.Assert(position.GetObject() != null);
+                    runningIndex = ((ReadOnlySequenceSegment<T>)position.GetObject()!).RunningIndex;
+                }
                 if (!InRange(
                     (ulong)(runningIndex + sliceStartIndex),
                     startRange,

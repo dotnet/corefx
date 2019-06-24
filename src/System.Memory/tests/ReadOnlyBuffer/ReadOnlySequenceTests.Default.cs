@@ -129,7 +129,7 @@ namespace System.Memory.Tests
             BufferSegment<byte> secondSegment = firstSegment.Append(new byte[1]);
 
             var sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, 1);
-            var slicedSequence = sequence.Slice(default(SequencePosition));
+            ReadOnlySequence<byte> slicedSequence = sequence.Slice(default(SequencePosition));
             Assert.Equal(sequence, slicedSequence);
 
             // Slice(default, default) should return an empty sequence
@@ -140,14 +140,7 @@ namespace System.Memory.Tests
             slicedSequence = sequence.Slice(0, default(SequencePosition));
             Assert.Equal(0, slicedSequence.Length);
 
-            try
-            {
-                slicedSequence = sequence.Slice(1, default(SequencePosition));
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                Assert.Equal(0, slicedSequence.Length);
-            }
+            Assert.Throws<ArgumentOutOfRangeException>(() => sequence.Slice(1, default(SequencePosition)));
 
             // Slice(default, x) returns sequence from the beginning to x
             slicedSequence = sequence.Slice(default(SequencePosition), 1);

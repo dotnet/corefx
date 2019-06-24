@@ -454,7 +454,7 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySequence<T> Slice(SequencePosition start)
         {
-            BoundsCheck(start);
+            BoundsCheck(start, positionIsNotNull: start.GetObject() != null);
             return SliceImpl(start.GetObject() == null ? Start : start);
         }
 
