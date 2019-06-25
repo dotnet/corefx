@@ -18,8 +18,8 @@ namespace System.Text.Json
     internal static class JsonTestHelper
     {
 #if BUILDING_INBOX_LIBRARY
-        public const string DoubleFormatString = "G";
-        public const string SingleFormatString = "G";
+        public const string DoubleFormatString = null;
+        public const string SingleFormatString = null;
 #else
         public const string DoubleFormatString = "G17";
         public const string SingleFormatString = "G9";
