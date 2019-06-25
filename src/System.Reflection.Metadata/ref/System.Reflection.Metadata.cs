@@ -1221,6 +1221,7 @@ namespace System.Reflection.Metadata
     public partial class ImageFormatLimitationException : System.Exception
     {
         public ImageFormatLimitationException() { }
+        protected ImageFormatLimitationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public ImageFormatLimitationException(string message) { }
         public ImageFormatLimitationException(string message, System.Exception innerException) { }
     }
