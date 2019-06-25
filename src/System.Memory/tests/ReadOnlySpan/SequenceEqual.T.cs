@@ -137,6 +137,7 @@ namespace System.SpanTests
         {
             ReadOnlySpan<string> theStrings = firstInput;
             Assert.Equal(expected, theStrings.SequenceEqual(secondInput));
+            Assert.Equal(expected, theStrings.SequenceEqual((ReadOnlySpan<string>)secondInput));
         }
     }
 }

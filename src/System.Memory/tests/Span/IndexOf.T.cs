@@ -193,13 +193,5 @@ namespace System.SpanTests
             Span<string> theStrings = spanInput;
             Assert.Equal(expected, theStrings.IndexOf((string)null));
         }
-
-        [Theory]
-        [MemberData(nameof(TestHelpers.ContainsNullData), MemberType = typeof(TestHelpers))]
-        public static void ContainsNull_String(string[] spanInput, bool expected)
-        {
-            Span<string> theStrings = spanInput;
-            Assert.Equal(expected, theStrings.Contains((string)null));
-        }
     }
 }

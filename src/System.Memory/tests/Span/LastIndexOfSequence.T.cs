@@ -248,22 +248,7 @@ namespace System.SpanTests
         {
             Span<string> theStrings = spanInput;
             Assert.Equal(expected, theStrings.LastIndexOf(searchInput));
-        }
-
-        [Theory]
-        [MemberData(nameof(TestHelpers.LastIndexOfAnyNullSequenceData), MemberType = typeof(TestHelpers))]
-        public static void LastIndexOfAnyNullSequence_String(string[] spanInput, string[] searchInput, int expected)
-        {
-            Span<string> theStrings = spanInput;
-            Assert.Equal(expected, theStrings.LastIndexOfAny(searchInput));
-        }
-
-        [Theory]
-        [MemberData(nameof(TestHelpers.LastIndexOfAnyNullData), MemberType = typeof(TestHelpers))]
-        public static void LastIndexOfAnyNull_String(string[] spanInput, string[] searchInput, int expected)
-        {
-            Span<string> theStrings = spanInput;
-            Assert.Equal(expected, theStrings.LastIndexOfAny(searchInput[0], searchInput[1]));
+            Assert.Equal(expected, theStrings.LastIndexOf((ReadOnlySpan<string>)searchInput));
         }
     }
 }

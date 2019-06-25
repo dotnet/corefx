@@ -970,14 +970,20 @@ namespace System.SpanTests
         {
             Span<string> theStrings = spanInput;
             Assert.Equal(expected, theStrings.IndexOfAny(searchInput));
-        }
+            Assert.Equal(expected, theStrings.IndexOfAny((ReadOnlySpan<string>)searchInput));
 
-        [Theory]
-        [MemberData(nameof(TestHelpers.IndexOfAnyNullData), MemberType = typeof(TestHelpers))]
-        public static void IndexOfAnyNull_String(string[] spanInput, string[] searchInput, int expected)
-        {
-            Span<string> theStrings = spanInput;
-            Assert.Equal(expected, theStrings.IndexOfAny(searchInput[0], searchInput[1]));
+            if (searchInput != null)
+            {
+                if (searchInput.Length >= 3)
+                {
+                    Assert.Equal(expected, theStrings.IndexOfAny(searchInput[0], searchInput[1], searchInput[2]));
+                }
+
+                if (searchInput.Length >= 2)
+                {
+                    Assert.Equal(expected, theStrings.IndexOfAny(searchInput[0], searchInput[1]));
+                }
+            }
         }
     }
 }
