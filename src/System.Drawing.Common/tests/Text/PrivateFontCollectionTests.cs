@@ -154,7 +154,7 @@ namespace System.Drawing.Text.Tests
         {
             using (var fontCollection = new PrivateFontCollection())
             {
-                Assert.Throws<FileNotFoundException>(() => fontCollection.AddFontFile(AppContext.BaseDirectory));
+                AssertExtensions.Throws<FileNotFoundException, ExternalException>(() => fontCollection.AddFontFile(AppContext.BaseDirectory));
             }
         }
 
