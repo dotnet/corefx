@@ -1340,7 +1340,7 @@ namespace System.Text.Json.Tests
         {
             // If https://github.com/dotnet/corefx/issues/33997 gets resolved as the reader throwing,
             // this test would need to expect FormatException from GetDouble, and false from TryGet.
-            JsonReaderOptions options = new JsonReaderOptions
+            var options = new JsonDocumentOptions
             {
                 CommentHandling = JsonCommentHandling.Skip,
             };
@@ -1804,7 +1804,7 @@ namespace System.Text.Json.Tests
             string okayJson = new string('[', OkayCount) + "2" + new string(']', OkayCount);
             int depth = 0;
 
-            using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = OkayCount }))
+            using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonDocumentOptions { MaxDepth = OkayCount }))
             {
                 JsonElement root = doc.RootElement;
                 Assert.Equal(JsonValueType.Array, root.Type);
@@ -1823,10 +1823,10 @@ namespace System.Text.Json.Tests
                 Assert.Equal(OkayCount, depth);
             }
 
-            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = 32 }));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(okayJson, new JsonDocumentOptions { MaxDepth = 32 }));
             Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(okayJson));
-            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = 0 }));
-            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = 64 }));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(okayJson, new JsonDocumentOptions { MaxDepth = 0 }));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(okayJson, new JsonDocumentOptions { MaxDepth = 64 }));
         }
 
         [Fact]
@@ -1837,13 +1837,13 @@ namespace System.Text.Json.Tests
 
             string okayJson = "[]";
 
-            using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = MaxDepthOverflow }))
+            using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonDocumentOptions { MaxDepth = MaxDepthOverflow }))
             {
                 JsonElement root = doc.RootElement;
                 Assert.Equal(JsonValueType.Array, root.Type);
             }
 
-            using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = int.MaxValue }))
+            using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonDocumentOptions { MaxDepth = int.MaxValue }))
             {
                 JsonElement root = doc.RootElement;
                 Assert.Equal(JsonValueType.Array, root.Type);
@@ -1854,40 +1854,45 @@ namespace System.Text.Json.Tests
         public static Task EnableComments()
         {
             string json = "3";
-            JsonReaderOptions options = new JsonReaderOptions
+            var options = new JsonDocumentOptions
+            {
+                CommentHandling = JsonCommentHandling.Allow,
+            };
+
+            var readerOptions = new JsonReaderOptions
             {
                 CommentHandling = JsonCommentHandling.Allow,
             };
 
             AssertExtensions.Throws<ArgumentException>(
-                "readerOptions",
+                "options",
                 () => JsonDocument.Parse(json, options));
 
             byte[] utf8 = Encoding.UTF8.GetBytes(json);
             AssertExtensions.Throws<ArgumentException>(
-                "readerOptions",
+                "options",
                 () => JsonDocument.Parse(utf8, options));
 
             ReadOnlySequence<byte> singleSeq = new ReadOnlySequence<byte>(utf8);
             AssertExtensions.Throws<ArgumentException>(
-                "readerOptions",
+                "options",
                 () => JsonDocument.Parse(singleSeq, options));
 
             ReadOnlySequence<byte> multiSegment = JsonTestHelper.SegmentInto(utf8, 6);
             AssertExtensions.Throws<ArgumentException>(
-                "readerOptions",
+                "options",
                 () => JsonDocument.Parse(multiSegment, options));
 
             Stream stream = new MemoryStream(utf8);
             AssertExtensions.Throws<ArgumentException>(
-                "readerOptions",
+                "options",
                 () => JsonDocument.Parse(stream, options));
 
             AssertExtensions.Throws<ArgumentException>(
                 "reader",
                 () =>
                 {
-                    JsonReaderState state = new JsonReaderState(options);
+                    JsonReaderState state = new JsonReaderState(readerOptions);
                     Utf8JsonReader reader = new Utf8JsonReader(utf8, isFinalBlock: false, state);
                     JsonDocument.ParseValue(ref reader);
                 });
@@ -1896,14 +1901,14 @@ namespace System.Text.Json.Tests
                 "reader",
                 () =>
                 {
-                    JsonReaderState state = new JsonReaderState(options);
+                    JsonReaderState state = new JsonReaderState(readerOptions);
                     Utf8JsonReader reader = new Utf8JsonReader(utf8, isFinalBlock: false, state);
                     JsonDocument.TryParseValue(ref reader, out _);
                 });
 
             stream.Seek(0, SeekOrigin.Begin);
             return AssertExtensions.ThrowsAsync<ArgumentException>(
-                "readerOptions",
+                "options",
                 () => JsonDocument.ParseAsync(stream, options));
         }
 

@@ -1132,14 +1132,26 @@ namespace System.Text.Json
         }
 
         private static void CheckSupportedOptions(
-            JsonReaderOptions readerOptions,
+            JsonDocumentOptions options,
             string paramName = null)
         {
-            if (readerOptions.CommentHandling == JsonCommentHandling.Allow)
+            if (options.CommentHandling == JsonCommentHandling.Allow)
             {
                 throw new ArgumentException(
                     SR.JsonDocumentDoesNotSupportComments,
-                    paramName ?? nameof(readerOptions));
+                    paramName ?? nameof(options));
+            }
+        }
+
+        private static void CheckSupportedOptions(
+            JsonReaderOptions options,
+            string paramName = null)
+        {
+            if (options.CommentHandling == JsonCommentHandling.Allow)
+            {
+                throw new ArgumentException(
+                    SR.JsonDocumentDoesNotSupportComments,
+                    paramName ?? nameof(options));
             }
         }
     }
