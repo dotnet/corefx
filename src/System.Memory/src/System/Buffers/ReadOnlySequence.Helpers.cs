@@ -459,21 +459,6 @@ namespace System.Buffers
         private static int GetIndex(int Integer) => Integer & ReadOnlySequence.IndexBitMask;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(in object? startObject, in int startIndex, in object? endObject, in int endIndex)
-        {
-            // In this method we reset high order bits from indices
-            // of positions that were passed in
-            // and apply type bits specific for current ReadOnlySequence type
-
-            return new ReadOnlySequence<T>(
-                startObject,
-                startIndex | (_startInteger & ReadOnlySequence.FlagBitMask),
-                endObject,
-                endIndex | (_endInteger & ReadOnlySequence.FlagBitMask)
-            );
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ReadOnlySequence<T> SliceImpl(in SequencePosition start, in SequencePosition end)
         {
             return new ReadOnlySequence<T>(
