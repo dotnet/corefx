@@ -243,7 +243,7 @@ namespace System.Text.Json
         }
 
         // Unlike the parameter-less overload of HasMoreData, if there is no more data when this method is called, we know the JSON input is invalid.
-        // This is because, this method is only called after a ',' (i.e. we expect a value/property name) or after 
+        // This is because, this method is only called after a ',' (i.e. we expect a value/property name) or after
         // a property name, which means it must be followed by a value.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool HasMoreDataMultiSegment(ExceptionResource resource)
@@ -2198,8 +2198,13 @@ namespace System.Text.Json
             else
             {
                 _totalConsumed = prevTotalConsumed;
-                // consumed might not be correct now but it won't be used anymore after we return false
-                // if we don't wrong number of bytes might get reported (if consuming called GetNextSpan)
+                // Note: BytesConsumed = _totalConsumed + _consumed
+                // Changing _consumed and _totalConsumed to original values might not work correctly
+                // since _consumed is tracking position in the current sequence
+                // and current sequence might not be the same as we could've called GetNextSpan.
+                // Since we return false we do not expect these APIs to be called again
+                // so the values are ok to be slightly incorrect as long as the sum remains the same
+                // if we don't reset this value to zero the BytesConsumed might be reported incorrectly.
                 _consumed = 0;
             }
 
@@ -2407,16 +2412,19 @@ namespace System.Text.Json
                 dangerousLineSeparatorBytesConsumed = 0;
 
                 if (idx == -1)
+                {
                     return -1;
+                }
 
                 if (localBuffer[idx] != JsonConstants.StartingByteOfNonStandardSeparator)
+                {
                     return totalIdx + idx;
+                }
 
                 int p = idx + 1;
                 localBuffer = localBuffer.Slice(p);
                 totalIdx += p;
 
-                // or dangerousLineSeparatorBytesConsumed = 1
                 dangerousLineSeparatorBytesConsumed++;
                 ThrowOnDangerousLineSeparatorMultiSegment(localBuffer, ref dangerousLineSeparatorBytesConsumed);
 
@@ -2465,7 +2473,8 @@ namespace System.Text.Json
 
             if (dangerousLineSeparatorBytesConsumed == 2)
             {
-                if (localBuffer[0] == 0xA8 || localBuffer[0] == 0xA9)
+                byte lastByte = localBuffer[0];
+                if (lastByte == 0xA8 || lastByte == 0xA9)
                 {
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfLineSeparator);
                 }
@@ -2530,7 +2539,8 @@ namespace System.Text.Json
                             _bytePositionInLine = 0;
                             _lineNumber++;
                             break;
-                        default: // JsonConstants.CarriageReturn:
+                        default:
+                            Debug.Assert(marker == JsonConstants.CarriageReturn);
                             _bytePositionInLine = 0;
                             _lineNumber++;
                             ignoreNextLfForLineTracking = true;

@@ -684,7 +684,7 @@ namespace System.Text.Json.Tests
         // For first line in each case:
         //     . represents contiguous characters in input.
         //     | represents end of a segment in the sequence. Character below | is last character of particular segment.
-        //     
+        //
         //     Note: \ for escape sequence has neither a . nor a |
         //
         // Second line in each case represents whether the resulting token after parsing has a value sequence or not.
@@ -939,7 +939,6 @@ namespace System.Text.Json.Tests
             foreach (JsonCommentHandling jsonCommentHandling in typeof(JsonCommentHandling).GetEnumValues())
             {
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = jsonCommentHandling });
-
 
                 foreach (bool isFinalBlock in new bool[] { false, true })
                 {
