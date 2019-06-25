@@ -9,7 +9,7 @@ namespace System.Text.Json
 {
     internal static partial class ThrowHelper
     {
-        public static ArgumentException GetArgumentOutOfRangeException_MaxDepthMustBePositive()
+        public static ArgumentOutOfRangeException GetArgumentOutOfRangeException_MaxDepthMustBePositive()
         {
             return GetArgumentOutOfRangeException(SR.MaxDepthMustBePositive);
         }
@@ -20,7 +20,7 @@ namespace System.Text.Json
             return new ArgumentOutOfRangeException(message);
         }
 
-        public static ArgumentException GetArgumentOutOfRangeException_CommentEnumMustBeInRange()
+        public static ArgumentOutOfRangeException GetArgumentOutOfRangeException_CommentEnumMustBeInRange()
         {
             return GetArgumentOutOfRangeException(SR.CommentHandlingMustBeValid);
         }

@@ -233,10 +233,10 @@ namespace System.Text.Json
             set
             {
                 VerifyMutable();
-                if (value != JsonCommentHandling.Disallow && value != JsonCommentHandling.Skip)
-                {
+
+                Debug.Assert(value >= 0);
+                if (value > JsonCommentHandling.Skip)
                     throw new ArgumentOutOfRangeException(nameof(value), SR.JsonSerializerDoesNotSupportComments);
-                }
 
                 _readCommentHandling = value;
             }
