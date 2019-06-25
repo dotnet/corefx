@@ -137,7 +137,7 @@
 
   <Target Name="GenerateReferenceSource">
     <PropertyGroup>
-      <_RefSourceFileOutputPath>$(MSBuildProjectDirectory)/../ref/$(AssemblyName).cs</_RefSourceFileOutputPath>
+      <_RefSourceFileOutputPath>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '..', 'ref', '$(AssemblyName).cs'))</_RefSourceFileOutputPath>
       <_ExcludeAPIList>$(RepositoryEngineeringDir)DefaultGenApiDocIds.txt</_ExcludeAPIList>
       <_LicenseHeaderTxtPath>$(RepositoryEngineeringDir)LicenseHeader.txt</_LicenseHeaderTxtPath>
     </PropertyGroup>
