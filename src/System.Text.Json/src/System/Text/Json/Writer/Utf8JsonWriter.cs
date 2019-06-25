@@ -19,22 +19,21 @@ namespace System.Text.Json
     /// Provides a high-performance API for forward-only, non-cached writing of UTF-8 encoded JSON text.
     /// </summary>
     /// <remarks>
-    /// It writes the text sequentially with no caching and adheres to the JSON RFC
-    /// by default (https://tools.ietf.org/html/rfc8259), with the exception of writing comments.
-    /// </remarks>
-    /// <remarks>
-    /// When the user attempts to write invalid JSON and validation is enabled, it throws
-    /// an <see cref="InvalidOperationException"/> with a context specific error message.
-    /// </remarks>
-    /// <remarks>
-    /// To be able to format the output with indentation and whitespace OR to skip validation, create an instance of 
-    /// <see cref="JsonWriterOptions"/> and pass that in to the writer.
+    ///   <para>
+    ///     It writes the text sequentially with no caching and adheres to the JSON RFC
+    ///     by default (https://tools.ietf.org/html/rfc8259), with the exception of writing comments.
+    ///   </para>
+    ///   <para>
+    ///     When the user attempts to write invalid JSON and validation is enabled, it throws
+    ///     an <see cref="InvalidOperationException"/> with a context specific error message.
+    ///   </para>
+    ///   <para>
+    ///     To be able to format the output with indentation and whitespace OR to skip validation, create an instance of 
+    ///     <see cref="JsonWriterOptions"/> and pass that in to the writer.
+    ///   </para>
     /// </remarks>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    public sealed partial class Utf8JsonWriter : IDisposable
-#if BUILDING_INBOX_LIBRARY
-        , IAsyncDisposable
-#endif
+    public sealed partial class Utf8JsonWriter : IDisposable, IAsyncDisposable
     {
         // Depending on OS, either '\r\n' OR '\n'
         private static readonly int s_newLineLength = Environment.NewLine.Length;
@@ -315,11 +314,13 @@ namespace System.Text.Json
         /// Commits any left over JSON text that has not yet been flushed and releases all resources used by the current instance.
         /// </summary>
         /// <remarks>
-        /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
-        /// In the case of Stream, this writes the data to the stream and flushes it.
-        /// </remarks>
-        /// <remarks>
-        /// The <see cref="Utf8JsonWriter"/> instance cannot be re-used after disposing.
+        ///   <para>
+        ///     In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
+        ///     In the case of Stream, this writes the data to the stream and flushes it.
+        ///   </para>
+        ///   <para>
+        ///     The <see cref="Utf8JsonWriter"/> instance cannot be re-used after disposing.
+        ///   </para>
         /// </remarks>
         public void Dispose()
         {
@@ -340,16 +341,17 @@ namespace System.Text.Json
             _output = null;
         }
 
-#if BUILDING_INBOX_LIBRARY
         /// <summary>
         /// Asynchronously commits any left over JSON text that has not yet been flushed and releases all resources used by the current instance.
         /// </summary>
         /// <remarks>
-        /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
-        /// In the case of Stream, this writes the data to the stream and flushes it.
-        /// </remarks>
-        /// <remarks>
-        /// The <see cref="Utf8JsonWriter"/> instance cannot be re-used after disposing.
+        ///   <para>
+        ///     In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
+        ///     In the case of Stream, this writes the data to the stream and flushes it.
+        ///   </para>
+        ///   <para>
+        ///     The <see cref="Utf8JsonWriter"/> instance cannot be re-used after disposing.
+        ///   </para>
         /// </remarks>
         public async ValueTask DisposeAsync()
         {
@@ -369,7 +371,6 @@ namespace System.Text.Json
             _arrayBufferWriter = null;
             _output = null;
         }
-#endif
 
         /// <summary>
         /// Asynchronously commits the JSON text written so far which makes it visible to the output destination.
@@ -1093,6 +1094,7 @@ namespace System.Text.Json
             _currentDepth |= 1 << 31;
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebuggerDisplay => $"BytesCommitted = {BytesCommitted} BytesPending = {BytesPending} CurrentDepth = {CurrentDepth}";
     }
 }

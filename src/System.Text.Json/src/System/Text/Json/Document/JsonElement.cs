@@ -399,6 +399,204 @@ namespace System.Text.Json
                 return value;
             }
 
+            throw ThrowHelper.GetFormatException();
+        }
+
+        /// <summary>
+        ///   Attempts to represent the current JSON number as an <see cref="sbyte"/>.
+        /// </summary>
+        /// <param name="value">Receives the value.</param>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <returns>
+        ///   <see langword="true"/> if the number can be represented as an <see cref="sbyte"/>,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        [CLSCompliant(false)]
+        public bool TryGetSByte(out sbyte value)
+        {
+            CheckValidInstance();
+
+            return _parent.TryGetValue(_idx, out value);
+        }
+
+        /// <summary>
+        ///   Gets the current JSON number as an <see cref="sbyte"/>.
+        /// </summary>
+        /// <returns>The current JSON number as an <see cref="sbyte"/>.</returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value cannot be represented as an <see cref="sbyte"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        [CLSCompliant(false)]
+        public sbyte GetSByte()
+        {
+            if (TryGetSByte(out sbyte value))
+            {
+                return value;
+            }
+
+            throw new FormatException();
+        }
+
+        /// <summary>
+        ///   Attempts to represent the current JSON number as a <see cref="byte"/>.
+        /// </summary>
+        /// <param name="value">Receives the value.</param>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <returns>
+        ///   <see langword="true"/> if the number can be represented as a <see cref="byte"/>,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public bool TryGetByte(out byte value)
+        {
+            CheckValidInstance();
+
+            return _parent.TryGetValue(_idx, out value);
+        }
+
+        /// <summary>
+        ///   Gets the current JSON number as a <see cref="byte"/>.
+        /// </summary>
+        /// <returns>The current JSON number as a <see cref="byte"/>.</returns>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value cannot be represented as a <see cref="byte"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public byte GetByte()
+        {
+            if (TryGetByte(out byte value))
+            {
+                return value;
+            }
+
+            throw new FormatException();
+        }
+
+        /// <summary>
+        ///   Attempts to represent the current JSON number as an <see cref="short"/>.
+        /// </summary>
+        /// <param name="value">Receives the value.</param>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <returns>
+        ///   <see langword="true"/> if the number can be represented as an <see cref="short"/>,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public bool TryGetInt16(out short value)
+        {
+            CheckValidInstance();
+
+            return _parent.TryGetValue(_idx, out value);
+        }
+
+        /// <summary>
+        ///   Gets the current JSON number as an <see cref="short"/>.
+        /// </summary>
+        /// <returns>The current JSON number as an <see cref="short"/>.</returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value cannot be represented as an <see cref="short"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public short GetInt16()
+        {
+            if (TryGetInt16(out short value))
+            {
+                return value;
+            }
+
+            throw new FormatException();
+        }
+
+        /// <summary>
+        ///   Attempts to represent the current JSON number as a <see cref="ushort"/>.
+        /// </summary>
+        /// <param name="value">Receives the value.</param>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <returns>
+        ///   <see langword="true"/> if the number can be represented as a <see cref="ushort"/>,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        [CLSCompliant(false)]
+        public bool TryGetUInt16(out ushort value)
+        {
+            CheckValidInstance();
+
+            return _parent.TryGetValue(_idx, out value);
+        }
+
+        /// <summary>
+        ///   Gets the current JSON number as a <see cref="ushort"/>.
+        /// </summary>
+        /// <returns>The current JSON number as a <see cref="ushort"/>.</returns>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value cannot be represented as a <see cref="ushort"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        [CLSCompliant(false)]
+        public ushort GetUInt16()
+        {
+            if (TryGetUInt16(out ushort value))
+            {
+                return value;
+            }
+
             throw new FormatException();
         }
 
@@ -446,7 +644,7 @@ namespace System.Text.Json
                 return value;
             }
 
-            throw new FormatException();
+            throw ThrowHelper.GetFormatException();
         }
 
         /// <summary>
@@ -498,7 +696,7 @@ namespace System.Text.Json
                 return value;
             }
 
-            throw new FormatException();
+            throw ThrowHelper.GetFormatException();
         }
 
         /// <summary>
@@ -548,7 +746,7 @@ namespace System.Text.Json
                 return value;
             }
 
-            throw new FormatException();
+            throw ThrowHelper.GetFormatException();
         }
 
         /// <summary>
@@ -600,7 +798,7 @@ namespace System.Text.Json
                 return value;
             }
 
-            throw new FormatException();
+            throw ThrowHelper.GetFormatException();
         }
 
         /// <summary>
@@ -667,7 +865,7 @@ namespace System.Text.Json
                 return value;
             }
 
-            throw new FormatException();
+            throw ThrowHelper.GetFormatException();
         }
 
         /// <summary>
@@ -734,7 +932,7 @@ namespace System.Text.Json
                 return value;
             }
 
-            throw new FormatException();
+            throw ThrowHelper.GetFormatException();
         }
 
         /// <summary>
@@ -786,7 +984,7 @@ namespace System.Text.Json
                 return value;
             }
 
-            throw new FormatException();
+            throw ThrowHelper.GetFormatException();
         }
 
         /// <summary>
@@ -837,7 +1035,7 @@ namespace System.Text.Json
                 return value;
             }
 
-            throw new FormatException();
+            throw ThrowHelper.GetFormatException();
         }
 
         /// <summary>
@@ -888,7 +1086,7 @@ namespace System.Text.Json
                 return value;
             }
 
-            throw new FormatException();
+            throw ThrowHelper.GetFormatException();
         }
 
         /// <summary>
@@ -939,7 +1137,7 @@ namespace System.Text.Json
                 return value;
             }
 
-            throw new FormatException();
+            throw ThrowHelper.GetFormatException();
         }
 
         internal string GetPropertyName()
@@ -1284,6 +1482,7 @@ namespace System.Text.Json
             }
         }
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebuggerDisplay => $"Type = {Type} : \"{ToString()}\"";
     }
 }

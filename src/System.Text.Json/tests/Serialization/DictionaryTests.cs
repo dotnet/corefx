@@ -140,22 +140,6 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void DuplicateKeysFail()
-        {
-            // Non-generic IDictionary case.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<IDictionary>(
-                @"{""Hello"":""World"", ""Hello"":""World""}"));
-
-            // Strongly-typed IDictionary<,> case.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<string, string>>(
-                @"{""Hello"":""World"", ""Hello"":""World""}"));
-
-            // Weakly-typed IDictionary case.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<string, object>>(
-                @"{""Hello"":null, ""Hello"":null}"));
-        }
-
-        [Fact]
         public static void DictionaryOfObject()
         {
             {
@@ -233,7 +217,7 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(typeof(int[]), @"{}")]
         [InlineData(typeof(int[]), @"[""test""")]
         [InlineData(typeof(int[]), @"[true]")]
-        // [InlineData(typeof(int[]), @"[{}]")] TODO #38485: Uncomment when fixed
+        [InlineData(typeof(int[]), @"[{}]")]
         [InlineData(typeof(int[]), @"[[]]")]
         [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": {}}")]
         [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": ""test""}")]
@@ -241,7 +225,7 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": true}")]
         [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": [""test""]}")]
         [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": [[]]}")]
-        // [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": [{}]}")] TODO #38485: Uncomment when fixed
+        [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": [{}]}")]
         public static void InvalidJsonForArrayShouldFail(Type type, string json)
         {
             Assert.Throws<JsonException>(() => JsonSerializer.Parse(json, type));
@@ -790,6 +774,54 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void DeserializeDictionaryWithDuplicateKeys()
+        {
+            // Non-generic IDictionary case.
+            IDictionary iDictionary = JsonSerializer.Parse<IDictionary>(@"{""Hello"":""World"", ""Hello"":""NewValue""}");
+            Assert.Equal("NewValue", iDictionary["Hello"].ToString());
+
+            // Generic IDictionary case.
+            IDictionary<string, string> iNonGenericDictionary = JsonSerializer.Parse<IDictionary<string, string>>(@"{""Hello"":""World"", ""Hello"":""NewValue""}");
+            Assert.Equal("NewValue", iNonGenericDictionary["Hello"]);
+
+            IDictionary<string, object> iNonGenericObjectDictionary = JsonSerializer.Parse<IDictionary<string, object>>(@"{""Hello"":""World"", ""Hello"":""NewValue""}");
+            Assert.Equal("NewValue", iNonGenericObjectDictionary["Hello"].ToString());
+
+            // Strongly-typed IDictionary<,> case.
+            Dictionary<string, string> dictionary = JsonSerializer.Parse<Dictionary<string, string>>(@"{""Hello"":""World"", ""Hello"":""NewValue""}");
+            Assert.Equal("NewValue", dictionary["Hello"]);
+
+            dictionary = JsonSerializer.Parse<Dictionary<string, string>>(@"{""Hello"":""World"", ""myKey"" : ""myValue"", ""Hello"":""NewValue""}");
+            Assert.Equal("NewValue", dictionary["Hello"]);
+
+            // Weakly-typed IDictionary case.
+            Dictionary<string, object> dictionaryObject = JsonSerializer.Parse<Dictionary<string, object>>(@"{""Hello"":""World"", ""Hello"": null}");
+            Assert.Null(dictionaryObject["Hello"]);
+        }
+
+        [Fact]
+        public static void DeserializeDictionaryWithDuplicateProperties()
+        {
+            PocoDuplicate foo = JsonSerializer.Parse<PocoDuplicate>(@"{""BoolProperty"": false, ""BoolProperty"": true}");
+            Assert.True(foo.BoolProperty);
+
+            foo = JsonSerializer.Parse<PocoDuplicate>(@"{""BoolProperty"": false, ""IntProperty"" : 1, ""BoolProperty"": true , ""IntProperty"" : 2}");
+            Assert.True(foo.BoolProperty);
+            Assert.Equal(2, foo.IntProperty);
+
+            foo = JsonSerializer.Parse<PocoDuplicate>(@"{""DictProperty"" : {""a"" : ""b"", ""c"" : ""d""},""DictProperty"" : {""b"" : ""b"", ""c"" : ""e""}}");
+            Assert.Equal(3, foo.DictProperty.Count);
+            Assert.Equal("e", foo.DictProperty["c"]);
+        }
+
+        public class PocoDuplicate
+        {
+            public bool BoolProperty { get; set; }
+            public int IntProperty { get; set; }
+            public Dictionary<string, string> DictProperty { get; set; }
+        }
+
+        [Fact]
         public static void ClassWithNoSetter()
         {
             string json = @"{""MyDictionary"":{""Key"":""Value""}}";
@@ -830,6 +862,49 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<IImmutableDictionaryWrapper>(json));
         }
 
+        [Fact]
+        public static void Regression38643_Serialize()
+        {
+            // Arrange
+            var value = new Regression38643_Parent()
+            {
+                Child = new Dictionary<string, Regression38643_Child>()
+                {
+                    ["1"] = new Regression38643_Child()
+                    {
+                        A = "1",
+                        B = string.Empty,
+                        C = Array.Empty<string>(),
+                        D = Array.Empty<string>(),
+                        F = Array.Empty<string>(),
+                        K = Array.Empty<string>(),
+                    }
+                }
+            };
+
+            var actual = JsonSerializer.ToString(value, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+            // Assert
+            Assert.NotNull(actual);
+            Assert.NotEmpty(actual);
+        }
+
+        [Fact]
+        public static void Regression38643_Deserialize()
+        {
+            // Arrange
+            string json = "{\"child\":{\"1\":{\"a\":\"1\",\"b\":\"\",\"c\":[],\"d\":[],\"e\":null,\"f\":[],\"g\":null,\"h\":null,\"i\":null,\"j\":null,\"k\":[]}}}";
+
+            var actual = JsonSerializer.Parse<Regression38643_Parent>(json, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+            // Assert
+            Assert.NotNull(actual);
+            Assert.NotNull(actual.Child);
+            Assert.Equal(1, actual.Child.Count);
+            Assert.True(actual.Child.ContainsKey("1"));
+            Assert.Equal("1", actual.Child["1"].A);
+        }
+
         public class ClassWithDictionaryButNoSetter
         {
             public Dictionary<string, string> MyDictionary { get; } = new Dictionary<string, string>();
@@ -843,6 +918,26 @@ namespace System.Text.Json.Serialization.Tests
         public class ClassWithNotSupportedDictionaryButIgnored
         {
             [JsonIgnore] public Dictionary<int, int> MyDictionary { get; set; }
+        }
+
+        public class Regression38643_Parent
+        {
+            public IDictionary<string, Regression38643_Child> Child { get; set; }
+        }
+
+        public class Regression38643_Child
+        {
+            public string A { get; set; }
+            public string B { get; set; }
+            public string[] C { get; set; }
+            public string[] D { get; set; }
+            public bool? E { get; set; }
+            public string[] F { get; set; }
+            public DateTimeOffset? G { get; set; }
+            public DateTimeOffset? H { get; set; }
+            public int? I { get; set; }
+            public int? J { get; set; }
+            public string[] K { get; set; }
         }
     }
 }

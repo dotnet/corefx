@@ -46,7 +46,7 @@ namespace System.Text.Json
             // Set the sorted property cache. Overwrite any existing cache which can occur in multi-threaded cases.
             if (frame.PropertyRefCache != null)
             {
-                List<PropertyRef> cache = frame.PropertyRefCache;
+                HashSet<PropertyRef> cache = frame.PropertyRefCache;
 
                 // Add any missing properties. This creates a consistent cache count which is important for
                 // the loop in GetProperty() when there are multiple threads in a race conditions each generating
@@ -56,29 +56,17 @@ namespace System.Text.Json
                     for (int iProperty = 0; iProperty < _propertyRefs.Count; iProperty++)
                     {
                         PropertyRef propertyRef = _propertyRefs[iProperty];
-                        bool found = false;
-                        int iCacheProperty = 0;
-
-                        for (; iCacheProperty < cache.Count; iCacheProperty++)
-                        {
-                            if (IsPropertyRefEqual(ref propertyRef, cache[iCacheProperty]))
-                            {
-                                // The property is already cached, skip to the next property.
-                                found = true;
-                                break;
-                            }
-                        }
-
-                        if (found == false)
-                        {
-                            cache.Add(propertyRef);
-                            break;
-                        }
+                        // Cache the missing property or override the existing property.
+                        cache.Add(propertyRef);
                     }
                 }
 
                 Debug.Assert(cache.Count == _propertyRefs.Count);
-                _propertyRefsSorted = cache.ToArray();
+                if (_propertyRefsSorted == null || _propertyRefsSorted.Length < cache.Count)
+                {
+                    _propertyRefsSorted = new PropertyRef[cache.Count];
+                }
+                cache.CopyTo(_propertyRefsSorted);
                 frame.PropertyRefCache = null;
             }
         }
@@ -86,9 +74,9 @@ namespace System.Text.Json
         internal JsonClassInfo(Type type, JsonSerializerOptions options)
         {
             Type = type;
-            ClassType = GetClassType(type);
+            ClassType = GetClassType(type, options);
 
-            CreateObject = options.ClassMaterializerStrategy.CreateConstructor(type);
+            CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
 
             // Ignore properties on enumerable.
             switch (ClassType)
@@ -133,10 +121,10 @@ namespace System.Text.Json
                         JsonPropertyInfo policyProperty = AddPolicyProperty(type, options);
 
                         // Use the type from the property policy to get any late-bound concrete types (from an interface like IDictionary).
-                        CreateObject = options.ClassMaterializerStrategy.CreateConstructor(policyProperty.RuntimePropertyType);
+                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(policyProperty.RuntimePropertyType);
 
                         // Create a ClassInfo that maps to the element type which is used for (de)serialization and policies.
-                        Type elementType = GetElementType(type, parentType: null, memberInfo: null);
+                        Type elementType = GetElementType(type, parentType: null, memberInfo: null, options: options);
                         ElementClassInfo = options.GetOrAddClass(elementType);
                     }
                     break;
@@ -145,46 +133,13 @@ namespace System.Text.Json
                         // Add a single property that maps to the class type so we can have policies applied.
                         AddPolicyProperty(type, options);
 
-                        Type elementType = GetElementType(type, parentType: null, memberInfo: null);
+                        Type elementType = GetElementType(type, parentType: null, memberInfo: null, options: options);
 
-                        CreateObject = options.ClassMaterializerStrategy.CreateConstructor(
+                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(
                             typeof(Dictionary<,>).MakeGenericType(typeof(string), elementType));
 
                         // Create a ClassInfo that maps to the element type which is used for (de)serialization and policies.
                         ElementClassInfo = options.GetOrAddClass(elementType);
-                    }
-                    break;
-                // TODO: Utilize converter mechanism to handle (de)serialization of KeyValuePair
-                // when it goes through: https://github.com/dotnet/corefx/issues/36639.
-                case ClassType.KeyValuePair:
-                    {
-                        // For deserialization, we treat it as ClassType.IDictionaryConstructible so we can parse it like a dictionary
-                        // before using converter-like logic to create a KeyValuePair instance.
-
-                        // Add a single property that maps to the class type so we can have policies applied.
-                        AddPolicyProperty(type, options);
-
-                        Type elementType = GetElementType(type, parentType: null, memberInfo: null);
-
-                        // Make this Dictionary<string, object> to accomodate input of form {"Key": "MyKey", "Value": 1}.
-                        CreateObject = options.ClassMaterializerStrategy.CreateConstructor(typeof(Dictionary<string, object>));
-
-                        // Create a ClassInfo that maps to the element type which is used for deserialization and policies.
-                        ElementClassInfo = options.GetOrAddClass(elementType);
-
-                        // For serialization, we treat it like ClassType.Object to utilize the public getters.
-
-                        // Add Key property
-                        PropertyInfo propertyInfo = type.GetProperty("Key", BindingFlags.Public | BindingFlags.Instance);
-                        JsonPropertyInfo jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
-                        Debug.Assert(jsonPropertyInfo.NameUsedToCompareAsString != null);
-                        jsonPropertyInfo.ClearUnusedValuesAfterAdd();
-
-                        // Add Value property.
-                        propertyInfo = type.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
-                        jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
-                        Debug.Assert(jsonPropertyInfo.NameUsedToCompareAsString != null);
-                        jsonPropertyInfo.ClearUnusedValuesAfterAdd();
                     }
                     break;
                 case ClassType.Value:
@@ -229,7 +184,7 @@ namespace System.Text.Json
                 {
                     if (property != null)
                     {
-                        ThrowHelper.ThrowInvalidOperationException_SerializationDuplicateAttribute(attributeType);
+                        ThrowHelper.ThrowInvalidOperationException_SerializationDuplicateTypeAttribute(Type, attributeType);
                     }
 
                     property = jsonPropertyInfo;
@@ -305,7 +260,7 @@ namespace System.Text.Json
                 if (propertyIndex == 0 && frame.PropertyRefCache == null)
                 {
                     // Create the temporary list on first property access to prevent a partially filled List.
-                    frame.PropertyRefCache = new List<PropertyRef>();
+                    frame.PropertyRefCache = new HashSet<PropertyRef>();
                 }
 
                 if (info != null)
@@ -321,13 +276,6 @@ namespace System.Text.Json
         internal JsonPropertyInfo GetPolicyProperty()
         {
             Debug.Assert(_propertyRefs.Count == 1);
-            return _propertyRefs[0].Info;
-        }
-
-        internal JsonPropertyInfo GetPolicyPropertyOfKeyValuePair()
-        {
-            // We have 3 here. One for the KeyValuePair itself, one for Key property, and one for the Value property.
-            Debug.Assert(_propertyRefs.Count == 3);
             return _propertyRefs[0].Info;
         }
 
@@ -416,10 +364,10 @@ namespace System.Text.Json
             return key;
         }
 
-        // Return the element type of the IEnumerable or KeyValuePair, or return null if not an IEnumerable or KayValuePair.
-        public static Type GetElementType(Type propertyType, Type parentType, MemberInfo memberInfo)
+        // Return the element type of the IEnumerable or return null if not an IEnumerable.
+        public static Type GetElementType(Type propertyType, Type parentType, MemberInfo memberInfo, JsonSerializerOptions options)
         {
-            if (!typeof(IEnumerable).IsAssignableFrom(propertyType) && !IsKeyValuePair(propertyType))
+            if (!typeof(IEnumerable).IsAssignableFrom(propertyType))
             {
                 return null;
             }
@@ -435,9 +383,9 @@ namespace System.Text.Json
             if (propertyType.IsGenericType)
             {
                 Type[] args = propertyType.GetGenericArguments();
-                ClassType classType = GetClassType(propertyType);
+                ClassType classType = GetClassType(propertyType, options);
 
-                if ((classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible || classType == ClassType.KeyValuePair) &&
+                if ((classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible) &&
                     args.Length >= 2 && // It is >= 2 in case there is a IDictionary<TKey, TValue, TSomeExtension>.
                     args[0].UnderlyingSystemType == typeof(string))
                 {
@@ -461,7 +409,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(propertyType, parentType, memberInfo);
         }
 
-        public static ClassType GetClassType(Type type)
+        public static ClassType GetClassType(Type type, JsonSerializerOptions options)
         {
             Debug.Assert(type != null);
 
@@ -470,7 +418,12 @@ namespace System.Text.Json
                 type = Nullable.GetUnderlyingType(type);
             }
 
-            if (DefaultConverters.IsValueConvertable(type))
+            if (type == typeof(object))
+            {
+                return ClassType.Unknown;
+            }
+
+            if (options.HasConverter(type))
             {
                 return ClassType.Value;
             }
@@ -488,19 +441,9 @@ namespace System.Text.Json
                 return ClassType.Dictionary;
             }
 
-            if (IsKeyValuePair(type))
-            {
-                return ClassType.KeyValuePair;
-            }
-
             if (typeof(IEnumerable).IsAssignableFrom(type))
             {
                 return ClassType.Enumerable;
-            }
-
-            if (type == typeof(object))
-            {
-                return ClassType.Unknown;
             }
 
             return ClassType.Object;
@@ -563,9 +506,9 @@ namespace System.Text.Json
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISet<>);
         }
 
-        public static bool HasConstructorThatTakesGenericIEnumerable(Type type)
+        public static bool HasConstructorThatTakesGenericIEnumerable(Type type, JsonSerializerOptions options)
         {
-            Type elementType = GetElementType(type, parentType: null, memberInfo: null);
+            Type elementType = GetElementType(type, parentType: null, memberInfo: null, options);
             return type.GetConstructor(new Type[] { typeof(List<>).MakeGenericType(elementType) }) != null;
         }
 
@@ -592,11 +535,6 @@ namespace System.Text.Json
                 default:
                     return false;
             }
-        }
-
-        public static bool IsKeyValuePair(Type type)
-        {
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>);
         }
     }
 }

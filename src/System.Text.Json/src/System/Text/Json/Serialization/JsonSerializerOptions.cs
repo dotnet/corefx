@@ -12,7 +12,7 @@ namespace System.Text.Json
     /// <summary>
     /// Provides options to be used with <see cref="JsonSerializer"/>.
     /// </summary>
-    public sealed class JsonSerializerOptions
+    public sealed partial class JsonSerializerOptions
     {
         internal const int BufferSizeDefault = 16 * 1024;
 
@@ -21,7 +21,7 @@ namespace System.Text.Json
         private readonly ConcurrentDictionary<Type, JsonClassInfo> _classes = new ConcurrentDictionary<Type, JsonClassInfo>();
         private readonly ConcurrentDictionary<Type, JsonPropertyInfo> _objectJsonProperties = new ConcurrentDictionary<Type, JsonPropertyInfo>();
         private static ConcurrentDictionary<string, object> s_createRangeDelegates = new ConcurrentDictionary<string, object>();
-        private ClassMaterializer _classMaterializerStrategy;
+        private MemberAccessor _memberAccessorStrategy;
         private JsonNamingPolicy _dictionayKeyPolicy;
         private JsonNamingPolicy _jsonPropertyNamingPolicy;
         private JsonCommentHandling _readCommentHandling;
@@ -37,7 +37,10 @@ namespace System.Text.Json
         /// <summary>
         /// Constructs a new <see cref="JsonSerializerOptions"/> instance.
         /// </summary>
-        public JsonSerializerOptions() { }
+        public JsonSerializerOptions()
+        {
+            Converters = new ConverterList(this);
+        }
 
         /// <summary>
         /// Defines whether an extra comma at the end of a list of JSON values in an object or array
@@ -171,8 +174,12 @@ namespace System.Text.Json
                     throw ThrowHelper.GetArgumentOutOfRangeException_MaxDepthMustBePositive();
 
                 _maxDepth = value;
+                EffectiveMaxDepth = (value == 0 ? JsonReaderOptions.DefaultMaxDepth : value);
             }
         }
+
+        // The default is 64 because that is what the reader uses, so re-use the same JsonReaderOptions.DefaultMaxDepth constant.
+        internal int EffectiveMaxDepth { get; private set; } = JsonReaderOptions.DefaultMaxDepth;
 
         /// <summary>
         /// Specifies the policy used to convert a property's name on an object to another format, such as camel-casing.
@@ -263,21 +270,21 @@ namespace System.Text.Json
             }
         }
 
-        internal ClassMaterializer ClassMaterializerStrategy
+        internal MemberAccessor MemberAccessorStrategy
         {
             get
             {
-                if (_classMaterializerStrategy == null)
+                if (_memberAccessorStrategy == null)
                 {
 #if BUILDING_INBOX_LIBRARY
-                    _classMaterializerStrategy = new ReflectionEmitMaterializer();
+                    _memberAccessorStrategy = new ReflectionEmitMemberAccessor();
 #else
                     // todo: should we attempt to detect here, or at least have a #define like #SUPPORTS_IL_EMIT
-                    _classMaterializerStrategy = new ReflectionMaterializer();
+                    _memberAccessorStrategy = new ReflectionMemberAccessor();
 #endif
                 }
 
-                return _classMaterializerStrategy;
+                return _memberAccessorStrategy;
             }
         }
 
@@ -285,7 +292,7 @@ namespace System.Text.Json
         {
             _haveTypesBeenCreated = true;
 
-            // todo: for performance, consider obtaining the type from s_defaultOptions and then cloning.
+            // todo: for performance and reduced instances, consider using the converters and JsonClassInfo from s_defaultOptions by cloning (or reference directly if no changes).
             if (!_classes.TryGetValue(classType, out JsonClassInfo result))
             {
                 result = _classes.GetOrAdd(classType, new JsonClassInfo(classType, this));
@@ -320,16 +327,6 @@ namespace System.Text.Json
 
         internal JsonPropertyInfo GetJsonPropertyInfoFromClassInfo(JsonClassInfo classInfo, JsonSerializerOptions options)
         {
-            if (classInfo.ClassType == ClassType.KeyValuePair)
-            {
-                return classInfo.GetPolicyPropertyOfKeyValuePair();
-            }
-
-            if (classInfo.ClassType != ClassType.Object)
-            {
-                return classInfo.GetPolicyProperty();
-            }
-
             Type objectType = classInfo.Type;
 
             if (!_objectJsonProperties.TryGetValue(objectType, out JsonPropertyInfo propertyInfo))
@@ -357,7 +354,7 @@ namespace System.Text.Json
         }
 
 
-        private void VerifyMutable()
+        internal void VerifyMutable()
         {
             // The default options are hidden and thus should be immutable.
             Debug.Assert(this != s_defaultOptions);
