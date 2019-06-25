@@ -329,7 +329,7 @@ namespace System.Buffers
         FoundInFirstSegment:
             // startIndex + start <= int.MaxValue
             Debug.Assert(start <= int.MaxValue - startIndex);
-            return SliceImpl(startObject, (int)startIndex + (int)start, sliceEndObject, (int)sliceEndIndex);
+            return SliceImpl(new SequencePosition(startObject, (int)startIndex + (int)start), new SequencePosition(sliceEndObject, (int)sliceEndIndex));
         }
 
         /// <summary>
@@ -406,7 +406,7 @@ namespace System.Buffers
         FoundInFirstSegment:
             // sliceStartIndex + length <= int.MaxValue
             Debug.Assert(length <= int.MaxValue - sliceStartIndex);
-            return SliceImpl(sliceStartObject, (int)sliceStartIndex, sliceStartObject, (int)sliceStartIndex + (int)length);
+            return SliceImpl(new SequencePosition(sliceStartObject, (int)sliceStartIndex), new SequencePosition(sliceStartObject, (int)sliceStartIndex + (int)length));
         }
 
         /// <summary>
@@ -454,8 +454,9 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySequence<T> Slice(SequencePosition start)
         {
-            BoundsCheck(start, positionIsNotNull: start.GetObject() != null);
-            return SliceImpl(start.GetObject() == null ? Start : start);
+            bool positionIsNotNull = start.GetObject() != null;
+            BoundsCheck(start, positionIsNotNull: positionIsNotNull);
+            return SliceImpl(positionIsNotNull ? start : Start);
         }
 
         /// <summary>
