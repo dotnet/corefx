@@ -97,6 +97,11 @@ namespace System.Text.Json
 
         private static bool TryFormatDouble(double value, Span<byte> destination, out int bytesWritten)
         {
+            // Frameworks that are not .NET Core 3.0 or higher do not produce roundtrippable strings by
+            // default. Further, the Utf8Formatter on older frameworks does not support taking a precision
+            // specifier for 'G' nor does it represent other formats such as 'R'. As such, we duplicate
+            // the .NET Core 3.0 logic of forwarding to the UTF16 formatter and transcoding it back to UTF8.
+
 #if BUILDING_INBOX_LIBRARY
             return Utf8Formatter.TryFormat(value, destination, out bytesWritten);
 #else
