@@ -236,6 +236,13 @@ namespace System
                 distroInfo.VersionId = distroInfo.VersionId.Substring(0, lastVersionNumberSeparatorIndex);
             }
 
+            // In some distros/versions we cannot discover the distro version; return something valid.
+            // Pick a high version number, since this seems to happen on newer distros.
+            if (String.IsNullOrEmpty(_distroInfo.Value?.VersionId)
+            {
+                distroInfo.VersionId = (new Version(Int32.MaxValue, Int32.MaxValue)).ToString();
+            }
+
             return distroInfo;
         }
 
