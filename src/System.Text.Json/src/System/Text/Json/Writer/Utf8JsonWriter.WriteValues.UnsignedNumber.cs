@@ -49,7 +49,6 @@ namespace System.Text.Json
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Number;
-            _isProperty = false;
         }
 
         private void WriteNumberValueMinimized(ulong value)

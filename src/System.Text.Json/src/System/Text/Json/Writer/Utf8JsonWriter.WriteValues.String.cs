@@ -30,7 +30,6 @@ namespace System.Text.Json
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
-            _isProperty = false;
         }
 
         /// <summary>
@@ -70,7 +69,6 @@ namespace System.Text.Json
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
-            _isProperty = false;
         }
 
         private void WriteStringEscape(ReadOnlySpan<char> value)
@@ -214,7 +212,6 @@ namespace System.Text.Json
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
-            _isProperty = false;
         }
 
         private void WriteStringEscape(ReadOnlySpan<byte> utf8Value)
