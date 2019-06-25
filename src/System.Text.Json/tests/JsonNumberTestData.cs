@@ -276,7 +276,7 @@ namespace System.Text.Json.Tests
                 // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
                 builder.Append("\"double").Append(i).Append("\": ");
                 const string format = "{0:" + JsonTestHelper.DoubleFormatString + "}, ";
-                var str = string.Format(CultureInfo.InvariantCulture, format, Doubles[i]);
+                string str = string.Format(CultureInfo.InvariantCulture, format, Doubles[i]);
                 builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", str);
             }
             for (int i = 0; i < Floats.Count; i++)
@@ -284,13 +284,13 @@ namespace System.Text.Json.Tests
                 // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
                 builder.Append("\"float").Append(i).Append("\": ");
                 const string format = "{0:" + JsonTestHelper.SingleFormatString + "}, ";
-                var str = string.Format(CultureInfo.InvariantCulture, format, Floats[i]);
+                string str = string.Format(CultureInfo.InvariantCulture, format, Floats[i]);
                 builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", str);
             }
             for (int i = 0; i < Decimals.Count; i++)
             {
                 builder.Append("\"decimal").Append(i).Append("\": ");
-                var str = string.Format(CultureInfo.InvariantCulture, "{0}, ", Decimals[i]);
+                string str = string.Format(CultureInfo.InvariantCulture, "{0}, ", Decimals[i]);
                 builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", str);
             }
 
