@@ -356,7 +356,7 @@ namespace System.Diagnostics.Tests
             foreach (var eventLog in EventLog.GetEventLogs())
             {
                 // Accessing eventlog properties should not throw.
-                int _ = eventLog.Entries.Count;
+                Assert.True(eventLog.Entries.Count >= 0);
             }
         }
     }
