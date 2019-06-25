@@ -71,18 +71,12 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, arr[1][1]);
         }
 
-        [Fact]
-        public static void ReadByteArrayFail()
+        [Theory]
+        [InlineData(@"""1""")]
+        [InlineData(@"""A===""")]
+        [InlineData(@"[1, 2]")]  // Currently not support deserializing JSON arrays as byte[] - only Base64 string.
+        public static void ReadByteArrayFail(string json)
         {
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(@"""1"""));
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(@"""A==="""));
-        }
-
-        [Fact]
-        public static void ReadByteArrayAsJsonArrayFail()
-        {
-            string json = $"[1, 2]";
-            // Currently no support deserializing JSON arrays as byte[] - only Base64 string.
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(json));
         }
 
@@ -172,6 +166,18 @@ namespace System.Text.Json.Serialization.Tests
 
             i = JsonSerializer.Parse<int[]>(Encoding.UTF8.GetBytes(@"[]"));
             Assert.Equal(0, i.Length);
+        }
+
+        [ActiveIssue(38435)]
+        [Fact]
+        public static void ReadInitializedArrayTest()
+        {
+            string serialized = "{\"Values\":[1,2,3]}";
+            TestClassWithInitializedArray testClassWithInitializedArray = JsonSerializer.Parse<TestClassWithInitializedArray>(serialized);
+
+            Assert.Equal(1, testClassWithInitializedArray.Values[0]);
+            Assert.Equal(2, testClassWithInitializedArray.Values[1]);
+            Assert.Equal(3, testClassWithInitializedArray.Values[2]);
         }
 
         [Fact]

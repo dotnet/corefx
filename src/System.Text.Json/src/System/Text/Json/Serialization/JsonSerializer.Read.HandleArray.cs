@@ -5,7 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.Json.Serialization.Policies;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -37,46 +37,53 @@ namespace System.Text.Json
 
             // Verify that we don't have a multidimensional array.
             Type arrayType = jsonPropertyInfo.RuntimePropertyType;
-            if (!state.Current.IsProcessingKeyValuePair && !typeof(IEnumerable).IsAssignableFrom(arrayType) || (arrayType.IsArray && arrayType.GetArrayRank() > 1))
+            if (!typeof(IEnumerable).IsAssignableFrom(arrayType) || (arrayType.IsArray && arrayType.GetArrayRank() > 1))
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(arrayType, reader, state.JsonPath);
             }
 
             Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
 
-            if (state.Current.PropertyInitialized)
+            if (state.Current.CollectionPropertyInitialized)
             {
                 // A nested json array so push a new stack frame.
                 Type elementType = jsonPropertyInfo.ElementClassInfo.Type;
 
                 state.Push();
                 state.Current.Initialize(elementType, options);
-                state.Current.PropertyInitialized = true;
+                state.Current.CollectionPropertyInitialized = true;
             }
             else
             {
-                state.Current.PropertyInitialized = true;
+                state.Current.CollectionPropertyInitialized = true;
             }
 
             jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
-            // If current property is already set (from a constructor, for example) leave as-is.
-            if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) == null)
+            if (state.Current.JsonClassInfo.ClassType == ClassType.Value)
             {
-                // Create the enumerable.
-                object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state, options);
-
-                // If value is not null, then we don't have a converter so apply the value.
-                if (value != null)
+                state.Current.JsonPropertyInfo.Read(JsonTokenType.StartObject, ref state, ref reader);
+            }
+            else
+            {
+                // If current property is already set (from a constructor, for example) leave as-is.
+                if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) == null)
                 {
-                    if (state.Current.ReturnValue != null)
+                    // Create the enumerable.
+                    object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state, options);
+
+                    // If value is not null, then we don't have a converter so apply the value.
+                    if (value != null)
                     {
-                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
-                    }
-                    else
-                    {
-                        // Primitive arrays being returned without object
-                        state.Current.SetReturnValue(value);
+                        if (state.Current.ReturnValue != null)
+                        {
+                            state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                        }
+                        else
+                        {
+                            // Primitive arrays being returned without object
+                            state.Current.SetReturnValue(value);
+                        }
                     }
                 }
             }
@@ -198,33 +205,17 @@ namespace System.Text.Json
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
-                if (!dictionary.Contains(key))
-                {
-                    dictionary.Add(key, value);
-                }
-                else
-                {
-                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.JsonPath);
-                }
+                dictionary[key] = value;
             }
             else if (state.Current.IsIDictionaryConstructible ||
-                (state.Current.IsIDictionaryConstructibleProperty && !setPropertyDirectly) ||
-                state.Current.IsKeyValuePair ||
-                (state.Current.IsKeyValuePairProperty && !setPropertyDirectly))
+                (state.Current.IsIDictionaryConstructibleProperty && !setPropertyDirectly))
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
                 IDictionary dictionary = (IDictionary)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.TempDictionaryValues);
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
-                if (!dictionary.Contains(key))
-                {
-                    dictionary.Add(key, value);
-                }
-                else
-                {
-                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.JsonPath);
-                }
+                dictionary[key] = value;
             }
             else
             {
@@ -280,30 +271,16 @@ namespace System.Text.Json
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
-                if (!dictionary.ContainsKey(key)) // The IDictionary.TryAdd extension method is not available in netstandard.
-                {
-                    dictionary.Add(key, value);
-                }
-                else
-                {
-                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.JsonPath);
-                }
+                dictionary[key] = value;
             }
-            else if (state.Current.IsProcessingIDictionaryConstructibleOrKeyValuePair)
+            else if (state.Current.IsProcessingIDictionaryConstructible)
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
                 IDictionary<string, TProperty> dictionary = (IDictionary<string, TProperty>)state.Current.TempDictionaryValues;
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
-                if (!dictionary.ContainsKey(key)) // The IDictionary.TryAdd extension method is not available in netstandard.
-                {
-                    dictionary.Add(key, value);
-                }
-                else
-                {
-                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.JsonPath);
-                }
+                dictionary[key] = value;
             }
             else
             {

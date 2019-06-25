@@ -2,12 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text.Json.Serialization.Policies;
-
 namespace System.Text.Json.Serialization.Converters
 {
-    internal static class DefaultConverters<TValue>
+    [Flags]
+    internal enum EnumConverterOptions
     {
-        internal static readonly JsonValueConverter<TValue> s_converter = (JsonValueConverter<TValue>)DefaultConverters.Create(typeof(TValue));
+        /// <summary>
+        /// Allow string values.
+        /// </summary>
+        AllowStrings    = 0b0001,
+
+        /// <summary>
+        /// Allow number values.
+        /// </summary>
+        AllowNumbers    = 0b0010
     }
 }

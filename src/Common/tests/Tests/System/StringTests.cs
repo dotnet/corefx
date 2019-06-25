@@ -1019,9 +1019,9 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(() => string.Compare(value, value, (StringComparison)6));
             
             ReadOnlySpan<char> span = value.AsSpan();
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, StringComparison.CurrentCulture - 1));
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, StringComparison.OrdinalIgnoreCase + 1));
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, (StringComparison)6));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, StringComparison.CurrentCulture - 1));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, StringComparison.OrdinalIgnoreCase + 1));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.CompareTo(_span, (StringComparison)6));
         }
         
         [Fact]
@@ -1314,9 +1314,9 @@ namespace System.Tests
         public static void ContainsUnknownComparisonType_StringComparison()
         {                        
             ReadOnlySpan<char> span = "456".AsSpan();
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, StringComparison.CurrentCulture - 1));
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, StringComparison.OrdinalIgnoreCase + 1));
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, (StringComparison)6));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, StringComparison.CurrentCulture - 1));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, StringComparison.OrdinalIgnoreCase + 1));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.Contains(_span, (StringComparison)6));
         }
 
         [Fact]
@@ -2149,9 +2149,9 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(() => value.EndsWith(value, (StringComparison)6));
 
             ReadOnlySpan<char> span = value.AsSpan();
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, StringComparison.CurrentCulture - 1));
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, StringComparison.OrdinalIgnoreCase + 1));
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, (StringComparison)6));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, StringComparison.CurrentCulture - 1));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, StringComparison.OrdinalIgnoreCase + 1));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.EndsWith(_span, (StringComparison)6));
         }
 
         [Fact]
@@ -5152,50 +5152,57 @@ namespace System.Tests
             Assert.Equal(expected, s1.ToLower(CultureInfo.CurrentCulture).ToArray());
             Assert.Equal(expected, s1.ToLowerInvariant().ToArray());
             {
-                ReadOnlySpan<char> source = a;
-                Span<char> destination = a;
-                Assert.Equal(source.Length, source.ToLower(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expected, destination.ToArray());
-                Assert.Equal(expected, source.ToArray());
+                MemoryTestHelpers.AssertThrows<InvalidOperationException, char>(a, a => 
+                {
+                    ReadOnlySpan<char> source = a;
+                    Span<char> destination = a;
+
+                    source.ToLower(destination, CultureInfo.CurrentCulture);
+                });
             }
-            {                
-                ReadOnlySpan<char> source = a;
-                Span<char> destination = a;
-                Assert.Equal(source.Length, source.ToLowerInvariant(destination));
-                Assert.Equal(expected, destination.ToArray());
-                Assert.Equal(expected, source.ToArray());
+            {
+                MemoryTestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
+                {
+                    ReadOnlySpan<char> source = a;
+                    Span<char> destination = a;
+
+                    source.ToLowerInvariant(destination);
+                });
             }
         }
 
         [Fact]
         public static void ToLowerOverlapping()
         {
-            var expectedSource = new char[3] { 'B', 'c', 'b' };
             var expectedDestination = new char[3] { 'b', 'c', 'b' };
 
             {                
                 char[] a = { 'a', 'B', 'c', 'B', 'c', 'B' };
 
-                string s1 = new string(a, 1, 3);                
+                string s1 = new string(a, 1, 3);
                 Assert.Equal(expectedDestination, s1.ToLower(CultureInfo.CurrentCulture).ToArray());
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
-                var destination = new Span<char>(a, 3, 3);
-                Assert.Equal(source.Length, source.ToLower(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expectedDestination, destination.ToArray());
-                Assert.Equal(expectedSource, source.ToArray());
+
+                MemoryTestHelpers.AssertThrows<InvalidOperationException,char>(source, source =>
+                { 
+                    var destination = new Span<char>(a, 3, 3);
+                    source.ToLower(destination, CultureInfo.CurrentCulture);
+                });
             }
             {
                 char[] a = { 'a', 'B', 'c', 'B', 'c', 'B' };
 
-                string s1 = new string(a, 1, 3);                
+                string s1 = new string(a, 1, 3);
                 Assert.Equal(expectedDestination, s1.ToLowerInvariant().ToArray());
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
-                var destination = new Span<char>(a, 3, 3);
-                Assert.Equal(source.Length, source.ToLowerInvariant(destination));
-                Assert.Equal(expectedDestination, destination.ToArray());
-                Assert.Equal(expectedSource, source.ToArray());
+
+                MemoryTestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
+                {
+                    var destination = new Span<char>(a, 3, 3);
+                    source.ToLowerInvariant(destination);
+                });
             }
         }
 
@@ -5358,25 +5365,28 @@ namespace System.Tests
             Assert.Equal(expected, s1.ToUpper(CultureInfo.CurrentCulture).ToArray());
             Assert.Equal(expected, s1.ToUpperInvariant().ToArray());
             {
-                ReadOnlySpan<char> source = a;
-                Span<char> destination = a;
-                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expected, destination.ToArray());
-                Assert.Equal(expected, source.ToArray());
+                MemoryTestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
+                {
+                    ReadOnlySpan<char> source = a;
+                    Span<char> destination = a;
+
+                    source.ToUpper(destination, CultureInfo.CurrentCulture);
+                });
             }
             {
-                ReadOnlySpan<char> source = a;
-                Span<char> destination = a;
-                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
-                Assert.Equal(expected, destination.ToArray());
-                Assert.Equal(expected, source.ToArray());
+                MemoryTestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
+                {
+                    ReadOnlySpan<char> source = a;
+                    Span<char> destination = a;
+
+                    source.ToUpperInvariant(destination);
+                });
             }
         }
 
         [Fact]
         public static void ToUpperOverlapping()
         {
-            var expectedSource = new char[3] { 'b', 'C', 'B' };
             var expectedDestination = new char[3] { 'B', 'C', 'B' };
 
             {                
@@ -5386,10 +5396,12 @@ namespace System.Tests
                 Assert.Equal(expectedDestination, s1.ToUpper(CultureInfo.CurrentCulture).ToArray());
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
-                var destination = new Span<char>(a, 3, 3);
-                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expectedDestination, destination.ToArray());
-                Assert.Equal(expectedSource, source.ToArray());
+
+                MemoryTestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
+                {
+                    var destination = new Span<char>(a, 3, 3);
+                    source.ToUpper(destination, CultureInfo.CurrentCulture);
+                });
             }
             {
                 char[] a = { 'a', 'b', 'C', 'b', 'C', 'b' };
@@ -5398,10 +5410,11 @@ namespace System.Tests
                 Assert.Equal(expectedDestination, s1.ToUpperInvariant().ToArray());
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
-                var destination = new Span<char>(a, 3, 3);
-                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
-                Assert.Equal(expectedDestination, destination.ToArray());
-                Assert.Equal(expectedSource, source.ToArray());
+                MemoryTestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
+                {
+                    var destination = new Span<char>(a, 3, 3);
+                    source.ToUpperInvariant(destination);
+                });
             }
         }
 
@@ -6715,18 +6728,13 @@ namespace System.Tests
         {
             //                          lower                upper          Culture
             yield return new object[] { "abcd",             "ABCD",         "en-US" };
+            yield return new object[] { "abcd",             "ABCD",         null };
             yield return new object[] { "latin i",          "LATIN I",      "en-US" };
+            yield return new object[] { "latin i",          "LATIN I",      null };
+            yield return new object[] { "",                 "",             null };
             yield return new object[] { "turky \u0131",     "TURKY I",      "tr-TR" };
             yield return new object[] { "turky i",          "TURKY \u0130", "tr-TR" };
             yield return new object[] { "\ud801\udc29",     PlatformDetection.IsWindows7 ? "\ud801\udc29" : "\ud801\udc01", "en-US" };
-        }
-
-        public static IEnumerable<object[]> UpperLowerCasing_NullCulture_TestData()
-        {
-            //                          lower       upper
-            yield return new object[] { "abcd",     "ABCD" };
-            yield return new object[] { "latin i",  "LATIN I" };
-            yield return new object[] { "",         "" };
         }
 
         public static IEnumerable<object[]> StartEndWith_TestData()
@@ -6787,7 +6795,7 @@ namespace System.Tests
         [MemberData(nameof(UpperLowerCasing_TestData))]
         public static void CasingTest(string lowerForm, string upperForm, string cultureName)
         {
-            CultureInfo ci = CultureInfo.GetCultureInfo(cultureName);
+            CultureInfo ci = cultureName != null ? CultureInfo.GetCultureInfo(cultureName) : null;
             Assert.Equal(lowerForm, upperForm.ToLower(ci));
             Assert.Equal(upperForm, lowerForm.ToUpper(ci));
 
@@ -6802,21 +6810,6 @@ namespace System.Tests
 
             Assert.Equal(lowerForm, lowerForm.AsSpan().ToString());
             Assert.Equal(upperForm, upperForm.AsSpan().ToString());
-        }
-
-        [Theory]
-        [MemberData(nameof(UpperLowerCasing_NullCulture_TestData))]
-        public static void CasingTestNullCulture(string lowerForm, string upperForm)
-        {
-            Assert.Equal(lowerForm, upperForm.ToLower(null));
-            Assert.Equal(upperForm, lowerForm.ToUpper(null));
-        }
-
-        [Fact]
-        public static void CasingAsSpan_NullCulture_ThrowsArgumentNullException()
-        {
-            Assert.Throws<ArgumentNullException>("culture", () => "".AsSpan().ToLower(new Span<char>(), null));
-            Assert.Throws<ArgumentNullException>("culture", () => "".AsSpan().ToUpper(new Span<char>(), null));
         }
 
         [Theory]
@@ -6991,9 +6984,9 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(() => s1.StartsWith(s1, (StringComparison)6));
 
             ReadOnlySpan<char> span = s1.AsSpan();
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, StringComparison.CurrentCulture - 1));
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, StringComparison.OrdinalIgnoreCase + 1));
-            SpanTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, (StringComparison)6));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, StringComparison.CurrentCulture - 1));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, StringComparison.OrdinalIgnoreCase + 1));
+            MemoryTestHelpers.AssertThrows<ArgumentException, char>(span, (_span) => _span.StartsWith(_span, (StringComparison)6));
         }
 
         [Fact]
