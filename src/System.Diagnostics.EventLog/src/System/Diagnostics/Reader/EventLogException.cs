@@ -72,12 +72,8 @@ namespace System.Diagnostics.Eventing.Reader
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
-            info.AddValue("errorCode", _errorCode);
             base.GetObjectData(info, context);
+            info.AddValue("errorCode", _errorCode, typeof(int));
         }
     }
 
