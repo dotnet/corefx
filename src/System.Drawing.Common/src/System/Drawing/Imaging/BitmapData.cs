@@ -41,9 +41,34 @@ namespace System.Drawing.Imaging
             get { return _pixelFormat; }
             set
             {
-                if (!Enum.IsDefined(typeof(PixelFormat), value))
+                switch (value)
                 {
-                    throw new System.ComponentModel.InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(PixelFormat));
+                    case PixelFormat.DontCare:
+                    // case PixelFormat.Undefined: same as DontCare
+                    case PixelFormat.Max:
+                    case PixelFormat.Indexed:
+                    case PixelFormat.Gdi:
+                    case PixelFormat.Format16bppRgb555:
+                    case PixelFormat.Format16bppRgb565:
+                    case PixelFormat.Format24bppRgb:
+                    case PixelFormat.Format32bppRgb:
+                    case PixelFormat.Format1bppIndexed:
+                    case PixelFormat.Format4bppIndexed:
+                    case PixelFormat.Format8bppIndexed:
+                    case PixelFormat.Alpha:
+                    case PixelFormat.Format16bppArgb1555:
+                    case PixelFormat.PAlpha:
+                    case PixelFormat.Format32bppPArgb:
+                    case PixelFormat.Extended:
+                    case PixelFormat.Format16bppGrayScale:
+                    case PixelFormat.Format48bppRgb:
+                    case PixelFormat.Format64bppPArgb:
+                    case PixelFormat.Canonical:
+                    case PixelFormat.Format32bppArgb:
+                    case PixelFormat.Format64bppArgb:
+                        break;
+                    default:
+                        throw new System.ComponentModel.InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(PixelFormat));
                 }
 
                 _pixelFormat = value;
