@@ -64,7 +64,7 @@ namespace System.IO.Compression
         private readonly byte[] _codeLengthTreeCodeLength;
         private readonly bool _deflate64;
         private HuffmanTree _codeLengthTree;
-        private long _uncompressedSize = -1;
+        private readonly long _uncompressedSize;
         private long _currentInflatedCount;
 
         private IFileFormatReader _formatReader; // class to decode header and footer (e.g. gzip)
