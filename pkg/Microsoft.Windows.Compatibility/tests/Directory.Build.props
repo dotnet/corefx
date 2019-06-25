@@ -1,15 +1,11 @@
 <Project>
   <PropertyGroup>
     <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
-    <BaseIntermediateOutputPath>bin</BaseIntermediateOutputPath>
-    <NuGetTargetMoniker Condition="'$(NugetMonikerVersion)' != ''">.NETCoreApp,Version=v$(NugetMonikerVersion)</NuGetTargetMoniker>
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <!-- Setting NETCoreAppMaximumVersion to a high version so that the sdk doesn't complain if we're restoring/publishing for a higher version than the sdk. -->
     <NETCoreAppMaximumVersion>99.9</NETCoreAppMaximumVersion>
     <PackageConflictPreferredPackages Condition="'$(TargetFramework)' != 'netcoreapp2.0'">Microsoft.Private.CoreFx.NETCoreApp;runtime.$(RuntimeIdentifiers).Microsoft.Private.CoreFx.NETCoreApp;$(PackageConflictPreferredPackages)</PackageConflictPreferredPackages>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
-    <IntermediateOutputPath Condition="'$(RestoreOutputPath)' != ''">$(RestoreOutputPath)</IntermediateOutputPath>
-    <OutputPath Condition="'$(RestoreOutputPath)' != ''">$(RestoreOutputPath)</OutputPath>
-    <MSBuildProjectExtensionsPath Condition="'$(RestoreOutputPath)' != ''">$(RestoreOutputPath)</MSBuildProjectExtensionsPath>
+    <BaseIntermediateOutputPath Condition="'$(RestoreOutputPath)' != ''">$(RestoreOutputPath)</BaseIntermediateOutputPath>
   </PropertyGroup>
 </Project>

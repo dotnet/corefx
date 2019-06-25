@@ -151,45 +151,46 @@ jobs:
                     /p:SymbolServerPAT=$(symweb-symbol-server-pat)
             displayName: Publish symbols to symweb
 
-      - job: GenerateApiCatalogLayout
-        displayName: Generate API Catalog Layout
-        timeoutInMinutes: 60
-        continueOnError: true
+      - ${{ if eq($(Build.SourceBranchName) 'master') }}:
+        - job: GenerateApiCatalogLayout
+          displayName: Generate API Catalog Layout
+          timeoutInMinutes: 60
+          continueOnError: true
 
-        ${{ if ne(parameters.dependsOn, '') }}:
-          dependsOn: ${{ parameters.dependsOn }}
+          ${{ if ne(parameters.dependsOn, '') }}:
+            dependsOn: ${{ parameters.dependsOn }}
 
-        pool:
-          name: NetCoreInternal-Pool
-          queue: buildpool.windows.10.amd64.vs2017
+          pool:
+            name: NetCoreInternal-Pool
+            queue: buildpool.windows.10.amd64.vs2017
 
-        workspace:
-          clean: all
+          workspace:
+            clean: all
 
-        variables:
-          - group: Publish-Build-Assets
-          - group: DotNet-Blob-Feed
-          - _dotnetFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
-          - _maestroApiEndpoint: https://maestro-prod.westus2.cloudapp.azure.com
-          - _TeamName: DotNetCore
-          - _SignType: real
+          variables:
+            - group: Publish-Build-Assets
+            - group: DotNet-Blob-Feed
+            - _dotnetFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+            - _maestroApiEndpoint: https://maestro-prod.westus2.cloudapp.azure.com
+            - _TeamName: DotNetCore
+            - _SignType: real
 
-        steps:
-          - task: DownloadBuildArtifacts@0
-            displayName: Download packages from build
-            inputs:
-              artifactName: packages
-              downloadPath: ${{ parameters.artifactsDir }}
+          steps:
+            - task: DownloadBuildArtifacts@0
+              displayName: Download packages from build
+              inputs:
+                artifactName: packages
+                downloadPath: ${{ parameters.artifactsDir }}
 
-          - script: build.cmd -restore -ci
-            displayName: Restore Tools
+            - script: build.cmd -restore -ci
+              displayName: Restore Tools
 
-          - script: powershell pkg\Microsoft.Windows.Compatibility\tests\publishcompatibilityassets.ps1
-            displayName: Generate local APICatalog layout
+            - script: powershell pkg\Microsoft.Windows.Compatibility\tests\publishcompatibilityassets.ps1
+              displayName: Generate local APICatalog layout
 
-          - task: CopyFiles@2
-            displayName: Copy API Catalog Layout to CPVSBuild
-            inputs:
-              sourceFolder: ${{ parameters.artifactsDir }}/ApiCatalogLayout/GeneratedLayout
-              contents: '**\*'
-              targetFolder: \\cpvsbuild\drops\DotNetCore\DotNet-CoreFx-APICatalog-LayoutDrop\$(Build.BuildNumber)
+            - task: CopyFiles@2
+              displayName: Copy API Catalog Layout to CPVSBuild
+              inputs:
+                sourceFolder: ${{ parameters.artifactsDir }}/ApiCatalogLayout/GeneratedLayout
+                contents: '**\*'
+                targetFolder: \\cpvsbuild\drops\DotNetCore\DotNet-CoreFx-APICatalog-LayoutDrop\$(Build.BuildNumber)

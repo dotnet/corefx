@@ -16,14 +16,6 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'uap10.0.16300'">
     <PackageReference Include="Microsoft.Private.CoreFx.UAP" Version="$(PrivateCorefxUAPPackageVersion)" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <PackageReference Include="Microsoft.NETCore.App" Version="2.1.5" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.5" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.9" />
-    <PackageReference Include="Microsoft.NETCore.App" Version="2.0.9" />
-  </ItemGroup>
 
   <PropertyGroup>
     <TargetFrameworks>uap10.0.16300;netcoreapp3.0</TargetFrameworks>
@@ -35,17 +27,17 @@
     <DisableStandardFrameworkResolution>true</DisableStandardFrameworkResolution>
   </PropertyGroup>
 
-  <Target Name="GetReferences">
+  <Target Name="CopyReferences">
     <ItemGroup>
       <_targetFrameworks Include="$(TargetFrameworks)" />
     </ItemGroup>
     <MSBuild Projects="$(MSBuildProjectFile)"
-             Targets="_getReferences"
+             Targets="_copyReferences"
              Condition="'$(TargetFramework)' == ''"
              Properties="TargetFramework=%(_targetFrameworks.Identity)" />
   </Target>
 
-  <Target Name="_getReferences" DependsOnTargets="ResolveReferences">
+  <Target Name="_copyReferences" DependsOnTargets="ResolveReferences">
     <ItemGroup>
       <_docFiles Include="@(ReferencePath->'%(RootDir)%(Directory)%(FileName).xml')" />
       <_docFilesExists Include="@(_docFiles)" Condition="Exists('%(FullPath)')" />
