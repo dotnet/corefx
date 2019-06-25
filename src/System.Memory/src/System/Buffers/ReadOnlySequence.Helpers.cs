@@ -474,10 +474,30 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(in SequencePosition start, in SequencePosition end) => SliceImpl(start.GetObject(), GetIndex(start), end.GetObject(), GetIndex(end));
+        private ReadOnlySequence<T> SliceImpl(in SequencePosition start, in SequencePosition end)
+        {
+            return new ReadOnlySequence<T>(
+                start.GetObject(),
+                GetIndex(start) | (_startInteger & ReadOnlySequence.FlagBitMask),
+                end.GetObject(),
+                GetIndex(end) | (_endInteger & ReadOnlySequence.FlagBitMask)
+                );
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(in SequencePosition start) => SliceImpl(start.GetObject(), GetIndex(start), _endObject, _endInteger);
+        private ReadOnlySequence<T> SliceImpl(in SequencePosition start)
+        {
+            // In this method we reset high order bits from indices
+            // of positions that were passed in
+            // and apply type bits specific for current ReadOnlySequence type
+
+            return new ReadOnlySequence<T>(
+                start.GetObject(),
+                GetIndex(start) | (_startInteger & ReadOnlySequence.FlagBitMask),
+                _endObject,
+                _endInteger
+            );
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetLength()
