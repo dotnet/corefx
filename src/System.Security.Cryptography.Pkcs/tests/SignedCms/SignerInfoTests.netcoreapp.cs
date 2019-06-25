@@ -221,6 +221,22 @@ namespace System.Security.Cryptography.Pkcs.Tests
             cms.CheckSignature(true);
         }
 
+        [Fact]
+        public static void CheckSignature_ECDSA256SignedWithRSASha256HashIdentifier_Prohibited()
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.SHA256ECDSAWithRsaSha256DigestIdentifier);
+            SignerInfo signer = cms.SignerInfos[0];
+
+            Assert.Equal(Oids.RsaPkcs1Sha256, signer.DigestAlgorithm.Value);
+
+            CryptographicException ex = Assert.ThrowsAny<CryptographicException>(() => {
+                signer.CheckSignature(true);
+            });
+            Assert.Contains("1.2.840.113549.1.1.11", ex.Message);
+            Assert.Contains("1.2.840.10045.4.3.2", ex.Message);
+        }
+
         private static void VerifyAttributesContainsAll(CryptographicAttributeObjectCollection attributes, List<AsnEncodedData> expectedAttributes)
         {
             var indices = new HashSet<int>();
