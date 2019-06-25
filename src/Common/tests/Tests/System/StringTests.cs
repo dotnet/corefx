@@ -5152,7 +5152,7 @@ namespace System.Tests
             Assert.Equal(expected, s1.ToLower(CultureInfo.CurrentCulture).ToArray());
             Assert.Equal(expected, s1.ToLowerInvariant().ToArray());
             {
-                TestHelpers.AssertThrows<InvalidOperationException, char>(a, a => 
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(a, a => 
                 {
                     ReadOnlySpan<char> source = a;
                     Span<char> destination = a;
@@ -5161,7 +5161,7 @@ namespace System.Tests
                 });
             }
             {
-                TestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
                 {
                     ReadOnlySpan<char> source = a;
                     Span<char> destination = a;
@@ -5184,7 +5184,7 @@ namespace System.Tests
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
 
-                TestHelpers.AssertThrows<InvalidOperationException,char>(source, source =>
+                SpanTestHelpers.AssertThrows<InvalidOperationException,char>(source, source =>
                 { 
                     var destination = new Span<char>(a, 3, 3);
                     source.ToLower(destination, CultureInfo.CurrentCulture);
@@ -5198,7 +5198,7 @@ namespace System.Tests
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
 
-                TestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
                 {
                     var destination = new Span<char>(a, 3, 3);
                     source.ToLowerInvariant(destination);
@@ -5365,7 +5365,7 @@ namespace System.Tests
             Assert.Equal(expected, s1.ToUpper(CultureInfo.CurrentCulture).ToArray());
             Assert.Equal(expected, s1.ToUpperInvariant().ToArray());
             {
-                TestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
                 {
                     ReadOnlySpan<char> source = a;
                     Span<char> destination = a;
@@ -5374,7 +5374,7 @@ namespace System.Tests
                 });
             }
             {
-                TestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
                 {
                     ReadOnlySpan<char> source = a;
                     Span<char> destination = a;
@@ -5397,7 +5397,7 @@ namespace System.Tests
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
 
-                TestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
                 {
                     var destination = new Span<char>(a, 3, 3);
                     source.ToUpper(destination, CultureInfo.CurrentCulture);
@@ -5410,7 +5410,7 @@ namespace System.Tests
                 Assert.Equal(expectedDestination, s1.ToUpperInvariant().ToArray());
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
-                TestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
                 {
                     var destination = new Span<char>(a, 3, 3);
                     source.ToUpperInvariant(destination);
