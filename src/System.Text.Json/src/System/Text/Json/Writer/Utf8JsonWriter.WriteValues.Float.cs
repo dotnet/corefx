@@ -18,8 +18,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="float"/> using a <see cref="StandardFormat"/> of 'G' on .NET Core
-        /// and 'G9' on .NET Framework.
+        /// Writes the <see cref="float"/> using the default <see cref="StandardFormat"/> on .NET Core 3 or higher
+        /// and 'G9' on any other framework.
         /// </remarks>
         public void WriteNumberValue(float value)
         {
