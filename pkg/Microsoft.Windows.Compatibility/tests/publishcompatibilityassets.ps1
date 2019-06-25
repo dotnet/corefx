@@ -26,17 +26,13 @@ $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 1
 $repoRoot = ((get-item $PSScriptRoot).parent.parent.parent.FullName)
 $dotnetPath = -join($repoRoot, "\.dotnet\dotnet.exe")
 $csprojPath = -join($PSScriptRoot, "\", (Get-ChildItem $PSScriptRoot"\*.csproj" | Select-Object -ExpandProperty Name))
-$localPackageSourcePath = -join($repoRoot, "\artifacts\packages\Debug\")
+$localPackageSourcePath = -join($repoRoot, "\artifacts\packages\")
 $restoreOutputPath = -join($repoRoot, "\artifacts\ApiCatalogLayout\")
 
 if (!(Test-Path $localPackageSourcePath))
 {
-	$localPackageSourcePath = -join($repoRoot, "\artifacts\packages\Release\")
-	if (!(Test-Path $localPackageSourcePath))
-	{
-		Write-Error -Message (-join('Local package source must exist ', $localPackageSourcePath))
-		Exit;
-	}
+	Write-Error -Message (-join('Local package source must exist ', $localPackageSourcePath))
+	Exit;
 }
 
 $restoreSources = -join("https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore/index.json;", $localPackageSourcePath)
