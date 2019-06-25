@@ -261,7 +261,7 @@ static int32_t ValidatePrivateRsaParameters(BIGNUM* bnN,
     const RSA_METHOD* openssl_method = RSA_PKCS1_OpenSSL();
 
     RSA* rsa = RSA_new();
-    
+
     if (!rsa)
     {
         return 0;
