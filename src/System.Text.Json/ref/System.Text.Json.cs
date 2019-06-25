@@ -318,10 +318,6 @@ namespace System.Text.Json
         public void WriteNull(string propertyName) { }
         public void WriteNull(System.Text.Json.JsonEncodedText propertyName) { }
         public void WriteNullValue() { }
-        public void WritePropertyName(JsonEncodedText propertyName) { }
-        public void WritePropertyName(System.ReadOnlySpan<byte> utf8PropertyName) { }
-        public void WritePropertyName(System.ReadOnlySpan<char> propertyName) { }
-        public void WritePropertyName(string propertyName) { }
         public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, decimal value) { }
         public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, double value) { }
         public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, int value) { }
@@ -367,6 +363,10 @@ namespace System.Text.Json
         public void WriteNumberValue(uint value) { }
         [System.CLSCompliantAttribute(false)]
         public void WriteNumberValue(ulong value) { }
+        public void WritePropertyName(System.ReadOnlySpan<byte> utf8PropertyName) { }
+        public void WritePropertyName(System.ReadOnlySpan<char> propertyName) { }
+        public void WritePropertyName(string propertyName) { }
+        public void WritePropertyName(System.Text.Json.JsonEncodedText propertyName) { }
         public void WriteStartArray() { }
         public void WriteStartArray(System.ReadOnlySpan<byte> utf8PropertyName) { }
         public void WriteStartArray(System.ReadOnlySpan<char> propertyName) { }
