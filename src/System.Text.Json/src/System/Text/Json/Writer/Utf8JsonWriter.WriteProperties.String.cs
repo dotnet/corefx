@@ -11,8 +11,8 @@ namespace System.Text.Json
     {
         /// <summary>
         /// Writes the pre-encoded property name (as a JSON string) as the first part of a name/value pair of a JSON object.
-        /// <param name="propertyName">The JSON encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// </summary>
+        /// <param name="propertyName">The JSON encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <remarks>
         /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
         /// </remarks>

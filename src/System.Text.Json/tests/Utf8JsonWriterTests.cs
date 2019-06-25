@@ -1318,6 +1318,39 @@ namespace System.Text.Json.Tests
             {
                 Assert.Throws<InvalidOperationException>(() => jsonUtf8.WritePropertyName("test name"));
             }
+
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            jsonUtf8.WriteBooleanValue(true);
+            if (skipValidation)
+            {
+                jsonUtf8.WritePropertyName("test name");
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WritePropertyName("test name"));
+            }
+
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            jsonUtf8.WriteNullValue();
+            if (skipValidation)
+            {
+                jsonUtf8.WritePropertyName("test name");
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WritePropertyName("test name"));
+            }
+
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            jsonUtf8.WriteStringValue("some string");
+            if (skipValidation)
+            {
+                jsonUtf8.WritePropertyName("test name");
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WritePropertyName("test name"));
+            }
         }
 
         [Theory]
