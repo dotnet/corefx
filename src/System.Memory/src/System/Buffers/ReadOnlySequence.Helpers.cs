@@ -481,7 +481,7 @@ namespace System.Buffers
                 GetIndex(start) | (_startInteger & ReadOnlySequence.FlagBitMask),
                 end.GetObject(),
                 GetIndex(end) | (_endInteger & ReadOnlySequence.FlagBitMask)
-                );
+            );
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
