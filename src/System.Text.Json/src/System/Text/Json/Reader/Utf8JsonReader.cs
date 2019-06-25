@@ -248,9 +248,16 @@ namespace System.Text.Json
         /// Constructs a new <see cref="Utf8JsonReader"/> instance.
         /// </summary>
         /// <param name="jsonData">The ReadOnlySpan&lt;byte&gt; containing the UTF-8 encoded JSON text to process.</param>
-        /// <param name="options"></param>
+        /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonReader"/>
+        /// that is different from the JSON RFC (for example how to handle comments or maximum depth allowed when reading).
+        /// By default, the <see cref="Utf8JsonReader"/> follows the JSON RFC strictly (i.e. comments within the JSON are invalid) and reads up to a maximum depth of 64.</param>
         /// <remarks>
-        /// Since this type is a ref struct, it is a stack-only type and all the limitations of ref structs apply to it.
+        ///   <para>
+        ///     Since this type is a ref struct, it is a stack-only type and all the limitations of ref structs apply to it.
+        ///   </para>
+        ///   <para>
+        ///     This assumes that the entire JSON payload is passed in directly (equivalent to <see cref="IsFinalBlock"/> = true)
+        ///   </para>
         /// </remarks>
         public Utf8JsonReader(ReadOnlySpan<byte> jsonData, JsonReaderOptions options = default)
         {

@@ -90,6 +90,91 @@ namespace System.Text.Json
             }
         }
 
+        /// <summary>
+        /// Constructs a new <see cref="Utf8JsonReader"/> instance.
+        /// </summary>
+        /// <param name="jsonData">The ReadOnlySequence&lt;byte&gt; containing the UTF-8 encoded JSON text to process.</param>
+        /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonReader"/>
+        /// that is different from the JSON RFC (for example how to handle comments or maximum depth allowed when reading).
+        /// By default, the <see cref="Utf8JsonReader"/> follows the JSON RFC strictly (i.e. comments within the JSON are invalid) and reads up to a maximum depth of 64.</param>
+        /// <remarks>
+        ///   <para>
+        ///     Since this type is a ref struct, it is a stack-only type and all the limitations of ref structs apply to it.
+        ///   </para>
+        ///   <para>
+        ///     This assumes that the entire JSON payload is passed in directly (equivalent to <see cref="IsFinalBlock"/> = true)
+        ///   </para>
+        /// </remarks>
+        public Utf8JsonReader(in ReadOnlySequence<byte> jsonData, JsonReaderOptions options = default)
+        {
+            _buffer = jsonData.First.Span;
+
+            _isFinalBlock = true;
+            _isInputSequence = true;
+
+            _lineNumber = default;
+            _bytePositionInLine = default;
+            _inObject = default;
+            _isNotPrimitive = default;
+            _numberFormat = default;
+            _stringHasEscaping = default;
+            _trailingCommaBeforeComment = default;
+            _tokenType = default;
+            _previousTokenType = default;
+            _readerOptions = default;
+            if (_readerOptions.MaxDepth == 0)
+            {
+                _readerOptions.MaxDepth = JsonReaderOptions.DefaultMaxDepth;  // If max depth is not set, revert to the default depth.
+            }
+
+            // Only allocate if the user reads a JSON payload beyond the depth that the _allocationFreeContainer can handle.
+            // This way we avoid allocations in the common, default cases, and allocate lazily.
+            _bitStack = default;
+
+            _consumed = 0;
+            TokenStartIndex = 0;
+            _totalConsumed = 0;
+
+            ValueSpan = ReadOnlySpan<byte>.Empty;
+
+            _sequence = jsonData;
+            HasValueSequence = false;
+            ValueSequence = ReadOnlySequence<byte>.Empty;
+
+            if (jsonData.IsSingleSegment)
+            {
+                _nextPosition = default;
+                _currentPosition = jsonData.Start;
+                _isLastSegment = true;
+                _isMultiSegment = false;
+            }
+            else
+            {
+                _currentPosition = jsonData.Start;
+                _nextPosition = _currentPosition;
+                if (_buffer.Length == 0)
+                {
+                    // Once we find a non-empty segment, we need to set current position to it.
+                    // Therefore, track the next position in a copy before it gets advanced to the next segment.
+                    SequencePosition previousNextPosition = _nextPosition;
+                    while (jsonData.TryGet(ref _nextPosition, out ReadOnlyMemory<byte> memory, advance: true))
+                    {
+                        // _currentPosition should point to the segment right befor the segment that _nextPosition points to.
+                        _currentPosition = previousNextPosition;
+                        if (memory.Length != 0)
+                        {
+                            _buffer = memory.Span;
+                            break;
+                        }
+                        previousNextPosition = _nextPosition;
+                    }
+                }
+
+                _isLastSegment = !jsonData.TryGet(ref _nextPosition, out _, advance: true);
+                _isMultiSegment = true;
+            }
+        }
+
         private bool ReadMultiSegment()
         {
             bool retVal = false;
