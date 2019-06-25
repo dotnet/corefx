@@ -12,20 +12,20 @@ namespace System.Text.Json
         // If the exception source is this value, the serializer will re-throw as JsonException.
         public const string ExceptionSourceValueToRethrowAsJsonException = "System.Text.Json.Rethrowable";
 
-        public static ArgumentOutOfRangeException GetArgumentOutOfRangeException_MaxDepthMustBePositive()
+        public static ArgumentOutOfRangeException GetArgumentOutOfRangeException_MaxDepthMustBePositive(string parameterName)
         {
-            return GetArgumentOutOfRangeException(SR.MaxDepthMustBePositive);
+            return GetArgumentOutOfRangeException(parameterName, SR.MaxDepthMustBePositive);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static ArgumentOutOfRangeException GetArgumentOutOfRangeException(string message)
+        private static ArgumentOutOfRangeException GetArgumentOutOfRangeException(string parameterName, string message)
         {
-            return new ArgumentOutOfRangeException(message);
+            return new ArgumentOutOfRangeException(parameterName, message);
         }
 
-        public static ArgumentOutOfRangeException GetArgumentOutOfRangeException_CommentEnumMustBeInRange()
+        public static ArgumentOutOfRangeException GetArgumentOutOfRangeException_CommentEnumMustBeInRange(string parameterName)
         {
-            return GetArgumentOutOfRangeException(SR.CommentHandlingMustBeValid);
+            return GetArgumentOutOfRangeException(parameterName, SR.CommentHandlingMustBeValid);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

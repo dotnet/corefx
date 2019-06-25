@@ -218,7 +218,7 @@ namespace System.Text.Json.Serialization.Tests
         public static void TestDepthInvalid(int depth)
         {
             var options = new JsonSerializerOptions();
-            Assert.Throws<ArgumentOutOfRangeException>(() => options.MaxDepth = depth);
+            Assert.Throws<ArgumentOutOfRangeException>("value", () => options.MaxDepth = depth);
         }
 
         [Fact]
