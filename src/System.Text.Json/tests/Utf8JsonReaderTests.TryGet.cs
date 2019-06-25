@@ -612,6 +612,9 @@ namespace System.Text.Json.Tests
                 {
                     if (PlatformDetection.IsFullFramework)
                     {
+                        // Full framework throws for overflow rather than returning Infinity
+                        // This was fixed for .NET Core 3.0 in order to be IEEE 754 compliant
+
                         Assert.False(json.TryGetSingle(out float _));
 
                         try
@@ -621,7 +624,7 @@ namespace System.Text.Json.Tests
                         }
                         catch (FormatException)
                         {
-
+                            /* Expected exception */
                         }
                     }
                     else
@@ -655,6 +658,9 @@ namespace System.Text.Json.Tests
                 {
                     if (PlatformDetection.IsFullFramework)
                     {
+                        // Full framework throws for overflow rather than returning Infinity
+                        // This was fixed for .NET Core 3.0 in order to be IEEE 754 compliant
+
                         Assert.False(json.TryGetDouble(out double _));
 
                         try
@@ -664,7 +670,7 @@ namespace System.Text.Json.Tests
                         }
                         catch (FormatException)
                         {
-
+                            /* Expected exception */
                         }
                     }
                     else

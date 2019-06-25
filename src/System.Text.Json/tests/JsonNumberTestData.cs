@@ -295,11 +295,10 @@ namespace System.Text.Json.Tests
             }
 
             builder.Append("\"intEnd\": 0}");
-#endregion
+            #endregion
 
             string jsonString = builder.ToString();
             JsonData = Encoding.UTF8.GetBytes(jsonString);
         }
-
     }
 }
