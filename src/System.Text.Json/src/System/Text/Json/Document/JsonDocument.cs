@@ -1135,7 +1135,7 @@ namespace System.Text.Json
             JsonReaderOptions readerOptions,
             string paramName = null)
         {
-            if (!JsonHelpers.IsCommentHandlingSupported(readerOptions.CommentHandling, JsonCommentHandling.Skip))
+            if (readerOptions.CommentHandling != JsonCommentHandling.Disallow && readerOptions.CommentHandling != JsonCommentHandling.Skip)
             {
                 throw new ArgumentException(
                     SR.JsonDocumentDoesNotSupportComments,

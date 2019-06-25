@@ -9,14 +9,20 @@ namespace System.Text.Json
 {
     internal static partial class ThrowHelper
     {
-        public static ArgumentException GetArgumentException_MaxDepthMustBePositive()
+        public static ArgumentException GetArgumentOutOfRangeException_MaxDepthMustBePositive()
         {
-            return GetArgumentException(SR.MaxDepthMustBePositive);
+            return GetArgumentOutOfRangeException(SR.MaxDepthMustBePositive);
         }
 
-        public static ArgumentException GetArgumentException_CommentEnumMustBeInRange()
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static ArgumentOutOfRangeException GetArgumentOutOfRangeException(string message)
         {
-            return GetArgumentException(SR.CommentHandlingMustBeValid);
+            return new ArgumentOutOfRangeException(message);
+        }
+
+        public static ArgumentException GetArgumentOutOfRangeException_CommentEnumMustBeInRange()
+        {
+            return GetArgumentOutOfRangeException(SR.CommentHandlingMustBeValid);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

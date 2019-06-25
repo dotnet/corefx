@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.Text.Json
 {
     /// <summary>
@@ -18,7 +20,7 @@ namespace System.Text.Json
         /// Defines how the <see cref="Utf8JsonReader"/> should handle comments when reading through the JSON.
         /// By default <exception cref="JsonException"/> is thrown if a comment is encountered.
         /// </summary>
-        /// <exception cref="ArgumentException">
+        /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when the comment handling enum is set to a value that is not supported (i.e. not within the <see cref="JsonCommentHandling"/> enum range).
         /// </exception>
         public JsonCommentHandling CommentHandling
@@ -26,8 +28,9 @@ namespace System.Text.Json
             get => _commentHandling;
             set
             {
-                if (!JsonHelpers.IsCommentHandlingSupported(value, JsonCommentHandling.Allow))
-                    throw ThrowHelper.GetArgumentException_CommentEnumMustBeInRange();
+                Debug.Assert(value >= 0);
+                if (value > JsonCommentHandling.Allow)
+                    throw ThrowHelper.GetArgumentOutOfRangeException_CommentEnumMustBeInRange();
 
                 _commentHandling = value;
             }
@@ -37,8 +40,8 @@ namespace System.Text.Json
         /// Gets or sets the maximum depth allowed when reading JSON, with the default (i.e. 0) indicating a max depth of 64.
         /// Reading past this depth will throw a <exception cref="JsonException"/>.
         /// </summary>
-        /// <exception cref="ArgumentException">
-        /// Thrown when the max depth is set to a value that is not supported (i.e less than zero).
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when the max depth is set to a negative value.
         /// </exception>
         public int MaxDepth
         {
@@ -46,7 +49,7 @@ namespace System.Text.Json
             set
             {
                 if (value < 0)
-                    throw ThrowHelper.GetArgumentException_MaxDepthMustBePositive();
+                    throw ThrowHelper.GetArgumentOutOfRangeException_MaxDepthMustBePositive();
 
                 _maxDepth = value;
             }

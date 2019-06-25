@@ -9,9 +9,6 @@ namespace System.Text.Json
     /// </summary>
     public enum JsonCommentHandling : byte
     {
-        // Do not re-order.
-        // We rely on the ordering to quickly check things like IsCommentHandlingSupported
-
         /// <summary>
         /// By default, do no allow comments within the JSON input.
         /// Comments are treated as invalid JSON if found and a
@@ -24,7 +21,7 @@ namespace System.Text.Json
         /// </summary>
         Skip = 1,
         /// <summary>
-        /// Allow comments within the JSON input and treat them as a valid token.
+        /// Allow comments within the JSON input and treat them as valid tokens.
         /// While reading, the caller will be able to access the comment values.
         /// </summary>
         Allow = 2,
