@@ -28,6 +28,7 @@ namespace System.Text.Json
 
             WriteStringByOptionsPropertyName(utf8PropertyName);
 
+            _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _tokenType = JsonTokenType.PropertyName;
             _isProperty = true;
         }
@@ -77,6 +78,7 @@ namespace System.Text.Json
             {
                 WriteStringByOptionsPropertyName(propertyName);
             }
+            _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _tokenType = JsonTokenType.PropertyName;
             _isProperty = true;
         }
@@ -108,7 +110,7 @@ namespace System.Text.Json
                 }
 
                 JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
-                propertyName = propertyName.Slice(0, written);
+                propertyName = escapedPropertyName.Slice(0, written);
             }
 
             WriteStringByOptionsPropertyName(propertyName);
@@ -230,6 +232,7 @@ namespace System.Text.Json
             {
                 WriteStringByOptionsPropertyName(utf8PropertyName);
             }
+            _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _tokenType = JsonTokenType.PropertyName;
             _isProperty = true;
         }
@@ -335,6 +338,8 @@ namespace System.Text.Json
             {
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
+
+            Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
 
             if (_tokenType != JsonTokenType.None)
             {
@@ -1417,6 +1422,8 @@ namespace System.Text.Json
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
+            Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
+
             if (_tokenType != JsonTokenType.None)
             {
                 WriteNewLine(output);
@@ -1463,6 +1470,8 @@ namespace System.Text.Json
             {
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
+
+            Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
 
             if (_tokenType != JsonTokenType.None)
             {
@@ -1514,6 +1523,8 @@ namespace System.Text.Json
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
+            Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
+
             if (_tokenType != JsonTokenType.None)
             {
                 WriteNewLine(output);
@@ -1562,6 +1573,8 @@ namespace System.Text.Json
             {
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
+
+            Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
 
             if (_tokenType != JsonTokenType.None)
             {
