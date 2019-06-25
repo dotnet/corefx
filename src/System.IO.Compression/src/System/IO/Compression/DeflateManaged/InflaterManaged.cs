@@ -108,7 +108,7 @@ namespace System.IO.Compression
             int count = 0;
             do
             {
-                int copied;
+                int copied = 0;
                 if (_uncompressedSize == -1)
                 {
                     copied = _output.CopyTo(bytes, offset, length);
@@ -117,15 +117,14 @@ namespace System.IO.Compression
                 {
                     if (_uncompressedSize > _currentInflatedCount)
                     {
+                        length = Math.Min(length, (int)(_uncompressedSize - _currentInflatedCount));
                         copied = _output.CopyTo(bytes, offset, length);
-                        copied = Math.Min(copied, (int)(_uncompressedSize - _currentInflatedCount));
                         _currentInflatedCount += copied;
                     }
                     else
                     {
-                        copied = 0;
                         _state = InflaterState.Done;
-                        _output._bytesUsed = 0;
+                        _output.ClearBytesUsed();
                     }
                 }
                 if (copied > 0)

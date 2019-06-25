@@ -86,7 +86,7 @@ namespace System.IO.Compression
             // State is valid; attempt inflation
             try
             {
-                int bytesRead;
+                int bytesRead = 0;
                 if (_uncompressedSize == -1)
                 {
                     ReadOutput(bufPtr, length, out bytesRead);
@@ -95,13 +95,12 @@ namespace System.IO.Compression
                 {
                     if (_uncompressedSize > _currentInflatedCount)
                     {
+                        length = Math.Min(length, (int)(_uncompressedSize - _currentInflatedCount));
                         ReadOutput(bufPtr, length, out bytesRead);
-                        bytesRead = Math.Min(bytesRead, (int)(_uncompressedSize - _currentInflatedCount));
                         _currentInflatedCount += bytesRead;
                     }
                     else
                     {
-                        bytesRead = 0;
                         _finished = true;
                         _zlibStream.AvailIn = 0;
                     }
