@@ -136,45 +136,6 @@ namespace System.Security.Cryptography.Rsa.Tests
         }
 
         [Fact]
-        public static void VulnerableRsaKeyWithCompositeP()
-        {
-            RSAParameters vulnerableKeyCompositeP = TestData.VulnerableKeyCompositeP;
-
-            using (RSA rsa = RSAFactory.Create())
-            {
-                Assert.ThrowsAny<CryptographicException>(() => {
-                    rsa.ImportParameters(vulnerableKeyCompositeP);
-                });
-            }
-        }
-
-        [Fact]
-        public static void VulnerableRsaKeySamePQ()
-        {
-            RSAParameters vulnerableKeyIdenticalPQ = TestData.VulnerableKeyIdenticalPQ;
-
-            using (RSA rsa = RSAFactory.Create())
-            {
-                Assert.ThrowsAny<CryptographicException>(() => {
-                    rsa.ImportParameters(vulnerableKeyIdenticalPQ);
-                });
-            }
-        }
-
-        [Fact]
-        public static void PrivatePublicParameterMismatch()
-        {
-            RSAParameters vulnerableKeyNNotPQ = TestData.VulnerableKeyNNotPQ;
-
-            using (RSA rsa = RSAFactory.Create())
-            {
-                Assert.ThrowsAny<CryptographicException>(() => {
-                    rsa.ImportParameters(vulnerableKeyNNotPQ);
-                });
-            }
-        }
-
-        [Fact]
         public static void ImportExport1032()
         {
             RSAParameters imported = TestData.RSA1032Parameters;
