@@ -734,25 +734,7 @@ namespace System.Security.Cryptography.Pkcs
 
         private HashAlgorithmName GetDigestAlgorithm()
         {
-            HashAlgorithmName digestAlgorithm = PkcsHelpers.GetDigestAlgorithm(
-                DigestAlgorithm.Value,
-                out string[] expectedSignatureAlgorithmOids,
-                forVerification: true);
-
-            // We permit using certain signature algorithms as the digest identifier, such as SHA256withRSA for
-            // compatibility with the Desktop framework. If such an identifier is used, it can only be used with
-            // the respective signature algorithm as well.
-            if (expectedSignatureAlgorithmOids != null &&
-                !expectedSignatureAlgorithmOids.Contains(_signatureAlgorithm.Value, StringComparer.Ordinal))
-            {
-                throw new CryptographicException(
-                    SR.Format(
-                        SR.Cryptography_Cms_InvalidSignerHashForSignatureAlg,
-                        DigestAlgorithm.Value,
-                        _signatureAlgorithm.Value));
-            }
-
-            return digestAlgorithm;
+            return PkcsHelpers.GetDigestAlgorithm(DigestAlgorithm.Value, forVerification: true);
         }
 
         internal static CryptographicAttributeObjectCollection MakeAttributeCollection(AttributeAsn[] attributes)
