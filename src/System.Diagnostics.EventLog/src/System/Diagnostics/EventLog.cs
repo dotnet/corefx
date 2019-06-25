@@ -656,15 +656,15 @@ namespace System.Diagnostics
                 eventkey?.Close();
             }
             // now create EventLog objects that point to those logs
-            List<EventLog> logs = new List<EventLog>();
+            List<EventLog> logs = new List<EventLog>(logNames.Length);
             for (int i = 0; i < logNames.Length; i++)
             {
+                EventLog log = new EventLog(logNames[i], machineName);
                 SafeEventLogReadHandle handle = Interop.Advapi32.OpenEventLog(machineName, logNames[i]);
 
                 if (!handle.IsInvalid)
                 {
                     handle.Close();
-                    EventLog log = new EventLog(logNames[i], machineName);
                     logs.Add(log);
                 }
             }
