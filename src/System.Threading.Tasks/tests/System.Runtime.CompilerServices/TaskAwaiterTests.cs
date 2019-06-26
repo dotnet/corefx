@@ -180,7 +180,6 @@ namespace System.Threading.Tasks.Tests
                             yield return new object[] { numContinuations, runContinuationsAsynchronously, valueTask, scheduler };
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "All await continuations complete synchronously on netfx.")]
         [Theory]
         [MemberData(nameof(Await_MultipleAwaits_FirstCompletesAccordingToOptions_RestCompleteAsynchronously_MemberData))]
         public async Task Await_MultipleAwaits_FirstCompletesAccordingToOptions_RestCompleteAsynchronously(
