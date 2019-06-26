@@ -850,7 +850,7 @@ namespace System.Text.Json.Tests
                 var json = new Utf8JsonReader(sequence.Slice(0, i), isFinalBlock: false, state);
                 VerifyReadLoop(ref json, expected);
 
-                json = new Utf8JsonReader(sequence.Slice(json.BytesConsumed), isFinalBlock: true, state);
+                json = new Utf8JsonReader(sequence.Slice(json.BytesConsumed), isFinalBlock: true, json.CurrentState);
                 VerifyReadLoop(ref json, expected);
             }
         }
@@ -871,7 +871,7 @@ namespace System.Text.Json.Tests
                 var json = new Utf8JsonReader(sequence.Slice(0, i), isFinalBlock: false, state);
                 VerifyReadLoop(ref json, null);
 
-                json = new Utf8JsonReader(sequence.Slice(json.BytesConsumed), isFinalBlock: true, state);
+                json = new Utf8JsonReader(sequence.Slice(json.BytesConsumed), isFinalBlock: true, json.CurrentState);
                 VerifyReadLoop(ref json, null);
             }
         }
