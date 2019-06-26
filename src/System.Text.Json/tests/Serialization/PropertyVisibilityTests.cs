@@ -255,12 +255,12 @@ namespace System.Text.Json.Serialization.Tests
         {
             const string json = @"{""EnumValue"":""Case2""}";
 
-            ClassWithOverride obj = JsonSerializer.Parse<ClassWithOverride>(json);
+            ClassWithOverride obj = JsonSerializer.Deserialize<ClassWithOverride>(json);
 
             Assert.Equal(MyEnum.Case2, obj.EnumValue);
             Assert.Equal("Case2", obj.EnumString);
 
-            string jsonSerialized = JsonSerializer.ToString(obj);
+            string jsonSerialized = JsonSerializer.Serialize(obj);
             Assert.Equal(json, jsonSerialized);
         }
 
@@ -297,12 +297,12 @@ namespace System.Text.Json.Serialization.Tests
         {
             const string json = @"{""EnumValue"":""Case2""}";
 
-            ClassWithOverrideReversed obj = JsonSerializer.Parse<ClassWithOverrideReversed>(json);
+            ClassWithOverrideReversed obj = JsonSerializer.Deserialize<ClassWithOverrideReversed>(json);
 
             Assert.Equal(MyEnum.Case2, obj.EnumValue);
             Assert.Equal("Case2", obj.EnumString);
 
-            string jsonSerialized = JsonSerializer.ToString(obj);
+            string jsonSerialized = JsonSerializer.Serialize(obj);
             Assert.Equal(json, jsonSerialized);
         }
     }
