@@ -855,6 +855,7 @@ namespace System.Text.Json.Tests
             }
         }
 
+        [ActiveIssue(38927)]
         [Theory]
         [MemberData(nameof(CommentTestLineSeparators))]
         public static void SkipSingleLineCommentMultiSpanTest(string lineSeparator)
