@@ -1313,6 +1313,11 @@ done:
 
 #ifdef NEED_OPENSSL_1_1
 
+// Only defined in OpenSSL 1.1.1+, has no effect on 1.1.0.
+#ifndef OPENSSL_INIT_NO_ATEXIT
+    #define OPENSSL_INIT_NO_ATEXIT 0x00080000L
+#endif
+
 static int32_t EnsureOpenSsl11Initialized()
 {
     // In OpenSSL 1.0 we call OPENSSL_add_all_algorithms_conf() and ERR_load_crypto_strings(),

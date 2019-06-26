@@ -107,12 +107,6 @@ int SSL_library_init(void);
 void SSL_load_error_strings(void);
 int SSL_state(const SSL* ssl);
 unsigned long SSLeay(void);
-
-// Only defined in OpenSSL 1.1.1+, has no effect on 1.1.0.
-#ifndef OPENSSL_INIT_NO_ATEXIT
-    #define OPENSSL_INIT_NO_ATEXIT 0x00080000L
-#endif
-
 #else
 typedef struct ossl_init_settings_st OPENSSL_INIT_SETTINGS;
 typedef struct stack_st OPENSSL_STACK;
