@@ -17,11 +17,27 @@ namespace System.Net.Http.HPack
         /// <summary>
         /// Decodes the first byte of the integer.
         /// </summary>
-        /// <param name="prefixLength">The length of the prefix, in bits, that the integer was encoded with. Must be between 1 and 8.</param>
-        /// <returns>If the integer has been fully decoded, true. Otherwise, false -- <see cref="Decode(byte)"/> must be called on subsequent bytes.</returns>
+        /// <param name="b">
+        /// The first byte of the variable-length encoded integer.
+        /// </param>
+        /// <param name="prefixLength">
+        /// The number of lower bits in this prefix byte that the
+        /// integer has been encoded into. Must be between 1 and 8.
+        /// Upper bits must be zero.
+        /// </param>
+        /// <returns>
+        /// If the integer has been fully decoded, true.
+        /// Otherwise, false -- <see cref="Decode(byte)"/> must be called on subsequent bytes.
+        /// </returns>
+        /// <remarks>
+        /// The term "prefix" can be confusing. From the HPACK spec:
+        /// An integer is represented in two parts: a prefix that fills the current octet and an
+        /// optional list of octets that are used if the integer value does not fit within the prefix.
+        /// </remarks>
         public bool StartDecode(byte b, int prefixLength)
         {
             Debug.Assert(prefixLength >= 1 && prefixLength <= 8);
+            Debug.Assert((b & ~((1 << prefixLength) - 1)) == 0, "bits other than prefix data must be set to 0.");
 
             if (b < ((1 << prefixLength) - 1))
             {
