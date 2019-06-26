@@ -260,44 +260,8 @@ namespace System.Text.Json
         ///   </para>
         /// </remarks>
         public Utf8JsonReader(ReadOnlySpan<byte> jsonData, JsonReaderOptions options = default)
+            : this(jsonData, isFinalBlock: true, new JsonReaderState(options))
         {
-            _buffer = jsonData;
-
-            _isFinalBlock = true;
-            _isInputSequence = false;
-
-            _lineNumber = default;
-            _bytePositionInLine = default;
-            _inObject = default;
-            _isNotPrimitive = default;
-            _numberFormat = default;
-            _stringHasEscaping = default;
-            _trailingCommaBeforeComment = default;
-            _tokenType = default;
-            _previousTokenType = default;
-            _readerOptions = options;
-            if (_readerOptions.MaxDepth == 0)
-            {
-                _readerOptions.MaxDepth = JsonReaderOptions.DefaultMaxDepth;  // If max depth is not set, revert to the default depth.
-            }
-
-            // Only allocate if the user reads a JSON payload beyond the depth that the _allocationFreeContainer can handle.
-            // This way we avoid allocations in the common, default cases, and allocate lazily.
-            _bitStack = default;
-
-            _consumed = 0;
-            TokenStartIndex = 0;
-            _totalConsumed = 0;
-            _isLastSegment = _isFinalBlock;
-            _isMultiSegment = false;
-
-            ValueSpan = ReadOnlySpan<byte>.Empty;
-
-            _currentPosition = default;
-            _nextPosition = default;
-            _sequence = default;
-            HasValueSequence = false;
-            ValueSequence = ReadOnlySequence<byte>.Empty;
         }
 
         /// <summary>

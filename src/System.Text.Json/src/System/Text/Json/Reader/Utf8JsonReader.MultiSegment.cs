@@ -106,73 +106,8 @@ namespace System.Text.Json
         ///   </para>
         /// </remarks>
         public Utf8JsonReader(in ReadOnlySequence<byte> jsonData, JsonReaderOptions options = default)
+            : this(jsonData, isFinalBlock: true, new JsonReaderState(options))
         {
-            _buffer = jsonData.First.Span;
-
-            _isFinalBlock = true;
-            _isInputSequence = true;
-
-            _lineNumber = default;
-            _bytePositionInLine = default;
-            _inObject = default;
-            _isNotPrimitive = default;
-            _numberFormat = default;
-            _stringHasEscaping = default;
-            _trailingCommaBeforeComment = default;
-            _tokenType = default;
-            _previousTokenType = default;
-            _readerOptions = default;
-            if (_readerOptions.MaxDepth == 0)
-            {
-                _readerOptions.MaxDepth = JsonReaderOptions.DefaultMaxDepth;  // If max depth is not set, revert to the default depth.
-            }
-
-            // Only allocate if the user reads a JSON payload beyond the depth that the _allocationFreeContainer can handle.
-            // This way we avoid allocations in the common, default cases, and allocate lazily.
-            _bitStack = default;
-
-            _consumed = 0;
-            TokenStartIndex = 0;
-            _totalConsumed = 0;
-
-            ValueSpan = ReadOnlySpan<byte>.Empty;
-
-            _sequence = jsonData;
-            HasValueSequence = false;
-            ValueSequence = ReadOnlySequence<byte>.Empty;
-
-            if (jsonData.IsSingleSegment)
-            {
-                _nextPosition = default;
-                _currentPosition = jsonData.Start;
-                _isLastSegment = true;
-                _isMultiSegment = false;
-            }
-            else
-            {
-                _currentPosition = jsonData.Start;
-                _nextPosition = _currentPosition;
-                if (_buffer.Length == 0)
-                {
-                    // Once we find a non-empty segment, we need to set current position to it.
-                    // Therefore, track the next position in a copy before it gets advanced to the next segment.
-                    SequencePosition previousNextPosition = _nextPosition;
-                    while (jsonData.TryGet(ref _nextPosition, out ReadOnlyMemory<byte> memory, advance: true))
-                    {
-                        // _currentPosition should point to the segment right befor the segment that _nextPosition points to.
-                        _currentPosition = previousNextPosition;
-                        if (memory.Length != 0)
-                        {
-                            _buffer = memory.Span;
-                            break;
-                        }
-                        previousNextPosition = _nextPosition;
-                    }
-                }
-
-                _isLastSegment = !jsonData.TryGet(ref _nextPosition, out _, advance: true);
-                _isMultiSegment = true;
-            }
         }
 
         private bool ReadMultiSegment()
