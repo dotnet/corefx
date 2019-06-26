@@ -6,6 +6,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <DisableImplicitFrameworkDefines>true</DisableImplicitFrameworkDefines>
     <DisableImplicitConfigurationDefines>true</DisableImplicitConfigurationDefines>
+    <GenerateResourceUsePreserializedResources>false</GenerateResourceUsePreserializedResources>
 
     <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>
   </PropertyGroup>
