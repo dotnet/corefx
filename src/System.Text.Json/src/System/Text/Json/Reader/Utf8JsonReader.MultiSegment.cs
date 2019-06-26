@@ -104,7 +104,7 @@ namespace System.Text.Json
         ///     This assumes that the entire JSON payload is passed in (equivalent to <see cref="IsFinalBlock"/> = true)
         ///   </para>
         /// </remarks>
-        public Utf8JsonReader(in ReadOnlySequence<byte> jsonData, JsonReaderOptions options = default)
+        public Utf8JsonReader(ReadOnlySequence<byte> jsonData, JsonReaderOptions options = default)
             : this(jsonData, isFinalBlock: true, new JsonReaderState(options))
         {
         }
