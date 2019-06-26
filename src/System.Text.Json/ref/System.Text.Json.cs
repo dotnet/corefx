@@ -98,6 +98,7 @@ namespace System.Text.Json
         public void WriteProperty(System.ReadOnlySpan<byte> utf8PropertyName, System.Text.Json.Utf8JsonWriter writer) { }
         public void WriteProperty(System.ReadOnlySpan<char> propertyName, System.Text.Json.Utf8JsonWriter writer) { }
         public void WriteProperty(string propertyName, System.Text.Json.Utf8JsonWriter writer) { }
+        public void WriteProperty(System.Text.Json.JsonEncodedText propertyName, System.Text.Json.Utf8JsonWriter writer) { }
         public void WriteValue(System.Text.Json.Utf8JsonWriter writer) { }
         public partial struct ArrayEnumerator : System.Collections.Generic.IEnumerable<System.Text.Json.JsonElement>, System.Collections.Generic.IEnumerator<System.Text.Json.JsonElement>, System.Collections.IEnumerable, System.Collections.IEnumerator, System.IDisposable
         {
@@ -180,9 +181,7 @@ namespace System.Text.Json
         private object _dummy;
         private int _dummyPrimitive;
         public JsonReaderState(System.Text.Json.JsonReaderOptions options = default(System.Text.Json.JsonReaderOptions)) { throw null; }
-        public long BytesConsumed { get { throw null; } }
         public System.Text.Json.JsonReaderOptions Options { get { throw null; } }
-        public System.SequencePosition Position { get { throw null; } }
     }
     public static partial class JsonSerializer
     {

@@ -29,8 +29,6 @@ namespace System.Text.Json.Tests
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
-            Assert.Equal(0, json.CurrentState.BytesConsumed);
-            Assert.Equal(default, json.CurrentState.Position);
             Assert.Equal(0, json.CurrentState.Options.MaxDepth);
             Assert.False(json.CurrentState.Options.AllowTrailingCommas);
             Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
@@ -126,8 +124,6 @@ namespace System.Text.Json.Tests
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
-            Assert.Equal(0, json.CurrentState.BytesConsumed);
-            Assert.Equal(default, json.CurrentState.Position);
             Assert.Equal(64, json.CurrentState.Options.MaxDepth);
             Assert.False(json.CurrentState.Options.AllowTrailingCommas);
             Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
@@ -177,8 +173,6 @@ namespace System.Text.Json.Tests
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
-            Assert.Equal(0, json.CurrentState.BytesConsumed);
-            Assert.Equal(default, json.CurrentState.Position);
             Assert.Equal(64, json.CurrentState.Options.MaxDepth);
             Assert.False(json.CurrentState.Options.AllowTrailingCommas);
             Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
@@ -195,8 +189,6 @@ namespace System.Text.Json.Tests
             Assert.True(json.ValueSpan.SequenceEqual(new byte[] { (byte)'1' }));
             Assert.True(json.ValueSequence.IsEmpty);
 
-            Assert.Equal(2, json.CurrentState.BytesConsumed);
-            Assert.Equal(default, json.CurrentState.Position);
             Assert.Equal(64, json.CurrentState.Options.MaxDepth);
             Assert.False(json.CurrentState.Options.AllowTrailingCommas);
             Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
@@ -215,8 +207,6 @@ namespace System.Text.Json.Tests
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
-            Assert.Equal(0, json.CurrentState.BytesConsumed);
-            Assert.Equal(default, json.CurrentState.Position);
             Assert.Equal(64, json.CurrentState.Options.MaxDepth);
             Assert.False(json.CurrentState.Options.AllowTrailingCommas);
             Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
@@ -315,7 +305,6 @@ namespace System.Text.Json.Tests
                 int written = firstLength;
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
@@ -323,9 +312,7 @@ namespace System.Text.Json.Tests
                 output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                 written += length;
                 Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
-                Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
-                Assert.Equal(default, json.CurrentState.Position);
 
                 Assert.Equal(outputSpan.Length, written);
                 string actualStr = Encoding.UTF8.GetString(outputArray);
@@ -363,7 +350,6 @@ namespace System.Text.Json.Tests
                 int written = firstLength;
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
 
                 for (long j = consumed; j < dataUtf8.Length - consumed; j++)
@@ -383,15 +369,12 @@ namespace System.Text.Json.Tests
                     written += length;
 
                     long consumedInner = json.BytesConsumed;
-                    Assert.Equal(consumedInner, json.CurrentState.BytesConsumed);
                     json = new Utf8JsonReader(dataUtf8.AsSpan((int)(consumed + consumedInner)), isFinalBlock: true, json.CurrentState);
                     output = JsonTestHelper.ReaderLoop(outputSpan.Length - written, out length, ref json);
                     output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                     written += length;
                     Assert.Equal(dataUtf8.Length - consumedInner - consumed, json.BytesConsumed);
-                    Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                     Assert.Equal(default, json.Position);
-                    Assert.Equal(default, json.CurrentState.Position);
 
                     Assert.Equal(outputSpan.Length, written);
                     string actualStr = Encoding.UTF8.GetString(outputArray);
@@ -421,7 +404,6 @@ namespace System.Text.Json.Tests
                 int written = firstLength;
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
                 Assert.Equal(0, json.TokenStartIndex);
 
@@ -442,15 +424,12 @@ namespace System.Text.Json.Tests
                     written += length;
 
                     long consumedInner = json.BytesConsumed;
-                    Assert.Equal(consumedInner, json.CurrentState.BytesConsumed);
                     json = new Utf8JsonReader(dataUtf8.AsSpan((int)(consumed + consumedInner)), isFinalBlock: true, json.CurrentState);
                     output = JsonTestHelper.ReaderLoop(outputSpan.Length - written, out length, ref json);
                     output.AsSpan(0, length).CopyTo(outputSpan.Slice(written));
                     written += length;
                     Assert.Equal(dataUtf8.Length - consumedInner - consumed, json.BytesConsumed);
-                    Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                     Assert.Equal(default, json.Position);
-                    Assert.Equal(default, json.CurrentState.Position);
                     Assert.Equal(0, json.TokenStartIndex);
 
                     Assert.Equal(outputSpan.Length, written);
@@ -892,7 +871,6 @@ namespace System.Text.Json.Tests
                 ValidateNextTrySkip(ref json);
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
                 while (json.TrySkip())
@@ -924,7 +902,6 @@ namespace System.Text.Json.Tests
                 ValidateNextTrySkip(ref json);
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
                 long bytesConsumed = json.BytesConsumed;
@@ -971,7 +948,6 @@ namespace System.Text.Json.Tests
                 ValidateNextTrySkip(ref json);
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
                 while (json.Read())
@@ -1057,7 +1033,6 @@ namespace System.Text.Json.Tests
                 }
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
                 while (true)
@@ -1089,7 +1064,6 @@ namespace System.Text.Json.Tests
                     ;
 
                 long consumed = json.BytesConsumed;
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
                 long bytesConsumed = json.BytesConsumed;
@@ -1588,9 +1562,6 @@ namespace System.Text.Json.Tests
                     var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
                     while (json.Read())
                         ;
-
-                    long consumed = json.BytesConsumed;
-                    Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                 }
             }
         }
@@ -1612,7 +1583,6 @@ namespace System.Text.Json.Tests
                         ;
 
                     long consumed = json.BytesConsumed;
-                    Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                     for (long j = consumed; j < dataUtf8.Length - consumed; j++)
                     {
@@ -1629,12 +1599,10 @@ namespace System.Text.Json.Tests
                             ;
 
                         long consumedInner = json.BytesConsumed;
-                        Assert.Equal(consumedInner, json.CurrentState.BytesConsumed);
                         json = new Utf8JsonReader(dataUtf8.AsSpan((int)(consumed + consumedInner)), isFinalBlock: true, json.CurrentState);
                         while (json.Read())
                             ;
                         Assert.Equal(dataUtf8.Length - consumedInner - consumed, json.BytesConsumed);
-                        Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                     }
                 }
             }
@@ -1823,7 +1791,6 @@ namespace System.Text.Json.Tests
                     }
 
                     long consumed = json.BytesConsumed;
-                    Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                     json = new Utf8JsonReader(data.AsSpan((int)consumed), true, json.CurrentState);
                     while (json.Read())
                     {
@@ -1832,7 +1799,6 @@ namespace System.Text.Json.Tests
                             builder.Append(Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                     }
                     Assert.Equal(data.Length - consumed, json.BytesConsumed);
-                    Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
 
                     Assert.Equal(commentHandling == JsonCommentHandling.Allow ? expectedWithComments : expectedWithoutComments, builder.ToString());
                 }
@@ -1947,7 +1913,6 @@ namespace System.Text.Json.Tests
                     }
 
                     long consumed = json.BytesConsumed;
-                    Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                     json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), true, json.CurrentState);
                     while (json.Read())
                     {
@@ -1961,7 +1926,6 @@ namespace System.Text.Json.Tests
                         }
                     }
                     Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
-                    Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                 }
             }
         }
@@ -1996,17 +1960,13 @@ namespace System.Text.Json.Tests
                 while (json.Read())
                     ;
                 Assert.Equal(consumed, json.BytesConsumed);
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
-                Assert.Equal(default, json.CurrentState.Position);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)json.BytesConsumed), true, json.CurrentState);
                 while (json.Read())
                     ;
                 Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
-                Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
-                Assert.Equal(default, json.CurrentState.Position);
             }
 
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
@@ -2047,7 +2007,6 @@ namespace System.Text.Json.Tests
                 while (json.Read())
                     ;
                 Assert.Equal(consumed, json.BytesConsumed);
-                Assert.Equal(consumed, json.CurrentState.BytesConsumed);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)json.BytesConsumed), true, json.CurrentState);
                 try
@@ -2179,7 +2138,6 @@ namespace System.Text.Json.Tests
                     Assert.Equal(expectedlineNumber, ex.LineNumber);
                     Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
                     Assert.Equal(default, json.Position);
-                    Assert.Equal(default, json.CurrentState.Position);
                 }
             }
 
@@ -2237,9 +2195,7 @@ namespace System.Text.Json.Tests
                             ;
 
                         long consumed = jsonSlice.BytesConsumed;
-                        Assert.Equal(consumed, jsonSlice.CurrentState.BytesConsumed);
                         Assert.Equal(default, json.Position);
-                        Assert.Equal(default, json.CurrentState.Position);
 
                         JsonReaderState jsonState = jsonSlice.CurrentState;
 
@@ -2260,7 +2216,6 @@ namespace System.Text.Json.Tests
                         errorMessage += " | " + firstSegmentString + " | " + secondSegmentString;
                         Assert.True(expectedBytePosition == ex.BytePositionInLine, errorMessage);
                         Assert.Equal(default, json.Position);
-                        Assert.Equal(default, json.CurrentState.Position);
                     }
                 }
             }
@@ -2319,7 +2274,6 @@ namespace System.Text.Json.Tests
                             break;
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
-                        Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
                         string actualComment = json.GetComment();
                         Assert.Equal(expectedComment, actualComment);
                         break;
@@ -2389,7 +2343,6 @@ namespace System.Text.Json.Tests
                             break;
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
-                        Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
                         string actualComment = json.GetComment();
                         Assert.Equal(expectedComment, actualComment);
                         break;
@@ -2416,7 +2369,6 @@ namespace System.Text.Json.Tests
                                 break;
                             foundComment = true;
                             indexAfterFirstComment = jsonSlice.BytesConsumed;
-                            Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
                             string actualComment = jsonSlice.GetComment();
                             Assert.Equal(expectedComment, actualComment);
                             break;
@@ -2424,7 +2376,6 @@ namespace System.Text.Json.Tests
                 }
 
                 int consumed = (int)jsonSlice.BytesConsumed;
-                Assert.Equal(consumed, jsonSlice.CurrentState.BytesConsumed);
                 jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(consumed), isFinalBlock: true, jsonSlice.CurrentState);
 
                 if (!foundComment)
@@ -2440,7 +2391,6 @@ namespace System.Text.Json.Tests
                                     break;
                                 foundComment = true;
                                 indexAfterFirstComment = jsonSlice.BytesConsumed;
-                                Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
                                 string actualComment = jsonSlice.GetComment();
                                 Assert.Equal(expectedComment, actualComment);
                                 break;
@@ -2506,7 +2456,6 @@ namespace System.Text.Json.Tests
                 prevTokenType = tokenType;
             }
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(dataUtf8.Length, json.CurrentState.BytesConsumed);
         }
 
         [Theory]
@@ -2561,7 +2510,6 @@ namespace System.Text.Json.Tests
                 }
             }
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(dataUtf8.Length, json.CurrentState.BytesConsumed);
 
             for (int i = 0; i < dataUtf8.Length; i++)
             {
@@ -2580,7 +2528,6 @@ namespace System.Text.Json.Tests
                 }
 
                 int prevConsumed = (int)jsonSlice.BytesConsumed;
-                Assert.Equal(prevConsumed, jsonSlice.CurrentState.BytesConsumed);
                 jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(prevConsumed), isFinalBlock: true, jsonSlice.CurrentState);
 
                 while (jsonSlice.Read())
@@ -2595,7 +2542,6 @@ namespace System.Text.Json.Tests
                 }
 
                 Assert.Equal(dataUtf8.Length - prevConsumed, jsonSlice.BytesConsumed);
-                Assert.Equal(jsonSlice.BytesConsumed, jsonSlice.CurrentState.BytesConsumed);
             }
         }
 
@@ -2734,7 +2680,6 @@ namespace System.Text.Json.Tests
                         }
                     }
 
-                    Assert.Equal(jsonSlice.BytesConsumed, jsonSlice.CurrentState.BytesConsumed);
                     jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan((int)jsonSlice.BytesConsumed), isFinalBlock: true, jsonSlice.CurrentState);
                     while (jsonSlice.Read())
                     {
@@ -3187,7 +3132,7 @@ namespace System.Text.Json.Tests
                 var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
                 VerifyReadLoop(ref json, expected);
 
-                json = new Utf8JsonReader(dataUtf8.AsSpan((int)state.BytesConsumed), isFinalBlock: true, state);
+                json = new Utf8JsonReader(dataUtf8.AsSpan((int)json.BytesConsumed), isFinalBlock: true, json.CurrentState);
                 VerifyReadLoop(ref json, expected);
             }
         }
@@ -3206,7 +3151,7 @@ namespace System.Text.Json.Tests
                 var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
                 VerifyReadLoop(ref json, null);
 
-                json = new Utf8JsonReader(dataUtf8.AsSpan((int)state.BytesConsumed), isFinalBlock: true, state);
+                json = new Utf8JsonReader(dataUtf8.AsSpan((int)json.BytesConsumed), isFinalBlock: true, json.CurrentState);
                 VerifyReadLoop(ref json, null);
             }
         }
