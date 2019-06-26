@@ -97,7 +97,7 @@ namespace System.Text.Json.Serialization.Converters
             JsonConverter<T> keyConverter = options.GetConverter(typeToConvert) as JsonConverter<T>;
             if (keyConverter == null)
             {
-                k = JsonSerializer.ReadValue<T>(ref reader, options);
+                k = JsonSerializer.Deserialize<T>(ref reader, options);
             }
             else
             {
@@ -116,7 +116,7 @@ namespace System.Text.Json.Serialization.Converters
             JsonConverter<T> keyConverter = options.GetConverter(typeof(T)) as JsonConverter<T>;
             if (keyConverter == null)
             {
-                JsonSerializer.WriteValue<T>(writer, value, options);
+                JsonSerializer.Serialize<T>(writer, value, options);
             }
             else
             {

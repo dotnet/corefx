@@ -70,14 +70,14 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.Converters.Add(new PointConverter());
 
-            Point[] Points = JsonSerializer.Parse<Point[]>(json, options);
+            Point[] Points = JsonSerializer.Deserialize<Point[]>(json, options);
             Assert.Equal(2, Points.Length);
             Assert.Equal(1, Points[0].X);
             Assert.Equal(2, Points[0].Y);
             Assert.Equal(3, Points[1].X);
             Assert.Equal(4, Points[1].Y);
 
-            string jsonSerialized = JsonSerializer.ToString(Points, options);
+            string jsonSerialized = JsonSerializer.Serialize(Points, options);
             Assert.Equal(json, jsonSerialized);
         }
 
@@ -89,11 +89,11 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.Converters.Add(new PointConverter());
 
-            Point obj = JsonSerializer.Parse<Point>(json, options);
+            Point obj = JsonSerializer.Deserialize<Point>(json, options);
             Assert.Equal(1, obj.X);
             Assert.Equal(2, obj.Y);
 
-            string jsonSerialized = JsonSerializer.ToString(obj, options);
+            string jsonSerialized = JsonSerializer.Serialize(obj, options);
             Assert.Equal(json, jsonSerialized);
         }
 
@@ -105,11 +105,11 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.Converters.Add(new PointConverter(100));
 
-            Point obj = JsonSerializer.Parse<Point>(json, options);
+            Point obj = JsonSerializer.Deserialize<Point>(json, options);
             Assert.Equal(101, obj.X);
             Assert.Equal(102, obj.Y);
 
-            string jsonSerialized = JsonSerializer.ToString(obj, options);
+            string jsonSerialized = JsonSerializer.Serialize(obj, options);
             Assert.Equal(json, jsonSerialized);
         }
 
@@ -121,7 +121,7 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.Converters.Add(new PointConverter());
 
-            Point? obj = JsonSerializer.Parse<Point?>(json, options);
+            Point? obj = JsonSerializer.Deserialize<Point?>(json, options);
             Assert.Null(obj);
         }
 
@@ -134,7 +134,7 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.Converters.Add(new PointConverter());
 
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Point>(json, options));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Point>(json, options));
         }
 
         [Fact]
@@ -145,11 +145,11 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.Converters.Add(new PointConverter());
 
-            Point obj = JsonSerializer.Parse<Point>(json, options);
+            Point obj = JsonSerializer.Deserialize<Point>(json, options);
             Assert.Equal(1, obj.X);
             Assert.Equal(2, obj.Y);
 
-            string jsonSerialized = JsonSerializer.ToString(obj, options);
+            string jsonSerialized = JsonSerializer.Serialize(obj, options);
             Assert.Equal(json, jsonSerialized);
         }
 
@@ -218,14 +218,14 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.Converters.Add(new PointObjectConverter());
 
-            Point[] Points = JsonSerializer.Parse<Point[]>(json, options);
+            Point[] Points = JsonSerializer.Deserialize<Point[]>(json, options);
             Assert.Equal(2, Points.Length);
             Assert.Equal(1, Points[0].X);
             Assert.Equal(2, Points[0].Y);
             Assert.Equal(3, Points[1].X);
             Assert.Equal(4, Points[1].Y);
 
-            string jsonSerialized = JsonSerializer.ToString(Points, options);
+            string jsonSerialized = JsonSerializer.Serialize(Points, options);
             Assert.Equal(json, jsonSerialized);
         }
 
@@ -237,11 +237,11 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.Converters.Add(new PointObjectConverter());
 
-            Point obj = JsonSerializer.Parse<Point>(json, options);
+            Point obj = JsonSerializer.Deserialize<Point>(json, options);
             Assert.Equal(1, obj.X);
             Assert.Equal(2, obj.Y);
 
-            string jsonSerialized = JsonSerializer.ToString(obj, options);
+            string jsonSerialized = JsonSerializer.Serialize(obj, options);
             Assert.Equal(json, jsonSerialized);
         }
     }
