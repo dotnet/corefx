@@ -467,7 +467,6 @@ namespace System.Text.Json.Serialization
         protected internal JsonConverter() { }
         public override bool CanConvert(System.Type type) { throw null; }
         public abstract T Read(ref System.Text.Json.Utf8JsonReader reader, System.Type type, System.Text.Json.JsonSerializerOptions options);
-        public virtual void Write(System.Text.Json.Utf8JsonWriter writer, T value, System.Text.Json.JsonEncodedText propertyName, System.Text.Json.JsonSerializerOptions options) { }
         public abstract void Write(System.Text.Json.Utf8JsonWriter writer, T value, System.Text.Json.JsonSerializerOptions options);
     }
     public sealed class JsonStringEnumConverter : System.Text.Json.Serialization.JsonConverterFactory
