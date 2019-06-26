@@ -218,13 +218,13 @@ namespace System.Text.Json
         EndObject = (byte)2,
         StartArray = (byte)3,
         EndArray = (byte)4,
-        PropertyName = (byte)5,
-        String = (byte)6,
-        Number = (byte)7,
-        True = (byte)8,
-        False = (byte)9,
-        Null = (byte)10,
-        Comment = (byte)11,
+        Comment = (byte)5,
+        PropertyName = (byte)6,
+        String = (byte)7,
+        Number = (byte)8,
+        True = (byte)9,
+        False = (byte)10,
+        Null = (byte)11,
     }
     public enum JsonValueType : byte
     {

@@ -45,6 +45,11 @@ namespace System.Text.Json
         EndArray,
 
         /// <summary>
+        ///   Indicates that the token type is the comment string.
+        /// </summary>
+        Comment,
+
+        /// <summary>
         ///   Indicates that the token type is a JSON property name.
         /// </summary>
         PropertyName,
@@ -73,10 +78,5 @@ namespace System.Text.Json
         ///   Indicates that the token type is the JSON literal <c>null</c>.
         /// </summary>
         Null,
-
-        /// <summary>
-        ///   Indicates that the token type is the comment string.
-        /// </summary>
-        Comment,
     }
 }
