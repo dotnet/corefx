@@ -131,9 +131,9 @@ namespace System.Text.Json
     {
         private readonly object _dummy;
         public System.ReadOnlySpan<byte> EncodedUtf8Bytes { get { throw null; } }
-        public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<byte> utf8Value) { throw null; }
-        public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<char> value) { throw null; }
-        public static System.Text.Json.JsonEncodedText Encode(string value) { throw null; }
+        public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<byte> utf8Value, System.Text.Encodings.Web.JavaScriptEncoder encoder = null) { throw null; }
+        public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<char> value, System.Text.Encodings.Web.JavaScriptEncoder encoder = null) { throw null; }
+        public static System.Text.Json.JsonEncodedText Encode(string value, System.Text.Encodings.Web.JavaScriptEncoder encoder = null) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Text.Json.JsonEncodedText other) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -217,6 +217,7 @@ namespace System.Text.Json
         public System.Text.Json.JsonCommentHandling ReadCommentHandling { get { throw null; } set { } }
         public bool WriteIndented { get { throw null; } set { } }
         public System.Text.Json.Serialization.JsonConverter GetConverter(System.Type typeToConvert) { throw null; }
+        public System.Text.Encodings.Web.JavaScriptEncoder Encoder { get { throw null; } set { } }
     }
     public enum JsonTokenType : byte
     {
@@ -249,6 +250,7 @@ namespace System.Text.Json
         private int _dummyPrimitive;
         public bool Indented { get { throw null; } set { } }
         public bool SkipValidation { get { throw null; } set { } }
+        public System.Text.Encodings.Web.JavaScriptEncoder Encoder { get { throw null; } set { } }
     }
     public ref partial struct Utf8JsonReader
     {

@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.Diagnostics;
+using System.Text.Encodings.Web;
 
 namespace System.Text.Json
 {
@@ -41,12 +42,12 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large or if it contains invalid UTF-16 characters.
         /// </exception>
-        public static JsonEncodedText Encode(string value)
+        public static JsonEncodedText Encode(string value, JavascriptEncoder encoder = null)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
 
-            return Encode(value.AsSpan());
+            return Encode(value.AsSpan(), encoder);
         }
 
         /// <summary>
@@ -56,17 +57,17 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large or if it contains invalid UTF-16 characters.
         /// </exception>
-        public static JsonEncodedText Encode(ReadOnlySpan<char> value)
+        public static JsonEncodedText Encode(ReadOnlySpan<char> value, JavascriptEncoder encoder = null)
         {
             if (value.Length == 0)
             {
                 return new JsonEncodedText(Array.Empty<byte>());
             }
 
-            return TranscodeAndEncode(value);
+            return TranscodeAndEncode(value, encoder);
         }
 
-        private static JsonEncodedText TranscodeAndEncode(ReadOnlySpan<char> value)
+        private static JsonEncodedText TranscodeAndEncode(ReadOnlySpan<char> value, JavascriptEncoder encoder)
         {
             JsonWriterHelper.ValidateValue(value);
 
@@ -80,7 +81,7 @@ namespace System.Text.Json
             int actualByteCount = JsonReaderHelper.GetUtf8FromText(value, utf8Bytes);
             Debug.Assert(expectedByteCount == actualByteCount);
 
-            encodedText = EncodeHelper(utf8Bytes.AsSpan(0, actualByteCount));
+            encodedText = EncodeHelper(utf8Bytes.AsSpan(0, actualByteCount), encoder);
 
             // On the basis that this is user data, go ahead and clear it.
             utf8Bytes.AsSpan(0, expectedByteCount).Clear();
@@ -96,7 +97,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large or if it contains invalid UTF-8 bytes.
         /// </exception>
-        public static JsonEncodedText Encode(ReadOnlySpan<byte> utf8Value)
+        public static JsonEncodedText Encode(ReadOnlySpan<byte> utf8Value, JavascriptEncoder encoder = null)
         {
             if (utf8Value.Length == 0)
             {
@@ -104,16 +105,21 @@ namespace System.Text.Json
             }
 
             JsonWriterHelper.ValidateValue(utf8Value);
-            return EncodeHelper(utf8Value);
+            return EncodeHelper(utf8Value, encoder);
         }
 
-        private static JsonEncodedText EncodeHelper(ReadOnlySpan<byte> utf8Value)
+        private static JsonEncodedText EncodeHelper(ReadOnlySpan<byte> utf8Value, JavascriptEncoder encoder)
         {
-            int idx = JsonWriterHelper.NeedsEscaping(utf8Value);
+            if (encoder == null)
+            {
+                encoder = JavascriptEncoder.Default;
+            }
+
+            int idx = encoder.FindFirstCharacterToEncodeUtf8(utf8Value);
 
             if (idx != -1)
             {
-                return new JsonEncodedText(GetEscapedString(utf8Value, idx));
+                return new JsonEncodedText(GetEscapedString(utf8Value, idx, encoder));
             }
             else
             {
@@ -121,7 +127,7 @@ namespace System.Text.Json
             }
         }
 
-        private static byte[] GetEscapedString(ReadOnlySpan<byte> utf8Value, int firstEscapeIndexVal)
+        private static byte[] GetEscapedString(ReadOnlySpan<byte> utf8Value, int firstEscapeIndexVal, JavascriptEncoder encoder)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= utf8Value.Length);
             Debug.Assert(firstEscapeIndexVal >= 0 && firstEscapeIndexVal < utf8Value.Length);
@@ -134,9 +140,19 @@ namespace System.Text.Json
                 stackalloc byte[length] :
                 (valueArray = ArrayPool<byte>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, out int written);
+            OperationStatus result = encoder.EncodeUtf8(utf8Value, escapedValue, out int bytesConsumed, out int bytesWritten);
+            Debug.Assert(result != OperationStatus.DestinationTooSmall);
+            Debug.Assert(result != OperationStatus.NeedMoreData);
 
-            byte[] escapedString = escapedValue.Slice(0, written).ToArray();
+            if (result == OperationStatus.InvalidData)
+            {
+                throw new Exception();
+            }
+
+            Debug.Assert(result == OperationStatus.Done);
+            Debug.Assert(bytesConsumed == utf8Value.Length);
+
+            byte[] escapedString = escapedValue.Slice(0, bytesWritten).ToArray();
 
             if (valueArray != null)
             {
