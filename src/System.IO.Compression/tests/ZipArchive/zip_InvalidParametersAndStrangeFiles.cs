@@ -204,19 +204,22 @@ namespace System.IO.Compression.Tests
             using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
             {
                 ZipArchiveEntry e = archive.GetEntry(s_tamperedFileName);
-                using (MemoryStream ms = new MemoryStream())
                 using (Stream source = e.Open())
                 {
                     byte[] buffer = new byte[e.Length + 20];
+                    Array.Fill<byte>(buffer, 0xDE);
                     int read;
-                    while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
+                    int offset = 0;
+                    int length = buffer.Length;
+
+                    while ((read = source.Read(buffer, offset, length)) != 0)
                     {
-                        ms.Write(buffer, 0, read);
+                        offset += read;
+                        length -= read;
                     }
-                    for (int i = (int)e.Length; i < buffer.Length; i++)
+                    for (int i = offset; i < buffer.Length; i++)
                     {
-                        //As buffer initialized to 0, all extra 20 bytes should still be equal to 0
-                        Assert.Equal(0, buffer[i]);
+                        Assert.Equal(0xDE, buffer[i]);
                     }
                 }
             }
