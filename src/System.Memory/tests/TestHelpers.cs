@@ -487,8 +487,8 @@ namespace System
             { new string[] { "1", null, null }, new string[] { null, null, "2" }, 1},
             { new string[] { null, null, null }, new string[] { null, null }, 0},
 
-            { new string[] { "1", "3", "2" }, null, 0},
-            { new string[] { "1", null, "2" }, null, 0},
+            { new string[] { "1", "3", "2" }, null, -1},
+            { new string[] { "1", null, "2" }, null, -1},
         };
 
         public static TheoryData<string[], int> LastIndexOfNullData => new TheoryData<string[], int>()
@@ -542,8 +542,8 @@ namespace System
             { new string[] { "1", null, null }, new string[] { null, null, "2" }, 2},
             { new string[] { null, null, null }, new string[] { null, null }, 2},
 
-            { new string[] { "1", null, "2" }, null, 0},
-            { new string[] { "1", "3", "2" }, null, 0},
+            { new string[] { "1", null, "2" }, null, -1},
+            { new string[] { "1", "3", "2" }, null, -1},
         };
     }
 }
