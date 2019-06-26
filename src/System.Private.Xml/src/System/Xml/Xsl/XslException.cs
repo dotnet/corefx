@@ -117,14 +117,11 @@ namespace System.Xml.Xsl
 
             if (hasLineInfo)
             {
-                string uriString;
-                int startLine, startPos, endLine, endPos;
-
-                uriString = (string)info.GetValue("Uri", typeof(string));
-                startLine = (int)info.GetValue("StartLine", typeof(int));
-                startPos = (int)info.GetValue("StartPos", typeof(int));
-                endLine = (int)info.GetValue("EndLine", typeof(int));
-                endPos = (int)info.GetValue("EndPos", typeof(int));
+                string uriString = (string)info.GetValue("Uri", typeof(string));
+                int startLine = (int)info.GetValue("StartLine", typeof(int));
+                int startPos = (int)info.GetValue("StartPos", typeof(int));
+                int endLine = (int)info.GetValue("EndLine", typeof(int));
+                int endPos = (int)info.GetValue("EndPos", typeof(int));
 
                 _lineInfo = new SourceLineInfo(uriString, startLine, startPos, endLine, endPos);
             }
