@@ -52,8 +52,6 @@ namespace System.Text.Json.Tests
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
-            Assert.Equal(0, json.CurrentState.BytesConsumed);
-            Assert.NotEqual(default, json.CurrentState.Position);
             Assert.Equal(64, json.CurrentState.Options.MaxDepth);
             Assert.False(json.CurrentState.Options.AllowTrailingCommas);
             Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
@@ -238,10 +236,8 @@ namespace System.Text.Json.Tests
                 while (json.Read())
                     ;
                 Assert.Equal(sequence.Length, json.BytesConsumed);
-                Assert.Equal(sequence.Length, json.CurrentState.BytesConsumed);
 
                 Assert.True(sequence.Slice(json.Position).IsEmpty);
-                Assert.True(sequence.Slice(json.CurrentState.Position).IsEmpty);
             }
         }
 
