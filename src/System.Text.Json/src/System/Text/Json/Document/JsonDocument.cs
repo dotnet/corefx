@@ -198,7 +198,7 @@ namespace System.Text.Json
             return _utf8Json.Slice(start, row.Location - start + row.SizeOrLength);
         }
 
-        internal ReadOnlyMemory<byte> GetPropertyRawValue(int valueIndex)
+        private ReadOnlyMemory<byte> GetPropertyRawValue(int valueIndex)
         {
             CheckNotDisposed();
 
