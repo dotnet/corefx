@@ -43,7 +43,7 @@ namespace System.Text.Json
                 case JsonTokenType.True:
                 case JsonTokenType.False:
                 case JsonTokenType.Null:
-                    return (JsonValueType)((byte)tokenType - 3);
+                    return (JsonValueType)((byte)tokenType - 4);
                 default:
                     Debug.Fail($"No mapping for token type {tokenType}");
                     return JsonValueType.Undefined;
