@@ -22,7 +22,7 @@ namespace Internal.Cryptography
     {
         private static readonly byte[] s_pSpecifiedDefaultParameters = { 0x04, 0x00 };
 
-#if !netcoreapp
+#if !netcoreapp && !netstandard21
         // Compatibility API.
         internal static void AppendData(this IncrementalHash hasher, ReadOnlySpan<byte> data)
         {
@@ -36,19 +36,24 @@ namespace Internal.Cryptography
             return GetDigestAlgorithm(oid.Value);
         }
 
-        internal static HashAlgorithmName GetDigestAlgorithm(string oidValue)
+        internal static HashAlgorithmName GetDigestAlgorithm(string oidValue, bool forVerification = false)
         {
             switch (oidValue)
             {
                 case Oids.Md5:
+                case Oids.RsaPkcs1Md5 when forVerification:
                     return HashAlgorithmName.MD5;
                 case Oids.Sha1:
+                case Oids.RsaPkcs1Sha1 when forVerification:
                     return HashAlgorithmName.SHA1;
                 case Oids.Sha256:
+                case Oids.RsaPkcs1Sha256 when forVerification:
                     return HashAlgorithmName.SHA256;
                 case Oids.Sha384:
+                case Oids.RsaPkcs1Sha384 when forVerification:
                     return HashAlgorithmName.SHA384;
                 case Oids.Sha512:
+                case Oids.RsaPkcs1Sha512 when forVerification:
                     return HashAlgorithmName.SHA512;
                 default:
                     throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, oidValue);
@@ -319,7 +324,7 @@ namespace Internal.Cryptography
             return ToUpperHexString(serialBytes);
         }
 
-#if netcoreapp
+#if netcoreapp || netstandard21
         private static unsafe string ToUpperHexString(ReadOnlySpan<byte> ba)
         {
             fixed (byte* baPtr = ba)
@@ -411,7 +416,7 @@ namespace Internal.Cryptography
                     attributeObject = Upgrade<Pkcs9MessageDigest>(attributeObject);
                     break;
 
-#if netcoreapp
+#if netcoreapp || netstandard21
                 case Oids.LocalKeyId:
                     attributeObject = Upgrade<Pkcs9LocalKeyId>(attributeObject);
                     break;

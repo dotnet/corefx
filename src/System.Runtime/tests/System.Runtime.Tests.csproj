@@ -54,6 +54,7 @@
     <Compile Include="Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs" />
     <Compile Include="System\AccessViolationExceptionTests.cs" />
     <Compile Include="System\ActivatorTests.cs" />
+    <Compile Include="System\ActivatorTests.Generic.cs" />
     <Compile Include="System\ArgumentExceptionTests.cs" />
     <Compile Include="System\ArgumentNullExceptionTests.cs" />
     <Compile Include="System\ArgumentOutOfRangeExceptionTests.cs" />
@@ -303,7 +304,7 @@
     <Compile Include="$(CommonPath)\..\tests\System\RealParserTestsBase.netcoreapp.cs" Link="System\RealParserTestsBase.netcoreapp.cs" />
     <Compile Include="System\RealParserTests.netcoreapp.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' != 'true'">
     <Compile Include="System\StringSplitExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -329,8 +330,6 @@
       <Name>TestCollectibleAssembly</Name>
     </ProjectReference>
     <ProjectReference Include="TestModule\System.Reflection.TestModule.ilproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+    <ProjectReference Include="TestStructs\System.TestStructs.ilproj" />
   </ItemGroup>
 </Project>

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -23,7 +23,7 @@ namespace System.Text.Json.Serialization
         /// <remarks>Using a <see cref="System.String"/> is not as efficient as using the
         /// UTF-8 methods since the implementation natively uses UTF-8.
         /// </remarks>
-        public static TValue Parse<TValue>(string json, JsonSerializerOptions options = null)
+        public static TValue Deserialize<TValue>(string json, JsonSerializerOptions options = null)
         {
             if (json == null)
                 throw new ArgumentNullException(nameof(json));
@@ -49,7 +49,7 @@ namespace System.Text.Json.Serialization
         /// <remarks>Using a <see cref="System.String"/> is not as efficient as using the
         /// UTF-8 methods since the implementation natively uses UTF-8.
         /// </remarks>
-        public static object Parse(string json, Type returnType, JsonSerializerOptions options = null)
+        public static object Deserialize(string json, Type returnType, JsonSerializerOptions options = null)
         {
             if (json == null)
                 throw new ArgumentNullException(nameof(json));
@@ -75,9 +75,8 @@ namespace System.Text.Json.Serialization
 
             if (reader.BytesConsumed != jsonBytes.Length)
             {
-                readerState = reader.CurrentState;
                 ThrowHelper.ThrowJsonException_DeserializeDataRemaining(
-                    jsonBytes.Length, jsonBytes.Length - readerState.BytesConsumed);
+                    jsonBytes.Length, jsonBytes.Length - reader.BytesConsumed);
             }
 
             return result;

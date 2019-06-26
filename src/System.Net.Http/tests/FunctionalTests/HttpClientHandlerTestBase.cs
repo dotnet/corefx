@@ -32,9 +32,9 @@ namespace System.Net.Http.Functional.Tests
 
         protected Version VersionFromUseHttp2 => GetVersion(UseHttp2);
 
-        private static Version GetVersion(bool http2) => http2 ? new Version(2, 0) : HttpVersion.Version11;
+        protected static Version GetVersion(bool http2) => http2 ? new Version(2, 0) : HttpVersion.Version11;
 
-        protected HttpClient CreateHttpClient() => CreateHttpClient(CreateHttpClientHandler());
+        protected virtual HttpClient CreateHttpClient() => CreateHttpClient(CreateHttpClientHandler());
 
         protected HttpClient CreateHttpClient(HttpMessageHandler handler)
         {

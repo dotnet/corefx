@@ -541,7 +541,7 @@ namespace System.IO
                 return true;
             }
 
-            bool needsSeparator = !(PathInternal.EndsInDirectorySeparator(path1) || PathInternal.StartsWithDirectorySeparator(path2));
+            bool needsSeparator = !(EndsInDirectorySeparator(path1) || PathInternal.StartsWithDirectorySeparator(path2));
             int charsNeeded = path1.Length + path2.Length + (needsSeparator ? 1 : 0);
             if (destination.Length < charsNeeded)
                 return false;
@@ -569,8 +569,8 @@ namespace System.IO
             if (path3.Length == 0)
                 return TryJoin(path1, path2, destination, out charsWritten);
 
-            int neededSeparators = PathInternal.EndsInDirectorySeparator(path1) || PathInternal.StartsWithDirectorySeparator(path2) ? 0 : 1;
-            bool needsSecondSeparator = !(PathInternal.EndsInDirectorySeparator(path2) || PathInternal.StartsWithDirectorySeparator(path3));
+            int neededSeparators = EndsInDirectorySeparator(path1) || PathInternal.StartsWithDirectorySeparator(path2) ? 0 : 1;
+            bool needsSecondSeparator = !(EndsInDirectorySeparator(path2) || PathInternal.StartsWithDirectorySeparator(path3));
             if (needsSecondSeparator)
                 neededSeparators++;
 
@@ -812,8 +812,18 @@ namespace System.IO
 
         private static string GetRelativePath(string relativeTo, string path, StringComparison comparisonType)
         {
-            if (string.IsNullOrEmpty(relativeTo)) throw new ArgumentNullException(nameof(relativeTo));
-            if (PathInternal.IsEffectivelyEmpty(path.AsSpan())) throw new ArgumentNullException(nameof(path));
+            if (relativeTo == null)
+                throw new ArgumentNullException(nameof(relativeTo));
+
+            if (PathInternal.IsEffectivelyEmpty(relativeTo.AsSpan()))
+                throw new ArgumentException(SR.Arg_PathEmpty, nameof(relativeTo));
+
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
+            if (PathInternal.IsEffectivelyEmpty(path.AsSpan()))
+                throw new ArgumentException(SR.Arg_PathEmpty, nameof(path));
+
             Debug.Assert(comparisonType == StringComparison.Ordinal || comparisonType == StringComparison.OrdinalIgnoreCase);
 
             relativeTo = GetFullPath(relativeTo);
@@ -831,10 +841,10 @@ namespace System.IO
 
             // Trailing separators aren't significant for comparison
             int relativeToLength = relativeTo.Length;
-            if (PathInternal.EndsInDirectorySeparator(relativeTo.AsSpan()))
+            if (EndsInDirectorySeparator(relativeTo.AsSpan()))
                 relativeToLength--;
 
-            bool pathEndsInSeparator = PathInternal.EndsInDirectorySeparator(path.AsSpan());
+            bool pathEndsInSeparator = EndsInDirectorySeparator(path.AsSpan());
             int pathLength = path.Length;
             if (pathEndsInSeparator)
                 pathLength--;
@@ -903,5 +913,33 @@ namespace System.IO
                     StringComparison.OrdinalIgnoreCase;
             }
         }
+
+        /// <summary>
+        /// Trims one trailing directory separator beyond the root of the path.
+        /// </summary>
+        public static string TrimEndingDirectorySeparator(string path) =>
+            EndsInDirectorySeparator(path) && !PathInternal.IsRoot(path.AsSpan()) ?
+                path.Substring(0, path.Length - 1) :
+                path;
+
+        /// <summary>
+        /// Trims one trailing directory separator beyond the root of the path.
+        /// </summary>
+        public static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) =>
+            EndsInDirectorySeparator(path) && !PathInternal.IsRoot(path) ?
+                path.Slice(0, path.Length - 1) :
+                path;
+
+        /// <summary>
+        /// Returns true if the path ends in a directory separator.
+        /// </summary>
+        public static bool EndsInDirectorySeparator(ReadOnlySpan<char> path)
+            => path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]);
+
+        /// <summary>
+        /// Returns true if the path ends in a directory separator.
+        /// </summary>
+        public static bool EndsInDirectorySeparator(string path)
+              => path != null && path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]);
     }
 }
