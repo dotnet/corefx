@@ -35,11 +35,12 @@
     <Compile Include="System\Text\Json\Document\JsonDocument.StackRow.cs" />
     <Compile Include="System\Text\Json\Document\JsonDocument.StackRowStack.cs" />
     <Compile Include="System\Text\Json\Document\JsonDocument.TryGetProperty.cs" />
+    <Compile Include="System\Text\Json\Document\JsonDocumentOptions.cs" />
     <Compile Include="System\Text\Json\Document\JsonElement.cs" />
     <Compile Include="System\Text\Json\Document\JsonElement.ArrayEnumerator.cs" />
     <Compile Include="System\Text\Json\Document\JsonElement.ObjectEnumerator.cs" />
     <Compile Include="System\Text\Json\Document\JsonProperty.cs" />
-    <Compile Include="System\Text\Json\Document\JsonValueType.cs" />
+    <Compile Include="System\Text\Json\Document\JsonValueKind.cs" />
     <Compile Include="System\Text\Json\Reader\ConsumeNumberResult.cs" />
     <Compile Include="System\Text\Json\Reader\ConsumeTokenResult.cs" />
     <Compile Include="System\Text\Json\Reader\JsonReaderHelper.cs" />

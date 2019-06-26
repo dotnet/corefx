@@ -1155,6 +1155,54 @@ namespace System.Text.Json.Tests
             {
                 Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteEndObject());
             }
+
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            jsonUtf8.WriteStartObject();
+            jsonUtf8.WritePropertyName("first name");
+            if (skipValidation)
+            {
+                jsonUtf8.WriteString("another property name", "some value");
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteString("another property name", "some value"));
+            }
+
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            jsonUtf8.WriteStartObject();
+            jsonUtf8.WritePropertyName("first name");
+            if (skipValidation)
+            {
+                jsonUtf8.WriteNumber("another property name", 12345);
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteNumber("another property name", 12345));
+            }
+
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            jsonUtf8.WriteStartObject();
+            jsonUtf8.WritePropertyName("first name");
+            if (skipValidation)
+            {
+                jsonUtf8.WriteNull("another property name");
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteNull("another property name"));
+            }
+
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            jsonUtf8.WriteStartObject();
+            jsonUtf8.WritePropertyName("first name");
+            if (skipValidation)
+            {
+                jsonUtf8.WriteBoolean("another property name", true);
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteBoolean("another property name", true));
+            }
         }
 
         [Theory]
@@ -4359,7 +4407,7 @@ namespace System.Text.Json.Tests
         public void WriteDateTime_TrimsFractionCorrectly_SerializerRoundtrip()
         {
             DateTime utcNow = DateTime.UtcNow;
-            Assert.Equal(utcNow, JsonSerializer.Parse(JsonSerializer.ToUtf8Bytes(utcNow), typeof(DateTime)));
+            Assert.Equal(utcNow, JsonSerializer.Deserialize(JsonSerializer.SerializeToUtf8Bytes(utcNow), typeof(DateTime)));
         }
 
         private static void WriteTooLargeHelper(JsonWriterOptions options, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value, bool noThrow = false)
