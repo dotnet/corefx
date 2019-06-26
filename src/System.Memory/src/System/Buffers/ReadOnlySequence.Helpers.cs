@@ -402,12 +402,12 @@ namespace System.Buffers
 
                 if (sliceStartObject != null)
                 {
-                    sliceStartRange += (ulong)((ReadOnlySequenceSegment<T>?)sliceStartObject!).RunningIndex;
+                    sliceStartRange += (ulong)((ReadOnlySequenceSegment<T>)sliceStartObject).RunningIndex;
                 }
 
                 if (sliceEndObject != null)
                 {
-                    sliceEndRange += (ulong)((ReadOnlySequenceSegment<T>?)sliceEndObject!).RunningIndex;
+                    sliceEndRange += (ulong)((ReadOnlySequenceSegment<T>)sliceEndObject).RunningIndex;
                 }
 
                 if (sliceStartRange > sliceEndRange)
