@@ -2174,42 +2174,15 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static Task EnableComments()
+        public static void EnableComments()
         {
             string json = "3";
-            var options = new JsonDocumentOptions
-            {
-                CommentHandling = JsonCommentHandling.Allow,
-            };
+            byte[] utf8 = Encoding.UTF8.GetBytes(json);
 
             var readerOptions = new JsonReaderOptions
             {
                 CommentHandling = JsonCommentHandling.Allow,
             };
-
-            AssertExtensions.Throws<ArgumentException>(
-                "options",
-                () => JsonDocument.Parse(json, options));
-
-            byte[] utf8 = Encoding.UTF8.GetBytes(json);
-            AssertExtensions.Throws<ArgumentException>(
-                "options",
-                () => JsonDocument.Parse(utf8, options));
-
-            ReadOnlySequence<byte> singleSeq = new ReadOnlySequence<byte>(utf8);
-            AssertExtensions.Throws<ArgumentException>(
-                "options",
-                () => JsonDocument.Parse(singleSeq, options));
-
-            ReadOnlySequence<byte> multiSegment = JsonTestHelper.SegmentInto(utf8, 6);
-            AssertExtensions.Throws<ArgumentException>(
-                "options",
-                () => JsonDocument.Parse(multiSegment, options));
-
-            Stream stream = new MemoryStream(utf8);
-            AssertExtensions.Throws<ArgumentException>(
-                "options",
-                () => JsonDocument.Parse(stream, options));
 
             AssertExtensions.Throws<ArgumentException>(
                 "reader",
@@ -2228,11 +2201,48 @@ namespace System.Text.Json.Tests
                     Utf8JsonReader reader = new Utf8JsonReader(utf8, isFinalBlock: false, state);
                     JsonDocument.TryParseValue(ref reader, out _);
                 });
+        }
 
-            stream.Seek(0, SeekOrigin.Begin);
-            return AssertExtensions.ThrowsAsync<ArgumentException>(
-                "options",
-                () => JsonDocument.ParseAsync(stream, options));
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(JsonCommentHandling.Allow)]
+        [InlineData(3)]
+        [InlineData(byte.MaxValue)]
+        [InlineData(byte.MaxValue + 3)] // Other values, like byte.MaxValue + 1 overflows to 0 (i.e. JsonCommentHandling.Disallow), which is valid.
+        [InlineData(byte.MaxValue + 4)]
+        public static void ReadCommentHandlingDoesNotSupportAllow(int enumValue)
+        {
+            var options = new JsonSerializerOptions();
+
+            Assert.Throws<ArgumentOutOfRangeException>("value", () => new JsonDocumentOptions
+            {
+                CommentHandling = (JsonCommentHandling)enumValue
+            });
+        }
+
+        [Fact]
+        public static void ReadCommentHandlingWorksForNegativeOverflow()
+        {
+            var options = new JsonDocumentOptions
+            {
+                CommentHandling = unchecked((JsonCommentHandling)(-255))
+            };
+            Assert.Equal(JsonCommentHandling.Skip, options.CommentHandling);
+
+            using (JsonDocument doc = JsonDocument.Parse("/* some comment */{ }", options))
+            {
+                Assert.Equal(JsonValueType.Object, doc.RootElement.Type);
+            }
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        public static void TestDepthInvalid(int depth)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>("value", () => new JsonDocumentOptions
+            {
+                MaxDepth = depth
+            });
         }
 
         [Fact]

@@ -1220,27 +1220,15 @@ namespace System.Text.Json
         }
 
         private static void CheckSupportedOptions(
-            JsonDocumentOptions options,
-            string paramName = null)
+            JsonReaderOptions readerOptions,
+            string paramName)
         {
-            Debug.Assert(readerOptions.CommentHandling >= 0);
-            if (readerOptions.CommentHandling > JsonCommentHandling.Skip)
-            {
-                throw new ArgumentException(
-                    SR.JsonDocumentDoesNotSupportComments,
-                    paramName ?? nameof(options));
-            }
-        }
+            // Since these are coming from a valid instance of Utf8JsonReader, the JsonReaderOptions must already be valid
+            Debug.Assert(readerOptions.CommentHandling >= 0 && readerOptions.CommentHandling <= JsonCommentHandling.Allow);
 
-        private static void CheckSupportedOptions(
-            JsonReaderOptions options,
-            string paramName = null)
-        {
-            if (options.CommentHandling == JsonCommentHandling.Allow)
+            if (readerOptions.CommentHandling == JsonCommentHandling.Allow)
             {
-                throw new ArgumentException(
-                    SR.JsonDocumentDoesNotSupportComments,
-                    paramName ?? nameof(options));
+                throw new ArgumentException(SR.JsonDocumentDoesNotSupportComments, paramName);
             }
         }
     }

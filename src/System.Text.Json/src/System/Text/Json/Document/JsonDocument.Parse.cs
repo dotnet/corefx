@@ -41,16 +41,7 @@ namespace System.Text.Json
         /// </exception>
         public static JsonDocument Parse(ReadOnlyMemory<byte> utf8Json, JsonDocumentOptions options = default)
         {
-            CheckSupportedOptions(options);
-
-            var readerOptions = new JsonReaderOptions
-            {
-                AllowTrailingCommas = options.AllowTrailingCommas,
-                CommentHandling = options.CommentHandling,
-                MaxDepth = options.MaxDepth
-            };
-
-            return Parse(utf8Json, readerOptions, null);
+            return Parse(utf8Json, options.GetReaderOptions(), null);
         }
 
         /// <summary>
@@ -80,14 +71,7 @@ namespace System.Text.Json
         /// </exception>
         public static JsonDocument Parse(ReadOnlySequence<byte> utf8Json, JsonDocumentOptions options = default)
         {
-            CheckSupportedOptions(options);
-
-            var readerOptions = new JsonReaderOptions
-            {
-                AllowTrailingCommas = options.AllowTrailingCommas,
-                CommentHandling = options.CommentHandling,
-                MaxDepth = options.MaxDepth
-            };
+            JsonReaderOptions readerOptions = options.GetReaderOptions();
 
             if (utf8Json.IsSingleSegment)
             {
@@ -133,20 +117,11 @@ namespace System.Text.Json
                 throw new ArgumentNullException(nameof(utf8Json));
             }
 
-            CheckSupportedOptions(options);
-
             ArraySegment<byte> drained = ReadToEnd(utf8Json);
-
-            var readerOptions = new JsonReaderOptions
-            {
-                AllowTrailingCommas = options.AllowTrailingCommas,
-                CommentHandling = options.CommentHandling,
-                MaxDepth = options.MaxDepth
-            };
 
             try
             {
-                return Parse(drained.AsMemory(), readerOptions, drained.Array);
+                return Parse(drained.AsMemory(), options.GetReaderOptions(), drained.Array);
             }
             catch
             {
@@ -183,8 +158,6 @@ namespace System.Text.Json
                 throw new ArgumentNullException(nameof(utf8Json));
             }
 
-            CheckSupportedOptions(options);
-
             return ParseAsyncCore(utf8Json, options, cancellationToken);
         }
 
@@ -195,16 +168,9 @@ namespace System.Text.Json
         {
             ArraySegment<byte> drained = await ReadToEndAsync(utf8Json, cancellationToken).ConfigureAwait(false);
 
-            var readerOptions = new JsonReaderOptions
-            {
-                AllowTrailingCommas = options.AllowTrailingCommas,
-                CommentHandling = options.CommentHandling,
-                MaxDepth = options.MaxDepth
-            };
-
             try
             {
-                return Parse(drained.AsMemory(), readerOptions, drained.Array);
+                return Parse(drained.AsMemory(), options.GetReaderOptions(), drained.Array);
             }
             catch
             {
@@ -236,25 +202,16 @@ namespace System.Text.Json
         /// </exception>
         public static JsonDocument Parse(ReadOnlyMemory<char> json, JsonDocumentOptions options = default)
         {
-            CheckSupportedOptions(options);
-
             ReadOnlySpan<char> jsonChars = json.Span;
             int expectedByteCount = JsonReaderHelper.GetUtf8ByteCount(jsonChars);
             byte[] utf8Bytes = ArrayPool<byte>.Shared.Rent(expectedByteCount);
-
-            var readerOptions = new JsonReaderOptions
-            {
-                AllowTrailingCommas = options.AllowTrailingCommas,
-                CommentHandling = options.CommentHandling,
-                MaxDepth = options.MaxDepth
-            };
 
             try
             {
                 int actualByteCount = JsonReaderHelper.GetUtf8FromText(jsonChars, utf8Bytes);
                 Debug.Assert(expectedByteCount == actualByteCount);
 
-                return Parse(utf8Bytes.AsMemory(0, actualByteCount), readerOptions, utf8Bytes);
+                return Parse(utf8Bytes.AsMemory(0, actualByteCount), options.GetReaderOptions(), utf8Bytes);
             }
             catch
             {
@@ -285,8 +242,6 @@ namespace System.Text.Json
             {
                 throw new ArgumentNullException(nameof(json));
             }
-
-            CheckSupportedOptions(options);
 
             return Parse(json.AsMemory(), options);
         }

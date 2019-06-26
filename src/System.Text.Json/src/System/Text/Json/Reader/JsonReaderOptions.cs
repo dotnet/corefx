@@ -18,11 +18,13 @@ namespace System.Text.Json
 
         /// <summary>
         /// Defines how the <see cref="Utf8JsonReader"/> should handle comments when reading through the JSON.
-        /// By default <exception cref="JsonException"/> is thrown if a comment is encountered.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when the comment handling enum is set to a value that is not supported (i.e. not within the <see cref="JsonCommentHandling"/> enum range).
         /// </exception>
+        /// <remarks>
+        /// By default <exception cref="JsonException"/> is thrown if a comment is encountered.
+        /// </remarks>
         public JsonCommentHandling CommentHandling
         {
             get => _commentHandling;
@@ -38,11 +40,13 @@ namespace System.Text.Json
 
         /// <summary>
         /// Gets or sets the maximum depth allowed when reading JSON, with the default (i.e. 0) indicating a max depth of 64.
-        /// Reading past this depth will throw a <exception cref="JsonException"/>.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when the max depth is set to a negative value.
         /// </exception>
+        /// <remarks>
+        /// Reading past this depth will throw a <exception cref="JsonException"/>.
+        /// </remarks>
         public int MaxDepth
         {
             get => _maxDepth;
@@ -58,8 +62,10 @@ namespace System.Text.Json
         /// <summary>
         /// Defines whether an extra comma at the end of a list of JSON values in an object or array
         /// is allowed (and ignored) within the JSON payload being read.
-        /// By default, it's set to false, and <exception cref="JsonException"/> is thrown if a trailing comma is encountered.
         /// </summary>
+        /// <remarks>
+        /// By default, it's set to false, and <exception cref="JsonException"/> is thrown if a trailing comma is encountered.
+        /// </remarks>
         public bool AllowTrailingCommas { get; set; }
     }
 }
