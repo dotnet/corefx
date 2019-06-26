@@ -351,6 +351,7 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void GetEventLogEntriesTest()
         {
             foreach (var eventLog in EventLog.GetEventLogs())
