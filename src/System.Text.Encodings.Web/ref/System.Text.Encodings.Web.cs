@@ -40,6 +40,9 @@ namespace System.Text.Encodings.Web
         public unsafe abstract bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten);
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public abstract bool WillEncode(int unicodeScalar);
+        public virtual System.Buffers.OperationStatus EncodeUtf8(System.ReadOnlySpan<byte> utf8Source, System.Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock = true) { throw null; }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public virtual int FindFirstCharacterToEncodeUtf8(System.ReadOnlySpan<byte> utf8Text) { throw null; }
     }
     public partial class TextEncoderSettings
     {

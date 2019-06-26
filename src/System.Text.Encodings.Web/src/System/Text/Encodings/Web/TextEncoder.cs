@@ -336,7 +336,7 @@ namespace System.Text.Encodings.Web
         /// <see langword="false"/> if there is no further source data that needs to be encoded.</param>
         /// <returns>An <see cref="OperationStatus"/> describing the result of the encoding operation.</returns>
         /// <remarks>The buffers <paramref name="utf8Source"/> and <paramref name="utf8Destination"/> must not overlap.</remarks>
-        internal unsafe virtual OperationStatus EncodeUtf8(ReadOnlySpan<byte> utf8Source, Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock = true)
+        public unsafe virtual OperationStatus EncodeUtf8(ReadOnlySpan<byte> utf8Source, Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock = true)
         {
             // Optimization: Detect how much "doesn't require escaping" data exists at the beginning of the buffer,
             // and memcpy it directly to the destination.
@@ -587,7 +587,7 @@ namespace System.Text.Encodings.Web
         /// current encoder instance, or -1 if no data in <paramref name="utf8Text"/> requires escaping.
         /// </returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        internal virtual int FindFirstCharacterToEncodeUtf8(ReadOnlySpan<byte> utf8Text)
+        public virtual int FindFirstCharacterToEncodeUtf8(ReadOnlySpan<byte> utf8Text)
         {
             int originalUtf8TextLength = utf8Text.Length;
 
