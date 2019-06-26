@@ -360,6 +360,7 @@ namespace System.Buffers
                     Debug.Assert(position.GetObject() != null);
                     runningIndex = ((ReadOnlySequenceSegment<T>)position.GetObject()!).RunningIndex;
                 }
+
                 if (!InRange(
                     (ulong)(runningIndex + sliceStartIndex),
                     startRange,
