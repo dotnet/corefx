@@ -31,7 +31,7 @@ namespace System.Text.Json
     {
         private int _dummyPrimitive;
         public bool AllowTrailingCommas { readonly get { throw null; } set { } }
-        public System.Text.Json.JsonCommentHandling CommentHandling { readonly get { throw null; } set { } }
+        public System.Text.Json.JsonCommentHandling CommentHandling { get { throw null; } set { } }
         public int MaxDepth { get { throw null; } set { } }
     }
     public readonly partial struct JsonElement
@@ -148,6 +148,7 @@ namespace System.Text.Json
         public JsonException(string message, string path, long? lineNumber, long? bytePositionInLine, System.Exception innerException) { }
         public long? BytePositionInLine { get { throw null; } }
         public long? LineNumber { get { throw null; } }
+        public override string Message { get { throw null; } }
         public string Path { get { throw null; } }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
@@ -171,7 +172,7 @@ namespace System.Text.Json
     {
         private int _dummyPrimitive;
         public bool AllowTrailingCommas { readonly get { throw null; } set { } }
-        public System.Text.Json.JsonCommentHandling CommentHandling { readonly get { throw null; } set { } }
+        public System.Text.Json.JsonCommentHandling CommentHandling { get { throw null; } set { } }
         public int MaxDepth { get { throw null; } set { } }
     }
     public partial struct JsonReaderState
@@ -454,7 +455,7 @@ namespace System.Text.Json.Serialization
     public abstract partial class JsonConverter
     {
         internal JsonConverter() { }
-        public abstract bool CanConvert(System.Type type);
+        public abstract bool CanConvert(System.Type typeToConvert);
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Property | System.AttributeTargets.Struct, AllowMultiple=false)]
     public partial class JsonConverterAttribute : System.Text.Json.Serialization.JsonAttribute
@@ -472,8 +473,8 @@ namespace System.Text.Json.Serialization
     public abstract partial class JsonConverter<T> : System.Text.Json.Serialization.JsonConverter
     {
         protected internal JsonConverter() { }
-        public override bool CanConvert(System.Type type) { throw null; }
-        public abstract T Read(ref System.Text.Json.Utf8JsonReader reader, System.Type type, System.Text.Json.JsonSerializerOptions options);
+        public override bool CanConvert(System.Type typeToConvert) { throw null; }
+        public abstract T Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options);
         public virtual void Write(System.Text.Json.Utf8JsonWriter writer, T value, System.Text.Json.JsonEncodedText propertyName, System.Text.Json.JsonSerializerOptions options) { }
         public abstract void Write(System.Text.Json.Utf8JsonWriter writer, T value, System.Text.Json.JsonSerializerOptions options);
     }
