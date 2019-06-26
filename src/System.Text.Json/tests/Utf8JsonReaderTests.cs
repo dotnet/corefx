@@ -1671,7 +1671,9 @@ namespace System.Text.Json.Tests
                     while (json.Read())
                     {
                         if (json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null)
+                        {
                             actualDepth = json.CurrentDepth;
+                        }
                     }
 
                     int expectedDepth = 0;
@@ -1705,7 +1707,9 @@ namespace System.Text.Json.Tests
                     while (json.Read())
                     {
                         if (json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null)
+                        {
                             actualDepth = json.CurrentDepth;
+                        }
                     }
 
                     int expectedDepth = 0;

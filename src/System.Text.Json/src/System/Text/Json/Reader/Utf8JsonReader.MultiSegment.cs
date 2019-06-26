@@ -102,7 +102,7 @@ namespace System.Text.Json
         ///     Since this type is a ref struct, it is a stack-only type and all the limitations of ref structs apply to it.
         ///   </para>
         ///   <para>
-        ///     This assumes that the entire JSON payload is passed in directly (equivalent to <see cref="IsFinalBlock"/> = true)
+        ///     This assumes that the entire JSON payload is passed in (equivalent to <see cref="IsFinalBlock"/> = true)
         ///   </para>
         /// </remarks>
         public Utf8JsonReader(in ReadOnlySequence<byte> jsonData, JsonReaderOptions options = default)
