@@ -498,7 +498,7 @@ namespace System.Text.Json.Serialization
     {
         public JsonStringEnumConverter() { }
         public JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy namingPolicy = null, bool allowIntegerValues = true) { }
-        public override bool CanConvert(System.Type type) { throw null; }
-        protected override System.Text.Json.Serialization.JsonConverter CreateConverter(System.Type type) { throw null; }
+        public override bool CanConvert(System.Type typeToConvert) { throw null; }
+        protected override System.Text.Json.Serialization.JsonConverter CreateConverter(System.Type typeToConvert) { throw null; }
     }
 }

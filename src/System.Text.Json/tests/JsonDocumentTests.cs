@@ -2212,8 +2212,6 @@ namespace System.Text.Json.Tests
         [InlineData(byte.MaxValue + 4)]
         public static void ReadCommentHandlingDoesNotSupportAllow(int enumValue)
         {
-            var options = new JsonSerializerOptions();
-
             Assert.Throws<ArgumentOutOfRangeException>("value", () => new JsonDocumentOptions
             {
                 CommentHandling = (JsonCommentHandling)enumValue
