@@ -199,6 +199,7 @@ namespace System.Linq.Expressions.Interpreter
     [Serializable]
     internal sealed class RethrowException : Exception
     {
+        public RethrowException() : base() { }
         internal RethrowException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 
