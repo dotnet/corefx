@@ -455,7 +455,7 @@ namespace System.Buffers
         public ReadOnlySequence<T> Slice(SequencePosition start)
         {
             bool positionIsNotNull = start.GetObject() != null;
-            BoundsCheck(start, positionIsNotNull: positionIsNotNull);
+            BoundsCheck(start, positionIsNotNull);
             return SliceImpl(positionIsNotNull ? start : Start);
         }
 

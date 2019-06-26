@@ -395,11 +395,19 @@ namespace System.Buffers
                 // Multi-Segment Sequence
                 // This optimization works because we know sliceStartIndex, sliceEndIndex, startIndex, and endIndex are all >= 0
                 Debug.Assert(sliceStartIndex >= 0 && startIndex >= 0 && endIndex >= 0);
-                long startRunningIndex = ((ReadOnlySequenceSegment<T>?)sliceStartObject)?.RunningIndex ?? 0;
-                long endRunningIndex = ((ReadOnlySequenceSegment<T>?)sliceEndObject)?.RunningIndex ?? 0;
 
-                ulong sliceStartRange = (ulong)(startRunningIndex + sliceStartIndex);
-                ulong sliceEndRange = (ulong)(endRunningIndex + sliceEndIndex);
+                ulong sliceStartRange = sliceStartIndex;
+                ulong sliceEndRange = sliceEndIndex;
+
+                if (sliceStartObject != null)
+                {
+                    sliceStartRange += (ulong)((ReadOnlySequenceSegment<T>?)sliceStartObject!).RunningIndex;
+                }
+
+                if (sliceEndObject != null)
+                {
+                    sliceEndRange += (ulong)((ReadOnlySequenceSegment<T>?)sliceEndObject!).RunningIndex;
+                }
 
                 if (sliceStartRange > sliceEndRange)
                     ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
@@ -461,6 +469,10 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ReadOnlySequence<T> SliceImpl(in SequencePosition start, in SequencePosition end)
         {
+            // In this method we reset high order bits from indices
+            // of positions that were passed in
+            // and apply type bits specific for current ReadOnlySequence type
+
             return new ReadOnlySequence<T>(
                 start.GetObject(),
                 GetIndex(start) | (_startInteger & ReadOnlySequence.FlagBitMask),
