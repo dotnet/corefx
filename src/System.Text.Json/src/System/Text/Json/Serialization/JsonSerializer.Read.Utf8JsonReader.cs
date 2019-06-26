@@ -47,7 +47,7 @@ namespace System.Text.Json
         ///     Hence, <see cref="JsonReaderOptions.AllowTrailingCommas"/>, <see cref="JsonReaderOptions.MaxDepth"/>, <see cref="JsonReaderOptions.CommentHandling"/> are used while reading.
         ///   </para>
         /// </remarks>
-        public static TValue ReadValue<TValue>(ref Utf8JsonReader reader, JsonSerializerOptions options = null)
+        public static TValue Deserialize<TValue>(ref Utf8JsonReader reader, JsonSerializerOptions options = null)
         {
             return (TValue)ReadValueCore(ref reader, typeof(TValue), options);
         }
@@ -93,7 +93,7 @@ namespace System.Text.Json
         ///     Hence, <see cref="JsonReaderOptions.AllowTrailingCommas"/>, <see cref="JsonReaderOptions.MaxDepth"/>, <see cref="JsonReaderOptions.CommentHandling"/> are used while reading.
         ///   </para>
         /// </remarks>
-        public static object ReadValue(ref Utf8JsonReader reader, Type returnType, JsonSerializerOptions options = null)
+        public static object Deserialize(ref Utf8JsonReader reader, Type returnType, JsonSerializerOptions options = null)
         {
             if (returnType == null)
                 throw new ArgumentNullException(nameof(returnType));
@@ -305,8 +305,7 @@ namespace System.Text.Json
 
                 if (newReader.BytesConsumed != length)
                 {
-                    state = newReader.CurrentState;
-                    ThrowHelper.ThrowJsonException_DeserializeDataRemaining(length, length - state.BytesConsumed);
+                    ThrowHelper.ThrowJsonException_DeserializeDataRemaining(length, length - newReader.BytesConsumed);
                 }
             }
             catch (JsonException)
