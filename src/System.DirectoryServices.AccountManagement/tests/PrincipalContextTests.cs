@@ -288,7 +288,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
             Assert.Throws<ObjectDisposedException>(() => context.UserName);
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
         [InlineData(null, null, true)]
         [InlineData("", "", false)]
         public void ValidateCredentials_Invoke_ReturnsExpected(string userName, string password, bool expected)
