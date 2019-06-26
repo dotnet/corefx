@@ -180,7 +180,6 @@ namespace System.Text.Json
         {
             _lineNumber = _lineNumber,
             _bytePositionInLine = _bytePositionInLine,
-            _bytesConsumed = BytesConsumed,
             _inObject = _inObject,
             _isNotPrimitive = _isNotPrimitive,
             _numberFormat = _numberFormat,
@@ -190,7 +189,6 @@ namespace System.Text.Json
             _previousTokenType = _previousTokenType,
             _readerOptions = _readerOptions,
             _bitStack = _bitStack,
-            _sequencePosition = Position,
         };
 
         /// <summary>
@@ -212,7 +210,6 @@ namespace System.Text.Json
             _isFinalBlock = isFinalBlock;
             _isInputSequence = false;
 
-            // Note: We do not retain _bytesConsumed or _sequencePosition as they reset with the new input data
             _lineNumber = state._lineNumber;
             _bytePositionInLine = state._bytePositionInLine;
             _inObject = state._inObject;
@@ -242,6 +239,26 @@ namespace System.Text.Json
             _sequence = default;
             HasValueSequence = false;
             ValueSequence = ReadOnlySequence<byte>.Empty;
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="Utf8JsonReader"/> instance.
+        /// </summary>
+        /// <param name="jsonData">The ReadOnlySpan&lt;byte&gt; containing the UTF-8 encoded JSON text to process.</param>
+        /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonReader"/>
+        /// that is different from the JSON RFC (for example how to handle comments or maximum depth allowed when reading).
+        /// By default, the <see cref="Utf8JsonReader"/> follows the JSON RFC strictly (i.e. comments within the JSON are invalid) and reads up to a maximum depth of 64.</param>
+        /// <remarks>
+        ///   <para>
+        ///     Since this type is a ref struct, it is a stack-only type and all the limitations of ref structs apply to it.
+        ///   </para>
+        ///   <para>
+        ///     This assumes that the entire JSON payload is passed in (equivalent to <see cref="IsFinalBlock"/> = true)
+        ///   </para>
+        /// </remarks>
+        public Utf8JsonReader(ReadOnlySpan<byte> jsonData, JsonReaderOptions options = default)
+            : this(jsonData, isFinalBlock: true, new JsonReaderState(options))
+        {
         }
 
         /// <summary>
