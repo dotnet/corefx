@@ -652,7 +652,7 @@ namespace System.Net.Http
             _incomingBuffer.Discard(frameHeader.Length);
         }
 
-        private async Task<Memory<byte>> StartWriteAsync(int writeBytes, CancellationToken cancellationToken = default)
+        private async ValueTask<Memory<byte>> StartWriteAsync(int writeBytes, CancellationToken cancellationToken = default)
         {
             await AcquireWriteLockAsync(cancellationToken).ConfigureAwait(false);
 
