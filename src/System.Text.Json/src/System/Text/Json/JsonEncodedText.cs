@@ -36,13 +36,14 @@ namespace System.Text.Json
         /// Encodes the string text value as a JSON string.
         /// </summary>
         /// <param name="value">The value to be transformed as JSON encoded text.</param>
+        /// <param name="encoder"></param>
         /// <exception cref="ArgumentNullException">
         /// Thrown if value is null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large or if it contains invalid UTF-16 characters.
         /// </exception>
-        public static JsonEncodedText Encode(string value, JavascriptEncoder encoder = null)
+        public static JsonEncodedText Encode(string value, JavaScriptEncoder encoder = null)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
@@ -54,10 +55,11 @@ namespace System.Text.Json
         /// Encodes the text value as a JSON string.
         /// </summary>
         /// <param name="value">The value to be transformed as JSON encoded text.</param>
+        /// <param name="encoder"></param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large or if it contains invalid UTF-16 characters.
         /// </exception>
-        public static JsonEncodedText Encode(ReadOnlySpan<char> value, JavascriptEncoder encoder = null)
+        public static JsonEncodedText Encode(ReadOnlySpan<char> value, JavaScriptEncoder encoder = null)
         {
             if (value.Length == 0)
             {
@@ -67,7 +69,7 @@ namespace System.Text.Json
             return TranscodeAndEncode(value, encoder);
         }
 
-        private static JsonEncodedText TranscodeAndEncode(ReadOnlySpan<char> value, JavascriptEncoder encoder)
+        private static JsonEncodedText TranscodeAndEncode(ReadOnlySpan<char> value, JavaScriptEncoder encoder)
         {
             JsonWriterHelper.ValidateValue(value);
 
@@ -94,10 +96,11 @@ namespace System.Text.Json
         /// Encodes the UTF-8 text value as a JSON string.
         /// </summary>
         /// <param name="utf8Value">The UTF-8 encoded value to be transformed as JSON encoded text.</param>
+        /// <param name="encoder"></param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large or if it contains invalid UTF-8 bytes.
         /// </exception>
-        public static JsonEncodedText Encode(ReadOnlySpan<byte> utf8Value, JavascriptEncoder encoder = null)
+        public static JsonEncodedText Encode(ReadOnlySpan<byte> utf8Value, JavaScriptEncoder encoder = null)
         {
             if (utf8Value.Length == 0)
             {
@@ -108,11 +111,11 @@ namespace System.Text.Json
             return EncodeHelper(utf8Value, encoder);
         }
 
-        private static JsonEncodedText EncodeHelper(ReadOnlySpan<byte> utf8Value, JavascriptEncoder encoder)
+        private static JsonEncodedText EncodeHelper(ReadOnlySpan<byte> utf8Value, JavaScriptEncoder encoder)
         {
             if (encoder == null)
             {
-                encoder = JavascriptEncoder.Default;
+                encoder = JavaScriptEncoder.Default;
             }
 
             int idx = encoder.FindFirstCharacterToEncodeUtf8(utf8Value);
@@ -127,7 +130,7 @@ namespace System.Text.Json
             }
         }
 
-        private static byte[] GetEscapedString(ReadOnlySpan<byte> utf8Value, int firstEscapeIndexVal, JavascriptEncoder encoder)
+        private static byte[] GetEscapedString(ReadOnlySpan<byte> utf8Value, int firstEscapeIndexVal, JavaScriptEncoder encoder)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= utf8Value.Length);
             Debug.Assert(firstEscapeIndexVal >= 0 && firstEscapeIndexVal < utf8Value.Length);

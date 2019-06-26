@@ -16,7 +16,7 @@
     <Reference Include="netstandard" />
     <Reference Include="System.Memory" />
     <Reference Include="System.Threading.Tasks.Extensions" />
-    <Reference Include="System.Text.Encodings.Web" />
+    <ProjectReference Include="..\..\System.Text.Encodings.Web\ref\System.Text.Encodings.Web.csproj" />
     <ProjectReference Include="..\..\Microsoft.Bcl.AsyncInterfaces\ref\Microsoft.Bcl.AsyncInterfaces.csproj" />
   </ItemGroup>
 </Project>
