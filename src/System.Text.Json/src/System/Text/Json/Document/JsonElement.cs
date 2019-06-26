@@ -1501,6 +1501,6 @@ namespace System.Text.Json
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private string DebuggerDisplay => $"Type = {ValueKind} : \"{ToString()}\"";
+        private string DebuggerDisplay => $"ValueKind = {ValueKind} : \"{ToString()}\"";
     }
 }

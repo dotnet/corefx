@@ -492,27 +492,9 @@ namespace System.Text.Json.Tests
 
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var buffer = new ArrayBufferWriter<byte>(1024);
-            var expectedBuffer = new ArrayBufferWriter<byte>(1024);
-            var options = new JsonWriterOptions
-            {
-                Indented = !compactData
-            };
-
-            var writer = new Utf8JsonWriter(buffer, options);
-            var expectedWriter = new Utf8JsonWriter(expectedBuffer, options);
-
             using (JsonDocument doc = stringDocBuilder?.Invoke(jsonString) ?? bytesDocBuilder?.Invoke(dataUtf8))
             {
                 Assert.NotNull(doc);
-
-                doc.Write(writer);
-                writer.Flush();
-
-                doc.RootElement.WriteValue(expectedWriter);
-                expectedWriter.Flush();
-
-                AssertContents(expectedBuffer, buffer);
 
                 JsonElement rootElement = doc.RootElement;
 
@@ -3707,23 +3689,6 @@ namespace System.Text.Json.Tests
             }
 
             return s_compactJson[testCaseType] = existing;
-        }
-
-        private static void AssertContents(ArrayBufferWriter<byte> expected, ArrayBufferWriter<byte> buffer)
-        {
-            Assert.Equal(
-                Encoding.UTF8.GetString(
-                    expected.WrittenSpan
-#if netfx
-                        .ToArray()
-#endif
-                    ),
-                Encoding.UTF8.GetString(
-                    buffer.WrittenSpan
-#if netfx
-                        .ToArray()
-#endif
-                    ));
         }
     }
 }

@@ -26,7 +26,6 @@ namespace System.Text.Json
         public static System.Threading.Tasks.Task<System.Text.Json.JsonDocument> ParseAsync(System.IO.Stream utf8Json, System.Text.Json.JsonDocumentOptions options = default(System.Text.Json.JsonDocumentOptions), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public static System.Text.Json.JsonDocument ParseValue(ref System.Text.Json.Utf8JsonReader reader) { throw null; }
         public static bool TryParseValue(ref System.Text.Json.Utf8JsonReader reader, out System.Text.Json.JsonDocument document) { throw null; }
-        public void Write(Utf8JsonWriter writer) { }
     }
     public partial struct JsonDocumentOptions
     {
@@ -169,7 +168,6 @@ namespace System.Text.Json
         public bool NameEquals(System.ReadOnlySpan<char> text) { throw null; }
         public bool NameEquals(string text) { throw null; }
         public override string ToString() { throw null; }
-        public void Write(System.Text.Json.Utf8JsonWriter writer) { }
     }
     public partial struct JsonReaderOptions
     {

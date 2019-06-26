@@ -75,18 +75,6 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        ///   Write the document into the provided writer as a JSON value.
-        /// </summary>
-        /// <param name="writer">The writer.</param>
-        /// <exception cref="ObjectDisposedException">
-        ///   The parent <see cref="JsonDocument"/> has been disposed.
-        /// </exception>
-        public void Write(Utf8JsonWriter writer)
-        {
-            RootElement.WriteValue(writer);
-        }
-
         internal JsonTokenType GetJsonTokenType(int index)
         {
             CheckNotDisposed();
