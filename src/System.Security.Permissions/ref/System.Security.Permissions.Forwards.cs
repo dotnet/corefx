@@ -18,3 +18,6 @@
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.PermissionSet))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Permissions.PermissionState))]
 #endif
+#if netcoreapp
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Xaml.Permissions.XamlAccessLevel))]
+#endif

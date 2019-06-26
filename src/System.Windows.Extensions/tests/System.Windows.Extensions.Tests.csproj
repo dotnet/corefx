@@ -21,6 +21,7 @@
     <Compile Include="System\Media\SoundPlayerTests.cs" />
     <Compile Include="System\Media\SystemSoundTests.cs" />
     <Compile Include="System\Media\SystemSoundsTests.cs" />
+    <Compile Include="XamlAccessLevelTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.TypeConverter.TestData" Version="$(SystemComponentModelTypeConverterTestDataPackageVersion)" />

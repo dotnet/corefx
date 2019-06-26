@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{07CAF142-B259-418E-86EF-C4BD8B50253E}</ProjectGuid>
     <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
@@ -38,5 +38,8 @@
     <ProjectReference Include="..\..\System.Security.Cryptography.X509Certificates\ref\System.Security.Cryptography.X509Certificates.csproj" />
     <ProjectReference Include="..\..\System.Text.RegularExpressions\ref\System.Text.RegularExpressions.csproj" />
     <ProjectReference Include="..\..\System.Threading\ref\System.Threading.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <ProjectReference Include="..\..\System.Windows.Extensions\ref\System.Windows.Extensions.csproj" />
   </ItemGroup>
 </Project>
