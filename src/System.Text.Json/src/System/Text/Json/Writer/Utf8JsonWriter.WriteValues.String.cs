@@ -12,10 +12,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the pre-encoded text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The JSON encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
-        /// <remarks>
-        /// The value should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
-        /// </remarks>
+        /// <param name="value">The JSON encoded value to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
@@ -35,10 +32,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the string text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
-        /// <remarks>
-        /// The value is escaped before writing.
-        /// </remarks>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
@@ -51,10 +45,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
-        /// <remarks>
-        /// The value is escaped before writing.
-        /// </remarks>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>

@@ -16,10 +16,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the string text value (as a JSON comment).
         /// </summary>
-        /// <param name="value">The value to be written as a UTF-8 transcoded JSON comment within /*..*/.</param>
-        /// <remarks>
-        /// The comment value is not escaped before writing.
-        /// </remarks>
+        /// <param name="value">The value to write as a JSON comment within /*..*/.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large OR if the given string text value contains a comment delimiter (i.e. */).
         /// </exception>
@@ -29,10 +26,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the text value (as a JSON comment).
         /// </summary>
-        /// <param name="value">The value to be written as a UTF-8 transcoded JSON comment within /*..*/.</param>
-        /// <remarks>
-        /// The comment value is not escaped before writing.
-        /// </remarks>
+        /// <param name="value">The value to write as a JSON comment within /*..*/.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large OR if the given text value contains a comment delimiter (i.e. */).
         /// </exception>

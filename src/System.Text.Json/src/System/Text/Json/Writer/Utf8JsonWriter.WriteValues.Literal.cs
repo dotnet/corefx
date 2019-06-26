@@ -25,7 +25,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the <see cref="bool"/> value (as a JSON literal "true" or "false") as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The value to be written as a JSON literal "true" or "false" as an element of a JSON array.</param>
+        /// <param name="value">The value write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>

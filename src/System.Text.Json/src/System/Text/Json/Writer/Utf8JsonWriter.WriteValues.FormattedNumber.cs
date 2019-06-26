@@ -12,7 +12,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the value (as a JSON number) as an element of a JSON array.
         /// </summary>
-        /// <param name="utf8FormattedNumber">The value to be written as a JSON number as an element of a JSON array.</param>
+        /// <param name="utf8FormattedNumber">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when <paramref name="utf8FormattedNumber"/> does not represent a valid JSON number.
         /// </exception>
