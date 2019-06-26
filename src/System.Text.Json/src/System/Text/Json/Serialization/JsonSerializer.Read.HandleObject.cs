@@ -5,13 +5,13 @@
 using System.Collections;
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
         private static void HandleStartObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingImmutableDictionary);
+            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingIDictionaryConstructible);
 
             if (state.Current.IsProcessingEnumerable)
             {
@@ -42,7 +42,7 @@ namespace System.Text.Json.Serialization
                 }
             }
 
-            if (state.Current.IsProcessingImmutableDictionary)
+            if (state.Current.IsProcessingIDictionaryConstructible)
             {
                 state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateObject();
             }
@@ -54,7 +54,7 @@ namespace System.Text.Json.Serialization
 
         private static void HandleEndObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingImmutableDictionary);
+            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingIDictionaryConstructible);
 
             state.Current.JsonClassInfo.UpdateSortedPropertyCache(ref state.Current);
 

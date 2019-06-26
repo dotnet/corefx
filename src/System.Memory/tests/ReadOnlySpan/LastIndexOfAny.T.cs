@@ -286,7 +286,7 @@ namespace System.SpanTests
 
             values = new ReadOnlySpan<int>(new int[] { });
             idx = sp.LastIndexOfAny(values);
-            Assert.Equal(0, idx);
+            Assert.Equal(-1, idx);
         }
 
         [Fact]
@@ -749,7 +749,7 @@ namespace System.SpanTests
 
             values = new ReadOnlySpan<string>(new string[] { });
             idx = sp.LastIndexOfAny(values);
-            Assert.Equal(0, idx);
+            Assert.Equal(-1, idx);
         }
 
         [Fact]
@@ -931,6 +931,28 @@ namespace System.SpanTests
                 var values = new ReadOnlySpan<string>(new string[] { "99", "99", "99", "99", "99", "99" });
                 int index = span.LastIndexOfAny(values);
                 Assert.Equal(-1, index);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(TestHelpers.LastIndexOfAnyNullSequenceData), MemberType = typeof(TestHelpers))]
+        public static void LastIndexOfAnyNullSequence_String(string[] spanInput, string[] searchInput, int expected)
+        {
+            ReadOnlySpan<string> theStrings = spanInput;
+            Assert.Equal(expected, theStrings.LastIndexOfAny(searchInput));
+            Assert.Equal(expected, theStrings.LastIndexOfAny((ReadOnlySpan<string>)searchInput));
+
+            if (searchInput != null)
+            {
+                if (searchInput.Length >= 3)
+                {
+                    Assert.Equal(expected, theStrings.LastIndexOfAny(searchInput[0], searchInput[1], searchInput[2]));
+                }
+
+                if (searchInput.Length >= 2)
+                {
+                    Assert.Equal(expected, theStrings.LastIndexOfAny(searchInput[0], searchInput[1]));
+                }
             }
         }
     }

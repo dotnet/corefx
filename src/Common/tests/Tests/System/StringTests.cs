@@ -5152,50 +5152,57 @@ namespace System.Tests
             Assert.Equal(expected, s1.ToLower(CultureInfo.CurrentCulture).ToArray());
             Assert.Equal(expected, s1.ToLowerInvariant().ToArray());
             {
-                ReadOnlySpan<char> source = a;
-                Span<char> destination = a;
-                Assert.Equal(source.Length, source.ToLower(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expected, destination.ToArray());
-                Assert.Equal(expected, source.ToArray());
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(a, a => 
+                {
+                    ReadOnlySpan<char> source = a;
+                    Span<char> destination = a;
+
+                    source.ToLower(destination, CultureInfo.CurrentCulture);
+                });
             }
-            {                
-                ReadOnlySpan<char> source = a;
-                Span<char> destination = a;
-                Assert.Equal(source.Length, source.ToLowerInvariant(destination));
-                Assert.Equal(expected, destination.ToArray());
-                Assert.Equal(expected, source.ToArray());
+            {
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
+                {
+                    ReadOnlySpan<char> source = a;
+                    Span<char> destination = a;
+
+                    source.ToLowerInvariant(destination);
+                });
             }
         }
 
         [Fact]
         public static void ToLowerOverlapping()
         {
-            var expectedSource = new char[3] { 'B', 'c', 'b' };
             var expectedDestination = new char[3] { 'b', 'c', 'b' };
 
             {                
                 char[] a = { 'a', 'B', 'c', 'B', 'c', 'B' };
 
-                string s1 = new string(a, 1, 3);                
+                string s1 = new string(a, 1, 3);
                 Assert.Equal(expectedDestination, s1.ToLower(CultureInfo.CurrentCulture).ToArray());
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
-                var destination = new Span<char>(a, 3, 3);
-                Assert.Equal(source.Length, source.ToLower(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expectedDestination, destination.ToArray());
-                Assert.Equal(expectedSource, source.ToArray());
+
+                SpanTestHelpers.AssertThrows<InvalidOperationException,char>(source, source =>
+                { 
+                    var destination = new Span<char>(a, 3, 3);
+                    source.ToLower(destination, CultureInfo.CurrentCulture);
+                });
             }
             {
                 char[] a = { 'a', 'B', 'c', 'B', 'c', 'B' };
 
-                string s1 = new string(a, 1, 3);                
+                string s1 = new string(a, 1, 3);
                 Assert.Equal(expectedDestination, s1.ToLowerInvariant().ToArray());
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
-                var destination = new Span<char>(a, 3, 3);
-                Assert.Equal(source.Length, source.ToLowerInvariant(destination));
-                Assert.Equal(expectedDestination, destination.ToArray());
-                Assert.Equal(expectedSource, source.ToArray());
+
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
+                {
+                    var destination = new Span<char>(a, 3, 3);
+                    source.ToLowerInvariant(destination);
+                });
             }
         }
 
@@ -5323,41 +5330,6 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void ToLowerNullCulture()
-        {
-            string s1 = "aBc";
-
-            try
-            {               
-                s1.ToLower(null);
-                Assert.False(true, "Expected exception: " + typeof(ArgumentNullException).GetType());
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception wrongException)
-            {
-                Assert.False(true, "Wrong exception thrown: Expected " + typeof(ArgumentNullException).GetType() + ": Actual: " + wrongException.GetType());
-            }
-
-            ReadOnlySpan<char> source = s1.AsSpan();
-            Span<char> destination = new char[3] { 'a', 'B', 'c' };
-
-            try
-            {               
-                source.ToLower(destination, null);
-                Assert.False(true, "Expected exception: " + typeof(ArgumentNullException).GetType());
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception wrongException)
-            {
-                Assert.False(true, "Wrong exception thrown: Expected " + typeof(ArgumentNullException).GetType() + ": Actual: " + wrongException.GetType());
-            }
-        }
-
-        [Fact]
         public static void ZeroLengthToUpper()
         {
             char[] expectedSource = { 'a', 'B', 'c' };
@@ -5393,25 +5365,28 @@ namespace System.Tests
             Assert.Equal(expected, s1.ToUpper(CultureInfo.CurrentCulture).ToArray());
             Assert.Equal(expected, s1.ToUpperInvariant().ToArray());
             {
-                ReadOnlySpan<char> source = a;
-                Span<char> destination = a;
-                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expected, destination.ToArray());
-                Assert.Equal(expected, source.ToArray());
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
+                {
+                    ReadOnlySpan<char> source = a;
+                    Span<char> destination = a;
+
+                    source.ToUpper(destination, CultureInfo.CurrentCulture);
+                });
             }
             {
-                ReadOnlySpan<char> source = a;
-                Span<char> destination = a;
-                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
-                Assert.Equal(expected, destination.ToArray());
-                Assert.Equal(expected, source.ToArray());
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(a, a =>
+                {
+                    ReadOnlySpan<char> source = a;
+                    Span<char> destination = a;
+
+                    source.ToUpperInvariant(destination);
+                });
             }
         }
 
         [Fact]
         public static void ToUpperOverlapping()
         {
-            var expectedSource = new char[3] { 'b', 'C', 'B' };
             var expectedDestination = new char[3] { 'B', 'C', 'B' };
 
             {                
@@ -5421,10 +5396,12 @@ namespace System.Tests
                 Assert.Equal(expectedDestination, s1.ToUpper(CultureInfo.CurrentCulture).ToArray());
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
-                var destination = new Span<char>(a, 3, 3);
-                Assert.Equal(source.Length, source.ToUpper(destination, CultureInfo.CurrentCulture));
-                Assert.Equal(expectedDestination, destination.ToArray());
-                Assert.Equal(expectedSource, source.ToArray());
+
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
+                {
+                    var destination = new Span<char>(a, 3, 3);
+                    source.ToUpper(destination, CultureInfo.CurrentCulture);
+                });
             }
             {
                 char[] a = { 'a', 'b', 'C', 'b', 'C', 'b' };
@@ -5433,10 +5410,11 @@ namespace System.Tests
                 Assert.Equal(expectedDestination, s1.ToUpperInvariant().ToArray());
 
                 var source = new ReadOnlySpan<char>(a, 1, 3);
-                var destination = new Span<char>(a, 3, 3);
-                Assert.Equal(source.Length, source.ToUpperInvariant(destination));
-                Assert.Equal(expectedDestination, destination.ToArray());
-                Assert.Equal(expectedSource, source.ToArray());
+                SpanTestHelpers.AssertThrows<InvalidOperationException, char>(source, source =>
+                {
+                    var destination = new Span<char>(a, 3, 3);
+                    source.ToUpperInvariant(destination);
+                });
             }
         }
 
@@ -5560,41 +5538,6 @@ namespace System.Tests
                 Assert.Equal('Z', first[length + 1]);
                 Assert.Equal('Y', second[0]);
                 Assert.Equal('Y', second[length + 1]);
-            }
-        }
-
-        [Fact]
-        public static void ToUpperNullCulture()
-        {
-            string s1 = "aBc";
-
-            try
-            {               
-                s1.ToUpper(null);
-                Assert.False(true, "Expected exception: " + typeof(ArgumentNullException).GetType());
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception wrongException)
-            {
-                Assert.False(true, "Wrong exception thrown: Expected " + typeof(ArgumentNullException).GetType() + ": Actual: " + wrongException.GetType());
-            }
-
-            ReadOnlySpan<char> source = s1.AsSpan();
-            Span<char> destination = new char[3] { 'a', 'B', 'c' };
-
-            try
-            {               
-                source.ToUpper(destination, null);
-                Assert.False(true, "Expected exception: " + typeof(ArgumentNullException).GetType());
-            }
-            catch (ArgumentNullException)
-            {
-            }
-            catch (Exception wrongException)
-            {
-                Assert.False(true, "Wrong exception thrown: Expected " + typeof(ArgumentNullException).GetType() + ": Actual: " + wrongException.GetType());
             }
         }
 
@@ -6764,22 +6707,31 @@ namespace System.Tests
         {
             //                           str1               str2          culture  ignorecase   expected
             yield return new object[] { "abcd",             "ABcd",       "en-US",    false,       -1  };
+            yield return new object[] { "abcd",             "ABcd",       null,       false,       -1  };
             yield return new object[] { "ABcd",             "abcd",       "en-US",    false,        1  };
+            yield return new object[] { "ABcd",             "abcd",       null,       false,        1  };
             yield return new object[] { "abcd",             "ABcd",       "en-US",    true,         0  };
+            yield return new object[] { "abcd",             "ABcd",       null,       true,         0  };
             yield return new object[] { "latin i",         "Latin I",     "tr-TR",    false,        1  };
             yield return new object[] { "latin i",         "Latin I",     "tr-TR",    true,         1  };
             yield return new object[] { "turkish \u0130",   "Turkish i",  "tr-TR",    true,         0  };
             yield return new object[] { "turkish \u0131",   "Turkish I",  "tr-TR",    true,         0  };
             yield return new object[] { null,               null,         "en-us",    true,         0  };
+            yield return new object[] { null,               null,         null,       true,         0  };
             yield return new object[] { null,               "",           "en-us",    true,        -1  };
+            yield return new object[] { null,               "",           null,       true,        -1  };
             yield return new object[] { "",                 null,         "en-us",    true,         1  };
+            yield return new object[] { "",                 null,         null,       true,         1  };
         }
 
         public static IEnumerable<object[]> UpperLowerCasing_TestData()
         {
             //                          lower                upper          Culture
             yield return new object[] { "abcd",             "ABCD",         "en-US" };
+            yield return new object[] { "abcd",             "ABCD",         null };
             yield return new object[] { "latin i",          "LATIN I",      "en-US" };
+            yield return new object[] { "latin i",          "LATIN I",      null };
+            yield return new object[] { "",                 "",             null };
             yield return new object[] { "turky \u0131",     "TURKY I",      "tr-TR" };
             yield return new object[] { "turky i",          "TURKY \u0130", "tr-TR" };
             yield return new object[] { "\ud801\udc29",     PlatformDetection.IsWindows7 ? "\ud801\udc29" : "\ud801\udc01", "en-US" };
@@ -6812,10 +6764,13 @@ namespace System.Tests
                 if (s2 == nullPlaceholder)
                     s2 = null;
 
+                if (cultureName == nullPlaceholder)
+                    cultureName = null;
+
                 bool ignoreCase = bool.Parse(bIgnoreCase);
                 int expected = int.Parse(iExpected);
 
-                CultureInfo ci = CultureInfo.GetCultureInfo(cultureName);
+                CultureInfo ci = cultureName != null ? CultureInfo.GetCultureInfo(cultureName) : null;
                 CompareOptions ignoreCaseOption = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
 
                 Assert.Equal(expected, String.Compare(s1, s2, ignoreCase, ci));
@@ -6826,33 +6781,21 @@ namespace System.Tests
                 Assert.Equal(String.Compare(s1, s2, StringComparison.Ordinal), String.Compare(s1, s2, ci, CompareOptions.Ordinal));
                 Assert.Equal(String.Compare(s1, s2, StringComparison.OrdinalIgnoreCase), String.Compare(s1, s2, ci, CompareOptions.OrdinalIgnoreCase));
 
-                CultureInfo.CurrentCulture = ci;
-                Assert.Equal(expected, String.Compare(s1, 0, s2, 0, s1 == null ? 0 : s1.Length, ignoreCase));
+                if (ci != null)
+                {
+                    CultureInfo.CurrentCulture = ci;
+                    Assert.Equal(expected, String.Compare(s1, 0, s2, 0, s1 == null ? 0 : s1.Length, ignoreCase));
+                }
 
                 return RemoteExecutor.SuccessExitCode;
-            }, aS1 ?? nullPlaceholder, aS2 ?? nullPlaceholder, aCultureName, aIgnoreCase.ToString(), aExpected.ToString()).Dispose();
-        }
-
-        [Fact]
-        public static void CompareNegativeTest()
-        {
-            AssertExtensions.Throws<ArgumentNullException>("culture", () => string.Compare("a", "b", false, null));
-
-            AssertExtensions.Throws<ArgumentException>("options", () => string.Compare("a", "b", CultureInfo.InvariantCulture, (CompareOptions) 7891));
-            AssertExtensions.Throws<ArgumentNullException>("culture", () => string.Compare("a", "b", null, CompareOptions.None));
-
-            AssertExtensions.Throws<ArgumentNullException>("culture", () => string.Compare("a", 0, "b", 0, 1, false, null));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("length1", () => string.Compare("a", 10,"b", 0, 1, false, CultureInfo.InvariantCulture));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("length2", () => string.Compare("a", 1, "b", 10,1, false, CultureInfo.InvariantCulture));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset1", () => string.Compare("a",-1, "b", 1 ,1, false, CultureInfo.InvariantCulture));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("offset2", () => string.Compare("a", 1, "b",-1 ,1, false, CultureInfo.InvariantCulture));
+            }, aS1 ?? nullPlaceholder, aS2 ?? nullPlaceholder, aCultureName ?? nullPlaceholder, aIgnoreCase.ToString(), aExpected.ToString()).Dispose();
         }
 
         [Theory]
         [MemberData(nameof(UpperLowerCasing_TestData))]
         public static void CasingTest(string lowerForm, string upperForm, string cultureName)
         {
-            CultureInfo ci = CultureInfo.GetCultureInfo(cultureName);
+            CultureInfo ci = cultureName != null ? CultureInfo.GetCultureInfo(cultureName) : null;
             Assert.Equal(lowerForm, upperForm.ToLower(ci));
             Assert.Equal(upperForm, lowerForm.ToUpper(ci));
 
@@ -6867,13 +6810,6 @@ namespace System.Tests
 
             Assert.Equal(lowerForm, lowerForm.AsSpan().ToString());
             Assert.Equal(upperForm, upperForm.AsSpan().ToString());
-        }
-
-        [Fact]
-        public static void CasingNegativeTest()
-        {
-            AssertExtensions.Throws<ArgumentNullException>("culture", () => "".ToLower(null));
-            AssertExtensions.Throws<ArgumentNullException>("culture", () => "".ToUpper(null));
         }
 
         [Theory]

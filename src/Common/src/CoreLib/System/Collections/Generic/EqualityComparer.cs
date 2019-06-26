@@ -17,7 +17,7 @@ namespace System.Collections.Generic
         public abstract bool Equals([AllowNull] T x, [AllowNull] T y);
         public abstract int GetHashCode([DisallowNull] T obj);
 
-#pragma warning disable CS8617 // TODO-NULLABLE: Covariant parameter types (https://github.com/dotnet/roslyn/issues/30958)
+#pragma warning disable CS8617 // TODO-NULLABLE: Covariance in interfaces (https://github.com/dotnet/roslyn/issues/35227)
         int IEqualityComparer.GetHashCode(object? obj)
 #pragma warning restore CS8617
         {
@@ -42,7 +42,10 @@ namespace System.Collections.Generic
     [Serializable]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     // Needs to be public to support binary serialization compatibility
-    public sealed partial class GenericEqualityComparer<T> : EqualityComparer<T> where T : IEquatable<T>
+    public sealed partial class GenericEqualityComparer<T> : EqualityComparer<T>
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
+        where T : IEquatable<T>
+#nullable restore
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals([AllowNull] T x, [AllowNull] T y)
@@ -72,7 +75,10 @@ namespace System.Collections.Generic
     [Serializable]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     // Needs to be public to support binary serialization compatibility
-    public sealed partial class NullableEqualityComparer<T> : EqualityComparer<T?> where T : struct, IEquatable<T>
+    public sealed partial class NullableEqualityComparer<T> : EqualityComparer<T?> where T : struct,
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
+        IEquatable<T>
+#nullable restore
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(T? x, T? y)

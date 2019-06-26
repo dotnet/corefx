@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{15DB0DCC-68B4-4CFB-8BD2-F26BCCAF5A3F}</ProjectGuid>
-    <IncludePartialFacadeTests Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">true</IncludePartialFacadeTests>
+    <IncludePartialFacadeTests>true</IncludePartialFacadeTests>
     <TestRuntime>true</TestRuntime>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
@@ -51,6 +51,7 @@
     <Compile Include="Span\AsSpan.cs" />
     <Compile Include="Span\Fill.cs" />
     <Compile Include="Span\Clear.cs" />
+    <Compile Include="Span\Contains.T.cs" />
     <Compile Include="Span\CopyTo.cs" />
     <Compile Include="Span\CtorArray.cs" />
     <Compile Include="Span\CtorArrayIntInt.cs" />
@@ -164,6 +165,7 @@
     <Compile Include="ReadOnlySpan\StartsWith.T.cs" />
     <Compile Include="ReadOnlySpan\ToArray.cs" />
     <Compile Include="ReadOnlySpan\ToString.cs" />
+    <Compile Include="ReadOnlySpan\ToUpperLower.cs" />
     <Compile Include="$(CommonTestPath)\Tests\System\SpanTestHelpers.cs">
       <Link>ReadOnlySpan\SpanTestHelpers.cs</Link>
     </Compile>
@@ -251,7 +253,7 @@
     <Compile Include="ParsersAndFormatters\TestData.cs" />
     <Compile Include="ParsersAndFormatters\TestUtils.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="Span\Indexer.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -266,8 +268,5 @@
     <Compile Include="$(CommonPath)\System\MutableDecimal.cs">
       <Link>Common\System\MutableDecimal.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
 </Project>

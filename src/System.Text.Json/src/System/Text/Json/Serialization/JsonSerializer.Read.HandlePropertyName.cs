@@ -6,7 +6,7 @@ using System.Buffers;
 using System.Collections;
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -23,7 +23,7 @@ namespace System.Text.Json.Serialization
             Debug.Assert(state.Current.ReturnValue != default || state.Current.TempDictionaryValues != default);
             Debug.Assert(state.Current.JsonClassInfo != default);
 
-            if (state.Current.IsProcessingDictionary || state.Current.IsProcessingImmutableDictionary)
+            if (state.Current.IsProcessingDictionary || state.Current.IsProcessingIDictionaryConstructible)
             {
                 if (ReferenceEquals(state.Current.JsonClassInfo.DataExtensionProperty, state.Current.JsonPropertyInfo))
                 {
@@ -47,16 +47,16 @@ namespace System.Text.Json.Serialization
                         keyName = options.DictionaryKeyPolicy.ConvertName(keyName);
                     }
 
-                    if (state.Current.IsDictionary || state.Current.IsImmutableDictionary)
+                    if (state.Current.IsDictionary || state.Current.IsIDictionaryConstructible)
                     {
-                        state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetPolicyProperty();
+                        state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.PolicyProperty;
                     }
 
                     Debug.Assert(
                         state.Current.IsDictionary ||
                         (state.Current.IsDictionaryProperty && state.Current.JsonPropertyInfo != null) ||
-                        state.Current.IsImmutableDictionary ||
-                        (state.Current.IsImmutableDictionaryProperty && state.Current.JsonPropertyInfo != null));
+                        state.Current.IsIDictionaryConstructible ||
+                        (state.Current.IsIDictionaryConstructibleProperty && state.Current.JsonPropertyInfo != null));
 
                     state.Current.KeyName = keyName;
                 }
@@ -73,7 +73,7 @@ namespace System.Text.Json.Serialization
                     propertyName = GetUnescapedString(propertyName, idx);
                 }
 
-                state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(options, propertyName, ref state.Current);
+                state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(propertyName, ref state.Current);
                 if (state.Current.JsonPropertyInfo == null)
                 {
                     if (state.Current.JsonClassInfo.DataExtensionProperty == null)

@@ -19,6 +19,7 @@ namespace System.Text.Json
     /// To be able to set max depth while reading OR allow skipping comments, create an instance of 
     /// <see cref="JsonReaderState"/> and pass that in to the reader.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public ref partial struct Utf8JsonReader
     {
         private ReadOnlySpan<byte> _buffer;
@@ -91,8 +92,6 @@ namespace System.Text.Json
         /// </summary>
         /// <remarks>
         /// For JSON strings (including property names), this points to before the start quote.
-        /// </remarks>
-        /// <remarks>
         /// For comments, this points to before the first comment delimiter (i.e. '/').
         /// </remarks>
         public long TokenStartIndex { get; private set; }
@@ -181,7 +180,6 @@ namespace System.Text.Json
         {
             _lineNumber = _lineNumber,
             _bytePositionInLine = _bytePositionInLine,
-            _bytesConsumed = BytesConsumed,
             _inObject = _inObject,
             _isNotPrimitive = _isNotPrimitive,
             _numberFormat = _numberFormat,
@@ -191,7 +189,6 @@ namespace System.Text.Json
             _previousTokenType = _previousTokenType,
             _readerOptions = _readerOptions,
             _bitStack = _bitStack,
-            _sequencePosition = Position,
         };
 
         /// <summary>
@@ -213,7 +210,6 @@ namespace System.Text.Json
             _isFinalBlock = isFinalBlock;
             _isInputSequence = false;
 
-            // Note: We do not retain _bytesConsumed or _sequencePosition as they reset with the new input data
             _lineNumber = state._lineNumber;
             _bytePositionInLine = state._bytePositionInLine;
             _inObject = state._inObject;
@@ -243,6 +239,26 @@ namespace System.Text.Json
             _sequence = default;
             HasValueSequence = false;
             ValueSequence = ReadOnlySequence<byte>.Empty;
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="Utf8JsonReader"/> instance.
+        /// </summary>
+        /// <param name="jsonData">The ReadOnlySpan&lt;byte&gt; containing the UTF-8 encoded JSON text to process.</param>
+        /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonReader"/>
+        /// that is different from the JSON RFC (for example how to handle comments or maximum depth allowed when reading).
+        /// By default, the <see cref="Utf8JsonReader"/> follows the JSON RFC strictly (i.e. comments within the JSON are invalid) and reads up to a maximum depth of 64.</param>
+        /// <remarks>
+        ///   <para>
+        ///     Since this type is a ref struct, it is a stack-only type and all the limitations of ref structs apply to it.
+        ///   </para>
+        ///   <para>
+        ///     This assumes that the entire JSON payload is passed in (equivalent to <see cref="IsFinalBlock"/> = true)
+        ///   </para>
+        /// </remarks>
+        public Utf8JsonReader(ReadOnlySpan<byte> jsonData, JsonReaderOptions options = default)
+            : this(jsonData, isFinalBlock: true, new JsonReaderState(options))
+        {
         }
 
         /// <summary>
@@ -332,17 +348,19 @@ namespace System.Text.Json
         /// or if the current depth exceeds the recursive limit set by the max depth.
         /// </exception>
         /// <remarks>
-        /// If the reader did not have enough data to completely skip the children of the current token,
-        /// it will be reset to the state it was in before the method was called.
-        /// </remarks>
-        /// <remarks>
-        /// When <see cref="TokenType"/> is <see cref="JsonTokenType.PropertyName" />, the reader first moves to the property value.
-        /// When <see cref="TokenType"/> (originally, or after advancing) is <see cref="JsonTokenType.StartObject" /> or 
-        /// <see cref="JsonTokenType.StartArray" />, the reader advances to the matching
-        /// <see cref="JsonTokenType.EndObject" /> or <see cref="JsonTokenType.EndArray" />.
+        ///   <para>
+        ///     If the reader did not have enough data to completely skip the children of the current token,
+        ///     it will be reset to the state it was in before the method was called.
+        ///   </para>
+        ///   <para>
+        ///     When <see cref="TokenType"/> is <see cref="JsonTokenType.PropertyName" />, the reader first moves to the property value.
+        ///     When <see cref="TokenType"/> (originally, or after advancing) is <see cref="JsonTokenType.StartObject" /> or 
+        ///     <see cref="JsonTokenType.StartArray" />, the reader advances to the matching
+        ///     <see cref="JsonTokenType.EndObject" /> or <see cref="JsonTokenType.EndArray" />.
         /// 
-        /// For all other token types, the reader does not move. After the next call to <see cref="Read"/>, the reader will be at
-        /// the next value (when in an array), the next property name (when in an object), or the end array/object token.
+        ///     For all other token types, the reader does not move. After the next call to <see cref="Read"/>, the reader will be at
+        ///     the next value (when in an array), the next property name (when in an object), or the end array/object token.
+        ///   </para>
         /// </remarks>
         public bool TrySkip()
         {
@@ -392,7 +410,7 @@ namespace System.Text.Json
         /// <summary>
         /// Compares the UTF-8 encoded text to the unescaped JSON token value in the source and returns true if they match.
         /// </summary>
-        /// <param name="otherUtf8Text">The UTF-8 encoded text to compare against.</param>
+        /// <param name="utf8Text">The UTF-8 encoded text to compare against.</param>
         /// <returns>True if the JSON token value in the source matches the UTF-8 encoded look up text.</returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to find a text match on a JSON token that is not a string
@@ -400,20 +418,47 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <remarks>
-        /// If the look up text is invalid UTF-8 text, the method will return false since you cannot have 
-        /// invalid UTF-8 within the JSON payload.
+        ///   <para>
+        ///     If the look up text is invalid UTF-8 text, the method will return false since you cannot have 
+        ///     invalid UTF-8 within the JSON payload.
+        ///   </para>
+        ///   <para>
+        ///     The comparison of the JSON token value in the source and the look up text is done by first unescaping the JSON value in source,
+        ///     if required. The look up text is matched as is, without any modifications to it.
+        ///   </para>
         /// </remarks>
-        /// <remarks>
-        /// The comparison of the JSON token value in the source and the look up text is done by first unescaping the JSON value in source,
-        /// if required. The look up text is matched as is, without any modifications to it.
-        /// </remarks>
-        public bool TextEquals(ReadOnlySpan<byte> otherUtf8Text)
+        public bool ValueTextEquals(ReadOnlySpan<byte> utf8Text)
         {
             if (!IsTokenTypeString(TokenType))
             {
                 throw ThrowHelper.GetInvalidOperationException_ExpectedStringComparison(TokenType);
             }
-            return TextEqualsHelper(otherUtf8Text);
+            return TextEqualsHelper(utf8Text);
+        }
+
+        /// <summary>
+        /// Compares the string text to the unescaped JSON token value in the source and returns true if they match.
+        /// </summary>
+        /// <param name="text">The text to compare against.</param>
+        /// <returns>True if the JSON token value in the source matches the look up text.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to find a text match on a JSON token that is not a string
+        /// (i.e. other than <see cref="JsonTokenType.String"/> or <see cref="JsonTokenType.PropertyName"/>).
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        /// <remarks>
+        ///   <para>
+        ///     If the look up text is invalid UTF-8 text, the method will return false since you cannot have 
+        ///     invalid UTF-8 within the JSON payload.
+        ///   </para>
+        ///   <para>
+        ///     The comparison of the JSON token value in the source and the look up text is done by first unescaping the JSON value in source,
+        ///     if required. The look up text is matched as is, without any modifications to it.
+        ///   </para>
+        /// </remarks>
+        public bool ValueTextEquals(string text)
+        {
+            return ValueTextEquals(text.AsSpan());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -435,7 +480,7 @@ namespace System.Text.Json
         /// <summary>
         /// Compares the text to the unescaped JSON token value in the source and returns true if they match.
         /// </summary>
-        /// <param name="otherText">The text to compare against.</param>
+        /// <param name="text">The text to compare against.</param>
         /// <returns>True if the JSON token value in the source matches the look up text.</returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to find a text match on a JSON token that is not a string
@@ -443,21 +488,23 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <remarks>
-        /// If the look up text is invalid or incomplete UTF-16 text (i.e. unpaired surrogates), the method will return false
-        /// since you cannot have invalid UTF-16 within the JSON payload.
+        ///   <para>
+        ///     If the look up text is invalid or incomplete UTF-16 text (i.e. unpaired surrogates), the method will return false
+        ///     since you cannot have invalid UTF-16 within the JSON payload.
+        ///   </para>
+        ///   <para>
+        ///     The comparison of the JSON token value in the source and the look up text is done by first unescaping the JSON value in source,
+        ///     if required. The look up text is matched as is, without any modifications to it.
+        ///   </para>
         /// </remarks>
-        /// <remarks>
-        /// The comparison of the JSON token value in the source and the look up text is done by first unescaping the JSON value in source,
-        /// if required. The look up text is matched as is, without any modifications to it.
-        /// </remarks>
-        public bool TextEquals(ReadOnlySpan<char> otherText)
+        public bool ValueTextEquals(ReadOnlySpan<char> text)
         {
             if (!IsTokenTypeString(TokenType))
             {
                 throw ThrowHelper.GetInvalidOperationException_ExpectedStringComparison(TokenType);
             }
 
-            if (MatchNotPossible(otherText.Length))
+            if (MatchNotPossible(text.Length))
             {
                 return false;
             }
@@ -466,9 +513,8 @@ namespace System.Text.Json
 
             Span<byte> otherUtf8Text;
 
-            ReadOnlySpan<byte> utf16Text = MemoryMarshal.AsBytes(otherText);
+            int length = checked(text.Length * JsonConstants.MaxExpansionFactorWhileTranscoding);
 
-            int length = checked(utf16Text.Length * JsonConstants.MaxExpansionFactorWhileTranscoding);
             if (length > JsonConstants.StackallocThreshold)
             {
                 otherUtf8TextArray = ArrayPool<byte>.Shared.Rent(length);
@@ -479,21 +525,26 @@ namespace System.Text.Json
                 // Cannot create a span directly since it gets passed to instance methods on a ref struct.
                 unsafe
                 {
-                    byte* ptr = stackalloc byte[length];
-                    otherUtf8Text = new Span<byte>(ptr, length);
+                    byte* ptr = stackalloc byte[JsonConstants.StackallocThreshold];
+                    otherUtf8Text = new Span<byte>(ptr, JsonConstants.StackallocThreshold);
                 }
             }
 
+            ReadOnlySpan<byte> utf16Text = MemoryMarshal.AsBytes(text);
             OperationStatus status = JsonWriterHelper.ToUtf8(utf16Text, otherUtf8Text, out int consumed, out int written);
             Debug.Assert(status != OperationStatus.DestinationTooSmall);
+            bool result;
             if (status > OperationStatus.DestinationTooSmall)   // Equivalent to: (status == NeedMoreData || status == InvalidData)
             {
-                return false;
+                result = false;
             }
-            Debug.Assert(status == OperationStatus.Done);
-            Debug.Assert(consumed == utf16Text.Length);
+            else
+            {
+                Debug.Assert(status == OperationStatus.Done);
+                Debug.Assert(consumed == utf16Text.Length);
 
-            bool result = TextEqualsHelper(otherUtf8Text.Slice(0, written));
+                result = TextEqualsHelper(otherUtf8Text.Slice(0, written));
+            }
 
             if (otherUtf8TextArray != null)
             {
@@ -620,8 +671,10 @@ namespace System.Text.Json
 
         // Returns true if the TokenType is a primitive string "value", i.e. PropertyName or String
         // Otherwise, return false.
-        private static bool IsTokenTypeString(JsonTokenType tokenType) =>
-            (tokenType - JsonTokenType.PropertyName) <= (JsonTokenType.String - JsonTokenType.PropertyName);
+        private static bool IsTokenTypeString(JsonTokenType tokenType)
+        {
+            return tokenType == JsonTokenType.PropertyName || tokenType == JsonTokenType.String;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool MatchNotPossible(int charTextLength)
@@ -2407,5 +2460,29 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.Comment;
             return true;
         }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string DebuggerDisplay => $"TokenType = {DebugTokenType} (TokenStartIndex = {TokenStartIndex}) Consumed = {BytesConsumed}";
+
+        // Using TokenType.ToString() (or {TokenType}) fails to render in the debug window. The
+        // message "The runtime refused to evaluate the expression at this time." is shown. This
+        // is a workaround until we root cause and fix the issue.
+        private string DebugTokenType
+            => TokenType switch
+            {
+                JsonTokenType.Comment => nameof(JsonTokenType.Comment),
+                JsonTokenType.EndArray => nameof(JsonTokenType.EndArray),
+                JsonTokenType.EndObject => nameof(JsonTokenType.EndObject),
+                JsonTokenType.False => nameof(JsonTokenType.False),
+                JsonTokenType.None => nameof(JsonTokenType.None),
+                JsonTokenType.Null => nameof(JsonTokenType.Null),
+                JsonTokenType.Number => nameof(JsonTokenType.Number),
+                JsonTokenType.PropertyName => nameof(JsonTokenType.PropertyName),
+                JsonTokenType.StartArray => nameof(JsonTokenType.StartArray),
+                JsonTokenType.StartObject => nameof(JsonTokenType.StartObject),
+                JsonTokenType.String => nameof(JsonTokenType.String),
+                JsonTokenType.True => nameof(JsonTokenType.True),
+                _ => ((byte)TokenType).ToString()
+            };
     }
 }
