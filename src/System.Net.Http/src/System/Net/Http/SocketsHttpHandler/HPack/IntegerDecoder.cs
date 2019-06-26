@@ -42,20 +42,27 @@ namespace System.Net.Http.HPack
         /// <returns>If the integer has been fully decoded, true. Otherwise, false -- <see cref="Decode(byte)"/> must be called on subsequent bytes.</returns>
         public bool Decode(byte b)
         {
-            if (_m - BitOperations.LeadingZeroCount(b) > 0)
+            // Check if shifting b by _m would result in > 31 bits.
+            // No masking is required: if the 8th bit is set, it indicates there is a
+            // bit set in a future byte, so it is fine to check that here as if it were
+            // bit 0 on the next byte.
+            // This is a simplified form of:
+            //   int additionalBitsRequired = 32 - BitOperations.LeadingZeroCount((uint)b);
+            //   if (_m + additionalBitsRequired > 31)
+            if (BitOperations.LeadingZeroCount((uint)b) <= _m)
             {
-                // A bit would be shifted beyond 31 bits.
                 throw new HPackDecodingException(SR.net_http_hpack_bad_integer);
             }
 
             _i = _i + ((b & 127) << _m);
-            _m = _m + 7;
 
+            // If the addition overflowed, the result will be negative.
             if (_i < 0)
             {
-                // Addition wrapped.
                 throw new HPackDecodingException(SR.net_http_hpack_bad_integer);
             }
+
+            _m = _m + 7;
 
             if ((b & 128) == 0)
             {
