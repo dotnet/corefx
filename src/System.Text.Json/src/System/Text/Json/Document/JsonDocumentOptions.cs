@@ -27,7 +27,7 @@ namespace System.Text.Json
         /// </remarks>
         public JsonCommentHandling CommentHandling
         {
-            get =>  _commentHandling;
+            readonly get =>  _commentHandling;
             set
             {
                 Debug.Assert(value >= 0);
@@ -49,7 +49,7 @@ namespace System.Text.Json
         /// </remarks>
         public int MaxDepth
         {
-            get => _maxDepth;
+            readonly get => _maxDepth;
             set
             {
                 if (value < 0)

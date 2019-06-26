@@ -31,8 +31,8 @@ namespace System.Text.Json
     {
         private int _dummyPrimitive;
         public bool AllowTrailingCommas { readonly get { throw null; } set { } }
-        public System.Text.Json.JsonCommentHandling CommentHandling { get { throw null; } set { } }
-        public int MaxDepth { get { throw null; } set { } }
+        public System.Text.Json.JsonCommentHandling CommentHandling { readonly get { throw null; } set { } }
+        public int MaxDepth { readonly get { throw null; } set { } }
     }
     public readonly partial struct JsonElement
     {
@@ -172,8 +172,8 @@ namespace System.Text.Json
     {
         private int _dummyPrimitive;
         public bool AllowTrailingCommas { readonly get { throw null; } set { } }
-        public System.Text.Json.JsonCommentHandling CommentHandling { get { throw null; } set { } }
-        public int MaxDepth { get { throw null; } set { } }
+        public System.Text.Json.JsonCommentHandling CommentHandling { readonly get { throw null; } set { } }
+        public int MaxDepth { readonly get { throw null; } set { } }
     }
     public partial struct JsonReaderState
     {
