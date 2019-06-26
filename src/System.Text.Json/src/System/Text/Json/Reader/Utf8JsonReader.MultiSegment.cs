@@ -2189,9 +2189,9 @@ namespace System.Text.Json
         {
             long prevTotalConsumed = BytesConsumed;
             SequencePosition start = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + _consumed);
-            bool ret = SkipCommentMultiSegment(out int tailBytesToIgnore);
+            bool skipSucceeded = SkipCommentMultiSegment(out int tailBytesToIgnore);
 
-            if (ret)
+            if (skipSucceeded)
             {
                 Debug.Assert(
                     _readerOptions.CommentHandling == JsonCommentHandling.Allow ||
@@ -2235,7 +2235,7 @@ namespace System.Text.Json
                 _consumed = 0;
             }
 
-            return ret;
+            return skipSucceeded;
         }
 
         private bool SkipCommentMultiSegment(out int tailBytesToIgnore)
