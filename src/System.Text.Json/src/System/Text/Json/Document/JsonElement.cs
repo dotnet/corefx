@@ -1170,13 +1170,6 @@ namespace System.Text.Json
             return _parent.GetPropertyRawValueAsString(_idx);
         }
 
-        internal ReadOnlyMemory<byte> GetPropertyRawBytes()
-        {
-            CheckValidInstance();
-
-            return _parent.GetPropertyRawValue(_idx);
-        }
-
         /// <summary>
         ///   Compares <paramref name="text" /> to the string value of this element.
         /// </summary>

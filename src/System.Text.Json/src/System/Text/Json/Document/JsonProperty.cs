@@ -40,7 +40,7 @@ namespace System.Text.Json
         /// </exception>
         public void Write(Utf8JsonWriter writer)
         {
-            Value.WriteProperty(Value.GetPropertyRawBytes().Span, writer);
+            Value.WriteProperty(Name, writer);
         }
 
         /// <summary>

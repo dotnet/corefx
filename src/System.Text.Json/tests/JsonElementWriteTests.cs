@@ -1024,6 +1024,39 @@ null,
 
                 AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
+
+            buffer.Clear();
+            using (JsonDocument doc = JsonDocument.Parse($" [  {jsonIn}  ]", s_options))
+            {
+                JsonElement target = doc.RootElement[0];
+
+                if (target.ValueKind == JsonValueKind.Object)
+                {
+                    var options = new JsonWriterOptions
+                    {
+                        Indented = indented,
+                    };
+
+                    var writer = new Utf8JsonWriter(buffer, options);
+
+                    writer.WriteStartObject();
+                    foreach (JsonProperty properties in target.EnumerateObject())
+                    {
+                        properties.Write(writer);
+                    }
+                    writer.WriteEndObject();
+                    writer.Flush();
+
+                    if (indented && s_replaceNewlines)
+                    {
+                        AssertContents(
+                            expectedIndent.Replace(CompiledNewline, Environment.NewLine),
+                            buffer);
+                    }
+
+                    AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
+                }
+            }
         }
 
         private static void WritePropertyValueBothForms(
