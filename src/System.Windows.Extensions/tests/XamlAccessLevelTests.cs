@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
-using System.Xaml.Permissions;
 using Xunit;
 
 namespace System.Security.Permissions.Tests

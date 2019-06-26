@@ -6,6 +6,7 @@
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="X509Certificate2UITests.cs" />
     <Compile Include="X509Certificate2UIManualTests.cs" />
+    <Compile Include="XamlAccessLevelTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Drawing\Helpers.cs">
@@ -21,7 +22,6 @@
     <Compile Include="System\Media\SoundPlayerTests.cs" />
     <Compile Include="System\Media\SystemSoundTests.cs" />
     <Compile Include="System\Media\SystemSoundsTests.cs" />
-    <Compile Include="XamlAccessLevelTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.ComponentModel.TypeConverter.TestData" Version="$(SystemComponentModelTypeConverterTestDataPackageVersion)" />

@@ -178,6 +178,8 @@
     <Compile Include="System\Web\AspNetHostingPermission.cs" />
     <Compile Include="System\Web\AspNetHostingPermissionAttribute.cs" />
     <Compile Include="System\Web\AspNetHostingPermissionLevel.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System\Xaml\Permissions\XamlLoadPermission.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
@@ -226,6 +228,8 @@
     <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Reference Include="System.Windows.Extensions" />
   </ItemGroup>
 </Project>
