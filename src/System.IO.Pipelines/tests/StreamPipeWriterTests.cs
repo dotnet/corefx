@@ -451,11 +451,58 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnReaderCompletedThrowsNotSupported()
+        public void OnReaderCompletedNoops()
         {
+            bool fired = false;
             PipeWriter writer = PipeWriter.Create(Stream.Null);
-            Assert.Throws<NotSupportedException>(() => writer.OnReaderCompleted((_, __) => { }, null));
+            writer.OnReaderCompleted((_, __) => { fired = true; }, null);
             writer.Complete();
+            Assert.False(fired);
+        }
+
+        [Fact]
+        public void LeaveUnderlyingStreamOpen()
+        {
+            var stream = new MemoryStream();
+            PipeWriter writer = PipeWriter.Create(stream, new StreamPipeWriterOptions(leaveOpen: true));
+
+            writer.Complete();
+
+            Assert.True(stream.CanRead);
+        }
+
+        [Fact]
+        public async Task OperationCancelledExceptionNotSwallowedIfNotThrownFromSpecifiedToken()
+        {
+            PipeWriter writer = PipeWriter.Create(new ThrowsOperationCanceledExceptionStream());
+
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await writer.WriteAsync(new byte[1]));
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await writer.FlushAsync());
+        }
+
+        private class ThrowsOperationCanceledExceptionStream : WriteOnlyStream
+        {
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                throw new OperationCanceledException();
+            }
+
+            public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+                throw new OperationCanceledException();
+            }
+
+            public override Task FlushAsync(CancellationToken cancellationToken)
+            {
+                throw new OperationCanceledException();
+            }
+
+#if netcoreapp
+            public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
+            {
+                throw new OperationCanceledException();
+            }
+#endif
         }
 
         private class FlushAsyncAwareStream : WriteOnlyStream

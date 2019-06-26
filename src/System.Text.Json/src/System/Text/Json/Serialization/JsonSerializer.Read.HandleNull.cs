@@ -4,7 +4,7 @@
 
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -29,16 +29,23 @@ namespace System.Text.Json.Serialization
                 ThrowHelper.ThrowJsonException_DeserializeCannotBeNull(reader, state.JsonPath);
             }
 
-            if (state.Current.IsEnumerable || state.Current.IsDictionary || state.Current.IsImmutableDictionary)
+            if (state.Current.IsEnumerable || state.Current.IsDictionary || state.Current.IsIDictionaryConstructible)
             {
                 ApplyObjectToEnumerable(null, ref state, ref reader);
                 return false;
             }
 
-            if (state.Current.IsEnumerableProperty || state.Current.IsDictionaryProperty || state.Current.IsImmutableDictionaryProperty)
+            if (state.Current.IsEnumerableProperty || state.Current.IsDictionaryProperty || state.Current.IsIDictionaryConstructibleProperty)
             {
-                bool setPropertyToNull = !state.Current.PropertyInitialized;
+                bool setPropertyToNull = !state.Current.CollectionPropertyInitialized;
                 ApplyObjectToEnumerable(null, ref state, ref reader, setPropertyDirectly: setPropertyToNull);
+
+                if (setPropertyToNull)
+                {
+                    // The property itself was set to null, in which case we should
+                    // reset so that `Is*Property` no longer returns true
+                    state.Current.ResetProperty();
+                }
                 return false;
             }
 

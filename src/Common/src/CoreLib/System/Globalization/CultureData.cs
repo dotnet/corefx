@@ -359,7 +359,7 @@ namespace System.Globalization
             if (retVal == null || (retVal.IsNeutralCulture == true))
             {
                 // Not a valid mapping, try the hard coded table
-                string name;
+                string? name;
                 if (RegionNames.TryGetValue(cultureName, out name))
                 {
                     // Make sure we can get culture data for it
@@ -590,7 +590,7 @@ namespace System.Globalization
             {
                 // Check the hash table
                 bool ret;
-                CultureData retVal;
+                CultureData? retVal;
                 lock (s_lock)
                 {
                     ret = tempHashTable.TryGetValue(hashName, out retVal);
@@ -695,6 +695,14 @@ namespace System.Globalization
                 cd._iLanguage = CultureInfo.LOCALE_CUSTOM_UNSPECIFIED;
 
                 return cd;
+            }
+
+            if (cultureName.Length == 1 && (cultureName[0] == 'C' || cultureName[0] == 'c'))
+            {
+                // Always map the "C" locale to Invariant to avoid mapping it to en_US_POSIX on Linux because POSIX
+                // locale collation doesn't support case insensitive comparisons.
+                // We do the same mapping on Windows for the sake of consistency. 
+                return CultureData.Invariant;
             }
 
             CultureData culture = new CultureData();

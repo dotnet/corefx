@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.Json.Serialization.Converters;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -18,13 +18,18 @@ namespace System.Text.Json.Serialization
             if (!state.Current.StartObjectWritten)
             {
                 state.Current.WriteObjectOrArrayStart(ClassType.Object, writer);
+                state.Current.PropertyEnumerator = state.Current.JsonClassInfo.PropertyCache.GetEnumerator();
+                state.Current.NextProperty();
+            }
+            else if (state.Current.MoveToNextProperty)
+            {
+                state.Current.NextProperty();
             }
 
             // Determine if we are done enumerating properties.
-            // If the ClassType is unknown, there will be a policy property applied. There is probably
-            // a better way to identify policy properties- maybe not put them in the normal property bag?
+            // If the ClassType is unknown, there will be a policy property applied
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
-            if (classInfo.ClassType != ClassType.Unknown && state.Current.PropertyIndex != classInfo.PropertyCount)
+            if (classInfo.ClassType != ClassType.Unknown && state.Current.PropertyEnumeratorActive)
             {
                 HandleObject(options, writer, ref state);
                 return false;
@@ -53,10 +58,11 @@ namespace System.Text.Json.Serialization
                 state.Current.JsonClassInfo.ClassType == ClassType.Object ||
                 state.Current.JsonClassInfo.ClassType == ClassType.Unknown);
 
-            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(state.Current.PropertyIndex);
+            var kvp = (KeyValuePair<string, JsonPropertyInfo>)state.Current.PropertyEnumerator.Current;
+            JsonPropertyInfo jsonPropertyInfo = kvp.Value;
             if (!jsonPropertyInfo.ShouldSerialize)
             {
-                state.Current.NextProperty();
+                state.Current.MoveToNextProperty = true;
                 return true;
             }
 
@@ -75,8 +81,8 @@ namespace System.Text.Json.Serialization
 
             if (jsonPropertyInfo.ClassType == ClassType.Value)
             {
-                jsonPropertyInfo.Write(ref state.Current, writer);
-                state.Current.NextProperty();
+                jsonPropertyInfo.Write(ref state, writer);
+                state.Current.MoveToNextProperty = true;
                 return true;
             }
 
@@ -86,7 +92,7 @@ namespace System.Text.Json.Serialization
                 bool endOfEnumerable = HandleEnumerable(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {
-                    state.Current.NextProperty();
+                    state.Current.MoveToNextProperty = true;
                 }
 
                 return endOfEnumerable;
@@ -98,21 +104,21 @@ namespace System.Text.Json.Serialization
                 bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {
-                    state.Current.NextProperty();
+                    state.Current.MoveToNextProperty = true;
                 }
 
                 return endOfEnumerable;
             }
 
             // A property that returns an immutable dictionary keeps the same stack frame.
-            if (jsonPropertyInfo.ClassType == ClassType.ImmutableDictionary)
+            if (jsonPropertyInfo.ClassType == ClassType.IDictionaryConstructible)
             {
-                state.Current.IsImmutableDictionaryProperty = true;
+                state.Current.IsIDictionaryConstructibleProperty = true;
 
                 bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {
-                    state.Current.NextProperty();
+                    state.Current.MoveToNextProperty = true;
                 }
 
                 return endOfEnumerable;
@@ -128,8 +134,7 @@ namespace System.Text.Json.Serialization
             {
                 // A new stack frame is required.
                 JsonPropertyInfo previousPropertyInfo = state.Current.JsonPropertyInfo;
-
-                state.Current.NextProperty();
+                state.Current.MoveToNextProperty = true;
 
                 JsonClassInfo nextClassInfo = jsonPropertyInfo.RuntimeClassInfo;
                 state.Push(nextClassInfo, currentValue);
@@ -144,7 +149,7 @@ namespace System.Text.Json.Serialization
                     writer.WriteNull(jsonPropertyInfo.EscapedName.Value);
                 }
 
-                state.Current.NextProperty();
+                state.Current.MoveToNextProperty = true;
             }
 
             return true;
