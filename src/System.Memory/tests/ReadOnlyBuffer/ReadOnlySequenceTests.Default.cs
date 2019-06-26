@@ -125,10 +125,10 @@ namespace System.Memory.Tests
         [Fact]
         public void Slice_DefaultSequencePosition()
         {
-            var firstSegment = new BufferSegment<byte>(new byte[1]);
-            BufferSegment<byte> secondSegment = firstSegment.Append(new byte[1]);
+            var firstSegment = new BufferSegment<byte>(new byte[4]);
+            BufferSegment<byte> secondSegment = firstSegment.Append(new byte[4]);
 
-            var sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, 1);
+            var sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, firstSegment.Memory.Length);
             ReadOnlySequence<byte> slicedSequence = sequence.Slice(default(SequencePosition));
             Assert.Equal(sequence, slicedSequence);
 
@@ -136,7 +136,8 @@ namespace System.Memory.Tests
             slicedSequence = sequence.Slice(default(SequencePosition), default(SequencePosition));
             Assert.Equal(0, slicedSequence.Length);
 
-            // Slice(x, default) returns empty is x = 0. Otherwise throws
+            // Slice(x, default) returns empty if x = 0. Otherwise throws
+            sequence = sequence.Slice(2);
             slicedSequence = sequence.Slice(0, default(SequencePosition));
             Assert.Equal(0, slicedSequence.Length);
 

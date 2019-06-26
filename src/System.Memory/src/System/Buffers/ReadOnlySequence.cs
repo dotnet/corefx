@@ -270,15 +270,21 @@ namespace System.Buffers
             if (start < 0)
                 ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
 
-            uint sliceEndIndex = (uint)GetIndex(end);
-            object? sliceEndObject = end.GetObject() ?? _startObject;
-
             uint startIndex = (uint)GetIndex(_startInteger);
             object? startObject = _startObject;
 
             uint endIndex = (uint)GetIndex(_endInteger);
             object? endObject = _endObject;
 
+            uint sliceEndIndex = (uint)GetIndex(end);
+            object? sliceEndObject = end.GetObject();
+
+            if (sliceEndObject == null)
+            {
+                sliceEndObject = _startObject;
+                sliceEndIndex = startIndex;
+            }
+            
             // Single-Segment Sequence
             if (startObject == endObject)
             {
@@ -340,15 +346,21 @@ namespace System.Buffers
         /// <returns>A slice that consists of <paramref name="length" /> elements from the current instance starting at sequence position <paramref name="start" />.</returns>
         public ReadOnlySequence<T> Slice(SequencePosition start, long length)
         {
-            // Check start before length
-            uint sliceStartIndex = (uint)GetIndex(start);
-            object? sliceStartObject = start.GetObject() ?? _startObject;
-
             uint startIndex = (uint)GetIndex(_startInteger);
             object? startObject = _startObject;
 
             uint endIndex = (uint)GetIndex(_endInteger);
             object? endObject = _endObject;
+
+            // Check start before length
+            uint sliceStartIndex = (uint)GetIndex(start);
+            object? sliceStartObject = start.GetObject();
+
+            if (sliceStartObject == null)
+            {
+                sliceStartIndex = startIndex;
+                sliceStartObject = _startObject;
+            }
 
             // Single-Segment Sequence
             if (startObject == endObject)
