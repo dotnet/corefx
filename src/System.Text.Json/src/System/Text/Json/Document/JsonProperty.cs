@@ -29,6 +29,21 @@ namespace System.Text.Json
         public string Name => Value.GetPropertyName();
 
         /// <summary>
+        ///   Write the property into the provided writer as a named JSON object property.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <exception cref="InvalidOperationException">
+        ///   This <see cref="Value"/>'s <see cref="JsonElement.ValueKind"/> is <see cref="JsonValueKind.Undefined"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void Write(Utf8JsonWriter writer)
+        {
+            Value.WriteProperty(Value.GetPropertyRawBytes().Span, writer);
+        }
+
+        /// <summary>
         ///   Compares <paramref name="text" /> to the name of this property.
         /// </summary>
         /// <param name="text">The text to compare against.</param>
@@ -103,6 +118,6 @@ namespace System.Text.Json
         }
 
         private string DebuggerDisplay
-            => Value.Type == JsonValueType.Undefined ? "<Undefined>" : $"\"{ToString()}\"";
+            => Value.ValueKind == JsonValueKind.Undefined ? "<Undefined>" : $"\"{ToString()}\"";
     }
 }

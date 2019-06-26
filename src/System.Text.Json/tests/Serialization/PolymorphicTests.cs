@@ -54,12 +54,12 @@ namespace System.Text.Json.Serialization.Tests
             object obj = JsonSerializer.Parse<object>(@"""hello""");
             Assert.IsType<JsonElement>(obj);
             JsonElement element = (JsonElement)obj;
-            Assert.Equal(JsonValueType.String, element.Type);
+            Assert.Equal(JsonValueKind.String, element.ValueKind);
             Assert.Equal("hello", element.GetString());
 
             obj = JsonSerializer.Parse<object>(@"true");
             element = (JsonElement)obj;
-            Assert.Equal(JsonValueType.True, element.Type);
+            Assert.Equal(JsonValueKind.True, element.ValueKind);
             Assert.Equal(true, element.GetBoolean());
 
             obj = JsonSerializer.Parse<object>(@"null");
@@ -67,7 +67,7 @@ namespace System.Text.Json.Serialization.Tests
 
             obj = JsonSerializer.Parse<object>(@"[]");
             element = (JsonElement)obj;
-            Assert.Equal(JsonValueType.Array, element.Type);
+            Assert.Equal(JsonValueKind.Array, element.ValueKind);
         }
 
         [Fact]

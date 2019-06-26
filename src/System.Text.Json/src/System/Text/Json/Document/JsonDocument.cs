@@ -75,6 +75,18 @@ namespace System.Text.Json
             }
         }
 
+        /// <summary>
+        ///   Write the document into the provided writer as a JSON value.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void Write(Utf8JsonWriter writer)
+        {
+            RootElement.WriteValue(writer);
+        }
+
         internal JsonTokenType GetJsonTokenType(int index)
         {
             CheckNotDisposed();
@@ -186,7 +198,7 @@ namespace System.Text.Json
             return _utf8Json.Slice(start, row.Location - start + row.SizeOrLength);
         }
 
-        private ReadOnlyMemory<byte> GetPropertyRawValue(int valueIndex)
+        internal ReadOnlyMemory<byte> GetPropertyRawValue(int valueIndex)
         {
             CheckNotDisposed();
 

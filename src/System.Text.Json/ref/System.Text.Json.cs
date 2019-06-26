@@ -26,6 +26,7 @@ namespace System.Text.Json
         public static System.Threading.Tasks.Task<System.Text.Json.JsonDocument> ParseAsync(System.IO.Stream utf8Json, System.Text.Json.JsonDocumentOptions options = default(System.Text.Json.JsonDocumentOptions), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public static System.Text.Json.JsonDocument ParseValue(ref System.Text.Json.Utf8JsonReader reader) { throw null; }
         public static bool TryParseValue(ref System.Text.Json.Utf8JsonReader reader, out System.Text.Json.JsonDocument document) { throw null; }
+        public void Write(Utf8JsonWriter writer) { }
     }
     public partial struct JsonDocumentOptions
     {
@@ -39,7 +40,7 @@ namespace System.Text.Json
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
         public System.Text.Json.JsonElement this[int index] { get { throw null; } }
-        public System.Text.Json.JsonValueType Type { get { throw null; } }
+        public System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
         public System.Text.Json.JsonElement Clone() { throw null; }
         public System.Text.Json.JsonElement.ArrayEnumerator EnumerateArray() { throw null; }
         public System.Text.Json.JsonElement.ObjectEnumerator EnumerateObject() { throw null; }
@@ -168,6 +169,7 @@ namespace System.Text.Json
         public bool NameEquals(System.ReadOnlySpan<char> text) { throw null; }
         public bool NameEquals(string text) { throw null; }
         public override string ToString() { throw null; }
+        public void Write(System.Text.Json.Utf8JsonWriter writer) { }
     }
     public partial struct JsonReaderOptions
     {
@@ -233,7 +235,7 @@ namespace System.Text.Json
         Null = (byte)10,
         Comment = (byte)11,
     }
-    public enum JsonValueType : byte
+    public enum JsonValueKind : byte
     {
         Undefined = (byte)0,
         Object = (byte)1,
