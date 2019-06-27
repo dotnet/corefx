@@ -9,41 +9,17 @@ using System.Runtime.InteropServices;
 
 namespace System.Security.Principal
 {
-    [Flags]
-    internal enum PolicyRights
-    {
-        POLICY_VIEW_LOCAL_INFORMATION = 0x00000001,
-        POLICY_VIEW_AUDIT_INFORMATION = 0x00000002,
-        POLICY_GET_PRIVATE_INFORMATION = 0x00000004,
-        POLICY_TRUST_ADMIN = 0x00000008,
-        POLICY_CREATE_ACCOUNT = 0x00000010,
-        POLICY_CREATE_SECRET = 0x00000020,
-        POLICY_CREATE_PRIVILEGE = 0x00000040,
-        POLICY_SET_DEFAULT_QUOTA_LIMITS = 0x00000080,
-        POLICY_SET_AUDIT_REQUIREMENTS = 0x00000100,
-        POLICY_AUDIT_LOG_ADMIN = 0x00000200,
-        POLICY_SERVER_ADMIN = 0x00000400,
-        POLICY_LOOKUP_NAMES = 0x00000800,
-        POLICY_NOTIFICATION = 0x00001000,
-    }
-
     internal static class Win32
     {
         internal const int FALSE = 0;
 
-        //
         // Wrapper around advapi32.LsaOpenPolicy
-        //
-
-
-        internal static SafeLsaPolicyHandle LsaOpenPolicy(
-            string systemName,
-            PolicyRights rights)
+        internal static SafeLsaPolicyHandle LsaOpenPolicy(string systemName, int rights)
         {
             SafeLsaPolicyHandle policyHandle;
 
             var attributes = new Interop.OBJECT_ATTRIBUTES();
-            uint error = Interop.Advapi32.LsaOpenPolicy(systemName, ref attributes, (int)rights, out policyHandle);
+            uint error = Interop.Advapi32.LsaOpenPolicy(systemName, ref attributes, rights, out policyHandle);
             if (error == 0)
             {
                 return policyHandle;
@@ -60,11 +36,9 @@ namespace System.Security.Principal
             else
             {
                 uint win32ErrorCode = Interop.Advapi32.LsaNtStatusToWinError(error);
-
                 throw new Win32Exception(unchecked((int)win32ErrorCode));
             }
         }
-
 
         internal static byte[] ConvertIntPtrSidToByteArraySid(IntPtr binaryForm)
         {

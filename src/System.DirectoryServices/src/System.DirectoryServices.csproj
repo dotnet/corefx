@@ -136,6 +136,42 @@
     <Compile Include="Interop\NativeMethods.cs" />
     <Compile Include="Interop\SafeNativeMethods.cs" />
     <Compile Include="Interop\UnsafeNativeMethods.cs" />
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.UNICODE_STRING.cs">
+      <Link>Common\Interop\Windows\Interop.UNICODE_STRING.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.OBJECT_ATTRIBUTES.cs">
+      <Link>Common\Interop\Windows\Interop.OBJECT_ATTRIBUTES.cs</Link>
+    </Compile>
+      <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.LsaClose.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.LsaClose.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.LsaFreeMemory.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.LsaFreeMemory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.LsaNtStatusToWinError.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.LsaNtStatusToWinError.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.LsaOpenPolicy.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.LsaOpenPolicy.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.LsaQueryInformationPolicy.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.LsaQueryInformationPolicy.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\Interop.LSAStructs.cs">
+      <Link>Common\Interop\Windows\SspiCli\Interop.LSAStructs.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.POLICY_INFORMATION_CLASS.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.POLICY_INFORMATION_CLASS.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLsaMemoryHandle.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeLsaMemoryHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeLsaPolicyHandle.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeLsaPolicyHandle.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Collections" />

@@ -9,6 +9,7 @@ using System.Security.Principal;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Globalization;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.DirectoryServices.ActiveDirectory
 {
@@ -43,7 +44,6 @@ namespace System.DirectoryServices.ActiveDirectory
     {
         private static int s_LOGON32_LOGON_NEW_CREDENTIALS = 9;
         private static int s_LOGON32_PROVIDER_WINNT50 = 3;
-        private static int s_POLICY_VIEW_LOCAL_INFORMATION = 0x00000001;
         private static uint s_STANDARD_RIGHTS_REQUIRED = 0x000F0000;
         private static uint s_SYNCHRONIZE = 0x00100000;
         private static uint s_THREAD_ALL_ACCESS = s_STANDARD_RIGHTS_REQUIRED | s_SYNCHRONIZE | 0x3FF;
@@ -1039,34 +1039,22 @@ namespace System.DirectoryServices.ActiveDirectory
             return serverName;
         }
 
-        internal static IntPtr GetPolicyHandle(string serverName)
+        internal static SafeLsaPolicyHandle GetPolicyHandle(string serverName)
         {
-            IntPtr handle = (IntPtr)0;
-            LSA_UNICODE_STRING systemName;
-            LSA_OBJECT_ATTRIBUTES objectAttribute = new LSA_OBJECT_ATTRIBUTES();
-            IntPtr target = (IntPtr)0;
-
-            int mask = s_POLICY_VIEW_LOCAL_INFORMATION;
-
-            systemName = new LSA_UNICODE_STRING();
-            target = Marshal.StringToHGlobalUni(serverName);
-            UnsafeNativeMethods.RtlInitUnicodeString(systemName, target);
-
-            try
+            SafeLsaPolicyHandle policyHandle;
+            var attributes = new Interop.OBJECT_ATTRIBUTES();
+            uint error = Interop.Advapi32.LsaOpenPolicy(
+                serverName,
+                ref attributes,
+                Interop.Advapi32.POLICY_VIEW_LOCAL_INFORMATION,
+                out policyHandle);
+            if (error != 0)
             {
-                int result = UnsafeNativeMethods.LsaOpenPolicy(systemName, objectAttribute, mask, out handle);
-                if (result != 0)
-                {
-                    throw ExceptionHelper.GetExceptionFromErrorCode(UnsafeNativeMethods.LsaNtStatusToWinError(result), serverName);
-                }
+                uint win32Error = Interop.Advapi32.LsaNtStatusToWinError(error);
+                throw ExceptionHelper.GetExceptionFromErrorCode(unchecked((int)win32Error), serverName);
+            }
 
-                return handle;
-            }
-            finally
-            {
-                if (target != (IntPtr)0)
-                    Marshal.FreeHGlobal(target);
-            }
+            return policyHandle;
         }
 
         //
@@ -2167,41 +2155,34 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal static IntPtr GetMachineDomainSid()
         {
-            IntPtr pPolicyHandle = IntPtr.Zero;
-            IntPtr pBuffer = IntPtr.Zero;
-            IntPtr pOA = IntPtr.Zero;
+            SafeLsaPolicyHandle policyHandle = null;
+            SafeLsaMemoryHandle bufferHandle = null;
 
             try
             {
-                LSA_OBJECT_ATTRIBUTES oa = new LSA_OBJECT_ATTRIBUTES();
-
-                pOA = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LSA_OBJECT_ATTRIBUTES)));
-                Marshal.StructureToPtr(oa, pOA, false);
-                int err = UnsafeNativeMethods.LsaOpenPolicy(
-                                IntPtr.Zero,
-                                pOA,
-                                1,          // POLICY_VIEW_LOCAL_INFORMATION
-                                ref pPolicyHandle);
-
-                if (err != 0)
+                var attributes = new Interop.OBJECT_ATTRIBUTES();
+                uint error = Interop.Advapi32.LsaOpenPolicy(
+                                null,
+                                ref attributes,
+                                Interop.Advapi32.POLICY_VIEW_LOCAL_INFORMATION,
+                                out policyHandle);
+                if (error != 0)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.UnableToRetrievePolicy, NativeMethods.LsaNtStatusToWinError(err)));
+                    throw new InvalidOperationException(SR.Format(SR.UnableToRetrievePolicy, Interop.Advapi32.LsaNtStatusToWinError(error)));
                 }
 
-                Debug.Assert(pPolicyHandle != IntPtr.Zero);
-                err = UnsafeNativeMethods.LsaQueryInformationPolicy(
-                                pPolicyHandle,
-                                5,              // PolicyAccountDomainInformation
-                                ref pBuffer);
-
-                if (err != 0)
+                Debug.Assert(!policyHandle.IsInvalid);
+                error = Interop.Advapi32.LsaQueryInformationPolicy(
+                                policyHandle,
+                                Interop.Advapi32.POLICY_INFORMATION_CLASS.PolicyAccountDomainInformation,
+                                out bufferHandle);
+                if (error != 0)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.UnableToRetrievePolicy, NativeMethods.LsaNtStatusToWinError(err)));
+                    throw new InvalidOperationException(SR.Format(SR.UnableToRetrievePolicy, Interop.Advapi32.LsaNtStatusToWinError(error)));
                 }
 
-                Debug.Assert(pBuffer != IntPtr.Zero);
-                POLICY_ACCOUNT_DOMAIN_INFO info = (POLICY_ACCOUNT_DOMAIN_INFO)
-                                    Marshal.PtrToStructure(pBuffer, typeof(POLICY_ACCOUNT_DOMAIN_INFO));
+                Debug.Assert(!bufferHandle.IsInvalid);
+                POLICY_ACCOUNT_DOMAIN_INFO info = Marshal.PtrToStructure<POLICY_ACCOUNT_DOMAIN_INFO>(bufferHandle.DangerousGetHandle());
 
                 Debug.Assert(UnsafeNativeMethods.IsValidSid(info.domainSid));
 
@@ -2220,14 +2201,8 @@ namespace System.DirectoryServices.ActiveDirectory
             }
             finally
             {
-                if (pPolicyHandle != IntPtr.Zero)
-                    UnsafeNativeMethods.LsaClose(pPolicyHandle);
-
-                if (pBuffer != IntPtr.Zero)
-                    UnsafeNativeMethods.LsaFreeMemory(pBuffer);
-
-                if (pOA != IntPtr.Zero)
-                    Marshal.FreeHGlobal(pOA);
+                policyHandle?.Dispose();
+                bufferHandle?.Dispose();
             }
         }
 

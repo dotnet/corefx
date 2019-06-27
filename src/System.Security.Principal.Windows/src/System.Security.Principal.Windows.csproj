@@ -23,10 +23,10 @@
       <Link>Common\Interop\Interop.Libraries.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.UNICODE_STRING.cs">
-      <Link>Common\Interop\Windows\Advapi32\Interop.UNICODE_STRING.cs</Link>
+      <Link>Common\Interop\Windows\Interop.UNICODE_STRING.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.OBJECT_ATTRIBUTES.cs">
-      <Link>Common\Interop\Windows\Advapi32\Interop.OBJECT_ATTRIBUTES.cs</Link>
+      <Link>Common\Interop\Windows\Interop.OBJECT_ATTRIBUTES.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\Interop.TOKENS.cs">
       <Link>Common\Interop\Interop.TOKENS.cs</Link>
@@ -63,6 +63,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.DuplicateTokenEx.cs">
       <Link>Common\Interop\Interop.DuplicateTokenEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.POLICY_INFORMATION_CLASS.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.POLICY_INFORMATION_CLASS.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.DuplicateHandle.cs">
       <Link>Common\Interop\Interop.DuplicateHandle.cs</Link>

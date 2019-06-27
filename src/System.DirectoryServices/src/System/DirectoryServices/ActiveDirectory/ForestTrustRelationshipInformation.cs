@@ -5,6 +5,7 @@
 using System.Runtime.InteropServices;
 using System.Collections;
 using System.Collections.Specialized;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.DirectoryServices.ActiveDirectory
 {
@@ -83,7 +84,7 @@ namespace System.DirectoryServices.ActiveDirectory
             int currentCount = 0;
             IntPtr tmpPtr = (IntPtr)0;
             IntPtr forestInfo = (IntPtr)0;
-            PolicySafeHandle handle = null;
+            SafeLsaPolicyHandle handle = null;
             LSA_UNICODE_STRING trustedDomainName;
             IntPtr collisionInfo = (IntPtr)0;
             ArrayList ptrList = new ArrayList();
@@ -269,7 +270,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     impersonated = Utils.Impersonate(context);
 
                     // get the policy handle                
-                    handle = new PolicySafeHandle(Utils.GetPolicyHandle(serverName));
+                    handle = Utils.GetPolicyHandle(serverName);
 
                     // get the target name
                     trustedDomainName = new LSA_UNICODE_STRING();
@@ -326,7 +327,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
 
                     if (collisionInfo != (IntPtr)0)
-                        UnsafeNativeMethods.LsaFreeMemory(collisionInfo);
+                        Interop.Advapi32.LsaFreeMemory(collisionInfo);
 
                     if (target != (IntPtr)0)
                         Marshal.FreeHGlobal(target);
@@ -341,7 +342,7 @@ namespace System.DirectoryServices.ActiveDirectory
         private void GetForestTrustInfoHelper()
         {
             IntPtr forestTrustInfo = (IntPtr)0;
-            PolicySafeHandle handle = null;
+            SafeLsaPolicyHandle handle = null;
             LSA_UNICODE_STRING tmpName = null;
             bool impersonated = false;
             IntPtr targetPtr = (IntPtr)0;
@@ -371,7 +372,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     impersonated = Utils.Impersonate(context);
 
                     // get the policy handle
-                    handle = new PolicySafeHandle(Utils.GetPolicyHandle(serverName));
+                    handle = Utils.GetPolicyHandle(serverName);
 
                     int result = UnsafeNativeMethods.LsaQueryForestTrustInformation(handle, tmpName, ref forestTrustInfo);
                     // check the result
@@ -441,7 +442,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
                     finally
                     {
-                        UnsafeNativeMethods.LsaFreeMemory(forestTrustInfo);
+                        Interop.Advapi32.LsaFreeMemory(forestTrustInfo);
                     }
 
                     _topLevelNames = tmpTLNs;

@@ -7,16 +7,6 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.DirectoryServices.ActiveDirectory
 {
-    internal sealed class PolicySafeHandle : SafeHandleZeroOrMinusOneIsInvalid
-    {
-        internal PolicySafeHandle(IntPtr value) : base(true)
-        {
-            SetHandle(value);
-        }
-
-        override protected bool ReleaseHandle() => UnsafeNativeMethods.LsaClose(handle) == 0;
-    }
-
     internal sealed class LsaLogonProcessSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         private LsaLogonProcessSafeHandle() : base(true) { }

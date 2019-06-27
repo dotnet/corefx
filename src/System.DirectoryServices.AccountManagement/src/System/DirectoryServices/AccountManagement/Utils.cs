@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Security.Principal;
 using System.Security;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.DirectoryServices.AccountManagement
 {
@@ -475,49 +476,42 @@ namespace System.DirectoryServices.AccountManagement
 
         internal static IntPtr GetMachineDomainSid()
         {
-            IntPtr pPolicyHandle = IntPtr.Zero;
-            IntPtr pBuffer = IntPtr.Zero;
-            IntPtr pOA = IntPtr.Zero;
+            SafeLsaPolicyHandle policyHandle = null;
+            SafeLsaMemoryHandle bufferHandle = null;
 
             try
             {
-                UnsafeNativeMethods.LSA_OBJECT_ATTRIBUTES oa = new UnsafeNativeMethods.LSA_OBJECT_ATTRIBUTES();
-
-                pOA = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(UnsafeNativeMethods.LSA_OBJECT_ATTRIBUTES)));
-                Marshal.StructureToPtr(oa, pOA, false);
-                int err = UnsafeNativeMethods.LsaOpenPolicy(
-                                IntPtr.Zero,
-                                pOA,
-                                1,          // POLICY_VIEW_LOCAL_INFORMATION
-                                ref pPolicyHandle);
-
+                var oa = new Interop.OBJECT_ATTRIBUTES();
+                uint err = Interop.Advapi32.LsaOpenPolicy(
+                                null,
+                                ref oa,
+                                Interop.Advapi32.POLICY_VIEW_LOCAL_INFORMATION,
+                                out policyHandle);
                 if (err != 0)
                 {
-                    GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "GetMachineDomainSid: LsaOpenPolicy failed, gle=" + SafeNativeMethods.LsaNtStatusToWinError(err));
+                    GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "GetMachineDomainSid: LsaOpenPolicy failed, gle=" + Interop.Advapi32.LsaNtStatusToWinError(err));
 
                     throw new PrincipalOperationException(SR.Format(
                                                                SR.UnableToRetrievePolicy,
-                                                               SafeNativeMethods.LsaNtStatusToWinError(err)));
+                                                               Interop.Advapi32.LsaNtStatusToWinError(err)));
                 }
 
-                Debug.Assert(pPolicyHandle != IntPtr.Zero);
-                err = UnsafeNativeMethods.LsaQueryInformationPolicy(
-                                pPolicyHandle,
-                                5,              // PolicyAccountDomainInformation
-                                ref pBuffer);
-
+                Debug.Assert(!policyHandle.IsInvalid);
+                err = Interop.Advapi32.LsaQueryInformationPolicy(
+                                policyHandle,
+                                Interop.Advapi32.POLICY_INFORMATION_CLASS.PolicyAccountDomainInformation,
+                                out bufferHandle);
                 if (err != 0)
                 {
-                    GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "GetMachineDomainSid: LsaQueryInformationPolicy failed, gle=" + SafeNativeMethods.LsaNtStatusToWinError(err));
+                    GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "GetMachineDomainSid: LsaQueryInformationPolicy failed, gle=" + Interop.Advapi32.LsaNtStatusToWinError(err));
 
                     throw new PrincipalOperationException(SR.Format(
                                                                SR.UnableToRetrievePolicy,
-                                                               SafeNativeMethods.LsaNtStatusToWinError(err)));
+                                                               Interop.Advapi32.LsaNtStatusToWinError(err)));
                 }
 
-                Debug.Assert(pBuffer != IntPtr.Zero);
-                UnsafeNativeMethods.POLICY_ACCOUNT_DOMAIN_INFO info = (UnsafeNativeMethods.POLICY_ACCOUNT_DOMAIN_INFO)
-                                    Marshal.PtrToStructure(pBuffer, typeof(UnsafeNativeMethods.POLICY_ACCOUNT_DOMAIN_INFO));
+                Debug.Assert(!bufferHandle.IsInvalid);
+                UnsafeNativeMethods.POLICY_ACCOUNT_DOMAIN_INFO info = Marshal.PtrToStructure<UnsafeNativeMethods.POLICY_ACCOUNT_DOMAIN_INFO>(bufferHandle.DangerousGetHandle());
 
                 Debug.Assert(UnsafeNativeMethods.IsValidSid(info.domainSid));
 
@@ -540,14 +534,8 @@ namespace System.DirectoryServices.AccountManagement
             }
             finally
             {
-                if (pPolicyHandle != IntPtr.Zero)
-                    UnsafeNativeMethods.LsaClose(pPolicyHandle);
-
-                if (pBuffer != IntPtr.Zero)
-                    UnsafeNativeMethods.LsaFreeMemory(pBuffer);
-
-                if (pOA != IntPtr.Zero)
-                    Marshal.FreeHGlobal(pOA);
+                policyHandle?.Dispose();
+                bufferHandle?.Dispose();
             }
         }
 

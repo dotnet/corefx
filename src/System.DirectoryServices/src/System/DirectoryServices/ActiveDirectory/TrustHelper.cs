@@ -5,6 +5,7 @@
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.DirectoryServices.ActiveDirectory
 {
@@ -49,7 +50,6 @@ namespace System.DirectoryServices.ActiveDirectory
         private static int s_NETLOGON_VERIFY_STATUS_RETURNED = 0x80;
         private static int s_PASSWORD_LENGTH = 15;
         private static int s_TRUST_AUTH_TYPE_CLEAR = 2;
-        private static int s_policyDnsDomainInformation = 12;
         private static int s_TRUSTED_SET_POSIX = 0x00000010;
         private static int s_TRUSTED_SET_AUTH = 0x00000020;
         internal static int TRUST_TYPE_DOWNLEVEL = 0x00000001;
@@ -63,7 +63,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal static bool GetTrustedDomainInfoStatus(DirectoryContext context, string sourceName, string targetName, TRUST_ATTRIBUTE attribute, bool isForest)
         {
-            PolicySafeHandle handle = null;
+            SafeLsaPolicyHandle handle = null;
             IntPtr buffer = (IntPtr)0;
             LSA_UNICODE_STRING trustedDomainName = null;
             bool impersonated = false;
@@ -80,7 +80,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 try
                 {
                     // get the policy handle first
-                    handle = new PolicySafeHandle(Utils.GetPolicyHandle(serverName));
+                    handle = Utils.GetPolicyHandle(serverName);
 
                     // get the target name
                     trustedDomainName = new LSA_UNICODE_STRING();
@@ -152,7 +152,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         Marshal.FreeHGlobal(target);
 
                     if (buffer != (IntPtr)0)
-                        UnsafeNativeMethods.LsaFreeMemory(buffer);
+                        Interop.Advapi32.LsaFreeMemory(buffer);
                 }
             }
             catch { throw; }
@@ -160,7 +160,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal static void SetTrustedDomainInfoStatus(DirectoryContext context, string sourceName, string targetName, TRUST_ATTRIBUTE attribute, bool status, bool isForest)
         {
-            PolicySafeHandle handle = null;
+            SafeLsaPolicyHandle handle = null;
             IntPtr buffer = (IntPtr)0;
             IntPtr newInfo = (IntPtr)0;
             LSA_UNICODE_STRING trustedDomainName = null;
@@ -177,7 +177,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 try
                 {
                     // get the policy handle first
-                    handle = new PolicySafeHandle(Utils.GetPolicyHandle(serverName));
+                    handle = Utils.GetPolicyHandle(serverName);
 
                     // get the target name
                     trustedDomainName = new LSA_UNICODE_STRING();
@@ -279,7 +279,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         Marshal.FreeHGlobal(target);
 
                     if (buffer != (IntPtr)0)
-                        UnsafeNativeMethods.LsaFreeMemory(buffer);
+                        Interop.Advapi32.LsaFreeMemory(buffer);
 
                     if (newInfo != (IntPtr)0)
                         Marshal.FreeHGlobal(newInfo);
@@ -290,7 +290,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal static void DeleteTrust(DirectoryContext sourceContext, string sourceName, string targetName, bool isForest)
         {
-            PolicySafeHandle policyHandle = null;
+            SafeLsaPolicyHandle policyHandle = null;
             LSA_UNICODE_STRING trustedDomainName = null;
             int win32Error = 0;
             bool impersonated = false;
@@ -307,7 +307,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 try
                 {
                     // get the policy handle
-                    policyHandle = new PolicySafeHandle(Utils.GetPolicyHandle(serverName));
+                    policyHandle = Utils.GetPolicyHandle(serverName);
 
                     // get the target name
                     trustedDomainName = new LSA_UNICODE_STRING();
@@ -352,7 +352,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     finally
                     {
                         if (buffer != (IntPtr)0)
-                            UnsafeNativeMethods.LsaFreeMemory(buffer);
+                        Interop.Advapi32.LsaFreeMemory(buffer);
                     }
                 }
                 finally
@@ -369,7 +369,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal static void VerifyTrust(DirectoryContext context, string sourceName, string targetName, bool isForest, TrustDirection direction, bool forceSecureChannelReset, string preferredTargetServer)
         {
-            PolicySafeHandle policyHandle = null;
+            SafeLsaPolicyHandle policyHandle = null;
             LSA_UNICODE_STRING trustedDomainName = null;
             int win32Error = 0;
             IntPtr data = (IntPtr)0;
@@ -389,7 +389,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 try
                 {
                     // get the policy handle
-                    policyHandle = new PolicySafeHandle(Utils.GetPolicyHandle(policyServerName));
+                    policyHandle = Utils.GetPolicyHandle(policyServerName);
 
                     // get the target name
                     trustedDomainName = new LSA_UNICODE_STRING();
@@ -489,22 +489,19 @@ namespace System.DirectoryServices.ActiveDirectory
             TRUSTED_DOMAIN_INFORMATION_EX tdi = null;
             IntPtr fileTime = (IntPtr)0;
             IntPtr unmanagedPassword = (IntPtr)0;
-            IntPtr info = (IntPtr)0;
             IntPtr domainHandle = (IntPtr)0;
-            PolicySafeHandle policyHandle = null;
+            SafeLsaPolicyHandle policyHandle = null;
             IntPtr unmanagedAuthData = (IntPtr)0;
             bool impersonated = false;
             string serverName = null;
 
             // get the domain info first
-            info = GetTrustedDomainInfo(targetContext, targetName, isForest);
-
-            try
+            using (SafeLsaMemoryHandle info = GetTrustedDomainInfo(targetContext, targetName, isForest))
             {
                 try
                 {
                     POLICY_DNS_DOMAIN_INFO domainInfo = new POLICY_DNS_DOMAIN_INFO();
-                    Marshal.PtrToStructure(info, domainInfo);
+                    Marshal.PtrToStructure(info.DangerousGetHandle(), domainInfo);
 
                     AuthData = new LSA_AUTH_INFORMATION();
                     fileTime = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(FileTime)));
@@ -560,7 +557,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
                     // do impersonation and get policy handle
                     impersonated = Utils.Impersonate(sourceContext);
-                    policyHandle = new PolicySafeHandle(Utils.GetPolicyHandle(serverName));
+                    policyHandle = Utils.GetPolicyHandle(serverName);
 
                     int result = UnsafeNativeMethods.LsaCreateTrustedDomainEx(policyHandle, tdi, AuthInfoEx, s_TRUSTED_SET_POSIX | s_TRUSTED_SET_AUTH, out domainHandle);
                     if (result != 0)
@@ -586,10 +583,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         Marshal.FreeHGlobal(fileTime);
 
                     if (domainHandle != (IntPtr)0)
-                        UnsafeNativeMethods.LsaClose(domainHandle);
-
-                    if (info != (IntPtr)0)
-                        UnsafeNativeMethods.LsaFreeMemory(info);
+                        Interop.Advapi32.LsaClose(domainHandle);
 
                     if (unmanagedPassword != (IntPtr)0)
                         Marshal.FreeHGlobal(unmanagedPassword);
@@ -598,12 +592,11 @@ namespace System.DirectoryServices.ActiveDirectory
                         Marshal.FreeHGlobal(unmanagedAuthData);
                 }
             }
-            catch { throw; }
         }
 
         internal static string UpdateTrust(DirectoryContext context, string sourceName, string targetName, string password, bool isForest)
         {
-            PolicySafeHandle handle = null;
+            SafeLsaPolicyHandle handle = null;
             IntPtr buffer = (IntPtr)0;
             LSA_UNICODE_STRING trustedDomainName = null;
             IntPtr newBuffer = (IntPtr)0;
@@ -626,7 +619,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 try
                 {
                     // get the policy handle first
-                    handle = new PolicySafeHandle(Utils.GetPolicyHandle(serverName));
+                    handle = Utils.GetPolicyHandle(serverName);
 
                     // get the target name
                     trustedDomainName = new LSA_UNICODE_STRING();
@@ -717,7 +710,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         Marshal.FreeHGlobal(target);
 
                     if (buffer != (IntPtr)0)
-                        UnsafeNativeMethods.LsaFreeMemory(buffer);
+                        Interop.Advapi32.LsaFreeMemory(buffer);
 
                     if (newBuffer != (IntPtr)0)
                         Marshal.FreeHGlobal(newBuffer);
@@ -737,7 +730,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal static void UpdateTrustDirection(DirectoryContext context, string sourceName, string targetName, string password, bool isForest, TrustDirection newTrustDirection)
         {
-            PolicySafeHandle handle = null;
+            SafeLsaPolicyHandle handle = null;
             IntPtr buffer = (IntPtr)0;
             LSA_UNICODE_STRING trustedDomainName = null;
             IntPtr newBuffer = (IntPtr)0;
@@ -759,7 +752,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 try
                 {
                     // get the policy handle first
-                    handle = new PolicySafeHandle(Utils.GetPolicyHandle(serverName));
+                    handle = Utils.GetPolicyHandle(serverName);
 
                     // get the target name
                     trustedDomainName = new LSA_UNICODE_STRING();
@@ -862,7 +855,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         Marshal.FreeHGlobal(target);
 
                     if (buffer != (IntPtr)0)
-                        UnsafeNativeMethods.LsaFreeMemory(buffer);
+                        Interop.Advapi32.LsaFreeMemory(buffer);
 
                     if (newBuffer != (IntPtr)0)
                         Marshal.FreeHGlobal(newBuffer);
@@ -880,7 +873,7 @@ namespace System.DirectoryServices.ActiveDirectory
             catch { throw; }
         }
 
-        private static void ValidateTrust(PolicySafeHandle handle, LSA_UNICODE_STRING trustedDomainName, string sourceName, string targetName, bool isForest, int direction, string serverName)
+        private static void ValidateTrust(SafeLsaPolicyHandle handle, LSA_UNICODE_STRING trustedDomainName, string sourceName, string targetName, bool isForest, int direction, string serverName)
         {
             IntPtr buffer = (IntPtr)0;
 
@@ -926,7 +919,7 @@ namespace System.DirectoryServices.ActiveDirectory
             finally
             {
                 if (buffer != (IntPtr)0)
-                    UnsafeNativeMethods.LsaFreeMemory(buffer);
+                    Interop.Advapi32.LsaFreeMemory(buffer);
             }
         }
 
@@ -989,63 +982,65 @@ namespace System.DirectoryServices.ActiveDirectory
             return password;
         }
 
-        private static IntPtr GetTrustedDomainInfo(DirectoryContext targetContext, string targetName, bool isForest)
+        private static SafeLsaMemoryHandle GetTrustedDomainInfo(DirectoryContext targetContext, string targetName, bool isForest)
         {
-            PolicySafeHandle policyHandle = null;
-            IntPtr buffer = (IntPtr)0;
+            SafeLsaPolicyHandle policyHandle = null;
             bool impersonated = false;
             string serverName = null;
 
             try
             {
+                serverName = Utils.GetPolicyServerName(targetContext, isForest, false, targetName);
+                impersonated = Utils.Impersonate(targetContext);
                 try
                 {
-                    serverName = Utils.GetPolicyServerName(targetContext, isForest, false, targetName);
-                    impersonated = Utils.Impersonate(targetContext);
-                    try
-                    {
-                        policyHandle = new PolicySafeHandle(Utils.GetPolicyHandle(serverName));
-                    }
-                    catch (ActiveDirectoryOperationException)
-                    {
-                        if (impersonated)
-                        {
-                            Utils.Revert();
-                            impersonated = false;
-                        }
-                        // try anonymous          
-                        Utils.ImpersonateAnonymous();
-                        impersonated = true;
-                        policyHandle = new PolicySafeHandle(Utils.GetPolicyHandle(serverName));
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        if (impersonated)
-                        {
-                            Utils.Revert();
-                            impersonated = false;
-                        }
-                        // try anonymous          
-                        Utils.ImpersonateAnonymous();
-                        impersonated = true;
-                        policyHandle = new PolicySafeHandle(Utils.GetPolicyHandle(serverName));
-                    }
-
-                    int result = UnsafeNativeMethods.LsaQueryInformationPolicy(policyHandle, s_policyDnsDomainInformation, out buffer);
-                    if (result != 0)
-                    {
-                        throw ExceptionHelper.GetExceptionFromErrorCode(UnsafeNativeMethods.LsaNtStatusToWinError(result), serverName);
-                    }
-
-                    return buffer;
+                    policyHandle = Utils.GetPolicyHandle(serverName);
                 }
-                finally
+                catch (ActiveDirectoryOperationException)
                 {
                     if (impersonated)
+                    {
                         Utils.Revert();
+                        impersonated = false;
+                    }
+                    // try anonymous          
+                    Utils.ImpersonateAnonymous();
+                    impersonated = true;
+                    policyHandle = Utils.GetPolicyHandle(serverName);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    if (impersonated)
+                    {
+                        Utils.Revert();
+                        impersonated = false;
+                    }
+                    // try anonymous          
+                    Utils.ImpersonateAnonymous();
+                    impersonated = true;
+                    policyHandle = Utils.GetPolicyHandle(serverName);
+                }
+
+                uint error = Interop.Advapi32.LsaQueryInformationPolicy(
+                    policyHandle,
+                    Interop.Advapi32.POLICY_INFORMATION_CLASS.PolicyDnsDomainInformation,
+                    out SafeLsaMemoryHandle buffer
+                );
+                if (error != 0)
+                {
+                    uint win32Error = Interop.Advapi32.LsaNtStatusToWinError(error);
+                    throw ExceptionHelper.GetExceptionFromErrorCode(unchecked((int)win32Error), serverName);
+                }
+
+                return buffer;
+            }
+            finally
+            {
+                if (impersonated)
+                {
+                    Utils.Revert();
                 }
             }
-            catch { throw; }
         }
     }
 }

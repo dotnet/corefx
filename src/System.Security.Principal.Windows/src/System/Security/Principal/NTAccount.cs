@@ -278,7 +278,7 @@ namespace System.Security.Principal
                 // Open LSA policy (for lookup requires it)
                 //
 
-                LsaHandle = Win32.LsaOpenPolicy(null, PolicyRights.POLICY_LOOKUP_NAMES);
+                LsaHandle = Win32.LsaOpenPolicy(null, Interop.Advapi32.POLICY_LOOKUP_NAMES);
 
                 //
                 // Now perform the actual lookup

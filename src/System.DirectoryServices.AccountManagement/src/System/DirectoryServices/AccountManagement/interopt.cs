@@ -684,17 +684,6 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public sealed class LSA_OBJECT_ATTRIBUTES
-        {
-            public int length = 0;
-            public IntPtr rootDirectory = IntPtr.Zero;
-            public IntPtr objectName = IntPtr.Zero;
-            public int attributes = 0;
-            public IntPtr securityDescriptor = IntPtr.Zero;
-            public IntPtr securityQualityOfService = IntPtr.Zero;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public sealed class POLICY_ACCOUNT_DOMAIN_INFO
         {
             public LSA_UNICODE_STRING domainName = new LSA_UNICODE_STRING();
@@ -707,39 +696,6 @@ namespace System.DirectoryServices.AccountManagement
             public ushort length = 0;
             public ushort maximumLength = 0;
             public IntPtr buffer = IntPtr.Zero;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public sealed class LSA_UNICODE_STRING_Managed
-        {
-            public ushort length = 0;
-            public ushort maximumLength = 0;
-            public string buffer;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public sealed class LSA_TRANSLATED_NAME
-        {
-            public int use = 0;
-            public LSA_UNICODE_STRING name = new LSA_UNICODE_STRING();
-            public int domainIndex = 0;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public sealed class LSA_REFERENCED_DOMAIN_LIST
-        {
-            // To stop the compiler from autogenerating a constructor for this class
-            private LSA_REFERENCED_DOMAIN_LIST() { }
-
-            public int entries = 0;
-            public IntPtr domains = IntPtr.Zero;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public sealed class LSA_TRUST_INFORMATION
-        {
-            public LSA_UNICODE_STRING name = new LSA_UNICODE_STRING();
-            private IntPtr _pSid = IntPtr.Zero;
         }
 
         [DllImport("advapi32.dll", SetLastError = true, CallingConvention = CallingConvention.StdCall, EntryPoint = "OpenThreadToken", CharSet = CharSet.Unicode)]
@@ -774,36 +730,6 @@ namespace System.DirectoryServices.AccountManagement
                                         int bufferSize,
                                         ref int returnLength
                                         );
-
-        [DllImport("advapi32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "LsaOpenPolicy", CharSet = CharSet.Unicode)]
-        static extern public int LsaOpenPolicy(
-                                        IntPtr lsaUnicodeString,
-                                        IntPtr lsaObjectAttributes,
-                                        int desiredAccess,
-                                        ref IntPtr policyHandle);
-
-        [DllImport("advapi32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "LsaQueryInformationPolicy", CharSet = CharSet.Unicode)]
-        static extern public int LsaQueryInformationPolicy(
-                                        IntPtr policyHandle,
-                                        int policyInformationClass,
-                                        ref IntPtr buffer
-                                        );
-
-        [DllImport("advapi32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "LsaLookupSids", CharSet = CharSet.Unicode)]
-        public static extern int LsaLookupSids(
-                                        IntPtr policyHandle,
-                                        int count,
-                                        IntPtr[] sids,
-                                        out IntPtr referencedDomains,
-                                        out IntPtr names
-                                        );
-
-        [DllImport("advapi32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "LsaFreeMemory", CharSet = CharSet.Unicode)]
-        static extern public int LsaFreeMemory(IntPtr buffer);
-
-        [DllImport("advapi32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "LsaClose", CharSet = CharSet.Unicode)]
-        static extern public int LsaClose(IntPtr policyHandle);
-
         //
         // Impersonation
         //

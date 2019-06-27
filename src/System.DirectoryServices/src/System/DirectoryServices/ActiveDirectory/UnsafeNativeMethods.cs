@@ -28,6 +28,7 @@
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.DirectoryServices.ActiveDirectory
 {
@@ -461,27 +462,6 @@ namespace System.DirectoryServices.ActiveDirectory
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal sealed class LSA_OBJECT_ATTRIBUTES
-    {
-        internal int Length;
-        private IntPtr _rootDirectory;
-        private IntPtr _objectName;
-        internal int Attributes;
-        private IntPtr _securityDescriptor;
-        private IntPtr _securityQualityOfService;
-
-        public LSA_OBJECT_ATTRIBUTES()
-        {
-            Length = 0;
-            _rootDirectory = (IntPtr)0;
-            _objectName = (IntPtr)0;
-            Attributes = 0;
-            _securityDescriptor = (IntPtr)0;
-            _securityQualityOfService = (IntPtr)0;
-        }
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
     internal sealed class TRUSTED_DOMAIN_INFORMATION_EX
     {
         public LSA_UNICODE_STRING Name;
@@ -678,34 +658,25 @@ namespace System.DirectoryServices.ActiveDirectory
         public static extern int ConvertStringSidToSidW(IntPtr stringSid, ref IntPtr pSid);
 
         [DllImport("Advapi32.dll", EntryPoint = "LsaSetForestTrustInformation")]
-        public static extern int LsaSetForestTrustInformation(PolicySafeHandle handle, LSA_UNICODE_STRING target, IntPtr forestTrustInfo, int checkOnly, out IntPtr collisionInfo);
-
-        [DllImport("Advapi32.dll", EntryPoint = "LsaOpenPolicy")]
-        public static extern int LsaOpenPolicy(LSA_UNICODE_STRING target, LSA_OBJECT_ATTRIBUTES objectAttributes, int access, out IntPtr handle);
-
-        [DllImport("Advapi32.dll", EntryPoint = "LsaClose")]
-        public static extern int LsaClose(IntPtr handle);
+        public static extern int LsaSetForestTrustInformation(SafeLsaPolicyHandle handle, LSA_UNICODE_STRING target, IntPtr forestTrustInfo, int checkOnly, out IntPtr collisionInfo);
 
         [DllImport("Advapi32.dll", EntryPoint = "LsaQueryForestTrustInformation")]
-        public static extern int LsaQueryForestTrustInformation(PolicySafeHandle handle, LSA_UNICODE_STRING target, ref IntPtr ForestTrustInfo);
+        public static extern int LsaQueryForestTrustInformation(SafeLsaPolicyHandle handle, LSA_UNICODE_STRING target, ref IntPtr ForestTrustInfo);
 
         [DllImport("Advapi32.dll", EntryPoint = "LsaQueryTrustedDomainInfoByName")]
-        public static extern int LsaQueryTrustedDomainInfoByName(PolicySafeHandle handle, LSA_UNICODE_STRING trustedDomain, TRUSTED_INFORMATION_CLASS infoClass, ref IntPtr buffer);
+        public static extern int LsaQueryTrustedDomainInfoByName(SafeLsaPolicyHandle handle, LSA_UNICODE_STRING trustedDomain, TRUSTED_INFORMATION_CLASS infoClass, ref IntPtr buffer);
 
         [DllImport("Advapi32.dll", EntryPoint = "LsaNtStatusToWinError")]
         public static extern int LsaNtStatusToWinError(int status);
 
-        [DllImport("Advapi32.dll", EntryPoint = "LsaFreeMemory")]
-        public static extern int LsaFreeMemory(IntPtr ptr);
-
         [DllImport("Advapi32.dll", EntryPoint = "LsaSetTrustedDomainInfoByName")]
-        public static extern int LsaSetTrustedDomainInfoByName(PolicySafeHandle handle, LSA_UNICODE_STRING trustedDomain, TRUSTED_INFORMATION_CLASS infoClass, IntPtr buffer);
+        public static extern int LsaSetTrustedDomainInfoByName(SafeLsaPolicyHandle handle, LSA_UNICODE_STRING trustedDomain, TRUSTED_INFORMATION_CLASS infoClass, IntPtr buffer);
 
         [DllImport("Advapi32.dll", EntryPoint = "LsaOpenTrustedDomainByName")]
-        public static extern int LsaOpenTrustedDomainByName(PolicySafeHandle policyHandle, LSA_UNICODE_STRING trustedDomain, int access, ref IntPtr trustedDomainHandle);
+        public static extern int LsaOpenTrustedDomainByName(SafeLsaPolicyHandle policyHandle, LSA_UNICODE_STRING trustedDomain, int access, ref IntPtr trustedDomainHandle);
 
         [DllImport("Advapi32.dll", EntryPoint = "LsaDeleteTrustedDomain")]
-        public static extern int LsaDeleteTrustedDomain(PolicySafeHandle handle, IntPtr pSid);
+        public static extern int LsaDeleteTrustedDomain(SafeLsaPolicyHandle handle, IntPtr pSid);
 
         [DllImport("netapi32.dll", EntryPoint = "I_NetLogonControl2", CharSet = CharSet.Unicode)]
         public static extern int I_NetLogonControl2(string serverName, int FunctionCode, int QueryLevel, IntPtr data, out IntPtr buffer);
@@ -713,11 +684,8 @@ namespace System.DirectoryServices.ActiveDirectory
         [DllImport("Kernel32.dll", EntryPoint = "GetSystemTimeAsFileTime")]
         public static extern void GetSystemTimeAsFileTime(IntPtr fileTime);
 
-        [DllImport("Advapi32.dll", EntryPoint = "LsaQueryInformationPolicy")]
-        public static extern int LsaQueryInformationPolicy(PolicySafeHandle handle, int infoClass, out IntPtr buffer);
-
         [DllImport("Advapi32.dll", EntryPoint = "LsaCreateTrustedDomainEx")]
-        public static extern int LsaCreateTrustedDomainEx(PolicySafeHandle handle, TRUSTED_DOMAIN_INFORMATION_EX domainEx, TRUSTED_DOMAIN_AUTH_INFORMATION authInfo, int classInfo, out IntPtr domainHandle);
+        public static extern int LsaCreateTrustedDomainEx(SafeLsaPolicyHandle handle, TRUSTED_DOMAIN_INFORMATION_EX domainEx, TRUSTED_DOMAIN_AUTH_INFORMATION authInfo, int classInfo, out IntPtr domainHandle);
 
         [DllImport("Kernel32.dll", EntryPoint = "OpenThread", SetLastError = true)]
         public static extern IntPtr OpenThread(uint desiredAccess, bool inheirted, int threadID);
@@ -811,20 +779,6 @@ namespace System.DirectoryServices.ActiveDirectory
                                         IntPtr buffer,
                                         int bufferSize,
                                         ref int returnLength
-                                        );
-
-        [DllImport("advapi32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "LsaOpenPolicy", CharSet = CharSet.Unicode)]
-        static extern public int LsaOpenPolicy(
-                                        IntPtr lsaUnicodeString,
-                                        IntPtr lsaObjectAttributes,
-                                        int desiredAccess,
-                                        ref IntPtr policyHandle);
-
-        [DllImport("advapi32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "LsaQueryInformationPolicy", CharSet = CharSet.Unicode)]
-        static extern public int LsaQueryInformationPolicy(
-                                        IntPtr policyHandle,
-                                        int policyInformationClass,
-                                        ref IntPtr buffer
                                         );
 
         [DllImport("advapi32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "LsaLookupSids", CharSet = CharSet.Unicode)]

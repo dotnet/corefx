@@ -10,6 +10,9 @@ internal static partial class Interop
 {
     internal static partial class Advapi32
     {
+        public const int POLICY_VIEW_LOCAL_INFORMATION = 0x00000001;
+        public const int POLICY_LOOKUP_NAMES = 0x00000800;
+
         [DllImport(Interop.Libraries.Advapi32, EntryPoint = "LsaOpenPolicy", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern uint LsaOpenPolicy(
             ref UNICODE_STRING SystemName,
