@@ -89,6 +89,12 @@ namespace System.Net.NetworkInformation
                 if (!isAsync || error != Interop.IpHlpApi.ERROR_IO_PENDING)
                 {
                     Cleanup(isAsync);
+
+                    if (error != 0 && Enum.IsDefined(typeof(IPStatus), error))
+                    {
+                        return Task.FromResult(new PingReply(address, default, (IPStatus)error, default, Array.Empty<byte>()));
+                    }
+
                     throw new Win32Exception(error);
                 }
             }
