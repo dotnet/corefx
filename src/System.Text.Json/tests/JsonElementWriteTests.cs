@@ -316,7 +316,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        //[InlineData(false)]
+        [InlineData(false)]
         [InlineData(true)]
         public static void WriteSimpleObject(bool indented)
         {
@@ -1177,8 +1177,7 @@ null,
                 target.WriteTo(writer);
                 writer.Flush();
 
-                AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
-
+                JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
         }
 
@@ -1243,13 +1242,6 @@ null,
                 target.WriteTo(writer);
                 writer.WriteEndObject();
                 writer.Flush();
-
-                if (indented && s_replaceNewlines)
-                {
-                    JsonTestHelper.AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
-                }
 
                 JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
@@ -1333,7 +1325,8 @@ null,
                 using var writer = new Utf8JsonWriter(buffer, options);
 
                 writer.WriteStartObject();
-                target.WriteProperty(propertyName, writer);
+                writer.WritePropertyName(propertyName);
+                target.WriteTo(writer);
                 writer.WriteEndObject();
                 writer.Flush();
 
