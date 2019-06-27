@@ -309,7 +309,7 @@ namespace System.Text.Json.Serialization.Tests
         {
             if (PlatformDetection.IsFullFramework)
             {
-                Assert.Throws<FormatException>(() => testCode());
+                Assert.Throws<JsonException>(() => testCode());
             }
             else
             {
