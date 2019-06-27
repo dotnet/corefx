@@ -296,7 +296,7 @@ namespace System.Net.Http
         }
 
         private static readonly HPackDecoder.HeaderCallback s_http2StreamOnResponseHeader =
-            (state, name, value) => ((Http2Stream)state).OnResponseHeader(name, value);
+            (state, name, value) => ((Http2Stream)state)?.OnResponseHeader(name, value);
 
         private async Task ProcessHeadersFrame(FrameHeader frameHeader)
         {
@@ -306,14 +306,12 @@ namespace System.Net.Http
 
             int streamId = frameHeader.StreamId;
             Http2Stream http2Stream = GetStream(streamId);
-            if (http2Stream == null)
-            {
-                _incomingBuffer.Discard(frameHeader.Length);
 
-                throw new Http2ProtocolException(Http2ProtocolErrorCode.StreamClosed);
-            }
+            // Note, http2Stream will be null if this is a closed stream.
+            // We will still process the headers, to ensure the header decoding state is up-to-date,
+            // but we will discard the decoded headers.
 
-            http2Stream.OnResponseHeadersStart();
+            http2Stream?.OnResponseHeadersStart();
 
             _hpackDecoder.Decode(
                 GetFrameData(_incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length), frameHeader.PaddedFlag, frameHeader.PriorityFlag),
@@ -341,11 +339,14 @@ namespace System.Net.Http
 
             _hpackDecoder.CompleteDecode();
 
-            http2Stream.OnResponseHeadersComplete(endStream);
-
-            if (endStream)
+            if (http2Stream != null)
             {
-                RemoveStream(http2Stream);
+                http2Stream.OnResponseHeadersComplete(endStream);
+
+                if (endStream)
+                {
+                    RemoveStream(http2Stream);
+                }
             }
         }
 
@@ -388,25 +389,30 @@ namespace System.Net.Http
             Debug.Assert(frameHeader.Type == FrameType.Data);
 
             Http2Stream http2Stream = GetStream(frameHeader.StreamId);
-            if (http2Stream == null)
-            {
-                _incomingBuffer.Discard(frameHeader.Length);
 
-                throw new Http2ProtocolException(Http2ProtocolErrorCode.StreamClosed);
-            }
+            // Note, http2Stream will be null if this is a closed stream.
+            // Just ignore the frame in this case.
 
             ReadOnlySpan<byte> frameData = GetFrameData(_incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length), hasPad: frameHeader.PaddedFlag, hasPriority: false);
 
-            bool endStream = frameHeader.EndStreamFlag;
+            if (http2Stream != null)
+            {
+                bool endStream = frameHeader.EndStreamFlag;
 
-            http2Stream.OnResponseData(frameData, endStream);
+                http2Stream.OnResponseData(frameData, endStream);
+
+                if (endStream)
+                {
+                    RemoveStream(http2Stream);
+                }
+            }
+
+            if (frameData.Length > 0)
+            {
+                ExtendWindow(frameData.Length);
+            }
 
             _incomingBuffer.Discard(frameHeader.Length);
-
-            if (endStream)
-            {
-                RemoveStream(http2Stream);
-            }
         }
 
         private void ProcessSettingsFrame(FrameHeader frameHeader)
@@ -652,7 +658,7 @@ namespace System.Net.Http
             _incomingBuffer.Discard(frameHeader.Length);
         }
 
-        private async Task StartWriteAsync(int writeBytes, CancellationToken cancellationToken = default)
+        private async ValueTask<Memory<byte>> StartWriteAsync(int writeBytes, CancellationToken cancellationToken = default)
         {
             await AcquireWriteLockAsync(cancellationToken).ConfigureAwait(false);
 
@@ -678,6 +684,10 @@ namespace System.Net.Http
                 }
 
                 _outgoingBuffer.EnsureAvailableSpace(writeBytes);
+                Memory<byte> writeBuffer = _outgoingBuffer.AvailableMemory.Slice(0, writeBytes);
+                _outgoingBuffer.Commit(writeBytes);
+
+                return writeBuffer;
             }
             catch
             {
@@ -736,8 +746,10 @@ namespace System.Net.Http
 
         private async Task SendSettingsAckAsync()
         {
-            await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
-            WriteFrameHeader(new FrameHeader(0, FrameType.Settings, FrameFlags.Ack, 0));
+            Memory<byte> writeBuffer = await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
+
+            FrameHeader frameHeader = new FrameHeader(0, FrameType.Settings, FrameFlags.Ack, 0);
+            frameHeader.WriteTo(writeBuffer);
 
             FinishWrite(mustFlush: true);
         }
@@ -746,20 +758,26 @@ namespace System.Net.Http
         {
             Debug.Assert(pingContent.Length == FrameHeader.PingLength);
 
-            await StartWriteAsync(FrameHeader.Size + FrameHeader.PingLength).ConfigureAwait(false);
-            WriteFrameHeader(new FrameHeader(FrameHeader.PingLength, FrameType.Ping, FrameFlags.Ack, 0));
-            pingContent.CopyTo(_outgoingBuffer.AvailableMemory);
-            _outgoingBuffer.Commit(FrameHeader.PingLength);
+            Memory<byte> writeBuffer = await StartWriteAsync(FrameHeader.Size + FrameHeader.PingLength).ConfigureAwait(false);
+
+            FrameHeader frameHeader = new FrameHeader(FrameHeader.PingLength, FrameType.Ping, FrameFlags.Ack, 0);
+            frameHeader.WriteTo(writeBuffer);
+            writeBuffer = writeBuffer.Slice(FrameHeader.Size);
+
+            pingContent.CopyTo(writeBuffer);
 
             FinishWrite(mustFlush: false);
         }
 
         private async Task SendRstStreamAsync(int streamId, Http2ProtocolErrorCode errorCode)
         {
-            await StartWriteAsync(FrameHeader.Size + FrameHeader.RstStreamLength).ConfigureAwait(false);
-            WriteFrameHeader(new FrameHeader(FrameHeader.RstStreamLength, FrameType.RstStream, FrameFlags.None, streamId));
-            BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, (int)errorCode);
-            _outgoingBuffer.Commit(FrameHeader.RstStreamLength);
+            Memory<byte> writeBuffer = await StartWriteAsync(FrameHeader.Size + FrameHeader.RstStreamLength).ConfigureAwait(false);
+
+            FrameHeader frameHeader = new FrameHeader(FrameHeader.RstStreamLength, FrameType.RstStream, FrameFlags.None, streamId);
+            frameHeader.WriteTo(writeBuffer);
+            writeBuffer = writeBuffer.Slice(FrameHeader.Size);
+
+            BinaryPrimitives.WriteInt32BigEndian(writeBuffer.Span, (int)errorCode);
 
             FinishWrite(mustFlush: true);
         }
@@ -1005,8 +1023,8 @@ namespace System.Net.Http
                 Debug.Assert(remaining.Length > 0);
 
                 // Calculate the total number of bytes we're going to use (content + headers).
-                int totalSize = remaining.Length + (remaining.Length / FrameHeader.MaxLength) * FrameHeader.Size +
-                                (remaining.Length % FrameHeader.MaxLength == 0 ? FrameHeader.Size : 0);
+                int frameCount = ((remaining.Length - 1) / FrameHeader.MaxLength) + 1;
+                int totalSize = remaining.Length + frameCount * FrameHeader.Size;
 
                 // Split into frames and send.
                 ReadOnlyMemory<byte> current;
@@ -1017,11 +1035,14 @@ namespace System.Net.Http
                     (request.Content == null ? FrameFlags.EndStream : FrameFlags.None);
 
                 // Note, HEADERS and CONTINUATION frames must be together, so hold the writer lock across sending all of them.
-                await StartWriteAsync(totalSize).ConfigureAwait(false);
+                Memory<byte> writeBuffer = await StartWriteAsync(totalSize).ConfigureAwait(false);
 
-                WriteFrameHeader(new FrameHeader(current.Length, FrameType.Headers, flags, streamId));
-                current.CopyTo(_outgoingBuffer.AvailableMemory);
-                _outgoingBuffer.Commit(current.Length);
+                FrameHeader frameHeader = new FrameHeader(current.Length, FrameType.Headers, flags, streamId);
+                frameHeader.WriteTo(writeBuffer.Span);
+                writeBuffer = writeBuffer.Slice(FrameHeader.Size);
+
+                current.CopyTo(writeBuffer);
+                writeBuffer = writeBuffer.Slice(current.Length);
 
                 while (remaining.Length > 0)
                 {
@@ -1029,10 +1050,15 @@ namespace System.Net.Http
 
                     flags = (remaining.Length == 0 ? FrameFlags.EndHeaders : FrameFlags.None);
 
-                    WriteFrameHeader(new FrameHeader(current.Length, FrameType.Continuation, flags, streamId));
-                    current.CopyTo(_outgoingBuffer.AvailableMemory);
-                    _outgoingBuffer.Commit(current.Length);
+                    frameHeader = new FrameHeader(current.Length, FrameType.Continuation, flags, streamId);
+                    frameHeader.WriteTo(writeBuffer.Span);
+                    writeBuffer = writeBuffer.Slice(FrameHeader.Size);
+
+                    current.CopyTo(writeBuffer);
+                    writeBuffer = writeBuffer.Slice(current.Length);
                 }
+
+                Debug.Assert(writeBuffer.Length == 0);
 
                 // If this is not the end of the stream, we can put off flushing the buffer
                 // since we know that there are going to be data frames following.
@@ -1073,9 +1099,10 @@ namespace System.Net.Http
 
                 // It's possible that a cancellation will occur while we wait for the write lock. In that case, we need to
                 // return the credit that we have acquired and don't plan to use.
+                Memory<byte> writeBuffer;
                 try
                 {
-                    await StartWriteAsync(FrameHeader.Size + current.Length, cancellationToken).ConfigureAwait(false);
+                    writeBuffer = await StartWriteAsync(FrameHeader.Size + current.Length, cancellationToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -1083,9 +1110,14 @@ namespace System.Net.Http
                     throw;
                 }
 
-                WriteFrameHeader(new FrameHeader(current.Length, FrameType.Data, FrameFlags.None, streamId));
-                current.CopyTo(_outgoingBuffer.AvailableMemory);
-                _outgoingBuffer.Commit(current.Length);
+                FrameHeader frameHeader = new FrameHeader(current.Length, FrameType.Data, FrameFlags.None, streamId);
+                frameHeader.WriteTo(writeBuffer);
+                writeBuffer = writeBuffer.Slice(FrameHeader.Size);
+
+                current.CopyTo(writeBuffer);
+                writeBuffer = writeBuffer.Slice(current.Length);
+
+                Debug.Assert(writeBuffer.Length == 0);
 
                 FinishWrite(mustFlush: false);
             }
@@ -1093,9 +1125,10 @@ namespace System.Net.Http
 
         private async Task SendEndStreamAsync(int streamId)
         {
-            await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
+            Memory<byte> writeBuffer = await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
 
-            WriteFrameHeader(new FrameHeader(0, FrameType.Data, FrameFlags.EndStream, streamId));
+            FrameHeader frameHeader = new FrameHeader(0, FrameType.Data, FrameFlags.EndStream, streamId);
+            frameHeader.WriteTo(writeBuffer);
 
             FinishWrite(mustFlush: true);
         }
@@ -1105,11 +1138,13 @@ namespace System.Net.Http
             Debug.Assert(amount > 0);
 
             // We update both the connection-level and stream-level windows at the same time
-            await StartWriteAsync(FrameHeader.Size + FrameHeader.WindowUpdateLength).ConfigureAwait(false);
+            Memory<byte> writeBuffer = await StartWriteAsync(FrameHeader.Size + FrameHeader.WindowUpdateLength).ConfigureAwait(false);
 
-            WriteFrameHeader(new FrameHeader(FrameHeader.WindowUpdateLength, FrameType.WindowUpdate, FrameFlags.None, streamId));
-            BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, amount);
-            _outgoingBuffer.Commit(FrameHeader.WindowUpdateLength);
+            FrameHeader frameHeader = new FrameHeader(FrameHeader.WindowUpdateLength, FrameType.WindowUpdate, FrameFlags.None, streamId);
+            frameHeader.WriteTo(writeBuffer);
+            writeBuffer = writeBuffer.Slice(FrameHeader.Size);
+
+            BinaryPrimitives.WriteInt32BigEndian(writeBuffer.Span, amount);
 
             FinishWrite(mustFlush: true);
         }
@@ -1337,6 +1372,8 @@ namespace System.Net.Http
                 buffer[7] = (byte)((StreamId & 0x0000FF00) >> 8);
                 buffer[8] = (byte)(StreamId & 0x000000FF);
             }
+
+            public void WriteTo(Memory<byte> buffer) => WriteTo(buffer.Span);
         }
 
         [Flags]
@@ -1498,6 +1535,8 @@ namespace System.Net.Http
 
         private void RemoveStream(Http2Stream http2Stream)
         {
+            Debug.Assert(http2Stream != null);
+
             lock (SyncObject)
             {
                 if (!_httpStreams.Remove(http2Stream.StreamId, out Http2Stream removed))

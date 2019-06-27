@@ -232,7 +232,7 @@ namespace System.Text.Json
             JsonTokenType actualType)
         {
             return GetInvalidOperationException(
-                SR.Format(SR.JsonElementHasWrongType, expectedType.ToValueType(), actualType.ToValueType()));
+                SR.Format(SR.JsonElementHasWrongType, expectedType.ToValueKind(), actualType.ToValueKind()));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -241,7 +241,7 @@ namespace System.Text.Json
             JsonTokenType actualType)
         {
             return GetInvalidOperationException(
-                SR.Format(SR.JsonElementHasWrongType, expectedTypeName, actualType.ToValueType()));
+                SR.Format(SR.JsonElementHasWrongType, expectedTypeName, actualType.ToValueKind()));
         }
 
         public static void ThrowJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte = default, ReadOnlySpan<byte> bytes = default)
@@ -376,6 +376,9 @@ namespace System.Text.Json
                     break;
                 case ExceptionResource.UnexpectedEndOfDataWhileReadingComment:
                     message = SR.Format(SR.UnexpectedEndOfDataWhileReadingComment);
+                    break;
+                case ExceptionResource.UnexpectedEndOfLineSeparator:
+                    message = SR.Format(SR.UnexpectedEndOfLineSeparator);
                     break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
@@ -627,8 +630,9 @@ namespace System.Text.Json
         TrailingCommaNotAllowedBeforeObjectEnd,
         InvalidCharacterAtStartOfComment,
         UnexpectedEndOfDataWhileReadingComment,
+        UnexpectedEndOfLineSeparator,
         ExpectedOneCompleteToken,
-        NotEnoughData
+        NotEnoughData,
     }
 
     internal enum NumericType
