@@ -1501,9 +1501,11 @@ namespace System.Net.Http.Functional.Tests
         public async Task Dispose_ProcessingResponse_OK()
         {
             HttpClient client =  CreateHttpClient();
-            bool diposeCalled = false;
-           int totalSent = 0;
+            bool disposeCalled = false;
+            int totalSent = 0;
             int totalReceived = 0;
+
+            ManualResetEventSlim serverProcessing = new ManualResetEventSlim(false);
 
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
@@ -1516,7 +1518,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     // Dispose client after receiving response headers.
                     client.Dispose();
-                    diposeCalled = true;
+                    disposeCalled = true;
 
                     int readLength;
                     byte[] buffer = new byte[100];
@@ -1526,6 +1528,9 @@ namespace System.Net.Http.Functional.Tests
                     } while (readLength != 0);
                 }
 
+                // Wait until server finished processing
+                // so that totalSent is fully updated
+                serverProcessing.Wait();
                 Assert.Equal(totalSent, totalReceived);
             },
             async server =>
@@ -1537,16 +1542,23 @@ namespace System.Net.Http.Functional.Tests
 
                 // Start streaming response and wait for client to be disposed.
                 byte[] responseBody = new byte[100];
-                while (!diposeCalled)
+                while (!disposeCalled)
                 {
+                    // Protect against overfilling window size
+                    while (totalSent - totalReceived > 30000)
+                    {
+                        await Task.Delay(1);
+                    }
+
                     await connection.SendResponseDataAsync(streamId, responseBody, endStream: false);
                     totalSent += responseBody.Length;
-                    await Task.Delay(100);
                 }
 
                 // Send final data block.
                 await connection.SendResponseDataAsync(streamId, responseBody, endStream: true);
                 totalSent += responseBody.Length;
+
+                serverProcessing.Set();
 
                 await connection.SendGoAway(streamId);
                 await connection.WaitForConnectionShutdownAsync();
