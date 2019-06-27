@@ -28,7 +28,7 @@ namespace System.ComponentModel
         /// <summary>
         /// Retrieves the Name for a input CultureInfo.
         /// </summary>
-        protected virtual string GetCultureName(CultureInfo culture) => culture.Name;
+        protected virtual string GetCultureName(CultureInfo culture) => culture?.Name;
 
         /// <summary>
         /// Gets a value indicating whether this converter can convert an object in the given
