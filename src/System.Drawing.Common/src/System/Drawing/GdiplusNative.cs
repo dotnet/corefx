@@ -443,6 +443,8 @@ namespace System.Drawing
                 GdipDrawLineI_ptr = FunctionWrapper.Load<GdipDrawLineI_delegate>(s_gdipModule, "GdipDrawLineI", LibraryName);
                 GdipDrawLines_ptr = FunctionWrapper.Load<GdipDrawLines_delegate>(s_gdipModule, "GdipDrawLines", LibraryName);
                 GdipDrawLinesI_ptr = FunctionWrapper.Load<GdipDrawLinesI_delegate>(s_gdipModule, "GdipDrawLinesI", LibraryName);
+                GdipFillPie_ptr = FunctionWrapper.Load<GdipFillPie_delegate>(s_gdipModule, "GdipFillPie", LibraryName);
+                GdipFillPieI_ptr = FunctionWrapper.Load<GdipFillPieI_delegate>(s_gdipModule, "GdipFillPieI", LibraryName);
             }
 
             // Shared function imports (all platforms)

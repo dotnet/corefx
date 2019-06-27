@@ -659,12 +659,10 @@ namespace System.Drawing
 
         public GraphicsState Save()
         {
-            uint saveState;
             int status = Gdip.GdipSaveGraphics(new HandleRef(this, NativeGraphics), out int state);
             Gdip.CheckStatus(status);
 
-            GraphicsState state = new GraphicsState((int)saveState);
-            return state;
+            return new GraphicsState((int)state);
         }
 
         public void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, PointF[] pts)

@@ -173,8 +173,6 @@ namespace System.Drawing
                 GdipCreateFontFromLogfontW_ptr = FunctionWrapper.Load<GdipCreateFontFromLogfontW_delegate>(s_gdipModule, "GdipCreateFontFromLogfontW", LibraryName);
                 GdipCreateBitmapFromStream_ptr = FunctionWrapper.Load<GdipCreateBitmapFromStream_delegate>(s_gdipModule, "GdipCreateBitmapFromStream", LibraryName);
                 GdipCreateBitmapFromStreamICM_ptr = FunctionWrapper.Load<GdipCreateBitmapFromStreamICM_delegate>(s_gdipModule, "GdipCreateBitmapFromStreamICM", LibraryName);
-                GdipFillPie_ptr = FunctionWrapper.Load<GdipFillPie_delegate>(s_gdipModule, "GdipFillPie", LibraryName);
-                GdipFillPieI_ptr = FunctionWrapper.Load<GdipFillPieI_delegate>(s_gdipModule, "GdipFillPieI", LibraryName);
             }
 
             // Imported functions
