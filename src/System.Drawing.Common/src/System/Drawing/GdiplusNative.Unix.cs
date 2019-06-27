@@ -104,10 +104,6 @@ namespace System.Drawing
                 GdipCreateFromHDC_ptr = FunctionWrapper.Load<GdipCreateFromHDC_delegate>(s_gdipModule, "GdipCreateFromHDC", LibraryName);
                 GdipDeleteGraphics_ptr = FunctionWrapper.Load<GdipDeleteGraphics_delegate>(s_gdipModule, "GdipDeleteGraphics", LibraryName);
                 GdipRestoreGraphics_ptr = FunctionWrapper.Load<GdipRestoreGraphics_delegate>(s_gdipModule, "GdipRestoreGraphics", LibraryName);
-                GdipDrawRectangle_ptr = FunctionWrapper.Load<GdipDrawRectangle_delegate>(s_gdipModule, "GdipDrawRectangle", LibraryName);
-                GdipDrawRectangleI_ptr = FunctionWrapper.Load<GdipDrawRectangleI_delegate>(s_gdipModule, "GdipDrawRectangleI", LibraryName);
-                GdipDrawRectangles_ptr = FunctionWrapper.Load<GdipDrawRectangles_delegate>(s_gdipModule, "GdipDrawRectangles", LibraryName);
-                GdipDrawRectanglesI_ptr = FunctionWrapper.Load<GdipDrawRectanglesI_delegate>(s_gdipModule, "GdipDrawRectanglesI", LibraryName);
                 GdipReleaseDC_ptr = FunctionWrapper.Load<GdipReleaseDC_delegate>(s_gdipModule, "GdipReleaseDC", LibraryName);
                 GdipFillPath_ptr = FunctionWrapper.Load<GdipFillPath_delegate>(s_gdipModule, "GdipFillPath", LibraryName);
                 GdipGetNearestColor_ptr = FunctionWrapper.Load<GdipGetNearestColor_delegate>(s_gdipModule, "GdipGetNearestColor", LibraryName);
@@ -275,22 +271,6 @@ namespace System.Drawing
             private delegate int GdipRestoreGraphics_delegate(IntPtr graphics, uint graphicsState);
             private static FunctionWrapper<GdipRestoreGraphics_delegate> GdipRestoreGraphics_ptr;
             internal static int GdipRestoreGraphics(IntPtr graphics, uint graphicsState) => GdipRestoreGraphics_ptr.Delegate(graphics, graphicsState);
-
-            private delegate int GdipDrawRectangle_delegate(IntPtr graphics, IntPtr pen, float x, float y, float width, float height);
-            private static FunctionWrapper<GdipDrawRectangle_delegate> GdipDrawRectangle_ptr;
-            internal static int GdipDrawRectangle(IntPtr graphics, IntPtr pen, float x, float y, float width, float height) => GdipDrawRectangle_ptr.Delegate(graphics, pen, x, y, width, height);
-
-            private delegate int GdipDrawRectangleI_delegate(IntPtr graphics, IntPtr pen, int x, int y, int width, int height);
-            private static FunctionWrapper<GdipDrawRectangleI_delegate> GdipDrawRectangleI_ptr;
-            internal static int GdipDrawRectangleI(IntPtr graphics, IntPtr pen, int x, int y, int width, int height) => GdipDrawRectangleI_ptr.Delegate(graphics, pen, x, y, width, height);
-
-            private delegate int GdipDrawRectangles_delegate(IntPtr graphics, IntPtr pen, RectangleF[] rects, int count);
-            private static FunctionWrapper<GdipDrawRectangles_delegate> GdipDrawRectangles_ptr;
-            internal static int GdipDrawRectangles(IntPtr graphics, IntPtr pen, RectangleF[] rects, int count) => GdipDrawRectangles_ptr.Delegate(graphics, pen, rects, count);
-
-            private delegate int GdipDrawRectanglesI_delegate(IntPtr graphics, IntPtr pen, Rectangle[] rects, int count);
-            private static FunctionWrapper<GdipDrawRectanglesI_delegate> GdipDrawRectanglesI_ptr;
-            internal static int GdipDrawRectanglesI(IntPtr graphics, IntPtr pen, Rectangle[] rects, int count) => GdipDrawRectanglesI_ptr.Delegate(graphics, pen, rects, count);
 
             private delegate int GdipReleaseDC_delegate(IntPtr graphics, IntPtr hdc);
             private static FunctionWrapper<GdipReleaseDC_delegate> GdipReleaseDC_ptr;
