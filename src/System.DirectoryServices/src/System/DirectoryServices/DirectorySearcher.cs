@@ -5,7 +5,7 @@
 using System.Runtime.InteropServices;
 using System.Collections;
 using System.Collections.Specialized;
-using System.DirectoryServices.Interop;
+using System.DirectoryServices.InteropInternal;
 using System.ComponentModel;
 
 using INTPTR_INTPTRCAST = System.IntPtr;

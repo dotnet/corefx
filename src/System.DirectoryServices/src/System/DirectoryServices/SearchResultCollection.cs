@@ -5,7 +5,7 @@
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Collections;
-using System.DirectoryServices.Interop;
+using System.DirectoryServices.InteropInternal;
 using System.Text;
 
 using INTPTR_INTPTRCAST = System.IntPtr;

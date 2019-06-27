@@ -4,7 +4,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace System.DirectoryServices.Interop
+namespace System.DirectoryServices.InteropInternal
 {
     [StructLayout(LayoutKind.Sequential)]
     internal struct Ads_Pointer

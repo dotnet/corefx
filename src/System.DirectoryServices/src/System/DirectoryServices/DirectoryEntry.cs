@@ -4,7 +4,7 @@
 
 using System.Runtime.InteropServices;
 using System.Diagnostics;
-using System.DirectoryServices.Interop;
+using System.DirectoryServices.InteropInternal;
 using System.ComponentModel;
 using System.Threading;
 using System.Reflection;
