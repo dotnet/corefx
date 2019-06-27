@@ -8,6 +8,7 @@
 
   <PropertyGroup Condition="'$(IsReferenceAssembly)'=='true'">
     <OutputPath>$([MSBuild]::NormalizeDirectory('$(ReferenceAssemblyOutputPath)', '$(MSBuildProjectName)', '$(Configuration)'))</OutputPath>
+    <BaseIntermediateOutputPath>$([MSBuild]::NormalizeDirectory('$(ArtifactsObjDir)', 'ref', '$(MSBuildProjectName)'))</BaseIntermediateOutputPath>
     <IntermediateOutputPath>$([MSBuild]::NormalizeDirectory('$(ArtifactsObjDir)', 'ref', '$(MSBuildProjectName)', '$(Configuration)'))</IntermediateOutputPath>
 
     <!-- disable warnings about unused fields -->
