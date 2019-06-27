@@ -278,8 +278,8 @@ namespace System.Drawing
                 Point p3 = points[i + 2];
                 Point p4 = points[i + 3];
 
-                status = Gdip.GdipDrawBezier(NativeGraphics,
-                                        pen.NativePen,
+                status = Gdip.GdipDrawBezier(
+                                        new HandleRef(this, NativeGraphics), new HandleRef(pen, pen.NativePen),
                                         p1.X, p1.Y, p2.X, p2.Y,
                                         p3.X, p3.Y, p4.X, p4.Y);
                 Gdip.CheckStatus(status);
