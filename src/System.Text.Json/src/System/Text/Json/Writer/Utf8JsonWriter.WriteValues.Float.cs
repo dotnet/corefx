@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace System.Text.Json
 {
@@ -111,6 +112,11 @@ namespace System.Text.Json
             // that allocation (as well as roundtripping from byte to char and back to byte) could be avoided by
             // calling into a refactored Number.FormatSingle/Double directly.
 
+#if netfx
+            // However, the ISpanFormattable interface isn't available for netfx, so it needs to be #ifdef'd out.
+            string utf16Text = string.Empty;
+            {
+#else
             const int StackBufferLength = 128; // large enough to handle the majority cases
             Span<char> stackBuffer = stackalloc char[StackBufferLength];
             ReadOnlySpan<char> utf16Text = stackalloc char[0];
@@ -130,6 +136,7 @@ namespace System.Text.Json
                     bytesWritten = 0;
                     return false;
                 }
+#endif
 
                 // Fall back to using a string format and allocating a string for the resulting formatted value.
                 utf16Text = value.ToString(FormatString, CultureInfo.InvariantCulture);
@@ -145,7 +152,20 @@ namespace System.Text.Json
 
             try
             {
+#if netfx
+                byte[] bytes = Encoding.UTF8.GetBytes(utf16Text);
+
+                if (bytes.Length > destination.Length)
+                {
+                    bytesWritten = 0;
+                    return false;
+                }
+
+                bytes.CopyTo(destination);
+                bytesWritten = bytes.Length;
+#else
                 bytesWritten = Encoding.UTF8.GetBytes(utf16Text, destination);
+#endif
                 return true;
             }
             catch
