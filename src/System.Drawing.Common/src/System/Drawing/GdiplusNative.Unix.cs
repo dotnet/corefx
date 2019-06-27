@@ -104,56 +104,11 @@ namespace System.Drawing
                 GdipCreateFromHDC_ptr = FunctionWrapper.Load<GdipCreateFromHDC_delegate>(s_gdipModule, "GdipCreateFromHDC", LibraryName);
                 GdipDeleteGraphics_ptr = FunctionWrapper.Load<GdipDeleteGraphics_delegate>(s_gdipModule, "GdipDeleteGraphics", LibraryName);
                 GdipRestoreGraphics_ptr = FunctionWrapper.Load<GdipRestoreGraphics_delegate>(s_gdipModule, "GdipRestoreGraphics", LibraryName);
-                GdipSaveGraphics_ptr = FunctionWrapper.Load<GdipSaveGraphics_delegate>(s_gdipModule, "GdipSaveGraphics", LibraryName);
-                GdipDrawArc_ptr = FunctionWrapper.Load<GdipDrawArc_delegate>(s_gdipModule, "GdipDrawArc", LibraryName);
-                GdipDrawArcI_ptr = FunctionWrapper.Load<GdipDrawArcI_delegate>(s_gdipModule, "GdipDrawArcI", LibraryName);
-                GdipDrawBezier_ptr = FunctionWrapper.Load<GdipDrawBezier_delegate>(s_gdipModule, "GdipDrawBezier", LibraryName);
-                GdipDrawBezierI_ptr = FunctionWrapper.Load<GdipDrawBezierI_delegate>(s_gdipModule, "GdipDrawBezierI", LibraryName);
-                GdipDrawEllipseI_ptr = FunctionWrapper.Load<GdipDrawEllipseI_delegate>(s_gdipModule, "GdipDrawEllipseI", LibraryName);
-                GdipDrawEllipse_ptr = FunctionWrapper.Load<GdipDrawEllipse_delegate>(s_gdipModule, "GdipDrawEllipse", LibraryName);
-                GdipDrawLine_ptr = FunctionWrapper.Load<GdipDrawLine_delegate>(s_gdipModule, "GdipDrawLine", LibraryName);
-                GdipDrawLineI_ptr = FunctionWrapper.Load<GdipDrawLineI_delegate>(s_gdipModule, "GdipDrawLineI", LibraryName);
-                GdipDrawLines_ptr = FunctionWrapper.Load<GdipDrawLines_delegate>(s_gdipModule, "GdipDrawLines", LibraryName);
-                GdipDrawLinesI_ptr = FunctionWrapper.Load<GdipDrawLinesI_delegate>(s_gdipModule, "GdipDrawLinesI", LibraryName);
-                GdipDrawPath_ptr = FunctionWrapper.Load<GdipDrawPath_delegate>(s_gdipModule, "GdipDrawPath", LibraryName);
-                GdipDrawPie_ptr = FunctionWrapper.Load<GdipDrawPie_delegate>(s_gdipModule, "GdipDrawPie", LibraryName);
-                GdipDrawPieI_ptr = FunctionWrapper.Load<GdipDrawPieI_delegate>(s_gdipModule, "GdipDrawPieI", LibraryName);
-                GdipDrawPolygon_ptr = FunctionWrapper.Load<GdipDrawPolygon_delegate>(s_gdipModule, "GdipDrawPolygon", LibraryName);
-                GdipDrawPolygonI_ptr = FunctionWrapper.Load<GdipDrawPolygonI_delegate>(s_gdipModule, "GdipDrawPolygonI", LibraryName);
                 GdipDrawRectangle_ptr = FunctionWrapper.Load<GdipDrawRectangle_delegate>(s_gdipModule, "GdipDrawRectangle", LibraryName);
                 GdipDrawRectangleI_ptr = FunctionWrapper.Load<GdipDrawRectangleI_delegate>(s_gdipModule, "GdipDrawRectangleI", LibraryName);
                 GdipDrawRectangles_ptr = FunctionWrapper.Load<GdipDrawRectangles_delegate>(s_gdipModule, "GdipDrawRectangles", LibraryName);
                 GdipDrawRectanglesI_ptr = FunctionWrapper.Load<GdipDrawRectanglesI_delegate>(s_gdipModule, "GdipDrawRectanglesI", LibraryName);
-                GdipFillEllipseI_ptr = FunctionWrapper.Load<GdipFillEllipseI_delegate>(s_gdipModule, "GdipFillEllipseI", LibraryName);
-                GdipFillEllipse_ptr = FunctionWrapper.Load<GdipFillEllipse_delegate>(s_gdipModule, "GdipFillEllipse", LibraryName);
-                GdipFillPolygon_ptr = FunctionWrapper.Load<GdipFillPolygon_delegate>(s_gdipModule, "GdipFillPolygon", LibraryName);
-                GdipFillPolygonI_ptr = FunctionWrapper.Load<GdipFillPolygonI_delegate>(s_gdipModule, "GdipFillPolygonI", LibraryName);
-                GdipFillPolygon2_ptr = FunctionWrapper.Load<GdipFillPolygon2_delegate>(s_gdipModule, "GdipFillPolygon2", LibraryName);
-                GdipFillPolygon2I_ptr = FunctionWrapper.Load<GdipFillPolygon2I_delegate>(s_gdipModule, "GdipFillPolygon2I", LibraryName);
-                GdipFillRectangle_ptr = FunctionWrapper.Load<GdipFillRectangle_delegate>(s_gdipModule, "GdipFillRectangle", LibraryName);
-                GdipFillRectangleI_ptr = FunctionWrapper.Load<GdipFillRectangleI_delegate>(s_gdipModule, "GdipFillRectangleI", LibraryName);
-                GdipFillRectangles_ptr = FunctionWrapper.Load<GdipFillRectangles_delegate>(s_gdipModule, "GdipFillRectangles", LibraryName);
-                GdipFillRectanglesI_ptr = FunctionWrapper.Load<GdipFillRectanglesI_delegate>(s_gdipModule, "GdipFillRectanglesI", LibraryName);
-                GdipDrawString_ptr = FunctionWrapper.Load<GdipDrawString_delegate>(s_gdipModule, "GdipDrawString", LibraryName);
                 GdipReleaseDC_ptr = FunctionWrapper.Load<GdipReleaseDC_delegate>(s_gdipModule, "GdipReleaseDC", LibraryName);
-                GdipDrawImageRectI_ptr = FunctionWrapper.Load<GdipDrawImageRectI_delegate>(s_gdipModule, "GdipDrawImageRectI", LibraryName);
-                GdipGraphicsClear_ptr = FunctionWrapper.Load<GdipGraphicsClear_delegate>(s_gdipModule, "GdipGraphicsClear", LibraryName);
-                GdipDrawClosedCurve_ptr = FunctionWrapper.Load<GdipDrawClosedCurve_delegate>(s_gdipModule, "GdipDrawClosedCurve", LibraryName);
-                GdipDrawClosedCurveI_ptr = FunctionWrapper.Load<GdipDrawClosedCurveI_delegate>(s_gdipModule, "GdipDrawClosedCurveI", LibraryName);
-                GdipDrawClosedCurve2_ptr = FunctionWrapper.Load<GdipDrawClosedCurve2_delegate>(s_gdipModule, "GdipDrawClosedCurve2", LibraryName);
-                GdipDrawClosedCurve2I_ptr = FunctionWrapper.Load<GdipDrawClosedCurve2I_delegate>(s_gdipModule, "GdipDrawClosedCurve2I", LibraryName);
-                GdipDrawCurve_ptr = FunctionWrapper.Load<GdipDrawCurve_delegate>(s_gdipModule, "GdipDrawCurve", LibraryName);
-                GdipDrawCurveI_ptr = FunctionWrapper.Load<GdipDrawCurveI_delegate>(s_gdipModule, "GdipDrawCurveI", LibraryName);
-                GdipDrawCurve2_ptr = FunctionWrapper.Load<GdipDrawCurve2_delegate>(s_gdipModule, "GdipDrawCurve2", LibraryName);
-                GdipDrawCurve2I_ptr = FunctionWrapper.Load<GdipDrawCurve2I_delegate>(s_gdipModule, "GdipDrawCurve2I", LibraryName);
-                GdipDrawCurve3_ptr = FunctionWrapper.Load<GdipDrawCurve3_delegate>(s_gdipModule, "GdipDrawCurve3", LibraryName);
-                GdipDrawCurve3I_ptr = FunctionWrapper.Load<GdipDrawCurve3I_delegate>(s_gdipModule, "GdipDrawCurve3I", LibraryName);
-                GdipFillClosedCurve_ptr = FunctionWrapper.Load<GdipFillClosedCurve_delegate>(s_gdipModule, "GdipFillClosedCurve", LibraryName);
-                GdipFillClosedCurveI_ptr = FunctionWrapper.Load<GdipFillClosedCurveI_delegate>(s_gdipModule, "GdipFillClosedCurveI", LibraryName);
-                GdipFillClosedCurve2_ptr = FunctionWrapper.Load<GdipFillClosedCurve2_delegate>(s_gdipModule, "GdipFillClosedCurve2", LibraryName);
-                GdipFillClosedCurve2I_ptr = FunctionWrapper.Load<GdipFillClosedCurve2I_delegate>(s_gdipModule, "GdipFillClosedCurve2I", LibraryName);
-                GdipFillPie_ptr = FunctionWrapper.Load<GdipFillPie_delegate>(s_gdipModule, "GdipFillPie", LibraryName);
-                GdipFillPieI_ptr = FunctionWrapper.Load<GdipFillPieI_delegate>(s_gdipModule, "GdipFillPieI", LibraryName);
                 GdipFillPath_ptr = FunctionWrapper.Load<GdipFillPath_delegate>(s_gdipModule, "GdipFillPath", LibraryName);
                 GdipGetNearestColor_ptr = FunctionWrapper.Load<GdipGetNearestColor_delegate>(s_gdipModule, "GdipGetNearestColor", LibraryName);
                 GdipTransformPoints_ptr = FunctionWrapper.Load<GdipTransformPoints_delegate>(s_gdipModule, "GdipTransformPoints", LibraryName);
@@ -161,8 +116,6 @@ namespace System.Drawing
                 GdipAddPathString_ptr = FunctionWrapper.Load<GdipAddPathString_delegate>(s_gdipModule, "GdipAddPathString", LibraryName);
                 GdipAddPathStringI_ptr = FunctionWrapper.Load<GdipAddPathStringI_delegate>(s_gdipModule, "GdipAddPathStringI", LibraryName);
                 GdipCreateFromHWND_ptr = FunctionWrapper.Load<GdipCreateFromHWND_delegate>(s_gdipModule, "GdipCreateFromHWND", LibraryName);
-                GdipMeasureString_ptr = FunctionWrapper.Load<GdipMeasureString_delegate>(s_gdipModule, "GdipMeasureString", LibraryName);
-                GdipMeasureCharacterRanges_ptr = FunctionWrapper.Load<GdipMeasureCharacterRanges_delegate>(s_gdipModule, "GdipMeasureCharacterRanges", LibraryName);
                 GdipLoadImageFromFile_ptr = FunctionWrapper.Load<GdipLoadImageFromFile_delegate>(s_gdipModule, "GdipLoadImageFromFile", LibraryName);
                 GdipCloneImage_ptr = FunctionWrapper.Load<GdipCloneImage_delegate>(s_gdipModule, "GdipCloneImage", LibraryName);
                 GdipLoadImageFromFileICM_ptr = FunctionWrapper.Load<GdipLoadImageFromFileICM_delegate>(s_gdipModule, "GdipLoadImageFromFileICM", LibraryName);
@@ -191,18 +144,7 @@ namespace System.Drawing
                 GdipSaveImageToFile_ptr = FunctionWrapper.Load<GdipSaveImageToFile_delegate>(s_gdipModule, "GdipSaveImageToFile", LibraryName);
                 GdipSaveAdd_ptr = FunctionWrapper.Load<GdipSaveAdd_delegate>(s_gdipModule, "GdipSaveAdd", LibraryName);
                 GdipSaveAddImage_ptr = FunctionWrapper.Load<GdipSaveAddImage_delegate>(s_gdipModule, "GdipSaveAddImage", LibraryName);
-                GdipDrawImageI_ptr = FunctionWrapper.Load<GdipDrawImageI_delegate>(s_gdipModule, "GdipDrawImageI", LibraryName);
                 GdipGetImageGraphicsContext_ptr = FunctionWrapper.Load<GdipGetImageGraphicsContext_delegate>(s_gdipModule, "GdipGetImageGraphicsContext", LibraryName);
-                GdipDrawImage_ptr = FunctionWrapper.Load<GdipDrawImage_delegate>(s_gdipModule, "GdipDrawImage", LibraryName);
-                GdipDrawImagePoints_ptr = FunctionWrapper.Load<GdipDrawImagePoints_delegate>(s_gdipModule, "GdipDrawImagePoints", LibraryName);
-                GdipDrawImagePointsI_ptr = FunctionWrapper.Load<GdipDrawImagePointsI_delegate>(s_gdipModule, "GdipDrawImagePointsI", LibraryName);
-                GdipDrawImageRectRectI_ptr = FunctionWrapper.Load<GdipDrawImageRectRectI_delegate>(s_gdipModule, "GdipDrawImageRectRectI", LibraryName);
-                GdipDrawImageRectRect_ptr = FunctionWrapper.Load<GdipDrawImageRectRect_delegate>(s_gdipModule, "GdipDrawImageRectRect", LibraryName);
-                GdipDrawImagePointsRectI_ptr = FunctionWrapper.Load<GdipDrawImagePointsRectI_delegate>(s_gdipModule, "GdipDrawImagePointsRectI", LibraryName);
-                GdipDrawImagePointsRect_ptr = FunctionWrapper.Load<GdipDrawImagePointsRect_delegate>(s_gdipModule, "GdipDrawImagePointsRect", LibraryName);
-                GdipDrawImageRect_ptr = FunctionWrapper.Load<GdipDrawImageRect_delegate>(s_gdipModule, "GdipDrawImageRect", LibraryName);
-                GdipDrawImagePointRect_ptr = FunctionWrapper.Load<GdipDrawImagePointRect_delegate>(s_gdipModule, "GdipDrawImagePointRect", LibraryName);
-                GdipDrawImagePointRectI_ptr = FunctionWrapper.Load<GdipDrawImagePointRectI_delegate>(s_gdipModule, "GdipDrawImagePointRectI", LibraryName);
                 GdipCreatePath_ptr = FunctionWrapper.Load<GdipCreatePath_delegate>(s_gdipModule, "GdipCreatePath", LibraryName);
                 GdipCreatePath2_ptr = FunctionWrapper.Load<GdipCreatePath2_delegate>(s_gdipModule, "GdipCreatePath2", LibraryName);
                 GdipCreatePath2I_ptr = FunctionWrapper.Load<GdipCreatePath2I_delegate>(s_gdipModule, "GdipCreatePath2I", LibraryName);
@@ -334,70 +276,6 @@ namespace System.Drawing
             private static FunctionWrapper<GdipRestoreGraphics_delegate> GdipRestoreGraphics_ptr;
             internal static int GdipRestoreGraphics(IntPtr graphics, uint graphicsState) => GdipRestoreGraphics_ptr.Delegate(graphics, graphicsState);
 
-            private delegate int GdipSaveGraphics_delegate(IntPtr graphics, out uint state);
-            private static FunctionWrapper<GdipSaveGraphics_delegate> GdipSaveGraphics_ptr;
-            internal static int GdipSaveGraphics(IntPtr graphics, out uint state) => GdipSaveGraphics_ptr.Delegate(graphics, out state);
-
-            private delegate int GdipDrawArc_delegate(IntPtr graphics, IntPtr pen, float x, float y, float width, float height, float startAngle, float sweepAngle);
-            private static FunctionWrapper<GdipDrawArc_delegate> GdipDrawArc_ptr;
-            internal static int GdipDrawArc(IntPtr graphics, IntPtr pen, float x, float y, float width, float height, float startAngle, float sweepAngle) => GdipDrawArc_ptr.Delegate(graphics, pen, x, y, width, height, startAngle, sweepAngle);
-
-            private delegate int GdipDrawArcI_delegate(IntPtr graphics, IntPtr pen, int x, int y, int width, int height, float startAngle, float sweepAngle);
-            private static FunctionWrapper<GdipDrawArcI_delegate> GdipDrawArcI_ptr;
-            internal static int GdipDrawArcI(IntPtr graphics, IntPtr pen, int x, int y, int width, int height, float startAngle, float sweepAngle) => GdipDrawArcI_ptr.Delegate(graphics, pen, x, y, width, height, startAngle, sweepAngle);
-
-            private delegate int GdipDrawBezier_delegate(IntPtr graphics, IntPtr pen, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
-            private static FunctionWrapper<GdipDrawBezier_delegate> GdipDrawBezier_ptr;
-            internal static int GdipDrawBezier(IntPtr graphics, IntPtr pen, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) => GdipDrawBezier_ptr.Delegate(graphics, pen, x1, y1, x2, y2, x3, y3, x4, y4);
-
-            private delegate int GdipDrawBezierI_delegate(IntPtr graphics, IntPtr pen, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
-            private static FunctionWrapper<GdipDrawBezierI_delegate> GdipDrawBezierI_ptr;
-            internal static int GdipDrawBezierI(IntPtr graphics, IntPtr pen, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) => GdipDrawBezierI_ptr.Delegate(graphics, pen, x1, y1, x2, y2, x3, y3, x4, y4);
-
-            private delegate int GdipDrawEllipseI_delegate(IntPtr graphics, IntPtr pen, int x, int y, int width, int height);
-            private static FunctionWrapper<GdipDrawEllipseI_delegate> GdipDrawEllipseI_ptr;
-            internal static int GdipDrawEllipseI(IntPtr graphics, IntPtr pen, int x, int y, int width, int height) => GdipDrawEllipseI_ptr.Delegate(graphics, pen, x, y, width, height);
-
-            private delegate int GdipDrawEllipse_delegate(IntPtr graphics, IntPtr pen, float x, float y, float width, float height);
-            private static FunctionWrapper<GdipDrawEllipse_delegate> GdipDrawEllipse_ptr;
-            internal static int GdipDrawEllipse(IntPtr graphics, IntPtr pen, float x, float y, float width, float height) => GdipDrawEllipse_ptr.Delegate(graphics, pen, x, y, width, height);
-
-            private delegate int GdipDrawLine_delegate(IntPtr graphics, IntPtr pen, float x1, float y1, float x2, float y2);
-            private static FunctionWrapper<GdipDrawLine_delegate> GdipDrawLine_ptr;
-            internal static int GdipDrawLine(IntPtr graphics, IntPtr pen, float x1, float y1, float x2, float y2) => GdipDrawLine_ptr.Delegate(graphics, pen, x1, y1, x2, y2);
-
-            private delegate int GdipDrawLineI_delegate(IntPtr graphics, IntPtr pen, int x1, int y1, int x2, int y2);
-            private static FunctionWrapper<GdipDrawLineI_delegate> GdipDrawLineI_ptr;
-            internal static int GdipDrawLineI(IntPtr graphics, IntPtr pen, int x1, int y1, int x2, int y2) => GdipDrawLineI_ptr.Delegate(graphics, pen, x1, y1, x2, y2);
-
-            private delegate int GdipDrawLines_delegate(IntPtr graphics, IntPtr pen, PointF[] points, int count);
-            private static FunctionWrapper<GdipDrawLines_delegate> GdipDrawLines_ptr;
-            internal static int GdipDrawLines(IntPtr graphics, IntPtr pen, PointF[] points, int count) => GdipDrawLines_ptr.Delegate(graphics, pen, points, count);
-
-            private delegate int GdipDrawLinesI_delegate(IntPtr graphics, IntPtr pen, Point[] points, int count);
-            private static FunctionWrapper<GdipDrawLinesI_delegate> GdipDrawLinesI_ptr;
-            internal static int GdipDrawLinesI(IntPtr graphics, IntPtr pen, Point[] points, int count) => GdipDrawLinesI_ptr.Delegate(graphics, pen, points, count);
-
-            private delegate int GdipDrawPath_delegate(IntPtr graphics, IntPtr pen, IntPtr path);
-            private static FunctionWrapper<GdipDrawPath_delegate> GdipDrawPath_ptr;
-            internal static int GdipDrawPath(IntPtr graphics, IntPtr pen, IntPtr path) => GdipDrawPath_ptr.Delegate(graphics, pen, path);
-
-            private delegate int GdipDrawPie_delegate(IntPtr graphics, IntPtr pen, float x, float y, float width, float height, float startAngle, float sweepAngle);
-            private static FunctionWrapper<GdipDrawPie_delegate> GdipDrawPie_ptr;
-            internal static int GdipDrawPie(IntPtr graphics, IntPtr pen, float x, float y, float width, float height, float startAngle, float sweepAngle) => GdipDrawPie_ptr.Delegate(graphics, pen, x, y, width, height, startAngle, sweepAngle);
-
-            private delegate int GdipDrawPieI_delegate(IntPtr graphics, IntPtr pen, int x, int y, int width, int height, float startAngle, float sweepAngle);
-            private static FunctionWrapper<GdipDrawPieI_delegate> GdipDrawPieI_ptr;
-            internal static int GdipDrawPieI(IntPtr graphics, IntPtr pen, int x, int y, int width, int height, float startAngle, float sweepAngle) => GdipDrawPieI_ptr.Delegate(graphics, pen, x, y, width, height, startAngle, sweepAngle);
-
-            private delegate int GdipDrawPolygon_delegate(IntPtr graphics, IntPtr pen, PointF[] points, int count);
-            private static FunctionWrapper<GdipDrawPolygon_delegate> GdipDrawPolygon_ptr;
-            internal static int GdipDrawPolygon(IntPtr graphics, IntPtr pen, PointF[] points, int count) => GdipDrawPolygon_ptr.Delegate(graphics, pen, points, count);
-
-            private delegate int GdipDrawPolygonI_delegate(IntPtr graphics, IntPtr pen, Point[] points, int count);
-            private static FunctionWrapper<GdipDrawPolygonI_delegate> GdipDrawPolygonI_ptr;
-            internal static int GdipDrawPolygonI(IntPtr graphics, IntPtr pen, Point[] points, int count) => GdipDrawPolygonI_ptr.Delegate(graphics, pen, points, count);
-
             private delegate int GdipDrawRectangle_delegate(IntPtr graphics, IntPtr pen, float x, float y, float width, float height);
             private static FunctionWrapper<GdipDrawRectangle_delegate> GdipDrawRectangle_ptr;
             internal static int GdipDrawRectangle(IntPtr graphics, IntPtr pen, float x, float y, float width, float height) => GdipDrawRectangle_ptr.Delegate(graphics, pen, x, y, width, height);
@@ -414,126 +292,10 @@ namespace System.Drawing
             private static FunctionWrapper<GdipDrawRectanglesI_delegate> GdipDrawRectanglesI_ptr;
             internal static int GdipDrawRectanglesI(IntPtr graphics, IntPtr pen, Rectangle[] rects, int count) => GdipDrawRectanglesI_ptr.Delegate(graphics, pen, rects, count);
 
-            private delegate int GdipFillEllipseI_delegate(IntPtr graphics, IntPtr pen, int x, int y, int width, int height);
-            private static FunctionWrapper<GdipFillEllipseI_delegate> GdipFillEllipseI_ptr;
-            internal static int GdipFillEllipseI(IntPtr graphics, IntPtr pen, int x, int y, int width, int height) => GdipFillEllipseI_ptr.Delegate(graphics, pen, x, y, width, height);
-
-            private delegate int GdipFillEllipse_delegate(IntPtr graphics, IntPtr pen, float x, float y, float width, float height);
-            private static FunctionWrapper<GdipFillEllipse_delegate> GdipFillEllipse_ptr;
-            internal static int GdipFillEllipse(IntPtr graphics, IntPtr pen, float x, float y, float width, float height) => GdipFillEllipse_ptr.Delegate(graphics, pen, x, y, width, height);
-
-            private delegate int GdipFillPolygon_delegate(IntPtr graphics, IntPtr brush, PointF[] points, int count, FillMode fillMode);
-            private static FunctionWrapper<GdipFillPolygon_delegate> GdipFillPolygon_ptr;
-            internal static int GdipFillPolygon(IntPtr graphics, IntPtr brush, PointF[] points, int count, FillMode fillMode) => GdipFillPolygon_ptr.Delegate(graphics, brush, points, count, fillMode);
-
-            private delegate int GdipFillPolygonI_delegate(IntPtr graphics, IntPtr brush, Point[] points, int count, FillMode fillMode);
-            private static FunctionWrapper<GdipFillPolygonI_delegate> GdipFillPolygonI_ptr;
-            internal static int GdipFillPolygonI(IntPtr graphics, IntPtr brush, Point[] points, int count, FillMode fillMode) => GdipFillPolygonI_ptr.Delegate(graphics, brush, points, count, fillMode);
-
-            private delegate int GdipFillPolygon2_delegate(IntPtr graphics, IntPtr brush, PointF[] points, int count);
-            private static FunctionWrapper<GdipFillPolygon2_delegate> GdipFillPolygon2_ptr;
-            internal static int GdipFillPolygon2(IntPtr graphics, IntPtr brush, PointF[] points, int count) => GdipFillPolygon2_ptr.Delegate(graphics, brush, points, count);
-
-            private delegate int GdipFillPolygon2I_delegate(IntPtr graphics, IntPtr brush, Point[] points, int count);
-            private static FunctionWrapper<GdipFillPolygon2I_delegate> GdipFillPolygon2I_ptr;
-            internal static int GdipFillPolygon2I(IntPtr graphics, IntPtr brush, Point[] points, int count) => GdipFillPolygon2I_ptr.Delegate(graphics, brush, points, count);
-
-            private delegate int GdipFillRectangle_delegate(IntPtr graphics, IntPtr brush, float x1, float y1, float x2, float y2);
-            private static FunctionWrapper<GdipFillRectangle_delegate> GdipFillRectangle_ptr;
-            internal static int GdipFillRectangle(IntPtr graphics, IntPtr brush, float x1, float y1, float x2, float y2) => GdipFillRectangle_ptr.Delegate(graphics, brush, x1, y1, x2, y2);
-
-            private delegate int GdipFillRectangleI_delegate(IntPtr graphics, IntPtr brush, int x1, int y1, int x2, int y2);
-            private static FunctionWrapper<GdipFillRectangleI_delegate> GdipFillRectangleI_ptr;
-            internal static int GdipFillRectangleI(IntPtr graphics, IntPtr brush, int x1, int y1, int x2, int y2) => GdipFillRectangleI_ptr.Delegate(graphics, brush, x1, y1, x2, y2);
-
-            private delegate int GdipFillRectangles_delegate(IntPtr graphics, IntPtr brush, RectangleF[] rects, int count);
-            private static FunctionWrapper<GdipFillRectangles_delegate> GdipFillRectangles_ptr;
-            internal static int GdipFillRectangles(IntPtr graphics, IntPtr brush, RectangleF[] rects, int count) => GdipFillRectangles_ptr.Delegate(graphics, brush, rects, count);
-
-            private delegate int GdipFillRectanglesI_delegate(IntPtr graphics, IntPtr brush, Rectangle[] rects, int count);
-            private static FunctionWrapper<GdipFillRectanglesI_delegate> GdipFillRectanglesI_ptr;
-            internal static int GdipFillRectanglesI(IntPtr graphics, IntPtr brush, Rectangle[] rects, int count) => GdipFillRectanglesI_ptr.Delegate(graphics, brush, rects, count);
-
-            private delegate int GdipDrawString_delegate(IntPtr graphics, [MarshalAs(UnmanagedType.LPWStr)]string text, int len, IntPtr font, ref RectangleF rc, IntPtr format, IntPtr brush);
-            private static FunctionWrapper<GdipDrawString_delegate> GdipDrawString_ptr;
-            internal static int GdipDrawString(IntPtr graphics, string text, int len, IntPtr font, ref RectangleF rc, IntPtr format, IntPtr brush) => GdipDrawString_ptr.Delegate(graphics, text, len, font, ref rc, format, brush);
-
             private delegate int GdipReleaseDC_delegate(IntPtr graphics, IntPtr hdc);
             private static FunctionWrapper<GdipReleaseDC_delegate> GdipReleaseDC_ptr;
             internal static int GdipReleaseDC(IntPtr graphics, IntPtr hdc) => GdipReleaseDC_ptr.Delegate(graphics, hdc);
             internal static int IntGdipReleaseDC(HandleRef graphics, HandleRef hdc) => (int)GdipReleaseDC_ptr.Delegate(graphics.Handle, hdc.Handle);
-
-            private delegate int GdipDrawImageRectI_delegate(IntPtr graphics, IntPtr image, int x, int y, int width, int height);
-            private static FunctionWrapper<GdipDrawImageRectI_delegate> GdipDrawImageRectI_ptr;
-            internal static int GdipDrawImageRectI(IntPtr graphics, IntPtr image, int x, int y, int width, int height) => GdipDrawImageRectI_ptr.Delegate(graphics, image, x, y, width, height);
-
-            private delegate int GdipGraphicsClear_delegate(IntPtr graphics, int argb);
-            private static FunctionWrapper<GdipGraphicsClear_delegate> GdipGraphicsClear_ptr;
-            internal static int GdipGraphicsClear(IntPtr graphics, int argb) => GdipGraphicsClear_ptr.Delegate(graphics, argb);
-
-            private delegate int GdipDrawClosedCurve_delegate(IntPtr graphics, IntPtr pen, PointF[] points, int count);
-            private static FunctionWrapper<GdipDrawClosedCurve_delegate> GdipDrawClosedCurve_ptr;
-            internal static int GdipDrawClosedCurve(IntPtr graphics, IntPtr pen, PointF[] points, int count) => GdipDrawClosedCurve_ptr.Delegate(graphics, pen, points, count);
-
-            private delegate int GdipDrawClosedCurveI_delegate(IntPtr graphics, IntPtr pen, Point[] points, int count);
-            private static FunctionWrapper<GdipDrawClosedCurveI_delegate> GdipDrawClosedCurveI_ptr;
-            internal static int GdipDrawClosedCurveI(IntPtr graphics, IntPtr pen, Point[] points, int count) => GdipDrawClosedCurveI_ptr.Delegate(graphics, pen, points, count);
-
-            private delegate int GdipDrawClosedCurve2_delegate(IntPtr graphics, IntPtr pen, PointF[] points, int count, float tension);
-            private static FunctionWrapper<GdipDrawClosedCurve2_delegate> GdipDrawClosedCurve2_ptr;
-            internal static int GdipDrawClosedCurve2(IntPtr graphics, IntPtr pen, PointF[] points, int count, float tension) => GdipDrawClosedCurve2_ptr.Delegate(graphics, pen, points, count, tension);
-
-            private delegate int GdipDrawClosedCurve2I_delegate(IntPtr graphics, IntPtr pen, Point[] points, int count, float tension);
-            private static FunctionWrapper<GdipDrawClosedCurve2I_delegate> GdipDrawClosedCurve2I_ptr;
-            internal static int GdipDrawClosedCurve2I(IntPtr graphics, IntPtr pen, Point[] points, int count, float tension) => GdipDrawClosedCurve2I_ptr.Delegate(graphics, pen, points, count, tension);
-
-            private delegate int GdipDrawCurve_delegate(IntPtr graphics, IntPtr pen, PointF[] points, int count);
-            private static FunctionWrapper<GdipDrawCurve_delegate> GdipDrawCurve_ptr;
-            internal static int GdipDrawCurve(IntPtr graphics, IntPtr pen, PointF[] points, int count) => GdipDrawCurve_ptr.Delegate(graphics, pen, points, count);
-
-            private delegate int GdipDrawCurveI_delegate(IntPtr graphics, IntPtr pen, Point[] points, int count);
-            private static FunctionWrapper<GdipDrawCurveI_delegate> GdipDrawCurveI_ptr;
-            internal static int GdipDrawCurveI(IntPtr graphics, IntPtr pen, Point[] points, int count) => GdipDrawCurveI_ptr.Delegate(graphics, pen, points, count);
-
-            private delegate int GdipDrawCurve2_delegate(IntPtr graphics, IntPtr pen, PointF[] points, int count, float tension);
-            private static FunctionWrapper<GdipDrawCurve2_delegate> GdipDrawCurve2_ptr;
-            internal static int GdipDrawCurve2(IntPtr graphics, IntPtr pen, PointF[] points, int count, float tension) => GdipDrawCurve2_ptr.Delegate(graphics, pen, points, count, tension);
-
-            private delegate int GdipDrawCurve2I_delegate(IntPtr graphics, IntPtr pen, Point[] points, int count, float tension);
-            private static FunctionWrapper<GdipDrawCurve2I_delegate> GdipDrawCurve2I_ptr;
-            internal static int GdipDrawCurve2I(IntPtr graphics, IntPtr pen, Point[] points, int count, float tension) => GdipDrawCurve2I_ptr.Delegate(graphics, pen, points, count, tension);
-
-            private delegate int GdipDrawCurve3_delegate(IntPtr graphics, IntPtr pen, PointF[] points, int count, int offset, int numberOfSegments, float tension);
-            private static FunctionWrapper<GdipDrawCurve3_delegate> GdipDrawCurve3_ptr;
-            internal static int GdipDrawCurve3(IntPtr graphics, IntPtr pen, PointF[] points, int count, int offset, int numberOfSegments, float tension) => GdipDrawCurve3_ptr.Delegate(graphics, pen, points, count, offset, numberOfSegments, tension);
-
-            private delegate int GdipDrawCurve3I_delegate(IntPtr graphics, IntPtr pen, Point[] points, int count, int offset, int numberOfSegments, float tension);
-            private static FunctionWrapper<GdipDrawCurve3I_delegate> GdipDrawCurve3I_ptr;
-            internal static int GdipDrawCurve3I(IntPtr graphics, IntPtr pen, Point[] points, int count, int offset, int numberOfSegments, float tension) => GdipDrawCurve3I_ptr.Delegate(graphics, pen, points, count, offset, numberOfSegments, tension);
-
-            private delegate int GdipFillClosedCurve_delegate(IntPtr graphics, IntPtr brush, PointF[] points, int count);
-            private static FunctionWrapper<GdipFillClosedCurve_delegate> GdipFillClosedCurve_ptr;
-            internal static int GdipFillClosedCurve(IntPtr graphics, IntPtr brush, PointF[] points, int count) => GdipFillClosedCurve_ptr.Delegate(graphics, brush, points, count);
-
-            private delegate int GdipFillClosedCurveI_delegate(IntPtr graphics, IntPtr brush, Point[] points, int count);
-            private static FunctionWrapper<GdipFillClosedCurveI_delegate> GdipFillClosedCurveI_ptr;
-            internal static int GdipFillClosedCurveI(IntPtr graphics, IntPtr brush, Point[] points, int count) => GdipFillClosedCurveI_ptr.Delegate(graphics, brush, points, count);
-
-            private delegate int GdipFillClosedCurve2_delegate(IntPtr graphics, IntPtr brush, PointF[] points, int count, float tension, FillMode fillMode);
-            private static FunctionWrapper<GdipFillClosedCurve2_delegate> GdipFillClosedCurve2_ptr;
-            internal static int GdipFillClosedCurve2(IntPtr graphics, IntPtr brush, PointF[] points, int count, float tension, FillMode fillMode) => GdipFillClosedCurve2_ptr.Delegate(graphics, brush, points, count, tension, fillMode);
-
-            private delegate int GdipFillClosedCurve2I_delegate(IntPtr graphics, IntPtr brush, Point[] points, int count, float tension, FillMode fillMode);
-            private static FunctionWrapper<GdipFillClosedCurve2I_delegate> GdipFillClosedCurve2I_ptr;
-            internal static int GdipFillClosedCurve2I(IntPtr graphics, IntPtr brush, Point[] points, int count, float tension, FillMode fillMode) => GdipFillClosedCurve2I_ptr.Delegate(graphics, brush, points, count, tension, fillMode);
-
-            private delegate int GdipFillPie_delegate(IntPtr graphics, IntPtr brush, float x, float y, float width, float height, float startAngle, float sweepAngle);
-            private static FunctionWrapper<GdipFillPie_delegate> GdipFillPie_ptr;
-            internal static int GdipFillPie(IntPtr graphics, IntPtr brush, float x, float y, float width, float height, float startAngle, float sweepAngle) => GdipFillPie_ptr.Delegate(graphics, brush, x, y, width, height, startAngle, sweepAngle);
-
-            private delegate int GdipFillPieI_delegate(IntPtr graphics, IntPtr brush, int x, int y, int width, int height, float startAngle, float sweepAngle);
-            private static FunctionWrapper<GdipFillPieI_delegate> GdipFillPieI_ptr;
-            internal static int GdipFillPieI(IntPtr graphics, IntPtr brush, int x, int y, int width, int height, float startAngle, float sweepAngle) => GdipFillPieI_ptr.Delegate(graphics, brush, x, y, width, height, startAngle, sweepAngle);
 
             private delegate int GdipFillPath_delegate(IntPtr graphics, IntPtr brush, IntPtr path);
             private static FunctionWrapper<GdipFillPath_delegate> GdipFillPath_ptr;
@@ -562,14 +324,6 @@ namespace System.Drawing
             private delegate int GdipCreateFromHWND_delegate(IntPtr hwnd, out IntPtr graphics);
             private static FunctionWrapper<GdipCreateFromHWND_delegate> GdipCreateFromHWND_ptr;
             internal static int GdipCreateFromHWND(IntPtr hwnd, out IntPtr graphics) => GdipCreateFromHWND_ptr.Delegate(hwnd, out graphics);
-
-            private delegate int GdipMeasureString_delegate(IntPtr graphics, [MarshalAs(UnmanagedType.LPWStr)]string str, int length, IntPtr font, ref RectangleF layoutRect, IntPtr stringFormat, out RectangleF boundingBox, int* codepointsFitted, int* linesFilled);
-            private static FunctionWrapper<GdipMeasureString_delegate> GdipMeasureString_ptr;
-            internal static int GdipMeasureString(IntPtr graphics, string str, int length, IntPtr font, ref RectangleF layoutRect, IntPtr stringFormat, out RectangleF boundingBox, int* codepointsFitted, int* linesFilled) => GdipMeasureString_ptr.Delegate(graphics, str, length, font, ref layoutRect, stringFormat, out boundingBox, codepointsFitted, linesFilled);
-
-            private delegate int GdipMeasureCharacterRanges_delegate(IntPtr graphics, [MarshalAs(UnmanagedType.LPWStr)]string str, int length, IntPtr font, ref RectangleF layoutRect, IntPtr stringFormat, int regcount, out IntPtr regions);
-            private static FunctionWrapper<GdipMeasureCharacterRanges_delegate> GdipMeasureCharacterRanges_ptr;
-            internal static int GdipMeasureCharacterRanges(IntPtr graphics, string str, int length, IntPtr font, ref RectangleF layoutRect, IntPtr stringFormat, int regcount, out IntPtr regions) => GdipMeasureCharacterRanges_ptr.Delegate(graphics, str, length, font, ref layoutRect, stringFormat, regcount, out regions);
 
             private delegate int GdipLoadImageFromFile_delegate([MarshalAs(UnmanagedType.LPWStr)]string filename, out IntPtr image);
             private static FunctionWrapper<GdipLoadImageFromFile_delegate> GdipLoadImageFromFile_ptr;
@@ -660,53 +414,9 @@ namespace System.Drawing
             private static FunctionWrapper<GdipSaveAddImage_delegate> GdipSaveAddImage_ptr;
             internal static int GdipSaveAddImage(IntPtr image, IntPtr imagenew, IntPtr encoderParameters) => GdipSaveAddImage_ptr.Delegate(image, imagenew, encoderParameters);
 
-            private delegate int GdipDrawImageI_delegate(IntPtr graphics, IntPtr image, int x, int y);
-            private static FunctionWrapper<GdipDrawImageI_delegate> GdipDrawImageI_ptr;
-            internal static int GdipDrawImageI(IntPtr graphics, IntPtr image, int x, int y) => GdipDrawImageI_ptr.Delegate(graphics, image, x, y);
-
             private delegate int GdipGetImageGraphicsContext_delegate(IntPtr image, out IntPtr graphics);
             private static FunctionWrapper<GdipGetImageGraphicsContext_delegate> GdipGetImageGraphicsContext_ptr;
             internal static int GdipGetImageGraphicsContext(IntPtr image, out IntPtr graphics) => GdipGetImageGraphicsContext_ptr.Delegate(image, out graphics);
-
-            private delegate int GdipDrawImage_delegate(IntPtr graphics, IntPtr image, float x, float y);
-            private static FunctionWrapper<GdipDrawImage_delegate> GdipDrawImage_ptr;
-            internal static int GdipDrawImage(IntPtr graphics, IntPtr image, float x, float y) => GdipDrawImage_ptr.Delegate(graphics, image, x, y);
-
-            private delegate int GdipDrawImagePoints_delegate(IntPtr graphics, IntPtr image, PointF[] destPoints, int count);
-            private static FunctionWrapper<GdipDrawImagePoints_delegate> GdipDrawImagePoints_ptr;
-            internal static int GdipDrawImagePoints(IntPtr graphics, IntPtr image, PointF[] destPoints, int count) => GdipDrawImagePoints_ptr.Delegate(graphics, image, destPoints, count);
-
-            private delegate int GdipDrawImagePointsI_delegate(IntPtr graphics, IntPtr image, Point[] destPoints, int count);
-            private static FunctionWrapper<GdipDrawImagePointsI_delegate> GdipDrawImagePointsI_ptr;
-            internal static int GdipDrawImagePointsI(IntPtr graphics, IntPtr image, Point[] destPoints, int count) => GdipDrawImagePointsI_ptr.Delegate(graphics, image, destPoints, count);
-
-            private delegate int GdipDrawImageRectRectI_delegate(IntPtr graphics, IntPtr image, int dstx, int dsty, int dstwidth, int dstheight, int srcx, int srcy, int srcwidth, int srcheight, GraphicsUnit srcUnit, IntPtr imageattr, Graphics.DrawImageAbort callback, IntPtr callbackData);
-            private static FunctionWrapper<GdipDrawImageRectRectI_delegate> GdipDrawImageRectRectI_ptr;
-            internal static int GdipDrawImageRectRectI(IntPtr graphics, IntPtr image, int dstx, int dsty, int dstwidth, int dstheight, int srcx, int srcy, int srcwidth, int srcheight, GraphicsUnit srcUnit, IntPtr imageattr, Graphics.DrawImageAbort callback, IntPtr callbackData) => GdipDrawImageRectRectI_ptr.Delegate(graphics, image, dstx, dsty, dstwidth, dstheight, srcx, srcy, srcwidth, srcheight, srcUnit, imageattr, callback, callbackData);
-
-            private delegate int GdipDrawImageRectRect_delegate(IntPtr graphics, IntPtr image, float dstx, float dsty, float dstwidth, float dstheight, float srcx, float srcy, float srcwidth, float srcheight, GraphicsUnit srcUnit, IntPtr imageattr, Graphics.DrawImageAbort callback, IntPtr callbackData);
-            private static FunctionWrapper<GdipDrawImageRectRect_delegate> GdipDrawImageRectRect_ptr;
-            internal static int GdipDrawImageRectRect(IntPtr graphics, IntPtr image, float dstx, float dsty, float dstwidth, float dstheight, float srcx, float srcy, float srcwidth, float srcheight, GraphicsUnit srcUnit, IntPtr imageattr, Graphics.DrawImageAbort callback, IntPtr callbackData) => GdipDrawImageRectRect_ptr.Delegate(graphics, image, dstx, dsty, dstwidth, dstheight, srcx, srcy, srcwidth, srcheight, srcUnit, imageattr, callback, callbackData);
-
-            private delegate int GdipDrawImagePointsRectI_delegate(IntPtr graphics, IntPtr image, Point[] destPoints, int count, int srcx, int srcy, int srcwidth, int srcheight, GraphicsUnit srcUnit, IntPtr imageattr, Graphics.DrawImageAbort callback, IntPtr callbackData);
-            private static FunctionWrapper<GdipDrawImagePointsRectI_delegate> GdipDrawImagePointsRectI_ptr;
-            internal static int GdipDrawImagePointsRectI(IntPtr graphics, IntPtr image, Point[] destPoints, int count, int srcx, int srcy, int srcwidth, int srcheight, GraphicsUnit srcUnit, IntPtr imageattr, Graphics.DrawImageAbort callback, IntPtr callbackData) => GdipDrawImagePointsRectI_ptr.Delegate(graphics, image, destPoints, count, srcx, srcy, srcwidth, srcheight, srcUnit, imageattr, callback, callbackData);
-
-            private delegate int GdipDrawImagePointsRect_delegate(IntPtr graphics, IntPtr image, PointF[] destPoints, int count, float srcx, float srcy, float srcwidth, float srcheight, GraphicsUnit srcUnit, IntPtr imageattr, Graphics.DrawImageAbort callback, IntPtr callbackData);
-            private static FunctionWrapper<GdipDrawImagePointsRect_delegate> GdipDrawImagePointsRect_ptr;
-            internal static int GdipDrawImagePointsRect(IntPtr graphics, IntPtr image, PointF[] destPoints, int count, float srcx, float srcy, float srcwidth, float srcheight, GraphicsUnit srcUnit, IntPtr imageattr, Graphics.DrawImageAbort callback, IntPtr callbackData) => GdipDrawImagePointsRect_ptr.Delegate(graphics, image, destPoints, count, srcx, srcy, srcwidth, srcheight, srcUnit, imageattr, callback, callbackData);
-
-            private delegate int GdipDrawImageRect_delegate(IntPtr graphics, IntPtr image, float x, float y, float width, float height);
-            private static FunctionWrapper<GdipDrawImageRect_delegate> GdipDrawImageRect_ptr;
-            internal static int GdipDrawImageRect(IntPtr graphics, IntPtr image, float x, float y, float width, float height) => GdipDrawImageRect_ptr.Delegate(graphics, image, x, y, width, height);
-
-            private delegate int GdipDrawImagePointRect_delegate(IntPtr graphics, IntPtr image, float x, float y, float srcx, float srcy, float srcwidth, float srcheight, GraphicsUnit srcUnit);
-            private static FunctionWrapper<GdipDrawImagePointRect_delegate> GdipDrawImagePointRect_ptr;
-            internal static int GdipDrawImagePointRect(IntPtr graphics, IntPtr image, float x, float y, float srcx, float srcy, float srcwidth, float srcheight, GraphicsUnit srcUnit) => GdipDrawImagePointRect_ptr.Delegate(graphics, image, x, y, srcx, srcy, srcwidth, srcheight, srcUnit);
-
-            private delegate int GdipDrawImagePointRectI_delegate(IntPtr graphics, IntPtr image, int x, int y, int srcx, int srcy, int srcwidth, int srcheight, GraphicsUnit srcUnit);
-            private static FunctionWrapper<GdipDrawImagePointRectI_delegate> GdipDrawImagePointRectI_ptr;
-            internal static int GdipDrawImagePointRectI(IntPtr graphics, IntPtr image, int x, int y, int srcx, int srcy, int srcwidth, int srcheight, GraphicsUnit srcUnit) => GdipDrawImagePointRectI_ptr.Delegate(graphics, image, x, y, srcx, srcy, srcwidth, srcheight, srcUnit);
 
             private delegate int GdipCreatePath_delegate(FillMode brushMode, out IntPtr path);
             private static FunctionWrapper<GdipCreatePath_delegate> GdipCreatePath_ptr;
