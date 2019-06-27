@@ -1530,7 +1530,7 @@ namespace System.Net.Http.Functional.Tests
 
                 // Wait until server finished processing
                 // so that totalSent is fully updated
-                serverProcessing.Wait();
+                serverProcessing.Wait(TimeSpan.FromSeconds(30));
                 Assert.Equal(totalSent, totalReceived);
             },
             async server =>
