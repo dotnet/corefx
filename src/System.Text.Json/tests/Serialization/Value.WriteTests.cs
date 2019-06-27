@@ -62,6 +62,11 @@ namespace System.Text.Json.Serialization.Tests
                 Uri.TryCreate("~/path", UriKind.RelativeOrAbsolute, out Uri uri);
                 Assert.Equal(@"""~\u002fpath""", JsonSerializer.Serialize(uri));
             }
+
+            {
+                Uri uri = new Uri("http://a/b/../c");
+                Assert.Equal(@"""http:\u002f\u002fa\u002fb\u002f..\u002fc""", JsonSerializer.Serialize(uri));
+            }
         }
     }
 }
