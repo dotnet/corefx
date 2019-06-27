@@ -223,7 +223,6 @@ namespace System.Text.Encodings.Tests
             Assert.Equal('\u0000', fallbackBuffer.GetNextChar());
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework contains known bugs in this code path.")]
         [Theory]
         [InlineData(new byte[] { 0xF1 }, new byte[] { 0xF1 }, -1)]
         [InlineData(new byte[] { 0xF1 }, new byte[] { 0x80 }, -1)]
