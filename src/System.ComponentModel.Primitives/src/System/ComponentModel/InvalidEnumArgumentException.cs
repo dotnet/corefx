@@ -49,8 +49,12 @@ namespace System.ComponentModel
             : base(SR.Format(SR.InvalidEnumArgument,
                                 argumentName,
                                 invalidValue.ToString(CultureInfo.CurrentCulture),
-                                enumClass.Name), argumentName)
+                                enumClass?.Name), argumentName)
         {
+            if (enumClass == null)
+            {
+                throw new ArgumentNullException(nameof(enumClass));
+            }
         }
 
         /// <summary>
