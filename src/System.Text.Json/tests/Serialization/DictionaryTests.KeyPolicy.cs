@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -98,6 +100,39 @@ namespace System.Text.Json.Serialization.Tests
             // A policy that returns null is not allowed.
             Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<Dictionary<string, int>>(@"{""onlyKey"": 1}", options));
             Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new Dictionary<string, int> { { "onlyKey", 1 } }, options));
+        }
+
+        [Fact]
+        public static void KeyConflictDeserialize_LastValueWins()
+        {
+            var options = new JsonSerializerOptions
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            // The camel case policy resolves two keys to the same output key.
+            string json = @"{""myInt"":1,""MyInt"":2}";
+            Dictionary<string, int> obj = JsonSerializer.Deserialize<Dictionary<string, int>>(json, options);
+
+            // Check that the last value wins.
+            Assert.Equal(2, obj["myInt"]);
+            Assert.Equal(1, obj.Count);
+        }
+
+        [Fact]
+        public static void KeyConflictSerialize_WriteAll()
+        {
+            var options = new JsonSerializerOptions
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            // The camel case policy resolves two keys to the same output key.
+            Dictionary<string, int> obj = new Dictionary<string, int> { { "myInt", 1 }, { "MyInt", 2 } };
+            string json = JsonSerializer.Serialize(obj, options);
+
+            // Check that we write all.
+            Assert.Equal(@"{""myInt"":1,""myInt"":2}", json);
         }
     }
 }
