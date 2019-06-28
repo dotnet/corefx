@@ -47,8 +47,8 @@ namespace System.Net.Http
 
         private bool _disposed;
         // anything else than -1 means that connection is being terminated
-        // in which case _lastStreamId is the maximum StreamId which can be processed
-        private int _lastStreamId = -1;
+        // in which case _lastValidStreamId is the maximum StreamId which can be processed
+        private int _lastValidStreamId = -1;
         private Exception _abortException;
 
         // If an in-progress write is canceled we need to be able to immediately
@@ -229,7 +229,7 @@ namespace System.Net.Http
                     frameHeader = await ReadFrameAsync().ConfigureAwait(false);
                     if (NetEventSource.IsEnabled) Trace($"Frame {frameNum}: {frameHeader}.");
 
-                    if (_lastStreamId != -1 && frameHeader.StreamId > _lastStreamId)
+                    if (_lastValidStreamId != -1 && frameHeader.StreamId > _lastValidStreamId)
                     {
                         // Ignore frames not meant to be processed after GOAWAY
                         _incomingBuffer.Discard(frameHeader.Length);
@@ -1282,23 +1282,25 @@ namespace System.Net.Http
         private void AbortStreams(int lastValidStream, Exception abortException)
         {
             Debug.Assert(lastValidStream >= 0);
-            bool hasAnyActiveStream = false;
-
-            if (_lastStreamId == -1)
-            {
-                _lastStreamId = lastValidStream;
-            }
-            else
-            {
-                // We have already received GOAWAY before
-                // In this case the smaller valid stream is used
-                _lastStreamId = Math.Min(_lastStreamId, lastValidStream);
-            }
+            bool isAlreadyInvalidated = _disposed;
 
             lock (SyncObject)
             {
-			    if (NetEventSource.IsEnabled) Trace($"{nameof(lastValidStream)}={lastValidStream}, {nameof(abortException)}={lastValidStream}={abortException}, {nameof(_lastStreamId)}={_lastStreamId}");
+                if (_lastValidStreamId == -1)
+                {
+                    _lastValidStreamId = lastValidStream;
+                }
+                else
+                {
+                    // We have already received GOAWAY before
+                    // In this case the smaller valid stream is used
+                    _lastValidStreamId = Math.Min(_lastValidStreamId, lastValidStream);
+                    isAlreadyInvalidated = true;
+                }
 
+                if (NetEventSource.IsEnabled) Trace($"{nameof(lastValidStream)}={lastValidStream}, {nameof(abortException)}={lastValidStream}={abortException}, {nameof(_lastValidStreamId)}={_lastValidStreamId}");
+
+                bool hasAnyActiveStream = false;
                 foreach (KeyValuePair<int, Http2Stream> kvp in _httpStreams)
                 {
                     int streamId = kvp.Key;
@@ -1312,34 +1314,32 @@ namespace System.Net.Http
                     }
                     else
                     {
-						if (NetEventSource.IsEnabled)
-	                    {
-	                        Trace($"Found {nameof(streamId)} {streamId} <= {lastValidStream}.");
-	                    }
+                        if (NetEventSource.IsEnabled) Trace($"Found {nameof(streamId)} {streamId} <= {lastValidStream}.");
 
                         hasAnyActiveStream = true;
                     }
                 }
 
+                if (!hasAnyActiveStream)
+                {
+                    _disposed = true;
+                }
+
                 CheckForShutdown();
             }
 
-            if (!hasAnyActiveStream)
+            if (!isAlreadyInvalidated)
             {
-                if (!_disposed)
-                {
-                    _disposed = true;
-                    // Invalidate outside of lock to avoid race with HttpPool Dispose()
-                    // We should not try to grab pool lock while holding connection lock as on disposing pool,
-                    // we could hold pool lock while trying to grab connection lock in Dispose().
-                    _pool.InvalidateHttp2Connection(this);
-                }
+                // Invalidate outside of lock to avoid race with HttpPool Dispose()
+                // We should not try to grab pool lock while holding connection lock as on disposing pool,
+                // we could hold pool lock while trying to grab connection lock in Dispose().
+                _pool.InvalidateHttp2Connection(this);
             }
         }
 
         private void CheckForShutdown()
         {
-            Debug.Assert(_disposed || _lastStreamId != -1);
+            Debug.Assert(_disposed || _lastValidStreamId != -1);
             Debug.Assert(Monitor.IsEntered(SyncObject));
 
             // Check if dictionary has become empty
@@ -1583,7 +1583,7 @@ namespace System.Net.Http
         {
             lock (SyncObject)
             {
-                if (_nextStream == MaxStreamId || _disposed || _lastStreamId != -1)
+                if (_nextStream == MaxStreamId || _disposed || _lastValidStreamId != -1)
                 {
                     if (_abortException != null)
                     {
@@ -1636,7 +1636,7 @@ namespace System.Net.Http
                     _idleSinceTickCount = Environment.TickCount64;
                 }
 
-                if (_disposed || _lastStreamId != -1)
+                if (_disposed || _lastValidStreamId != -1)
                 {
                     CheckForShutdown();
                 }
