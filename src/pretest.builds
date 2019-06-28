@@ -6,7 +6,7 @@
     <GenerateTestSharedFrameworkDepsFile Condition="'$(BinplaceTestSharedFramework)' == 'true'">true</GenerateTestSharedFrameworkDepsFile>
   </PropertyGroup>
 
-  <Target Name="Build" DependsOnTargets="GenerateTestSharedFrameworkDepsFile;GenerateLaunchSettingsFiles" />
+  <Target Name="Build" DependsOnTargets="GenerateTestSharedFrameworkDepsFile;GenerateLaunchSettingsFiles;BuildTestSupportLibraries" />
 
   <!-- Generate launch settings support files to enable VS debugging. -->
   <Target Name="GenerateLaunchSettingsFiles" Condition="'$(EnableLaunchSettings)' == 'true'">
@@ -23,6 +23,13 @@
     <MSBuild Projects="@(TestProjects)"
              Targets="GenerateLaunchSettingsFile"
              ContinueOnError="ErrorAndContinue" />
+  </Target>
+
+  <!-- This is necessary as inside VS project references that aren't part of the sln aren't built. -->
+  <Target Name="BuildTestSupportLibraries">
+    <MSBuild Projects="$(CommonTestPath)\CoreFx.Private.TestUtilities\CoreFx.Private.TestUtilities.csproj"
+             Targets="Build"
+             Properties="Configuration=$(BuildConfiguration)" />
   </Target>
 
   <Import Project="Directory.Build.targets" />
