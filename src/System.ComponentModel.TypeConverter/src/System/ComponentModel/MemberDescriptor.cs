@@ -64,6 +64,10 @@ namespace System.ComponentModel
         /// </summary>
         protected MemberDescriptor(MemberDescriptor descr)
         {
+            if (descr == null)
+            {
+                throw new ArgumentException(SR.InvalidMemberName)
+            }
             _name = descr.Name;
             _displayName = _name;
             _nameHash = _name.GetHashCode();
