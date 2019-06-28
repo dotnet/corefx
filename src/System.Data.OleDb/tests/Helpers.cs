@@ -2,6 +2,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace System.Data.OleDb.Tests
 {
@@ -34,6 +35,10 @@ namespace System.Data.OleDb.Tests
                 }
                 // skip if x86 or if the expected driver not available 
                 IsAvailable = !PlatformDetection.Is32BitProcess && providerNames.Contains(ExpectedProviderName);
+                if (!CultureInfo.CurrentCulture.Name.Equals("en-US", StringComparison.OrdinalIgnoreCase))
+                {
+                    IsAvailable = false; // ActiveIssue: https://github.com/dotnet/corefx/issues/38737
+                }
                 ProviderName = IsAvailable ? ExpectedProviderName : null;
             }
         }
