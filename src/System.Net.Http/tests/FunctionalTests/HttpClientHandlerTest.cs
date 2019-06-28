@@ -1628,6 +1628,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_CustomTransferEncoding_Success()
         {
+            const string TestContent = "Test String";
             await LoopbackServer.CreateClientAndServerAsync(
                 async url =>
                 {
@@ -1636,12 +1637,12 @@ namespace System.Net.Http.Functional.Tests
                         // Since we are issuing a GET request, we do not need any Transfer-Encoding headers.
                         // It is still permissible to add them, though.
                         client.DefaultRequestHeaders.TransferEncoding.Add(new TransferCodingHeaderValue("chunked2"));
-                        Assert.Equal("hello world", await client.GetStringAsync(url));
+                        Assert.Equal(TestContent, await client.GetStringAsync(url));
                     }
                 },
                 async server =>
                 {
-                    List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync(content: "hello world");
+                    List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync(content: TestContent);
                     Assert.Contains("Transfer-Encoding: chunked2", headers);
                 });
         }
@@ -2334,14 +2335,14 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task PostAsync_CustomTransferEncoding_Success()
         {
-            string data = "Test String";
+            const string TestContent = "Test String";
             await LoopbackServer.CreateClientAndServerAsync(
                 async url =>
                 {
                     using (HttpClient client = new HttpClient())
                     {
                         client.DefaultRequestHeaders.TransferEncoding.Add(new TransferCodingHeaderValue("chunked2"));
-                        using (HttpResponseMessage response = await client.PostAsync(url, new StringContent(data)))
+                        using (HttpResponseMessage response = await client.PostAsync(url, new StringContent(TestContent)))
                         {
                             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                         }
@@ -2355,7 +2356,7 @@ namespace System.Net.Http.Functional.Tests
                         // Since we are using a custom (unknown) transfer encoding, the request body is sent as-is.
                         await connection.SendResponseAsync();
                         var content = await connection.Reader.ReadToEndAsync();
-                        Assert.Equal(data, content);
+                        Assert.Equal(TestContent, content);
                     });
                 });
         }
