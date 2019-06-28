@@ -45,6 +45,11 @@ namespace System.Text.Json
                     if (options.DictionaryKeyPolicy != null)
                     {
                         keyName = options.DictionaryKeyPolicy.ConvertName(keyName);
+
+                        if (keyName == null)
+                        {
+                            ThrowHelper.ThrowInvalidOperationException_SerializerDictionaryKeyNull(options.DictionaryKeyPolicy.GetType());
+                        }
                     }
 
                     if (state.Current.IsDictionary || state.Current.IsIDictionaryConstructible)

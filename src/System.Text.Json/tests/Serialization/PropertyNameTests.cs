@@ -64,6 +64,7 @@ namespace System.Text.Json.Serialization.Tests
 
             // A policy that returns null is not allowed.
             Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<SimpleTestClass>(@"{}", options));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new SimpleTestClass(), options));
         }
 
         [Fact]
