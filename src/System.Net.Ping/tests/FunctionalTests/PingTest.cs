@@ -842,7 +842,7 @@ namespace System.Net.NetworkInformation.Tests
         public void Ping_TimedOutSync_Success()
         {
             var sender = new Ping();
-            PingReply reply = sender.Send("192.0.2.0");
+            PingReply reply = sender.Send(TestSettings.UnreachableAddress);
             Assert.Equal(IPStatus.TimedOut, reply.Status);
         }
      }
