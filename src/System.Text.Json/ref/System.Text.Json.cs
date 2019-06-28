@@ -39,7 +39,7 @@ namespace System.Text.Json
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
         public System.Text.Json.JsonElement this[int index] { get { throw null; } }
-        public System.Text.Json.JsonValueType Type { get { throw null; } }
+        public System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
         public System.Text.Json.JsonElement Clone() { throw null; }
         public System.Text.Json.JsonElement.ArrayEnumerator EnumerateArray() { throw null; }
         public System.Text.Json.JsonElement.ObjectEnumerator EnumerateObject() { throw null; }
@@ -226,14 +226,14 @@ namespace System.Text.Json
         StartArray = (byte)3,
         EndArray = (byte)4,
         PropertyName = (byte)5,
-        String = (byte)6,
-        Number = (byte)7,
-        True = (byte)8,
-        False = (byte)9,
-        Null = (byte)10,
-        Comment = (byte)11,
+        Comment = (byte)6,
+        String = (byte)7,
+        Number = (byte)8,
+        True = (byte)9,
+        False = (byte)10,
+        Null = (byte)11,
     }
-    public enum JsonValueType : byte
+    public enum JsonValueKind : byte
     {
         Undefined = (byte)0,
         Object = (byte)1,
@@ -254,8 +254,8 @@ namespace System.Text.Json
     {
         private object _dummy;
         private int _dummyPrimitive;
-        public Utf8JsonReader(in System.Buffers.ReadOnlySequence<byte> jsonData, bool isFinalBlock, System.Text.Json.JsonReaderState state) { throw null; }
-        public Utf8JsonReader(in System.Buffers.ReadOnlySequence<byte> jsonData, System.Text.Json.JsonReaderOptions options = default(System.Text.Json.JsonReaderOptions)) { throw null; }
+        public Utf8JsonReader(System.Buffers.ReadOnlySequence<byte> jsonData, bool isFinalBlock, System.Text.Json.JsonReaderState state) { throw null; }
+        public Utf8JsonReader(System.Buffers.ReadOnlySequence<byte> jsonData, System.Text.Json.JsonReaderOptions options = default(System.Text.Json.JsonReaderOptions)) { throw null; }
         public Utf8JsonReader(System.ReadOnlySpan<byte> jsonData, bool isFinalBlock, System.Text.Json.JsonReaderState state) { throw null; }
         public Utf8JsonReader(System.ReadOnlySpan<byte> jsonData, System.Text.Json.JsonReaderOptions options = default(System.Text.Json.JsonReaderOptions)) { throw null; }
         public long BytesConsumed { get { throw null; } }
