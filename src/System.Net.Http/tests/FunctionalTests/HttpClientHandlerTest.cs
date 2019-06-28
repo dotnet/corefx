@@ -2355,7 +2355,7 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Contains("Transfer-Encoding: chunked2", headers);
                         // Since we are using a custom (unknown) transfer encoding, the request body is sent as-is.
                         await connection.SendResponseAsync();
-                        var content = await connection.Reader.ReadToEndAsync();
+                        string content = await connection.ReadToEndAsync();
                         Assert.Equal(TestContent, content);
                     });
                 });
