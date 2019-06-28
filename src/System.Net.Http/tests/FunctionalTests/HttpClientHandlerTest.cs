@@ -1625,6 +1625,28 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
+        public async Task GetAsync_CustomTransferEncoding()
+        {
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    using (HttpClientHandler handler = CreateHttpClientHandler())
+                    using (var client = new HttpClient(handler))
+                    {
+                        // Since we are issuing a GET request, we do not need any Transfer-Encoding headers.
+                        // It is still permissible to add them, though.
+                        client.DefaultRequestHeaders.TransferEncoding.Add(new TransferCodingHeaderValue("chunked2"));
+                        Assert.Equal("hello world", await client.GetStringAsync(url));
+                    }
+                },
+                async server =>
+                {
+                    List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync(content: "hello world");
+                    Assert.Contains("Transfer-Encoding: chunked2", headers);
+                });
+        }
+
 #region Post Methods Tests
 
         [OuterLoop("Uses external server")]
@@ -2308,6 +2330,36 @@ namespace System.Net.Http.Functional.Tests
                 }
             }, server => server.AcceptConnectionSendCustomResponseAndCloseAsync(
                 $"HTTP/1.1 {(int)statusCode} {reasonPhrase}\r\nContent-Length: 0\r\n\r\n"));
+        }
+
+        [Fact]
+        public async Task PostAsync_CustomTransferEncoding()
+        {
+            string data = "Test String";
+            await LoopbackServer.CreateClientAndServerAsync(
+                async url =>
+                {
+                    using (HttpClientHandler handler = CreateHttpClientHandler())
+                    using (var client = new HttpClient(handler))
+                    {
+                        client.DefaultRequestHeaders.TransferEncoding.Add(new TransferCodingHeaderValue("chunked2"));
+                        using (HttpResponseMessage response = await client.PostAsync(url, new StringContent(data)))
+                        {
+                            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        }
+                    }
+                },
+                async server =>
+                {
+                    await server.AcceptConnectionAsync(async connection => {
+                        List<string> headers = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
+                        Assert.Contains("Transfer-Encoding: chunked2", headers);
+                        // Since we are using a custom (unknown) transfer encoding, the request body is sent as-is.
+                        await connection.SendResponseAsync();
+                        var content = await connection.Reader.ReadToEndAsync();
+                        Assert.Equal(data, content);
+                    });
+                });
         }
 
 #endregion
