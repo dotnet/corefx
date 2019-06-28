@@ -66,7 +66,7 @@ namespace System.ComponentModel
         {
             if (descr == null)
             {
-                throw new ArgumentException(SR.InvalidMemberName)
+                throw new ArgumentException(SR.InvalidMemberName);
             }
             _name = descr.Name;
             _displayName = _name;
