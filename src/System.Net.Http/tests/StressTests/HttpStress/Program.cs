@@ -79,7 +79,14 @@ public class Program
         var clientOperations = new (string, Func<HttpClient, Task<string>>)[]
         {
             ("GET",
-            client => client.GetStringAsync(serverUri)),
+            async client =>
+            {
+                using (HttpResponseMessage m = await client.GetAsync(serverUri))
+                {
+                    ValidateResponse(m);
+                    return await m.Content.ReadAsStringAsync();
+                }
+            }),
 
             ("POST",
             async client =>
@@ -101,7 +108,7 @@ public class Program
                 }
             }),
 
-            ("POST w/ Expect: 100-continue",
+            ("POST ExpectContinue",
             async client =>
             {
                 using (var req = new HttpRequestMessage(HttpMethod.Post, serverUri) { Version = httpVersion })
@@ -116,7 +123,7 @@ public class Program
                 }
             }),
 
-            ("GET w/ Cancellation",
+            ("GET Cancellation",
             async client =>
             {
                 using (var req = new HttpRequestMessage(HttpMethod.Get, serverUri) { Version = httpVersion })
@@ -137,7 +144,7 @@ public class Program
                 }
             }),
 
-            ("POST w/ Cancellation",
+            ("POST Cancellation",
             async client =>
             {
                 using (var req = new HttpRequestMessage(HttpMethod.Post, serverUri) { Version = httpVersion })
@@ -219,9 +226,15 @@ public class Program
             .Build()
             .Start();
 
-        // Configure the client.
+        // Start the client.
         Console.WriteLine($"Starting {ConcurrentRequests} client workers.");
-        using (var handler = new SocketsHttpHandler() { SslOptions = new SslClientAuthenticationOptions { RemoteCertificateValidationCallback = delegate { return true; } } })
+        var handler = new SocketsHttpHandler()
+        {
+            SslOptions = new SslClientAuthenticationOptions
+            {
+                RemoteCertificateValidationCallback = delegate { return true; }
+            }
+        };
         using (var client = new HttpClient(handler) { DefaultRequestVersion = httpVersion })
         {
             // Track all successes and failures
