@@ -44,25 +44,13 @@ namespace System.ComponentModel
             yield return new object[] { attribute, attribute, true };
             yield return new object[] { attribute, new ProvidePropertyAttribute("propertyName", "receiverTypeName"), true };
             yield return new object[] { attribute, new ProvidePropertyAttribute("propertyname", "receiverTypeName"), false };
-            // .NET Framework throws NullReferenceException.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { attribute, new ProvidePropertyAttribute(null, "receiverTypeName"), false };
-            }
+            yield return new object[] { attribute, new ProvidePropertyAttribute(null, "receiverTypeName"), false };
             yield return new object[] { attribute, new ProvidePropertyAttribute("propertyName", "receivertypename"), false };
-            // .NET Framework throws NullReferenceException.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { attribute, new ProvidePropertyAttribute("propertyName", (string)null), false };
-            }
+            yield return new object[] { attribute, new ProvidePropertyAttribute("propertyName", (string)null), false };
 
-            // .NET Framework throws NullReferenceException.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { new ProvidePropertyAttribute(null, (string)null), new ProvidePropertyAttribute(null, (string)null), true };
-                yield return new object[] { new ProvidePropertyAttribute(null, (string)null), new ProvidePropertyAttribute("propertyName", (string)null), false };
-                yield return new object[] { new ProvidePropertyAttribute(null, (string)null), new ProvidePropertyAttribute(null, "receiverTypeName"), false };
-            }
+            yield return new object[] { new ProvidePropertyAttribute(null, (string)null), new ProvidePropertyAttribute(null, (string)null), true };
+            yield return new object[] { new ProvidePropertyAttribute(null, (string)null), new ProvidePropertyAttribute("propertyName", (string)null), false };
+            yield return new object[] { new ProvidePropertyAttribute(null, (string)null), new ProvidePropertyAttribute(null, "receiverTypeName"), false };
 
             yield return new object[] { attribute, new object(), false };
             yield return new object[] { attribute, null, false };

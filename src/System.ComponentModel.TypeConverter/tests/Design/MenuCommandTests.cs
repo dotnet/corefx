@@ -99,11 +99,7 @@ namespace System.ComponentModel.Design.Tests
                 "00000000-0000-0000-0000-000000000000 : 0 : Supported|Enabled|Visible|Checked"
             };
 
-            // .NET Framework throws NullReferenceException.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { new MenuCommand(new EventHandler(EventHandler), null), " : Supported|Enabled|Visible" };
-            }
+            yield return new object[] { new MenuCommand(new EventHandler(EventHandler), null), " : Supported|Enabled|Visible" };
         }
 
         [Theory]

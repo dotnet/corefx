@@ -76,11 +76,7 @@ namespace System.ComponentModel.Tests
             yield return new object[] { "BaseTypeName", "System.ComponentModel.EditorAttributeBaseTypeName" };
             yield return new object[] { "BaseTypeName,Other", "System.ComponentModel.EditorAttributeBaseTypeName" };
             yield return new object[] { string.Empty, "System.ComponentModel.EditorAttribute" };
-            // .NET Framework throws NullReferenceException.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { null, "System.ComponentModel.EditorAttribute" };
-            }
+            yield return new object[] { null, "System.ComponentModel.EditorAttribute" };
         }
 
         [Theory]

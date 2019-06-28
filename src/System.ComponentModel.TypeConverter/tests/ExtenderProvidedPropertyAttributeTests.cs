@@ -22,11 +22,7 @@ namespace System.ComponentModel.Tests
         {
             var attribute = new ExtenderProvidedPropertyAttribute();
             yield return new object[] { attribute, attribute, true };
-            // .NET Framework throws NullReferenceException.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { attribute, new ExtenderProvidedPropertyAttribute(), true };
-            }
+            yield return new object[] { attribute, new ExtenderProvidedPropertyAttribute(), true };
 
             yield return new object[] { attribute, new object(), false };
             yield return new object[] { attribute, null, false };

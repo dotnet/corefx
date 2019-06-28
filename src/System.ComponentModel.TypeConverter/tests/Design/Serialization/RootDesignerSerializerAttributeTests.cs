@@ -61,11 +61,7 @@ namespace System.ComponentModel.Design.Serialization.Tests
             yield return new object[] { "BaseSerializerTypeName", "System.ComponentModel.Design.Serialization.RootDesignerSerializerAttributeBaseSerializerTypeName" };
             yield return new object[] { "BaseSerializerTypeName,Other", "System.ComponentModel.Design.Serialization.RootDesignerSerializerAttributeBaseSerializerTypeName" };
             yield return new object[] { string.Empty, "System.ComponentModel.Design.Serialization.RootDesignerSerializerAttribute" };
-            // .NET Framework throws NullReferenceException.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { null, "System.ComponentModel.Design.Serialization.RootDesignerSerializerAttribute" };
-            }
+            yield return new object[] { null, "System.ComponentModel.Design.Serialization.RootDesignerSerializerAttribute" };
         }
 
         [Theory]

@@ -92,11 +92,7 @@ namespace System.ComponentModel.Tests
             yield return new object[] { "BaseDesignerTypeName", "System.ComponentModel.DesignerAttributeBaseDesignerTypeName" };
             yield return new object[] { "BaseDesignerTypeName,Other", "System.ComponentModel.DesignerAttributeBaseDesignerTypeName" };
             yield return new object[] { string.Empty, "System.ComponentModel.DesignerAttribute" };
-            // .NET Framework throws NullReferenceException.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { null, "System.ComponentModel.DesignerAttribute" };
-            }
+            yield return new object[] { null, "System.ComponentModel.DesignerAttribute" };
         }
 
         [Theory]
@@ -115,19 +111,11 @@ namespace System.ComponentModel.Tests
             yield return new object[] { attribute, new DesignerAttribute("designerTypeName", "designerBaseTypeName"), true };
             yield return new object[] { attribute, new DesignerAttribute("designertypename", "designerBaseTypeName"), false };
             yield return new object[] { attribute, new DesignerAttribute("designerTypeName", "designerbasetypename"), false };
-            // .NET Framework throws NullReferenceException.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { attribute, new DesignerAttribute("designerTypeName", (string)null), false };
-            }
+            yield return new object[] { attribute, new DesignerAttribute("designerTypeName", (string)null), false };
 
-            // .NET Framework throws NullReferenceException.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { new DesignerAttribute("designerTypeName", (string)null), new DesignerAttribute("designerTypeName", (string)null), true };
-                yield return new object[] { new DesignerAttribute("designerTypeName", (string)null), new DesignerAttribute("designertypename", (string)null), false };
-                yield return new object[] { new DesignerAttribute("designerTypeName", (string)null), new DesignerAttribute("designerTypeName", "designertBaseTypeName"), false };
-            }
+            yield return new object[] { new DesignerAttribute("designerTypeName", (string)null), new DesignerAttribute("designerTypeName", (string)null), true };
+            yield return new object[] { new DesignerAttribute("designerTypeName", (string)null), new DesignerAttribute("designertypename", (string)null), false };
+            yield return new object[] { new DesignerAttribute("designerTypeName", (string)null), new DesignerAttribute("designerTypeName", "designertBaseTypeName"), false };
 
             yield return new object[] { attribute, new object(), false };
             yield return new object[] { attribute, null, false };
