@@ -229,13 +229,6 @@ namespace System.Net.Http
                     frameHeader = await ReadFrameAsync().ConfigureAwait(false);
                     if (NetEventSource.IsEnabled) Trace($"Frame {frameNum}: {frameHeader}.");
 
-                    if (_lastValidStreamId != -1 && frameHeader.StreamId > _lastValidStreamId)
-                    {
-                        // Ignore frames not meant to be processed after GOAWAY
-                        _incomingBuffer.Discard(frameHeader.Length);
-                        continue;
-                    }
-
                     switch (frameHeader.Type)
                     {
                         case FrameType.Headers:
