@@ -1626,7 +1626,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public async Task GetAsync_CustomTransferEncoding()
+        public async Task GetAsync_CustomTransferEncoding_Success()
         {
             await LoopbackServer.CreateClientAndServerAsync(
                 async url =>
@@ -2332,7 +2332,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public async Task PostAsync_CustomTransferEncoding()
+        public async Task PostAsync_CustomTransferEncoding_Success()
         {
             string data = "Test String";
             await LoopbackServer.CreateClientAndServerAsync(
