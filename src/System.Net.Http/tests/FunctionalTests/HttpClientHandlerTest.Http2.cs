@@ -582,6 +582,41 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ConditionalFact(nameof(SupportsAlpn))]
+        public async Task GoAwayFrame_ServerDisconnect_AbortStreams()
+        {
+            using (var server = Http2LoopbackServer.CreateServer())
+            using (HttpClient client = CreateHttpClient())
+            {
+                server.AllowMultipleConnections = true;
+
+                Task<HttpResponseMessage> sendTask = client.GetAsync(server.Address);
+                Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
+                int streamId = await connection.ReadRequestHeaderAsync();
+
+                await connection.SendGoAway(streamId);
+
+                // wait until GOAWAY received
+                await connection.PingPong();
+                await connection.WaitForConnectionShutdownAsync();
+
+                // Timeout is small on purpose, connection should be closed immediatelly
+                // We add some slack though in case machine is being slow
+                const int ShortTimeout = 2000;
+                const int ErrorMargin = 500;
+
+                Stopwatch sw = Stopwatch.StartNew();
+                await Assert.ThrowsAnyAsync<HttpRequestException>(() =>
+                    new Task[]
+                    {
+                        sendTask
+                    }.WhenAllOrAnyFailed(ShortTimeout));
+
+                // In case we timeout for longer but exception matches
+                Assert.InRange(sw.Elapsed, TimeSpan.Zero, TimeSpan.FromMilliseconds(ShortTimeout + ErrorMargin));
+            }
+        }
+
+        [ConditionalFact(nameof(SupportsAlpn))]
         public async Task DataFrame_TooLong_ConnectionError()
         {
             using (var server = Http2LoopbackServer.CreateServer())

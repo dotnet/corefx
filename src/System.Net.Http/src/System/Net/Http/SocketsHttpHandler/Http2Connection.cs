@@ -46,6 +46,9 @@ namespace System.Net.Http
         private int _pendingWriters;
 
         private bool _disposed;
+        // anything else than -1 means that connection is being terminated
+        // in which case _lastStreamId is the maximum StreamId which can be processed
+        private int _lastStreamId = -1;
         private Exception _abortException;
 
         // If an in-progress write is canceled we need to be able to immediately
@@ -225,6 +228,13 @@ namespace System.Net.Http
                 {
                     frameHeader = await ReadFrameAsync().ConfigureAwait(false);
                     if (NetEventSource.IsEnabled) Trace($"Frame {frameNum}: {frameHeader}.");
+
+                    if (_lastStreamId != -1 && frameHeader.StreamId > _lastStreamId)
+                    {
+                        // Ignore frames not meant to be processed after GOAWAY
+                        _incomingBuffer.Discard(frameHeader.Length);
+                        continue;
+                    }
 
                     switch (frameHeader.Type)
                     {
@@ -1271,16 +1281,23 @@ namespace System.Net.Http
 
         private void AbortStreams(int lastValidStream, Exception abortException)
         {
-            bool shouldInvalidate = false;
+            Debug.Assert(lastValidStream >= 0);
+            bool hasAnyActiveStream = false;
+
+            if (_lastStreamId == -1)
+            {
+                _lastStreamId = lastValidStream;
+            }
+            else
+            {
+                // We have already received GOAWAY before
+                // In this case the smaller valid stream is used
+                _lastStreamId = Math.Min(_lastStreamId, lastValidStream);
+            }
+
             lock (SyncObject)
             {
-                if (NetEventSource.IsEnabled) Trace($"{nameof(lastValidStream)}={lastValidStream}, {nameof(abortException)}={lastValidStream}={abortException}");
-
-                if (!_disposed)
-                {
-                    shouldInvalidate = true;
-                    _disposed = true;
-                }
+			    if (NetEventSource.IsEnabled) Trace($"{nameof(lastValidStream)}={lastValidStream}, {nameof(abortException)}={lastValidStream}={abortException}, {nameof(_lastStreamId)}={_lastStreamId}");
 
                 foreach (KeyValuePair<int, Http2Stream> kvp in _httpStreams)
                 {
@@ -1293,33 +1310,46 @@ namespace System.Net.Http
 
                         _httpStreams.Remove(kvp.Value.StreamId);
                     }
-                    else if (NetEventSource.IsEnabled)
+                    else
                     {
-                        Trace($"Found {nameof(streamId)} {streamId} <= {lastValidStream}.");
+						if (NetEventSource.IsEnabled)
+	                    {
+	                        Trace($"Found {nameof(streamId)} {streamId} <= {lastValidStream}.");
+	                    }
+
+                        hasAnyActiveStream = true;
                     }
                 }
 
                 CheckForShutdown();
             }
 
-            if (shouldInvalidate)
+            if (!hasAnyActiveStream)
             {
-                // Invalidate outside of lock to avoid race with HttpPool Dispose()
-                // We should not try to grab pool lock while holding connection lock as on disposing pool,
-                // we could hold pool lock while trying to grab connection lock in Dispose().
-                _pool.InvalidateHttp2Connection(this);
+                if (!_disposed)
+                {
+                    _disposed = true;
+                    // Invalidate outside of lock to avoid race with HttpPool Dispose()
+                    // We should not try to grab pool lock while holding connection lock as on disposing pool,
+                    // we could hold pool lock while trying to grab connection lock in Dispose().
+                    _pool.InvalidateHttp2Connection(this);
+                }
             }
         }
 
         private void CheckForShutdown()
         {
-            Debug.Assert(_disposed);
+            Debug.Assert(_disposed || _lastStreamId != -1);
             Debug.Assert(Monitor.IsEntered(SyncObject));
 
             // Check if dictionary has become empty
             if (_httpStreams.Count != 0)
             {
                 return;
+            }
+            else
+            {
+                _disposed = true;
             }
 
             // Do shutdown.
@@ -1553,7 +1583,7 @@ namespace System.Net.Http
         {
             lock (SyncObject)
             {
-                if (_nextStream == MaxStreamId || _disposed)
+                if (_nextStream == MaxStreamId || _disposed || _lastStreamId != -1)
                 {
                     if (_abortException != null)
                     {
@@ -1606,7 +1636,7 @@ namespace System.Net.Http
                     _idleSinceTickCount = Environment.TickCount64;
                 }
 
-                if (_disposed)
+                if (_disposed || _lastStreamId != -1)
                 {
                     CheckForShutdown();
                 }
