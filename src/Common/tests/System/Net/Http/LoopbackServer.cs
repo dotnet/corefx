@@ -122,34 +122,9 @@ namespace System.Net.Test.Common
 
         public async Task AcceptConnectionAsync(Func<Connection, Task> funcAsync)
         {
-            using (Socket s = await _listenSocket.AcceptAsync().ConfigureAwait(false))
+            using (var connection = await EstablishConnectionAsync().ConfigureAwait(false))
             {
-                s.NoDelay = true;
-
-                Stream stream = new NetworkStream(s, ownsSocket: false);
-                if (_options.UseSsl)
-                {
-                    var sslStream = new SslStream(stream, false, delegate { return true; });
-                    using (var cert = Configuration.Certificates.GetServerCertificate())
-                    {
-                        await sslStream.AuthenticateAsServerAsync(
-                            cert,
-                            clientCertificateRequired: true, // allowed but not required
-                            enabledSslProtocols: _options.SslProtocols,
-                            checkCertificateRevocation: false).ConfigureAwait(false);
-                    }
-                    stream = sslStream;
-                }
-
-                if (_options.StreamWrapper != null)
-                {
-                    stream = _options.StreamWrapper(stream);
-                }
-
-                using (var connection = new Connection(s, stream))
-                {
-                    await funcAsync(connection).ConfigureAwait(false);
-                }
+                await funcAsync(connection).ConfigureAwait(false);
             }
         }
 
@@ -429,6 +404,7 @@ namespace System.Net.Test.Common
             private int _readEnd;
             private int _contentLength = 0;
             private bool _bodyRead = false;
+            private bool _headersSent = false;
 
             public Connection(Socket socket, Stream stream)
             {
@@ -765,6 +741,7 @@ namespace System.Net.Test.Common
             {
                 string headerString = null;
                 int contentLength = -1;
+                bool isChunked = false;
 
                 if (headers != null)
                 {
@@ -775,18 +752,26 @@ namespace System.Net.Test.Common
                         {
                             contentLength = int.Parse(headerData.Value);
                         }
+                        else if (headerData.Name.Equals("Transfer-Encoding", StringComparison.OrdinalIgnoreCase) && headerData.Value.Equals("chunked", StringComparison.OrdinalIgnoreCase))
+                        {
+                            isChunked = true;
+                        }
                     }
                 }
 
-                if (contentLength < 0)
+                if (!_headersSent)
                 {
-                    // We did not find Content header in headers.
-                    contentLength = String.IsNullOrEmpty(content) ? 0 : content.Length;
+                    headerString =
+                        $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
+                        (contentLength < 0 && !isChunked && content != null ? "Content-length: {content.Length}\r\n" : "") +
+                        headerString;
+                    _headersSent = true;
                 }
 
-                if (content != null || isFinal)
+                if (isFinal || content != null)
                 {
-                    headerString = GetHttpResponseHeaders(statusCode, headerString, contentLength, connectionClose : true);
+                    // Finish header block
+                    headerString = headerString + "\r\n";
                 }
 
                 await SendResponseAsync(headerString).ConfigureAwait(false);

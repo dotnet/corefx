@@ -134,8 +134,7 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpClient client = CreateHttpClient())
                 {
                     HttpResponseMessage response = await  client.GetAsync(uri).ConfigureAwait(false);
-                    // HTTP/1.1 LoopbackServer adds Connection: close and Date to responses.
-                    Assert.Equal(UseHttp2 ?  headers.Count : headers.Count + 2, response.Headers.Count());
+                    Assert.Equal(headers.Count, response.Headers.Count());
                     Assert.NotNull(response.Headers.GetValues("x-empty"));
                 }
             },
