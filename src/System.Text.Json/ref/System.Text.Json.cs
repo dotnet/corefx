@@ -217,7 +217,6 @@ namespace System.Text.Json
         public System.Text.Json.JsonCommentHandling ReadCommentHandling { get { throw null; } set { } }
         public bool WriteIndented { get { throw null; } set { } }
         public System.Text.Json.Serialization.JsonConverter GetConverter(System.Type typeToConvert) { throw null; }
-        public System.Text.Encodings.Web.JavaScriptEncoder Encoder { get { throw null; } set { } }
     }
     public enum JsonTokenType : byte
     {
@@ -250,7 +249,6 @@ namespace System.Text.Json
         private int _dummyPrimitive;
         public bool Indented { get { throw null; } set { } }
         public bool SkipValidation { get { throw null; } set { } }
-        public System.Text.Encodings.Web.JavaScriptEncoder Encoder { get { throw null; } set { } }
     }
     public ref partial struct Utf8JsonReader
     {

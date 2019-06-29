@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -37,6 +39,63 @@ namespace System.Text.Json.Tests
 
             Assert.True(textCharEmpty.Equals(textByteEmpty));
             Assert.Equal(textByteEmpty.GetHashCode(), textCharEmpty.GetHashCode());
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonEncodedTextStrings))]
+        public static void NullEncoderMeansDefault(string message, string expectedMessage)
+        {
+            JsonEncodedText text = JsonEncodedText.Encode(message, null);
+            JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan(), null);
+            JsonEncodedText textUtf8Span = JsonEncodedText.Encode(Encoding.UTF8.GetBytes(message), null);
+
+            Assert.Equal(expectedMessage, text.ToString());
+            Assert.Equal(expectedMessage, textSpan.ToString());
+            Assert.Equal(expectedMessage, textUtf8Span.ToString());
+
+            Assert.True(text.Equals(textSpan));
+            Assert.True(text.Equals(textUtf8Span));
+            Assert.Equal(text.GetHashCode(), textSpan.GetHashCode());
+            Assert.Equal(text.GetHashCode(), textUtf8Span.GetHashCode());
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonEncodedTextStringsCustom))]
+        public static void CustomEncoder(string message, string expectedMessage)
+        {
+            // Latin-1 Supplement block starts from U+0080 and ends at U+00FF
+            JavaScriptEncoder encoder = JavaScriptEncoder.Create(UnicodeRange.Create((char)0x0080, (char)0x00FF));
+            JsonEncodedText text = JsonEncodedText.Encode(message, encoder);
+            JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan(), encoder);
+            JsonEncodedText textUtf8Span = JsonEncodedText.Encode(Encoding.UTF8.GetBytes(message), encoder);
+
+            Assert.Equal(expectedMessage, text.ToString());
+            Assert.Equal(expectedMessage, textSpan.ToString());
+            Assert.Equal(expectedMessage, textUtf8Span.ToString());
+
+            Assert.True(text.Equals(textSpan));
+            Assert.True(text.Equals(textUtf8Span));
+            Assert.Equal(text.GetHashCode(), textSpan.GetHashCode());
+            Assert.Equal(text.GetHashCode(), textUtf8Span.GetHashCode());
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonEncodedTextStrings))]
+        public static void CustomEncoderCantOverrideHtml(string message, string expectedMessage)
+        {
+            JavaScriptEncoder encoder = JavaScriptEncoder.Create(UnicodeRange.Create(' ', '}'));
+            JsonEncodedText text = JsonEncodedText.Encode(message, encoder);
+            JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan(), encoder);
+            JsonEncodedText textUtf8Span = JsonEncodedText.Encode(Encoding.UTF8.GetBytes(message), encoder);
+
+            Assert.Equal(expectedMessage, text.ToString());
+            Assert.Equal(expectedMessage, textSpan.ToString());
+            Assert.Equal(expectedMessage, textUtf8Span.ToString());
+
+            Assert.True(text.Equals(textSpan));
+            Assert.True(text.Equals(textUtf8Span));
+            Assert.Equal(text.GetHashCode(), textSpan.GetHashCode());
+            Assert.Equal(text.GetHashCode(), textUtf8Span.GetHashCode());
         }
 
         [Fact]
@@ -323,8 +382,27 @@ namespace System.Text.Json.Tests
                     new object[] { "message", "message" },
                     new object[] { "mess\"age", "mess\\u0022age" },
                     new object[] { "mess\\u0022age", "mess\\\\u0022age" },
-                    new object[] { ">>>>>", "\\u003e\\u003e\\u003e\\u003e\\u003e" },
+                    new object[] { ">>>>>", "\\u003E\\u003E\\u003E\\u003E\\u003E" },
                     new object[] { "\\u003e\\u003e\\u003e\\u003e\\u003e", "\\\\u003e\\\\u003e\\\\u003e\\\\u003e\\\\u003e" },
+                    new object[] { "\\u003E\\u003E\\u003E\\u003E\\u003E", "\\\\u003E\\\\u003E\\\\u003E\\\\u003E\\\\u003E" },
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> JsonEncodedTextStringsCustom
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] {"", "" },
+                    new object[] { "age", "\\u0061\\u0067\\u0065" },
+                    new object[] { "éééééêêêêê", "éééééêêêêê" },
+                    new object[] { "ééééé\"êêêêê", "ééééé\\u0022êêêêê" },
+                    new object[] { "ééééé\\u0022êêêêê", "ééééé\\\\\\u0075\\u0030\\u0030\\u0032\\u0032êêêêê" },
+                    new object[] { "ééééé>>>>>êêêêê", "ééééé\\u003E\\u003E\\u003E\\u003E\\u003Eêêêêê" },
+                    new object[] { "ééééé\\u003e\\u003eêêêêê", "ééééé\\\\\\u0075\\u0030\\u0030\\u0033\\u0065\\\\\\u0075\\u0030\\u0030\\u0033\\u0065êêêêê" },
+                    new object[] { "ééééé\\u003E\\u003Eêêêêê", "ééééé\\\\\\u0075\\u0030\\u0030\\u0033\\u0045\\\\\\u0075\\u0030\\u0030\\u0033\\u0045êêêêê" },
                 };
             }
         }
