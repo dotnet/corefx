@@ -27,9 +27,13 @@
 
   <!-- This is necessary as inside VS project references that aren't part of the sln aren't built. -->
   <Target Name="BuildTestSupportLibraries">
-    <MSBuild Projects="$(CommonTestPath)\CoreFx.Private.TestUtilities\CoreFx.Private.TestUtilities.csproj"
+    <ItemGroup>
+      <_TestLibs Include="$(CommonTestPath)\CoreFx.Private.TestUtilities\CoreFx.Private.TestUtilities.csproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_TestLibs)"
              Targets="Build"
-             Properties="Configuration=$(BuildConfiguration)" />
+             Properties="BuildConfiguration=$(BuildConfiguration);%(Project.AdditionalProperties)" />
   </Target>
 
   <Import Project="Directory.Build.targets" />
