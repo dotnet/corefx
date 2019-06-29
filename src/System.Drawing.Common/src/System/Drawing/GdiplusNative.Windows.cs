@@ -127,8 +127,6 @@ namespace System.Drawing
                 GdipCreateFromHWND_ptr = FunctionWrapper.Load<GdipCreateFromHWND_delegate>(s_gdipModule, "GdipCreateFromHWND", LibraryName);
                 GdipDeleteGraphics_ptr = FunctionWrapper.Load<GdipDeleteGraphics_delegate>(s_gdipModule, "GdipDeleteGraphics", LibraryName);
                 GdipReleaseDC_ptr = FunctionWrapper.Load<GdipReleaseDC_delegate>(s_gdipModule, "GdipReleaseDC", LibraryName);
-                GdipTransformPoints_ptr = FunctionWrapper.Load<GdipTransformPoints_delegate>(s_gdipModule, "GdipTransformPoints", LibraryName);
-                GdipTransformPointsI_ptr = FunctionWrapper.Load<GdipTransformPointsI_delegate>(s_gdipModule, "GdipTransformPointsI", LibraryName);
                 GdipGetNearestColor_ptr = FunctionWrapper.Load<GdipGetNearestColor_delegate>(s_gdipModule, "GdipGetNearestColor", LibraryName);
                 GdipCreateHalftonePalette_ptr = FunctionWrapper.Load<GdipCreateHalftonePalette_delegate>(s_gdipModule, "GdipCreateHalftonePalette", LibraryName);
                 GdipDrawBeziers_ptr = FunctionWrapper.Load<GdipDrawBeziers_delegate>(s_gdipModule, "GdipDrawBeziers", LibraryName);
@@ -556,14 +554,6 @@ namespace System.Drawing
             private delegate int GdipReleaseDC_delegate(HandleRef graphics, HandleRef hdc);
             private static FunctionWrapper<GdipReleaseDC_delegate> GdipReleaseDC_ptr;
             internal static int IntGdipReleaseDC(HandleRef graphics, HandleRef hdc) => GdipReleaseDC_ptr.Delegate(graphics, hdc);
-
-            private delegate int GdipTransformPoints_delegate(HandleRef graphics, int destSpace, int srcSpace, PointF* points, int count);
-            private static FunctionWrapper<GdipTransformPoints_delegate> GdipTransformPoints_ptr;
-            internal static int GdipTransformPoints(HandleRef graphics, int destSpace, int srcSpace, PointF* points, int count) => GdipTransformPoints_ptr.Delegate(graphics, destSpace, srcSpace, points, count);
-
-            private delegate int GdipTransformPointsI_delegate(HandleRef graphics, int destSpace, int srcSpace, Point* points, int count);
-            private static FunctionWrapper<GdipTransformPointsI_delegate> GdipTransformPointsI_ptr;
-            internal static int GdipTransformPointsI(HandleRef graphics, int destSpace, int srcSpace, Point* points, int count) => GdipTransformPointsI_ptr.Delegate(graphics, destSpace, srcSpace, points, count);
 
             private delegate int GdipGetNearestColor_delegate(HandleRef graphics, ref int color);
             private static FunctionWrapper<GdipGetNearestColor_delegate> GdipGetNearestColor_ptr;

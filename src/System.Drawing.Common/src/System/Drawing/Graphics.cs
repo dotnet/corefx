@@ -2429,6 +2429,39 @@ namespace System.Drawing
             EnumerateMetafile(metafile, destPoints, srcRect, srcUnit, callback, callbackData, null);
         }
 
+        public unsafe void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, PointF[] pts)
+        {
+            if (pts == null)
+                throw new ArgumentNullException(nameof(pts));
+
+            fixed (PointF* p = pts)
+            {
+                Gdip.CheckStatus(Gdip.GdipTransformPoints(
+                    new HandleRef(this, NativeGraphics),
+                    (int)destSpace,
+                    (int)srcSpace,
+                    p,
+                    pts.Length));
+            }
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public unsafe void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, Point[] pts)
+        {
+            if (pts == null)
+                throw new ArgumentNullException(nameof(pts));
+
+            fixed (Point* p = pts)
+            {
+                Gdip.CheckStatus(Gdip.GdipTransformPointsI(
+                    new HandleRef(this, NativeGraphics),
+                    (int)destSpace,
+                    (int)srcSpace,
+                    p,
+                    pts.Length));
+            }
+        }
+
         /// <summary>
         /// GDI+ will return a 'generic error' with specific win32 last error codes when
         /// a terminal server session has been closed, minimized, etc... We don't want 

@@ -445,6 +445,8 @@ namespace System.Drawing
                 GdipDrawLinesI_ptr = FunctionWrapper.Load<GdipDrawLinesI_delegate>(s_gdipModule, "GdipDrawLinesI", LibraryName);
                 GdipFillPie_ptr = FunctionWrapper.Load<GdipFillPie_delegate>(s_gdipModule, "GdipFillPie", LibraryName);
                 GdipFillPieI_ptr = FunctionWrapper.Load<GdipFillPieI_delegate>(s_gdipModule, "GdipFillPieI", LibraryName);
+                GdipTransformPoints_ptr = FunctionWrapper.Load<GdipTransformPoints_delegate>(s_gdipModule, "GdipTransformPoints", LibraryName);
+                GdipTransformPointsI_ptr = FunctionWrapper.Load<GdipTransformPointsI_delegate>(s_gdipModule, "GdipTransformPointsI", LibraryName);
             }
 
             // Shared function imports (all platforms)
@@ -2142,6 +2144,14 @@ namespace System.Drawing
             private delegate int GdipDrawLinesI_delegate(HandleRef graphics, HandleRef pen, Point* points, int count);
             private static FunctionWrapper<GdipDrawLinesI_delegate> GdipDrawLinesI_ptr;
             internal static int GdipDrawLinesI(HandleRef graphics, HandleRef pen, Point* points, int count) => GdipDrawLinesI_ptr.Delegate(graphics, pen, points, count);
+
+            private delegate int GdipTransformPoints_delegate(HandleRef graphics, int destSpace, int srcSpace, PointF* points, int count);
+            private static FunctionWrapper<GdipTransformPoints_delegate> GdipTransformPoints_ptr;
+            internal static int GdipTransformPoints(HandleRef graphics, int destSpace, int srcSpace, PointF* points, int count) => GdipTransformPoints_ptr.Delegate(graphics, destSpace, srcSpace, points, count);
+
+            private delegate int GdipTransformPointsI_delegate(HandleRef graphics, int destSpace, int srcSpace, Point* points, int count);
+            private static FunctionWrapper<GdipTransformPointsI_delegate> GdipTransformPointsI_ptr;
+            internal static int GdipTransformPointsI(HandleRef graphics, int destSpace, int srcSpace, Point* points, int count) => GdipTransformPointsI_ptr.Delegate(graphics, destSpace, srcSpace, points, count);
         }
 
         [StructLayout(LayoutKind.Sequential)]

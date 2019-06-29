@@ -107,8 +107,6 @@ namespace System.Drawing
                 GdipReleaseDC_ptr = FunctionWrapper.Load<GdipReleaseDC_delegate>(s_gdipModule, "GdipReleaseDC", LibraryName);
                 GdipFillPath_ptr = FunctionWrapper.Load<GdipFillPath_delegate>(s_gdipModule, "GdipFillPath", LibraryName);
                 GdipGetNearestColor_ptr = FunctionWrapper.Load<GdipGetNearestColor_delegate>(s_gdipModule, "GdipGetNearestColor", LibraryName);
-                GdipTransformPoints_ptr = FunctionWrapper.Load<GdipTransformPoints_delegate>(s_gdipModule, "GdipTransformPoints", LibraryName);
-                GdipTransformPointsI_ptr = FunctionWrapper.Load<GdipTransformPointsI_delegate>(s_gdipModule, "GdipTransformPointsI", LibraryName);
                 GdipAddPathString_ptr = FunctionWrapper.Load<GdipAddPathString_delegate>(s_gdipModule, "GdipAddPathString", LibraryName);
                 GdipAddPathStringI_ptr = FunctionWrapper.Load<GdipAddPathStringI_delegate>(s_gdipModule, "GdipAddPathStringI", LibraryName);
                 GdipCreateFromHWND_ptr = FunctionWrapper.Load<GdipCreateFromHWND_delegate>(s_gdipModule, "GdipCreateFromHWND", LibraryName);
@@ -284,14 +282,6 @@ namespace System.Drawing
             private delegate int GdipGetNearestColor_delegate(IntPtr graphics, out int argb);
             private static FunctionWrapper<GdipGetNearestColor_delegate> GdipGetNearestColor_ptr;
             internal static int GdipGetNearestColor(IntPtr graphics, out int argb) => GdipGetNearestColor_ptr.Delegate(graphics, out argb);
-
-            private delegate int GdipTransformPoints_delegate(IntPtr graphics, CoordinateSpace destSpace, CoordinateSpace srcSpace, IntPtr points, int count);
-            private static FunctionWrapper<GdipTransformPoints_delegate> GdipTransformPoints_ptr;
-            internal static int GdipTransformPoints(IntPtr graphics, CoordinateSpace destSpace, CoordinateSpace srcSpace, IntPtr points, int count) => GdipTransformPoints_ptr.Delegate(graphics, destSpace, srcSpace, points, count);
-
-            private delegate int GdipTransformPointsI_delegate(IntPtr graphics, CoordinateSpace destSpace, CoordinateSpace srcSpace, IntPtr points, int count);
-            private static FunctionWrapper<GdipTransformPointsI_delegate> GdipTransformPointsI_ptr;
-            internal static int GdipTransformPointsI(IntPtr graphics, CoordinateSpace destSpace, CoordinateSpace srcSpace, IntPtr points, int count) => GdipTransformPointsI_ptr.Delegate(graphics, destSpace, srcSpace, points, count);
 
             private delegate int GdipAddPathString_delegate(IntPtr path, [MarshalAs(UnmanagedType.LPWStr)]string s, int lenght, IntPtr family, int style, float emSize, ref RectangleF layoutRect, IntPtr format);
             private static FunctionWrapper<GdipAddPathString_delegate> GdipAddPathString_ptr;
