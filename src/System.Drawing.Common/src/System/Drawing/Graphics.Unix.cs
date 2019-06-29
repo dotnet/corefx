@@ -130,24 +130,6 @@ namespace System.Drawing
             return new GraphicsContainer(state);
         }
 
-        public void CopyFromScreen(Point upperLeftSource, Point upperLeftDestination, Size blockRegionSize)
-        {
-            CopyFromScreen(upperLeftSource.X, upperLeftSource.Y, upperLeftDestination.X, upperLeftDestination.Y,
-                blockRegionSize, CopyPixelOperation.SourceCopy);
-        }
-
-        public void CopyFromScreen(Point upperLeftSource, Point upperLeftDestination, Size blockRegionSize, CopyPixelOperation copyPixelOperation)
-        {
-            CopyFromScreen(upperLeftSource.X, upperLeftSource.Y, upperLeftDestination.X, upperLeftDestination.Y,
-                blockRegionSize, copyPixelOperation);
-        }
-
-        public void CopyFromScreen(int sourceX, int sourceY, int destinationX, int destinationY, Size blockRegionSize)
-        {
-            CopyFromScreen(sourceX, sourceY, destinationX, destinationY, blockRegionSize,
-                CopyPixelOperation.SourceCopy);
-        }
-
         public void CopyFromScreen(int sourceX, int sourceY, int destinationX, int destinationY, Size blockRegionSize, CopyPixelOperation copyPixelOperation)
         {
             if (!Enum.IsDefined(typeof(CopyPixelOperation), copyPixelOperation))
