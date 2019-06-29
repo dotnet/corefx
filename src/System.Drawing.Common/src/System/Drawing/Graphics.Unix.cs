@@ -51,14 +51,6 @@ namespace System.Drawing
         private static float defDpiX = 0;
         private static float defDpiY = 0;
 
-        public delegate bool EnumerateMetafileProc(EmfPlusRecordType recordType,
-                                int flags,
-                                int dataSize,
-                                IntPtr data,
-                                PlayRecordCallback callbackData);
-
-        public delegate bool DrawImageAbort(IntPtr callbackdata);
-
         internal Graphics(IntPtr nativeGraphics) => NativeGraphics = nativeGraphics;
 
         ~Graphics()

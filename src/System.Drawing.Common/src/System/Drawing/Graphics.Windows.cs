@@ -52,25 +52,6 @@ namespace System.Drawing
         // pointer back to the Image backing a specific graphic object
         private Image _backingImage;
 
-        public delegate bool DrawImageAbort(IntPtr callbackdata);
-
-        /// <summary>
-        /// Callback for EnumerateMetafile methods.
-        /// This method can then call Metafile.PlayRecord to play the record that was just enumerated.
-        /// </summary>
-        /// <param name="recordType">if >= MinRecordType, it's an EMF+ record</param>
-        /// <param name="flags">always 0 for EMF records</param>
-        /// <param name="dataSize">size of the data, or 0 if no data</param>
-        /// <param name="data">pointer to the data, or NULL if no data (UINT32 aligned)</param>
-        /// <param name="callbackData">pointer to callbackData, if any</param>
-        /// <returns>False to abort enumerating, true to continue.</returns>
-        public delegate bool EnumerateMetafileProc(
-            EmfPlusRecordType recordType,
-            int flags,
-            int dataSize,
-            IntPtr data,
-            PlayRecordCallback callbackData);
-
         /// <summary>
         /// Constructor to initialize this object from a native GDI+ Graphics pointer.
         /// </summary>
