@@ -231,31 +231,6 @@ namespace System.Drawing
         }
 
         /// <summary>
-        /// CopyPixels will perform a gdi "bitblt" operation to the source from the destination with the given size.
-        /// </summary>
-        public void CopyFromScreen(Point upperLeftSource, Point upperLeftDestination, Size blockRegionSize)
-        {
-            CopyFromScreen(upperLeftSource.X, upperLeftSource.Y, upperLeftDestination.X, upperLeftDestination.Y, blockRegionSize);
-        }
-
-        /// <summary>
-        /// CopyPixels will perform a gdi "bitblt" operation to the source from the destination with the given size.
-        /// </summary>
-        public void CopyFromScreen(int sourceX, int sourceY, int destinationX, int destinationY, Size blockRegionSize)
-        {
-            CopyFromScreen(sourceX, sourceY, destinationX, destinationY, blockRegionSize, CopyPixelOperation.SourceCopy);
-        }
-
-        /// <summary>
-        /// CopyPixels will perform a gdi "bitblt" operation to the source from the destination with the given size
-        /// and specified raster operation.
-        /// </summary>
-        public void CopyFromScreen(Point upperLeftSource, Point upperLeftDestination, Size blockRegionSize, CopyPixelOperation copyPixelOperation)
-        {
-            CopyFromScreen(upperLeftSource.X, upperLeftSource.Y, upperLeftDestination.X, upperLeftDestination.Y, blockRegionSize, copyPixelOperation);
-        }
-
-        /// <summary>
         /// CopyPixels will perform a gdi "bitblt" operation to the source from the destination with the given size
         /// and specified raster operation.
         /// </summary>
