@@ -28,25 +28,27 @@ namespace System.Text.Json
             return (newLines, lastLineFeedIndex);
         }
 
-        internal static JsonValueType ToValueType(this JsonTokenType tokenType)
+        internal static JsonValueKind ToValueKind(this JsonTokenType tokenType)
         {
             switch (tokenType)
             {
                 case JsonTokenType.None:
-                    return JsonValueType.Undefined;
+                    return JsonValueKind.Undefined;
                 case JsonTokenType.StartArray:
-                    return JsonValueType.Array;
+                    return JsonValueKind.Array;
                 case JsonTokenType.StartObject:
-                    return JsonValueType.Object;
+                    return JsonValueKind.Object;
                 case JsonTokenType.String:
                 case JsonTokenType.Number:
                 case JsonTokenType.True:
                 case JsonTokenType.False:
                 case JsonTokenType.Null:
-                    return (JsonValueType)((byte)tokenType - 3);
+                    // This is the offset between the set of literals within JsonValueType and JsonTokenType
+                    // Essentially: JsonTokenType.Null - JsonValueType.Null
+                    return (JsonValueKind)((byte)tokenType - 4);
                 default:
                     Debug.Fail($"No mapping for token type {tokenType}");
-                    return JsonValueType.Undefined;
+                    return JsonValueKind.Undefined;
             }
         }
 

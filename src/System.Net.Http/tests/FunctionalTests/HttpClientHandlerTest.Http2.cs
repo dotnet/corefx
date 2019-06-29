@@ -601,8 +601,10 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
-        public async Task CompletedResponse_FrameReceived_ConnectionError()
+        [ConditionalTheory(nameof(SupportsAlpn))]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task CompletedResponse_FrameReceived_Ignored(bool sendDataFrame)
         {
             using (var server = Http2LoopbackServer.CreateServer())
             using (HttpClient client = CreateHttpClient())
@@ -622,19 +624,20 @@ namespace System.Net.Http.Functional.Tests
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
                 // Send a frame on the now-closed stream.
-                DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, streamId);
+                Frame invalidFrame = ConstructInvalidFrameForClosedStream(streamId, sendDataFrame);
                 await connection.WriteFrameAsync(invalidFrame);
 
-                if (!IsWinHttpHandler)
-                {
-                    // The client should close the connection as this is a fatal connection level error.
-                    Assert.Null(await connection.ReadFrameAsync(TimeSpan.FromSeconds(30)));
-                }
+                // Pingpong to ensure the frame is processed and ignored
+                await connection.PingPong();
+
+                await ValidateConnection(client, server.Address, connection);
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
-        public async Task EmptyResponse_FrameReceived_ConnectionError()
+        [ConditionalTheory(nameof(SupportsAlpn))]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task EmptyResponse_FrameReceived_Ignored(bool sendDataFrame)
         {
             using (var server = Http2LoopbackServer.CreateServer())
             using (HttpClient client = CreateHttpClient())
@@ -651,14 +654,13 @@ namespace System.Net.Http.Functional.Tests
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
                 // Send a frame on the now-closed stream.
-                DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, streamId);
+                Frame invalidFrame = ConstructInvalidFrameForClosedStream(streamId, sendDataFrame);
                 await connection.WriteFrameAsync(invalidFrame);
 
-                if (!IsWinHttpHandler)
-                {
-                    // The client should close the connection as this is a fatal connection level error.
-                    Assert.Null(await connection.ReadFrameAsync(TimeSpan.FromSeconds(30)));
-                }
+                // Pingpong to ensure the frame is processed and ignored
+                await connection.PingPong();
+
+                await ValidateConnection(client, server.Address, connection);
             }
         }
 
@@ -688,15 +690,51 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        private static Frame ConstructInvalidFrameForClosedStream(int streamId, bool dataFrame)
+        {
+            if (dataFrame)
+            {
+                return new DataFrame(new byte[10], FrameFlags.None, 0, streamId);
+            }
+            else
+            {
+                byte[] headers = new byte[] { 0x88 };   // Encoding for ":status: 200"
+                return new HeadersFrame(headers, FrameFlags.EndHeaders, 0, 0, 0, streamId);
+            }
+        }
+
+        // Validate that connection is still usable, by sending a request and receiving a response
+        private static async Task<int> ValidateConnection(HttpClient client, Uri serverAddress, Http2LoopbackConnection connection)
+        {
+            Task<HttpResponseMessage> sendTask = client.GetAsync(serverAddress);
+
+            int streamId = await connection.ReadRequestHeaderAsync();
+            await connection.SendDefaultResponseAsync(streamId);
+
+            HttpResponseMessage response = await sendTask;
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            return streamId;
+        }
+
         public static IEnumerable<object[]> ValidAndInvalidProtocolErrors() =>
             Enum.GetValues(typeof(ProtocolErrors))
             .Cast<ProtocolErrors>()
             .Concat(new[] { (ProtocolErrors)12345 })
             .Select(p => new object[] { p });
 
+        public static IEnumerable<object[]> ValidAndInvalidProtocolErrorsAndBool()
+        {
+            foreach (object[] args in ValidAndInvalidProtocolErrors())
+            {
+                yield return args.Append(true).ToArray();
+                yield return args.Append(false).ToArray();
+            }
+        }
+
         [ConditionalTheory(nameof(SupportsAlpn))]
-        [MemberData(nameof(ValidAndInvalidProtocolErrors))]
-        public async Task ResetResponseStream_FrameReceived_ConnectionError(ProtocolErrors error)
+        [MemberData(nameof(ValidAndInvalidProtocolErrorsAndBool))]
+        public async Task ResetResponseStream_FrameReceived_Ignored(ProtocolErrors error, bool dataFrame)
         {
             using (var server = Http2LoopbackServer.CreateServer())
             using (HttpClient client = CreateHttpClient())
@@ -714,14 +752,13 @@ namespace System.Net.Http.Functional.Tests
                 await AssertProtocolErrorAsync(sendTask, error);
 
                 // Send a frame on the now-closed stream.
-                DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, streamId);
+                Frame invalidFrame = ConstructInvalidFrameForClosedStream(streamId, dataFrame);
                 await connection.WriteFrameAsync(invalidFrame);
 
-                if (!IsWinHttpHandler)
-                {
-                    // The client should close the connection as this is a fatal connection level error.
-                    Assert.Null(await connection.ReadFrameAsync(TimeSpan.FromSeconds(30)));
-                }
+                // Pingpong to ensure the frame is processed and ignored
+                await connection.PingPong();
+
+                await ValidateConnection(client, server.Address, connection);
             }
         }
 
@@ -1457,62 +1494,6 @@ namespace System.Net.Http.Functional.Tests
                     Assert.NotNull(frame); // We should get Rst before closing connection.
                     Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
                  } while (frame.Type != FrameType.RstStream);
-            });
-        }
-
-        [ConditionalFact(nameof(SupportsAlpn))]
-        public async Task Dispose_ProcessingResponse_OK()
-        {
-            HttpClient client =  CreateHttpClient();
-            bool diposeCalled = false;
-           int totalSent = 0;
-            int totalReceived = 0;
-
-            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
-            {
-                var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Version = new Version(2,0);
-                HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-                using (Stream stream = await response.Content.ReadAsStreamAsync())
-                {
-                    // Dispose client after receiving response headers.
-                    client.Dispose();
-                    diposeCalled = true;
-
-                    int readLength;
-                    byte[] buffer = new byte[100];
-                    do {
-                        readLength = await stream.ReadAsync(buffer);
-                        totalReceived += readLength;
-                    } while (readLength != 0);
-                }
-
-                Assert.Equal(totalSent, totalReceived);
-            },
-            async server =>
-            {
-                Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
-
-                (int streamId, HttpRequestData requestData) = await connection.ReadAndParseRequestHeaderAsync(readBody : true);
-                await connection.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.OK);
-
-                // Start streaming response and wait for client to be disposed.
-                byte[] responseBody = new byte[100];
-                while (!diposeCalled)
-                {
-                    await connection.SendResponseDataAsync(streamId, responseBody, endStream: false);
-                    totalSent += responseBody.Length;
-                    await Task.Delay(100);
-                }
-
-                // Send final data block.
-                await connection.SendResponseDataAsync(streamId, responseBody, endStream: true);
-                totalSent += responseBody.Length;
-
-                await connection.SendGoAway(streamId);
-                await connection.WaitForConnectionShutdownAsync();
             });
         }
 
