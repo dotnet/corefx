@@ -497,16 +497,8 @@ namespace System.Text.Json
                     {
                         if (shouldThrow)
                         {
-                            byte displayByte;
-
-                            if (reader.HasValueSequence)
-                            {
-                                displayByte = reader.ValueSequence.First.Span[0];
-                            }
-                            else
-                            {
-                                displayByte = reader.ValueSpan[0];
-                            }
+                            Debug.Assert(!reader.HasValueSequence);
+                            byte displayByte = reader.ValueSpan[0];                          
 
                             ThrowHelper.ThrowJsonReaderException(
                                 ref reader,
