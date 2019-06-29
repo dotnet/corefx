@@ -131,12 +131,6 @@ namespace System.Drawing
             [DllImport(LibraryName, ExactSpelling = true)]
             internal static extern int GdipGetNearestColor(IntPtr graphics, out int argb);
 
-            [DllImport(LibraryName, ExactSpelling = true)]
-            internal static extern int GdipTransformPoints(IntPtr graphics, CoordinateSpace destSpace, CoordinateSpace srcSpace, IntPtr points, int count);
-
-            [DllImport(LibraryName, ExactSpelling = true)]
-            internal static extern int GdipTransformPointsI(IntPtr graphics, CoordinateSpace destSpace, CoordinateSpace srcSpace, IntPtr points, int count);
-
             [DllImport(LibraryName, ExactSpelling = true, CharSet = CharSet.Unicode)]
             internal static extern int GdipAddPathString(IntPtr path, string s, int lenght, IntPtr family, int style, float emSize, ref RectangleF layoutRect, IntPtr format);
 

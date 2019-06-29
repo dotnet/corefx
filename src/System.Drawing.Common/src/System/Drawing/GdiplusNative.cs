@@ -1338,6 +1338,12 @@ namespace System.Drawing
 
             [DllImport(LibraryName, ExactSpelling = true)]
             internal static extern int GdipDrawRectanglesI(HandleRef graphics, HandleRef pen, Rectangle* rects, int count);
+
+            [DllImport(LibraryName, ExactSpelling = true)]
+            internal static extern int GdipTransformPoints(HandleRef graphics, int destSpace, int srcSpace, PointF* points, int count);
+
+            [DllImport(LibraryName, ExactSpelling = true)]
+            internal static extern int GdipTransformPointsI(HandleRef graphics, int destSpace, int srcSpace, Point* points, int count);
         }
 
         [StructLayout(LayoutKind.Sequential)]

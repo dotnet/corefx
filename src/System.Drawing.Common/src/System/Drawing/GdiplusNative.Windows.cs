@@ -300,12 +300,6 @@ namespace System.Drawing
             internal static extern int GdipReleaseDC(HandleRef graphics, IntPtr hdc);
 
             [DllImport(LibraryName, ExactSpelling = true)]
-            internal static extern int GdipTransformPoints(HandleRef graphics, int destSpace, int srcSpace, PointF* points, int count);
-
-            [DllImport(LibraryName, ExactSpelling = true)]
-            internal static extern int GdipTransformPointsI(HandleRef graphics, int destSpace, int srcSpace, Point* points, int count);
-
-            [DllImport(LibraryName, ExactSpelling = true)]
             internal static extern int GdipGetNearestColor(HandleRef graphics, ref int color);
 
             [DllImport(LibraryName, ExactSpelling = true)]

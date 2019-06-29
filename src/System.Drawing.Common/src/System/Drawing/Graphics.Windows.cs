@@ -278,39 +278,6 @@ namespace System.Drawing
             }
         }
 
-        public unsafe void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, PointF[] pts)
-        {
-            if (pts == null)
-                throw new ArgumentNullException(nameof(pts));
-
-            fixed (PointF* p = pts)
-            {
-                Gdip.CheckStatus(Gdip.GdipTransformPoints(
-                    new HandleRef(this, NativeGraphics),
-                    (int)destSpace,
-                    (int)srcSpace,
-                    p,
-                    pts.Length));
-            }
-        }
-
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
-        public unsafe void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, Point[] pts)
-        {
-            if (pts == null)
-                throw new ArgumentNullException(nameof(pts));
-
-            fixed (Point* p = pts)
-            {
-                Gdip.CheckStatus(Gdip.GdipTransformPointsI(
-                    new HandleRef(this, NativeGraphics),
-                    (int)destSpace,
-                    (int)srcSpace,
-                    p,
-                    pts.Length));
-            }
-        }
-
         public Color GetNearestColor(Color color)
         {
             int nearest = color.ToArgb();

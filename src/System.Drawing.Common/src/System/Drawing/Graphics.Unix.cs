@@ -547,32 +547,6 @@ namespace System.Drawing
             return new GraphicsState((int)state);
         }
 
-        public void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, PointF[] pts)
-        {
-            if (pts == null)
-                throw new ArgumentNullException(nameof(pts));
-
-            IntPtr ptrPt = MarshallingHelpers.FromPointToUnManagedMemory(pts);
-
-            int status = Gdip.GdipTransformPoints(NativeGraphics, destSpace, srcSpace, ptrPt, pts.Length);
-            Gdip.CheckStatus(status);
-
-            MarshallingHelpers.FromUnManagedMemoryToPoint(ptrPt, pts);
-        }
-
-
-        public void TransformPoints(CoordinateSpace destSpace, CoordinateSpace srcSpace, Point[] pts)
-        {
-            if (pts == null)
-                throw new ArgumentNullException(nameof(pts));
-            IntPtr ptrPt = MarshallingHelpers.FromPointToUnManagedMemoryI(pts);
-
-            int status = Gdip.GdipTransformPointsI(NativeGraphics, destSpace, srcSpace, ptrPt, pts.Length);
-            Gdip.CheckStatus(status);
-
-            MarshallingHelpers.FromUnManagedMemoryToPointI(ptrPt, pts);
-        }
-
         public RectangleF VisibleClipBounds
         {
             get
