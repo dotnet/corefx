@@ -144,11 +144,11 @@ namespace System.Security.Cryptography
         {
             Oid oid = null;
 
-            if (oidValue is null && oidFriendlyName is object)
+            if (oidValue == null && oidFriendlyName != null)
             {
                 try
                 {
-                    oid = Oid.FromFriendlyName(oidFriendlyName, OidGroup.All);
+                    oid = Oid.FromFriendlyName(oidFriendlyName, OidGroup.PublicKeyAlgorithm);
                 }
                 catch (CryptographicException)
                 {
