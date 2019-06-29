@@ -2196,6 +2196,220 @@ namespace System.Drawing
             CopyFromScreen(upperLeftSource.X, upperLeftSource.Y, upperLeftDestination.X, upperLeftDestination.Y, blockRegionSize, copyPixelOperation);
         }
 
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(Metafile metafile, PointF destPoint, EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destPoint, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(Metafile metafile, PointF destPoint, EnumerateMetafileProc callback, IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destPoint, callback, callbackData, null);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(Metafile metafile, Point destPoint, EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destPoint, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(Metafile metafile, Point destPoint, EnumerateMetafileProc callback, IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destPoint, callback, callbackData, null);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(Metafile metafile, RectangleF destRect, EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destRect, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(Metafile metafile, RectangleF destRect, EnumerateMetafileProc callback, IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destRect, callback, callbackData, null);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(Metafile metafile, Rectangle destRect, EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destRect, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(Metafile metafile, Rectangle destRect, EnumerateMetafileProc callback, IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destRect, callback, callbackData, null);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(Metafile metafile, PointF[] destPoints, EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destPoints, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            PointF[] destPoints,
+            EnumerateMetafileProc callback,
+            IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destPoints, callback, IntPtr.Zero, null);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(Metafile metafile, Point[] destPoints, EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destPoints, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(Metafile metafile, Point[] destPoints, EnumerateMetafileProc callback, IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destPoints, callback, callbackData, null);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            PointF destPoint,
+            RectangleF srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destPoint, srcRect, srcUnit, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            PointF destPoint,
+            RectangleF srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback,
+            IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destPoint, srcRect, srcUnit, callback, callbackData, null);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            Point destPoint,
+            Rectangle srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destPoint, srcRect, srcUnit, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            Point destPoint,
+            Rectangle srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback,
+            IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destPoint, srcRect, srcUnit, callback, callbackData, null);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            RectangleF destRect,
+            RectangleF srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destRect, srcRect, srcUnit, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            RectangleF destRect,
+            RectangleF srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback,
+            IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destRect, srcRect, srcUnit, callback, callbackData, null);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            Rectangle destRect,
+            Rectangle srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destRect, srcRect, srcUnit, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            Rectangle destRect,
+            Rectangle srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback,
+            IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destRect, srcRect, srcUnit, callback, callbackData, null);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            PointF[] destPoints,
+            RectangleF srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destPoints, srcRect, srcUnit, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            PointF[] destPoints,
+            RectangleF srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback,
+            IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destPoints, srcRect, srcUnit, callback, callbackData, null);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            Point[] destPoints,
+            Rectangle srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback)
+        {
+            EnumerateMetafile(metafile, destPoints, srcRect, srcUnit, callback, IntPtr.Zero);
+        }
+
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
+        public void EnumerateMetafile(
+            Metafile metafile,
+            Point[] destPoints,
+            Rectangle srcRect,
+            GraphicsUnit srcUnit,
+            EnumerateMetafileProc callback,
+            IntPtr callbackData)
+        {
+            EnumerateMetafile(metafile, destPoints, srcRect, srcUnit, callback, callbackData, null);
+        }
+
         /// <summary>
         /// GDI+ will return a 'generic error' with specific win32 last error codes when
         /// a terminal server session has been closed, minimized, etc... We don't want 

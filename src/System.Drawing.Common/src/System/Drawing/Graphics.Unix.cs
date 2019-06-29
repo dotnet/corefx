@@ -340,96 +340,6 @@ namespace System.Drawing
             Gdip.CheckStatus(status);
         }
 
-        public void EnumerateMetafile(Metafile metafile, Point[] destPoints, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, RectangleF destRect, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, PointF[] destPoints, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, Rectangle destRect, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, Point destPoint, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, PointF destPoint, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, PointF destPoint, EnumerateMetafileProc callback, IntPtr callbackData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, Rectangle destRect, EnumerateMetafileProc callback, IntPtr callbackData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, PointF[] destPoints, EnumerateMetafileProc callback, IntPtr callbackData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, Point destPoint, EnumerateMetafileProc callback, IntPtr callbackData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, Point[] destPoints, EnumerateMetafileProc callback, IntPtr callbackData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, RectangleF destRect, EnumerateMetafileProc callback, IntPtr callbackData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, PointF destPoint, RectangleF srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, Point destPoint, Rectangle srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, PointF[] destPoints, RectangleF srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, Point[] destPoints, Rectangle srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, RectangleF destRect, RectangleF srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, Rectangle destRect, Rectangle srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback)
-        {
-            throw new NotImplementedException();
-        }
-
         public void EnumerateMetafile(Metafile metafile, RectangleF destRect, EnumerateMetafileProc callback, IntPtr callbackData, ImageAttributes imageAttr)
         {
             throw new NotImplementedException();
@@ -456,36 +366,6 @@ namespace System.Drawing
         }
 
         public void EnumerateMetafile(Metafile metafile, Rectangle destRect, EnumerateMetafileProc callback, IntPtr callbackData, ImageAttributes imageAttr)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, Rectangle destRect, Rectangle srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback, IntPtr callbackData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, PointF[] destPoints, RectangleF srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback, IntPtr callbackData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, RectangleF destRect, RectangleF srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback, IntPtr callbackData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, PointF destPoint, RectangleF srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback, IntPtr callbackData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, Point destPoint, Rectangle srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback, IntPtr callbackData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void EnumerateMetafile(Metafile metafile, Point[] destPoints, Rectangle srcRect, GraphicsUnit srcUnit, EnumerateMetafileProc callback, IntPtr callbackData)
         {
             throw new NotImplementedException();
         }
