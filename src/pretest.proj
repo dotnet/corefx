@@ -17,7 +17,10 @@
           Condition="'$(PlatformManifestFile)' != ''"
           BeforeTargets="GenerateFileVersionProps">
     <ItemGroup>
-      <SharedFrameworkRuntimeFiles Include="$(TestHostRuntimePath)*"
+      <_manualSharedFrameworkRuntimeFiles Include="System.Security.Cryptography.Native.OpenSsl.so" />
+      <_manualSharedFrameworkRuntimeFiles Include="System.Security.Cryptography.Native.Apple.dylib" />
+      <_manualSharedFrameworkRuntimeFiles Include="System.Security.Cryptography.Native.OpenSsl.dylib" />
+      <SharedFrameworkRuntimeFiles Include="$(TestHostRuntimePath)*;@(_manualSharedFrameworkRuntimeFiles->'$(TestHostRuntimePath)%(Identity)')"
                                    Exclude="$(TestHostRuntimePath)dotnet-Microsoft.XmlSerializer.Generator.*"
                                    TargetPath="runtimes/" />
     </ItemGroup>
