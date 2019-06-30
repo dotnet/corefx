@@ -16,10 +16,12 @@
   <Target Name="CollectSharedFrameworkRuntimeFiles"
           Condition="'$(PlatformManifestFile)' != ''"
           BeforeTargets="GenerateFileVersionProps">
-    <ItemGroup>
+    <ItemGroup Condition="'$(BuildingNETCoreAppVertical)' == 'true'">
       <_manualSharedFrameworkRuntimeFiles Include="System.Security.Cryptography.Native.OpenSsl.so" />
       <_manualSharedFrameworkRuntimeFiles Include="System.Security.Cryptography.Native.Apple.dylib" />
       <_manualSharedFrameworkRuntimeFiles Include="System.Security.Cryptography.Native.OpenSsl.dylib" />
+    </ItemGroup>
+    <ItemGroup>
       <SharedFrameworkRuntimeFiles Include="$(TestHostRuntimePath)*;@(_manualSharedFrameworkRuntimeFiles->'$(TestHostRuntimePath)%(Identity)')"
                                    Exclude="$(TestHostRuntimePath)dotnet-Microsoft.XmlSerializer.Generator.*"
                                    TargetPath="runtimes/" />

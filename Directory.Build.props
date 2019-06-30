@@ -344,7 +344,7 @@
     <TestHostRuntimePath Condition="'$(BinPlaceUAPFramework)' == 'true'">$(UAPTestSharedFrameworkPath)</TestHostRuntimePath>
     <TestHostRuntimePath Condition="'$(BinPlaceNETFXRuntime)' == 'true'">$(TestHostRootPath)</TestHostRuntimePath>
 
-    <PlatformManifestFile Condition="'$(BinplaceTestSharedFramework)' == 'true'">$(TestHostRuntimePath)PlatformManifest.txt</PlatformManifestFile>
+    <PlatformManifestFile>$(TestHostRuntimePath)PlatformManifest.txt</PlatformManifestFile>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(PlatformManifestFile)' != '' and '$(IsTestProject)' == 'true'">
