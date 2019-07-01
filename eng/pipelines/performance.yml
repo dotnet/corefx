@@ -27,9 +27,9 @@ jobs:
     pool: ${{ parameters.pool }}
     container: ${{ parameters.container }}
 
-    ${{ if eq(parameters.osGroup, 'Windows_NT') }}:
+    ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
       extraSetupParameters: -CoreRootDirectory $(Build.SourcesDirectory)\artifacts\bin\runtime\netcoreapp-${{ parameters.targetOS }}-Release-${{ parameters.architecture }} -Architecture ${{ parameters.architecture }}
-    ${{ if ne(parameters.osGroup, 'Windows_NT') }}:
+    ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
       extraSetupParameters: --corerootdirectory $(Build.SourcesDirectory)/artifacts/bin/runtime/netcoreapp-${{ parameters.targetOS }}-Release-${{ parameters.architecture }} --architecture ${{ parameters.architecture }}
 
     steps:
