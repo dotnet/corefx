@@ -23,6 +23,7 @@ namespace System.Net.Test.Common
         private bool _ignoreWindowUpdates;
         public static TimeSpan Timeout => Http2LoopbackServer.Timeout;
         private int _lastStreamId;
+        private bool _shouldSendStatus;
 
         private readonly byte[] _prefix;
         public string PrefixString => Encoding.UTF8.GetString(_prefix, 0, _prefix.Length);
@@ -671,6 +672,7 @@ namespace System.Net.Test.Common
         {
             (int streamId, HttpRequestData requestData) = await ReadAndParseRequestHeaderAsync(readBody).ConfigureAwait(false);
             _lastStreamId = streamId;
+            _shouldSendStatus = true;
 
             return requestData;
         }
@@ -680,11 +682,68 @@ namespace System.Net.Test.Common
             return ReadBodyAsync();
         }
 
-        public override Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string body = null, bool isFinal = true, int requestId = 0)
+        public override async Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string body = null, bool isFinal = true, int requestId = 0)
         {
+            if (headers != null & _shouldSendStatus)
+            {
+                bool hasDate = false;
+                bool stripContentLength = false;
+                foreach (HttpHeaderData headerData in headers)
+                {
+                    // Check if we should inject Date header to match HTTP/1.
+                    if (headerData.Name.Equals("Date", StringComparison.OrdinalIgnoreCase))
+                    {
+                        hasDate = true;
+                    }
+                    else if (headerData.Name.Equals("Content-Length") && headerData.Value == null)
+                    {
+                        // Hack used for Http/1 to avoid sending content-length header.
+                        stripContentLength = true;
+                    }
+                }
+
+                if (!hasDate || stripContentLength)
+                {
+                    var newHeaders = new List<HttpHeaderData>();
+                    foreach (HttpHeaderData headerData in headers)
+                    {
+                        if (headerData.Name.Equals("Content-Length") && headerData.Value == null)
+                        {
+                            continue;
+                        }
+
+                        newHeaders.Add(headerData);
+                    }
+                    newHeaders.Add(new HttpHeaderData("Date", $"{DateTimeOffset.UtcNow:R}"));
+                    headers = newHeaders;
+                }
+            }
+
             int streamId = requestId == 0 ? _lastStreamId : requestId;
             bool endHeaders = body != null || isFinal;
-            return SendResponseHeadersAsync(streamId, endStream : isFinal, statusCode, isTrailingHeader : false, endHeaders : endHeaders, headers);
+
+            // TODO: Header continuation support.
+            Assert.False(!_shouldSendStatus && headers != null);
+            if (string.IsNullOrEmpty(body))
+            {
+                await SendResponseHeadersAsync(streamId, endStream: isFinal, statusCode, isTrailingHeader: false, endHeaders: endHeaders, headers);
+                _shouldSendStatus = false;
+            }
+            else
+            {
+                if (headers != null || _shouldSendStatus)
+                {
+                    await SendResponseHeadersAsync(streamId, endStream: false, statusCode, isTrailingHeader: false, endHeaders: endHeaders, headers);
+                    _shouldSendStatus = false;
+                }
+                await SendResponseBodyAsync(body, isFinal: isFinal, requestId: streamId);
+            }
+
+            // If we sent transient response, we need to send response code again.
+            if ((int)statusCode < 200)
+            {
+                _shouldSendStatus = true;
+            }
         }
 
         public override Task SendResponseBodyAsync(byte[] body, bool isFinal = true, int requestId = 0)

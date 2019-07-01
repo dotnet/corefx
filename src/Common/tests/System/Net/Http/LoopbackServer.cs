@@ -122,7 +122,7 @@ namespace System.Net.Test.Common
 
         public async Task AcceptConnectionAsync(Func<Connection, Task> funcAsync)
         {
-            using (var connection = await EstablishConnectionAsync().ConfigureAwait(false))
+            using (Connection connection = await EstablishConnectionAsync().ConfigureAwait(false))
             {
                 await funcAsync(connection).ConfigureAwait(false);
             }
@@ -375,9 +375,8 @@ namespace System.Net.Test.Common
             "\r\n" +
             content;
 
-        public class Options
+        public class Options : GenericLoopbackOptions
         {
-            public IPAddress Address { get; set; } = IPAddress.Loopback;
             public int ListenBacklog { get; set; } = 1;
             public bool UseSsl { get; set; } = false;
             public SslProtocols SslProtocols { get; set; } =
@@ -404,7 +403,7 @@ namespace System.Net.Test.Common
             private int _readEnd;
             private int _contentLength = 0;
             private bool _bodyRead = false;
-            private bool _headersSent = false;
+            private bool _shouldSendStatus;
 
             public Connection(Socket socket, Stream stream)
             {
@@ -679,6 +678,8 @@ namespace System.Net.Test.Common
                     requestData.Body = await ReadRequestBodyAsync().ConfigureAwait(false);
                     _bodyRead = true;
                 }
+                // After reading request, we should send status before headers.
+                _shouldSendStatus = true;
 
                 return requestData;
             }
@@ -742,40 +743,61 @@ namespace System.Net.Test.Common
                 string headerString = null;
                 int contentLength = -1;
                 bool isChunked = false;
+                bool hasDate = false;
+                bool hasContentLength  = false;
 
                 if (headers != null)
                 {
+                    // Process given headers and look for some well-known cases.
                     foreach (HttpHeaderData headerData in headers)
                     {
-                        headerString = headerString + $"{headerData.Name}: {headerData.Value}\r\n";
                         if (headerData.Name.Equals("Content-Length", StringComparison.OrdinalIgnoreCase))
                         {
+                            hasContentLength = true;
+                            if (headerData.Value == null)
+                            {
+                                continue;
+                            }
+
                             contentLength = int.Parse(headerData.Value);
                         }
                         else if (headerData.Name.Equals("Transfer-Encoding", StringComparison.OrdinalIgnoreCase) && headerData.Value.Equals("chunked", StringComparison.OrdinalIgnoreCase))
                         {
                             isChunked = true;
                         }
+                        else if (headerData.Name.Equals("Date", StringComparison.OrdinalIgnoreCase))
+                        {
+                            hasDate = true;
+                        }
+
+                        headerString = headerString + $"{headerData.Name}: {headerData.Value}\r\n";
                     }
                 }
 
-                if (!_headersSent)
+                bool endHeaders = content != null || isFinal;
+                if (_shouldSendStatus)
                 {
+                    // If we need to send status line, prepped it to headers and possibly add missing headers to the end.
                     headerString =
                         $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
-                        (contentLength < 0 && !isChunked && content != null ? "Content-length: {content.Length}\r\n" : "") +
-                        headerString;
-                    _headersSent = true;
-                }
-
-                if (isFinal || content != null)
-                {
-                    // Finish header block
-                    headerString = headerString + "\r\n";
+                        (hasDate ? "" : $"Date: {DateTimeOffset.UtcNow:R}\r\n") +
+                        (!hasContentLength && !isChunked && content != null ? $"Content-length: {content.Length}\r\n" : "") +
+                        headerString +
+                        (endHeaders ? "\r\n" : "");
+                    _shouldSendStatus = false;
                 }
 
                 await SendResponseAsync(headerString).ConfigureAwait(false);
-                await SendResponseAsync(content).ConfigureAwait(false);
+                if (content != null)
+                {
+                    await SendResponseBodyAsync(content, isFinal: isFinal, requestId: requestId).ConfigureAwait(false);
+                }
+
+                // If we sent transient response, we need to send response code again.
+                if ((int)statusCode < 200)
+                {
+                    _shouldSendStatus = true;
+                }
             }
 
             public override async Task SendResponseBodyAsync(byte[] body, bool isFinal = true, int requestId = 0)
@@ -805,9 +827,15 @@ namespace System.Net.Test.Common
     {
         public static readonly Http11LoopbackServerFactory Singleton = new Http11LoopbackServerFactory();
 
-        public override Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync, int millisecondsTimeout = 60_000)
+        public override Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync, int millisecondsTimeout = 60_000, GenericLoopbackOptions options = null)
         {
-            return LoopbackServer.CreateServerAsync((server, uri) => funcAsync(server, uri));
+            LoopbackServer.Options newOptions = new LoopbackServer.Options();
+            if (options != null)
+            {
+                newOptions.Address = options.Address;
+            }
+
+            return LoopbackServer.CreateServerAsync((server, uri) => funcAsync(server, uri), options: newOptions);
         }
 
         public override bool IsHttp11 => true;

@@ -125,7 +125,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_EmptyResponseHeader_Success()
         {
             IList<HttpHeaderData> headers = new HttpHeaderData[] {
-                                                new HttpHeaderData("x-test", "SendAsync_EmptyHeader_Success"),
+                                                new HttpHeaderData("Date", $"{DateTimeOffset.UtcNow:R}"),
                                                 new HttpHeaderData("x-empty", ""),
                                                 new HttpHeaderData("x-last", "bye") };
 

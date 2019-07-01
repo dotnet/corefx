@@ -14,14 +14,14 @@ namespace System.Net.Test.Common
 
     public abstract class LoopbackServerFactory
     {
-        public abstract Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync, int millisecondsTimeout = 60_000);
+        public abstract Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync, int millisecondsTimeout = 60_000, GenericLoopbackOptions options = null);
 
         public abstract bool IsHttp11 { get; }
         public abstract bool IsHttp2 { get; }
 
         // Common helper methods
 
-        public Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<GenericLoopbackServer, Task> serverFunc, int millisecondsTimeout = 60_000)
+        public Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<GenericLoopbackServer, Task> serverFunc, int millisecondsTimeout = 60_000, GenericLoopbackOptions options = null)
         {
             return CreateServerAsync(async (server, uri) =>
             {
@@ -29,7 +29,7 @@ namespace System.Net.Test.Common
                 Task serverTask = serverFunc(server);
 
                 await new Task[] { clientTask, serverTask }.WhenAllOrAnyFailed().ConfigureAwait(false);
-            }).TimeoutAfter(millisecondsTimeout);
+            }, options: options).TimeoutAfter(millisecondsTimeout);
         }
     }
 
@@ -42,6 +42,18 @@ namespace System.Net.Test.Common
         public abstract Task AcceptConnectionAsync(Func<GenericLoopbackConnection, Task> funcAsync);
 
         public abstract void Dispose();
+
+        public async Task<HttpRequestData> AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, string content = "")
+        {
+            HttpRequestData requestData = null;
+            await AcceptConnectionAsync(async connection =>
+            {
+                requestData = await connection.ReadRequestDataAsync();
+                await connection.SendResponseAsync(statusCode, body: content);
+            });
+
+            return requestData;
+        }
     }
 
     public abstract class GenericLoopbackConnection : IDisposable
@@ -65,6 +77,10 @@ namespace System.Net.Test.Common
         }
     }
 
+    public class GenericLoopbackOptions
+    {
+        public IPAddress Address { get; set; } = IPAddress.Loopback;
+    }
 
     public struct HttpHeaderData
     {
