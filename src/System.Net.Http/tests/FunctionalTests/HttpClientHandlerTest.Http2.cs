@@ -294,6 +294,80 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ConditionalFact(nameof(SupportsAlpn))]
+        public async Task GetAsync_StreamRefused_RequestIsRetried()
+        {
+            using (var server = Http2LoopbackServer.CreateServer())
+            using (HttpClient client = CreateHttpClient())
+            {
+                (_, Http2LoopbackConnection connection) = await EstablishConnectionAndProcessOneRequestAsync(client, server);
+
+                Task<HttpResponseMessage> sendTask = client.GetAsync(server.Address);
+                (int streamId1, HttpRequestData requestData1) = await connection.ReadAndParseRequestHeaderAsync(readBody: true);
+
+                // Send SETTINGS frame to change stream limit to 0, allowing us to send a REFUSED_STREAM error due to the new limit
+                connection.ExpectSettingsAck();
+                Frame frame = new SettingsFrame(new SettingsEntry() { SettingId = SettingId.MaxConcurrentStreams, Value = 0 });
+                await connection.WriteFrameAsync(frame);
+
+                // Send a RST_STREAM with error = REFUSED_STREAM, indicating the request can be retried.
+                frame = new RstStreamFrame(FrameFlags.None, (int)ProtocolErrors.REFUSED_STREAM, streamId1);
+                await connection.WriteFrameAsync(frame);
+
+                await connection.PingPong();
+
+                // Send SETTINGS frame to change stream limit to 1, allowing the request to now be processed
+                connection.ExpectSettingsAck();
+                frame = new SettingsFrame(new SettingsEntry() { SettingId = SettingId.MaxConcurrentStreams, Value = 1 });
+                await connection.WriteFrameAsync(frame);
+
+                // Process retried request
+                (int streamId2, HttpRequestData requestData2) = await connection.ReadAndParseRequestHeaderAsync(readBody: true);
+                await connection.SendDefaultResponseAsync(streamId2);
+                HttpResponseMessage response = await sendTask;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+        }
+
+        [ConditionalFact(nameof(SupportsAlpn))]
+        public async Task PostAsync_StreamRefused_RequestIsRetried()
+        {
+            using (var server = Http2LoopbackServer.CreateServer())
+            using (HttpClient client = CreateHttpClient())
+            {
+                const string Content = "Hello world";
+
+                (_, Http2LoopbackConnection connection) = await EstablishConnectionAndProcessOneRequestAsync(client, server);
+
+                Task<HttpResponseMessage> sendTask = client.PostAsync(server.Address, new StringContent(Content));
+                (int streamId1, HttpRequestData requestData1) = await connection.ReadAndParseRequestHeaderAsync(readBody: true);
+                Assert.Equal(Content, Encoding.UTF8.GetString(requestData1.Body));
+
+                // Send SETTINGS frame to change stream limit to 0, allowing us to send a REFUSED_STREAM error due to the new limit
+                connection.ExpectSettingsAck();
+                Frame frame = new SettingsFrame(new SettingsEntry() { SettingId = SettingId.MaxConcurrentStreams, Value = 0 });
+                await connection.WriteFrameAsync(frame);
+
+                // Send a RST_STREAM with error = REFUSED_STREAM, indicating the request can be retried.
+                frame = new RstStreamFrame(FrameFlags.None, (int)ProtocolErrors.REFUSED_STREAM, streamId1);
+                await connection.WriteFrameAsync(frame);
+
+                await connection.PingPong();
+
+                // Send SETTINGS frame to change stream limit to 1, allowing the request to now be processed
+                connection.ExpectSettingsAck();
+                frame = new SettingsFrame(new SettingsEntry() { SettingId = SettingId.MaxConcurrentStreams, Value = 1 });
+                await connection.WriteFrameAsync(frame);
+
+                // Process retried request
+                (int streamId2, HttpRequestData requestData2) = await connection.ReadAndParseRequestHeaderAsync(readBody: true);
+                Assert.Equal(Content, Encoding.UTF8.GetString(requestData2.Body));
+                await connection.SendDefaultResponseAsync(streamId2);
+                HttpResponseMessage response = await sendTask;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+        }
+
         // This test is based on RFC 7540 section 6.1:
         // "If a DATA frame is received whose stream identifier field is 0x0, the recipient MUST
         // respond with a connection error (Section 5.4.1) of type PROTOCOL_ERROR."
@@ -720,6 +794,7 @@ namespace System.Net.Http.Functional.Tests
         public static IEnumerable<object[]> ValidAndInvalidProtocolErrors() =>
             Enum.GetValues(typeof(ProtocolErrors))
             .Cast<ProtocolErrors>()
+            .Where(e => e != ProtocolErrors.REFUSED_STREAM)     // REFUSED_STREAM allows retry instead of abort, so skip it
             .Concat(new[] { (ProtocolErrors)12345 })
             .Select(p => new object[] { p });
 
@@ -1391,7 +1466,9 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(38820)]
         [ConditionalFact(nameof(SupportsAlpn))]
+        [OuterLoop("Uses Task.Delay")]
         public async Task Http2_PendingSend_SendsReset()
         {
             var cts = new CancellationTokenSource();
@@ -1498,6 +1575,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ConditionalFact(nameof(SupportsAlpn))]
+        [OuterLoop("Uses Task.Delay")]
         public async Task Dispose_ProcessingRequest_Throws()
         {
             HttpClient client =  CreateHttpClient();
@@ -1597,6 +1675,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        [OuterLoop("Uses Task.Delay")]
         public async Task PostAsyncExpect100Continue_LateForbiddenResponse_Ok()
         {
             TaskCompletionSource<bool> tsc = new TaskCompletionSource<bool>();
@@ -1647,6 +1726,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(false, HttpStatusCode.Forbidden)]
         [InlineData(true, HttpStatusCode.OK)]
         [InlineData(false, HttpStatusCode.OK)]
+        [OuterLoop("Uses Task.Delay")]
         public async Task SendAsync_ConcurentSendReceive_Ok(bool shouldWait, HttpStatusCode responseCode)
         {
             TaskCompletionSource<bool> tsc = new TaskCompletionSource<bool>();
@@ -1703,6 +1783,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        [OuterLoop("Uses Task.Delay")]
         public async Task SendAsync_ConcurentSendReceive_Fail()
         {
             TaskCompletionSource<bool> tsc = new TaskCompletionSource<bool>();
@@ -1978,7 +2059,8 @@ namespace System.Net.Http.Functional.Tests
                     handler.MaxResponseHeadersLength = 1;
 
                     using HttpClient client = CreateHttpClient(handler);
-                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(uri));
+                    Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(uri));
+                    Assert.Contains((handler.MaxResponseHeadersLength * 1024).ToString(), e.ToString());
                 },
                 async server =>
                 {
@@ -2006,7 +2088,8 @@ namespace System.Net.Http.Functional.Tests
                     handler.MaxResponseHeadersLength = 1;
 
                     using HttpClient client = CreateHttpClient(handler);
-                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(uri));
+                    Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(uri));
+                    Assert.Contains((handler.MaxResponseHeadersLength * 1024).ToString(), e.ToString());
                 },
                 async server =>
                 {
