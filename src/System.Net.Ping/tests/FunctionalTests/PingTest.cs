@@ -845,5 +845,14 @@ namespace System.Net.NetworkInformation.Tests
             PingReply reply = sender.Send(TestSettings.UnreachableAddress);
             Assert.Equal(IPStatus.TimedOut, reply.Status);
         }
-     }
+
+        [Fact]
+        [OuterLoop]
+        public async Task PingAsync_TimedOutSync_Success()
+        {
+            var sender = new Ping();
+            PingReply reply = await sender.SendPingAsync(TestSettings.UnreachableAddress);
+            Assert.Equal(IPStatus.TimedOut, reply.Status);
+        }
+    }
 }
