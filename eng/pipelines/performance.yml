@@ -10,21 +10,12 @@ jobs:
 - template: ../common/templates/job/performance.yml
   parameters:
     variables:
-
-    # pass along job variables
-    - ${{ each variable in job.variables }}:
-      - ${{ if ne(variable.name, '') }}:
-        - name: ${{ variable.name }}
-          value: ${{ variable.value }}
-      - ${{ if ne(variable.group, '') }}:
-        - group: ${{ variable.group }}
-
     - _msbuildCommonParameters: ''
     - _archiveTestsParameter: ''
     - _finalFrameworkArg: -framework ${{ parameters.framework }}
     - _testScopeArg: ''
 
-    - _args: -configuration Release -ci -arch ${{ parameters.architecture }} $(_finalFrameworkArg) $(_archiveTestsParameter) ${{ job.buildExtraArguments }}
+    - _args: -configuration Release -ci -arch ${{ parameters.architecture }} $(_finalFrameworkArg) $(_archiveTestsParameter)
     - _commonArguments: $(_args)
 
     # Windows variables
@@ -39,7 +30,7 @@ jobs:
       - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
         - _commonArguments: $(_args) -stripSymbols
 
-    jobName: ${{ format('performance_{0}_{2}', paramters.targetOS, parameters.architecture) }}
+    jobName: ${{ format('performance_{0}_{2}', parameters.targetOS, parameters.architecture) }}
     pool: ${{ parameters.pool }}
     container: ${{ parameters.container }}
 
