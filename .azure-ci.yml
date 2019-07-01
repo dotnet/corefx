@@ -44,23 +44,23 @@ resources:
     image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-ef0ac75-20175511035548
 
 jobs:
-  # Windows legs
-  - template: /eng/pipelines/windows.yml
-    parameters:
-      isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
-      fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
+  # # Windows legs
+  # - template: /eng/pipelines/windows.yml
+  #   parameters:
+  #     isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
+  #     fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
 
-  # Linux legs
-  - template: /eng/pipelines/linux.yml
-    parameters:
-      isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
-      fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
+  # # Linux legs
+  # - template: /eng/pipelines/linux.yml
+  #   parameters:
+  #     isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
+  #     fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
 
-  # MacOS legs
-  - template: /eng/pipelines/macos.yml
-    parameters:
-      isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
-      fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
+  # # MacOS legs
+  # - template: /eng/pipelines/macos.yml
+  #   parameters:
+  #     isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
+  #     fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
 
     # FreeBSD leg is only for official builds
     # - template: /eng/pipelines/freebsd.yml
@@ -68,14 +68,28 @@ jobs:
     #     isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
     #     fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
 
+  # Performance legs
+  - template: /eng/pipelines/performance.yml
+    parameters:
+      targetOS: Windows_NT
+      pool: 
+        name: Hosted VS2017
+
+  - template: /eng/pipelines/performance.yml
+    parameters:
+      targetOS: Linux
+      pool: 
+        name: Hosted Ubuntu 1604
+      container: rhel7_container
+
   # Publish step. Only run in official builds
-  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
-    - template: /eng/pipelines/publish.yml
-      parameters:
-        dependsOn:
-          - WindowsTest
-          - WindowsNoTest
-          - AllConfigurations
-          - LinuxTest
-          - MacOS
-          # - FreeBSD
+  # - ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
+  #   - template: /eng/pipelines/publish.yml
+  #     parameters:
+  #       dependsOn:
+  #         - WindowsTest
+  #         - WindowsNoTest
+  #         - AllConfigurations
+  #         - LinuxTest
+  #         - MacOS
+  #         # - FreeBSD
