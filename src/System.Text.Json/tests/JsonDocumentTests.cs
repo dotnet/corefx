@@ -412,46 +412,68 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void ParseJson_Stream_Throws_CodeCoverage()
+        public static void ParseJson_Stream_Throws_ClearRentedBuffer_CodeCoverage()
         {
             byte[] data = Encoding.UTF8.GetBytes(SR.Json400KB);
-            Stream stream = new MemoryStream(data);
+            Stream stream = new ThrowOnReadStream(data);
             JsonDocument doc = null;
-            Assert.Throws<AggregateException>(() =>
+            Assert.Throws<NotImplementedException>(() =>
             {
-                while (true)
-                {
-                    Task task = Task.Run(() => doc = JsonDocument.Parse(stream));
-                    if (!task.IsCompleted)
-                    {
-                        stream.Dispose();
-                        task.Wait();
-                        break;
-                    }
-                }
+                doc = JsonDocument.Parse(stream);
             });
+           Assert.Null(doc);
+        }
 
+        [Fact]
+        public static void ParseJson_Stream_Async_Throws_ClearRentedBuffer_CodeCoverage()
+        {
+            byte[] data = Encoding.UTF8.GetBytes(SR.Json400KB);
+            Stream stream = new ThrowOnReadStream(data);
+            JsonDocument doc = null;
+            Assert.ThrowsAsync<NotImplementedException>(async () =>
+            {
+                doc = await JsonDocument.ParseAsync(stream);
+            });
             Assert.Null(doc);
         }
 
         [Fact]
-        public static void ParseJson_Stream_Async_Throws_CodeCoverage()
+        public static void ParseJson_Stream_CanSeekThrows_NullBuffer_CodeCoverage()
         {
             byte[] data = Encoding.UTF8.GetBytes(SR.Json400KB);
-            Stream stream = new MemoryStream(data);
-            Assert.Throws<AggregateException>(() =>
+            Stream stream = new ThrowOnSeekStream(data);
+            JsonDocument doc = null;
+            Assert.Throws<NotImplementedException>(() =>
             {
-                while (true)
-                {
-                    Task task = Task.Run(() => JsonDocument.ParseAsync(stream));
-                    if (!task.IsCompleted)
-                    {
-                        stream.Dispose();
-                        task.Wait();
-                        break;
-                    }
-                }
+                doc = JsonDocument.Parse(stream);
             });
+            Assert.Null(doc);
+        }
+
+        [Fact]
+        public static void ParseJson_Stream_Async_CanSeekThrows_NullBuffer_CodeCoverage()
+        {
+            byte[] data = Encoding.UTF8.GetBytes(SR.Json400KB);
+            Stream stream = new ThrowOnSeekStream(data);
+            JsonDocument doc = null;
+            Assert.ThrowsAsync<NotImplementedException>(async () =>
+            {
+                doc = await JsonDocument.ParseAsync(stream);
+            });
+            Assert.Null(doc);
+        }
+
+        [Fact]
+        public static void ParseJson_Stream_NonSeekableThrows_CodeCoverage()
+        {
+            byte[] data = Encoding.UTF8.GetBytes(SR.Json400KB);
+            Stream stream = new ThrowOnSeekStream(data);
+            JsonDocument doc = null;
+            Assert.Throws<NotImplementedException>(() =>
+            {
+                doc = JsonDocument.Parse(stream);
+            });
+            Assert.Null(doc);
         }
 
         [Theory]
@@ -3808,5 +3830,25 @@ namespace System.Text.Json.Tests
 
             return s_compactJson[testCaseType] = existing;
         }
+    }
+    public class ThrowOnReadStream : MemoryStream
+    {
+        public ThrowOnReadStream(byte[] bytes) : base(bytes)
+        {
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ThrowOnSeekStream : MemoryStream
+    {
+        public ThrowOnSeekStream(byte[] bytes) : base(bytes)
+        {
+        }
+
+        public override bool CanSeek => throw new NotImplementedException();
     }
 }
