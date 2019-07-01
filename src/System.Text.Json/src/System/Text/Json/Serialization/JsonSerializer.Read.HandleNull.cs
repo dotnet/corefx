@@ -34,10 +34,9 @@ namespace System.Text.Json
 
             if (state.Current.IsCollectionForProperty)
             {
-                bool addElement = state.Current.CollectionPropertyInitialized;
-
-                if (addElement)
+                if (state.Current.CollectionPropertyInitialized)
                 {
+                    // Add the element.
                     AddNullToCollection(jsonPropertyInfo, ref reader, ref state);
                 }
                 else

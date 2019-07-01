@@ -166,7 +166,7 @@ namespace System.Text.Json.Serialization.Tests
             public Dictionary<string, int> MyOverflow { get; set; }
         }
 
-        private class ClassWithTwoExtensionPropertys
+        private class ClassWithTwoExtensionProperties
         {
             [JsonExtensionData]
             public Dictionary<string, object> MyOverflow1 { get; set; }
@@ -183,7 +183,7 @@ namespace System.Text.Json.Serialization.Tests
             JsonSerializer.Deserialize<ClassWithExtensionPropertyAsObject>(@"{}");
 
             Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<ClassWithInvalidExtensionProperty>(@"{}"));
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<ClassWithTwoExtensionPropertys>(@"{}"));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<ClassWithTwoExtensionProperties>(@"{}"));
         }
 
         private class ClassWithIgnoredData

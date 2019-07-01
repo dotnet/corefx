@@ -171,7 +171,7 @@ namespace System.Text.Json
 
         private bool DetermineExtensionDataProperty(Dictionary<string, JsonPropertyInfo> cache)
         {
-            JsonPropertyInfo jsonPropertyInfo = GetPropertyThatHasAttribute(typeof(JsonExtensionDataAttribute), cache);
+            JsonPropertyInfo jsonPropertyInfo = GetPropertyWithUniqueAttribute(typeof(JsonExtensionDataAttribute), cache);
             if (jsonPropertyInfo != null)
             {
                 Type declaredPropertyType = jsonPropertyInfo.DeclaredPropertyType;
@@ -188,7 +188,7 @@ namespace System.Text.Json
             return false;
         }
 
-        private JsonPropertyInfo GetPropertyThatHasAttribute(Type attributeType, Dictionary<string, JsonPropertyInfo> cache)
+        private JsonPropertyInfo GetPropertyWithUniqueAttribute(Type attributeType, Dictionary<string, JsonPropertyInfo> cache)
         {
             JsonPropertyInfo property = null;
 
