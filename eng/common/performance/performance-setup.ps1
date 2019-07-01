@@ -23,11 +23,6 @@ $PerformanceDirectory = (Join-Path $PayloadDirectory "performance")
 $WorkItemDirectory = (Join-Path $SourceDirectory "workitem")
 $Creator = ""
 
-Write-Output $PerformanceDirectory
-Write-Output $PayloadDirectory
-Write-Output $CoreRootDirectory
-Write-Output $SourceDirectory
-
 if ($Internal) {
     $Queue = "Windows.10.Amd64.ClientRS1.Perf"
     $PerfLabArguments = "--upload-to-perflab-container"
