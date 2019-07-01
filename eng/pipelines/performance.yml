@@ -10,25 +10,18 @@ jobs:
 - template: ../common/templates/job/performance.yml
   parameters:
     variables:
-    - _msbuildCommonParameters: ''
-    - _archiveTestsParameter: ''
-    - _finalFrameworkArg: -framework ${{ parameters.framework }}
-    - _testScopeArg: ''
-
-    - _args: -configuration Release -ci -arch ${{ parameters.architecture }} $(_finalFrameworkArg) $(_archiveTestsParameter)
-    - _commonArguments: $(_args)
+    - name: _commonArguments
+      value: -configuration Release -ci -arch ${{ parameters.architecture }} -framework ${{ parameters.framework }} $(_archiveTestsParameter)
 
     # Windows variables
     - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
-      - _buildScript: build.cmd
-      - _msbuildCommand: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
+      - name: _buildScript
+        value: build.cmd
 
     # Non-Windows variables
     - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
-      - _buildScript: ./build.sh
-      - _msbuildCommand: ./eng/common/msbuild.sh --warnaserror false --ci
-      - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-        - _commonArguments: $(_args) -stripSymbols
+      - name: _buildScript
+        value: ./build.sh
 
     jobName: ${{ format('performance_{0}_{1}', parameters.targetOS, parameters.architecture) }}
     pool: ${{ parameters.pool }}
@@ -46,6 +39,4 @@ jobs:
       - script: $(_buildScript)
               -build
               $(_commonArguments)
-              $(_testScopeArg)
-              $(_msbuildCommonParameters)
         displayName: Build Sources and Tests
