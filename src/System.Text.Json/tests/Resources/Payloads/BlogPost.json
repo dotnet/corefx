@@ -1,0 +1,996 @@
+﻿{
+    "value": {
+        "id": "dcf15871f943",
+        "versionId": "e732cdbd8ac4",
+        "creatorId": "7ef192b7f545",
+        "homeCollectionId": "",
+        "title": "A Smart Programmer Understands The Problems Worth Fixing",
+        "detectedLanguage": "en",
+        "latestVersion": "e732cdbd8ac4",
+        "latestPublishedVersion": "e732cdbd8ac4",
+        "hasUnpublishedEdits": false,
+        "latestRev": 1456,
+        "createdAt": 1552712843349,
+        "updatedAt": 1559259331085,
+        "acceptedAt": 0,
+        "firstPublishedAt": 1553763660931,
+        "latestPublishedAt": 1559259330926,
+        "vote": false,
+        "experimentalCss": "",
+        "displayAuthor": "",
+        "content": {
+            "subtitle": "The difference between solving any problem and the right one",
+            "bodyModel": {
+                "paragraphs": [
+                    {
+                        "name": "97c6",
+                        "type": 3,
+                        "text": "A Smart Programmer Understands The Problems Worth Fixing",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "d1b2",
+                        "type": 13,
+                        "text": "The difference between solving any problem and the right one",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 35,
+                                "end": 42,
+                                "href": "https:\/\/levelup.gitconnected.com\/the-problem-you-solve-is-more-important-than-the-code-you-write-d0e5493132c6",
+                                "title": "",
+                                "rel": "",
+                                "anchorType": 0
+                            }
+                        ]
+                    },
+                    {
+                        "name": "04cc",
+                        "type": 4,
+                        "text": "The picture of two firefighters clearing up the snow surrounding a hydrant. In case there's an emergency, the cost in lives due to having snow blocking the hydrant is more significant than the cost of clearing them all beforehand. Clearing a hydrant after a snowfall is a problem worth solving.",
+                        "markups": [
+
+                        ],
+                        "layout": 5,
+                        "metadata": {
+                            "id": "1*SNhelFbiMUTGX73GF_c_ew.jpeg",
+                            "originalWidth": 1200,
+                            "originalHeight": 412,
+                            "isFeatured": true
+                        }
+                    },
+                    {
+                        "name": "d163",
+                        "type": 1,
+                        "text": "This is the story of Peter. Peter is a programmer that can do anything. He can create software as good as any of his other peers. However, there's a difference between a programmer with experience from a programmer without experience, even though both have the same technical skills.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "253f",
+                        "type": 1,
+                        "text": "How's that possible?",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "5f96",
+                        "type": 1,
+                        "text": "Peter has built a great distributed online booking system for a shop. The user can choose the time that is available to book, the \"Available Time Screen.\" Mary, the operator of the system, uses the code that Peter wrote. She is responsible for receiving the next person in the line and providing the service inside the shop.",
+                        "markups": [
+                            {
+                                "type": 1,
+                                "start": 0,
+                                "end": 5
+                            },
+                            {
+                                "type": 1,
+                                "start": 155,
+                                "end": 159
+                            }
+                        ]
+                    },
+                    {
+                        "name": "e993",
+                        "type": 4,
+                        "text": "A diagram showing the Browser, one service for checking the Available Time and one service to Book. The Browser initiates the booking process on the Available Time Service then redirects the user to the Booking Service to confirm and finalize. The Booking Service notifies the operator when the booking is complete.",
+                        "markups": [
+
+                        ],
+                        "layout": 1,
+                        "metadata": {
+                            "id": "1*fy5yrh7sHTw3YNkU3IV8Qw.png",
+                            "originalWidth": 536,
+                            "originalHeight": 571
+                        }
+                    },
+                    {
+                        "name": "c89f",
+                        "type": 1,
+                        "text": "However, the booking system has a problem. Although the state of the system updates immediately in the server, the user has to refresh the page or reenter the website to see the updates to the available time. That way, if two people are looking simultaneously at the \"Available Time Screen.\" they can create the same booking at the same time. If that happens on a busy day, Mary will get in trouble trying to fix the problem in the shop. This will make the customers unhappy with the service and will cause frustration to Mary.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "13c4",
+                        "type": 1,
+                        "text": "Peter is smart and wants to fix it. He plans to develop an in-memory system which updates the \"Available Time Screen\" instantly and send a push message to the browser so that it can update the UI in real time. Even if that's not fast enough, the code also makes a check to verify the duplication right before finishing the booking. If the user tries to create a duplicated booking when the update is not fast enough, the system shows an error.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "e05b",
+                        "type": 4,
+                        "text": "The same diagram as before. However, now instead of the Booking Service notifying only the operator when the booking is complete, the Booking Service also notifies the browser using a WebSocket.",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 184,
+                                "end": 193,
+                                "href": "https:\/\/developer.mozilla.org\/en-US\/docs\/Web\/API\/WebSockets_API",
+                                "title": "",
+                                "rel": "",
+                                "anchorType": 0
+                            }
+                        ],
+                        "layout": 1,
+                        "metadata": {
+                            "id": "1*5XZrAmo8ToLaZsP5vxSY9A.png",
+                            "originalWidth": 536,
+                            "originalHeight": 571
+                        }
+                    },
+                    {
+                        "name": "a8ed",
+                        "type": 1,
+                        "text": "Mary is starting to get frustrated. Peter is taking too much time to deliver this.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "e11a",
+                        "type": 1,
+                        "text": "After 2 months, Peter delivers the improvement. After a few days, Mary notices that there\u2019s no duplicate booking anymore.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "e1c3",
+                        "type": 1,
+                        "text": "Peter considers the job done and moves on to the next thing.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "de3e",
+                        "type": 7,
+                        "text": "Peter is smart, he can solve anything as good as anybody else!",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "defa",
+                        "type": 1,
+                        "text": "Two months later, Mary calls Peter again. The booking system is working well. However, three users out of a few thousand complained that they got errors when trying to book due to a duplicate booking. Peter thought that the real-time update of the booking system in memory would be sufficient. It clearly wasn't.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "d5c0",
+                        "type": 1,
+                        "text": "After a few hours of debugging and many days of analysis due to the complex code and validations surrounding the duplicated booking check, Peter can't figure out what happened. He doesn't know how to reproduce the problem because there are too many possible conditions. The software is too complex! Therefore, he decides to add extra logging that will provide more debug information when the error occurs again.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "27f6",
+                        "type": 1,
+                        "text": "Six weeks later, another user managed to create a duplicated booking and bypass the validation. Although the last one didn't happen on a busy day, Mary only realized the issue when both customers came at the same time.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "6b2e",
+                        "type": 1,
+                        "text": "The logs didn't show anything useful, only what everyone already knows: A limited number of people are able to bypass the validation and create duplicate bookings, and it's impossible to reproduce the problem.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "6522",
+                        "type": 7,
+                        "text": "Peter believed he could solve everything, but he didn't. The difference is that he only noticed too late.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "22e9",
+                        "type": 1,
+                        "text": "Ten years later I asked Peter what he learned about this episode with the booking system.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "11ae",
+                        "type": 1,
+                        "text": "Here's what Peter said:",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "7b6b",
+                        "type": 6,
+                        "text": "I've learned with my colleague, Jasmin, that there are some technical limitations in distributed systems. Constraints such as to prevent duplicate bookings are impossible to solve efficiently without a significant cost. There are multiple computers involved, network latency, etc. When you work with a distributed booking system at scale, you need to accept two people will try to do the same thing twice. If there's a business imperative for that not to happen, like no duplicate bookings, you need to take that limitation into the business stakeholders and understand how they want to solve it.",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 259,
+                                "end": 279,
+                                "href": "https:\/\/en.wikipedia.org\/wiki\/Fallacies_of_distributed_computing",
+                                "title": "",
+                                "rel": "",
+                                "anchorType": 0
+                            }
+                        ]
+                    },
+                    {
+                        "name": "54fa",
+                        "type": 6,
+                        "text": "If you allow the program to create the duplicate but create a process to enable the operators of the system to fix the problem by themselves, the user that is booking won't get a bad experience like an error. Once the cost for the operators of the system to fix the incorrect booking is too high, then you'll have a good problem to solve. In the meantime, you can spend your programming efforts on more important things.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "6c96",
+                        "type": 6,
+                        "text": "It doesn't make sense to invest your energy before you have enough evidence the cost pays off.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "7274",
+                        "type": 1,
+                        "text": "Peter went on to give an example:",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "d2ad",
+                        "type": 6,
+                        "text": "For example, the server might not send a notification to the user until the operator confirms. If the operator has a UI to notify there's a duplicated booking, they can talk to both users and reschedule one of them. That happens hours or even days before they come to the shop.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "67ca",
+                        "type": 6,
+                        "text": "Once the cost to reschedule becomes too big, you can automate the process.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "5766",
+                        "type": 6,
+                        "text": "For example, you can create a system that looks at the database and lists all the bookings that are duplicated. Then, you write code to send a notification to interested parties that are able to solve that duplication manually, perhaps even another department.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "5a4f",
+                        "type": 6,
+                        "text": "If the cost to solve the duplication manually becomes too big, then you can create a system that automatically sends an SMS or an e-mail to the user saying \"Sorry, we can't serve you at 10AM, please book another time\". You switch the considerable cost from the operator to a small inconvenience to the user.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "6c42",
+                        "type": 6,
+                        "text": "If the cost to the user is unacceptable, then you can explore more complicated ways to validate.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "5242",
+                        "type": 6,
+                        "text": "This way, at every step, you spend your time to write software that solves only the right problem. You don't waste your time trying to solve a problem that doesn't exist.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "5a9a",
+                        "type": 7,
+                        "text": "Peter learned that it is more valuable to lift some technical limitations into business scenarios and develop incrementally instead of trying to solve all the problems in one go.",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 110,
+                                "end": 123,
+                                "href": "https:\/\/medium.com\/@fagnerbrack\/code-less-think-more-incrementally-98adee22df9b",
+                                "title": "",
+                                "rel": "",
+                                "anchorType": 0
+                            }
+                        ]
+                    },
+                    {
+                        "name": "5056",
+                        "type": 1,
+                        "text": "The connection between multiple computers works like communication in the universe does. It's messy, complex, and asynchronous, where events happen in ways you can least expect. It doesn\u2019t work like a perfect and synchronous operation, where every event occurs one after the other.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "537c",
+                        "type": 1,
+                        "text": "Before trying to fix every problem, focus on the problems that matter. If requirements require too much effort to solve, handle them as valid business scenarios. Once you have enough evidence that it's worth investing the time and effort to fix them, then you'll have a good problem to solve.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "debd",
+                        "type": 1,
+                        "text": "Peter thought he was smart at that time, but it took many years of experience for him to understand that \u2026",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "7074",
+                        "type": 7,
+                        "text": "\u2026 a smart programmer is not the one who fix all the problems, it's the one who understands what the problems worth fixing are.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "cc83",
+                        "type": 1,
+                        "text": "It\u2019s natural to think this is the job of the \"Product Manager,\" but it is your job. Next time you have a business problem to solve, look at the edge cases and see if you can turn those problems into a valid business scenario.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "fe1f",
+                        "type": 1,
+                        "text": "This is an industry where algorithmic interviews and segregation of roles are the norms. What we need are programmers who can understand the value they bring and look at the tradeoffs instead of naively pretend they can fix everything.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "6243",
+                        "type": 1,
+                        "text": "You may realize in a few months or years that the code you're writing today is a mistake. At that time, you'll learn the same thing that Peter did. However, learning with your own mistake means that you need to commit them in the first place.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "6917",
+                        "type": 1,
+                        "text": "It's better if you don't need to.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "6402",
+                        "type": 1,
+                        "text": "It's better if you can learn with Peter.",
+                        "markups": [
+
+                        ]
+                    },
+                    {
+                        "name": "8fea",
+                        "type": 1,
+                        "text": "Thanks for reading. If you have some feedback, reach out to me on Twitter, Facebook or Github.",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 66,
+                                "end": 73,
+                                "href": "https:\/\/twitter.com\/FagnerBrack",
+                                "title": "",
+                                "rel": "nofollow noopener noopener noopener noopener noopener noopener noopener noopener noopener noopener noopener noopener nofollow noopener",
+                                "anchorType": 0
+                            },
+                            {
+                                "type": 3,
+                                "start": 75,
+                                "end": 83,
+                                "href": "https:\/\/www.facebook.com\/fagner.brack",
+                                "title": "",
+                                "rel": "nofollow noopener noopener noopener noopener noopener noopener noopener noopener noopener noopener noopener noopener nofollow noopener",
+                                "anchorType": 0
+                            },
+                            {
+                                "type": 3,
+                                "start": 87,
+                                "end": 93,
+                                "href": "http:\/\/github.com\/FagnerMartinsBrack",
+                                "title": "",
+                                "rel": "nofollow noopener noopener noopener noopener noopener noopener noopener noopener noopener noopener noopener noopener nofollow noopener",
+                                "anchorType": 0
+                            }
+                        ]
+                    },
+                    {
+                        "name": "cdff",
+                        "type": 1,
+                        "text": "Thanks to Ian Tinsley and Gustavo Henke for their insightful inputs to this post.",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 10,
+                                "end": 21,
+                                "anchorType": 2,
+                                "userId": "c4ccb3ab8d17"
+                            },
+                            {
+                                "type": 3,
+                                "start": 26,
+                                "end": 39,
+                                "href": "https:\/\/twitter.com\/gustavohenke",
+                                "title": "",
+                                "rel": "",
+                                "anchorType": 0
+                            }
+                        ]
+                    },
+                    {
+                        "name": "dc40",
+                        "type": 1,
+                        "text": "Wanna chat in person? You can find me in the Sydney Software Crafters meetup.",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 45,
+                                "end": 76,
+                                "href": "https:\/\/www.meetup.com\/Software-Crafters-Sydney\/",
+                                "title": "",
+                                "rel": "noopener",
+                                "anchorType": 0
+                            },
+                            {
+                                "type": 1,
+                                "start": 45,
+                                "end": 76
+                            }
+                        ]
+                    }
+                ],
+                "sections": [
+                    {
+                        "name": "ca52",
+                        "startIndex": 0
+                    },
+                    {
+                        "name": "941f",
+                        "startIndex": 41
+                    }
+                ]
+            },
+            "postDisplay": {
+                "coverless": true
+            }
+        },
+        "virtuals": {
+            "allowNotes": true,
+            "previewImage": {
+                "imageId": "1*SNhelFbiMUTGX73GF_c_ew.jpeg",
+                "filter": "",
+                "backgroundSize": "",
+                "originalWidth": 1200,
+                "originalHeight": 412,
+                "strategy": "resample",
+                "height": 0,
+                "width": 0
+            },
+            "wordCount": 1355,
+            "imageCount": 3,
+            "readingTime": 5.6632075471698,
+            "subtitle": "The difference between solving any problem and the right one",
+            "userPostRelation": {
+                "userId": "78aeffcb483e",
+                "postId": "dcf15871f943",
+                "readAt": 0,
+                "readLaterAddedAt": 0,
+                "votedAt": 0,
+                "collaboratorAddedAt": 0,
+                "notesAddedAt": 0,
+                "subscribedAt": 0,
+                "lastReadSectionName": "",
+                "lastReadVersionId": "",
+                "lastReadAt": 0,
+                "lastReadParagraphName": "",
+                "lastReadPercentage": 0,
+                "viewedAt": 1560700543075,
+                "presentedCountInResponseManagement": 0,
+                "clapCount": 0,
+                "seriesUpdateNotifsOptedInAt": 0,
+                "queuedAt": 0,
+                "seriesFirstViewedAt": 0,
+                "presentedCountInStream": 1,
+                "seriesLastViewedAt": 0,
+                "audioProgressSec": 0
+            },
+            "usersBySocialRecommends": [
+
+            ],
+            "noIndex": false,
+            "recommends": 763,
+            "isBookmarked": false,
+            "tags": [
+                {
+                    "slug": "programming",
+                    "name": "Programming",
+                    "postCount": 100751,
+                    "metadata": {
+                        "postCount": 100751,
+                        "coverImage": {
+                            "id": "0*R1c-uLLQzlqqiA-b",
+                            "originalWidth": 8192,
+                            "originalHeight": 5461,
+                            "isFeatured": true,
+                            "unsplashPhotoId": "UKdCsFKBbkQ"
+                        }
+                    },
+                    "type": "Tag"
+                },
+                {
+                    "slug": "web-development",
+                    "name": "Web Development",
+                    "postCount": 96250,
+                    "metadata": {
+                        "postCount": 96250,
+                        "coverImage": {
+                            "id": "1*mJ-qdNqldpgae2U5oS0qDg.png",
+                            "originalWidth": 1266,
+                            "originalHeight": 826,
+                            "isFeatured": true
+                        }
+                    },
+                    "type": "Tag"
+                },
+                {
+                    "slug": "agile",
+                    "name": "Agile",
+                    "postCount": 31643,
+                    "metadata": {
+                        "postCount": 31643,
+                        "coverImage": {
+                            "id": "1*GFqOwDxjKJVSYM6UtQ19ng.png",
+                            "originalWidth": 2094,
+                            "originalHeight": 1172,
+                            "isFeatured": true
+                        }
+                    },
+                    "type": "Tag"
+                },
+                {
+                    "slug": "javascript",
+                    "name": "JavaScript",
+                    "postCount": 98130,
+                    "metadata": {
+                        "postCount": 98130,
+                        "coverImage": {
+                            "id": "1*uq5ZTlw6HLRRqbHaPYYL0g.png",
+                            "originalWidth": 1112,
+                            "originalHeight": 556,
+                            "isFeatured": true,
+                            "focusPercentX": 30,
+                            "focusPercentY": 44
+                        }
+                    },
+                    "type": "Tag"
+                },
+                {
+                    "slug": "software-development",
+                    "name": "Software Development",
+                    "postCount": 62810,
+                    "metadata": {
+                        "postCount": 62810,
+                        "coverImage": {
+                            "id": "0*R1c-uLLQzlqqiA-b",
+                            "originalWidth": 8192,
+                            "originalHeight": 5461,
+                            "isFeatured": true,
+                            "unsplashPhotoId": "UKdCsFKBbkQ"
+                        }
+                    },
+                    "type": "Tag"
+                }
+            ],
+            "socialRecommendsCount": 0,
+            "responsesCreatedCount": 16,
+            "links": {
+                "entries": [
+                    {
+                        "url": "http:\/\/github.com\/FagnerMartinsBrack",
+                        "alts": [
+
+                        ],
+                        "httpStatus": 200
+                    },
+                    {
+                        "url": "https:\/\/www.facebook.com\/fagner.brack",
+                        "alts": [
+
+                        ],
+                        "httpStatus": 200
+                    },
+                    {
+                        "url": "https:\/\/twitter.com\/FagnerBrack",
+                        "alts": [
+                            {
+                                "type": 3,
+                                "url": "twitter:\/\/user?screen_name=FagnerBrack"
+                            },
+                            {
+                                "type": 2,
+                                "url": "twitter:\/\/user?screen_name=FagnerBrack"
+                            }
+                        ],
+                        "httpStatus": 200
+                    },
+                    {
+                        "url": "https:\/\/www.meetup.com\/Software-Crafters-Sydney\/",
+                        "alts": [
+                            {
+                                "type": 3,
+                                "url": "meetup:\/\/Software-Crafters-Sydney\/"
+                            },
+                            {
+                                "type": 2,
+                                "url": "meetup:\/\/Software-Crafters-Sydney\/"
+                            }
+                        ],
+                        "httpStatus": 200
+                    },
+                    {
+                        "url": "https:\/\/en.wikipedia.org\/wiki\/Fallacies_of_distributed_computing",
+                        "alts": [
+
+                        ],
+                        "httpStatus": 200
+                    },
+                    {
+                        "url": "https:\/\/twitter.com\/gustavohenke",
+                        "alts": [
+                            {
+                                "type": 2,
+                                "url": "twitter:\/\/user?screen_name=gustavohenke"
+                            },
+                            {
+                                "type": 3,
+                                "url": "twitter:\/\/user?screen_name=gustavohenke"
+                            }
+                        ],
+                        "httpStatus": 200
+                    },
+                    {
+                        "url": "https:\/\/levelup.gitconnected.com\/the-problem-you-solve-is-more-important-than-the-code-you-write-d0e5493132c6",
+                        "alts": [
+                            {
+                                "type": 3,
+                                "url": "medium:\/\/p\/d0e5493132c6"
+                            },
+                            {
+                                "type": 2,
+                                "url": "medium:\/\/p\/d0e5493132c6"
+                            }
+                        ],
+                        "httpStatus": 200
+                    },
+                    {
+                        "url": "https:\/\/medium.com\/@fagnerbrack\/code-less-think-more-incrementally-98adee22df9b",
+                        "alts": [
+                            {
+                                "type": 2,
+                                "url": "medium:\/\/p\/98adee22df9b"
+                            },
+                            {
+                                "type": 3,
+                                "url": "medium:\/\/p\/98adee22df9b"
+                            }
+                        ],
+                        "httpStatus": 200
+                    },
+                    {
+                        "url": "https:\/\/developer.mozilla.org\/en-US\/docs\/Web\/API\/WebSockets_API",
+                        "alts": [
+
+                        ],
+                        "httpStatus": 200
+                    }
+                ],
+                "version": "0.3",
+                "generatedAt": 1559259331761
+            },
+            "isLockedPreviewOnly": false,
+            "metaDescription": "",
+            "totalClapCount": 4306,
+            "sectionCount": 2,
+            "readingList": 0,
+            "topics": [
+                {
+                    "topicId": "decb52b64abf",
+                    "slug": "programming",
+                    "createdAt": 1493934116328,
+                    "deletedAt": 0,
+                    "image": {
+                        "id": "1*iPa136b1cGEO7lvoXg6uHQ@2x.jpeg",
+                        "originalWidth": 6016,
+                        "originalHeight": 4016
+                    },
+                    "name": "Programming",
+                    "description": "The good, the bad, the buggy.",
+                    "relatedTopics": [
+
+                    ],
+                    "visibility": 1,
+                    "relatedTags": [
+
+                    ],
+                    "relatedTopicIds": [
+
+                    ],
+                    "type": "Topic"
+                }
+            ]
+        },
+        "coverless": true,
+        "slug": "a-smart-programmer-understands-the-problems-worth-fixing",
+        "translationSourcePostId": "",
+        "translationSourceCreatorId": "",
+        "isApprovedTranslation": false,
+        "inResponseToPostId": "",
+        "inResponseToRemovedAt": 0,
+        "isTitleSynthesized": false,
+        "allowResponses": true,
+        "importedUrl": "",
+        "importedPublishedAt": 0,
+        "visibility": 0,
+        "uniqueSlug": "a-smart-programmer-understands-the-problems-worth-fixing-dcf15871f943",
+        "previewContent": {
+            "bodyModel": {
+                "paragraphs": [
+                    {
+                        "name": "previewImage",
+                        "type": 4,
+                        "text": "",
+                        "layout": 10,
+                        "metadata": {
+                            "id": "1*SNhelFbiMUTGX73GF_c_ew.jpeg",
+                            "originalWidth": 1200,
+                            "originalHeight": 412,
+                            "isFeatured": true
+                        }
+                    },
+                    {
+                        "name": "97c6",
+                        "type": 3,
+                        "text": "A Smart Programmer Understands The Problems Worth Fixing",
+                        "markups": [
+
+                        ],
+                        "alignment": 1
+                    },
+                    {
+                        "name": "d1b2",
+                        "type": 13,
+                        "text": "The difference between solving any problem\u2026",
+                        "markups": [
+                            {
+                                "type": 3,
+                                "start": 35,
+                                "end": 42,
+                                "href": "https:\/\/levelup.gitconnected.com\/the-problem-you-solve-is-more-important-than-the-code-you-write-d0e5493132c6",
+                                "title": "",
+                                "rel": "",
+                                "anchorType": 0
+                            }
+                        ],
+                        "alignment": 1
+                    }
+                ],
+                "sections": [
+                    {
+                        "startIndex": 0
+                    }
+                ]
+            },
+            "isFullContent": false,
+            "subtitle": "The difference between solving any problem and the right one"
+        },
+        "license": 1,
+        "inResponseToMediaResourceId": "",
+        "canonicalUrl": "https:\/\/medium.com\/@fagnerbrack\/a-smart-programmer-understands-the-problems-worth-fixing-dcf15871f943",
+        "approvedHomeCollectionId": "",
+        "newsletterId": "",
+        "webCanonicalUrl": "https:\/\/medium.com\/@fagnerbrack\/a-smart-programmer-understands-the-problems-worth-fixing-dcf15871f943",
+        "mediumUrl": "https:\/\/medium.com\/@fagnerbrack\/a-smart-programmer-understands-the-problems-worth-fixing-dcf15871f943",
+        "migrationId": "",
+        "notifyFollowers": true,
+        "notifyTwitter": false,
+        "notifyFacebook": false,
+        "responseHiddenOnParentPostAt": 0,
+        "isSeries": false,
+        "isSubscriptionLocked": false,
+        "seriesLastAppendedAt": 0,
+        "audioVersionDurationSec": 0,
+        "sequenceId": "",
+        "isNsfw": false,
+        "isEligibleForRevenue": false,
+        "isBlockedFromHightower": false,
+        "deletedAt": 0,
+        "lockedPostSource": 0,
+        "hightowerMinimumGuaranteeStartsAt": 0,
+        "hightowerMinimumGuaranteeEndsAt": 0,
+        "featureLockRequestAcceptedAt": 0,
+        "mongerRequestType": 1,
+        "layerCake": 3,
+        "socialTitle": "",
+        "socialDek": "",
+        "editorialPreviewTitle": "",
+        "editorialPreviewDek": "",
+        "curationEligibleAt": 0,
+        "primaryTopic": {
+            "topicId": "decb52b64abf",
+            "slug": "programming",
+            "createdAt": 1493934116328,
+            "deletedAt": 0,
+            "image": {
+                "id": "1*iPa136b1cGEO7lvoXg6uHQ@2x.jpeg",
+                "originalWidth": 6016,
+                "originalHeight": 4016
+            },
+            "name": "Programming",
+            "description": "The good, the bad, the buggy.",
+            "relatedTopics": [
+
+            ],
+            "visibility": 1,
+            "relatedTags": [
+
+            ],
+            "relatedTopicIds": [
+
+            ],
+            "type": "Topic"
+        },
+        "primaryTopicId": "decb52b64abf",
+        "isProxyPost": false,
+        "proxyPostFaviconUrl": "",
+        "proxyPostProviderName": "",
+        "proxyPostType": 0,
+        "type": "Post"
+    },
+    "mentionedUsers": [
+        {
+            "userId": "c4ccb3ab8d17",
+            "name": "Ian Tinsley",
+            "username": "itinsley",
+            "createdAt": 1438064675373,
+            "imageId": "",
+            "backgroundImageId": "",
+            "bio": "",
+            "twitterScreenName": "",
+            "facebookAccountId": "10155043593360477",
+            "allowNotes": 1,
+            "mediumMemberAt": 0,
+            "isNsfw": false,
+            "isWriterProgramEnrolled": true,
+            "isQuarantined": false,
+            "type": "User"
+        }
+    ],
+    "collaborators": [
+        {
+            "user": {
+                "userId": "c4ccb3ab8d17",
+                "name": "Ian Tinsley",
+                "username": "itinsley",
+                "createdAt": 1438064675373,
+                "imageId": "",
+                "backgroundImageId": "",
+                "bio": "",
+                "twitterScreenName": "",
+                "facebookAccountId": "10155043593360477",
+                "allowNotes": 1,
+                "mediumMemberAt": 0,
+                "isNsfw": false,
+                "isWriterProgramEnrolled": true,
+                "isQuarantined": false,
+                "type": "User"
+            },
+            "state": "visible"
+        }
+    ],
+    "hideMeter": false,
+    "collectionUserRelations": [
+        {
+            "collectionId": "6b0b79fe3153",
+            "userId": "78aeffcb483e",
+            "role": "ADMIN"
+        }
+    ],
+    "mode": null,
+    "references": {
+        "User": {
+            "7ef192b7f545": {
+                "userId": "7ef192b7f545",
+                "name": "Fagner Brack",
+                "username": "fagnerbrack",
+                "createdAt": 1456628553936,
+                "imageId": "1*h8Ph7pgNeQHZTiLlah3h-A.jpeg",
+                "backgroundImageId": "",
+                "bio": "I believe ideas should be open and free. This is a non-profit initiative to write about fundamentals you won\u2019t find anywhere else. ~7 min post every few weeks.",
+                "twitterScreenName": "FagnerBrack",
+                "socialStats": {
+                    "userId": "7ef192b7f545",
+                    "usersFollowedCount": 0,
+                    "usersFollowedByCount": 4338,
+                    "type": "SocialStats"
+                },
+                "social": {
+                    "userId": "78aeffcb483e",
+                    "targetUserId": "7ef192b7f545",
+                    "type": "Social"
+                },
+                "facebookAccountId": "",
+                "allowNotes": 1,
+                "mediumMemberAt": 0,
+                "isNsfw": false,
+                "isWriterProgramEnrolled": true,
+                "isQuarantined": false,
+                "type": "User"
+            }
+        },
+        "Social": {
+            "7ef192b7f545": {
+                "userId": "78aeffcb483e",
+                "targetUserId": "7ef192b7f545",
+                "type": "Social"
+            }
+        },
+        "SocialStats": {
+            "7ef192b7f545": {
+                "userId": "7ef192b7f545",
+                "usersFollowedCount": 0,
+                "usersFollowedByCount": 4338,
+                "type": "SocialStats"
+            }
+        }
+    }
+}

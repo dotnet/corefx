@@ -1,0 +1,47 @@
+﻿{
+    "open_account_search_response": {
+        "data": {
+            "datas": {
+                "open_account": [
+                    {
+                        "login_id": "baymax",
+                        "create_device_id": "FxJbzXjm3vtO2GqNIdfnej9Db44Kwek",
+                        "alipay_id": "baymax@126.com",
+                        "create_app_key": "4272",
+                        "locale": "zh_CN",
+                        "bank_card_no": "1234 7655 28763 211",
+                        "isv_account_id": "19862",
+                        "email": "abc@126.com",
+                        "avatar_url": "http:\/\/image.abc.com\/aa.jpg",
+                        "domain_id": 123,
+                        "bank_card_owner_name": "baymax",
+                        "display_name": "baymax",
+                        "login_pwd_salt": "WjndM",
+                        "login_pwd": "xmbuioyfhkuijaamdkoohndmadjidhjifjd",
+                        "open_id": "xhdjeiyenmkljagjud",
+                        "mobile": "17084836002",
+                        "create_location": "120.146484,30.313617",
+                        "ext_infos": "{\"gender\":\"male\"}",
+                        "login_pwd_intensity": 1,
+                        "id": 123,
+                        "type": 2,
+                        "status": 1,
+                        "gmt_create": "2015-01-01 00:00:00",
+                        "gmt_modified": "2015-01-01 00:00:00",
+                        "version": 1,
+                        "login_pwd_encryption": 1,
+                        "gender": 1,
+                        "name": "baymax",
+                        "birthday": "20150120",
+                        "wangwang": "baymax",
+                        "weixin": "1822939822",
+                        "oauth_plateform": 1
+                    }
+                ]
+            },
+            "successful": true,
+            "code": 1,
+            "message": ""
+        }
+    }
+}

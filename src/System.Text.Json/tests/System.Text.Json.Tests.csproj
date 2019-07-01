@@ -30,6 +30,9 @@
     <Compile Include="NewtonsoftTests\EnumConverterTests.cs" />
     <Compile Include="NewtonsoftTests\ImmutableCollectionsTests.cs" />
     <Compile Include="NewtonsoftTests\JsonSerializerTests.cs" />
+    <Compile Include="RealWorld\BlogPost.cs" />
+    <Compile Include="RealWorld\Profile.cs" />
+    <Compile Include="RealWorld\RealWorldTest.cs" />
     <Compile Include="Serialization\Array.ReadTests.cs" />
     <Compile Include="Serialization\Array.WriteTests.cs" />
     <Compile Include="Serialization\CacheTests.cs" />
@@ -101,6 +104,14 @@
     <Compile Include="$(CommonPath)\System\Buffers\ArrayBufferWriter.cs">
       <Link>CommonTest\System\Buffers\ArrayBufferWriter.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Payloads\AccountSearch.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Resources\Payloads\BlogPost.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Resources\Payloads\Profile.json" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="Resources\Payloads\Tweets.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Resources\Payloads\Video.json" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="Resources\Payloads\WikiPage.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
