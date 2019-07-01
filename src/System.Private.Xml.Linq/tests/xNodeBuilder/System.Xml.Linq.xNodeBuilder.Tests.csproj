@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{5D4FB9ED-C3AC-4EFA-9FEE-619ED4B4B92D}</ProjectGuid>
     <!-- This project uses a different test harness. -->
-    <EnableXUnitAnalyzer>false</EnableXUnitAnalyzer>
+    <DisableXUnitAnalyzer>true</DisableXUnitAnalyzer>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
