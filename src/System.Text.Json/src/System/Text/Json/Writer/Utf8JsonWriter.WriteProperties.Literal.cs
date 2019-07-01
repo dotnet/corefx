@@ -12,7 +12,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the pre-encoded property name and the JSON literal "null" as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The JSON encoded name of the property to write.</param>
+        /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
@@ -91,7 +91,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the pre-encoded property name and <see cref="bool"/> value (as a JSON literal "true" or "false") as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The JSON encoded name of the property to write.</param>
+        /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).

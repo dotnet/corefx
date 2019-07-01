@@ -12,7 +12,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the pre-encoded text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The JSON encoded value to write.</param>
+        /// <param name="value">The JSON-encoded value to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
