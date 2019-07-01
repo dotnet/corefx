@@ -125,6 +125,9 @@
   <data name="Enum_InvalidValue" xml:space="preserve">
     <value>Enumeration value '{0}' specified in condition mapping is not valid.</value>
   </data>
+  <data name="InvalidArgument" xml:space="preserve">
+    <value>The argument is invalid.</value>
+  </data>
   <data name="none" xml:space="preserve">
     <value>(none)</value>
   </data>
