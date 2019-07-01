@@ -30,7 +30,7 @@ jobs:
       - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
         - _commonArguments: $(_args) -stripSymbols
 
-    jobName: ${{ format('performance_{0}_{2}', parameters.targetOS, parameters.architecture) }}
+    jobName: ${{ format('performance_{0}_{1}', parameters.targetOS, parameters.architecture) }}
     pool: ${{ parameters.pool }}
     container: ${{ parameters.container }}
 
