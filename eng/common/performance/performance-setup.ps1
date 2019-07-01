@@ -25,7 +25,7 @@ $Creator = ""
 
 Write-Output $PerformanceDirectory
 Write-Output $PayloadDirectory
-Write-Ouptut $CoreRootDirectory
+Write-Output $CoreRootDirectory
 Write-Output $SourceDirectory
 
 if ($Internal) {
