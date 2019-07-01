@@ -1,0 +1,60 @@
+parameters:
+  targetOS: ''
+  architecture: 'x64'
+  framework: 'netcoreapp'
+  isOfficialBuild: false
+  pool: ''
+  container: ''
+
+jobs:
+- template: ../common/templates/job/performance.yml
+  parameters:
+    variables:
+
+    # pass along job variables
+    - ${{ each variable in job.variables }}:
+      - ${{ if ne(variable.name, '') }}:
+        - name: ${{ variable.name }}
+          value: ${{ variable.value }}
+      - ${{ if ne(variable.group, '') }}:
+        - group: ${{ variable.group }}
+
+    - _msbuildCommonParameters: ''
+    - _archiveTestsParameter: ''
+    - _finalFrameworkArg: -framework ${{ parameters.framework }}
+    - _testScopeArg: ''
+
+    - _args: -configuration Release -ci -arch ${{ parameters.architecture }} $(_finalFrameworkArg) $(_archiveTestsParameter) ${{ job.buildExtraArguments }}
+    - _commonArguments: $(_args)
+
+    # Windows variables
+    - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
+      - _buildScript: build.cmd
+      - _msbuildCommand: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
+
+    # Non-Windows variables
+    - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
+      - _buildScript: ./build.sh
+      - _msbuildCommand: ./eng/common/msbuild.sh --warnaserror false --ci
+      - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+        - _commonArguments: $(_args) -stripSymbols
+
+    jobName: ${{ format('performance_{0}_{2}', paramters.targetOS, parameters.architecture) }}
+    pool: ${{ parameters.pool }}
+    container: ${{ parameters.container }}
+
+    ${{ if eq(parameters.osGroup, 'Windows_NT') }}:
+      extraSetupParameters: -CoreRootDirectory $(Build.SourcesDirectory)\artifacts\bin\\runtime\${{ parameters.framework }}-${{ parameters.targetOS }}-Release-${{ parameters.architecture }} -Architecture ${{ parameters.architecture }}
+    ${{ if ne(parameters.osGroup, 'Windows_NT') }}:
+      extraSetupParameters: --corerootdirectory $(Build.SourcesDirectory)/artifacts/bin/runtime/netcoreapp-${{ parameters.targetOS }}-Release-${{ parameters.architecture }} --architecture ${{ parameters.architecture }}
+
+    steps:
+      - script: $(_buildScript) -restore $(_commonArguments)
+        displayName: Restore Build Tools
+
+      - script: $(_buildScript)
+              -build
+              $(_commonArguments)
+              $(_testScopeArg)
+              $(_msbuildCommonParameters)
+        displayName: Build Sources and Tests
