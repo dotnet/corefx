@@ -6,6 +6,9 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <DisableImplicitFrameworkDefines>true</DisableImplicitFrameworkDefines>
     <DisableImplicitConfigurationDefines>true</DisableImplicitConfigurationDefines>
+    
+    <!-- Overwrite the setting in arcade/CoreFxTesting. Remove in arcade after merged. -->
+    <GenerateDependencyFile Condition="'$(IsTestProject)' == 'true'">true</GenerateDependencyFile>
 
     <!-- Workaround for https://github.com/microsoft/msbuild/issues/4474 -->
     <GenerateResourceUsePreserializedResources>false</GenerateResourceUsePreserializedResources>
