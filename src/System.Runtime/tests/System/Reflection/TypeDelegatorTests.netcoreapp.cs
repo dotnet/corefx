@@ -9,7 +9,7 @@ namespace System.Reflection.Tests
 {
     public class TypeDelegatorNetcoreTests
     {
-        private static IEnumerable<object[]> SZArrayOrNotTypes()
+        public static IEnumerable<object[]> SZArrayOrNotTypes()
         {
             yield return new object[] { typeof(int[]), true };
             yield return new object[] { typeof(string[]), true };
@@ -17,7 +17,6 @@ namespace System.Reflection.Tests
             yield return new object[] { typeof(int), false };
             yield return new object[] { typeof(int[]).MakeByRefType(), false };
             yield return new object[] { typeof(int[,]), false };
-            yield return new object[] { typeof(TypeInfoTests), false };
             if (PlatformDetection.IsNonZeroLowerBoundArraySupported)
             {
                 yield return new object[] { Array.CreateInstance(typeof(int), new[] { 2 }, new[] { -1 }).GetType(), false };

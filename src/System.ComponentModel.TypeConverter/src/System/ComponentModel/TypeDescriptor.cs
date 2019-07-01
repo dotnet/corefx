@@ -251,7 +251,7 @@ namespace System.ComponentModel
         /// all types.
         /// 
         /// This method can be called from partially trusted code. If 
-        /// <see cref="TypeDescriptorPermissionFlags.RestrictedRegistrationAccess"/>
+        /// <see cref="E:System.Security.Permissions.TypeDescriptorPermissionFlags.RestrictedRegistrationAccess"/>
         /// is defined, the caller can register a provider for the specified type 
         /// if it's also partially trusted.
         /// </summary>
@@ -279,7 +279,7 @@ namespace System.ComponentModel
         /// the object from finalizing.
         /// 
         /// This method can be called from partially trusted code. If 
-        /// <see cref="TypeDescriptorPermissionFlags.RestrictedRegistrationAccess"/>
+        /// <see cref="E:System.Security.Permissions.TypeDescriptorPermissionFlags.RestrictedRegistrationAccess"/>
         /// is defined, the caller can register a provider for the specified instance 
         /// if its type is also partially trusted.
         /// </summary>
@@ -599,10 +599,8 @@ namespace System.ComponentModel
                     }
                 }
 
-#if FEATURE_IDESIGNERHOST
                 // Not in our table. We have a default association with a designer 
                 // if that designer is a component.
-                //
                 if (associatedObject == primary)
                 {
                     IComponent component = primary as IComponent;
@@ -621,7 +619,6 @@ namespace System.ComponentModel
                                 // got here, we're probably hosed because the user just passed in
                                 // an object that this PropertyDescriptor can't munch on, but it's
                                 // clearer to use that object instance instead of it's designer.
-                                //
                                 if (designer != null && type.IsInstanceOfType(designer))
                                 {
                                     associatedObject = designer;
@@ -630,7 +627,6 @@ namespace System.ComponentModel
                         }
                     }
                 }
-#endif
             }
 
             return associatedObject;
@@ -909,12 +905,6 @@ namespace System.ComponentModel
                 throw new ArgumentException(nameof(component));
             }
 
-            if (component is IUnimplemented)
-            {
-                throw new NotSupportedException(SR.Format(SR.TypeDescriptorUnsupportedRemoteObject, component.GetType().FullName));
-            }
-
-
             ICustomTypeDescriptor desc = NodeFor(component).GetTypeDescriptor(component);
             ICustomTypeDescriptor d = component as ICustomTypeDescriptor;
             if (!noCustomTypeDesc && d != null)
@@ -1159,7 +1149,7 @@ namespace System.ComponentModel
                     name = ci.ToString(CultureInfo.InvariantCulture);
                 }
 
-                suffix = string.Format(CultureInfo.InvariantCulture, "_{0}", name);
+                suffix = "_" + name;
             }
 
             return suffix;
@@ -1555,6 +1545,11 @@ namespace System.ComponentModel
             {
                 Type type = instance.GetType();
 
+                if (type.IsCOMObject)
+                {
+                    type = ComObjectType;
+                }
+
                 if (createDelegator)
                 {
                     node = new TypeDescriptionNode(new DelegatingTypeDescriptionProvider(type));
@@ -1849,7 +1844,7 @@ namespace System.ComponentModel
                     break;
             }
 
-            // See if we can re-use the IList were were passed. If we can,
+            // See if we can re-use the IList that was passed. If we can,
             // it is more efficient to re-use its slots than to generate new ones.
             if (list == null || list.IsReadOnly)
             {
@@ -2368,7 +2363,7 @@ namespace System.ComponentModel
             return result;
         }
 
-        [Obsolete("This property has been deprecated. Use a type description provider to supply type information for COM types instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This property has been deprecated. Use a type description provider to supply type information for COM types instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static IComNativeDescriptorHandler ComNativeDescriptorHandler
         {
             get
@@ -2508,7 +2503,7 @@ namespace System.ComponentModel
         /// associated with.
         /// 
         /// This method can be called from partially trusted code. If 
-        /// <see cref="TypeDescriptorPermissionFlags.RestrictedRegistrationAccess"/>
+        /// <see cref="E:System.Security.Permissions.TypeDescriptorPermissionFlags.RestrictedRegistrationAccess"/>
         /// is defined, the caller can unregister a provider for the specified type
         /// if it's also partially trusted.
         /// </summary>
@@ -2535,7 +2530,7 @@ namespace System.ComponentModel
         /// associated with.
         /// 
         /// This method can be called from partially trusted code. If 
-        /// <see cref="TypeDescriptorPermissionFlags.RestrictedRegistrationAccess"/>
+        /// <see cref="E:System.Security.Permissions.TypeDescriptorPermissionFlags.RestrictedRegistrationAccess"/>
         /// is defined, the caller can register a provider for the specified instance 
         /// if its type is also partially trusted.
         /// </summary>
@@ -2859,24 +2854,6 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        /// An unimplemented interface. What is this?  It is an interface that nobody ever
-        /// implements, of course? Where and why would it be used?  Why, to find cross-process
-        /// remoted objects, of course!  If a well-known object comes in from a cross process
-        /// connection, the remoting layer does contain enough type information to determine
-        /// if an object implements an interface. It assumes that if you are going to cast
-        /// an object to an interface that you know what you're doing, and allows the cast,
-        /// even for objects that DON'T actually implement the interface. The error here
-        /// is raised later when you make your first call on that interface pointer:  you
-        /// get a remoting exception.
-        ///
-        /// This is a big problem for code that does "is" and "as" checks to detect the
-        /// presence of an interface. We do that all over the place here, so we do a check
-        /// during parameter validation to see if an object implements IUnimplemented. If it
-        /// does, we know that what we really have is a lying remoting proxy, and we bail.
-        /// </summary>
-        private interface IUnimplemented { }
-
-        /// <summary>
         /// This comparer compares member descriptors for sorting.
         /// </summary>
         private sealed class MemberDescriptorComparer : IComparer
@@ -2889,8 +2866,29 @@ namespace System.ComponentModel
             }
         }
 
+        [TypeDescriptionProvider(typeof(ComNativeDescriptorProxy))]
         private sealed class TypeDescriptorComObject
         {
+        }
+
+        // This class is being used to aid in diagnosability. The alternative to having this proxy would be
+        // to set the fully qualified type name in the TypeDescriptionProvider attribute. The issue with the
+        // string method is the failure is silent during type load making diagnosing the issue difficult.
+        private sealed class ComNativeDescriptorProxy : TypeDescriptionProvider
+        {
+            private readonly TypeDescriptionProvider _comNativeDescriptor;
+
+            public ComNativeDescriptorProxy()
+            {
+                Assembly assembly = Assembly.Load("System.Windows.Forms");
+                Type realComNativeDescriptor = assembly.GetType("System.Windows.Forms.ComponentModel.Com2Interop.ComNativeDescriptor", throwOnError: true);
+                _comNativeDescriptor = (TypeDescriptionProvider)Activator.CreateInstance(realComNativeDescriptor);
+            }
+
+            public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
+            {
+                return _comNativeDescriptor.GetTypeDescriptor(objectType, instance);
+            }
         }
 
         /// <summary>

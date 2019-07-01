@@ -22,7 +22,7 @@ namespace System.Buffers
                 int index = source.First.Span.IndexOf(value);
                 if (index != -1)
                 {
-                    return source.GetPosition(index);
+                    return source.Seek(index);
                 }
 
                 return null;
@@ -63,12 +63,12 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(in this ReadOnlySequence<T> source, Span<T> destination)
         {
-            if (source.Length > destination.Length)
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.destination);
-
             if (source.IsSingleSegment)
             {
-                source.First.Span.CopyTo(destination);
+                ReadOnlySpan<T> span = source.First.Span;
+                if (span.Length > destination.Length)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.destination);
+                span.CopyTo(destination);
             }
             else
             {
@@ -78,6 +78,9 @@ namespace System.Buffers
 
         private static void CopyToMultiSegment<T>(in ReadOnlySequence<T> sequence, Span<T> destination)
         {
+            if (sequence.Length > destination.Length)
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.destination);
+
             SequencePosition position = sequence.Start;
             while (sequence.TryGet(ref position, out ReadOnlyMemory<T> memory))
             {
@@ -107,6 +110,9 @@ namespace System.Buffers
         /// <summary>
         /// Writes contents of <paramref name="value"/> to <paramref name="writer"/>
         /// </summary>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when the <paramref name="writer"/> is shorter than the <paramref name="value"/>.
+        /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Write<T>(this IBufferWriter<T> writer, ReadOnlySpan<T> value)
         {
@@ -135,7 +141,13 @@ namespace System.Buffers
                 input = input.Slice(writeSize);
                 if (input.Length > 0)
                 {
-                    destination = writer.GetSpan(input.Length);
+                    destination = writer.GetSpan();
+
+                    if (destination.IsEmpty)
+                    {
+                        ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.writer);
+                    }
+
                     continue;
                 }
 

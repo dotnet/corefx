@@ -23,13 +23,13 @@ namespace System
             HResult = HResults.COR_E_FIELDACCESS;
         }
 
-        public FieldAccessException(string message)
+        public FieldAccessException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_FIELDACCESS;
         }
 
-        public FieldAccessException(string message, Exception inner)
+        public FieldAccessException(string? message, Exception? inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_FIELDACCESS;

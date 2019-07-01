@@ -92,7 +92,7 @@ namespace System.Diagnostics
             get
             {
                 if (_categoryName == null)
-                    throw new InvalidOperationException(SR.Format(SR.CategoryNameNotSet));
+                    throw new InvalidOperationException(SR.CategoryNameNotSet);
 
                 if (_categoryHelp == null)
                     _categoryHelp = PerformanceCounterLib.GetCategoryHelp(_machineName, _categoryName);
@@ -105,19 +105,21 @@ namespace System.Diagnostics
         {
             get
             {
-                CategorySample categorySample = PerformanceCounterLib.GetCategorySample(_machineName, _categoryName);
-
-                // If we get MultiInstance, we can be confident it is correct.  If it is single instance, though
-                // we need to check if is a custom category and if the IsMultiInstance value is set in the registry.
-                // If not we return Unknown
-                if (categorySample._isMultiInstance)
-                    return PerformanceCounterCategoryType.MultiInstance;
-                else
+                using (CategorySample categorySample = PerformanceCounterLib.GetCategorySample(_machineName, _categoryName))
                 {
-                    if (PerformanceCounterLib.IsCustomCategory(".", _categoryName))
-                        return PerformanceCounterLib.GetCategoryType(".", _categoryName);
+
+                    // If we get MultiInstance, we can be confident it is correct.  If it is single instance, though
+                    // we need to check if is a custom category and if the IsMultiInstance value is set in the registry.
+                    // If not we return Unknown
+                    if (categorySample._isMultiInstance)
+                        return PerformanceCounterCategoryType.MultiInstance;
                     else
-                        return PerformanceCounterCategoryType.SingleInstance;
+                    {
+                        if (PerformanceCounterLib.IsCustomCategory(".", _categoryName))
+                            return PerformanceCounterLib.GetCategoryType(".", _categoryName);
+                        else
+                            return PerformanceCounterCategoryType.SingleInstance;
+                    }
                 }
             }
         }
@@ -155,7 +157,7 @@ namespace System.Diagnostics
                 throw new ArgumentNullException(nameof(counterName));
 
             if (_categoryName == null)
-                throw new InvalidOperationException(SR.Format(SR.CategoryNameNotSet));
+                throw new InvalidOperationException(SR.CategoryNameNotSet);
 
             return PerformanceCounterLib.CounterExists(_machineName, _categoryName, counterName);
         }
@@ -191,7 +193,7 @@ namespace System.Diagnostics
         /// <summary>
         ///     Registers one extensible performance category of type NumberOfItems32 with the system
         /// </summary>
-        [Obsolete("This method has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.Create(string categoryName, string categoryHelp, PerformanceCounterCategoryType categoryType, string counterName, string counterHelp) instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.Create(string categoryName, string categoryHelp, PerformanceCounterCategoryType categoryType, string counterName, string counterHelp) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public static PerformanceCounterCategory Create(string categoryName, string categoryHelp, string counterName, string counterHelp)
         {
             CounterCreationData customData = new CounterCreationData(counterName, counterHelp, PerformanceCounterType.NumberOfItems32);
@@ -207,7 +209,7 @@ namespace System.Diagnostics
         /// <summary>
         ///     Registers the extensible performance category with the system on the local machine
         /// </summary>
-        [Obsolete("This method has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.Create(string categoryName, string categoryHelp, PerformanceCounterCategoryType categoryType, CounterCreationDataCollection counterData) instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.Create(string categoryName, string categoryHelp, PerformanceCounterCategoryType categoryType, CounterCreationDataCollection counterData) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public static PerformanceCounterCategory Create(string categoryName, string categoryHelp, CounterCreationDataCollection counterData)
         {
             return Create(categoryName, categoryHelp, PerformanceCounterCategoryType.Unknown, counterData);
@@ -231,7 +233,7 @@ namespace System.Diagnostics
             Mutex mutex = null;
             try
             {
-                SharedUtils.EnterMutex(PerfMutexName, ref mutex);
+                NetFrameworkUtils.EnterMutex(PerfMutexName, ref mutex);
                 if (PerformanceCounterLib.IsCustomCategory(machineName, categoryName) || PerformanceCounterLib.CategoryExists(machineName, categoryName))
                     throw new InvalidOperationException(SR.Format(SR.PerformanceCategoryExists, categoryName));
 
@@ -261,7 +263,7 @@ namespace System.Diagnostics
             // 1026 chars is the size of the buffer used in perfcounter.dll to get this name.  
             // If the categoryname plus prefix is too long, we won't be able to read the category properly. 
             if (categoryName.Length > (1024 - SharedPerformanceCounter.DefaultFileMappingName.Length))
-                throw new ArgumentException(SR.Format(SR.CategoryNameTooLong));
+                throw new ArgumentException(SR.CategoryNameTooLong);
         }
 
         internal static void CheckValidCounter(string counterName)
@@ -312,7 +314,7 @@ namespace System.Diagnostics
             {
                 if (counterData[i].CounterName == null || counterData[i].CounterName.Length == 0)
                 {
-                    throw new ArgumentException(SR.Format(SR.InvalidCounterName));
+                    throw new ArgumentException(SR.InvalidCounterName);
                 }
 
                 int currentSampleType = (int)counterData[i].CounterType;
@@ -326,20 +328,20 @@ namespace System.Diagnostics
                         (currentSampleType == Interop.Kernel32.PerformanceCounterOptions.PERF_AVERAGE_TIMER))
                 {
                     if (counterData.Count <= (i + 1))
-                        throw new InvalidOperationException(SR.Format(SR.CounterLayout));
+                        throw new InvalidOperationException(SR.CounterLayout);
                     else
                     {
                         currentSampleType = (int)counterData[i + 1].CounterType;
 
 
                         if (!PerformanceCounterLib.IsBaseCounter(currentSampleType))
-                            throw new InvalidOperationException(SR.Format(SR.CounterLayout));
+                            throw new InvalidOperationException(SR.CounterLayout);
                     }
                 }
                 else if (PerformanceCounterLib.IsBaseCounter(currentSampleType))
                 {
                     if (i == 0)
-                        throw new InvalidOperationException(SR.Format(SR.CounterLayout));
+                        throw new InvalidOperationException(SR.CounterLayout);
                     else
                     {
                         currentSampleType = (int)counterData[i - 1].CounterType;
@@ -353,7 +355,7 @@ namespace System.Diagnostics
                         (currentSampleType != Interop.Kernel32.PerformanceCounterOptions.PERF_RAW_FRACTION) &&
                         (currentSampleType != Interop.Kernel32.PerformanceCounterOptions.PERF_SAMPLE_FRACTION) &&
                         (currentSampleType != Interop.Kernel32.PerformanceCounterOptions.PERF_AVERAGE_TIMER))
-                            throw new InvalidOperationException(SR.Format(SR.CounterLayout));
+                            throw new InvalidOperationException(SR.CounterLayout);
                     }
                 }
 
@@ -387,9 +389,9 @@ namespace System.Diagnostics
             Mutex mutex = null;
             try
             {
-                SharedUtils.EnterMutex(PerfMutexName, ref mutex);
+                NetFrameworkUtils.EnterMutex(PerfMutexName, ref mutex);
                 if (!PerformanceCounterLib.IsCustomCategory(machineName, categoryName))
-                    throw new InvalidOperationException(SR.Format(SR.CantDeleteCategory));
+                    throw new InvalidOperationException(SR.CantDeleteCategory);
 
                 SharedPerformanceCounter.RemoveAllInstances(categoryName);
 
@@ -440,16 +442,18 @@ namespace System.Diagnostics
         /// <internalonly/>
         internal static string[] GetCounterInstances(string categoryName, string machineName)
         {
-            CategorySample categorySample = PerformanceCounterLib.GetCategorySample(machineName, categoryName);
-            if (categorySample._instanceNameTable.Count == 0)
-                return Array.Empty<string>();
+            using (CategorySample categorySample = PerformanceCounterLib.GetCategorySample(machineName, categoryName))
+            {
+                if (categorySample._instanceNameTable.Count == 0)
+                    return Array.Empty<string>();
 
-            string[] instanceNames = new string[categorySample._instanceNameTable.Count];
-            categorySample._instanceNameTable.Keys.CopyTo(instanceNames, 0);
-            if (instanceNames.Length == 1 && instanceNames[0] == PerformanceCounterLib.SingleInstanceName)
-                return Array.Empty<string>();
+                string[] instanceNames = new string[categorySample._instanceNameTable.Count];
+                categorySample._instanceNameTable.Keys.CopyTo(instanceNames, 0);
+                if (instanceNames.Length == 1 && instanceNames[0] == PerformanceCounterLib.SingleInstanceName)
+                    return Array.Empty<string>();
 
-            return instanceNames;
+                return instanceNames;
+            }
         }
 
         /// <summary>
@@ -458,7 +462,7 @@ namespace System.Diagnostics
         public PerformanceCounter[] GetCounters()
         {
             if (GetInstanceNames().Length != 0)
-                throw new ArgumentException(SR.Format(SR.InstanceNameRequired));
+                throw new ArgumentException(SR.InstanceNameRequired);
             return GetCounters("");
         }
 
@@ -471,7 +475,7 @@ namespace System.Diagnostics
                 throw new ArgumentNullException(nameof(instanceName));
 
             if (_categoryName == null)
-                throw new InvalidOperationException(SR.Format(SR.CategoryNameNotSet));
+                throw new InvalidOperationException(SR.CategoryNameNotSet);
 
             if (instanceName.Length != 0 && !InstanceExists(instanceName))
                 throw new InvalidOperationException(SR.Format(SR.MissingInstance, instanceName, _categoryName));
@@ -515,7 +519,7 @@ namespace System.Diagnostics
         public string[] GetInstanceNames()
         {
             if (_categoryName == null)
-                throw new InvalidOperationException(SR.Format(SR.CategoryNameNotSet));
+                throw new InvalidOperationException(SR.CategoryNameNotSet);
 
             return GetCounterInstances(_categoryName, _machineName);
         }
@@ -529,10 +533,12 @@ namespace System.Diagnostics
                 throw new ArgumentNullException(nameof(instanceName));
 
             if (_categoryName == null)
-                throw new InvalidOperationException(SR.Format(SR.CategoryNameNotSet));
+                throw new InvalidOperationException(SR.CategoryNameNotSet);
 
-            CategorySample categorySample = PerformanceCounterLib.GetCategorySample(_machineName, _categoryName);
-            return categorySample._instanceNameTable.ContainsKey(instanceName);
+            using (CategorySample categorySample = PerformanceCounterLib.GetCategorySample(_machineName, _categoryName))
+            {
+                return categorySample._instanceNameTable.ContainsKey(instanceName);
+            }
         }
 
         /// <summary>
@@ -571,10 +577,12 @@ namespace System.Diagnostics
         public InstanceDataCollectionCollection ReadCategory()
         {
             if (_categoryName == null)
-                throw new InvalidOperationException(SR.Format(SR.CategoryNameNotSet));
+                throw new InvalidOperationException(SR.CategoryNameNotSet);
 
-            CategorySample categorySample = PerformanceCounterLib.GetCategorySample(_machineName, _categoryName);
-            return categorySample.ReadCategory();
+            using (CategorySample categorySample = PerformanceCounterLib.GetCategorySample(_machineName, _categoryName))
+            {
+                return categorySample.ReadCategory();
+            }
         }
     }
 

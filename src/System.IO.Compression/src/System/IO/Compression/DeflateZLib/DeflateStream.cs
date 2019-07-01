@@ -4,7 +4,6 @@
 
 using System.Buffers;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +22,10 @@ namespace System.IO.Compression
         private byte[] _buffer;
         private int _activeAsyncOperation; // 1 == true, 0 == false
         private bool _wroteBytes;
+
+        internal DeflateStream(Stream stream, CompressionMode mode, long uncompressedSize) : this(stream, mode, leaveOpen: false, ZLibNative.Deflate_DefaultWindowBits, uncompressedSize)
+        {
+        }
 
         public DeflateStream(Stream stream, CompressionMode mode) : this(stream, mode, leaveOpen: false)
         {
@@ -46,7 +49,7 @@ namespace System.IO.Compression
         /// Internal constructor to check stream validity and call the correct initialization function depending on
         /// the value of the CompressionMode given.
         /// </summary>
-        internal DeflateStream(Stream stream, CompressionMode mode, bool leaveOpen, int windowBits)
+        internal DeflateStream(Stream stream, CompressionMode mode, bool leaveOpen, int windowBits, long uncompressedSize = -1)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
@@ -54,7 +57,7 @@ namespace System.IO.Compression
             switch (mode)
             {
                 case CompressionMode.Decompress:
-                    InitializeInflater(stream, leaveOpen, windowBits);
+                    InitializeInflater(stream, leaveOpen, windowBits, uncompressedSize);
                     break;
 
                 case CompressionMode.Compress:
@@ -80,13 +83,13 @@ namespace System.IO.Compression
         /// <summary>
         /// Sets up this DeflateStream to be used for Zlib Inflation/Decompression
         /// </summary>
-        internal void InitializeInflater(Stream stream, bool leaveOpen, int windowBits)
+        internal void InitializeInflater(Stream stream, bool leaveOpen, int windowBits, long uncompressedSize)
         {
             Debug.Assert(stream != null);
             if (!stream.CanRead)
                 throw new ArgumentException(SR.NotSupported_UnreadableStream, nameof(stream));
 
-            _inflater = new Inflater(windowBits);
+            _inflater = new Inflater(windowBits, uncompressedSize);
 
             _stream = stream;
             _mode = CompressionMode.Decompress;
@@ -628,6 +631,53 @@ namespace System.IO.Compression
             }
         }
 
+        private async Task PurgeBuffersAsync()
+        {
+            // Same logic as PurgeBuffers, except with async counterparts.
+
+            if (_stream == null)
+                return;
+
+            if (_mode != CompressionMode.Compress)
+                return;
+
+            // Some deflaters (e.g. ZLib) write more than zero bytes for zero byte inputs.
+            // This round-trips and we should be ok with this, but our legacy managed deflater
+            // always wrote zero output for zero input and upstack code (e.g. ZipArchiveEntry)
+            // took dependencies on it. Thus, make sure to only "flush" when we actually had
+            // some input.
+            if (_wroteBytes)
+            {
+                // Compress any bytes left
+                await WriteDeflaterOutputAsync(default).ConfigureAwait(false);
+
+                // Pull out any bytes left inside deflater:
+                bool finished;
+                do
+                {
+                    int compressedBytes;
+                    finished = _deflater.Finish(_buffer, out compressedBytes);
+
+                    if (compressedBytes > 0)
+                        await _stream.WriteAsync(new ReadOnlyMemory<byte>(_buffer, 0, compressedBytes)).ConfigureAwait(false);
+                } while (!finished);
+            }
+            else
+            {
+                // In case of zero length buffer, we still need to clean up the native created stream before
+                // the object get disposed because eventually ZLibNative.ReleaseHandle will get called during
+                // the dispose operation and although it frees the stream, it returns an error code because the
+                // stream state was still marked as in use. The symptoms of this problem will not be seen except
+                // if running any diagnostic tools which check for disposing safe handle objects.
+                bool finished;
+                do
+                {
+                    int compressedBytes;
+                    finished = _deflater.Finish(_buffer, out compressedBytes);
+                } while (!finished);
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             try
@@ -669,6 +719,58 @@ namespace System.IO.Compression
                         }
 
                         base.Dispose(disposing);
+                    }
+                }
+            }
+        }
+
+        public override ValueTask DisposeAsync()
+        {
+            return GetType() == typeof(DeflateStream) ?
+                DisposeAsyncCore() :
+                base.DisposeAsync();
+        }
+
+        private async ValueTask DisposeAsyncCore()
+        {
+            // Same logic as Dispose(true), except with async counterparts.
+            try
+            {
+                await PurgeBuffersAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                // Close the underlying stream even if PurgeBuffers threw.
+                // Stream.Close() may throw here (may or may not be due to the same error).
+                // In this case, we still need to clean up internal resources, hence the inner finally blocks.
+                Stream stream = _stream;
+                _stream = null;
+                try
+                {
+                    if (!_leaveOpen && stream != null)
+                        await stream.DisposeAsync().ConfigureAwait(false);
+                }
+                finally
+                {
+                    try
+                    {
+                        _deflater?.Dispose();
+                        _inflater?.Dispose();
+                    }
+                    finally
+                    {
+                        _deflater = null;
+                        _inflater = null;
+
+                        byte[] buffer = _buffer;
+                        if (buffer != null)
+                        {
+                            _buffer = null;
+                            if (!AsyncOperationIsActive)
+                            {
+                                ArrayPool<byte>.Shared.Return(buffer);
+                            }
+                        }
                     }
                 }
             }
@@ -890,6 +992,10 @@ namespace System.IO.Compression
                     {
                         break;
                     }
+                    if (_deflateStream._inflater.Finished())
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -922,6 +1028,10 @@ namespace System.IO.Compression
                         _destination.Write(_arrayPoolBuffer, 0, bytesRead);
                     }
                     else
+                    {
+                        break;
+                    }
+                    if (_deflateStream._inflater.Finished())
                     {
                         break;
                     }

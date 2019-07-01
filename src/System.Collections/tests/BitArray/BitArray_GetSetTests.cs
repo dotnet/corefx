@@ -139,7 +139,8 @@ namespace System.Collections.Tests
             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
 
             // Has finished enumerating
-            while (enumerator.MoveNext()) ;
+            while (enumerator.MoveNext())
+                ;
             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
 
             // Has resetted enumerating
@@ -191,8 +192,10 @@ namespace System.Collections.Tests
         [MemberData(nameof(Length_Set_Data))]
         public static void Length_Set(int originalSize, int newSize)
         {
-            BitArray bitArray = new BitArray(originalSize, true);
-            bitArray.Length = newSize;
+            BitArray bitArray = new BitArray(originalSize, true)
+            {
+                Length = newSize
+            };
             Assert.Equal(newSize, bitArray.Length);
             for (int i = 0; i < Math.Min(originalSize, bitArray.Length); i++)
             {
@@ -236,7 +239,7 @@ namespace System.Collections.Tests
                 BitArray allFalse = new BitArray(Enumerable.Repeat(false, bitArraySize).ToArray());
                 BitArray alternating = new BitArray(Enumerable.Range(0, bitArraySize).Select(i => i % 2 == 1).ToArray());
 
-                foreach (var d in new[] { Tuple.Create(bitArraySize, 0),
+                foreach (Tuple<int, int> d in new[] { Tuple.Create(bitArraySize, 0),
                     Tuple.Create(bitArraySize * 2 + 1, 0),
                     Tuple.Create(bitArraySize * 2 + 1, bitArraySize + 1),
                     Tuple.Create(bitArraySize * 2 + 1, bitArraySize / 2 + 1) })
@@ -270,7 +273,7 @@ namespace System.Collections.Tests
                 BitArray allFalse = new BitArray(Enumerable.Repeat(false, bitArraySize).ToArray());
                 BitArray alternating = new BitArray(Enumerable.Range(0, bitArraySize).Select(i => i % 2 == 1).ToArray());
 
-                foreach (var d in new[] { Tuple.Create(bitArraySize, 0),
+                foreach (Tuple<int, int> d in new[] { Tuple.Create(bitArraySize, 0),
                     Tuple.Create(bitArraySize * 2 + 1, 0),
                     Tuple.Create(bitArraySize * 2 + 1, bitArraySize + 1),
                     Tuple.Create(bitArraySize * 2 + 1, bitArraySize / 2 + 1)})
@@ -364,14 +367,20 @@ namespace System.Collections.Tests
             BitArray setAll = new BitArray(BitsPerInt32 / 2 - 3, false);
             setAll.SetAll(true);
             yield return new object[] { "SetAll", setAll };
-            BitArray lengthShort = new BitArray(BitsPerInt32, true);
-            lengthShort.Length = BitsPerInt32 / 2 - 3;
+            BitArray lengthShort = new BitArray(BitsPerInt32, true)
+            {
+                Length = BitsPerInt32 / 2 - 3
+            };
             yield return new object[] { "Length-Short", lengthShort };
-            BitArray lengthLong = new BitArray(2 * BitsPerInt32, true);
-            lengthLong.Length = BitsPerInt32 - 3;
+            BitArray lengthLong = new BitArray(2 * BitsPerInt32, true)
+            {
+                Length = BitsPerInt32 - 3
+            };
             yield return new object[] { "Length-Long < 32", lengthLong };
-            BitArray lengthLong2 = new BitArray(2 * BitsPerInt32, true);
-            lengthLong2.Length = BitsPerInt32 + 3;
+            BitArray lengthLong2 = new BitArray(2 * BitsPerInt32, true)
+            {
+                Length = BitsPerInt32 + 3
+            };
             yield return new object[] { "Length-Long > 32", lengthLong2 };
             // alligned test cases
             yield return new object[] { "Aligned-Constructor", new BitArray(BitsPerInt32, true) };
@@ -384,7 +393,6 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix for #9838 yet.")]
         [MemberData(nameof(CopyTo_Hidden_Data))]
         public static void CopyTo_Int_Hidden(string label, BitArray bits)
         {
@@ -405,29 +413,11 @@ namespace System.Collections.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix for #9838 yet.")]
-        [MemberData(nameof(CopyTo_Hidden_Data))]
-        public static void CopyTo_Int_Hidden_Desktop(string label, BitArray bits)
-        {
-            int allBitsSet = unchecked((int)0xffffffff); // 32 bits set to 1 = -1
-            int fullInts = bits.Length / BitsPerInt32;
-            int remainder = bits.Length % BitsPerInt32;
-            int arrayLength = fullInts + (remainder > 0 ? 1 : 0);
-
-            int[] data = new int[arrayLength];
-            ((ICollection)bits).CopyTo(data, 0);
-
-            Assert.All(data, d => Assert.Equal(allBitsSet, d));
-            
-        }
-
-        [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix for #9838 yet.")]
         [MemberData(nameof(CopyTo_Hidden_Data))]
         public static void CopyTo_Byte_Hidden(string label, BitArray bits)
         {
             byte allBitsSet = (1 << BitsPerByte) - 1; // 8 bits set to 1 = 255
-            
+
             int fullBytes = bits.Length / BitsPerByte;
             int remainder = bits.Length % BitsPerByte;
             int arrayLength = fullBytes + (remainder > 0 ? 1 : 0);
@@ -441,24 +431,6 @@ namespace System.Collections.Tests
             {
                 Assert.Equal((byte)((1 << remainder) - 1), data[fullBytes]);
             }
-        }
-
-        [Theory]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix for #9838 yet.")]
-        [MemberData(nameof(CopyTo_Hidden_Data))]
-        public static void CopyTo_Byte_Hidden_Desktop(string label, BitArray bits)
-        {
-            byte allBitsSet = (1 << BitsPerByte) - 1; // 8 bits set to 1 = 255
-
-            int fullBytes = bits.Length / BitsPerByte;
-            int remainder = bits.Length % BitsPerByte;
-            int arrayLength = fullBytes + (remainder > 0 ? 1 : 0);
-
-            byte[] data = new byte[arrayLength];
-            ((ICollection)bits).CopyTo(data, 0);
-
-            Assert.All(data, d => Assert.Equal(allBitsSet, d));
-            
         }
     }
 }

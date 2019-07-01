@@ -292,7 +292,7 @@ namespace Internal.Cryptography.Pal
                             // Currently only UPN is supported, which is a UTF8 string per
                             // https://msdn.microsoft.com/en-us/library/ff842518.aspx
                             AsnReader nameReader = new AsnReader(generalName.OtherName.Value.Value, AsnEncodingRules.DER);
-                            string udnName = nameReader.GetCharacterString(UniversalTagNumber.UTF8String);
+                            string udnName = nameReader.ReadCharacterString(UniversalTagNumber.UTF8String);
                             nameReader.ThrowIfNotEmpty();
                             return udnName;
                         }
@@ -343,7 +343,7 @@ namespace Internal.Cryptography.Pal
                 {
                     AsnReader tavReader = rdnReader.ReadSequence();
                     string oid = tavReader.ReadObjectIdentifierAsString();
-                    string value = tavReader.ReadDirectoryOrIA5String();
+                    string value = tavReader.ReadAnyAsnString();
                     tavReader.ThrowIfNotEmpty();
                     yield return new KeyValuePair<string, string>(oid, value);
                 }

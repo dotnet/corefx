@@ -55,7 +55,7 @@ namespace System.Net.Http
 
                 // Configure the options.  Our best support is when targeting OpenSSL/1.0.  For other backends,
                 // we fall back to a minimal amount of support, and may throw a PNSE based on the options requested.
-                if (CurlSslVersionDescription.IndexOf(Interop.Http.OpenSsl10Description, StringComparison.OrdinalIgnoreCase) != -1)
+                if (Interop.Http.HasMatchingOpenSslVersion)
                 {
                     // Register the callback with libcurl.  We need to register even if there's no user-provided
                     // server callback and even if there are no client certificates, because we support verifying
@@ -169,12 +169,12 @@ namespace System.Net.Http
             {
                 if (certProvider != null)
                 {
-                    throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_clientcerts_notsupported_sslbackend, CurlVersionDescription, CurlSslVersionDescription, Interop.Http.OpenSsl10Description));
+                    throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_clientcerts_notsupported_sslbackend, CurlVersionDescription, CurlSslVersionDescription, Interop.Http.RequiredOpenSslDescription));
                 }
 
                 if (easy._handler.CheckCertificateRevocationList)
                 {
-                    throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_revocation_notsupported_sslbackend, CurlVersionDescription, CurlSslVersionDescription, Interop.Http.OpenSsl10Description));
+                    throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_revocation_notsupported_sslbackend, CurlVersionDescription, CurlSslVersionDescription, Interop.Http.RequiredOpenSslDescription));
                 }
 
                 if (easy._handler.ServerCertificateCustomValidationCallback != null)
@@ -187,7 +187,7 @@ namespace System.Net.Http
                     }
                     else
                     {
-                        throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_callback_notsupported_sslbackend, CurlVersionDescription, CurlSslVersionDescription, Interop.Http.OpenSsl10Description));
+                        throw new PlatformNotSupportedException(SR.Format(SR.net_http_libcurl_callback_notsupported_sslbackend, CurlVersionDescription, CurlSslVersionDescription, Interop.Http.RequiredOpenSslDescription));
                     }
                 }
                 else
@@ -233,8 +233,12 @@ namespace System.Net.Http
                     case SslProtocols.Tls12:
                         curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1_2;
                         break;
+                    case SslProtocols.Tls13:
+                        curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1_3;
+                        break;
 
                     case SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12:
+                    case SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13:
                         curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1;
                         break;
 
@@ -374,14 +378,10 @@ namespace System.Net.Http
                         // If it succeeds in verifying the cert chain, we're done. Employing this instead of 
                         // our custom implementation will need to be revisited if we ever decide to introduce a 
                         // "disallowed" store that enables users to "untrust" certs the system trusts.
-                        int sslResult = Interop.Crypto.X509VerifyCert(storeCtx);
-                        if (sslResult == 1)
+                        if (Interop.Crypto.X509VerifyCert(storeCtx))
                         {
                             return true;
                         }
-
-                        // X509_verify_cert can return < 0 in the case of programmer error
-                        Debug.Assert(sslResult == 0, "Unexpected error from X509_verify_cert: " + sslResult);
                     }
 
                     // Either OpenSSL verification failed, or there was a server validation callback

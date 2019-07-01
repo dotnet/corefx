@@ -150,23 +150,40 @@ namespace System.IO.Tests
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
 
-            // Long path should throw PathTooLongException on Desktop and IOException
-            // elsewhere.
-            if (PlatformDetection.IsFullFramework)
-            {
-                Assert.Throws<PathTooLongException>(
-                    () => Create(Path.Combine(testDir.FullName, new string('a', 300))));
-            }
-            else
-            {
-                AssertExtensions.ThrowsAny<IOException, DirectoryNotFoundException, PathTooLongException>(
-                    () => Create(Path.Combine(testDir.FullName, new string('a', 300))));
-            }
+            AssertExtensions.ThrowsAny<IOException, DirectoryNotFoundException, PathTooLongException>(() =>
+              Create(Path.Combine(testDir.FullName, new string('a', 300))));
         }
 
         #endregion
 
         #region PlatformSpecific
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void LongDirectoryName()
+        {
+            // 255 = NAME_MAX on Linux and macOS
+            DirectoryInfo path = Directory.CreateDirectory(Path.Combine(GetTestFilePath(), new string('a', 255)));
+
+            Assert.True(Directory.Exists(path.FullName));
+            Directory.Delete(path.FullName);
+            Assert.False(Directory.Exists(path.FullName));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void LongFileName()
+        {
+            // 255 = NAME_MAX on Linux and macOS
+            var dir = GetTestFilePath();
+            Directory.CreateDirectory(dir);
+            var path = Path.Combine(dir, new string('b', 255));
+            File.Create(path).Dispose();
+
+            Assert.True(File.Exists(path));
+            File.Delete(path);
+            Assert.False(File.Exists(path));
+        }
 
         [Fact]
         [PlatformSpecific(CaseSensitivePlatforms)]
@@ -198,19 +215,6 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void WindowsWildCharacterPath_Desktop()
-        {
-            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-            Assert.Throws<ArgumentException>(() => Create(Path.Combine(testDir.FullName, "dls;d", "442349-0", "v443094(*)(+*$#$*", new string(Path.DirectorySeparatorChar, 3))));
-            Assert.Throws<ArgumentException>(() => Create(Path.Combine(testDir.FullName, "*")));
-            Assert.Throws<ArgumentException>(() => Create(Path.Combine(testDir.FullName, "Test*t")));
-            Assert.Throws<ArgumentException>(() => Create(Path.Combine(testDir.FullName, "*Tes*t")));
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsWildCharacterPath_Core()
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
@@ -237,19 +241,6 @@ namespace System.IO.Tests
             InlineData("<"),
             InlineData("\t")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void WindowsInvalidPath_Desktop(string path)
-        {
-            Assert.Throws<ArgumentException>(() => Create(path));
-        }
-
-        [Theory,
-            InlineData("\n"),
-            InlineData(">"),
-            InlineData("<"),
-            InlineData("\t")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsInvalidPath_Core(string path)
         {
             Assert.ThrowsAny<IOException>(() => Create(Path.Combine(TestDirectory, path)));
@@ -284,7 +275,6 @@ namespace System.IO.Tests
             InlineData(":bar:$DATA"),
             InlineData("::$DATA")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsAlternateDataStream(string streamName)
         {
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
@@ -299,7 +289,6 @@ namespace System.IO.Tests
             InlineData(":bar"),
             InlineData(":bar:$DATA")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsAlternateDataStream_OnExisting(string streamName)
         {
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());

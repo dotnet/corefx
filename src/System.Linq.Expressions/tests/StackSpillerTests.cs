@@ -1795,7 +1795,7 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Fact]
-        public static void Spill_Optimizations_LiteralField()
+        public static void Spill_Optimizations_LiteralField_NotNetFramework()
         {
             Expression<Func<double>> e =
                 Expression.Lambda<Func<double>>(
@@ -1829,7 +1829,7 @@ namespace System.Linq.Expressions.Tests
                   IL_0011: stloc.0
 
                   // <OPTIMIZATION> Evaluate lhs (`Math.PI` gets inlined) </OPTIMIZATION>
-                  IL_0012: ldc.r8     3.14159265358979
+                  IL_0012: ldc.r8     3.141592653589793
 
                   // Load rhs from V_0
                   IL_001b: ldloc.0

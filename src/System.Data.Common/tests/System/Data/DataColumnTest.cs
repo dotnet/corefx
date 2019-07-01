@@ -433,7 +433,7 @@ namespace System.Data.Tests
             }
 
             //The following two cases fail on mono. MS.net evaluates the expression
-            //immediatly upon assignment. We don't do this yet hence we don't throw
+            //immediately upon assignment. We don't do this yet hence we don't throw
             //an exception at this point.
             try
             {
@@ -550,8 +550,8 @@ namespace System.Data.Tests
             Assert.Equal("60", T.Rows[60][3]);
 
             C.Expression = "stdev (Child.age)";
-            Assert.Equal((1.4142135623731).ToString(T.Locale), T.Rows[0][3]);
-            Assert.Equal((1.4142135623731).ToString(T.Locale), T.Rows[60][3]);
+            Assert.Equal((1.4142135623730951).ToString(T.Locale), T.Rows[0][3]);
+            Assert.Equal((1.4142135623730951).ToString(T.Locale), T.Rows[60][3]);
 
             C.Expression = "var (Child.age)";
             Assert.Equal("2", T.Rows[0][3]);

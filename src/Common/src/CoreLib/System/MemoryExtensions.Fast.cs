@@ -141,6 +141,15 @@ namespace System
                 return -1;
             }
 
+            if (comparisonType == StringComparison.Ordinal)
+            {
+                return SpanHelpers.IndexOf(
+                    ref MemoryMarshal.GetReference(span),
+                    span.Length,
+                    ref MemoryMarshal.GetReference(value),
+                    value.Length);
+            }
+
             if (GlobalizationMode.Invariant)
             {
                 return CompareInfo.InvariantIndexOf(span, value, string.GetCaseCompareOfComparisonCulture(comparisonType) != CompareOptions.None);
@@ -157,8 +166,8 @@ namespace System
                     return CompareInfo.Invariant.IndexOf(span, value, string.GetCaseCompareOfComparisonCulture(comparisonType));
 
                 default:
-                    Debug.Assert(comparisonType == StringComparison.Ordinal || comparisonType == StringComparison.OrdinalIgnoreCase);
-                    return CompareInfo.Invariant.IndexOfOrdinal(span, value, string.GetCaseCompareOfComparisonCulture(comparisonType) != CompareOptions.None);
+                    Debug.Assert(comparisonType == StringComparison.OrdinalIgnoreCase);
+                    return CompareInfo.Invariant.IndexOfOrdinalIgnoreCase(span, value);
             }
         }
 
@@ -210,14 +219,14 @@ namespace System
         /// <param name="source">The source span.</param>
         /// <param name="destination">The destination span which contains the transformed characters.</param>
         /// <param name="culture">An object that supplies culture-specific casing rules.</param>
-        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
-        /// a temporary location before the destination is overwritten.</remarks>
+        /// <remarks>If <paramref name="culture"/> is null, <see cref="System.Globalization.CultureInfo.CurrentCulture"/> will be used.</remarks>
         /// <returns>The number of characters written into the destination span. If the destination is too small, returns -1.</returns>
-        /// <exception cref="System.ArgumentNullException">
-        /// Thrown when <paramref name="culture"/> is null.
-        /// </exception>
-        public static int ToLower(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo culture)
+        /// <exception cref="InvalidOperationException">The source and destination buffers overlap.</exception>
+        public static int ToLower(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo? culture)
         {
+            if (source.Overlaps(destination))
+                throw new InvalidOperationException(SR.InvalidOperation_SpanOverlappedOperation);
+
             if (culture == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.culture);
 
@@ -228,7 +237,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToLowerAsciiInvariant(source, destination);
             else
-                culture.TextInfo.ChangeCase(source, destination, toUpper: false);
+                culture!.TextInfo.ChangeCaseToLower(source, destination); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             return source.Length;
         }
 
@@ -238,11 +247,13 @@ namespace System
         /// </summary>
         /// <param name="source">The source span.</param>
         /// <param name="destination">The destination span which contains the transformed characters.</param>
-        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
-        /// a temporary location before the destination is overwritten.</remarks>
         /// <returns>The number of characters written into the destination span. If the destination is too small, returns -1.</returns>
+        /// <exception cref="InvalidOperationException">The source and destination buffers overlap.</exception>
         public static int ToLowerInvariant(this ReadOnlySpan<char> source, Span<char> destination)
         {
+            if (source.Overlaps(destination))
+                throw new InvalidOperationException(SR.InvalidOperation_SpanOverlappedOperation);
+
             // Assuming that changing case does not affect length
             if (destination.Length < source.Length)
                 return -1;
@@ -250,7 +261,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToLowerAsciiInvariant(source, destination);
             else
-                CultureInfo.InvariantCulture.TextInfo.ChangeCase(source, destination, toUpper: false);
+                CultureInfo.InvariantCulture.TextInfo.ChangeCaseToLower(source, destination);
             return source.Length;
         }
 
@@ -261,14 +272,14 @@ namespace System
         /// <param name="source">The source span.</param>
         /// <param name="destination">The destination span which contains the transformed characters.</param>
         /// <param name="culture">An object that supplies culture-specific casing rules.</param>
-        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
-        /// a temporary location before the destination is overwritten.</remarks>
+        /// <remarks>If <paramref name="culture"/> is null, <see cref="System.Globalization.CultureInfo.CurrentCulture"/> will be used.</remarks>
         /// <returns>The number of characters written into the destination span. If the destination is too small, returns -1.</returns>
-        /// <exception cref="System.ArgumentNullException">
-        /// Thrown when <paramref name="culture"/> is null.
-        /// </exception>
-        public static int ToUpper(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo culture)
+        /// <exception cref="InvalidOperationException">The source and destination buffers overlap.</exception>
+        public static int ToUpper(this ReadOnlySpan<char> source, Span<char> destination, CultureInfo? culture)
         {
+            if (source.Overlaps(destination))
+                throw new InvalidOperationException(SR.InvalidOperation_SpanOverlappedOperation);
+
             if (culture == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.culture);
 
@@ -279,7 +290,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToUpperAsciiInvariant(source, destination);
             else
-                culture.TextInfo.ChangeCase(source, destination, toUpper: true);
+                culture!.TextInfo.ChangeCaseToUpper(source, destination); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             return source.Length;
         }
 
@@ -289,11 +300,13 @@ namespace System
         /// </summary>
         /// <param name="source">The source span.</param>
         /// <param name="destination">The destination span which contains the transformed characters.</param>
-        /// <remarks>If the source and destinations overlap, this method behaves as if the original values are in
-        /// a temporary location before the destination is overwritten.</remarks>
         /// <returns>The number of characters written into the destination span. If the destination is too small, returns -1.</returns>
+        /// <exception cref="InvalidOperationException">The source and destination buffers overlap.</exception>
         public static int ToUpperInvariant(this ReadOnlySpan<char> source, Span<char> destination)
         {
+            if (source.Overlaps(destination))
+                throw new InvalidOperationException(SR.InvalidOperation_SpanOverlappedOperation);
+
             // Assuming that changing case does not affect length
             if (destination.Length < source.Length)
                 return -1;
@@ -301,7 +314,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToUpperAsciiInvariant(source, destination);
             else
-                CultureInfo.InvariantCulture.TextInfo.ChangeCase(source, destination, toUpper: true);
+                CultureInfo.InvariantCulture.TextInfo.ChangeCaseToUpper(source, destination);
             return source.Length;
         }
 
@@ -375,7 +388,7 @@ namespace System
         /// Creates a new span over the portion of the target array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> AsSpan<T>(this T[] array, int start)
+        public static Span<T> AsSpan<T>(this T[]? array, int start)
         {
             if (array == null)
             {
@@ -383,7 +396,7 @@ namespace System
                     ThrowHelper.ThrowArgumentOutOfRangeException();
                 return default;
             }
-            if (default(T) == null && array.GetType() != typeof(T[]))
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 ThrowHelper.ThrowArrayTypeMismatchException();
             if ((uint)start > (uint)array.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException();
@@ -392,12 +405,60 @@ namespace System
         }
 
         /// <summary>
+        /// Creates a new span over the portion of the target array.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> AsSpan<T>(this T[]? array, Index startIndex)
+        {
+            if (array == null)
+            {
+                if (!startIndex.Equals(Index.Start))
+                    ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+
+                return default;
+            }
+
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
+                ThrowHelper.ThrowArrayTypeMismatchException();
+
+            int actualIndex = startIndex.GetOffset(array.Length);
+            if ((uint)actualIndex > (uint)array.Length)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+
+            return new Span<T>(ref Unsafe.Add(ref Unsafe.As<byte, T>(ref array.GetRawSzArrayData()), actualIndex), array.Length - actualIndex);
+        }
+
+        /// <summary>
+        /// Creates a new span over the portion of the target array.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> AsSpan<T>(this T[]? array, Range range)
+        {
+            if (array == null)
+            {
+                Index startIndex = range.Start;
+                Index endIndex = range.End;
+
+                if (!startIndex.Equals(Index.Start) || !endIndex.Equals(Index.Start))
+                    ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+
+                return default;
+            }
+
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
+                ThrowHelper.ThrowArrayTypeMismatchException();
+
+            (int start, int length) = range.GetOffsetAndLength(array.Length);
+            return new Span<T>(ref Unsafe.Add(ref Unsafe.As<byte, T>(ref array.GetRawSzArrayData()), start), length);
+        }
+
+        /// <summary>
         /// Creates a new readonly span over the portion of the target string.
         /// </summary>
         /// <param name="text">The target string.</param>
         /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsSpan(this string text)
+        public static ReadOnlySpan<char> AsSpan(this string? text)
         {
             if (text == null)
                 return default;
@@ -415,7 +476,7 @@ namespace System
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsSpan(this string text, int start)
+        public static ReadOnlySpan<char> AsSpan(this string? text, int start)
         {
             if (text == null)
             {
@@ -441,7 +502,7 @@ namespace System
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsSpan(this string text, int start, int length)
+        public static ReadOnlySpan<char> AsSpan(this string? text, int start, int length)
         {
             if (text == null)
             {
@@ -450,8 +511,14 @@ namespace System
                 return default;
             }
 
+#if BIT64
+            // See comment in Span<T>.Slice for how this works.
+            if ((ulong)(uint)start + (ulong)(uint)length > (ulong)(uint)text.Length)
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+#else
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+#endif
 
             return new ReadOnlySpan<char>(ref Unsafe.Add(ref text.GetRawStringData(), start), length);
         }
@@ -459,7 +526,7 @@ namespace System
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
         /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
-        public static ReadOnlyMemory<char> AsMemory(this string text)
+        public static ReadOnlyMemory<char> AsMemory(this string? text)
         {
             if (text == null)
                 return default;
@@ -474,7 +541,7 @@ namespace System
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
-        public static ReadOnlyMemory<char> AsMemory(this string text, int start)
+        public static ReadOnlyMemory<char> AsMemory(this string? text, int start)
         {
             if (text == null)
             {
@@ -491,13 +558,33 @@ namespace System
 
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
+        /// <param name="startIndex">The index at which to begin this slice.</param>
+        public static ReadOnlyMemory<char> AsMemory(this string? text, Index startIndex)
+        {
+            if (text == null)
+            {
+                if (!startIndex.Equals(Index.Start))
+                    ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+
+                return default;
+            }
+
+            int actualIndex = startIndex.GetOffset(text.Length);
+            if ((uint)actualIndex > (uint)text.Length)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+
+            return new ReadOnlyMemory<char>(text, actualIndex, text.Length - actualIndex);
+        }
+
+        /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
+        /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>
         /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
-        public static ReadOnlyMemory<char> AsMemory(this string text, int start, int length)
+        public static ReadOnlyMemory<char> AsMemory(this string? text, int start, int length)
         {
             if (text == null)
             {
@@ -506,9 +593,35 @@ namespace System
                 return default;
             }
 
+#if BIT64
+            // See comment in Span<T>.Slice for how this works.
+            if ((ulong)(uint)start + (ulong)(uint)length > (ulong)(uint)text.Length)
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+#else
             if ((uint)start > (uint)text.Length || (uint)length > (uint)(text.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
+#endif
 
+            return new ReadOnlyMemory<char>(text, start, length);
+        }
+
+        /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
+        /// <param name="text">The target string.</param>
+        /// <param name="range">The range used to indicate the start and length of the sliced string.</param>
+        public static ReadOnlyMemory<char> AsMemory(this string? text, Range range)
+        {
+            if (text == null)
+            {
+                Index startIndex = range.Start;
+                Index endIndex = range.End;
+
+                if (!startIndex.Equals(Index.Start) || !endIndex.Equals(Index.Start))
+                    ThrowHelper.ThrowArgumentNullException(ExceptionArgument.text);
+
+                return default;
+            }
+
+            (int start, int length) = range.GetOffsetAndLength(text.Length);
             return new ReadOnlyMemory<char>(text, start, length);
         }
     }

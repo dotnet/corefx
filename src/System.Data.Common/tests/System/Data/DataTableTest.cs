@@ -36,11 +36,12 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Formatters.Tests;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Data.Tests
 {
-    public class DataTableTest : RemoteExecutorTestBase
+    public class DataTableTest
     {
         public DataTableTest()
         {
@@ -698,7 +699,6 @@ namespace System.Data.Tests
 
             /*
 			try {
-				// FIXME: LAMESPEC: Why the exception is thrown why... why... 
 				Mom.Select ("Child.Name = 'Jack'");
 Assert.False(true);
 			} catch (Exception e) {
@@ -865,7 +865,7 @@ Assert.False(true);
         [Fact]
         public void PropertyExceptions()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 DataSet set = new DataSet();
                 DataTable table = new DataTable();
@@ -915,7 +915,7 @@ Assert.False(true);
 
                 Assert.Throws<DataException>(() => table.Prefix = "Prefix#1");
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -3332,7 +3332,7 @@ Assert.False(true);
         [Fact]
         public void WriteXmlSchema()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("en-GB");
 
@@ -3411,7 +3411,7 @@ Assert.False(true);
 
                 Assert.Equal("</xs:schema>", TextString);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -3776,12 +3776,12 @@ Assert.False(true);
             StringWriter sw1 = new StringWriter();
             ds1.Tables[0].WriteXmlSchema(sw1);
             string xml1 = sw1.ToString();
-            Assert.True(xml1.IndexOf(@"<xs:unique name=""Constraint1"">") != -1);
+            Assert.Contains(@"<xs:unique name=""Constraint1"">", xml1, StringComparison.Ordinal);
 
             StringWriter sw2 = new StringWriter();
             ds1.Tables[1].WriteXmlSchema(sw2);
             string xml2 = sw2.ToString();
-            Assert.True(xml2.IndexOf(@"<xs:unique name=""Constraint1"">") == -1);
+            Assert.DoesNotContain(@"<xs:unique name=""Constraint1"">", xml2, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -4044,8 +4044,7 @@ Assert.False(true);
 
     [Serializable]
 
-    public class AppDomainsAndFormatInfo : RemoteExecutorTestBase
-    {
+    public class AppDomainsAndFormatInfo    {
         public void Remote()
         {
             int n = (int)Convert.ChangeType("5", typeof(int));
@@ -4081,7 +4080,7 @@ Assert.False(true);
         [Fact]
         public void Bug82109()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 DataTable tbl = new DataTable();
                 tbl.Columns.Add("data", typeof(DateTime));
@@ -4098,7 +4097,7 @@ Assert.False(true);
                 CultureInfo.CurrentCulture = new CultureInfo("fr-FR");
                 Select(tbl);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 

@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!--
     Microsoft ResX Schema
 
@@ -137,6 +136,9 @@
   </data>
   <data name="net_WebSockets_Connect101Expected" xml:space="preserve">
     <value>The server returned status code '{0}' when status code '101' was expected.</value>
+  </data>
+  <data name="net_WebSockets_MissingResponseHeader" xml:space="preserve">
+    <value>The server's response was missing the required header '{0}'.</value>
   </data>
   <data name="net_WebSockets_InvalidState_ClosedOrAborted" xml:space="preserve">
     <value>The '{0}' instance cannot be used for communication because it has been transitioned into the '{1}' state.</value>

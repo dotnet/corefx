@@ -77,7 +77,7 @@ namespace System.IO
             // Get the temp path from the TMPDIR environment variable.
             // If it's not set, just return the default path.
             // If it is, return it, ensuring it ends with a slash.
-            string path = Environment.GetEnvironmentVariable(TempEnvVar);
+            string? path = Environment.GetEnvironmentVariable(TempEnvVar);
             return
                 string.IsNullOrEmpty(path) ? DefaultTempPath :
                 PathInternal.IsDirectorySeparator(path[path.Length - 1]) ? path :
@@ -103,7 +103,7 @@ namespace System.IO
             return Encoding.UTF8.GetString(name, 0, name.Length - 1); // trim off the trailing '\0'
         }
 
-        public static bool IsPathRooted(string path)
+        public static bool IsPathRooted(string? path)
         {
             if (path == null)
                 return false;
@@ -119,7 +119,7 @@ namespace System.IO
         /// <summary>
         /// Returns the path root or null if path is empty or null.
         /// </summary>
-        public static string GetPathRoot(string path)
+        public static string? GetPathRoot(string? path)
         {
             if (PathInternal.IsEffectivelyEmpty(path)) return null;
 

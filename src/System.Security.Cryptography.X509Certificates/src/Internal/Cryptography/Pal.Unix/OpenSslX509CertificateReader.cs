@@ -166,6 +166,22 @@ namespace Internal.Cryptography.Pal
 
         internal static bool TryReadX509Pem(SafeBioHandle bio, out ICertificatePal certPal)
         {
+            SafeX509Handle cert = Interop.Crypto.PemReadX509FromBioAux(bio);
+
+            if (cert.IsInvalid)
+            {
+                cert.Dispose();
+                certPal = null;
+                Interop.Crypto.ErrClearError();
+                return false;
+            }
+
+            certPal = new OpenSslX509CertificateReader(cert);
+            return true;
+        }
+
+        internal static bool TryReadX509PemNoAux(SafeBioHandle bio, out ICertificatePal certPal)
+        {
             SafeX509Handle cert = Interop.Crypto.PemReadX509FromBio(bio);
 
             if (cert.IsInvalid)
@@ -423,6 +439,21 @@ namespace Internal.Cryptography.Pal
                 }
 
                 return extensions;
+            }
+        }
+
+        internal static ArraySegment<byte> FindFirstExtension(SafeX509Handle cert, string oidValue)
+        {
+            int nid = Interop.Crypto.ResolveRequiredNid(oidValue);
+
+            using (SafeSharedAsn1OctetStringHandle data = Interop.Crypto.X509FindExtensionData(cert, nid))
+            {
+                if (data.IsInvalid)
+                {
+                    return default;
+                }
+
+                return Interop.Crypto.RentAsn1StringBytes(data.DangerousGetHandle());
             }
         }
 

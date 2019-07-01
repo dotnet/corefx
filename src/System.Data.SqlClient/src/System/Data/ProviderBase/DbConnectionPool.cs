@@ -1021,7 +1021,7 @@ namespace System.Data.ProviderBase
                         Interlocked.Exchange(ref _pendingOpensWaiting, 0);
                     }
                 }
-            } while (_pendingOpens.TryPeek(out next));
+            } while (!_pendingOpens.IsEmpty);
         }
 
         internal bool TryGetConnection(DbConnection owningObject, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions, out DbConnectionInternal connection)
@@ -1386,7 +1386,7 @@ namespace System.Data.ProviderBase
                                         }
                                         catch
                                         {
-                                            // Catch all the exceptions occuring during CreateObject so that they 
+                                            // Catch all the exceptions occurring during CreateObject so that they 
                                             // don't emerge as unhandled on the thread pool and don't crash applications
                                             // The error is handled in CreateObject and surfaced to the caller of the Connection Pool
                                             // using the ErrorEvent. Hence it is OK to swallow all exceptions here.

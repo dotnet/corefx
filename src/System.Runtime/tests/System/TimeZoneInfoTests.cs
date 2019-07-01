@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -134,8 +136,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET Framework has a bug. See https://github.com/dotnet/corefx/issues/26479")]
-        public static void CaseInsensiveLookup()
+        public static void CaseInsensitiveLookup()
         {
             Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strBrasilia), TimeZoneInfo.FindSystemTimeZoneById(s_strBrasilia.ToLowerInvariant()));
             Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strJohannesburg), TimeZoneInfo.FindSystemTimeZoneById(s_strJohannesburg.ToUpperInvariant()));
@@ -2209,6 +2210,45 @@ namespace System.Tests
                     Assert.True(Math.Abs(ar.DaylightDelta.TotalHours) <= 12.0);
                 }
             }
+        }
+
+        [Fact]
+        public static void TimeZoneInfo_DisplayNameStartsWithOffset()
+        {
+            foreach (TimeZoneInfo tzi in TimeZoneInfo.GetSystemTimeZones())
+            {
+                if (tzi.Id != "UTC")
+                {
+                    Assert.False(string.IsNullOrWhiteSpace(tzi.StandardName));
+                    Assert.Matches(@"^\(UTC(\+|-)[0-9]{2}:[0-9]{2}\) \S.*", tzi.DisplayName);
+
+                    // see https://github.com/dotnet/corefx/pull/33204#issuecomment-438782500
+                    if (PlatformDetection.IsNotWindowsNanoServer && !PlatformDetection.IsWindows7)
+                    {
+                        string offset = Regex.Match(tzi.DisplayName, @"(-|)[0-9]{2}:[0-9]{2}").Value;
+                        TimeSpan ts = TimeSpan.Parse(offset);
+                        if (tzi.BaseUtcOffset != ts && tzi.Id.IndexOf("Morocco", StringComparison.Ordinal) >= 0)
+                        {
+                            // Windows data can report display name with UTC+01:00 offset which is not matching the actual BaseUtcOffset.
+                            // We special case this in the test to avoid the test failures like:
+                            //      01:00 != 00:00:00, dn:(UTC+01:00) Casablanca, sn:Morocco Standard Time
+                            Assert.True(tzi.BaseUtcOffset == new TimeSpan(0, 0, 0), $"{offset} != {tzi.BaseUtcOffset}, dn:{tzi.DisplayName}, sn:{tzi.StandardName}");
+                        }
+                        else
+                        {
+                            Assert.True(tzi.BaseUtcOffset == ts, $"{offset} != {tzi.BaseUtcOffset}, dn:{tzi.DisplayName}, sn:{tzi.StandardName}");
+                        }
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public static void EnsureUtcObjectSingleton()
+        {
+            TimeZoneInfo utcObject = TimeZoneInfo.GetSystemTimeZones().Single(x => x.Id.Equals("UTC", StringComparison.OrdinalIgnoreCase));
+            Assert.True(ReferenceEquals(utcObject, TimeZoneInfo.Utc));
+            Assert.True(ReferenceEquals(TimeZoneInfo.FindSystemTimeZoneById("UTC"), TimeZoneInfo.Utc));
         }
 
         private static void VerifyConvertException<TException>(DateTimeOffset inputTime, string destinationTimeZoneId) where TException : Exception

@@ -48,8 +48,9 @@ namespace System.Numerics
         /// Copies the contents of the vector into the given array.
         /// </summary>
         /// <param name="array">The destination array.</param>
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(float[] array)
+        public readonly void CopyTo(float[] array)
         {
             CopyTo(array, 0);
         }
@@ -62,7 +63,8 @@ namespace System.Numerics
         /// <exception cref="ArgumentOutOfRangeException">If index is greater than end of the array or index is less than zero.</exception>
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination array
         /// or if there are not enough elements to copy.</exception>
-        public void CopyTo(float[] array, int index)
+        [Intrinsic]
+        public readonly void CopyTo(float[] array, int index)
         {
             if (array == null)
             {
@@ -87,7 +89,7 @@ namespace System.Numerics
         /// <param name="other">The Vector2 to compare this instance to.</param>
         /// <returns>True if the other Vector2 is equal to this instance; False otherwise.</returns>
         [Intrinsic]
-        public bool Equals(Vector2 other)
+        public readonly bool Equals(Vector2 other)
         {
             return this.X == other.X && this.Y == other.Y;
         }
@@ -271,6 +273,7 @@ namespace System.Numerics
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The second vector to compare.</param>
         /// <returns>True if the vectors are equal; False otherwise.</returns>
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Vector2 left, Vector2 right)
         {
@@ -283,6 +286,7 @@ namespace System.Numerics
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The second vector to compare.</param>
         /// <returns>True if the vectors are not equal; False if they are equal.</returns>
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Vector2 left, Vector2 right)
         {

@@ -180,7 +180,7 @@ namespace System.ComponentModel
         public virtual string Name => _name ?? "";
 
         /// <summary>
-        /// Gets the hash code for the name of the member as specified in <see cref='System.String.GetHashCode'/>.
+        /// Gets the hash code for the name of the member as specified in <see cref='System.String.GetHashCode()'/>.
         /// </summary>
         protected virtual int NameHashCode => _nameHash;
 
@@ -432,7 +432,7 @@ namespace System.ComponentModel
         /// </summary>
         protected static ISite GetSite(object component) => (component as IComponent)?.Site;
 
-        [Obsolete("This method has been deprecated. Use GetInvocationTarget instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated. Use GetInvocationTarget instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected static object GetInvokee(Type componentClass, object component) {
 
             if (componentClass == null)

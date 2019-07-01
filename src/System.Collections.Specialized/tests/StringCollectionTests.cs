@@ -639,7 +639,7 @@ namespace System.Collections.Specialized.Tests
         {
             object syncRoot = collection.SyncRoot;
             Assert.NotNull(syncRoot);
-            Assert.IsType<object>(syncRoot);
+            Assert.IsType<ArrayList>(syncRoot);
 
             Assert.Same(syncRoot, collection.SyncRoot);
             Assert.NotSame(syncRoot, new StringCollection().SyncRoot);

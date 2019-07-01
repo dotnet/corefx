@@ -22,9 +22,9 @@ namespace System.Diagnostics.Tracing
 #endif
 {
     [StructLayout(LayoutKind.Explicit, Size = 16)]
-#if !CORECLR && !ES_BUILD_PN    
+#if ES_BUILD_STANDALONE
     [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
-#endif // !CORECLR && !ES_BUILD_PN
+#endif
 
     /*
      EventDescriptor was public in the separate System.Diagnostics.Tracing assembly(pre NS2.0), 
@@ -176,7 +176,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is EventDescriptor))
                 return false;

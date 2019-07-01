@@ -4,11 +4,14 @@
 
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
     public abstract class Accept<T> : SocketTestHelperBase<T> where T : SocketHelperBase, new()
     {
+        public Accept(ITestOutputHelper output) : base(output) { }
+
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(Loopbacks))]
@@ -162,7 +165,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [ActiveIssue(22808, TargetFrameworkMonikers.NetFramework)]
         [ActiveIssue(17209, TestPlatforms.AnyUnix)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
@@ -288,9 +290,28 @@ namespace System.Net.Sockets.Tests
         }
     }
 
-    public sealed class AcceptSync : Accept<SocketHelperArraySync> { }
-    public sealed class AcceptSyncForceNonBlocking : Accept<SocketHelperSyncForceNonBlocking> { }
-    public sealed class AcceptApm : Accept<SocketHelperApm> { }
-    public sealed class AcceptTask : Accept<SocketHelperTask> { }
-    public sealed class AcceptEap : Accept<SocketHelperEap> { }
+    public sealed class AcceptSync : Accept<SocketHelperArraySync>
+    {
+        public AcceptSync(ITestOutputHelper output) : base(output) {}
+    }
+
+    public sealed class AcceptSyncForceNonBlocking : Accept<SocketHelperSyncForceNonBlocking>
+    {
+        public AcceptSyncForceNonBlocking(ITestOutputHelper output) : base(output) {}
+    }
+
+    public sealed class AcceptApm : Accept<SocketHelperApm>
+    {
+        public AcceptApm(ITestOutputHelper output) : base(output) {}
+    }
+
+    public sealed class AcceptTask : Accept<SocketHelperTask>
+    {
+        public AcceptTask(ITestOutputHelper output) : base(output) {}
+    }
+
+    public sealed class AcceptEap : Accept<SocketHelperEap>
+    {
+        public AcceptEap(ITestOutputHelper output) : base(output) {}
+    }
 }

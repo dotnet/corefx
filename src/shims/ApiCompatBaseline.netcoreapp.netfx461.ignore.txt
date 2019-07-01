@@ -125,7 +125,6 @@ MembersMustExist : Member 'System.Reflection.Emit.ConstructorBuilder.ReturnType.
 MembersMustExist : Member 'System.Reflection.Emit.ConstructorBuilder.SetMethodBody(System.Byte[], System.Int32, System.Byte[], System.Collections.Generic.IEnumerable<System.Reflection.Emit.ExceptionHandler>, System.Collections.Generic.IEnumerable<System.Int32>)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Reflection.Emit.ConstructorBuilder.SetSymCustomAttribute(System.String, System.Byte[])' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Reflection.Emit.ConstructorBuilder.Signature.get()' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Reflection.Emit.DynamicMethod.GetDynamicILInfo()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Reflection.Emit.EnumBuilder.CreateType()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Reflection.Emit.EnumBuilder.TypeToken.get()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Reflection.Emit.EventBuilder.GetEventToken()' does not exist in the implementation but it does exist in the contract.
@@ -767,7 +766,6 @@ CannotRemoveBaseTypeOrInterface : Type 'System.Net.WebPermissionAttribute' does 
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.Mail.SmtpPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.NetworkInformation.NetworkInformationPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Data.Odbc.OdbcPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
-CannotRemoveBaseTypeOrInterface : Type 'System.Data.OleDb.OleDbPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Drawing.Printing.PrintingPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.PeerToPeer.PnrpPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
 CannotRemoveBaseTypeOrInterface : Type 'System.Net.PeerToPeer.Collaboration.PeerCollaborationPermissionAttribute' does not implement interface 'System.Runtime.InteropServices._Attribute' in the implementation but it does in the contract.
@@ -826,7 +824,6 @@ TypesMustExist : Type 'System.IAppDomainSetup' does not exist in the implementat
 TypesMustExist : Type 'System.Deployment.Internal.InternalActivationContextHelper' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Deployment.Internal.InternalApplicationIdentityHelper' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.Contracts.Internal.ContractHelper' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.CompilerServices.IDispatchConstantAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.DesignerServices.WindowsRuntimeDesignerContext' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Hosting.ActivationArguments' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Hosting.ApplicationActivator' does not exist in the implementation but it does exist in the contract.
@@ -2705,8 +2702,6 @@ TypesMustExist : Type 'System.ServiceProcess.ServiceInstaller' does not exist in
 TypesMustExist : Type 'System.ServiceProcess.ServiceProcessDescriptionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.ServiceProcess.ServiceProcessInstaller' does not exist in the implementation but it does exist in the contract.
 
-// Not bringing back argiterator
-TypesMustExist : Type 'System.ArgIterator' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Console.Write(System.String, System.Object, System.Object, System.Object, System.Object, __arglist)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Console.WriteLine(System.String, System.Object, System.Object, System.Object, System.Object, __arglist)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.String.Concat(System.Object, System.Object, System.Object, System.Object, __arglist)' does not exist in the implementation but it does exist in the contract.

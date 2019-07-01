@@ -620,6 +620,11 @@ namespace System.IO
         // 
         public static void Move(string sourceFileName, string destFileName)
         {
+            Move(sourceFileName, destFileName, false);
+        }
+
+        public static void Move(string sourceFileName, string destFileName, bool overwrite)
+        {
             if (sourceFileName == null)
                 throw new ArgumentNullException(nameof(sourceFileName), SR.ArgumentNull_FileName);
             if (destFileName == null)
@@ -637,17 +642,17 @@ namespace System.IO
                 throw new FileNotFoundException(SR.Format(SR.IO_FileNotFound_FileName, fullSourceFileName), fullSourceFileName);
             }
 
-            FileSystem.MoveFile(fullSourceFileName, fullDestFileName);
+            FileSystem.MoveFile(fullSourceFileName, fullDestFileName, overwrite);
         }
 
         public static void Encrypt(string path)
         {
-            FileSystem.Encrypt(path);
+            FileSystem.Encrypt(path ?? throw new ArgumentNullException(nameof(path)));
         }
 
         public static void Decrypt(string path)
         {
-            FileSystem.Decrypt(path);
+            FileSystem.Decrypt(path ?? throw new ArgumentNullException(nameof(path)));
         }
 
         // UTF-8 without BOM and with error detection. Same as the default encoding for StreamWriter.

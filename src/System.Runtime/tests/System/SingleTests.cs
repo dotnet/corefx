@@ -6,11 +6,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Tests
 {
-    public partial class SingleTests : RemoteExecutorTestBase
+    public partial class SingleTests
     {
         // NOTE: Consider duplicating any tests added here in DoubleTests.cs
 
@@ -111,7 +112,6 @@ namespace System.Tests
         [InlineData(float.NaN, -float.NaN, true)]
         [InlineData(789.0f, 789.0, false)]
         [InlineData(789.0f, "789", false)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in coreclr that is not in netfx. See https://github.com/dotnet/coreclr/issues/6237")]
         public static void Equals(float f1, object value, bool expected)
         {
             if (value is float f2)
@@ -395,15 +395,12 @@ namespace System.Tests
 
         public static IEnumerable<object[]> ToString_TestData()
         {
-            yield return new object[] { float.MinValue, "G", null, "-3.402823E+38" };
             yield return new object[] { -4567.0f, "G", null, "-4567" };
             yield return new object[] { -4567.89101f, "G", null, "-4567.891" };
             yield return new object[] { 0.0f, "G", null, "0" };
             yield return new object[] { 4567.0f, "G", null, "4567" };
             yield return new object[] { 4567.89101f, "G", null, "4567.891" };
-            yield return new object[] { float.MaxValue, "G", null, "3.402823E+38" };
 
-            yield return new object[] { float.Epsilon, "G", null, "1.401298E-45" };
             yield return new object[] { float.NaN, "G", null, "NaN" };
 
             yield return new object[] { 2468.0f, "N", null, "2,468.00" };
@@ -430,27 +427,42 @@ namespace System.Tests
             yield return new object[] { -2468.0f, "N", customNegativeSignGroupSeparatorNegativePattern, "(2*468.00)" };
 
             NumberFormatInfo invariantFormat = NumberFormatInfo.InvariantInfo;
-            yield return new object[] { float.Epsilon, "G", invariantFormat, "1.401298E-45" };
             yield return new object[] { float.NaN, "G", invariantFormat, "NaN" };
             yield return new object[] { float.PositiveInfinity, "G", invariantFormat, "Infinity" };
             yield return new object[] { float.NegativeInfinity, "G", invariantFormat, "-Infinity" };
         }
 
-        [Fact]
-        public static void Test_ToString()
+        public static IEnumerable<object[]> ToString_TestData_NotNetFramework()
         {
-            RemoteInvoke(() =>
+            foreach (var testData in ToString_TestData())
+            {
+                yield return testData;
+            }
+
+            yield return new object[] { float.MinValue, "G", null, "-3.4028235E+38" };
+            yield return new object[] { float.MaxValue, "G", null, "3.4028235E+38" };
+
+            yield return new object[] { float.Epsilon, "G", null, "1E-45" };
+
+            NumberFormatInfo invariantFormat = NumberFormatInfo.InvariantInfo;
+            yield return new object[] { float.Epsilon, "G", invariantFormat, "1E-45" };
+        }
+
+        [Fact]
+        public static void Test_ToString_NotNetFramework()
+        {
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-                foreach (var testdata in ToString_TestData())
+                foreach (var testdata in ToString_TestData_NotNetFramework())
                 {
                     ToString((float)testdata[0], (string)testdata[1], (IFormatProvider)testdata[2], (string)testdata[3]);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
-        
+
         private static void ToString(float f, string format, IFormatProvider provider, string expected)
         {
             bool isDefaultProvider = provider == null;

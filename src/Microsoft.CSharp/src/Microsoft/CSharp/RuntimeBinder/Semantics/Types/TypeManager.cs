@@ -212,7 +212,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                     if (src != dst)
                     {
                         CType[] dsts = new CType[srcs.Length];
-                        Array.Copy(srcs, dsts, i);
+                        Array.Copy(srcs, 0, dsts, 0, i);
                         dsts[i] = dst;
                         while (++i < srcs.Length)
                         {
@@ -257,7 +257,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (type.TypeKind)
             {
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail("Unknown type kind");
                     return type;
 
                 case TypeKind.TK_NullType:
@@ -372,7 +372,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (typeSrc.TypeKind)
             {
                 default:
-                    Debug.Assert(false, "Bad Symbol kind in SubstEqualTypesCore");
+                    Debug.Fail("Bad Symbol kind in SubstEqualTypesCore");
                     return false;
 
                 case TypeKind.TK_NullType:
@@ -468,7 +468,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (type.TypeKind)
             {
                 default:
-                    Debug.Assert(false, "Bad Symbol kind in TypeContainsType");
+                    Debug.Fail("Bad Symbol kind in TypeContainsType");
                     return false;
 
                 case TypeKind.TK_NullType:
@@ -507,7 +507,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             switch (type.TypeKind)
             {
                 default:
-                    Debug.Assert(false, "Bad Symbol kind in TypeContainsTyVars");
+                    Debug.Fail("Bad Symbol kind in TypeContainsTyVars");
                     return false;
 
                 case TypeKind.TK_NullType:

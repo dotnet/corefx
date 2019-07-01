@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
 
@@ -13,13 +14,10 @@ using Internal.Runtime.CompilerServices;
 namespace System.Runtime.CompilerServices
 {
     /// <summary>Provides an awaiter for a <see cref="ValueTask"/>.</summary>
-    public readonly struct ValueTaskAwaiter : ICriticalNotifyCompletion
-#if CORECLR
-            , IStateMachineBoxAwareAwaiter
-#endif
+    public readonly struct ValueTaskAwaiter : ICriticalNotifyCompletion, IStateMachineBoxAwareAwaiter
     {
         /// <summary>Shim used to invoke an <see cref="Action"/> passed as the state argument to a <see cref="Action{Object}"/>.</summary>
-        internal static readonly Action<object> s_invokeActionDelegate = state =>
+        internal static readonly Action<object?> s_invokeActionDelegate = state =>
         {
             if (!(state is Action action))
             {
@@ -35,7 +33,7 @@ namespace System.Runtime.CompilerServices
         /// <summary>Initializes the awaiter.</summary>
         /// <param name="value">The value to be awaited.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ValueTaskAwaiter(ValueTask value) => _value = value;
+        internal ValueTaskAwaiter(in ValueTask value) => _value = value;
 
         /// <summary>Gets whether the <see cref="ValueTask"/> has completed.</summary>
         public bool IsCompleted
@@ -45,14 +43,13 @@ namespace System.Runtime.CompilerServices
         }
 
         /// <summary>Gets the result of the ValueTask.</summary>
-        [StackTraceHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void GetResult() => _value.ThrowIfCompletedUnsuccessfully();
 
         /// <summary>Schedules the continuation action for this ValueTask.</summary>
         public void OnCompleted(Action continuation)
         {
-            object obj = _value._obj;
+            object? obj = _value._obj;
             Debug.Assert(obj == null || obj is Task || obj is IValueTaskSource);
 
             if (obj is Task t)
@@ -72,7 +69,7 @@ namespace System.Runtime.CompilerServices
         /// <summary>Schedules the continuation action for this ValueTask.</summary>
         public void UnsafeOnCompleted(Action continuation)
         {
-            object obj = _value._obj;
+            object? obj = _value._obj;
             Debug.Assert(obj == null || obj is Task || obj is IValueTaskSource);
 
             if (obj is Task t)
@@ -89,10 +86,9 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-#if CORECLR
         void IStateMachineBoxAwareAwaiter.AwaitUnsafeOnCompleted(IAsyncStateMachineBox box)
         {
-            object obj = _value._obj;
+            object? obj = _value._obj;
             Debug.Assert(obj == null || obj is Task || obj is IValueTaskSource);
 
             if (obj is Task t)
@@ -101,33 +97,17 @@ namespace System.Runtime.CompilerServices
             }
             else if (obj != null)
             {
-                Unsafe.As<IValueTaskSource>(obj).OnCompleted(s_invokeAsyncStateMachineBox, box, _value._token, ValueTaskSourceOnCompletedFlags.UseSchedulingContext);
+                Unsafe.As<IValueTaskSource>(obj).OnCompleted(ThreadPoolGlobals.s_invokeAsyncStateMachineBox, box, _value._token, ValueTaskSourceOnCompletedFlags.UseSchedulingContext);
             }
             else
             {
                 TaskAwaiter.UnsafeOnCompletedInternal(Task.CompletedTask, box, continueOnCapturedContext: true);
             }
         }
-
-        /// <summary>Shim used to invoke <see cref="ITaskCompletionAction.Invoke"/> of the supplied <see cref="IAsyncStateMachineBox"/>.</summary>
-        internal static readonly Action<object> s_invokeAsyncStateMachineBox = state =>
-        {
-            if (!(state is IAsyncStateMachineBox box))
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.state);
-                return;
-            }
-
-            box.MoveNext();
-        };
-#endif
     }
 
     /// <summary>Provides an awaiter for a <see cref="ValueTask{TResult}"/>.</summary>
-    public readonly struct ValueTaskAwaiter<TResult> : ICriticalNotifyCompletion
-#if CORECLR
-            , IStateMachineBoxAwareAwaiter
-#endif
+    public readonly struct ValueTaskAwaiter<TResult> : ICriticalNotifyCompletion, IStateMachineBoxAwareAwaiter
     {
         /// <summary>The value being awaited.</summary>
         private readonly ValueTask<TResult> _value;
@@ -135,7 +115,7 @@ namespace System.Runtime.CompilerServices
         /// <summary>Initializes the awaiter.</summary>
         /// <param name="value">The value to be awaited.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ValueTaskAwaiter(ValueTask<TResult> value) => _value = value;
+        internal ValueTaskAwaiter(in ValueTask<TResult> value) => _value = value;
 
         /// <summary>Gets whether the <see cref="ValueTask{TResult}"/> has completed.</summary>
         public bool IsCompleted
@@ -145,14 +125,13 @@ namespace System.Runtime.CompilerServices
         }
 
         /// <summary>Gets the result of the ValueTask.</summary>
-        [StackTraceHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TResult GetResult() => _value.Result;
 
         /// <summary>Schedules the continuation action for this ValueTask.</summary>
         public void OnCompleted(Action continuation)
         {
-            object obj = _value._obj;
+            object? obj = _value._obj;
             Debug.Assert(obj == null || obj is Task<TResult> || obj is IValueTaskSource<TResult>);
 
             if (obj is Task<TResult> t)
@@ -172,7 +151,7 @@ namespace System.Runtime.CompilerServices
         /// <summary>Schedules the continuation action for this ValueTask.</summary>
         public void UnsafeOnCompleted(Action continuation)
         {
-            object obj = _value._obj;
+            object? obj = _value._obj;
             Debug.Assert(obj == null || obj is Task<TResult> || obj is IValueTaskSource<TResult>);
 
             if (obj is Task<TResult> t)
@@ -189,10 +168,9 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-#if CORECLR
         void IStateMachineBoxAwareAwaiter.AwaitUnsafeOnCompleted(IAsyncStateMachineBox box)
         {
-            object obj = _value._obj;
+            object? obj = _value._obj;
             Debug.Assert(obj == null || obj is Task<TResult> || obj is IValueTaskSource<TResult>);
 
             if (obj is Task<TResult> t)
@@ -201,17 +179,15 @@ namespace System.Runtime.CompilerServices
             }
             else if (obj != null)
             {
-                Unsafe.As<IValueTaskSource<TResult>>(obj).OnCompleted(ValueTaskAwaiter.s_invokeAsyncStateMachineBox, box, _value._token, ValueTaskSourceOnCompletedFlags.UseSchedulingContext);
+                Unsafe.As<IValueTaskSource<TResult>>(obj).OnCompleted(ThreadPoolGlobals.s_invokeAsyncStateMachineBox, box, _value._token, ValueTaskSourceOnCompletedFlags.UseSchedulingContext);
             }
             else
             {
                 TaskAwaiter.UnsafeOnCompletedInternal(Task.CompletedTask, box, continueOnCapturedContext: true);
             }
         }
-#endif
     }
 
-#if CORECLR
     /// <summary>Internal interface used to enable optimizations from <see cref="AsyncTaskMethodBuilder"/>.</summary>>
     internal interface IStateMachineBoxAwareAwaiter
     {
@@ -219,5 +195,4 @@ namespace System.Runtime.CompilerServices
         /// <param name="box">The box object.</param>
         void AwaitUnsafeOnCompleted(IAsyncStateMachineBox box);
     }
-#endif
 }

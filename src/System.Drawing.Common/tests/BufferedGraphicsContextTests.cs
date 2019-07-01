@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Drawing.Tests
@@ -18,7 +19,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Allocate_ValidTargetGraphics_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -32,7 +33,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Allocate_SmallRectWithTargetGraphics_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -46,7 +47,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Allocate_LargeRectWithTargetGraphics_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -61,7 +62,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Allocate_ValidTargetHdc_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -85,7 +86,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Allocate_SmallRectWithTargetHdc_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -109,7 +110,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Allocate_LargeRectWithTargetHdc_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -144,7 +145,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Allocate_NullGraphicsZeroSize_Success()
         {
             using (var context = new BufferedGraphicsContext())
@@ -155,7 +156,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Allocate_NullGraphicsNonZeroSize_ThrowsArgumentNullException()
         {
             using (var context = new BufferedGraphicsContext())
@@ -166,7 +167,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Allocate_DisposedGraphics_ThrowsArgumentException()
         {
             using (var context = new BufferedGraphicsContext())
@@ -182,7 +183,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Allocate_BusyGraphics_ThrowsInvalidOperationException()
         {
             using (var context = new BufferedGraphicsContext())
@@ -249,16 +250,22 @@ namespace System.Drawing.Tests
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void AllocateBufferedGraphicsContext() => new BufferedGraphicsContext();
+
+
         [Fact]
         public void Finalize_Invoke_Success()
         {
-            // Don't allocate anything as this would leak memory.
             // This makes sure than finalization doesn't cause any errors or debug assertions.
-            var context = new BufferedGraphicsContext();
+            AllocateBufferedGraphicsContext();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Dispose_BusyAndValidated_ThrowsInvalidOperationException()
         {
             using (var context = new BufferedGraphicsContext())
@@ -273,7 +280,7 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Dispose_BusyAndInvalidated_ThrowsInvalidOperationException()
         {
             using (var context = new BufferedGraphicsContext())

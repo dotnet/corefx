@@ -33,7 +33,7 @@ namespace System.Diagnostics.Tests
                 using (EventLog eventLog = new EventLog())
                 {
                     eventLog.Source = source;
-                    eventLog.Clear();
+                    Helpers.RetryOnWin7(() => eventLog.Clear());
                     Assert.Equal(0, Helpers.RetryOnWin7((() => eventLog.Entries.Count)));
                     Helpers.RetryOnWin7(() => eventLog.WriteEntry("Writing to event log."));
                     Helpers.WaitForEventLog(eventLog, 1);
@@ -347,6 +347,17 @@ namespace System.Diagnostics.Tests
             {
                 eventlog.Source = "Security";
                 Assert.Contains("", eventlog.Entries.LastOrDefault()?.Message ?? "");
+            }
+        }
+
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void GetEventLogEntriesTest()
+        {
+            foreach (var eventLog in EventLog.GetEventLogs())
+            {
+                // Accessing eventlog properties should not throw.
+                Assert.True(eventLog.Entries.Count >= 0);
             }
         }
     }

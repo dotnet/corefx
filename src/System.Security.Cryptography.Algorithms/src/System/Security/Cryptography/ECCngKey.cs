@@ -13,15 +13,18 @@ namespace System.Security.Cryptography
         private SafeNCryptKeyHandle _keyHandle;
         private int _lastKeySize;
         private string _lastAlgorithm;
+        private bool _disposed;
         private readonly string _algorithmGroup;
+        private readonly string _disposedName;
 
-        internal ECCngKey(string algorithmGroup)
+        internal ECCngKey(string algorithmGroup, string disposedName)
         {
             Debug.Assert(
                 algorithmGroup == BCryptNative.AlgorithmName.ECDH ||
                 algorithmGroup == BCryptNative.AlgorithmName.ECDsa);
 
             _algorithmGroup = algorithmGroup;
+            _disposedName = disposedName;
         }
 
         internal int KeySize { get; private set; }
@@ -46,6 +49,8 @@ namespace System.Security.Cryptography
 
         internal SafeNCryptKeyHandle GetDuplicatedKeyHandle(int callerKeySizeProperty)
         {
+            ThrowIfDisposed();
+
             if (ECCng.IsECNamedCurve(_lastAlgorithm))
             {
                 // Curve was previously created, so use that
@@ -100,6 +105,7 @@ namespace System.Security.Cryptography
         internal void GenerateKey(ECCurve curve)
         {
             curve.Validate();
+            ThrowIfDisposed();
 
             if (_keyHandle != null)
             {
@@ -114,7 +120,7 @@ namespace System.Security.Cryptography
                 if (string.IsNullOrEmpty(curve.Oid.FriendlyName))
                 {
                     throw new PlatformNotSupportedException(
-                        string.Format(SR.Cryptography_InvalidCurveOid, curve.Oid.Value));
+                        SR.Format(SR.Cryptography_InvalidCurveOid, curve.Oid.Value));
                 }
 
                 // Map curve name to algorithm to support pre-Win10 curves
@@ -144,7 +150,7 @@ namespace System.Security.Cryptography
                             errorCode == Interop.NCrypt.ErrorCode.NTE_NOT_SUPPORTED)
                         {
                             throw new PlatformNotSupportedException(
-                                string.Format(SR.Cryptography_CurveNotSupported, curve.Oid.FriendlyName), e);
+                                SR.Format(SR.Cryptography_CurveNotSupported, curve.Oid.FriendlyName), e);
                         }
 
                         throw;
@@ -168,7 +174,7 @@ namespace System.Security.Cryptography
                             keySize = 521;
                             break;
                         default:
-                            Debug.Fail(string.Format("Unknown algorithm {0}", algorithm.ToString()));
+                            Debug.Fail($"Unknown algorithm {algorithm}");
                             throw new ArgumentException(SR.Cryptography_InvalidKeySize);
                     }
 
@@ -184,12 +190,18 @@ namespace System.Security.Cryptography
             else
             {
                 throw new PlatformNotSupportedException(
-                    string.Format(SR.Cryptography_CurveNotSupported, curve.CurveType.ToString()));
+                    SR.Format(SR.Cryptography_CurveNotSupported, curve.CurveType.ToString()));
             }
 
             _lastAlgorithm = algorithm;
             _lastKeySize = keySize;
             KeySize = keySize;
+        }
+
+        internal void FullDispose()
+        {
+            DisposeKey();
+            _disposed = true;
         }
 
         internal void DisposeKey()
@@ -206,12 +218,22 @@ namespace System.Security.Cryptography
 
         internal void SetHandle(SafeNCryptKeyHandle keyHandle, string algorithmName)
         {
+            ThrowIfDisposed();
+
             _keyHandle?.Dispose();
             _keyHandle = keyHandle;
             _lastAlgorithm = algorithmName;
 
             KeySize = CngKeyLite.GetKeyLength(keyHandle);
             _lastKeySize = KeySize;
+        }
+
+        internal void ThrowIfDisposed()
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(_disposedName);
+            }
         }
     }
 }

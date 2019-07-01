@@ -27,6 +27,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <net/if.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -50,12 +51,13 @@
 #include <sys/uio.h>
 #endif
 #if !HAVE_IN_PKTINFO
-#include <net/if.h>
 #if HAVE_GETIFADDRS
 #include <ifaddrs.h>
 #endif
 #endif
-
+#ifdef AF_CAN
+#include <linux/can.h>
+#endif
 #if HAVE_KQUEUE
 #if KEVENT_HAS_VOID_UDATA
 static void* GetKeventUdata(uintptr_t udata)
@@ -490,7 +492,21 @@ static bool TryConvertAddressFamilyPlatformToPal(sa_family_t platformAddressFami
         case AF_INET6:
             *palAddressFamily = AddressFamily_AF_INET6;
             return true;
-
+#ifdef AF_NETLINK
+        case AF_NETLINK:
+            *palAddressFamily = AddressFamily_AF_NETLINK;
+            return true;
+#endif
+#ifdef AF_PACKET
+        case AF_PACKET:
+            *palAddressFamily = AddressFamily_AF_PACKET;
+            return true;
+#endif
+#ifdef AF_CAN
+        case AF_CAN:
+            *palAddressFamily = AddressFamily_AF_CAN;
+            return true;
+#endif
         default:
             *palAddressFamily = platformAddressFamily;
             return false;
@@ -518,7 +534,16 @@ static bool TryConvertAddressFamilyPalToPlatform(int32_t palAddressFamily, sa_fa
         case AddressFamily_AF_INET6:
             *platformAddressFamily = AF_INET6;
             return true;
-
+#ifdef AF_PACKET
+        case AddressFamily_AF_PACKET:
+            *platformAddressFamily = AF_PACKET;
+            return true;
+#endif
+#ifdef AF_CAN
+        case AddressFamily_AF_CAN:
+            *platformAddressFamily = AF_CAN;
+            return true;
+#endif
         default:
             *platformAddressFamily = (sa_family_t)palAddressFamily;
             return false;
@@ -1058,7 +1083,7 @@ int32_t SystemNative_SetIPv6MulticastOption(intptr_t socket, int32_t multicastOp
 }
 
 #if defined(__APPLE__) && __APPLE__
-static int32_t GetMaxLingerTime()
+static int32_t GetMaxLingerTime(void)
 {
     static volatile int32_t MaxLingerTime = -1;
     c_static_assert(sizeof_member(xsocket, so_linger) == 2);
@@ -1084,7 +1109,7 @@ static int32_t GetMaxLingerTime()
     return maxLingerTime;
 }
 #else
-static int32_t GetMaxLingerTime()
+static int32_t GetMaxLingerTime(void)
 {
     // On other platforms, the maximum linger time is locked to the smaller of
     // 65535 (the maximum time for winsock) and the maximum signed value that
@@ -1184,21 +1209,22 @@ static int8_t ConvertSocketFlagsPalToPlatform(int32_t palFlags, int* platformFla
         return false;
     }
 
-    *platformFlags = ((palFlags & SocketFlags_MSG_OOB) == 0 ? 0 : MSG_OOB) | ((palFlags & SocketFlags_MSG_PEEK) == 0 ? 0 : MSG_PEEK) |
-                    ((palFlags & SocketFlags_MSG_DONTROUTE) == 0 ? 0 : MSG_DONTROUTE) |
-                    ((palFlags & SocketFlags_MSG_TRUNC) == 0 ? 0 : MSG_TRUNC) |
-                    ((palFlags & SocketFlags_MSG_CTRUNC) == 0 ? 0 : MSG_CTRUNC);
+    *platformFlags = ((palFlags & SocketFlags_MSG_OOB) == 0 ? 0 : MSG_OOB) |
+                     ((palFlags & SocketFlags_MSG_PEEK) == 0 ? 0 : MSG_PEEK) |
+                     ((palFlags & SocketFlags_MSG_DONTROUTE) == 0 ? 0 : MSG_DONTROUTE) |
+                     ((palFlags & SocketFlags_MSG_TRUNC) == 0 ? 0 : MSG_TRUNC) |
+                     ((palFlags & SocketFlags_MSG_CTRUNC) == 0 ? 0 : MSG_CTRUNC);
 
     return true;
 }
 
 static int32_t ConvertSocketFlagsPlatformToPal(int platformFlags)
 {
-    const int SupportedFlagsMask = MSG_OOB | MSG_PEEK | MSG_DONTROUTE | MSG_TRUNC | MSG_CTRUNC;
+    const int SupportedFlagsMask = MSG_OOB | MSG_DONTROUTE | MSG_TRUNC | MSG_CTRUNC;
 
     platformFlags &= SupportedFlagsMask;
 
-    return ((platformFlags & MSG_OOB) == 0 ? 0 : SocketFlags_MSG_OOB) | ((platformFlags & MSG_PEEK) == 0 ? 0 : SocketFlags_MSG_PEEK) |
+    return ((platformFlags & MSG_OOB) == 0 ? 0 : SocketFlags_MSG_OOB) |
            ((platformFlags & MSG_DONTROUTE) == 0 ? 0 : SocketFlags_MSG_DONTROUTE) |
            ((platformFlags & MSG_TRUNC) == 0 ? 0 : SocketFlags_MSG_TRUNC) |
            ((platformFlags & MSG_CTRUNC) == 0 ? 0 : SocketFlags_MSG_CTRUNC);
@@ -1267,7 +1293,12 @@ int32_t SystemNative_SendMessage(intptr_t socket, MessageHeader* messageHeader, 
     ConvertMessageHeaderToMsghdr(&header, messageHeader, fd);
 
     ssize_t res;
+#if defined(__APPLE__) && __APPLE__
+    // possible OSX kernel bug:  #31927
+    while ((res = sendmsg(fd, &header, socketFlags)) < 0 && (errno == EINTR || errno == EPROTOTYPE));
+#else
     while ((res = sendmsg(fd, &header, socketFlags)) < 0 && errno == EINTR);
+#endif
     if (res != -1)
     {
         *sent = res;
@@ -1816,14 +1847,12 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
     //
     if (socketOptionLevel == SocketOptionLevel_SOL_SOCKET)
     {
-        // Windows supports 3 address sharing modes:
-        // - not sharing      (SO_EXCLUSIVEADDRUSE=1, SO_REUSEADDR=0)
-        // - explicit sharing (SO_EXCLUSIVEADDRUSE=0, SO_REUSEADDR=1)
-        // - implicit sharing (SO_EXCLUSIVEADDRUSE=0, SO_REUSEADDR=0)
-        // On Unix we have two address sharing modes:
-        // - not sharing      (SO_REUSEPORT=0)
-        // - explicit sharing (SO_REUSEPORT=1)
-        // We make both SocketOptionName_SO_REUSEADDR and SocketOptionName_SO_EXCLUSIVEADDRUSE control SO_REUSEPORT.
+        // Windows supports 3 address reuse modes:
+        // - reuse not allowed        (SO_EXCLUSIVEADDRUSE=1, SO_REUSEADDR=0)
+        // - reuse explicily allowed  (SO_EXCLUSIVEADDRUSE=0, SO_REUSEADDR=1)
+        // - reuse implicitly allowed (SO_EXCLUSIVEADDRUSE=0, SO_REUSEADDR=0)
+        // On Unix we can reuse or not, there is no implicit reuse.
+        // We make both SocketOptionName_SO_REUSEADDR and SocketOptionName_SO_EXCLUSIVEADDRUSE control SO_REUSEPORT/SO_REUSEADDR.
         if (socketOptionName == SocketOptionName_SO_EXCLUSIVEADDRUSE || socketOptionName == SocketOptionName_SO_REUSEADDR)
         {
 #ifdef SO_REUSEPORT
@@ -1847,7 +1876,15 @@ SystemNative_SetSockOpt(intptr_t socket, int32_t socketOptionLevel, int32_t sock
                 }
             }
 
+            // An application that sets SO_REUSEPORT/SO_REUSEADDR can reuse the endpoint with another
+            // application that sets the same option. If one application sets SO_REUSEPORT and another
+            // sets SO_REUSEADDR the second application will fail to bind. We set both options, this
+            // enables reuse with applications that set one or both options.
             int err = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &value, (socklen_t)optionLen);
+            if (err == 0)
+            {
+                err = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &value, (socklen_t)optionLen);
+            }
             return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 #else // !SO_REUSEPORT
             return Error_SUCCESS;
@@ -1908,35 +1945,126 @@ static bool TryConvertSocketTypePalToPlatform(int32_t palSocketType, int* platfo
     }
 }
 
-static bool TryConvertProtocolTypePalToPlatform(int32_t palProtocolType, int* platformProtocolType)
+static bool TryConvertProtocolTypePalToPlatform(int32_t palAddressFamily, int32_t palProtocolType, int* platformProtocolType)
 {
     assert(platformProtocolType != NULL);
 
-    switch (palProtocolType)
+    switch(palAddressFamily)
     {
-        case ProtocolType_PT_UNSPECIFIED:
-            *platformProtocolType = 0;
+#ifdef AF_PACKET
+        case AddressFamily_AF_PACKET:
+            // protocol is the IEEE 802.3 protocol number in network order.
+            *platformProtocolType = palProtocolType;
             return true;
+#endif
+#ifdef AF_CAN
+        case AddressFamily_AF_CAN:
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
 
-        case ProtocolType_PT_ICMP:
-            *platformProtocolType = IPPROTO_ICMP;
-            return true;
+                case ProtocolType_PT_RAW:
+                    *platformProtocolType = CAN_RAW;
+                    return true;
 
-        case ProtocolType_PT_TCP:
-            *platformProtocolType = IPPROTO_TCP;
-            return true;
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+            }
+#endif
+        case AddressFamily_AF_INET:
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
 
-        case ProtocolType_PT_UDP:
-            *platformProtocolType = IPPROTO_UDP;
-            return true;
+                case ProtocolType_PT_ICMP:
+                    *platformProtocolType = IPPROTO_ICMP;
+                    return true;
 
-        case ProtocolType_PT_ICMPV6:
-            *platformProtocolType = IPPROTO_ICMPV6;
-            return true;
+                case ProtocolType_PT_TCP:
+                    *platformProtocolType = IPPROTO_TCP;
+                    return true;
+
+                case ProtocolType_PT_UDP:
+                    *platformProtocolType = IPPROTO_UDP;
+                    return true;
+
+                case ProtocolType_PT_IGMP:
+                    *platformProtocolType = IPPROTO_IGMP;
+                    return true;
+
+                case ProtocolType_PT_RAW:
+                    *platformProtocolType = IPPROTO_RAW;
+                    return true;
+
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+                }
+
+        case AddressFamily_AF_INET6:
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
+
+                case ProtocolType_PT_ICMPV6:
+                case ProtocolType_PT_ICMP:
+                    *platformProtocolType = IPPROTO_ICMPV6;
+                    return true;
+
+                case ProtocolType_PT_TCP:
+                    *platformProtocolType = IPPROTO_TCP;
+                    return true;
+
+                case ProtocolType_PT_UDP:
+                    *platformProtocolType = IPPROTO_UDP;
+                    return true;
+
+                case ProtocolType_PT_IGMP:
+                    *platformProtocolType = IPPROTO_IGMP;
+                    return true;
+
+                case ProtocolType_PT_RAW:
+                    *platformProtocolType = IPPROTO_RAW;
+                    return true;
+
+                case ProtocolType_PT_DSTOPTS:
+                    *platformProtocolType = IPPROTO_DSTOPTS;
+                    return true;
+
+                case ProtocolType_PT_NONE:
+                    *platformProtocolType = IPPROTO_NONE;
+                    return true;
+
+                case ProtocolType_PT_ROUTING:
+                    *platformProtocolType = IPPROTO_ROUTING;
+                    return true;
+
+                case ProtocolType_PT_FRAGMENT:
+                    *platformProtocolType = IPPROTO_FRAGMENT;
+                    return true;
+
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+            }
 
         default:
-            *platformProtocolType = (int)palProtocolType;
-            return false;
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+            }
     }
 }
 
@@ -1962,7 +2090,7 @@ int32_t SystemNative_Socket(int32_t addressFamily, int32_t socketType, int32_t p
         return Error_EPROTOTYPE;
     }
 
-    if (!TryConvertProtocolTypePalToPlatform(protocolType, &platformProtocolType))
+    if (!TryConvertProtocolTypePalToPlatform(addressFamily, protocolType, &platformProtocolType))
     {
         *createdSocket = -1;
         return Error_EPROTONOSUPPORT;
@@ -1972,7 +2100,15 @@ int32_t SystemNative_Socket(int32_t addressFamily, int32_t socketType, int32_t p
     platformSocketType |= SOCK_CLOEXEC;
 #endif
     *createdSocket = socket(platformAddressFamily, platformSocketType, platformProtocolType);
-    return *createdSocket != -1 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+    if (*createdSocket == -1)
+    {
+        return SystemNative_ConvertErrorPlatformToPal(errno);
+    }
+
+#ifndef SOCK_CLOEXEC
+    fcntl(ToFileDescriptor(*createdSocket), F_SETFD, FD_CLOEXEC); // ignore any failures; this is best effort
+#endif
+    return Error_SUCCESS;
 }
 
 int32_t SystemNative_GetAtOutOfBandMark(intptr_t socket, int32_t* atMark)
@@ -2552,4 +2688,12 @@ int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, i
     errno = ENOTSUP;
     return SystemNative_ConvertErrorPlatformToPal(errno);
 #endif
+}
+
+uint32_t SystemNative_InterfaceNameToIndex(char* interfaceName)
+{
+    assert(interfaceName != NULL);
+    if (interfaceName[0] == '%')
+        interfaceName++;
+    return if_nametoindex(interfaceName);
 }

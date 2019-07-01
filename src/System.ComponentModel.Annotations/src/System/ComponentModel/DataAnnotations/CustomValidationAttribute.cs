@@ -64,6 +64,7 @@ namespace System.ComponentModel.DataAnnotations
         private string _lastMessage;
         private MethodInfo _methodInfo;
         private Type _firstParameterType;
+        private Tuple<string, Type> _typeId;
 
         #endregion
 
@@ -99,6 +100,22 @@ namespace System.ComponentModel.DataAnnotations
         ///     Gets the type that contains the validation method identified by <see cref="Method" />.
         /// </summary>
         public Type ValidatorType { get; }
+
+        /// <summary>
+        /// Gets a unique identifier for this attribute.
+        /// </summary>
+        public override object TypeId
+        {
+            get
+            {
+                if (_typeId is null)
+                {
+                    _typeId = new Tuple<string, Type>(Method, ValidatorType);
+                }
+
+                return _typeId;
+            }
+        }
 
         /// <summary>
         ///     Gets the name of the method in <see cref="ValidatorType" /> to invoke to perform validation.
@@ -242,8 +259,8 @@ namespace System.ComponentModel.DataAnnotations
                 return SR.Format(SR.CustomValidationAttribute_Method_Not_Found, Method, ValidatorType.Name);
             }
 
-            // Method must return a ValidationResult
-            if (methodInfo.ReturnType != typeof(ValidationResult))
+            // Method must return a ValidationResult or derived class
+            if (!typeof(ValidationResult).IsAssignableFrom(methodInfo.ReturnType))
             {
                 return SR.Format(SR.CustomValidationAttribute_Method_Must_Return_ValidationResult, Method, ValidatorType.Name);
             }

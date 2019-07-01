@@ -839,6 +839,18 @@ namespace SerializationTypes
         public string StringField2;
     }
 
+    [KnownType(typeof(List<SimpleType>))]
+    [KnownType(typeof(SimpleType[]))]
+    [DataContract]
+    public class TypeWithKnownTypesOfCollectionsWithConflictingXmlName
+    {
+        [DataMember]
+        public object Value1 = new List<SimpleType>();
+
+        [DataMember]
+        public object Value2 = new SimpleType[1];
+
+    }
 }
 
 public class TypeWithXmlElementProperty
@@ -1242,4 +1254,43 @@ public class TypeWithMismatchBetweenAttributeAndPropertyType
             _intValue = value;
         }
     }
+}
+
+[DataContract(IsReference = true)]
+public class TypeWithLinkedProperty
+{
+    [DataMember]
+    public TypeWithLinkedProperty Child { get; set; }
+    [DataMember]
+    public List<TypeWithLinkedProperty> Children { get; set; }
+}
+
+[Serializable()]
+[System.Xml.Serialization.XmlType("MsgDocumentType", Namespace = "http://example.com")]
+[System.Xml.Serialization.XmlRoot("Document", Namespace = "http://example.com")]
+public partial class MsgDocumentType
+{
+    [System.Xml.Serialization.XmlAttribute("id", DataType = "ID")]
+    public string Id { get; set; }
+
+    [System.Xml.Serialization.XmlAttribute("refs", DataType = "IDREFS")]
+    public string[] Refs { get; set; }
+}
+
+public class RootClass
+{
+    [XmlArray]
+    public List<Parameter> Parameters { get; set; }
+}
+
+[XmlInclude(typeof(Parameter<string>))]
+public class Parameter
+{
+    [XmlAttribute]
+    public string Name { get; set; }
+}
+
+public class Parameter<T> : Parameter
+{
+    public T Value { get; set; }
 }

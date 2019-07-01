@@ -53,7 +53,7 @@ namespace System.Diagnostics.Tracing
         /// else
         ///     fieldName = typeof(T).Name;
         /// </summary>
-        public string Name
+        public string? Name
         {
             get;
             set;

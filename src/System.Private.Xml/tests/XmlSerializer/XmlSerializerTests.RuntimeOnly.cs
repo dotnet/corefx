@@ -145,12 +145,17 @@ public static partial class XmlSerializerTests
         Assert.StrictEqual(SerializeAndDeserialize<float>((float)2.3,
 @"<?xml version=""1.0""?>
 <float>2.3</float>"), (float)2.3);
+    }
+
+    [Fact]
+    public static void Xml_FloatAsRoot_NotNetFramework()
+    {
         Assert.StrictEqual(SerializeAndDeserialize<float>(float.MinValue,
 @"<?xml version=""1.0""?>
-<float>-3.40282347E+38</float>"), float.MinValue);
+<float>-3.4028235E+38</float>"), float.MinValue);
         Assert.StrictEqual(SerializeAndDeserialize<float>(float.MaxValue,
 @"<?xml version=""1.0""?>
-<float>3.40282347E+38</float>"), float.MaxValue);
+<float>3.4028235E+38</float>"), float.MaxValue);
     }
 
     [Fact]
@@ -1346,7 +1351,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void  SoapAttributeTests()
     {
         SoapAttributes soapAttrs = new SoapAttributes();
@@ -1357,7 +1361,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_ComplexField()
     {
         XmlTypeMapping typeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType2));
@@ -1373,7 +1376,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Basic()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType1));
@@ -1399,7 +1401,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithNullableFields()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType4));
@@ -1436,7 +1437,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Nullable()
     {
         XmlTypeMapping intMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(int?));
@@ -1469,7 +1469,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Basic_FromMappings()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType1));
@@ -1495,7 +1494,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_With_SoapIgnore()
     {
         var soapAttributes = new SoapAttributes();
@@ -1527,7 +1525,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_With_SoapElement()
     {
         var soapAttributes = new SoapAttributes();
@@ -1560,7 +1557,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_With_SoapType()
     {
         var soapAttributes = new SoapAttributes();
@@ -1594,7 +1590,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Enum()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestEnum));
@@ -1610,7 +1605,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Enum_With_SoapEnumOverrides()
     {
         var soapAtts = new SoapAttributes();
@@ -1635,7 +1629,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapEncodedSerialization_SoapAttribute()
     {
         var soapAtts1 = new SoapAttributes();
@@ -1670,7 +1663,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapEncodedSerialization_IncludeType()
     {
         var soapImporter = new SoapReflectionImporter();
@@ -1697,7 +1689,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapEncodedSerialization_CircularLink()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyCircularLink));
@@ -1713,7 +1704,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Array()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup));
@@ -1736,7 +1726,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_List()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup2));
@@ -1760,7 +1749,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_MyCollection()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyCollection<string>));
@@ -1795,7 +1783,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_WithNullables()
     {
         var mapping = new SoapReflectionImporter().ImportTypeMapping(typeof(WithNullables));
@@ -1815,7 +1802,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Enums()
     {
         var mapping = new SoapReflectionImporter().ImportTypeMapping(typeof(WithEnums));
@@ -1830,14 +1816,12 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Dictionary()
     {
         Assert.Throws<NotSupportedException>(() => { new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup3)); });
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_NestedPublicType()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithNestedPublicType.LevelData));
@@ -1852,7 +1836,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_ObjectAsRoot()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(object));
@@ -1887,7 +1870,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_ObjectAsRoot_Nullable()
     {
         XmlTypeMapping nullableTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithNullableObject));
@@ -1981,7 +1963,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapSchemaMemberTest()
     {
         string ns = "http://www.w3.org/2001/XMLSchema";
@@ -2458,7 +2439,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_SimpleType()
     {
         string memberName = "GetData";
@@ -2471,7 +2451,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_CompositeType()
     {
         string memberName = "GetDataUsingDataContract";
@@ -2666,7 +2645,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithReadOnlyMyCollectionProperty()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithReadOnlyMyCollectionProperty));
@@ -2681,7 +2659,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_SoapComplexType()
     {
         string memberName = "EchoComositeTypeXmlSerializerFormatSoapResult";
@@ -2711,7 +2688,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_SoapComplexTypeWithArray()
     {
         string memberName = "EchoComositeTypeXmlSerializerFormatSoapResult";
@@ -2826,7 +2802,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #21724")]
     public static void DerivedTypeWithDifferentOverrides()
     {
         DerivedTypeWithDifferentOverrides value = new DerivedTypeWithDifferentOverrides() { Name1 = "Name1", Name2 = "Name2", Name3 = "Name3", Name4 = "Name4", Name5 = "Name5" };
@@ -2839,7 +2814,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #21724")]
     public static void DerivedTypeWithDifferentOverrides2()
     {
         DerivedTypeWithDifferentOverrides2 value = new DerivedTypeWithDifferentOverrides2() { Name1 = "Name1", Name2 = "Name2", Name3 = "Name3", Name4 = "Name4", Name5 = "Name5", Name6 = "Name6" };
@@ -2954,7 +2928,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #31427")]
     public static void SerializeXmlTextAttributeOnDerivedClass()
     {
         var value = new EnumTestDerived() { Test = TestEnum.On };
@@ -2963,7 +2936,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #31427")]
     public static void SerializePrimitiveXmlTextAttributeOnDerivedClass()
     {
         var value = new PrimiveAttributeTestDerived() { Number = 5 };

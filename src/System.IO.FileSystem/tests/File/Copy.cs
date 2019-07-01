@@ -35,8 +35,9 @@ namespace System.IO.Tests
         public void CopyOntoDirectory()
         {
             string testFile = GetTestFilePath();
+            string targetTestDirectory = Directory.CreateDirectory(GetTestFilePath()).FullName;
             File.Create(testFile).Dispose();
-            Assert.Throws<IOException>(() => Copy(testFile, TestDirectory));
+            Assert.Throws<IOException>(() => Copy(testFile, targetTestDirectory));
         }
 
         [Fact]
@@ -136,7 +137,7 @@ namespace System.IO.Tests
             {
                 char[] readData = new char[data.Length];
                 stream.Read(readData, 0, data.Length);
-                Assert.Equal(data, readData);
+                AssertExtensions.Equal(data, readData);
             }
 
             // Ensure last write/access time on the new file is appropriate
@@ -173,23 +174,6 @@ namespace System.IO.Tests
             InlineData("<"),
             InlineData("\t")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void WindowsInvalidCharsPath_Desktop(string invalid)
-        {
-            string testFile = GetTestFilePath();
-            File.Create(testFile).Dispose();
-
-            Assert.Throws<ArgumentException>(() => Copy(testFile, invalid));
-            Assert.Throws<ArgumentException>(() => Copy(invalid, testFile));
-        }
-
-        [Theory,
-            InlineData("\n"),
-            InlineData(">"),
-            InlineData("<"),
-            InlineData("\t")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsInvalidCharsPath_Core(string invalid)
         {
             string testFile = GetTestFilePath();
@@ -224,7 +208,6 @@ namespace System.IO.Tests
             InlineData("::$DATA", ":bar"),
             InlineData("::$DATA", ":bar:$DATA")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsAlternateDataStream(string defaultStream, string alternateStream)
         {
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
@@ -286,7 +269,7 @@ namespace System.IO.Tests
             {
                 char[] readData = new char[sourceData.Length];
                 stream.Read(readData, 0, sourceData.Length);
-                Assert.Equal(sourceData, readData);
+                AssertExtensions.Equal(sourceData, readData);
             }
         }
 
@@ -312,7 +295,7 @@ namespace System.IO.Tests
             {
                 char[] readData = new char[sourceData.Length];
                 stream.Read(readData, 0, sourceData.Length);
-                Assert.Equal(destData, readData);
+                AssertExtensions.Equal(destData, readData);
             }
         }
 
@@ -322,7 +305,6 @@ namespace System.IO.Tests
             InlineData("::$DATA", ":bar"),
             InlineData("::$DATA", ":bar:$DATA")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void WindowsAlternateDataStreamOverwrite(string defaultStream, string alternateStream)
         {
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());

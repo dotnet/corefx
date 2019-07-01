@@ -1,57 +1,73 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0.
+// See THIRD-PARTY-NOTICES.TXT in the project root for license information.
+
+using System.Diagnostics;
 
 namespace System.Net.Http.HPack
 {
     internal static class IntegerEncoder
     {
-        public static bool Encode(int i, int n, Span<byte> buffer, out int length)
+        /// <summary>
+        /// Encodes an integer into one or more bytes.
+        /// </summary>
+        /// <param name="value">The value to encode. Must not be negative.</param>
+        /// <param name="numBits">The length of the prefix, in bits, to encode <paramref name="value"/> within. Must be between 1 and 8.</param>
+        /// <param name="destination">The destination span to encode <paramref name="value"/> to.</param>
+        /// <param name="bytesWritten">The number of bytes used to encode <paramref name="value"/>.</param>
+        /// <returns>If <paramref name="destination"/> had enough storage to encode <paramref name="value"/>, true. Otherwise, false.</returns>
+        public static bool Encode(int value, int numBits, Span<byte> destination, out int bytesWritten)
         {
-            int j = 0;
-            length = 0;
+            Debug.Assert(value >= 0);
+            Debug.Assert(numBits >= 1 && numBits <= 8);
 
-            if (buffer.Length == 0)
+            if (destination.Length == 0)
             {
+                bytesWritten = 0;
                 return false;
             }
 
-            buffer[j] &= MaskHigh(8 - n);
-            if (i < (1 << n) - 1)
+            destination[0] &= MaskHigh(8 - numBits);
+
+            if (value < (1 << numBits) - 1)
             {
-                buffer[j++] |= (byte)i;
+                destination[0] |= (byte)value;
+
+                bytesWritten = 1;
+                return true;
             }
             else
             {
-                buffer[j++] |= (byte)((1 << n) - 1);
+                destination[0] |= (byte)((1 << numBits) - 1);
 
-                if (j == buffer.Length)
+                if (1 == destination.Length)
                 {
+                    bytesWritten = 0;
                     return false;
                 }
 
-                i = i - ((1 << n) - 1);
-                while (i >= 128)
-                {
-                    buffer[j++] = (byte)(i % 128 + 128);
+                value = value - ((1 << numBits) - 1);
+                int i = 1;
 
-                    if (j > buffer.Length)
+                while (value >= 128)
+                {
+                    destination[i++] = (byte)(value % 128 + 128);
+
+                    if (i >= destination.Length)
                     {
+                        bytesWritten = 0;
                         return false;
                     }
 
-                    i = i / 128;
+                    value = value / 128;
                 }
-                buffer[j++] = (byte)i;
+                destination[i++] = (byte)value;
+
+                bytesWritten = i;
+                return true;
             }
-
-            length = j;
-            return true;
         }
 
-        private static byte MaskHigh(int n)
-        {
-            return (byte)(sbyte.MinValue >> (n - 1));
-        }
+        private static byte MaskHigh(int n) => (byte)(sbyte.MinValue >> (n - 1));
     }
 }

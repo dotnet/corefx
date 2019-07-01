@@ -12,8 +12,6 @@ namespace System
     // Provides Windows-based support for System.Console.
     internal static class ConsolePal
     {
-        private const int DefaultConsoleBufferSize = 256; // default size of buffer used in stream readers/writers
-
         private static IntPtr InvalidHandleValue => new IntPtr(-1);
 
         private static bool IsWindows7()
@@ -136,7 +134,7 @@ namespace System
 
                 default:
                     // This can never happen.
-                    Debug.Assert(false, "Unexpected handleType value (" + handleType + ")");
+                    Debug.Fail("Unexpected handleType value (" + handleType + ")");
                     return true;
             }
         }
@@ -179,7 +177,7 @@ namespace System
                     stream: inputStream,
                     encoding: new ConsoleEncoding(Console.InputEncoding),
                     detectEncodingFromByteOrderMarks: false,
-                    bufferSize: DefaultConsoleBufferSize,
+                    bufferSize: Console.ReadBufferSize,
                     leaveOpen: true));
         }
 
@@ -1245,7 +1243,7 @@ namespace System
 
                         // If the code page could be Unicode, we should use ReadConsole instead, e.g.
                         // Note that WriteConsoleW has a max limit on num of chars to write (64K)
-                        // [http://msdn.microsoft.com/en-us/library/ms687401.aspx]
+                        // [https://docs.microsoft.com/en-us/windows/console/writeconsole]
                         // However, we do not need to worry about that because the StreamWriter in Console has
                         // a much shorter buffer size anyway.
                         int charsWritten;

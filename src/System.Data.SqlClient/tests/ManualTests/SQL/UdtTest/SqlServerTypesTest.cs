@@ -15,7 +15,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public static class SqlServerTypesTest
     {
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void GetSchemaTableTest()
         {
             using (SqlConnection conn = new SqlConnection(DataTestUtility.TcpConnStr))
@@ -39,7 +39,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void GetValueTest()
         {
             using (SqlConnection conn = new SqlConnection(DataTestUtility.TcpConnStr))
@@ -57,7 +57,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestUdtZeroByte()
         {
             using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
@@ -76,13 +76,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestUdtSqlDataReaderGetSqlBytesSequentialAccess()
         {
             TestUdtSqlDataReaderGetSqlBytes(CommandBehavior.SequentialAccess);
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestUdtSqlDataReaderGetSqlBytes()
         {
             TestUdtSqlDataReaderGetSqlBytes(CommandBehavior.Default);
@@ -119,13 +119,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestUdtSqlDataReaderGetBytesSequentialAccess()
         {
             TestUdtSqlDataReaderGetBytes(CommandBehavior.SequentialAccess);
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestUdtSqlDataReaderGetBytes()
         {
             TestUdtSqlDataReaderGetBytes(CommandBehavior.Default);
@@ -175,13 +175,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestUdtSqlDataReaderGetStreamSequentialAccess()
         {
             TestUdtSqlDataReaderGetStream(CommandBehavior.SequentialAccess);
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestUdtSqlDataReaderGetStream()
         {
             TestUdtSqlDataReaderGetStream(CommandBehavior.Default);
@@ -239,7 +239,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestUdtSchemaMetadata()
         {
             using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
@@ -274,6 +274,74 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     Assert.NotNull(column.UdtAssemblyQualifiedName);
                     AssertSqlUdtAssemblyQualifiedName(column.UdtAssemblyQualifiedName, "Microsoft.SqlServer.Types.SqlGeography");
                 }
+            }
+        }
+
+        [ConditionalFact(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
+        public static void TestUdtParameterSetSqlByteValue()
+        {
+            const string ExpectedPointValue = "POINT (1 1)";
+            SqlBytes geometrySqlBytes = null;
+            string actualtPointValue = null;
+
+            using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
+            {
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = $"SELECT geometry::Parse('{ExpectedPointValue}')";
+                    using (var reader = command.ExecuteReader())
+                    {
+                        reader.Read();
+                        geometrySqlBytes = reader.GetSqlBytes(0);
+                    }
+                }
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT @geometry.STAsText()";
+                    var parameter = command.Parameters.AddWithValue("@geometry", geometrySqlBytes);
+                    parameter.SqlDbType = SqlDbType.Udt;
+                    parameter.UdtTypeName = "geometry";
+                    actualtPointValue = Convert.ToString(command.ExecuteScalar());
+                }
+
+                Assert.Equal(ExpectedPointValue, actualtPointValue);
+            }
+        }
+
+        [ConditionalFact(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
+        public static void TestUdtParameterSetRawByteValue()
+        {
+            const string ExpectedPointValue = "POINT (1 1)";
+            byte[] geometryBytes = null;
+            string actualtPointValue = null;
+
+            using (SqlConnection connection = new SqlConnection(DataTestUtility.TcpConnStr))
+            {
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = $"SELECT geometry::Parse('{ExpectedPointValue}')";
+                    using (var reader = command.ExecuteReader())
+                    {
+                        reader.Read();
+                        geometryBytes = reader.GetSqlBytes(0).Buffer;
+                    }
+                }
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT @geometry.STAsText()";
+                    var parameter = command.Parameters.AddWithValue("@geometry", geometryBytes);
+                    parameter.SqlDbType = SqlDbType.Udt;
+                    parameter.UdtTypeName = "geometry";
+                    actualtPointValue = Convert.ToString(command.ExecuteScalar());
+                }
+
+                Assert.Equal(ExpectedPointValue, actualtPointValue);
             }
         }
 

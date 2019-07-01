@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Common.Tests;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Primitives;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.UnitTesting;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.ComponentModel.Composition
@@ -368,22 +370,25 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void Message_ShouldFormatCountOfRootCausesUsingTheCurrentCulture()
         {
-            IEnumerable<CultureInfo> cultures = Expectations.GetCulturesForFormatting();
-
-            foreach (CultureInfo culture in cultures)
+            RemoteExecutor.Invoke(() =>
             {
-                // Save old culture and set a fixed culture for object instantiation
-                using (new ThreadCultureChange(culture))
+                IEnumerable<CultureInfo> cultures = Expectations.GetCulturesForFormatting();
+                foreach (CultureInfo culture in cultures)
                 {
-                    CompositionError[] errors = CreateCompositionErrors(1000);
-                    CompositionException exception = CreateCompositionException(errors);
-                    AssertMessage(exception, 1000, culture);
+                    // Save old culture and set a fixed culture for object instantiation
+                    using (new ThreadCultureChange(culture))
+                    {
+                        CompositionError[] errors = CreateCompositionErrors(1000);
+                        CompositionException exception = CreateCompositionException(errors);
+                        AssertMessage(exception, 1000, culture);
 
-                    errors = CreateCompositionErrors(1);
-                    exception = CreateCompositionException(errors);
-                    AssertMessage(exception, 1, culture);
+                        errors = CreateCompositionErrors(1);
+                        exception = CreateCompositionException(errors);
+                        AssertMessage(exception, 1, culture);
+                    }
                 }
-            }
+                return RemoteExecutor.SuccessExitCode;
+            }).Dispose();
         }
 
         private string GetElementGraphString(CompositionError error)
@@ -402,10 +407,6 @@ namespace System.ComponentModel.Composition
 
         private void AssertMessage(CompositionException exception, int rootCauseCount, CultureInfo culture)
         {
-            if (PlatformDetection.IsNetNative)
-            {
-                return;
-            }
             using (StringReader reader = new StringReader(exception.Message))
             {
                 string line = reader.ReadLine();
@@ -426,10 +427,6 @@ namespace System.ComponentModel.Composition
 
         private void AssertMessage(CompositionException exception, string[] expected)
         {
-            if (PlatformDetection.IsNetNative)
-            {
-                return;
-            }
             using (StringReader reader = new StringReader(exception.Message))
             {
                 // Skip header

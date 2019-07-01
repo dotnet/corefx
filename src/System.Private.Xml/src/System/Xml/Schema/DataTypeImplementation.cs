@@ -16,14 +16,10 @@ namespace System.Xml.Schema
     using System.Xml.Serialization;
     using System.Reflection;
 
-    /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety"]/*' />
     public enum XmlSchemaDatatypeVariety
     {
-        /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety.Atomic"]/*' />
         Atomic,
-        /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety.List"]/*' />
         List,
-        /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety.Union"]/*' />
         Union
     }
 
@@ -445,7 +441,6 @@ namespace System.Xml.Schema
 
         internal override bool IsEqual(object o1, object o2)
         {
-            //Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceVerbose, string.Format("\t\tSchemaDatatype.IsEqual({0}, {1})", o1, o2));
             return Compare(o1, o2) == 0;
         }
 

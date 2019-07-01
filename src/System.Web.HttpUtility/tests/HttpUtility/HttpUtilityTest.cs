@@ -462,7 +462,11 @@ namespace System.Web.Tests
                 new object[] { "http://example.net/\uFFFD", "http://example.net/\uD800" },
                 new object[] { "http://example.net/\uFFFDa", "http://example.net/\uD800a" },
                 new object[] { "http://example.net/\uFFFD", "http://example.net/\uDC00" },
-                new object[] { "http://example.net/\uFFFDa", "http://example.net/\uDC00a" }
+                new object[] { "http://example.net/\uFFFDa", "http://example.net/\uDC00a" },
+                // The "Baz" portion of "http://example.net/Baz" has been double-encoded - one iteration of UrlDecode() should produce a once-encoded string.
+                new object[] { "http://example.net/%42%61%7A", "http://example.net/%2542%2561%257A"},
+                // The second iteration should return the original string
+                new object[] { "http://example.net/Baz", "http://example.net/%42%61%7A"}
             };
 
         public static IEnumerable<object[]> UrlDecodeDataToBytes =>
@@ -752,6 +756,22 @@ namespace System.Web.Tests
         public void UrlPathEncode(string decoded, string encoded)
         {
             Assert.Equal(encoded, HttpUtility.UrlPathEncode(decoded));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("name=foo&desc=foo")]
+        [InlineData("type=foo&type=bar")]
+        [InlineData("name=&desc=foo")]
+        [InlineData("name=&name=foo")]
+        [InlineData("foo&bar")]
+        [InlineData("foo&name=bar")]
+        [InlineData("name=bar&foo&foo")]
+        public void ParseAndToStringMaintainAllKeyValuePairs(string input)
+        {
+            var values = HttpUtility.ParseQueryString(input);
+            var output = values.ToString();
+            Assert.Equal(input, output);
         }
     }
 }

@@ -13,10 +13,10 @@ namespace System.Net.Http
     // is not supported (i.e. before Win8.1/Win2K12R2) in the WinHttpOpen() function.
     internal class WinInetProxyHelper
     {
-        private bool _useProxy = false;
+        private const int RecentAutoDetectionInterval = 120_000; // 2 minutes in milliseconds.
+        private readonly bool _useProxy = false;
         private bool _autoDetectionFailed;
         private int _lastTimeAutoDetectionFailed; // Environment.TickCount units (milliseconds).
-        private const int _recentAutoDetectionInterval = 120_000; // 2 minutes in milliseconds.
 
         public WinInetProxyHelper()
         {
@@ -57,33 +57,23 @@ namespace System.Net.Http
             }
         }
 
-        public string AutoConfigUrl { get; set; }
+        public string AutoConfigUrl { get; }
 
-        public bool AutoDetect { get; set; }
+        public bool AutoDetect { get; }
 
-        public bool AutoSettingsUsed
-        {
-            get
-            {
-                return AutoDetect || !string.IsNullOrEmpty(AutoConfigUrl);
-            }
-        }
+        public bool AutoSettingsUsed => AutoDetect || !string.IsNullOrEmpty(AutoConfigUrl);
 
-        public bool ManualSettingsOnly
-        {
-            get
-            {
-                return !AutoDetect && string.IsNullOrEmpty(AutoConfigUrl) && !string.IsNullOrEmpty(Proxy);
-            }
-        }
+        public bool ManualSettingsUsed => !string.IsNullOrEmpty(Proxy);
 
-        public string Proxy { get; set; }
+        public bool ManualSettingsOnly => !AutoSettingsUsed && ManualSettingsUsed;
 
-        public string ProxyBypass { get; set; }
+        public string Proxy { get; }
+
+        public string ProxyBypass { get; }
 
         public bool RecentAutoDetectionFailure =>
             _autoDetectionFailed &&
-            Environment.TickCount - _lastTimeAutoDetectionFailed <= _recentAutoDetectionInterval;
+            Environment.TickCount - _lastTimeAutoDetectionFailed <= RecentAutoDetectionInterval;
 
         public bool GetProxyForUrl(
             SafeWinHttpHandle sessionHandle,
@@ -113,7 +103,7 @@ namespace System.Net.Http
             autoProxyOptions.Reserved2 = 0;
 
             // AutoProxy Cache.
-            // http://msdn.microsoft.com/en-us/library/windows/desktop/aa383153(v=vs.85).aspx
+            // https://docs.microsoft.com/en-us/windows/desktop/WinHttp/autoproxy-cache
             // If the out-of-process service is active when WinHttpGetProxyForUrl is called, the cached autoproxy
             // URL and script are available to the whole computer. However, if the out-of-process service is used,
             // and the fAutoLogonIfChallenged flag in the pAutoProxyOptions structure is true, then the autoproxy

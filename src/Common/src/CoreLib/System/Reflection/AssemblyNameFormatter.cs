@@ -11,7 +11,7 @@ namespace System.Reflection
 {
     internal static class AssemblyNameFormatter
     {
-        public static string ComputeDisplayName(string name, Version version, string cultureName, byte[] pkt, AssemblyNameFlags flags, AssemblyContentType contentType)
+        public static string ComputeDisplayName(string? name, Version? version, string? cultureName, byte[]? pkt, AssemblyNameFlags flags, AssemblyContentType contentType)
         {
             const int PUBLIC_KEY_TOKEN_LEN = 8;
 

@@ -11,7 +11,6 @@
 **
 ===========================================================*/
 
-using System;
 using System.Threading;
 
 namespace System
@@ -23,7 +22,7 @@ namespace System
         WaitHandle AsyncWaitHandle { get; }
 
 
-        object AsyncState { get; }
+        object? AsyncState { get; }
 
         bool CompletedSynchronously { get; }
     }

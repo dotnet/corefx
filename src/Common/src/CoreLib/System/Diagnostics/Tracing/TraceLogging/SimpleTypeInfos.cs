@@ -28,7 +28,7 @@ namespace System.Diagnostics.Tracing
 
         public override void WriteMetadata(
             TraceLoggingMetadataCollector collector,
-            string name,
+            string? name,
             EventFieldFormat format)
         {
             collector.AddGroup(name);
@@ -39,7 +39,7 @@ namespace System.Diagnostics.Tracing
             return;
         }
 
-        public override object GetData(object value)
+        public override object? GetData(object? value)
         {
             return null;
         }
@@ -63,9 +63,9 @@ namespace System.Diagnostics.Tracing
             this.nativeFormat = nativeFormat;
         }
 
-        public override void WriteMetadata(TraceLoggingMetadataCollector collector, string name, EventFieldFormat format)
+        public override void WriteMetadata(TraceLoggingMetadataCollector collector, string? name, EventFieldFormat format)
         {
-            collector.AddScalar(name, formatFunc(format, nativeFormat));
+            collector.AddScalar(name!, formatFunc(format, nativeFormat));
         }
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
@@ -112,9 +112,9 @@ namespace System.Diagnostics.Tracing
             this.elementSize = elementSize;
         }
 
-        public override void WriteMetadata(TraceLoggingMetadataCollector collector, string name, EventFieldFormat format)
+        public override void WriteMetadata(TraceLoggingMetadataCollector collector, string? name, EventFieldFormat format)
         {
-            collector.AddArray(name, formatFunc(format, nativeFormat));
+            collector.AddArray(name!, formatFunc(format, nativeFormat));
         }
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
@@ -148,20 +148,20 @@ namespace System.Diagnostics.Tracing
 
         public override void WriteMetadata(
             TraceLoggingMetadataCollector collector,
-            string name,
+            string? name,
             EventFieldFormat format)
         {
-            collector.AddNullTerminatedString(name, Statics.MakeDataType(TraceLoggingDataType.Utf16String, format));
+            collector.AddNullTerminatedString(name!, Statics.MakeDataType(TraceLoggingDataType.Utf16String, format));
         }
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
         {
-            collector.AddNullTerminatedString((string)value.ReferenceValue);
+            collector.AddNullTerminatedString((string?)value.ReferenceValue);
         }
         
-        public override object GetData(object value)
+        public override object GetData(object? value)
         {
-            if(value == null)
+            if (value == null)
             {
                 return "";
             }
@@ -179,10 +179,10 @@ namespace System.Diagnostics.Tracing
 
         public override void WriteMetadata(
             TraceLoggingMetadataCollector collector,
-            string name,
+            string? name,
             EventFieldFormat format)
         {
-            collector.AddScalar(name, Statics.MakeDataType(TraceLoggingDataType.FileTime, format));
+            collector.AddScalar(name!, Statics.MakeDataType(TraceLoggingDataType.FileTime, format));
         }
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
@@ -205,7 +205,7 @@ namespace System.Diagnostics.Tracing
     {
         public DateTimeOffsetTypeInfo() : base(typeof(DateTimeOffset)) { }
 
-        public override void WriteMetadata(TraceLoggingMetadataCollector collector, string name, EventFieldFormat format)
+        public override void WriteMetadata(TraceLoggingMetadataCollector collector, string? name, EventFieldFormat format)
         {
             var group = collector.AddGroup(name);
             group.AddScalar("Ticks", Statics.MakeDataType(TraceLoggingDataType.FileTime, format));
@@ -230,10 +230,10 @@ namespace System.Diagnostics.Tracing
 
         public override void WriteMetadata(
             TraceLoggingMetadataCollector collector,
-            string name,
+            string? name,
             EventFieldFormat format)
         {
-            collector.AddScalar(name, Statics.MakeDataType(TraceLoggingDataType.Int64, format));
+            collector.AddScalar(name!, Statics.MakeDataType(TraceLoggingDataType.Int64, format));
         }
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
@@ -251,10 +251,10 @@ namespace System.Diagnostics.Tracing
 
         public override void WriteMetadata(
             TraceLoggingMetadataCollector collector,
-            string name,
+            string? name,
             EventFieldFormat format)
         {
-            collector.AddScalar(name, Statics.MakeDataType(TraceLoggingDataType.Double, format));
+            collector.AddScalar(name!, Statics.MakeDataType(TraceLoggingDataType.Double, format));
         }
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
@@ -269,7 +269,6 @@ namespace System.Diagnostics.Tracing
     internal sealed class NullableTypeInfo : TraceLoggingTypeInfo
     {
         private readonly TraceLoggingTypeInfo valueInfo;
-        private readonly Func<PropertyValue, PropertyValue> hasValueGetter;
         private readonly Func<PropertyValue, PropertyValue> valueGetter;
 
         public NullableTypeInfo(Type type, List<Type> recursionCheck)
@@ -278,13 +277,12 @@ namespace System.Diagnostics.Tracing
             var typeArgs = type.GenericTypeArguments;
             Debug.Assert(typeArgs.Length == 1);
             this.valueInfo = TraceLoggingTypeInfo.GetInstance(typeArgs[0], recursionCheck);
-            this.hasValueGetter = PropertyValue.GetPropertyGetter(type.GetTypeInfo().GetDeclaredProperty("HasValue"));
-            this.valueGetter = PropertyValue.GetPropertyGetter(type.GetTypeInfo().GetDeclaredProperty("Value"));
+            this.valueGetter = PropertyValue.GetPropertyGetter(type.GetTypeInfo().GetDeclaredProperty("Value")!);
         }
 
         public override void WriteMetadata(
             TraceLoggingMetadataCollector collector,
-            string name,
+            string? name,
             EventFieldFormat format)
         {
             var group = collector.AddGroup(name);
@@ -294,9 +292,11 @@ namespace System.Diagnostics.Tracing
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
         {
-            var hasValue = hasValueGetter(value);
+            // It's not currently possible to get the HasValue property of a nullable type through reflection when the
+            // value is null. Instead, we simply check that the nullable is not null.
+            var hasValue = value.ReferenceValue != null;
             collector.AddScalar(hasValue);
-            var val = hasValue.ScalarValue.AsBoolean ? valueGetter(value) : valueInfo.PropertyValueFactory(Activator.CreateInstance(valueInfo.DataType));
+            var val = hasValue ? valueGetter(value) : valueInfo.PropertyValueFactory(Activator.CreateInstance(valueInfo.DataType));
             this.valueInfo.WriteData(collector, val);
         }
     }

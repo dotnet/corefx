@@ -71,7 +71,6 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new Stack());
@@ -90,7 +89,6 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute_NullStack_ThrowsArgumentNullException()
         {
             bool threwNull = false;
@@ -563,7 +561,7 @@ namespace System.Collections.Tests
                 stackMother.Push(i);
             }
 
-            Assert.Equal(typeof(object), stackMother.SyncRoot.GetType());
+            Assert.IsType<Stack>(stackMother.SyncRoot);
 
             Stack stackSon = Stack.Synchronized(stackMother);
             _stackGrandDaughter = Stack.Synchronized(stackSon);

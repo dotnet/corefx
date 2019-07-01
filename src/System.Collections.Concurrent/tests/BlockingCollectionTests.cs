@@ -172,7 +172,6 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void TestDebuggerAttributes()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new BlockingCollection<int>());
@@ -184,7 +183,6 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void TestDebuggerAttributes_Null()
         {
             Type proxyType = DebuggerAttributes.GetProxyType(new BlockingCollection<int>());
@@ -296,7 +294,7 @@ namespace System.Collections.Concurrent.Tests
         /// <param name="numOfElementsPerThread">Number of elements to Add/Take per thread.</param>
         [Theory]
         [InlineData(8, 1024)]
-        private static void TestConcurrentAddTake(int numOfThreads, int numOfElementsPerThread)
+        public static void TestConcurrentAddTake(int numOfThreads, int numOfElementsPerThread)
         {
             //If numOfThreads is not an even number, make it even.
             if ((numOfThreads % 2) != 0)

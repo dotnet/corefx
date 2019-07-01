@@ -115,10 +115,42 @@ namespace System.Security.Cryptography.Pkcs
                 throw new InvalidOperationException(SR.Cryptography_Cms_MessageNotSigned);
             }
 
-            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            try
             {
-                _signedData.Encode(writer);
-                return PkcsHelpers.EncodeContentInfo(writer.Encode(), Oids.Pkcs7Signed);
+                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+                {
+                    _signedData.Encode(writer);
+                    return PkcsHelpers.EncodeContentInfo(writer.Encode(), Oids.Pkcs7Signed);
+                }
+            }
+            catch (CryptographicException) when (!Detached)
+            {
+                // If we can't write the contents back out then the most likely culprit is an
+                // indefinite length encoding in the content field.  To preserve as much input data
+                // as possible while still maintaining our expectations of sorting any SET OF values,
+                // do the following:
+                // * Write the DER normalized version of the SignedData in detached mode.
+                // * BER-decode that structure
+                // * Copy the content field over
+                // * BER-write the modified structure.
+
+                SignedDataAsn copy = _signedData;
+                copy.EncapContentInfo.Content = null;
+                Debug.Assert(_signedData.EncapContentInfo.Content != null);
+
+                using (AsnWriter detachedWriter = new AsnWriter(AsnEncodingRules.DER))
+                {
+                    copy.Encode(detachedWriter);
+                    copy = SignedDataAsn.Decode(detachedWriter.Encode(), AsnEncodingRules.BER);
+                }
+
+                copy.EncapContentInfo.Content = _signedData.EncapContentInfo.Content;
+
+                using (AsnWriter attachedWriter = new AsnWriter(AsnEncodingRules.BER))
+                {
+                    copy.Encode(attachedWriter);
+                    return PkcsHelpers.EncodeContentInfo(attachedWriter.Encode(), Oids.Pkcs7Signed);
+                }
             }
         }
 
@@ -206,12 +238,12 @@ namespace System.Security.Cryptography.Pkcs
             {
                 AsnReader reader = new AsnReader(wrappedContent, AsnEncodingRules.BER);
 
-                if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> inner))
+                if (reader.TryReadPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> inner))
                 {
                     return inner;
                 }
 
-                rented = ArrayPool<byte>.Shared.Rent(wrappedContent.Length);
+                rented = CryptoPool.Rent(wrappedContent.Length);
 
                 if (!reader.TryCopyOctetStringBytes(rented, out bytesWritten))
                 {
@@ -228,8 +260,7 @@ namespace System.Security.Cryptography.Pkcs
             {
                 if (rented != null)
                 {
-                    rented.AsSpan(0, bytesWritten).Clear();
-                    ArrayPool<byte>.Shared.Return(rented);
+                    CryptoPool.Return(rented, bytesWritten);
                 }
             }
 

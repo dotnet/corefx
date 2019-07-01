@@ -10,8 +10,6 @@
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-using System;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System.Threading.Tasks
@@ -36,7 +34,7 @@ namespace System.Threading.Tasks
         /// class with a specified error message.
         /// </summary>
         /// <param name="message">The error message that explains the reason for the exception.</param>
-        public TaskSchedulerException(string message) : base(message)
+        public TaskSchedulerException(string? message) : base(message)
         {
         }
 
@@ -46,7 +44,7 @@ namespace System.Threading.Tasks
         /// this exception.
         /// </summary>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
-        public TaskSchedulerException(Exception innerException)
+        public TaskSchedulerException(Exception? innerException)
             : base(SR.TaskSchedulerException_ctor_DefaultMessage, innerException)
         {
         }
@@ -58,7 +56,7 @@ namespace System.Threading.Tasks
         /// </summary>
         /// <param name="message">The error message that explains the reason for the exception.</param>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
-        public TaskSchedulerException(string message, Exception innerException) : base(message, innerException)
+        public TaskSchedulerException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
 

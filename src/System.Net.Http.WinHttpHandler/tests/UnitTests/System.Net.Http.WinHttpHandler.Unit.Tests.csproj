@@ -4,10 +4,10 @@
     <NoWarn>$(NoWarn);0436</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
-    <Configurations>netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <TargetingPackExclusions Include="System.Net.Http.WinHttpHandler" />
+    <DefaultReferenceExclusions Include="System.Net.Http.WinHttpHandler" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="$(CommonTestPath)\System\Net\SslProtocolSupport.cs">
@@ -28,11 +28,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\UnmanagedCertificateContext.IntPtr.cs">
       <Link>Common\Interop\Windows\SChannel\UnmanagedCertificateContext.IntPtr.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\winhttp\Interop.SafeWinHttpHandle.cs">
-      <Link>Common\Interop\Windows\winhttp\Interop.SafeWinHttpHandle.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\WinHttp\Interop.SafeWinHttpHandle.cs">
+      <Link>Common\Interop\Windows\WinHttp\Interop.SafeWinHttpHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\winhttp\Interop.winhttp_types.cs">
-      <Link>Common\Interop\Windows\winhttp\Interop.winhttp_types.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\WinHttp\Interop.winhttp_types.cs">
+      <Link>Common\Interop\Windows\WinHttp\Interop.winhttp_types.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\CharArrayHelpers.cs">
       <Link>Common\System\CharArrayHelpers.cs</Link>
@@ -127,6 +127,9 @@
     <Compile Include="..\..\src\System\Net\Http\WinInetProxyHelper.cs">
       <Link>ProductionCode\WinInetProxyHelper.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\System.Net.Http\src\System\Net\Http\SocketsHttpHandler\HttpWindowsProxy.cs">
+      <Link>ProductionCode\HttpWindowsProxy.cs</Link>
+    </Compile>
     <Compile Include="APICallHistory.cs" />
     <Compile Include="ClientCertificateHelper.cs" />
     <Compile Include="ClientCertificateScenarioTest.cs" />
@@ -135,6 +138,7 @@
     <Compile Include="FakeRegistry.cs" />
     <Compile Include="FakeSafeWinHttpHandle.cs" />
     <Compile Include="FakeX509Certificates.cs" />
+    <Compile Include="HttpWindowsProxyTest.cs" />
     <Compile Include="SafeWinHttpHandleTest.cs" />
     <Compile Include="SendRequestHelper.cs" />
     <Compile Include="TestServer.cs" />

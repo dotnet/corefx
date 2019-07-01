@@ -4,6 +4,7 @@
 
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -26,8 +27,6 @@ namespace System.Collections.Generic
         private T[] _items; // Do not rename (binary serialization)
         private int _size; // Do not rename (binary serialization)
         private int _version; // Do not rename (binary serialization)
-        [NonSerialized]
-        private object _syncRoot;
 
         private static readonly T[] s_emptyArray = new T[0];
 
@@ -82,7 +81,13 @@ namespace System.Collections.Generic
             {
                 _size = 0;
                 _items = s_emptyArray;
-                AddEnumerable(collection);
+                using (IEnumerator<T> en = collection!.GetEnumerator())
+                {
+                    while (en.MoveNext())
+                    {
+                        Add(en.Current);
+                    }
+                }
             }
         }
 
@@ -136,17 +141,7 @@ namespace System.Collections.Generic
         bool ICollection.IsSynchronized => false;
 
         // Synchronization root for this object.
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                if (_syncRoot == null)
-                {
-                    Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
-                }
-                return _syncRoot;
-            }
-        }
+        object ICollection.SyncRoot => this;
 
         // Sets or Gets the element at the given index.
         public T this[int index]
@@ -172,14 +167,14 @@ namespace System.Collections.Generic
             }
         }
 
-        private static bool IsCompatibleObject(object value)
+        private static bool IsCompatibleObject(object? value)
         {
             // Non-null values are fine.  Only accept nulls if T is a class or Nullable<U>.
             // Note that default(T) is not equal to null for value types except when T is Nullable<U>. 
-            return ((value is T) || (value == null && default(T) == null));
+            return ((value is T) || (value == null && default(T)! == null)); // default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
         }
 
-        object IList.this[int index]
+        object? IList.this[int index]
         {
             get
             {
@@ -191,7 +186,7 @@ namespace System.Collections.Generic
 
                 try
                 {
-                    this[index] = (T)value;
+                    this[index] = (T)value!;
                 }
                 catch (InvalidCastException)
                 {
@@ -231,13 +226,13 @@ namespace System.Collections.Generic
             _items[size] = item;
         }
 
-        int IList.Add(object item)
+        int IList.Add(object? item)
         {
             ThrowHelper.IfNullAndNullsAreIllegalThenThrow<T>(item, ExceptionArgument.item);
 
             try
             {
-                Add((T)item);
+                Add((T)item!);
             }
             catch (InvalidCastException)
             {
@@ -277,7 +272,7 @@ namespace System.Collections.Generic
         // The method uses the Array.BinarySearch method to perform the
         // search.
         // 
-        public int BinarySearch(int index, int count, T item, IComparer<T> comparer)
+        public int BinarySearch(int index, int count, T item, IComparer<T>? comparer)
         {
             if (index < 0)
                 ThrowHelper.ThrowIndexArgumentOutOfRange_NeedNonNegNumException();
@@ -292,7 +287,7 @@ namespace System.Collections.Generic
         public int BinarySearch(T item)
             => BinarySearch(0, Count, item, null);
 
-        public int BinarySearch(T item, IComparer<T> comparer)
+        public int BinarySearch(T item, IComparer<T>? comparer)
             => BinarySearch(0, Count, item, comparer);
 
         // Clears the contents of List.
@@ -332,11 +327,11 @@ namespace System.Collections.Generic
             return _size != 0 && IndexOf(item) != -1;
         }
 
-        bool IList.Contains(object item)
+        bool IList.Contains(object? item)
         {
             if (IsCompatibleObject(item))
             {
-                return Contains((T)item);
+                return Contains((T)item!);
             }
             return false;
         }
@@ -351,7 +346,7 @@ namespace System.Collections.Generic
             List<TOutput> list = new List<TOutput>(_size);
             for (int i = 0; i < _size; i++)
             {
-                list._items[i] = converter(_items[i]);
+                list._items[i] = converter!(_items[i]); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             }
             list._size = _size;
             return list;
@@ -374,7 +369,7 @@ namespace System.Collections.Generic
             try
             {
                 // Array.Copy will check for NULL.
-                Array.Copy(_items, 0, array, arrayIndex, _size);
+                Array.Copy(_items, 0, array!, arrayIndex, _size);
             }
             catch (ArrayTypeMismatchException)
             {
@@ -424,6 +419,7 @@ namespace System.Collections.Generic
         public bool Exists(Predicate<T> match)
             => FindIndex(match) != -1;
 
+        [return: MaybeNull]
         public T Find(Predicate<T> match)
         {
             if (match == null)
@@ -433,12 +429,12 @@ namespace System.Collections.Generic
 
             for (int i = 0; i < _size; i++)
             {
-                if (match(_items[i]))
+                if (match!(_items[i]))
                 {
                     return _items[i];
                 }
             }
-            return default;
+            return default!;
         }
 
         public List<T> FindAll(Predicate<T> match)
@@ -451,7 +447,7 @@ namespace System.Collections.Generic
             List<T> list = new List<T>();
             for (int i = 0; i < _size; i++)
             {
-                if (match(_items[i]))
+                if (match!(_items[i])) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 {
                     list.Add(_items[i]);
                 }
@@ -485,11 +481,12 @@ namespace System.Collections.Generic
             int endIndex = startIndex + count;
             for (int i = startIndex; i < endIndex; i++)
             {
-                if (match(_items[i])) return i;
+                if (match!(_items[i])) return i;
             }
             return -1;
         }
 
+        [return: MaybeNull]
         public T FindLast(Predicate<T> match)
         {
             if (match == null)
@@ -499,12 +496,12 @@ namespace System.Collections.Generic
 
             for (int i = _size - 1; i >= 0; i--)
             {
-                if (match(_items[i]))
+                if (match!(_items[i]))
                 {
                     return _items[i];
                 }
             }
-            return default;
+            return default!;
         }
 
         public int FindLastIndex(Predicate<T> match)
@@ -546,7 +543,7 @@ namespace System.Collections.Generic
             int endIndex = startIndex - count;
             for (int i = startIndex; i > endIndex; i--)
             {
-                if (match(_items[i]))
+                if (match!(_items[i])) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 {
                     return i;
                 }
@@ -569,7 +566,7 @@ namespace System.Collections.Generic
                 {
                     break;
                 }
-                action(_items[i]);
+                action!(_items[i]);
             }
 
             if (version != _version)
@@ -625,11 +622,11 @@ namespace System.Collections.Generic
         public int IndexOf(T item)
             => Array.IndexOf(_items, item, 0, _size);
 
-        int IList.IndexOf(object item)
+        int IList.IndexOf(object? item)
         {
             if (IsCompatibleObject(item))
             {
-                return IndexOf((T)item);
+                return IndexOf((T)item!);
             }
             return -1;
         }
@@ -691,13 +688,13 @@ namespace System.Collections.Generic
             _version++;
         }
 
-        void IList.Insert(int index, object item)
+        void IList.Insert(int index, object? item)
         {
             ThrowHelper.IfNullAndNullsAreIllegalThenThrow<T>(item, ExceptionArgument.item);
 
             try
             {
-                Insert(index, (T)item);
+                Insert(index, (T)item!);
             }
             catch (InvalidCastException)
             {
@@ -748,21 +745,15 @@ namespace System.Collections.Generic
                     _size += count;
                 }
             }
-            else if (index < _size)
+            else
             {
-                // We're inserting a lazy enumerable. Call Insert on each of the constituent items.
-                using (IEnumerator<T> en = collection.GetEnumerator())
+                using (IEnumerator<T> en = collection!.GetEnumerator()) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 {
                     while (en.MoveNext())
                     {
                         Insert(index++, en.Current);
                     }
                 }
-            }
-            else
-            {
-                // We're adding a lazy enumerable because the index is at the end of this list.
-                AddEnumerable(collection);
             }
             _version++;
         }
@@ -856,11 +847,11 @@ namespace System.Collections.Generic
             return false;
         }
 
-        void IList.Remove(object item)
+        void IList.Remove(object? item)
         {
             if (IsCompatibleObject(item))
             {
-                Remove((T)item);
+                Remove((T)item!);
             }
         }
 
@@ -876,14 +867,14 @@ namespace System.Collections.Generic
             int freeIndex = 0;   // the first free slot in items array
 
             // Find the first item which needs to be removed.
-            while (freeIndex < _size && !match(_items[freeIndex])) freeIndex++;
+            while (freeIndex < _size && !match!(_items[freeIndex])) freeIndex++; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             if (freeIndex >= _size) return 0;
 
             int current = freeIndex + 1;
             while (current < _size)
             {
                 // Find the first item which needs to be kept.
-                while (current < _size && match(_items[current])) current++;
+                while (current < _size && match!(_items[current])) current++;
 
                 if (current < _size)
                 {
@@ -918,7 +909,7 @@ namespace System.Collections.Generic
             }
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                _items[_size] = default;
+                _items[_size] = default!;
             }
             _version++;
         }
@@ -993,7 +984,7 @@ namespace System.Collections.Generic
 
         // Sorts the elements in this list.  Uses Array.Sort with the
         // provided comparer.
-        public void Sort(IComparer<T> comparer)
+        public void Sort(IComparer<T>? comparer)
             => Sort(0, Count, comparer);
 
         // Sorts the elements in a section of this list. The sort compares the
@@ -1004,7 +995,7 @@ namespace System.Collections.Generic
         // 
         // This method uses the Array.Sort method to sort the elements.
         // 
-        public void Sort(int index, int count, IComparer<T> comparer)
+        public void Sort(int index, int count, IComparer<T>? comparer)
         {
             if (index < 0)
             {
@@ -1035,7 +1026,7 @@ namespace System.Collections.Generic
 
             if (_size > 1)
             {
-                ArraySortHelper<T>.Sort(_items, 0, _size, comparison);
+                ArraySortHelper<T>.Sort(_items, 0, _size, comparison!); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             }
             _version++;
         }
@@ -1081,7 +1072,7 @@ namespace System.Collections.Generic
 
             for (int i = 0; i < _size; i++)
             {
-                if (!match(_items[i]))
+                if (!match!(_items[i]))
                 {
                     return false;
                 }
@@ -1089,44 +1080,19 @@ namespace System.Collections.Generic
             return true;
         }
 
-        private void AddEnumerable(IEnumerable<T> enumerable)
-        {
-            Debug.Assert(enumerable != null);
-            Debug.Assert(!(enumerable is ICollection<T>), "We should have optimized for this beforehand.");
-
-            _version++; // Even if the enumerable has no items, we can update _version.
-            using (IEnumerator<T> en = enumerable.GetEnumerator())
-            {
-
-                while (en.MoveNext())
-                {
-                    // Capture Current before doing anything else. If this throws
-                    // an exception, we want to make a clean break.
-                    T current = en.Current;
-
-                    if (_size == _items.Length)
-                    {
-                        EnsureCapacity(_size + 1);
-                    }
-
-                    _items[_size++] = current;
-                }
-            }
-        }
-
         public struct Enumerator : IEnumerator<T>, IEnumerator
         {
             private readonly List<T> _list;
             private int _index;
             private readonly int _version;
-            private T _current;
+            [AllowNull, MaybeNull] private T _current;
 
             internal Enumerator(List<T> list)
             {
                 _list = list;
                 _index = 0;
                 _version = list._version;
-                _current = default;
+                _current = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
             }
 
             public void Dispose()
@@ -1154,13 +1120,13 @@ namespace System.Collections.Generic
                 }
 
                 _index = _list._size + 1;
-                _current = default;
+                _current = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
                 return false;
             }
 
-            public T Current => _current;
+            public T Current => _current!;
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get
                 {
@@ -1180,7 +1146,7 @@ namespace System.Collections.Generic
                 }
 
                 _index = 0;
-                _current = default;
+                _current = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
             }
         }
     }

@@ -27,7 +27,7 @@ namespace System.IO.Pipes
         private PipeTransmissionMode _readMode;
         private PipeTransmissionMode _transmissionMode;
         private PipeDirection _pipeDirection;
-        private int _outBufferSize;
+        private uint _outBufferSize;
         private PipeState _state;
 
         protected PipeStream(PipeDirection direction, int bufferSize)
@@ -41,7 +41,7 @@ namespace System.IO.Pipes
                 throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
-            Init(direction, PipeTransmissionMode.Byte, bufferSize);
+            Init(direction, PipeTransmissionMode.Byte, (uint)bufferSize);
         }
 
         protected PipeStream(PipeDirection direction, PipeTransmissionMode transmissionMode, int outBufferSize)
@@ -59,10 +59,10 @@ namespace System.IO.Pipes
                 throw new ArgumentOutOfRangeException(nameof(outBufferSize), SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
-            Init(direction, transmissionMode, outBufferSize);
+            Init(direction, transmissionMode, (uint)outBufferSize);
         }
 
-        private void Init(PipeDirection direction, PipeTransmissionMode transmissionMode, int outBufferSize)
+        private void Init(PipeDirection direction, PipeTransmissionMode transmissionMode, uint outBufferSize)
         {
             Debug.Assert(direction >= PipeDirection.In && direction <= PipeDirection.InOut, "invalid pipe direction");
             Debug.Assert(transmissionMode >= PipeTransmissionMode.Byte && transmissionMode <= PipeTransmissionMode.Message, "transmissionMode is out of range");
@@ -168,7 +168,7 @@ namespace System.IO.Pipes
                 return s_zeroTask;
             }
 
-            return ReadAsyncCore(new Memory<byte>(buffer, offset, count), cancellationToken);
+            return ReadAsyncCore(new Memory<byte>(buffer, offset, count), cancellationToken).AsTask();
         }
 
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
@@ -196,7 +196,7 @@ namespace System.IO.Pipes
                 return new ValueTask<int>(0);
             }
 
-            return new ValueTask<int>(ReadAsyncCore(buffer, cancellationToken));
+            return ReadAsyncCore(buffer, cancellationToken);
         }
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -340,16 +340,6 @@ namespace System.IO.Pipes
             Debug.Assert(!handle.IsClosed, "handle is closed");
         }
 
-        [Conditional("DEBUG")]
-        private static void DebugAssertReadWriteArgs(byte[] buffer, int offset, int count, SafePipeHandle handle)
-        {
-            Debug.Assert(buffer != null, "buffer is null");
-            Debug.Assert(offset >= 0, "offset is negative");
-            Debug.Assert(count >= 0, "count is negative");
-            Debug.Assert(offset <= buffer.Length - count, "offset + count is too big");
-            DebugAssertHandleValid(handle);
-        }
-
         // Reads a byte from the pipe stream.  Returns the byte cast to an int
         // or -1 if the connection has been broken.
         public override unsafe int ReadByte()
@@ -376,9 +366,15 @@ namespace System.IO.Pipes
 
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
-            // Just throw exceptions -- we do no I/O in this method.
-            Flush();
-            return Task.CompletedTask;
+            try
+            {
+                Flush();
+                return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                return Task.FromException(ex);
+            }
         }
 
         protected override void Dispose(bool disposing)

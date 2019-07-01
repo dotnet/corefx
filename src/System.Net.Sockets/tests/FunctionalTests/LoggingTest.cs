@@ -5,15 +5,22 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
-    public class LoggingTest : RemoteExecutorTestBase
+    public class LoggingTest
     {
+        public readonly ITestOutputHelper _output;
+
+        public LoggingTest(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact]
-        [ActiveIssue(20470, TargetFrameworkMonikers.UapAot)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core.")]
         public static void EventSource_ExistsWithCorrectId()
         {
             Type esType = typeof(Socket).Assembly.GetType("System.Net.NetEventSource", throwOnError: true, ignoreCase: false);
@@ -27,11 +34,9 @@ namespace System.Net.Sockets.Tests
 
         [OuterLoop]
         [Fact]
-        [ActiveIssue(20470, TargetFrameworkMonikers.UapAot)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core.")]
         public void EventSource_EventsRaisedAsExpected()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var listener = new TestEventListener("Microsoft-System-Net-Sockets", EventLevel.Verbose))
                 {
@@ -40,17 +45,17 @@ namespace System.Net.Sockets.Tests
                     {
                         // Invoke several tests to execute code paths while tracing is enabled
 
-                        new SendReceiveSync().SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
-                        new SendReceiveSync().SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
+                        new SendReceiveSync(null).SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
+                        new SendReceiveSync(null).SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
 
-                        new SendReceiveTask().SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
-                        new SendReceiveTask().SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
+                        new SendReceiveTask(null).SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
+                        new SendReceiveTask(null).SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
 
-                        new SendReceiveEap().SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
-                        new SendReceiveEap().SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
+                        new SendReceiveEap(null).SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
+                        new SendReceiveEap(null).SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
 
-                        new SendReceiveApm().SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
-                        new SendReceiveApm().SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
+                        new SendReceiveApm(null).SendRecv_Stream_TCP(IPAddress.Loopback, false).GetAwaiter();
+                        new SendReceiveApm(null).SendRecv_Stream_TCP(IPAddress.Loopback, true).GetAwaiter();
 
                         new NetworkStreamTest().CopyToAsync_AllDataCopied(4096).GetAwaiter().GetResult();
                         new NetworkStreamTest().Timeout_ValidData_Roundtrips().GetAwaiter().GetResult();
@@ -58,7 +63,7 @@ namespace System.Net.Sockets.Tests
                     Assert.DoesNotContain(events, ev => ev.EventId == 0); // errors from the EventSource itself
                     Assert.InRange(events.Count, 1, int.MaxValue);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
     }

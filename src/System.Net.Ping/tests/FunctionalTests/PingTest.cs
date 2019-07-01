@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.DotNet.XUnitExtensions;
+using System.Linq;
 using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Runtime.InteropServices;
@@ -9,12 +11,15 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.NetworkInformation.Tests
 {
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Ping class not supported on UWP. See dotnet/corefx #19583")]
     public class PingTest
     {
+        public readonly ITestOutputHelper _output;
+
         private class FinalizingPing : Ping
         {
             public static volatile bool WasFinalized;
@@ -35,18 +40,39 @@ namespace System.Net.NetworkInformation.Tests
             }
         }
 
-        private static void PingResultValidator(PingReply pingReply, IPAddress localIpAddress)
+        public PingTest(ITestOutputHelper output)
         {
-            if (pingReply.Status == IPStatus.TimedOut)
+            _output = output;
+        }
+
+        private void PingResultValidator(PingReply pingReply, IPAddress localIpAddress)
+        {
+            PingResultValidator(pingReply, new IPAddress[] { localIpAddress });
+        }
+
+        private void PingResultValidator(PingReply pingReply, IPAddress[] localIpAddresses)
+        {
+            if (pingReply.Status == IPStatus.TimedOut && pingReply.Address.AddressFamily == AddressFamily.InterNetworkV6 && PlatformDetection.IsOSX)
             {
                 // Workaround OSX ping6 bug, refer issue #15018
-                Assert.Equal(AddressFamily.InterNetworkV6, localIpAddress.AddressFamily);
-                Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
                 return;
             }
 
             Assert.Equal(IPStatus.Success, pingReply.Status);
-            Assert.True(pingReply.Address.Equals(localIpAddress));
+            if (localIpAddresses.Any(addr => pingReply.Address.Equals(addr)))
+            {
+                // response did come from expected address. Test will pass.
+                return;
+            }
+            // We did not find response address in given list.
+            // Test is going to fail. Collect some more info.
+            _output.WriteLine($"Reply address {pingReply.Address} is not expected local address.");
+            foreach (IPAddress address in localIpAddresses)
+            {
+                _output.WriteLine($"Local address {address}");
+            }
+
+            Assert.Contains(pingReply.Address, localIpAddresses); ///, "Reply address {pingReply.Address} is not expected local address.");
         }
 
         [Fact]
@@ -382,52 +408,52 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public void SendPingWithHost()
         {
-            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+            IPAddress[] localIpAddresses = TestSettings.GetLocalIPAddresses();
 
             SendBatchPing(
                 (ping) => ping.Send(TestSettings.LocalHost),
                 (pingReply) =>
                 {
-                    PingResultValidator(pingReply, localIpAddress);
+                    PingResultValidator(pingReply, localIpAddresses);
                 });
         }
 
         [Fact]
         public async Task SendPingAsyncWithHost()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
+            IPAddress[] localIpAddresses = await TestSettings.GetLocalIPAddressesAsync();
 
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(TestSettings.LocalHost),
                 (pingReply) =>
                 {
-                    PingResultValidator(pingReply, localIpAddress);
+                    PingResultValidator(pingReply, localIpAddresses);
                 });
         }
 
         [Fact]
         public void SendPingWithHostAndTimeout()
         {
-            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+            IPAddress[] localIpAddresses = TestSettings.GetLocalIPAddresses();
 
             SendBatchPing(
                 (ping) => ping.Send(TestSettings.LocalHost, TestSettings.PingTimeout),
                 (pingReply) =>
                 {
-                    PingResultValidator(pingReply, localIpAddress);
+                    PingResultValidator(pingReply, localIpAddresses);
                 });
         }
 
         [Fact]
         public async Task SendPingAsyncWithHostAndTimeout()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
+            IPAddress[] localIpAddresses = await TestSettings.GetLocalIPAddressesAsync();
 
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(TestSettings.LocalHost, TestSettings.PingTimeout),
                 (pingReply) =>
                 {
-                    PingResultValidator(pingReply, localIpAddress);
+                    PingResultValidator(pingReply, localIpAddresses);
                 });
         }
 
@@ -467,17 +493,17 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public void SendPingWithHostAndTimeoutAndBuffer_Unix()
         {
-            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+            IPAddress[] localIpAddresses = TestSettings.GetLocalIPAddresses();
 
             byte[] buffer = TestSettings.PayloadAsBytes;
             SendBatchPing(
                 (ping) => ping.Send(TestSettings.LocalHost, TestSettings.PingTimeout, buffer),
                 (pingReply) =>
                 {
-                    PingResultValidator(pingReply, localIpAddress);
+                    PingResultValidator(pingReply, localIpAddresses);
 
                     // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
+                    if (Capability.CanUseRawSockets(pingReply.Address.AddressFamily))
                     {
                         Assert.Equal(buffer, pingReply.Buffer);
                     }
@@ -492,17 +518,17 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBuffer_Unix()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
+            IPAddress[] localIpAddresses = await TestSettings.GetLocalIPAddressesAsync();
 
             byte[] buffer = TestSettings.PayloadAsBytes;
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(TestSettings.LocalHost, TestSettings.PingTimeout, buffer),
                 (pingReply) =>
                 {
-                    PingResultValidator(pingReply, localIpAddress);
+                    PingResultValidator(pingReply, localIpAddresses);
 
                     // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
+                    if (Capability.CanUseRawSockets(pingReply.Address.AddressFamily))
                     {
                         Assert.Equal(buffer, pingReply.Buffer);
                     }
@@ -551,17 +577,17 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public void SendPingWithHostAndTimeoutAndBufferAndPingOptions_Unix()
         {
-            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+            IPAddress[] localIpAddresses = TestSettings.GetLocalIPAddresses();
 
             byte[] buffer = TestSettings.PayloadAsBytes;
             SendBatchPing(
                 (ping) => ping.Send(TestSettings.LocalHost, TestSettings.PingTimeout, buffer, new PingOptions()),
                 (pingReply) =>
                 {
-                    PingResultValidator(pingReply, localIpAddress);
+                    PingResultValidator(pingReply, localIpAddresses);
 
                     // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
+                    if (Capability.CanUseRawSockets(pingReply.Address.AddressFamily))
                     {
                         Assert.Equal(buffer, pingReply.Buffer);
                     }
@@ -576,17 +602,17 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBufferAndPingOptions_Unix()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
+            IPAddress[] localIpAddresses = await TestSettings.GetLocalIPAddressesAsync();
 
             byte[] buffer = TestSettings.PayloadAsBytes;
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(TestSettings.LocalHost, TestSettings.PingTimeout, buffer, new PingOptions()),
                 (pingReply) =>
                 {
-                    PingResultValidator(pingReply, localIpAddress);
+                    PingResultValidator(pingReply, localIpAddresses);
 
                     // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
+                    if (Capability.CanUseRawSockets(pingReply.Address.AddressFamily))
                     {
                         Assert.Equal(buffer, pingReply.Buffer);
                     }
@@ -598,39 +624,39 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        public static async Task SendPings_ReuseInstance_Hostname()
+        public async Task SendPings_ReuseInstance_Hostname()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
+            IPAddress[] localIpAddresses = await TestSettings.GetLocalIPAddressesAsync();
 
             using (Ping p = new Ping())
             {
                 for (int i = 0; i < 3; i++)
                 {
                     PingReply pingReply = await p.SendPingAsync(TestSettings.LocalHost);
-                    PingResultValidator(pingReply, localIpAddress);
+                    PingResultValidator(pingReply, localIpAddresses);
                 }
             }
         }
 
         [Fact]
-        public static async Task Sends_ReuseInstance_Hostname()
+        public async Task Sends_ReuseInstance_Hostname()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
+            IPAddress[] localIpAddresses = await TestSettings.GetLocalIPAddressesAsync();
 
             using (Ping p = new Ping())
             {
                 for (int i = 0; i < 3; i++)
                 {
                     PingReply pingReply = p.Send(TestSettings.LocalHost);
-                    PingResultValidator(pingReply, localIpAddress);
+                    PingResultValidator(pingReply, localIpAddresses);
                 }
             }
         }
 
         [Fact]
-        public static async Task SendAsyncs_ReuseInstance_Hostname()
+        public async Task SendAsyncs_ReuseInstance_Hostname()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
+            IPAddress[] localIpAddresses = await TestSettings.GetLocalIPAddressesAsync();
 
             using (Ping p = new Ping())
             {
@@ -655,7 +681,7 @@ namespace System.Net.NetworkInformation.Tests
                     await tcs.Task;
 
                     Assert.NotNull(ea);
-                    PingResultValidator(ea.Reply, localIpAddress);
+                    PingResultValidator(ea.Reply, localIpAddresses);
                 }
 
                 // Several canceled iterations
@@ -759,5 +785,56 @@ namespace System.Net.NetworkInformation.Tests
             GC.WaitForPendingFinalizers();
             Assert.True(FinalizingPing.WasFinalized);
         }
-    }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task SendPingAsyncWithHostAndTtlAndFragmentPingOptions(bool fragment)
+        {
+            IPAddress[] localIpAddresses = await TestSettings.GetLocalIPAddressesAsync();
+
+            byte[] buffer = TestSettings.PayloadAsBytes;
+
+            PingOptions  options = new PingOptions();
+            options.Ttl = 32;
+            options.DontFragment = fragment;
+
+            await SendBatchPingAsync(
+                (ping) => ping.SendPingAsync(TestSettings.LocalHost, TestSettings.PingTimeout, buffer, options),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddresses);
+                });
+        }
+
+        [ConditionalFact]
+        [OuterLoop] // Depends on external host and assumption that network respects and does not change TTL
+        public async Task SendPingToExternalHostWithLowTtlTest()
+        {
+            string host = System.Net.Test.Common.Configuration.Ping.PingHost;
+            PingReply pingReply;
+            PingOptions options = new PingOptions();
+            bool reachable = false;
+
+            Ping ping = new Ping();
+            for (int i = 0; i < s_pingcount; i++)
+            {
+                pingReply = await ping.SendPingAsync(host, TestSettings.PingTimeout, TestSettings.PayloadAsBytesShort);
+                if (pingReply.Status == IPStatus.Success)
+                {
+                    reachable = true;
+                    break;
+                }
+            }
+            if (!reachable)
+            {
+                throw new SkipTestException($"Host {host} is not reachable. Skipping test.");
+            }
+
+            options.Ttl = 1;
+            // This should always fail unless host is one IP hop away.
+            pingReply = await ping.SendPingAsync(host, TestSettings.PingTimeout, TestSettings.PayloadAsBytesShort, options);
+            Assert.NotEqual(IPStatus.Success, pingReply.Status);
+        }
+     }
 }

@@ -7,11 +7,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Threading.Tests
 {
-    public class MutexTests : RemoteExecutorTestBase
+    public class MutexTests : FileCleanupTestBase
     {
         [Fact]
         public void Ctor_ConstructWaitRelease()
@@ -34,13 +35,6 @@ namespace System.Threading.Tests
                 m.ReleaseMutex();
                 m.ReleaseMutex();
             }
-        }
-
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Full framework throws argument exception on long names")]
-        [Fact]
-        public void Ctor_InvalidNames_Windows()
-        {
-            AssertExtensions.Throws<ArgumentException>("name", null, () => new Mutex(false, new string('a', 1000), out bool createdNew));
         }
 
         [Fact]
@@ -78,9 +72,6 @@ namespace System.Threading.Tests
 
         [PlatformSpecific(TestPlatforms.Windows)]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't create global objects in appcontainer
-        [SkipOnTargetFramework(
-            TargetFrameworkMonikers.NetFramework,
-            "The fix necessary for this test (PR https://github.com/dotnet/coreclr/pull/12381) is not in the .NET Framework.")]
         public void Ctor_ImpersonateAnonymousAndTryCreateGlobalMutexTest()
         {
             ThreadTestHelpers.RunTestInBackgroundThread(() =>
@@ -246,11 +237,11 @@ namespace System.Threading.Tests
 
                         IncrementValueInFileNTimes(mutex, f, 10);
                     }
-                    return SuccessExitCode;
+                    return RemoteExecutor.SuccessExitCode;
                 };
 
                 using (var mutex = new Mutex(false, mutexName))
-                using (var remote = RemoteInvoke(otherProcess, mutexName, fileName))
+                using (var remote = RemoteExecutor.Invoke(otherProcess, mutexName, fileName))
                 {
                     SpinWait.SpinUntil(() => File.Exists(fileName), ThreadTestHelpers.UnexpectedTimeoutMilliseconds);
 
@@ -280,7 +271,7 @@ namespace System.Threading.Tests
         {
             var names  =  new TheoryData<string>() { Guid.NewGuid().ToString("N") };
 
-            if (PlatformDetection.IsWindows && !PlatformDetection.IsFullFramework)
+            if (PlatformDetection.IsWindows)
                 names.Add(Guid.NewGuid().ToString("N") + new string('a', 1000));
 
             return names;

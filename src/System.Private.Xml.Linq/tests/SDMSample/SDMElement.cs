@@ -393,14 +393,22 @@ namespace XDocumentTests.SDMSample
             // Test various values.
             XElement e1 = new XElement("x");
             XElement e2 = new XElement("x", "bogus");
-            XElement e3 = new XElement("x", "5e+500");
             XElement e4 = new XElement("x", "5.0");
 
             Assert.Throws<FormatException>(() => (float)e1);
             Assert.Throws<FormatException>(() => (float)e2);
-            Assert.Throws<OverflowException>(() => (float)e3);
 
             Assert.Equal(5.0f, (float)e4);
+        }
+
+        /// <summary>
+        /// Validates the explicit float conversion operator on XElement.
+        /// </summary>
+        [Fact]
+        public void ElementExplicitToFloat_NotNetFramework()
+        {
+            XElement e3 = new XElement("x", "5e+500");
+            Assert.Equal(float.PositiveInfinity, (float)e3);
         }
 
         /// <summary>
@@ -415,14 +423,22 @@ namespace XDocumentTests.SDMSample
             // Test various values.
             XElement e1 = new XElement("x");
             XElement e2 = new XElement("x", "bogus");
-            XElement e3 = new XElement("x", "5e+5000");
             XElement e4 = new XElement("x", "5.0");
 
             Assert.Throws<FormatException>(() => (double)e1);
             Assert.Throws<FormatException>(() => (double)e2);
-            Assert.Throws<OverflowException>(() => (double)e3);
 
             Assert.Equal(5.0, (double)e4);
+        }
+
+        /// <summary>
+        /// Validates the explicit double conversion operator on XElement.
+        /// </summary>
+        [Fact]
+        public void ElementExplicitToDouble_NotNetFramework()
+        {
+            XElement e3 = new XElement("x", "5e+5000");
+            Assert.Equal(double.PositiveInfinity, (double)e3);
         }
 
         /// <summary>

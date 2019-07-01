@@ -9,7 +9,7 @@ Each project is analyzed against one of two possible lists we maintain.
 ## Legal UWP API's
 
 ### Applies to
-This applies to product libraries that are being built for use in a modern Windows app (aka UWP app, or app running on UAP). When building the `uapaot` or `uap` configurations we will apply this check. If the library does not have a `uap` or `uapaot` configuration explicitly listed in `Configuration.props` in the project folder, when targeting `uap` or `uapaot` we will build the `netstandard` configuration, and apply this check.
+This applies to product libraries that are being built for use in a modern Windows app (aka UWP app, or app running on UAP). When building the `uap` configurations we will apply this check. If the library does not have a `uap` configuration explicitly listed in `Configuration.props` in the project folder, when targeting `uap` we will build the `netstandard` configuration, and apply this check.
 
 We do not currently apply this check to test binaries. Although when testing UWP libraries the tests must run within a test app, they do not need to pass through the store validation process. It is still possible they may call an API that does not work correctly within an app's security boundary and that call would have to be avoided.
 
@@ -36,4 +36,4 @@ We do not currently apply this check to test binaries as they do not need to run
 ### Implementation
 To enforce this the analyzer consults the list [here](https://github.com/dotnet/buildtools/blob/master/src/Microsoft.DotNet.CodeAnalysis/PackageFiles/PinvokeAnalyzer_Win32Apis.txt). 
 
-The analyzer is enabled by default when building for Windows, not a test, and not building for UWP. We aim to make all such configurations OneCore compilant, but in the rare cases where a library cannot be, the check can be disabled with `<EnablePInvokeAnalyzer>false<EnablePInvokeAnalyzer>` in the project file.
+The analyzer is enabled by default when building for Windows, not a test, and not building for UWP. We aim to make all such configurations OneCore compliant, but in the rare cases where a library cannot be, the check can be disabled with `<EnablePInvokeAnalyzer>false<EnablePInvokeAnalyzer>` in the project file.

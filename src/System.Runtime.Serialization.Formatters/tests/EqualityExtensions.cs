@@ -25,6 +25,11 @@ using System.Security;
 using System.Threading;
 using Xunit;
 
+// System.Text.Json is a .NET Core 3.0 specific library
+#if netcoreapp
+using System.Text.Json;
+#endif
+
 namespace System.Runtime.Serialization.Formatters.Tests
 {
     public static class EqualityExtensions
@@ -113,7 +118,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             try
             {
                 eA = (@this as IEnumerable).GetEnumerator();
-                eB = (@this as IEnumerable).GetEnumerator();
+                eB = (other as IEnumerable).GetEnumerator();
                 while (true)
                 {
                     bool moved = eA.MoveNext();
@@ -158,7 +163,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         public static void IsEqual<T>(this WeakReference<T> @this, WeakReference<T> other, bool isSamePlatform)
             where T : class
         {
-            if(@this == null && other == null)
+            if (@this == null && other == null)
                 return;
 
             Assert.NotNull(@this);
@@ -242,6 +247,13 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.Equal(@this.MinimumCapacity, other.MinimumCapacity);
         }
 
+        public static void IsEqual(this DateTime @this, DateTime other, bool isSamePlatform)
+        {
+            // DateTime's Equals ignores Kind
+            Assert.Equal(@this.Kind, other.Kind);
+            Assert.Equal(@this.Ticks, other.Ticks);
+        }
+
         public static void IsEqual(this Comparer @this, Comparer other, bool isSamePlatform)
         {
             if (@this == null && other == null)
@@ -249,7 +261,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             Assert.NotNull(@this);
             Assert.NotNull(other);
-            
+
             // The compareInfos are internal and get reflection blocked on .NET Native, so use
             // GetObjectData to get them
             SerializationInfo thisInfo = new SerializationInfo(typeof(Comparer), new FormatterConverter());
@@ -259,10 +271,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
             SerializationInfo otherInfo = new SerializationInfo(typeof(Comparer), new FormatterConverter());
             other.GetObjectData(otherInfo, new StreamingContext());
             CompareInfo otherCompareInfo = (CompareInfo)otherInfo.GetValue("CompareInfo", typeof(CompareInfo));
-            
+
             Assert.Equal(thisCompareInfo, otherCompareInfo);
         }
-        
+
         public static void IsEqual(this DictionaryEntry @this, DictionaryEntry other, bool isSamePlatform)
         {
             CheckEquals(@this.Key, other.Key, isSamePlatform);
@@ -947,9 +959,15 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.NotNull(@this);
             Assert.NotNull(other);
             Assert.Equal(@this.Id, other.Id);
-            Assert.Equal(@this.DisplayName, other.DisplayName);
-            Assert.Equal(@this.StandardName, other.StandardName);
-            Assert.Equal(@this.DaylightName, other.DaylightName);
+
+            if (isSamePlatform)
+            {
+                // These properties can change in between TFMs.
+                Assert.Equal(@this.DisplayName, other.DisplayName);
+                Assert.Equal(@this.StandardName, other.StandardName);
+                Assert.Equal(@this.DaylightName, other.DaylightName);
+            }
+
             Assert.Equal(@this.BaseUtcOffset, other.BaseUtcOffset);
             Assert.Equal(@this.SupportsDaylightSavingTime, other.SupportsDaylightSavingTime);
         }
@@ -1144,7 +1162,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 CheckEquals(@this.InnerException, other.InnerException, isSamePlatform);
             }
 
-            if (!PlatformDetection.IsFullFramework && !PlatformDetection.IsNetNative)
+            if (!PlatformDetection.IsFullFramework)
             {
                 // Different by design for those exceptions
                 if (!((@this is NetworkInformationException || @this is SocketException) && !isSamePlatform))
@@ -1158,9 +1176,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     @this is XmlSyntaxException ||
                     @this is ThreadAbortException) && !isSamePlatform))
                 {
-                    if (!(@this is ActiveDirectoryServerDownException || 
-                        @this is SqlException || 
-                        @this is NetworkInformationException || 
+                    if (!(@this is ActiveDirectoryServerDownException ||
+                        @this is SqlException ||
+                        @this is NetworkInformationException ||
                         @this is SocketException))
                     {
                         Assert.Equal(@this.ToString(), other.ToString());
@@ -1168,13 +1186,10 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 }
             }
 
-            if (!PlatformDetection.IsNetNative)
+            // Different by design for those exceptions
+            if (!((@this is NetworkInformationException || @this is SocketException) && !isSamePlatform))
             {
-                // Different by design for those exceptions
-                if (!((@this is NetworkInformationException || @this is SocketException) && !isSamePlatform))
-                {
-                    Assert.Equal(@this.HResult, other.HResult);
-                }
+                Assert.Equal(@this.HResult, other.HResult);
             }
         }
 
@@ -1188,6 +1203,21 @@ namespace System.Runtime.Serialization.Formatters.Tests
             IsEqual(@this as Exception, other as Exception, isSamePlatform);
             @this.InnerExceptions.CheckSequenceEquals(other.InnerExceptions, isSamePlatform);
         }
+
+#if netcoreapp
+        public static void IsEqual(this JsonException @this, JsonException other, bool isSamePlatform)
+        {
+            if (@this == null && other == null)
+                return;
+
+            Assert.NotNull(@this);
+            Assert.NotNull(other);
+            IsEqual(@this as Exception, other as Exception, isSamePlatform);
+            Assert.Equal(@this.Path, other.Path);
+            Assert.Equal(@this.LineNumber, other.LineNumber);
+            Assert.Equal(@this.BytePositionInLine, other.BytePositionInLine);
+        }
+#endif
 
         public static void IsEqual(this EventArgs @this, EventArgs other, bool isSamePlatform)
         {
@@ -1234,7 +1264,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.Equal(@this.Height, other.Height);
         }
 
-        public class ReferenceComparer<T> : IEqualityComparer<T> where T: class
+        public class ReferenceComparer<T> : IEqualityComparer<T> where T : class
         {
             public bool Equals(T x, T y)
             {

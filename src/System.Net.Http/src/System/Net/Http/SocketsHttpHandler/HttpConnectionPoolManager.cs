@@ -96,7 +96,17 @@ namespace System.Net.Http
                         restoreFlow = true;
                     }
 
-                    _cleaningTimer = new Timer(s => ((HttpConnectionPoolManager)s).RemoveStalePools(), this, Timeout.Infinite, Timeout.Infinite);
+                    // Create the timer.  Ensure the Timer has a weak reference to this manager; otherwise, it
+                    // can introduce a cycle that keeps the HttpConnectionPoolManager rooted by the Timer
+                    // implementation until the handler is Disposed (or indefinitely if it's not).
+                    _cleaningTimer = new Timer(s =>
+                    {
+                        var wr = (WeakReference<HttpConnectionPoolManager>)s;
+                        if (wr.TryGetTarget(out HttpConnectionPoolManager thisRef))
+                        {
+                            thisRef.RemoveStalePools();
+                        }
+                    }, new WeakReference<HttpConnectionPoolManager>(this), Timeout.Infinite, Timeout.Infinite);
                 }
                 finally
                 {
@@ -111,7 +121,7 @@ namespace System.Net.Http
             // Figure out proxy stuff.
             if (settings._useProxy)
             {
-                _proxy = settings._proxy ?? SystemProxyInfo.ConstructSystemProxy();
+                _proxy = settings._proxy ?? HttpClient.DefaultProxy;
                 if (_proxy != null)
                 {
                     _proxyCredentials = _proxy.Credentials ?? settings._defaultProxyCredentials;
@@ -297,11 +307,6 @@ namespace System.Net.Http
             foreach (KeyValuePair<HttpConnectionKey, HttpConnectionPool> pool in _pools)
             {
                 pool.Value.Dispose();
-            }
-
-            if (_proxy is IDisposable obj)
-            {
-                obj.Dispose();
             }
         }
 

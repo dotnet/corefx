@@ -15,6 +15,8 @@ namespace System.Security.Cryptography
             public override void ImportParameters(ECParameters parameters)
             {
                 parameters.Validate();
+                ThrowIfDisposed();
+
                 ECCurve curve = parameters.Curve;
                 bool includePrivateParamerters = (parameters.D != null);
 
@@ -29,7 +31,7 @@ namespace System.Security.Cryptography
                     if (string.IsNullOrEmpty(curve.Oid.FriendlyName))
                     {
                         throw new PlatformNotSupportedException(
-                            string.Format(SR.Cryptography_InvalidCurveOid, curve.Oid.Value));
+                            SR.Format(SR.Cryptography_InvalidCurveOid, curve.Oid.Value));
                     }
 
                     byte[] ecNamedCurveBlob = ECCng.GetNamedCurveBlob(ref parameters, ecdh: true);
@@ -38,7 +40,7 @@ namespace System.Security.Cryptography
                 else
                 {
                     throw new PlatformNotSupportedException(
-                        string.Format(SR.Cryptography_CurveNotSupported, curve.CurveType.ToString()));
+                        SR.Format(SR.Cryptography_CurveNotSupported, curve.CurveType.ToString()));
                 }
             }
 
@@ -92,6 +94,7 @@ namespace System.Security.Cryptography
 
             public override void ImportPkcs8PrivateKey(ReadOnlySpan<byte> source, out int bytesRead)
             {
+                ThrowIfDisposed();
                 CngPkcs8.Pkcs8Response response = CngPkcs8.ImportPkcs8PrivateKey(source, out int localRead);
 
                 ProcessPkcs8Response(response);
@@ -103,6 +106,7 @@ namespace System.Security.Cryptography
                 ReadOnlySpan<byte> source,
                 out int bytesRead)
             {
+                ThrowIfDisposed();
                 CngPkcs8.Pkcs8Response response = CngPkcs8.ImportEncryptedPkcs8PrivateKey(
                     passwordBytes,
                     source,
@@ -117,6 +121,7 @@ namespace System.Security.Cryptography
                 ReadOnlySpan<byte> source,
                 out int bytesRead)
             {
+                ThrowIfDisposed();
                 CngPkcs8.Pkcs8Response response = CngPkcs8.ImportEncryptedPkcs8PrivateKey(
                     password,
                     source,

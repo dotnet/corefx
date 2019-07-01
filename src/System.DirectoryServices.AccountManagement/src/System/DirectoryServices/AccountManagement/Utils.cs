@@ -383,20 +383,14 @@ namespace System.DirectoryServices.AccountManagement
                             int lastError = Marshal.GetLastWin32Error();
                             GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "GetCurrentUserSid: OpenProcessToken failed, gle=" + lastError);
 
-                            throw new PrincipalOperationException(
-                                            string.Format(CultureInfo.CurrentCulture,
-                                                          SR.UnableToOpenToken,
-                                                          lastError));
+                            throw new PrincipalOperationException(SR.Format(SR.UnableToOpenToken, lastError));
                         }
                     }
                     else
                     {
                         GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "GetCurrentUserSid: OpenThreadToken failed, gle=" + error);
 
-                        throw new PrincipalOperationException(
-                                        string.Format(CultureInfo.CurrentCulture,
-                                                      SR.UnableToOpenToken,
-                                                      error));
+                        throw new PrincipalOperationException(SR.Format(SR.UnableToOpenToken, error));
                     }
                 }
 
@@ -419,7 +413,7 @@ namespace System.DirectoryServices.AccountManagement
                     GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "GetCurrentUserSid: GetTokenInformation (1st try) failed, gle=" + getTokenInfoError);
 
                     throw new PrincipalOperationException(
-                                    string.Format(CultureInfo.CurrentCulture, SR.UnableToRetrieveTokenInfo, getTokenInfoError));
+                                    SR.Format(SR.UnableToRetrieveTokenInfo, getTokenInfoError));
                 }
 
                 // Allocate the necessary buffer.
@@ -442,7 +436,7 @@ namespace System.DirectoryServices.AccountManagement
                                       "GetCurrentUserSid: GetTokenInformation (2nd try) failed, neededBufferSize=" + neededBufferSize + ", gle=" + lastError);
 
                     throw new PrincipalOperationException(
-                                    string.Format(CultureInfo.CurrentCulture, SR.UnableToRetrieveTokenInfo, lastError));
+                                    SR.Format(SR.UnableToRetrieveTokenInfo, lastError));
                 }
 
                 // Retrieve the user's SID from the user info
@@ -463,7 +457,7 @@ namespace System.DirectoryServices.AccountManagement
                                       "GetCurrentUserSid: CopySid failed, errorcode=" + lastError);
 
                     throw new PrincipalOperationException(
-                                    string.Format(CultureInfo.CurrentCulture, SR.UnableToRetrieveTokenInfo, lastError));
+                                    SR.Format(SR.UnableToRetrieveTokenInfo, lastError));
                 }
 
                 return pCopyOfUserSid;
@@ -501,7 +495,7 @@ namespace System.DirectoryServices.AccountManagement
                 {
                     GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "GetMachineDomainSid: LsaOpenPolicy failed, gle=" + SafeNativeMethods.LsaNtStatusToWinError(err));
 
-                    throw new PrincipalOperationException(string.Format(CultureInfo.CurrentCulture,
+                    throw new PrincipalOperationException(SR.Format(
                                                                SR.UnableToRetrievePolicy,
                                                                SafeNativeMethods.LsaNtStatusToWinError(err)));
                 }
@@ -516,7 +510,7 @@ namespace System.DirectoryServices.AccountManagement
                 {
                     GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "GetMachineDomainSid: LsaQueryInformationPolicy failed, gle=" + SafeNativeMethods.LsaNtStatusToWinError(err));
 
-                    throw new PrincipalOperationException(string.Format(CultureInfo.CurrentCulture,
+                    throw new PrincipalOperationException(SR.Format(
                                                                SR.UnableToRetrievePolicy,
                                                                SafeNativeMethods.LsaNtStatusToWinError(err)));
                 }
@@ -539,7 +533,7 @@ namespace System.DirectoryServices.AccountManagement
                                       "GetMachineDomainSid: CopySid failed, errorcode=" + lastError);
 
                     throw new PrincipalOperationException(
-                                    string.Format(CultureInfo.CurrentCulture, SR.UnableToRetrievePolicy, lastError));
+                                    SR.Format(SR.UnableToRetrievePolicy, lastError));
                 }
 
                 return pCopyOfSid;
@@ -593,8 +587,7 @@ namespace System.DirectoryServices.AccountManagement
                 {
                     GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "GetDcName: DsGetDcName failed, err=" + err);
                     throw new PrincipalOperationException(
-                                    string.Format(
-                                            CultureInfo.CurrentCulture,
+                                    SR.Format(
                                             SR.UnableToRetrieveDomainInfo,
                                             err));
                 }
@@ -611,15 +604,10 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        internal static int LookupSid(string serverName, NetCred credentials, byte[] sid, out string name, out string domainName, out int accountUsage)
+        internal static unsafe int LookupSid(string serverName, NetCred credentials, byte[] sid, out string name, out string domainName, out int accountUsage)
         {
-            IntPtr pSid = IntPtr.Zero;
-
             int nameLength = 0;
             int domainNameLength = 0;
-
-            StringBuilder sbName;
-            StringBuilder sbDomainName;
 
             accountUsage = 0;
             name = null;
@@ -629,15 +617,13 @@ namespace System.DirectoryServices.AccountManagement
 
             try
             {
-                pSid = ConvertByteArrayToIntPtr(sid);
-
                 Utils.BeginImpersonation(credentials, out hUser);
 
                 // hUser could be null if no credentials were specified
                 Debug.Assert(hUser != IntPtr.Zero ||
                                 (credentials == null || (credentials.UserName == null && credentials.Password == null)));
 
-                bool f = UnsafeNativeMethods.LookupAccountSid(serverName, pSid, null, ref nameLength, null, ref domainNameLength, ref accountUsage);
+                int f = Interop.Advapi32.LookupAccountSid(serverName, sid, null, ref nameLength, null, ref domainNameLength, out accountUsage);
 
                 int lastErr = Marshal.GetLastWin32Error();
                 if (lastErr != 122) // ERROR_INSUFFICIENT_BUFFER
@@ -646,35 +632,33 @@ namespace System.DirectoryServices.AccountManagement
                     return lastErr;
                 }
 
-                Debug.Assert(f == false);   // should never succeed, with a 0 buffer size                
+                Debug.Assert(f == 0);   // should never succeed, with a 0 buffer size                
 
                 Debug.Assert(nameLength > 0);
                 Debug.Assert(domainNameLength > 0);
 
-                sbName = new StringBuilder(nameLength);
-                sbDomainName = new StringBuilder(domainNameLength);
-
-                f = UnsafeNativeMethods.LookupAccountSid(serverName, pSid, sbName, ref nameLength, sbDomainName, ref domainNameLength, ref accountUsage);
-
-                if (f == false)
+                fixed (char* sbName = new char[nameLength])
+                fixed (char* sbDomainName = new char[domainNameLength])
                 {
-                    lastErr = Marshal.GetLastWin32Error();
-                    Debug.Assert(lastErr != 0);
+                    f = Interop.Advapi32.LookupAccountSid(serverName, sid, sbName, ref nameLength, sbDomainName, ref domainNameLength, out accountUsage);
 
-                    GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "LookupSid: LookupAccountSid (2nd try) failed, gle=" + lastErr);
-                    return lastErr;
+                    if (f == 0)
+                    {
+                        lastErr = Marshal.GetLastWin32Error();
+                        Debug.Assert(lastErr != 0);
+
+                        GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "LookupSid: LookupAccountSid (2nd try) failed, gle=" + lastErr);
+                        return lastErr;
+                    }
+
+                    name = new string(sbName);
+                    domainName = new string(sbDomainName);
                 }
-
-                name = sbName.ToString();
-                domainName = sbDomainName.ToString();
 
                 return 0;
             }
             finally
             {
-                if (pSid != IntPtr.Zero)
-                    Marshal.FreeHGlobal(pSid);
-
                 if (hUser != IntPtr.Zero)
                     Utils.EndImpersonation(hUser);
             }
@@ -794,9 +778,7 @@ namespace System.DirectoryServices.AccountManagement
                 GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "BeginImpersonation: LogonUser failed, gle=" + lastError);
 
                 throw new PrincipalOperationException(
-                    string.Format(CultureInfo.CurrentCulture,
-                                  SR.UnableToImpersonateCredentials,
-                                  lastError));
+                    SR.Format(SR.UnableToImpersonateCredentials, lastError));
             }
 
             result = UnsafeNativeMethods.ImpersonateLoggedOnUser(hToken);
@@ -809,9 +791,7 @@ namespace System.DirectoryServices.AccountManagement
                 UnsafeNativeMethods.CloseHandle(hToken);
 
                 throw new PrincipalOperationException(
-                    string.Format(CultureInfo.CurrentCulture,
-                                  SR.UnableToImpersonateCredentials,
-                                  lastError));
+                    SR.Format(SR.UnableToImpersonateCredentials, lastError));
             }
 
             hUserToken = hToken;
@@ -842,8 +822,7 @@ namespace System.DirectoryServices.AccountManagement
                 {
                     GlobalDebug.WriteLineIf(GlobalDebug.Error, "Utils", "IsMachineDC: DsRoleGetPrimaryDomainInformation failed, err=" + err);
                     throw new PrincipalOperationException(
-                                    string.Format(
-                                            CultureInfo.CurrentCulture,
+                                    SR.Format(
                                             SR.UnableToRetrieveDomainInfo,
                                             err));
                 }

@@ -12,33 +12,33 @@ namespace System.Globalization
     //
     //  NOTE: Calendars depend on the locale name that creates it.  Only a few
     //        properties are available without locales using CalendarData.GetCalendar(CalendarData)
-
+    //
     internal partial class CalendarData
     {
         // Max calendars
         internal const int MAX_CALENDARS = 23;
 
         // Identity
-        internal string sNativeName; // Calendar Name for the locale
+        internal string sNativeName = null!; // Calendar Name for the locale
 
         // Formats
-        internal string[] saShortDates; // Short Data format, default first
-        internal string[] saYearMonths; // Year/Month Data format, default first
-        internal string[] saLongDates; // Long Data format, default first
-        internal string sMonthDay; // Month/Day format
+        internal string[] saShortDates = null!; // Short Data format, default first
+        internal string[] saYearMonths = null!; // Year/Month Data format, default first
+        internal string[] saLongDates = null!; // Long Data format, default first
+        internal string sMonthDay = null!; // Month/Day format
 
         // Calendar Parts Names
-        internal string[] saEraNames; // Names of Eras
-        internal string[] saAbbrevEraNames; // Abbreviated Era Names
-        internal string[] saAbbrevEnglishEraNames; // Abbreviated Era Names in English
-        internal string[] saDayNames; // Day Names, null to use locale data, starts on Sunday
-        internal string[] saAbbrevDayNames; // Abbrev Day Names, null to use locale data, starts on Sunday
-        internal string[] saSuperShortDayNames; // Super short Day of week names
-        internal string[] saMonthNames; // Month Names (13)
-        internal string[] saAbbrevMonthNames; // Abbrev Month Names (13)
-        internal string[] saMonthGenitiveNames; // Genitive Month Names (13)
-        internal string[] saAbbrevMonthGenitiveNames; // Genitive Abbrev Month Names (13)
-        internal string[] saLeapYearMonthNames; // Multiple strings for the month names in a leap year.
+        internal string[] saEraNames = null!; // Names of Eras
+        internal string[] saAbbrevEraNames = null!; // Abbreviated Era Names
+        internal string[] saAbbrevEnglishEraNames = null!; // Abbreviated Era Names in English
+        internal string[] saDayNames = null!; // Day Names, null to use locale data, starts on Sunday
+        internal string[] saAbbrevDayNames = null!; // Abbrev Day Names, null to use locale data, starts on Sunday
+        internal string[] saSuperShortDayNames = null!; // Super short Day of week names
+        internal string[] saMonthNames = null!; // Month Names (13)
+        internal string[] saAbbrevMonthNames = null!; // Abbrev Month Names (13)
+        internal string[] saMonthGenitiveNames = null!; // Genitive Month Names (13)
+        internal string[] saAbbrevMonthGenitiveNames = null!; // Genitive Abbrev Month Names (13)
+        internal string[] saLeapYearMonthNames = null!; // Multiple strings for the month names in a leap year.
 
         // Integers at end to make marshaller happier
         internal int iTwoDigitYearMax = 2029; // Max 2 digit year (for Y2K bug data entry)
@@ -51,7 +51,9 @@ namespace System.Globalization
         internal static readonly CalendarData Invariant = CreateInvariant();
 
         // Private constructor
-        private CalendarData() { }
+        private CalendarData()
+        {
+        }
 
         // Invariant factory
         private static CalendarData CreateInvariant()
@@ -105,7 +107,8 @@ namespace System.Globalization
 
             if (!LoadCalendarDataFromSystem(localeName, calendarId))
             {
-                Debug.Fail("[CalendarData] LoadCalendarDataFromSystem call isn't expected to fail for calendar " + calendarId + " locale " + localeName);
+                // LoadCalendarDataFromSystem sometimes can fail on Linux if the installed ICU package is missing some resources.
+                // The ICU package can miss some resources in some cases like if someone compile and build the ICU package manually or ICU has a regression.
 
                 // Something failed, try invariant for missing parts
                 // This is really not good, but we don't want the callers to crash.
@@ -165,7 +168,7 @@ namespace System.Globalization
                 this.saAbbrevEnglishEraNames = new string[] { "" };
             }
 
-            // Japanese is the only thing with > 1 era.  Its current era # is how many ever 
+            // Japanese is the only thing with > 1 era.  Its current era # is how many ever
             // eras are in the array.  (And the others all have 1 string in the array)
             this.iCurrentEra = this.saEraNames.Length;
         }
@@ -177,7 +180,7 @@ namespace System.Globalization
             {
                 // For Localized Gregorian we really expect the data from the OS.
                 case CalendarId.GREGORIAN:
-                    // Fallback for CoreCLR < Win7 or culture.dll missing            
+                    // Fallback for CoreCLR < Win7 or culture.dll missing
                     if (this.saEraNames == null || this.saEraNames.Length == 0 || string.IsNullOrEmpty(this.saEraNames[0]))
                     {
                         this.saEraNames = new string[] { "A.D." };
@@ -260,7 +263,7 @@ namespace System.Globalization
             {
                 // For Localized Gregorian we really expect the data from the OS.
                 case CalendarId.GREGORIAN:
-                    // Fallback for CoreCLR < Win7 or culture.dll missing            
+                    // Fallback for CoreCLR < Win7 or culture.dll missing
                     if (this.saAbbrevEraNames == null || this.saAbbrevEraNames.Length == 0 || string.IsNullOrEmpty(this.saAbbrevEraNames[0]))
                     {
                         this.saAbbrevEraNames = new string[] { "AD" };
@@ -320,7 +323,7 @@ namespace System.Globalization
             //
             // Get a calendar.
             // Unfortunately we depend on the locale in the OS, so we need a locale
-            // no matter what.  So just get the appropriate calendar from the 
+            // no matter what.  So just get the appropriate calendar from the
             // appropriate locale here
             //
 
@@ -375,4 +378,3 @@ namespace System.Globalization
         }
     }
 }
-

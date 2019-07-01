@@ -12,8 +12,6 @@
 ** See $(RepoRoot)\src\inc\OpCodeGen.pl for more information.**
 ==============================================================*/
 
-using System;
-
 namespace System.Reflection.Emit
 {
     public enum FlowControl
@@ -24,7 +22,7 @@ namespace System.Reflection.Emit
         Cond_Branch = 3,
         Meta = 4,
         Next = 5,
-        [Obsolete("This API has been deprecated. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This API has been deprecated. https://go.microsoft.com/fwlink/?linkid=14202")]
         Phi = 6,
         Return = 7,
         Throw = 8,

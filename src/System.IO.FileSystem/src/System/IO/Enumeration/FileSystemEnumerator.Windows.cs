@@ -34,24 +34,15 @@ namespace System.IO.Enumeration
         private Interop.NtDll.FILE_FULL_DIR_INFORMATION* _entry;
         private TResult _current;
 
-        private byte[] _buffer;
+        private IntPtr _buffer;
+        private int _bufferLength;
         private IntPtr _directoryHandle;
         private string _currentPath;
         private bool _lastEntryFound;
         private Queue<(IntPtr Handle, string Path)> _pending;
-        private GCHandle _pinnedBuffer;
 
-        /// <summary>
-        /// Encapsulates a find operation.
-        /// </summary>
-        /// <param name="directory">The directory to search in.</param>
-        /// <param name="options">Enumeration options to use.</param>
-        public FileSystemEnumerator(string directory, EnumerationOptions options = null)
+        private void Init()
         {
-            _originalRootDirectory = directory ?? throw new ArgumentNullException(nameof(directory));
-            _rootDirectory = PathInternal.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
-            _options = options ?? EnumerationOptions.Default;
-
             // We'll only suppress the media insertion prompt on the topmost directory as that is the
             // most likely scenario and we don't want to take the perf hit for large enumerations.
             // (We weren't consistent with how we handled this historically.)
@@ -67,13 +58,15 @@ namespace System.IO.Enumeration
             _currentPath = _rootDirectory;
 
             int requestedBufferSize = _options.BufferSize;
-            int bufferSize = requestedBufferSize <= 0 ? StandardBufferSize
+            _bufferLength = requestedBufferSize <= 0 ? StandardBufferSize
                 : Math.Max(MinimumBufferSize, requestedBufferSize);
 
             try
             {
-                _buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
-                _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
+                // NtQueryDirectoryFile needs its buffer to be 64bit aligned to work
+                // successfully with FileFullDirectoryInformation on ARM32. AllocHGlobal
+                // will return pointers aligned as such, new byte[] does not.
+                _buffer = Marshal.AllocHGlobal(_bufferLength);
             }
             catch
             {
@@ -209,7 +202,7 @@ namespace System.IO.Enumeration
 
             // We need more data
             if (GetData())
-                _entry = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)_pinnedBuffer.AddrOfPinnedObject();
+                _entry = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)_buffer;
         }
 
         private bool DequeueNextDirectory()
@@ -239,13 +232,12 @@ namespace System.IO.Enumeration
                         _pending = null;
                     }
 
-                    if (_pinnedBuffer.IsAllocated)
-                        _pinnedBuffer.Free();
+                    if (_buffer != default)
+                    {
+                        Marshal.FreeHGlobal(_buffer);
+                    }
 
-                    if (_buffer != null)
-                        ArrayPool<byte>.Shared.Return(_buffer);
-
-                    _buffer = null;
+                    _buffer = default;
                 }
             }
 

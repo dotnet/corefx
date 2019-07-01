@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -20,6 +21,27 @@ namespace System
     //       to also change the test class.
     internal static class ConsolePal
     {
+        // StdInReader is only used when input isn't redirected and we're working
+        // with an interactive terminal.  In that case, performance isn't critical
+        // and we can use a smaller buffer to minimize working set.
+        private const int InteractiveBufferSize = 255;
+
+        // For performance we cache Cursor{Left,Top} and Window{Width,Height}.
+        // These values must be read/written under lock (Console.Out).
+        // We also need to invalidate these values when certain signals occur.
+        // We don't want to take the lock in the signal handling thread for this.
+        // Instead, we set a flag. Before reading a cached value, a call to CheckTerminalSettingsInvalidated
+        // will invalidate the cached values if a signal has occured.
+        private static int s_cursorVersion; // Gets incremented each time the cursor position changed.
+                                            // Used to synchronize between lock (Console.Out) blocks.
+        private static int s_cursorLeft;    // Cached CursorLeft, -1 when invalid.
+        private static int s_cursorTop;     // Cached CursorTop, invalid when s_cursorLeft == -1.
+        private static int s_windowWidth;   // Cached WindowWidth, -1 when invalid.
+        private static int s_windowHeight;  // Cached WindowHeight, invalid when s_windowWidth == -1.
+        private static int s_invalidateCachedSettings = 1; // Tracks whether we should invalidate the cached settings.
+
+        private static readonly Interop.Sys.TerminalInvalidationCallback s_invalidateTerminalSettings = InvalidateTerminalSettings;
+
         public static Stream OpenStandardInput()
         {
             return new UnixConsoleStream(SafeFileHandleHelper.Open(() => Interop.Sys.Dup(Interop.Sys.FileDescriptors.STDIN_FILENO)), FileAccess.Read);
@@ -46,7 +68,6 @@ namespace System
         }
 
         private static SyncTextReader s_stdInReader;
-        private const int DefaultBufferSize = 255;
 
         private static SyncTextReader StdInReader
         {
@@ -58,12 +79,11 @@ namespace System
                         ref s_stdInReader,
                         () => SyncTextReader.GetSynchronizedTextReader(
                             new StdInReader(
-                                encoding: new ConsoleEncoding(Console.InputEncoding), // This ensures no prefix is written to the stream.
-                                bufferSize: DefaultBufferSize)));
+                                encoding: Console.InputEncoding,
+                                bufferSize: InteractiveBufferSize)));
             }
         }
 
-        private const int DefaultConsoleBufferSize = 256; // default size of buffer used in stream readers/writers
         internal static TextReader GetOrCreateReader()
         {
             if (Console.IsInputRedirected)
@@ -74,9 +94,9 @@ namespace System
                     StreamReader.Null :
                     new StreamReader(
                         stream: inputStream,
-                        encoding: new ConsoleEncoding(Console.InputEncoding), // This ensures no prefix is written to the stream.
+                        encoding: Console.InputEncoding,
                         detectEncodingFromByteOrderMarks: false,
-                        bufferSize: DefaultConsoleBufferSize,
+                        bufferSize: Console.ReadBufferSize,
                         leaveOpen: true)
                         );
             }
@@ -109,7 +129,10 @@ namespace System
                 keyInfo = new ConsoleKeyInfo('\r', keyInfo.Key, shift, alt, control);
             }
 
-            if (!intercept && !previouslyProcessed) Console.Write(keyInfo.KeyChar);
+            if (!intercept && !previouslyProcessed && keyInfo.KeyChar != '\0')
+            {
+                Console.Write(keyInfo.KeyChar);
+            }
             return keyInfo;
         }
 
@@ -181,7 +204,7 @@ namespace System
                 if (!string.IsNullOrEmpty(titleFormat))
                 {
                     string ansiStr = TermInfo.ParameterizedStrings.Evaluate(titleFormat, value);
-                    WriteStdoutAnsiString(ansiStr);
+                    WriteStdoutAnsiString(ansiStr, mayChangeCursorPosition: false);
                 }
             }
         }
@@ -190,7 +213,7 @@ namespace System
         {
             if (!Console.IsOutputRedirected)
             {
-                WriteStdoutAnsiString(TerminalFormatStrings.Instance.Bell);
+                WriteStdoutAnsiString(TerminalFormatStrings.Instance.Bell, mayChangeCursorPosition: false);
             }
         }
 
@@ -212,12 +235,67 @@ namespace System
             if (Console.IsOutputRedirected)
                 return;
 
-            string cursorAddressFormat = TerminalFormatStrings.Instance.CursorAddress;
-            if (!string.IsNullOrEmpty(cursorAddressFormat))
+            lock (Console.Out)
             {
-                string ansiStr = TermInfo.ParameterizedStrings.Evaluate(cursorAddressFormat, top, left);
-                WriteStdoutAnsiString(ansiStr);
+                if (TryGetCachedCursorPosition(out int leftCurrent, out int topCurrent) &&
+                    left == leftCurrent &&
+                    top == topCurrent)
+                {
+                    return;
+                }
+
+                string cursorAddressFormat = TerminalFormatStrings.Instance.CursorAddress;
+                if (!string.IsNullOrEmpty(cursorAddressFormat))
+                {
+                    string ansiStr = TermInfo.ParameterizedStrings.Evaluate(cursorAddressFormat, top, left);
+                    WriteStdoutAnsiString(ansiStr);
+                }
+
+                SetCachedCursorPosition(left, top);
             }
+        }
+
+        private static void SetCachedCursorPosition(int left, int top, int? version = null)
+        {
+            Debug.Assert(left >= 0);
+
+            bool setPosition = version == null || version == s_cursorVersion;
+
+            if (setPosition)
+            {
+                s_cursorLeft = left;
+                s_cursorTop = top;
+                s_cursorVersion++;
+            }
+            else
+            {
+                InvalidateCachedCursorPosition();
+            }
+        }
+
+        private static void InvalidateCachedCursorPosition()
+        {
+            s_cursorLeft = -1;
+            s_cursorVersion++;
+        }
+
+        private static bool TryGetCachedCursorPosition(out int left, out int top)
+        {
+            // Invalidate before reading cached values.
+            CheckTerminalSettingsInvalidated();
+
+            bool hasCachedCursorPosition = s_cursorLeft >= 0;
+            if (hasCachedCursorPosition)
+            {
+                left = s_cursorLeft;
+                top = s_cursorTop;
+            }
+            else
+            {
+                left = 0;
+                top = 0;
+            }
+            return hasCachedCursorPosition;
         }
 
         public static int BufferWidth
@@ -263,10 +341,8 @@ namespace System
         {
             get
             {
-                Interop.Sys.WinSize winsize;
-                return Interop.Sys.GetWindowSize(out winsize) == 0 ?
-                    winsize.Col :
-                    TerminalFormatStrings.Instance.Columns;
+                GetWindowSize(out int width, out int height);
+                return width;
             }
             set { throw new PlatformNotSupportedException(); }
         }
@@ -275,12 +351,36 @@ namespace System
         {
             get
             {
-                Interop.Sys.WinSize winsize;
-                return Interop.Sys.GetWindowSize(out winsize) == 0 ?
-                    winsize.Row :
-                    TerminalFormatStrings.Instance.Lines;
+                GetWindowSize(out int width, out int height);
+                return height;
             }
             set { throw new PlatformNotSupportedException(); }
+        }
+
+        private static void GetWindowSize(out int width, out int height)
+        {
+            lock (Console.Out)
+            {
+                // Invalidate before reading cached values.
+                CheckTerminalSettingsInvalidated();
+
+                if (s_windowWidth == -1)
+                {
+                    Interop.Sys.WinSize winsize;
+                    if (Interop.Sys.GetWindowSize(out winsize) == 0)
+                    {
+                        s_windowWidth = winsize.Col;
+                        s_windowHeight = winsize.Row;
+                    }
+                    else
+                    {
+                        s_windowWidth = TerminalFormatStrings.Instance.Columns;
+                        s_windowHeight = TerminalFormatStrings.Instance.Lines;
+                    }
+                }
+                width = s_windowWidth;
+                height = s_windowHeight;
+            }
         }
 
         public static void SetWindowPosition(int left, int top)
@@ -307,15 +407,12 @@ namespace System
             }
         }
 
-        // TODO: It's quite expensive to use the request/response protocol each time CursorLeft/Top is accessed.
-        // We should be able to (mostly) track the position of the cursor in locals, doing the request/response infrequently.
-
         public static int CursorLeft
         {
             get
             {
                 int left, top;
-                GetCursorPosition(out left, out top);
+                TryGetCursorPosition(out left, out top);
                 return left;
             }
         }
@@ -325,7 +422,7 @@ namespace System
             get
             {
                 int left, top;
-                GetCursorPosition(out left, out top);
+                TryGetCursorPosition(out left, out top);
                 return top;
             }
         }
@@ -345,7 +442,10 @@ namespace System
         private static bool s_firstCursorPositionRequest = true;
 
         /// <summary>Gets the current cursor position.  This involves both writing to stdout and reading stdin.</summary>
-        private static unsafe void GetCursorPosition(out int left, out int top)
+        /// <param name="left">Cursor column.</param>
+        /// <param name="top">Cursor row.</param>
+        /// <param name="reinitializeForRead">Indicates whether this method is called as part of a on-going Read operation.</param>
+        internal static unsafe bool TryGetCursorPosition(out int left, out int top, bool reinitializeForRead = false)
         {
             left = top = 0;
 
@@ -353,7 +453,18 @@ namespace System
             // parsing a response string from the terminal.  So if anything is redirected, bail.
             if (Console.IsInputRedirected || Console.IsOutputRedirected)
             {
-                return;
+                return false;
+            }
+
+            int cursorVersion;
+            lock (Console.Out)
+            {
+                if (TryGetCachedCursorPosition(out left, out top))
+                {
+                    return true;
+                }
+
+                cursorVersion = s_cursorVersion;
             }
 
             // Create a buffer to read the response into.  We start with stack memory and grow
@@ -385,10 +496,10 @@ namespace System
                 {
                     // Write out the cursor position report request.
                     Debug.Assert(!string.IsNullOrEmpty(TerminalFormatStrings.CursorPositionReport));
-                    WriteStdoutAnsiString(TerminalFormatStrings.CursorPositionReport);
+                    WriteStdoutAnsiString(TerminalFormatStrings.CursorPositionReport, mayChangeCursorPosition: false);
 
                     // Read the cursor position report (CPR), of the form \ESC[row;colR. This is not
-                    // as easy it it sounds.  Prior to the CPR having been supplied to stdin, other
+                    // as easy as it sounds.  Prior to the CPR having been supplied to stdin, other
                     // user input could have come in and be available to read first from stdin.  Plus,
                     // that user input could include escape sequences, and those escape sequences could
                     // have a prefix very similar to that of the CPR (e.g. other escape sequences start
@@ -417,7 +528,7 @@ namespace System
                         // back to the StdInReader's extra buffer, treating it all as user input,
                         // and exit having not computed a valid cursor position.
                         TransferBytes(readBytes.Slice(readBytesPos), r);
-                        return;
+                        return false;
                     }
 
                     // At this point, readBytes starts with \ESC and ends with 'R'.
@@ -453,10 +564,16 @@ namespace System
                 }
                 finally
                 {
-                    Interop.Sys.UninitializeConsoleAfterRead();
+                    if (reinitializeForRead)
+                    {
+                        Interop.Sys.InitializeConsoleBeforeRead();
+                    }
+                    else
+                    {
+                        Interop.Sys.UninitializeConsoleAfterRead();
+                    }
                     s_firstCursorPositionRequest = false;
                 }
-
 
                 bool BufferUntil(byte toFind, StdInReader src, ref Span<byte> dst, ref int dstPos, out int foundPos)
                 {
@@ -555,6 +672,12 @@ namespace System
                     }
                 }
             }
+
+            lock (Console.Out)
+            {
+                SetCachedCursorPosition(left, top, cursorVersion);
+                return true;
+            }
         }
 
         public static void MoveBufferArea(int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop)
@@ -609,7 +732,9 @@ namespace System
         private static Encoding GetConsoleEncoding()
         {
             Encoding enc = EncodingHelper.GetEncodingFromCharset();
-            return enc ?? new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+            return enc != null ?
+                enc.RemovePreamble() :
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
         }
 
         public static void SetConsoleInputEncoding(Encoding enc)
@@ -807,12 +932,14 @@ namespace System
             {
                 if (!s_initialized)
                 {
-                    // Ensure the console is configured appropriately.  This will start
-                    // signal handlers, etc.
-                    if (!Interop.Sys.InitializeConsole())
+                    if (!Interop.Sys.InitializeTerminalAndSignalHandling())
                     {
                         throw new Win32Exception();
                     }
+
+                    // Register a callback for signals that may invalidate our cached terminal settings.
+                    // This includes: SIGCONT, SIGCHLD, SIGWINCH.
+                    Interop.Sys.SetTerminalInvalidationHandler(s_invalidateTerminalSettings);
 
                     // Provide the native lib with the correct code from the terminfo to transition us into
                     // "application mode".  This will both transition it immediately, as well as allow
@@ -880,6 +1007,8 @@ namespace System
             public readonly string CursorAddress;
             /// <summary>The format string to use to move the cursor to the left.</summary>
             public readonly string CursorLeft;
+            /// <summary>The format string to use to clear to the end of line.</summary>
+            public readonly string ClrEol;
             /// <summary>The ANSI-compatible string for the Cursor Position report request.</summary>
             /// <remarks>
             /// This should really be in user string 7 in the terminfo file, but some terminfo databases
@@ -918,6 +1047,7 @@ namespace System
                 CursorInvisible = db.GetString(TermInfo.WellKnownStrings.CursorInvisible);
                 CursorAddress = db.GetString(TermInfo.WellKnownStrings.CursorAddress);
                 CursorLeft = db.GetString(TermInfo.WellKnownStrings.CursorLeft);
+                ClrEol = db.GetString(TermInfo.WellKnownStrings.ClrEol);
 
                 Title = GetTitle(db);
 
@@ -1100,18 +1230,21 @@ namespace System
         /// <param name="buffer">The buffer from which to write data.</param>
         /// <param name="offset">The offset at which the data to write starts in the buffer.</param>
         /// <param name="count">The number of bytes to write.</param>
-        private static unsafe void Write(SafeFileHandle fd, byte[] buffer, int offset, int count)
+        /// <param name="mayChangeCursorPosition">Writing this buffer may change the cursor position.</param>
+        private static unsafe void Write(SafeFileHandle fd, byte[] buffer, int offset, int count, bool mayChangeCursorPosition = true)
         {
             fixed (byte* bufPtr = buffer)
             {
-                Write(fd, bufPtr + offset, count);
+                Write(fd, bufPtr + offset, count, mayChangeCursorPosition);
             }
         }
 
-        private static unsafe void Write(SafeFileHandle fd, byte* bufPtr, int count)
+        private static unsafe void Write(SafeFileHandle fd, byte* bufPtr, int count, bool mayChangeCursorPosition = true)
         {
             while (count > 0)
             {
+                int cursorVersion = mayChangeCursorPosition ? Volatile.Read(ref s_cursorVersion) : -1;
+
                 int bytesWritten = Interop.Sys.Write(fd, bufPtr, count);
                 if (bytesWritten < 0)
                 {
@@ -1139,15 +1272,107 @@ namespace System
                         throw Interop.GetExceptionForIoErrno(errorInfo);
                     }
                 }
+                else
+                {
+                    if (mayChangeCursorPosition)
+                    {
+                        UpdatedCachedCursorPosition(bufPtr, bytesWritten, cursorVersion);
+                    }
+                }
 
                 count -= bytesWritten;
                 bufPtr += bytesWritten;
             }
         }
 
+        private static unsafe void UpdatedCachedCursorPosition(byte* bufPtr, int count, int cursorVersion)
+        {
+            lock (Console.Out)
+            {
+                int left, top;
+                if (cursorVersion != s_cursorVersion               ||  // the cursor was changed during the write by another operation
+                    !TryGetCachedCursorPosition(out left, out top) ||  // we don't have a cursor position
+                    count > InteractiveBufferSize)                     // limit the amount of bytes we are willing to inspect
+                {
+                    InvalidateCachedCursorPosition();
+                    return;
+                }
+
+                GetWindowSize(out int width, out int height);
+
+                for (int i = 0; i < count; i++)
+                {
+                    byte c = bufPtr[i];
+                    if (c < 127 && c >= 32) // ASCII/UTF-8 characters that take up a single position
+                    {
+                        IncrementX();
+                    }
+                    else if (c == (byte)'\r')
+                    {
+                        left = 0;
+                    }
+                    else if (c == (byte)'\n')
+                    {
+                        left = 0;
+                        IncrementY();
+                    }
+                    else if (c == (byte)'\b')
+                    {
+                        if (left > 0)
+                        {
+                            left--;
+                        }
+                    }
+                    else
+                    {
+                        InvalidateCachedCursorPosition();
+                        return;
+                    }
+                }
+
+                // We pass cursorVersion because it may have changed the earlier check by calling GetWindowSize.
+                SetCachedCursorPosition(left, top, cursorVersion);
+
+                void IncrementY()
+                {
+                    top++;
+                    if (top >= height)
+                    {
+                        top = height - 1;
+                    }
+                }
+
+                void IncrementX()
+                {
+                    left++;
+                    if (left >= width)
+                    {
+                        left = 0;
+                        IncrementY();
+                    }
+                }
+            }
+        }
+
+        private static void CheckTerminalSettingsInvalidated()
+        {
+            bool invalidateSettings = Interlocked.CompareExchange(ref s_invalidateCachedSettings, 0, 1) == 1;
+            if (invalidateSettings)
+            {
+                InvalidateCachedCursorPosition();
+                s_windowWidth = -1;
+            }
+        }
+
+        private static void InvalidateTerminalSettings()
+        {
+            Volatile.Write(ref s_invalidateCachedSettings, 1);
+        }
+
         /// <summary>Writes a terminfo-based ANSI escape string to stdout.</summary>
         /// <param name="value">The string to write.</param>
-        private static unsafe void WriteStdoutAnsiString(string value)
+        /// <param name="mayChangeCursorPosition">Writing this value may change the cursor position.</param>
+        internal static unsafe void WriteStdoutAnsiString(string value, bool mayChangeCursorPosition = true)
         {
             if (string.IsNullOrEmpty(value))
                 return;
@@ -1165,7 +1390,7 @@ namespace System
 
                     lock (Console.Out) // synchronize with other writers
                     {
-                        Write(Interop.Sys.FileDescriptors.STDOUT_FILENO, data, bytesToWrite);
+                        Write(Interop.Sys.FileDescriptors.STDOUT_FILENO, data, bytesToWrite, mayChangeCursorPosition);
                     }
                 }
             }
@@ -1174,7 +1399,7 @@ namespace System
                 byte[] data = Encoding.UTF8.GetBytes(value);
                 lock (Console.Out) // synchronize with other writers
                 {
-                    Write(Interop.Sys.FileDescriptors.STDOUT_FILENO, data, 0, data.Length);
+                    Write(Interop.Sys.FileDescriptors.STDOUT_FILENO, data, 0, data.Length, mayChangeCursorPosition);
                 }
             }
         }

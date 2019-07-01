@@ -56,6 +56,15 @@ DLLEXPORT int32_t CryptoNative_SetX509ChainVerifyTime(X509_STORE_CTX* ctx,
                                                       int32_t second,
                                                       int32_t isDst);
 
+DLLEXPORT int32_t CryptoNative_X509StoreSetVerifyTime(X509_STORE* ctx,
+                                                      int32_t year,
+                                                      int32_t month,
+                                                      int32_t day,
+                                                      int32_t hour,
+                                                      int32_t minute,
+                                                      int32_t second,
+                                                      int32_t isDst);
+
 DLLEXPORT X509* CryptoNative_ReadX509AsDerFromBio(BIO* bio);
 
 DLLEXPORT int32_t CryptoNative_BioTell(BIO* bio);
@@ -72,4 +81,4 @@ DLLEXPORT int32_t CryptoNative_LookupFriendlyNameByOid(const char* oidValue, con
 
 DLLEXPORT int32_t CryptoNative_EnsureOpenSslInitialized(void);
 
-DLLEXPORT uint32_t CryptoNative_OpenSslVersionNumber(void);
+DLLEXPORT int64_t CryptoNative_OpenSslVersionNumber(void);

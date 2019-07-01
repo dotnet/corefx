@@ -40,6 +40,7 @@ namespace System.IO
 
             using (DisableMediaInsertionPrompt.Create())
             {
+                Debug.Assert(_path != null);
                 return ValidateFileHandle(
                     Interop.Kernel32.CreateFile(_path, fAccess, share, ref secAttrs, mode, flagsAndAttributes, IntPtr.Zero));
             }
@@ -67,7 +68,7 @@ namespace System.IO
             switch (status)
             {
                 case 0:
-                    // We we're successful
+                    // We were successful
                     break;
                 case Interop.NtDll.STATUS_INVALID_HANDLE:
                     if (!ignoreInvalid)

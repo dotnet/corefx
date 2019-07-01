@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -25,7 +26,7 @@ internal partial class Interop
             FileMode dwCreationDisposition,
             ref Kernel32.CREATEFILE2_EXTENDED_PARAMETERS pCreateExParams)
         {
-            lpFileName = PathInternal.EnsureExtendedPrefixOverMaxPath(lpFileName);
+            lpFileName = PathInternal.EnsureExtendedPrefixIfNeeded(lpFileName)!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
             return CreateFile2Private(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, ref pCreateExParams);
         }
     }

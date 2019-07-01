@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 #if netcoreapp
 using Internal.Runtime.CompilerServices;
 #endif
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics.Hashing;
 using System.Runtime.CompilerServices;
@@ -58,10 +60,16 @@ namespace System.Numerics
             [Intrinsic]
             get
             {
-                return s_count;
+                ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
+#if PROJECTN
+                // Hits an active bug in ProjectN (887908). This code path is actually only used rarely,
+                // since get_Count is an intrinsic.
+                throw new NotImplementedException();
+#else
+                return Unsafe.SizeOf<Vector<T>>() / Unsafe.SizeOf<T>();
+#endif
             }
         }
-        private static readonly int s_count = InitializeCount();
 
         /// <summary>
         /// Returns a vector containing all zeroes.
@@ -89,74 +97,16 @@ namespace System.Numerics
         }
         private static readonly Vector<T> s_one = new Vector<T>(GetOneValue());
 
-        internal static Vector<T> AllOnes { get { return s_allOnes; } }
+        internal static Vector<T> AllOnes
+        {
+            [Intrinsic]
+            get
+            {
+                return s_allOnes;
+            }
+        }
         private static readonly Vector<T> s_allOnes = new Vector<T>(GetAllBitsSetValue());
         #endregion Static Members
-
-        #region Static Initialization
-        private struct VectorSizeHelper
-        {
-            internal Vector<T> _placeholder;
-            internal byte _byte;
-        }
-
-        // Calculates the size of this struct in bytes, by computing the offset of a field in a structure
-        private static unsafe int InitializeCount()
-        {
-            VectorSizeHelper vsh;
-            byte* vectorBase = &vsh._placeholder.register.byte_0;
-            byte* byteBase = &vsh._byte;
-            int vectorSizeInBytes = (int)(byteBase - vectorBase);
-
-            int typeSizeInBytes = -1;
-            if (typeof(T) == typeof(byte))
-            {
-                typeSizeInBytes = sizeof(byte);
-            }
-            else if (typeof(T) == typeof(sbyte))
-            {
-                typeSizeInBytes = sizeof(sbyte);
-            }
-            else if (typeof(T) == typeof(ushort))
-            {
-                typeSizeInBytes = sizeof(ushort);
-            }
-            else if (typeof(T) == typeof(short))
-            {
-                typeSizeInBytes = sizeof(short);
-            }
-            else if (typeof(T) == typeof(uint))
-            {
-                typeSizeInBytes = sizeof(uint);
-            }
-            else if (typeof(T) == typeof(int))
-            {
-                typeSizeInBytes = sizeof(int);
-            }
-            else if (typeof(T) == typeof(ulong))
-            {
-                typeSizeInBytes = sizeof(ulong);
-            }
-            else if (typeof(T) == typeof(long))
-            {
-                typeSizeInBytes = sizeof(long);
-            }
-            else if (typeof(T) == typeof(float))
-            {
-                typeSizeInBytes = sizeof(float);
-            }
-            else if (typeof(T) == typeof(double))
-            {
-                typeSizeInBytes = sizeof(double);
-            }
-            else
-            {
-                throw new NotSupportedException(SR.Arg_TypeNotSupported);
-            }
-
-            return vectorSizeInBytes / typeSizeInBytes;
-        }
-        #endregion Static Initialization
 
         #region Constructors
         /// <summary>
@@ -380,6 +330,7 @@ namespace System.Numerics
         /// Constructs a vector from the given array, starting from the given index.
         /// The array must contain at least Vector'T.Count from the given index.
         /// </summary>
+        [Intrinsic]
         public unsafe Vector(T[] values, int index)
             : this()
         {
@@ -770,37 +721,81 @@ namespace System.Numerics
 
 #if netcoreapp
         /// <summary>
-        /// Constructs a vector from the given span. The span must contain at least Vector'T.Count elements.
+        /// Constructs a vector from the given <see cref="ReadOnlySpan{Byte}"/>. The span must contain at least <see cref="Vector{Byte}.Count"/> elements.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector(ReadOnlySpan<byte> values)
+            : this()
+        {
+            ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
+            if (values.Length < Vector<byte>.Count)
+            {
+                Vector.ThrowInsufficientNumberOfElementsException(Vector<byte>.Count);
+            }
+            this = Unsafe.ReadUnaligned<Vector<T>>(ref MemoryMarshal.GetReference(values));
+        }
+        
+        /// <summary>
+        /// Constructs a vector from the given <see cref="ReadOnlySpan{T}"/>. The span must contain at least <see cref="Vector{T}.Count"/> elements.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector(ReadOnlySpan<T> values)
+            : this()
+        {
+            if (values.Length < Count)
+            {
+                Vector.ThrowInsufficientNumberOfElementsException(Vector<T>.Count);
+            }
+            this = Unsafe.ReadUnaligned<Vector<T>>(ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)));
+        }
+
+        /// <summary>
+        /// Constructs a vector from the given <see cref="Span{T}"/>. The span must contain at least <see cref="Vector{T}.Count"/> elements.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector(Span<T> values)
             : this()
         {
-            if ((typeof(T) == typeof(byte))
-                || (typeof(T) == typeof(sbyte))
-                || (typeof(T) == typeof(ushort))
-                || (typeof(T) == typeof(short))
-                || (typeof(T) == typeof(uint))
-                || (typeof(T) == typeof(int))
-                || (typeof(T) == typeof(ulong))
-                || (typeof(T) == typeof(long))
-                || (typeof(T) == typeof(float))
-                || (typeof(T) == typeof(double)))
+            if (values.Length < Count)
             {
-                if (values.Length < Count)
-                {
-                    throw new IndexOutOfRangeException(SR.Format(SR.Arg_InsufficientNumberOfElements, Vector<T>.Count, nameof(values)));
-                }
-                this = Unsafe.ReadUnaligned<Vector<T>>(ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)));
+                Vector.ThrowInsufficientNumberOfElementsException(Vector<T>.Count);
             }
-            else
-            {
-                throw new NotSupportedException(SR.Arg_TypeNotSupported);
-            }
+            this = Unsafe.ReadUnaligned<Vector<T>>(ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)));
         }
 #endif
         #endregion Constructors
 
         #region Public Instance Methods
+        /// <summary>
+        /// Copies the vector to the given <see cref="Span{Byte}"/>. The destination span must be at least size <see cref="Vector{Byte}.Count"/>.
+        /// </summary>
+        /// <param name="destination">The destination span which the values are copied into</param>
+        /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination span</exception>
+        public readonly void CopyTo(Span<byte> destination)
+        {
+            ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
+            if ((uint)destination.Length < (uint)Vector<byte>.Count)
+            {
+                ThrowHelper.ThrowArgumentException_DestinationTooShort();
+            }
+            Unsafe.WriteUnaligned<Vector<T>>(ref MemoryMarshal.GetReference(destination), this);
+        }
+
+        /// <summary>
+        /// Copies the vector to the given <see cref="Span{T}"/>. The destination span must be at least size <see cref="Vector{T}.Count"/>.
+        /// </summary>
+        /// <param name="destination">The destination span which the values are copied into</param>
+        /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination span</exception>
+        public readonly void CopyTo(Span<T> destination)
+        {
+            if ((uint)destination.Length < (uint)Count)
+            {
+                ThrowHelper.ThrowArgumentException_DestinationTooShort();
+            }
+
+            Unsafe.WriteUnaligned<Vector<T>>(ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destination)), this);
+        }
+
         /// <summary>
         /// Copies the vector to the given destination array. The destination array must be at least size Vector'T.Count.
         /// </summary>
@@ -808,7 +803,7 @@ namespace System.Numerics
         /// <exception cref="ArgumentNullException">If the destination array is null</exception>
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination array</exception>
         [Intrinsic]
-        public unsafe void CopyTo(T[] destination)
+        public unsafe readonly void CopyTo(T[] destination)
         {
             CopyTo(destination, 0);
         }
@@ -822,7 +817,7 @@ namespace System.Numerics
         /// <exception cref="ArgumentOutOfRangeException">If index is greater than end of the array or index is less than zero</exception>
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination array</exception>
         [Intrinsic]
-        public unsafe void CopyTo(T[] destination, int startIndex)
+        public unsafe readonly void CopyTo(T[] destination, int startIndex)
         {
             if (destination == null)
             {
@@ -1095,7 +1090,7 @@ namespace System.Numerics
         /// <summary>
         /// Returns the element at the given index.
         /// </summary>
-        public unsafe T this[int index]
+        public unsafe readonly T this[int index]
         {
             [Intrinsic]
             get
@@ -1187,7 +1182,7 @@ namespace System.Numerics
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this vector; False otherwise.</returns>
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             if (!(obj is Vector<T>))
             {
@@ -1202,7 +1197,7 @@ namespace System.Numerics
         /// <param name="other">The vector to compare this instance to.</param>
         /// <returns>True if the other vector is equal to this instance; False otherwise.</returns>
         [Intrinsic]
-        public bool Equals(Vector<T> other)
+        public readonly bool Equals(Vector<T> other)
         {
             if (Vector.IsHardwareAccelerated)
             {
@@ -1334,7 +1329,7 @@ namespace System.Numerics
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             int hash = 0;
 
@@ -1544,7 +1539,7 @@ namespace System.Numerics
         /// Returns a String representing this vector.
         /// </summary>
         /// <returns>The string representation.</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return ToString("G", CultureInfo.CurrentCulture);
         }
@@ -1554,7 +1549,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="format">The format of individual elements.</param>
         /// <returns>The string representation.</returns>
-        public string ToString(string format)
+        public readonly string ToString(string? format)
         {
             return ToString(format, CultureInfo.CurrentCulture);
         }
@@ -1566,7 +1561,7 @@ namespace System.Numerics
         /// <param name="format">The format of individual elements.</param>
         /// <param name="formatProvider">The format provider to use when formatting elements.</param>
         /// <returns>The string representation.</returns>
-        public string ToString(string format, IFormatProvider formatProvider)
+        public readonly string ToString(string? format, IFormatProvider? formatProvider)
         {
             StringBuilder sb = new StringBuilder();
             string separator = NumberFormatInfo.GetInstance(formatProvider).NumberGroupSeparator;
@@ -1582,6 +1577,41 @@ namespace System.Numerics
             sb.Append('>');
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Attempts to copy the vector to the given <see cref="Span{Byte}"/>. The destination span must be at least size <see cref="Vector{Byte}.Count"/>.
+        /// </summary>
+        /// <param name="destination">The destination span which the values are copied into</param>
+        /// <returns>True if the source vector was successfully copied to <paramref name="destination"/>. False if
+        /// <paramref name="destination"/> is not large enough to hold the source vector.</returns>
+        public readonly bool TryCopyTo(Span<byte> destination)
+        {
+            ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
+            if ((uint)destination.Length < (uint)Vector<byte>.Count)
+            {
+                return false;
+            }
+
+            Unsafe.WriteUnaligned<Vector<T>>(ref MemoryMarshal.GetReference(destination), this);
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to copy the vector to the given <see cref="Span{T}"/>. The destination span must be at least size <see cref="Vector{T}.Count"/>.
+        /// </summary>
+        /// <param name="destination">The destination span which the values are copied into</param>
+        /// <returns>True if the source vector was successfully copied to <paramref name="destination"/>. False if
+        /// <paramref name="destination"/> is not large enough to hold the source vector.</returns>
+        public readonly bool TryCopyTo(Span<T> destination)
+        {
+            if ((uint)destination.Length < (uint)Count)
+            {
+                return false;
+            }
+
+            Unsafe.WriteUnaligned<Vector<T>>(ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destination)), this);
+            return true;
+        }
         #endregion Public Instance Methods
 
         #region Arithmetic Operators
@@ -1591,6 +1621,7 @@ namespace System.Numerics
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The summed vector.</returns>
+        [Intrinsic]
         public static unsafe Vector<T> operator +(Vector<T> left, Vector<T> right)
         {
             unchecked
@@ -1802,6 +1833,7 @@ namespace System.Numerics
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The difference vector.</returns>
+        [Intrinsic]
         public static unsafe Vector<T> operator -(Vector<T> left, Vector<T> right)
         {
             unchecked
@@ -2014,6 +2046,7 @@ namespace System.Numerics
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The product vector.</returns>
+        [Intrinsic]
         public static unsafe Vector<T> operator *(Vector<T> left, Vector<T> right)
         {
             unchecked
@@ -2219,242 +2252,28 @@ namespace System.Numerics
             }
         }
 
-        // This method is intrinsic only for certain types. It cannot access fields directly unless we are sure the context is unaccelerated.
         /// <summary>
         /// Multiplies a vector by the given scalar.
         /// </summary>
         /// <param name="value">The source vector.</param>
         /// <param name="factor">The scalar value.</param>
         /// <returns>The scaled vector.</returns>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static Vector<T> operator *(Vector<T> value, T factor)
         {
-            unchecked
-            {
-                if (Vector.IsHardwareAccelerated)
-                {
-                    return new Vector<T>(factor) * value;
-                }
-                else
-                {
-                    Vector<T> product = new Vector<T>();
-                    if (typeof(T) == typeof(byte))
-                    {
-                        product.register.byte_0 = (byte)(value.register.byte_0 * (byte)(object)factor);
-                        product.register.byte_1 = (byte)(value.register.byte_1 * (byte)(object)factor);
-                        product.register.byte_2 = (byte)(value.register.byte_2 * (byte)(object)factor);
-                        product.register.byte_3 = (byte)(value.register.byte_3 * (byte)(object)factor);
-                        product.register.byte_4 = (byte)(value.register.byte_4 * (byte)(object)factor);
-                        product.register.byte_5 = (byte)(value.register.byte_5 * (byte)(object)factor);
-                        product.register.byte_6 = (byte)(value.register.byte_6 * (byte)(object)factor);
-                        product.register.byte_7 = (byte)(value.register.byte_7 * (byte)(object)factor);
-                        product.register.byte_8 = (byte)(value.register.byte_8 * (byte)(object)factor);
-                        product.register.byte_9 = (byte)(value.register.byte_9 * (byte)(object)factor);
-                        product.register.byte_10 = (byte)(value.register.byte_10 * (byte)(object)factor);
-                        product.register.byte_11 = (byte)(value.register.byte_11 * (byte)(object)factor);
-                        product.register.byte_12 = (byte)(value.register.byte_12 * (byte)(object)factor);
-                        product.register.byte_13 = (byte)(value.register.byte_13 * (byte)(object)factor);
-                        product.register.byte_14 = (byte)(value.register.byte_14 * (byte)(object)factor);
-                        product.register.byte_15 = (byte)(value.register.byte_15 * (byte)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(sbyte))
-                    {
-                        product.register.sbyte_0 = (sbyte)(value.register.sbyte_0 * (sbyte)(object)factor);
-                        product.register.sbyte_1 = (sbyte)(value.register.sbyte_1 * (sbyte)(object)factor);
-                        product.register.sbyte_2 = (sbyte)(value.register.sbyte_2 * (sbyte)(object)factor);
-                        product.register.sbyte_3 = (sbyte)(value.register.sbyte_3 * (sbyte)(object)factor);
-                        product.register.sbyte_4 = (sbyte)(value.register.sbyte_4 * (sbyte)(object)factor);
-                        product.register.sbyte_5 = (sbyte)(value.register.sbyte_5 * (sbyte)(object)factor);
-                        product.register.sbyte_6 = (sbyte)(value.register.sbyte_6 * (sbyte)(object)factor);
-                        product.register.sbyte_7 = (sbyte)(value.register.sbyte_7 * (sbyte)(object)factor);
-                        product.register.sbyte_8 = (sbyte)(value.register.sbyte_8 * (sbyte)(object)factor);
-                        product.register.sbyte_9 = (sbyte)(value.register.sbyte_9 * (sbyte)(object)factor);
-                        product.register.sbyte_10 = (sbyte)(value.register.sbyte_10 * (sbyte)(object)factor);
-                        product.register.sbyte_11 = (sbyte)(value.register.sbyte_11 * (sbyte)(object)factor);
-                        product.register.sbyte_12 = (sbyte)(value.register.sbyte_12 * (sbyte)(object)factor);
-                        product.register.sbyte_13 = (sbyte)(value.register.sbyte_13 * (sbyte)(object)factor);
-                        product.register.sbyte_14 = (sbyte)(value.register.sbyte_14 * (sbyte)(object)factor);
-                        product.register.sbyte_15 = (sbyte)(value.register.sbyte_15 * (sbyte)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(ushort))
-                    {
-                        product.register.uint16_0 = (ushort)(value.register.uint16_0 * (ushort)(object)factor);
-                        product.register.uint16_1 = (ushort)(value.register.uint16_1 * (ushort)(object)factor);
-                        product.register.uint16_2 = (ushort)(value.register.uint16_2 * (ushort)(object)factor);
-                        product.register.uint16_3 = (ushort)(value.register.uint16_3 * (ushort)(object)factor);
-                        product.register.uint16_4 = (ushort)(value.register.uint16_4 * (ushort)(object)factor);
-                        product.register.uint16_5 = (ushort)(value.register.uint16_5 * (ushort)(object)factor);
-                        product.register.uint16_6 = (ushort)(value.register.uint16_6 * (ushort)(object)factor);
-                        product.register.uint16_7 = (ushort)(value.register.uint16_7 * (ushort)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(short))
-                    {
-                        product.register.int16_0 = (short)(value.register.int16_0 * (short)(object)factor);
-                        product.register.int16_1 = (short)(value.register.int16_1 * (short)(object)factor);
-                        product.register.int16_2 = (short)(value.register.int16_2 * (short)(object)factor);
-                        product.register.int16_3 = (short)(value.register.int16_3 * (short)(object)factor);
-                        product.register.int16_4 = (short)(value.register.int16_4 * (short)(object)factor);
-                        product.register.int16_5 = (short)(value.register.int16_5 * (short)(object)factor);
-                        product.register.int16_6 = (short)(value.register.int16_6 * (short)(object)factor);
-                        product.register.int16_7 = (short)(value.register.int16_7 * (short)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(uint))
-                    {
-                        product.register.uint32_0 = (uint)(value.register.uint32_0 * (uint)(object)factor);
-                        product.register.uint32_1 = (uint)(value.register.uint32_1 * (uint)(object)factor);
-                        product.register.uint32_2 = (uint)(value.register.uint32_2 * (uint)(object)factor);
-                        product.register.uint32_3 = (uint)(value.register.uint32_3 * (uint)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(int))
-                    {
-                        product.register.int32_0 = (int)(value.register.int32_0 * (int)(object)factor);
-                        product.register.int32_1 = (int)(value.register.int32_1 * (int)(object)factor);
-                        product.register.int32_2 = (int)(value.register.int32_2 * (int)(object)factor);
-                        product.register.int32_3 = (int)(value.register.int32_3 * (int)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(ulong))
-                    {
-                        product.register.uint64_0 = (ulong)(value.register.uint64_0 * (ulong)(object)factor);
-                        product.register.uint64_1 = (ulong)(value.register.uint64_1 * (ulong)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(long))
-                    {
-                        product.register.int64_0 = (long)(value.register.int64_0 * (long)(object)factor);
-                        product.register.int64_1 = (long)(value.register.int64_1 * (long)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(float))
-                    {
-                        product.register.single_0 = (float)(value.register.single_0 * (float)(object)factor);
-                        product.register.single_1 = (float)(value.register.single_1 * (float)(object)factor);
-                        product.register.single_2 = (float)(value.register.single_2 * (float)(object)factor);
-                        product.register.single_3 = (float)(value.register.single_3 * (float)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(double))
-                    {
-                        product.register.double_0 = (double)(value.register.double_0 * (double)(object)factor);
-                        product.register.double_1 = (double)(value.register.double_1 * (double)(object)factor);
-                    }
-                    return product;
-                }
-            }
+            return new Vector<T>(factor) * value;
         }
 
-        // This method is intrinsic only for certain types. It cannot access fields directly unless we are sure the context is unaccelerated.
         /// <summary>
         /// Multiplies a vector by the given scalar.
         /// </summary>
         /// <param name="factor">The scalar value.</param>
         /// <param name="value">The source vector.</param>
         /// <returns>The scaled vector.</returns>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static Vector<T> operator *(T factor, Vector<T> value)
         {
-            unchecked
-            {
-                if (Vector.IsHardwareAccelerated)
-                {
-                    return new Vector<T>(factor) * value;
-                }
-                else
-                {
-                    Vector<T> product = new Vector<T>();
-                    if (typeof(T) == typeof(byte))
-                    {
-                        product.register.byte_0 = (byte)(value.register.byte_0 * (byte)(object)factor);
-                        product.register.byte_1 = (byte)(value.register.byte_1 * (byte)(object)factor);
-                        product.register.byte_2 = (byte)(value.register.byte_2 * (byte)(object)factor);
-                        product.register.byte_3 = (byte)(value.register.byte_3 * (byte)(object)factor);
-                        product.register.byte_4 = (byte)(value.register.byte_4 * (byte)(object)factor);
-                        product.register.byte_5 = (byte)(value.register.byte_5 * (byte)(object)factor);
-                        product.register.byte_6 = (byte)(value.register.byte_6 * (byte)(object)factor);
-                        product.register.byte_7 = (byte)(value.register.byte_7 * (byte)(object)factor);
-                        product.register.byte_8 = (byte)(value.register.byte_8 * (byte)(object)factor);
-                        product.register.byte_9 = (byte)(value.register.byte_9 * (byte)(object)factor);
-                        product.register.byte_10 = (byte)(value.register.byte_10 * (byte)(object)factor);
-                        product.register.byte_11 = (byte)(value.register.byte_11 * (byte)(object)factor);
-                        product.register.byte_12 = (byte)(value.register.byte_12 * (byte)(object)factor);
-                        product.register.byte_13 = (byte)(value.register.byte_13 * (byte)(object)factor);
-                        product.register.byte_14 = (byte)(value.register.byte_14 * (byte)(object)factor);
-                        product.register.byte_15 = (byte)(value.register.byte_15 * (byte)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(sbyte))
-                    {
-                        product.register.sbyte_0 = (sbyte)(value.register.sbyte_0 * (sbyte)(object)factor);
-                        product.register.sbyte_1 = (sbyte)(value.register.sbyte_1 * (sbyte)(object)factor);
-                        product.register.sbyte_2 = (sbyte)(value.register.sbyte_2 * (sbyte)(object)factor);
-                        product.register.sbyte_3 = (sbyte)(value.register.sbyte_3 * (sbyte)(object)factor);
-                        product.register.sbyte_4 = (sbyte)(value.register.sbyte_4 * (sbyte)(object)factor);
-                        product.register.sbyte_5 = (sbyte)(value.register.sbyte_5 * (sbyte)(object)factor);
-                        product.register.sbyte_6 = (sbyte)(value.register.sbyte_6 * (sbyte)(object)factor);
-                        product.register.sbyte_7 = (sbyte)(value.register.sbyte_7 * (sbyte)(object)factor);
-                        product.register.sbyte_8 = (sbyte)(value.register.sbyte_8 * (sbyte)(object)factor);
-                        product.register.sbyte_9 = (sbyte)(value.register.sbyte_9 * (sbyte)(object)factor);
-                        product.register.sbyte_10 = (sbyte)(value.register.sbyte_10 * (sbyte)(object)factor);
-                        product.register.sbyte_11 = (sbyte)(value.register.sbyte_11 * (sbyte)(object)factor);
-                        product.register.sbyte_12 = (sbyte)(value.register.sbyte_12 * (sbyte)(object)factor);
-                        product.register.sbyte_13 = (sbyte)(value.register.sbyte_13 * (sbyte)(object)factor);
-                        product.register.sbyte_14 = (sbyte)(value.register.sbyte_14 * (sbyte)(object)factor);
-                        product.register.sbyte_15 = (sbyte)(value.register.sbyte_15 * (sbyte)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(ushort))
-                    {
-                        product.register.uint16_0 = (ushort)(value.register.uint16_0 * (ushort)(object)factor);
-                        product.register.uint16_1 = (ushort)(value.register.uint16_1 * (ushort)(object)factor);
-                        product.register.uint16_2 = (ushort)(value.register.uint16_2 * (ushort)(object)factor);
-                        product.register.uint16_3 = (ushort)(value.register.uint16_3 * (ushort)(object)factor);
-                        product.register.uint16_4 = (ushort)(value.register.uint16_4 * (ushort)(object)factor);
-                        product.register.uint16_5 = (ushort)(value.register.uint16_5 * (ushort)(object)factor);
-                        product.register.uint16_6 = (ushort)(value.register.uint16_6 * (ushort)(object)factor);
-                        product.register.uint16_7 = (ushort)(value.register.uint16_7 * (ushort)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(short))
-                    {
-                        product.register.int16_0 = (short)(value.register.int16_0 * (short)(object)factor);
-                        product.register.int16_1 = (short)(value.register.int16_1 * (short)(object)factor);
-                        product.register.int16_2 = (short)(value.register.int16_2 * (short)(object)factor);
-                        product.register.int16_3 = (short)(value.register.int16_3 * (short)(object)factor);
-                        product.register.int16_4 = (short)(value.register.int16_4 * (short)(object)factor);
-                        product.register.int16_5 = (short)(value.register.int16_5 * (short)(object)factor);
-                        product.register.int16_6 = (short)(value.register.int16_6 * (short)(object)factor);
-                        product.register.int16_7 = (short)(value.register.int16_7 * (short)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(uint))
-                    {
-                        product.register.uint32_0 = (uint)(value.register.uint32_0 * (uint)(object)factor);
-                        product.register.uint32_1 = (uint)(value.register.uint32_1 * (uint)(object)factor);
-                        product.register.uint32_2 = (uint)(value.register.uint32_2 * (uint)(object)factor);
-                        product.register.uint32_3 = (uint)(value.register.uint32_3 * (uint)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(int))
-                    {
-                        product.register.int32_0 = (int)(value.register.int32_0 * (int)(object)factor);
-                        product.register.int32_1 = (int)(value.register.int32_1 * (int)(object)factor);
-                        product.register.int32_2 = (int)(value.register.int32_2 * (int)(object)factor);
-                        product.register.int32_3 = (int)(value.register.int32_3 * (int)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(ulong))
-                    {
-                        product.register.uint64_0 = (ulong)(value.register.uint64_0 * (ulong)(object)factor);
-                        product.register.uint64_1 = (ulong)(value.register.uint64_1 * (ulong)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(long))
-                    {
-                        product.register.int64_0 = (long)(value.register.int64_0 * (long)(object)factor);
-                        product.register.int64_1 = (long)(value.register.int64_1 * (long)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(float))
-                    {
-                        product.register.single_0 = (float)(value.register.single_0 * (float)(object)factor);
-                        product.register.single_1 = (float)(value.register.single_1 * (float)(object)factor);
-                        product.register.single_2 = (float)(value.register.single_2 * (float)(object)factor);
-                        product.register.single_3 = (float)(value.register.single_3 * (float)(object)factor);
-                    }
-                    else if (typeof(T) == typeof(double))
-                    {
-                        product.register.double_0 = (double)(value.register.double_0 * (double)(object)factor);
-                        product.register.double_1 = (double)(value.register.double_1 * (double)(object)factor);
-                    }
-                    return product;
-                }
-            }
+            return new Vector<T>(factor) * value;
         }
 
         // This method is intrinsic only for certain types. It cannot access fields directly unless we are sure the context is unaccelerated.
@@ -2464,6 +2283,7 @@ namespace System.Numerics
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The vector resulting from the division.</returns>
+        [Intrinsic]
         public static unsafe Vector<T> operator /(Vector<T> left, Vector<T> right)
         {
             unchecked
@@ -2793,6 +2613,7 @@ namespace System.Numerics
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The first vector to compare.</param>
         /// <returns>True if all elements are equal; False otherwise.</returns>
+        [Intrinsic]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Vector<T> left, Vector<T> right)
         {
@@ -2805,6 +2626,7 @@ namespace System.Numerics
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The second vector to compare.</param>
         /// <returns>True if left and right are not equal; False otherwise.</returns>
+        [Intrinsic]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Vector<T> left, Vector<T> right)
         {
@@ -4183,7 +4005,7 @@ namespace System.Numerics
         }
 
         [Intrinsic]
-        internal static T DotProduct(Vector<T> left, Vector<T> right)
+        internal static T Dot(Vector<T> left, Vector<T> right)
         {
             if (Vector.IsHardwareAccelerated)
             {
@@ -5534,5 +5356,13 @@ namespace System.Numerics
         }
 
         #endregion Same-Size Conversion
+
+        #region Throw Helpers
+        [DoesNotReturn]
+        internal static void ThrowInsufficientNumberOfElementsException(int requiredElementCount)
+        {
+            throw new IndexOutOfRangeException(SR.Format(SR.Arg_InsufficientNumberOfElements, requiredElementCount, "values"));
+        }
+        #endregion
     }
 }

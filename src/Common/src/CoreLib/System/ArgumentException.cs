@@ -23,7 +23,7 @@ namespace System
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ArgumentException : SystemException
     {
-        private string _paramName;
+        private string? _paramName;
 
         // Creates a new ArgumentException with its message 
         // string set to the empty string. 
@@ -36,26 +36,26 @@ namespace System
         // Creates a new ArgumentException with its message 
         // string set to message. 
         // 
-        public ArgumentException(string message)
+        public ArgumentException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_ARGUMENT;
         }
 
-        public ArgumentException(string message, Exception innerException)
+        public ArgumentException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_ARGUMENT;
         }
 
-        public ArgumentException(string message, string paramName, Exception innerException)
+        public ArgumentException(string? message, string? paramName, Exception? innerException)
             : base(message, innerException)
         {
             _paramName = paramName;
             HResult = HResults.COR_E_ARGUMENT;
         }
 
-        public ArgumentException(string message, string paramName)
+        public ArgumentException(string? message, string? paramName)
             : base(message)
         {
             _paramName = paramName;
@@ -78,6 +78,8 @@ namespace System
         {
             get
             {
+                SetMessageField();
+                
                 string s = base.Message;
                 if (!string.IsNullOrEmpty(_paramName))
                 {
@@ -89,7 +91,15 @@ namespace System
             }
         }
 
-        public virtual string ParamName
+        private void SetMessageField()
+        {
+            if (_message == null && HResult == System.HResults.COR_E_ARGUMENT) 
+            {
+                _message = SR.Arg_ArgumentException;
+            }
+        }
+        
+        public virtual string? ParamName
         {
             get { return _paramName; }
         }

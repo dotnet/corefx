@@ -5,6 +5,7 @@
 using System.Text;
 using System.Diagnostics;
 using System.Buffers;
+using System.Threading.Tasks;
 
 namespace System.IO
 {
@@ -12,19 +13,19 @@ namespace System.IO
     // primitives to an arbitrary stream. A subclass can override methods to
     // give unique encodings.
     //
-    public class BinaryWriter : IDisposable
+    public class BinaryWriter : IDisposable, IAsyncDisposable
     {
         public static readonly BinaryWriter Null = new BinaryWriter();
 
         protected Stream OutStream;
-        private byte[] _buffer;    // temp space for writing primitives to.
-        private Encoding _encoding;
-        private Encoder _encoder;
+        private readonly byte[] _buffer;    // temp space for writing primitives to.
+        private readonly Encoding _encoding;
+        private readonly Encoder _encoder;
 
         private bool _leaveOpen;
 
         // Perf optimization stuff
-        private byte[] _largeByteBuffer;  // temp space for writing chars.
+        private byte[]? _largeByteBuffer;  // temp space for writing chars.
         private int _maxChars;   // max # of chars we can put in _largeByteBuffer
         // Size should be around the max number of chars/string * Encoding's max bytes/char
         private const int LargeByteBufferSize = 256;
@@ -85,6 +86,34 @@ namespace System.IO
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        public virtual ValueTask DisposeAsync()
+        {
+            try
+            {
+                if (GetType() == typeof(BinaryWriter))
+                {
+                    if (_leaveOpen)
+                    {
+                        return new ValueTask(OutStream.FlushAsync());
+                    }
+
+                    OutStream.Close();
+                }
+                else
+                {
+                    // Since this is a derived BinaryWriter, delegate to whatever logic
+                    // the derived implementation already has in Dispose.
+                    Dispose();
+                }
+
+                return default;
+            }
+            catch (Exception exc)
+            {
+                return new ValueTask(Task.FromException(exc));
+            }
         }
 
         // Returns the stream associated with the writer. It flushes all pending

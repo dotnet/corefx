@@ -812,7 +812,7 @@ namespace System.IO.Ports.Tests
             com2.Write(bytesToWrite, 0, bytesToWrite.Length);
             com1.ReadTimeout = 500;
 
-            //This is pretty lame but we will have to live with if for now becuase we can not 
+            //This is pretty silly but we will have to live with if for now becuase we can not 
             //gaurentee the number of bytes Write will add
             Thread.Sleep((int)(((bytesToWrite.Length * 10.0) / com1.BaudRate) * 1000) + 250);
 
@@ -952,7 +952,7 @@ namespace System.IO.Ports.Tests
 
                 if (encoding.EncodingName == Encoding.UTF7.EncodingName)
                 {
-                    //If UTF7Encoding is being used we we might leave a - in the stream
+                    //If UTF7Encoding is being used we might leave a - in the stream
                     if (com1.BytesToRead == xmitByteBuffer.Length + 1)
                     {
                         int byteRead;

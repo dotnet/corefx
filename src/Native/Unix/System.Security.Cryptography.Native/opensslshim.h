@@ -23,6 +23,7 @@
 #include <openssl/hmac.h>
 #include <openssl/md5.h>
 #include <openssl/objects.h>
+#include <openssl/ocsp.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>
 #include <openssl/pkcs7.h>
@@ -35,8 +36,15 @@
 #include <openssl/x509v3.h>
 
 #include "pal_crypto_config.h"
+#define OPENSSL_VERSION_1_1_1_RTM 0x10101000L
 #define OPENSSL_VERSION_1_1_0_RTM 0x10100000L
 #define OPENSSL_VERSION_1_0_2_RTM 0x10002000L
+
+#if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_1_1_RTM
+#define HAVE_OPENSSL_SET_CIPHERSUITES 1
+#else
+#define HAVE_OPENSSL_SET_CIPHERSUITES 0
+#endif
 
 #if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0_RTM
 
@@ -52,6 +60,7 @@
 #undef EVP_MD_CTX_create
 #undef EVP_MD_CTX_init
 #undef EVP_MD_CTX_destroy
+#undef RSA_PKCS1_SSLeay
 #undef SSLv23_method
 #endif
 
@@ -76,6 +85,14 @@ int EC_POINT_get_affine_coordinates_GF2m(const EC_GROUP* group, const EC_POINT* 
 int EC_POINT_set_affine_coordinates_GF2m(
     const EC_GROUP* group, EC_POINT* p, const BIGNUM* x, const BIGNUM* y, BN_CTX* ctx);
 #endif
+
+#if !HAVE_OPENSSL_SET_CIPHERSUITES
+#undef HAVE_OPENSSL_SET_CIPHERSUITES
+#define HAVE_OPENSSL_SET_CIPHERSUITES 1
+int SSL_CTX_set_ciphersuites(SSL_CTX *ctx, const char *str);
+const SSL_CIPHER* SSL_CIPHER_find(SSL *ssl, const unsigned char *ptr);
+#endif
+
 #if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_1_0_RTM
 typedef struct stack_st _STACK;
 int CRYPTO_add_lock(int* pointer, int amount, int type, const char* file, int line);
@@ -118,6 +135,7 @@ int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS* settings);
 void OPENSSL_sk_free(OPENSSL_STACK*);
 OPENSSL_STACK* OPENSSL_sk_new_null(void);
 int OPENSSL_sk_num(const OPENSSL_STACK*);
+void* OPENSSL_sk_pop(OPENSSL_STACK* st);
 void OPENSSL_sk_pop_free(OPENSSL_STACK* st, void (*func)(void*));
 int OPENSSL_sk_push(OPENSSL_STACK* st, const void* data);
 void* OPENSSL_sk_value(const OPENSSL_STACK*, int);
@@ -126,6 +144,7 @@ void RSA_get0_crt_params(const RSA* rsa, const BIGNUM** dmp1, const BIGNUM** dmq
 void RSA_get0_factors(const RSA* rsa, const BIGNUM** p, const BIGNUM** q);
 void RSA_get0_key(const RSA* rsa, const BIGNUM** n, const BIGNUM** e, const BIGNUM** d);
 int32_t RSA_meth_get_flags(const RSA_METHOD* meth);
+const RSA_METHOD* RSA_PKCS1_OpenSSL(void);
 int32_t RSA_set0_crt_params(RSA* rsa, BIGNUM* dmp1, BIGNUM* dmq1, BIGNUM* iqmp);
 int32_t RSA_set0_factors(RSA* rsa, BIGNUM* p, BIGNUM* q);
 int32_t RSA_set0_key(RSA* rsa, BIGNUM* n, BIGNUM* e, BIGNUM* d);
@@ -141,7 +160,9 @@ int32_t X509_NAME_get0_der(X509_NAME* x509Name, const uint8_t** pder, size_t* pd
 int32_t X509_PUBKEY_get0_param(
     ASN1_OBJECT** palgOid, const uint8_t** pkeyBytes, int* pkeyBytesLen, X509_ALGOR** palg, X509_PUBKEY* pubkey);
 X509* X509_STORE_CTX_get0_cert(X509_STORE_CTX* ctx);
-STACK_OF(X509) * X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx);
+STACK_OF(X509)* X509_STORE_CTX_get0_chain(X509_STORE_CTX* ctx);
+STACK_OF(X509)* X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx);
+X509_VERIFY_PARAM* X509_STORE_get0_param(X509_STORE* ctx);
 const ASN1_TIME* X509_get0_notAfter(const X509* x509);
 const ASN1_TIME* X509_get0_notBefore(const X509* x509);
 ASN1_BIT_STRING* X509_get0_pubkey_bitstr(const X509* x509);
@@ -149,6 +170,13 @@ const X509_ALGOR* X509_get0_tbs_sigalg(const X509* x509);
 X509_PUBKEY* X509_get_X509_PUBKEY(const X509* x509);
 int32_t X509_get_version(const X509* x509);
 int32_t X509_up_ref(X509* x509);
+#endif
+
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_0_2_RTM
+X509_STORE* X509_STORE_CTX_get0_store(X509_STORE_CTX* ctx);
+int32_t X509_check_host(X509* x509, const char* name, size_t namelen, unsigned int flags, char** peername);
+#define X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS 4
+
 #endif
 
 #if !HAVE_OPENSSL_ALPN
@@ -174,11 +202,15 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
 
 #define FOR_ALL_OPENSSL_FUNCTIONS \
     REQUIRED_FUNCTION(ASN1_BIT_STRING_free) \
+    REQUIRED_FUNCTION(ASN1_d2i_bio) \
+    REQUIRED_FUNCTION(ASN1_i2d_bio) \
+    REQUIRED_FUNCTION(ASN1_GENERALIZEDTIME_free) \
     REQUIRED_FUNCTION(ASN1_INTEGER_get) \
     REQUIRED_FUNCTION(ASN1_OBJECT_free) \
     REQUIRED_FUNCTION(ASN1_OCTET_STRING_free) \
     REQUIRED_FUNCTION(ASN1_OCTET_STRING_new) \
     REQUIRED_FUNCTION(ASN1_OCTET_STRING_set) \
+    REQUIRED_FUNCTION(ASN1_STRING_dup) \
     REQUIRED_FUNCTION(ASN1_STRING_free) \
     REQUIRED_FUNCTION(ASN1_STRING_print_ex) \
     REQUIRED_FUNCTION(BASIC_CONSTRAINTS_free) \
@@ -194,6 +226,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(BN_bin2bn) \
     REQUIRED_FUNCTION(BN_bn2bin) \
     REQUIRED_FUNCTION(BN_clear_free) \
+    REQUIRED_FUNCTION(BN_dup) \
     REQUIRED_FUNCTION(BN_free) \
     REQUIRED_FUNCTION(BN_new) \
     REQUIRED_FUNCTION(BN_num_bits) \
@@ -204,8 +237,10 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(d2i_ASN1_OCTET_STRING) \
     REQUIRED_FUNCTION(d2i_BASIC_CONSTRAINTS) \
     REQUIRED_FUNCTION(d2i_EXTENDED_KEY_USAGE) \
+    REQUIRED_FUNCTION(d2i_OCSP_RESPONSE) \
     REQUIRED_FUNCTION(d2i_PKCS12) \
     REQUIRED_FUNCTION(d2i_PKCS12_bio) \
+    REQUIRED_FUNCTION(d2i_PKCS12_fp) \
     REQUIRED_FUNCTION(d2i_PKCS7) \
     REQUIRED_FUNCTION(d2i_PKCS7_bio) \
     REQUIRED_FUNCTION(d2i_RSAPublicKey) \
@@ -338,6 +373,8 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(HMAC_Update) \
     REQUIRED_FUNCTION(i2d_ASN1_INTEGER) \
     REQUIRED_FUNCTION(i2d_ASN1_TYPE) \
+    REQUIRED_FUNCTION(i2d_OCSP_REQUEST) \
+    REQUIRED_FUNCTION(i2d_OCSP_RESPONSE) \
     REQUIRED_FUNCTION(i2d_PKCS12) \
     REQUIRED_FUNCTION(i2d_PKCS7) \
     REQUIRED_FUNCTION(i2d_X509) \
@@ -351,17 +388,32 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(OBJ_sn2nid) \
     REQUIRED_FUNCTION(OBJ_txt2nid) \
     REQUIRED_FUNCTION(OBJ_txt2obj) \
+    REQUIRED_FUNCTION(OCSP_BASICRESP_free) \
+    REQUIRED_FUNCTION(OCSP_basic_verify) \
+    REQUIRED_FUNCTION(OCSP_CERTID_free) \
+    REQUIRED_FUNCTION(OCSP_cert_to_id) \
+    REQUIRED_FUNCTION(OCSP_check_nonce) \
+    REQUIRED_FUNCTION(OCSP_request_add0_id) \
+    REQUIRED_FUNCTION(OCSP_request_add1_nonce) \
+    REQUIRED_FUNCTION(OCSP_REQUEST_free) \
+    REQUIRED_FUNCTION(OCSP_REQUEST_new) \
+    REQUIRED_FUNCTION(OCSP_resp_find_status) \
+    REQUIRED_FUNCTION(OCSP_response_get1_basic) \
+    REQUIRED_FUNCTION(OCSP_RESPONSE_free) \
+    REQUIRED_FUNCTION(OCSP_RESPONSE_new) \
     LEGACY_FUNCTION(OPENSSL_add_all_algorithms_conf) \
     REQUIRED_FUNCTION(OPENSSL_cleanse) \
     NEW_REQUIRED_FUNCTION(OPENSSL_init_ssl) \
     RENAMED_FUNCTION(OPENSSL_sk_free, sk_free) \
     RENAMED_FUNCTION(OPENSSL_sk_new_null, sk_new_null) \
     RENAMED_FUNCTION(OPENSSL_sk_num, sk_num) \
+    RENAMED_FUNCTION(OPENSSL_sk_pop, sk_pop) \
     RENAMED_FUNCTION(OPENSSL_sk_pop_free, sk_pop_free) \
     RENAMED_FUNCTION(OPENSSL_sk_push, sk_push) \
     RENAMED_FUNCTION(OPENSSL_sk_value, sk_value) \
     FALLBACK_FUNCTION(OpenSSL_version_num) \
     REQUIRED_FUNCTION(PEM_read_bio_PKCS7) \
+    REQUIRED_FUNCTION(PEM_read_bio_X509) \
     REQUIRED_FUNCTION(PEM_read_bio_X509_AUX) \
     REQUIRED_FUNCTION(PEM_read_bio_X509_CRL) \
     REQUIRED_FUNCTION(PEM_write_bio_X509_CRL) \
@@ -372,6 +424,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(PKCS7_free) \
     REQUIRED_FUNCTION(RAND_bytes) \
     REQUIRED_FUNCTION(RAND_poll) \
+    REQUIRED_FUNCTION(RSA_check_key) \
     REQUIRED_FUNCTION(RSA_free) \
     REQUIRED_FUNCTION(RSA_generate_key_ex) \
     REQUIRED_FUNCTION(RSA_get_method) \
@@ -380,6 +433,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     FALLBACK_FUNCTION(RSA_get0_key) \
     FALLBACK_FUNCTION(RSA_meth_get_flags) \
     REQUIRED_FUNCTION(RSA_new) \
+    RENAMED_FUNCTION(RSA_PKCS1_OpenSSL, RSA_PKCS1_SSLeay) \
     REQUIRED_FUNCTION(RSA_private_decrypt) \
     REQUIRED_FUNCTION(RSA_private_encrypt) \
     REQUIRED_FUNCTION(RSA_public_decrypt) \
@@ -387,12 +441,16 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     FALLBACK_FUNCTION(RSA_set0_crt_params) \
     FALLBACK_FUNCTION(RSA_set0_factors) \
     FALLBACK_FUNCTION(RSA_set0_key) \
+    REQUIRED_FUNCTION(RSA_set_method) \
     REQUIRED_FUNCTION(RSA_sign) \
     REQUIRED_FUNCTION(RSA_size) \
     REQUIRED_FUNCTION(RSA_up_ref) \
     REQUIRED_FUNCTION(RSA_verify) \
-    REQUIRED_FUNCTION(SSL_CIPHER_description) \
+    LIGHTUP_FUNCTION(SSL_CIPHER_find) \
     REQUIRED_FUNCTION(SSL_CIPHER_get_bits) \
+    REQUIRED_FUNCTION(SSL_CIPHER_get_id) \
+    LIGHTUP_FUNCTION(SSL_CIPHER_get_name) \
+    LIGHTUP_FUNCTION(SSL_CIPHER_get_version) \
     REQUIRED_FUNCTION(SSL_ctrl) \
     REQUIRED_FUNCTION(SSL_set_quiet_shutdown) \
     REQUIRED_FUNCTION(SSL_CTX_check_private_key) \
@@ -404,6 +462,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     LIGHTUP_FUNCTION(SSL_CTX_set_alpn_select_cb) \
     REQUIRED_FUNCTION(SSL_CTX_set_cert_verify_callback) \
     REQUIRED_FUNCTION(SSL_CTX_set_cipher_list) \
+    LIGHTUP_FUNCTION(SSL_CTX_set_ciphersuites) \
     REQUIRED_FUNCTION(SSL_CTX_set_client_cert_cb) \
     REQUIRED_FUNCTION(SSL_CTX_set_quiet_shutdown) \
     FALLBACK_FUNCTION(SSL_CTX_set_options) \
@@ -437,8 +496,11 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     LEGACY_FUNCTION(SSLeay) \
     RENAMED_FUNCTION(TLS_method, SSLv23_method) \
     REQUIRED_FUNCTION(SSL_write) \
+    FALLBACK_FUNCTION(X509_check_host) \
     REQUIRED_FUNCTION(X509_check_issued) \
     REQUIRED_FUNCTION(X509_check_purpose) \
+    REQUIRED_FUNCTION(X509_cmp_current_time) \
+    REQUIRED_FUNCTION(X509_cmp_time) \
     REQUIRED_FUNCTION(X509_CRL_free) \
     FALLBACK_FUNCTION(X509_CRL_get0_nextUpdate) \
     REQUIRED_FUNCTION(X509_digest) \
@@ -454,6 +516,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(X509_get_default_cert_file) \
     REQUIRED_FUNCTION(X509_get_default_cert_file_env) \
     REQUIRED_FUNCTION(X509_get_ext) \
+    REQUIRED_FUNCTION(X509_get_ext_by_NID) \
     REQUIRED_FUNCTION(X509_get_ext_count) \
     REQUIRED_FUNCTION(X509_get_ext_d2i) \
     REQUIRED_FUNCTION(X509_get_issuer_name) \
@@ -475,20 +538,27 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     FALLBACK_FUNCTION(X509_NAME_get0_der) \
     REQUIRED_FUNCTION(X509_PUBKEY_get) \
     FALLBACK_FUNCTION(X509_PUBKEY_get0_param) \
+    REQUIRED_FUNCTION(X509_subject_name_hash) \
     REQUIRED_FUNCTION(X509_STORE_add_cert) \
     REQUIRED_FUNCTION(X509_STORE_add_crl) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_cleanup) \
     REQUIRED_FUNCTION(X509_STORE_CTX_free) \
-    REQUIRED_FUNCTION(X509_STORE_CTX_get0_param) \
-    REQUIRED_FUNCTION(X509_STORE_CTX_get1_chain) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_get_current_cert) \
     REQUIRED_FUNCTION(X509_STORE_CTX_get_error) \
     REQUIRED_FUNCTION(X509_STORE_CTX_get_error_depth) \
     FALLBACK_FUNCTION(X509_STORE_CTX_get0_cert) \
+    FALLBACK_FUNCTION(X509_STORE_CTX_get0_chain) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_get0_param) \
+    FALLBACK_FUNCTION(X509_STORE_CTX_get0_store) \
     FALLBACK_FUNCTION(X509_STORE_CTX_get0_untrusted) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_get1_chain) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_get1_issuer) \
     REQUIRED_FUNCTION(X509_STORE_CTX_init) \
     REQUIRED_FUNCTION(X509_STORE_CTX_new) \
     REQUIRED_FUNCTION(X509_STORE_CTX_set_flags) \
     REQUIRED_FUNCTION(X509_STORE_CTX_set_verify_cb) \
     REQUIRED_FUNCTION(X509_STORE_free) \
+    FALLBACK_FUNCTION(X509_STORE_get0_param) \
     REQUIRED_FUNCTION(X509_STORE_new) \
     REQUIRED_FUNCTION(X509_STORE_set_flags) \
     REQUIRED_FUNCTION(X509V3_EXT_print) \
@@ -501,7 +571,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     LIGHTUP_FUNCTION(EC_GROUP_set_curve_GF2m) \
     LIGHTUP_FUNCTION(EC_POINT_get_affine_coordinates_GF2m) \
     LIGHTUP_FUNCTION(EC_POINT_set_affine_coordinates_GF2m) \
-    
+
 // Declare pointers to all the used OpenSSL functions
 #define REQUIRED_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
 #define NEW_REQUIRED_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
@@ -520,11 +590,15 @@ FOR_ALL_OPENSSL_FUNCTIONS
 // Redefine all calls to OpenSSL functions as calls through pointers that are set
 // to the functions from the libssl.so selected by the shim.
 #define ASN1_BIT_STRING_free ASN1_BIT_STRING_free_ptr
+#define ASN1_GENERALIZEDTIME_free ASN1_GENERALIZEDTIME_free_ptr
+#define ASN1_d2i_bio ASN1_d2i_bio_ptr
+#define ASN1_i2d_bio ASN1_i2d_bio_ptr
 #define ASN1_INTEGER_get ASN1_INTEGER_get_ptr
 #define ASN1_OBJECT_free ASN1_OBJECT_free_ptr
 #define ASN1_OCTET_STRING_free ASN1_OCTET_STRING_free_ptr
 #define ASN1_OCTET_STRING_new ASN1_OCTET_STRING_new_ptr
 #define ASN1_OCTET_STRING_set ASN1_OCTET_STRING_set_ptr
+#define ASN1_STRING_dup ASN1_STRING_dup_ptr
 #define ASN1_STRING_free ASN1_STRING_free_ptr
 #define ASN1_STRING_print_ex ASN1_STRING_print_ex_ptr
 #define BASIC_CONSTRAINTS_free BASIC_CONSTRAINTS_free_ptr
@@ -540,6 +614,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define BN_bin2bn BN_bin2bn_ptr
 #define BN_bn2bin BN_bn2bin_ptr
 #define BN_clear_free BN_clear_free_ptr
+#define BN_dup BN_dup_ptr
 #define BN_free BN_free_ptr
 #define BN_new BN_new_ptr
 #define BN_num_bits BN_num_bits_ptr
@@ -550,8 +625,10 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define d2i_ASN1_OCTET_STRING d2i_ASN1_OCTET_STRING_ptr
 #define d2i_BASIC_CONSTRAINTS d2i_BASIC_CONSTRAINTS_ptr
 #define d2i_EXTENDED_KEY_USAGE d2i_EXTENDED_KEY_USAGE_ptr
+#define d2i_OCSP_RESPONSE d2i_OCSP_RESPONSE_ptr
 #define d2i_PKCS12 d2i_PKCS12_ptr
 #define d2i_PKCS12_bio d2i_PKCS12_bio_ptr
+#define d2i_PKCS12_fp d2i_PKCS12_fp_ptr
 #define d2i_PKCS7 d2i_PKCS7_ptr
 #define d2i_PKCS7_bio d2i_PKCS7_bio_ptr
 #define d2i_RSAPublicKey d2i_RSAPublicKey_ptr
@@ -684,6 +761,8 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define HMAC_Update HMAC_Update_ptr
 #define i2d_ASN1_INTEGER i2d_ASN1_INTEGER_ptr
 #define i2d_ASN1_TYPE i2d_ASN1_TYPE_ptr
+#define i2d_OCSP_REQUEST i2d_OCSP_REQUEST_ptr
+#define i2d_OCSP_RESPONSE i2d_OCSP_RESPONSE_ptr
 #define i2d_PKCS12 i2d_PKCS12_ptr
 #define i2d_PKCS7 i2d_PKCS7_ptr
 #define i2d_X509 i2d_X509_ptr
@@ -697,17 +776,32 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define OBJ_sn2nid OBJ_sn2nid_ptr
 #define OBJ_txt2nid OBJ_txt2nid_ptr
 #define OBJ_txt2obj OBJ_txt2obj_ptr
+#define OCSP_basic_verify OCSP_basic_verify_ptr
+#define OCSP_BASICRESP_free OCSP_BASICRESP_free_ptr
+#define OCSP_cert_to_id OCSP_cert_to_id_ptr
+#define OCSP_check_nonce OCSP_check_nonce_ptr
+#define OCSP_CERTID_free OCSP_CERTID_free_ptr
+#define OCSP_request_add0_id OCSP_request_add0_id_ptr
+#define OCSP_request_add1_nonce OCSP_request_add1_nonce_ptr
+#define OCSP_REQUEST_free OCSP_REQUEST_free_ptr
+#define OCSP_REQUEST_new OCSP_REQUEST_new_ptr
+#define OCSP_resp_find_status OCSP_resp_find_status_ptr
+#define OCSP_response_get1_basic OCSP_response_get1_basic_ptr
+#define OCSP_RESPONSE_free OCSP_RESPONSE_free_ptr
+#define OCSP_RESPONSE_new OCSP_RESPONSE_new_ptr
 #define OPENSSL_add_all_algorithms_conf OPENSSL_add_all_algorithms_conf_ptr
 #define OPENSSL_cleanse OPENSSL_cleanse_ptr
 #define OPENSSL_init_ssl OPENSSL_init_ssl_ptr
 #define OPENSSL_sk_free OPENSSL_sk_free_ptr
 #define OPENSSL_sk_new_null OPENSSL_sk_new_null_ptr
 #define OPENSSL_sk_num OPENSSL_sk_num_ptr
+#define OPENSSL_sk_pop OPENSSL_sk_pop_ptr
 #define OPENSSL_sk_pop_free OPENSSL_sk_pop_free_ptr
 #define OPENSSL_sk_push OPENSSL_sk_push_ptr
 #define OPENSSL_sk_value OPENSSL_sk_value_ptr
 #define OpenSSL_version_num OpenSSL_version_num_ptr
 #define PEM_read_bio_PKCS7 PEM_read_bio_PKCS7_ptr
+#define PEM_read_bio_X509 PEM_read_bio_X509_ptr
 #define PEM_read_bio_X509_AUX PEM_read_bio_X509_AUX_ptr
 #define PEM_read_bio_X509_CRL PEM_read_bio_X509_CRL_ptr
 #define PEM_write_bio_X509_CRL PEM_write_bio_X509_CRL_ptr
@@ -718,6 +812,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define PKCS7_free PKCS7_free_ptr
 #define RAND_bytes RAND_bytes_ptr
 #define RAND_poll RAND_poll_ptr
+#define RSA_check_key RSA_check_key_ptr
 #define RSA_free RSA_free_ptr
 #define RSA_generate_key_ex RSA_generate_key_ex_ptr
 #define RSA_get0_crt_params RSA_get0_crt_params_ptr
@@ -726,6 +821,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define RSA_get_method RSA_get_method_ptr
 #define RSA_meth_get_flags RSA_meth_get_flags_ptr
 #define RSA_new RSA_new_ptr
+#define RSA_PKCS1_OpenSSL RSA_PKCS1_OpenSSL_ptr
 #define RSA_private_decrypt RSA_private_decrypt_ptr
 #define RSA_private_encrypt RSA_private_encrypt_ptr
 #define RSA_public_decrypt RSA_public_decrypt_ptr
@@ -733,6 +829,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define RSA_set0_crt_params RSA_set0_crt_params_ptr
 #define RSA_set0_factors RSA_set0_factors_ptr
 #define RSA_set0_key RSA_set0_key_ptr
+#define RSA_set_method RSA_set_method_ptr
 #define RSA_sign RSA_sign_ptr
 #define RSA_size RSA_size_ptr
 #define RSA_up_ref RSA_up_ref_ptr
@@ -740,11 +837,15 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define sk_free OPENSSL_sk_free_ptr
 #define sk_new_null OPENSSL_sk_new_null_ptr
 #define sk_num OPENSSL_sk_num_ptr
+#define sk_pop OPENSSL_sk_pop_ptr
 #define sk_pop_free OPENSSL_sk_pop_free_ptr
 #define sk_push OPENSSL_sk_push_ptr
 #define sk_value OPENSSL_sk_value_ptr
 #define SSL_CIPHER_get_bits SSL_CIPHER_get_bits_ptr
-#define SSL_CIPHER_description SSL_CIPHER_description_ptr
+#define SSL_CIPHER_find SSL_CIPHER_find_ptr
+#define SSL_CIPHER_get_id SSL_CIPHER_get_id_ptr
+#define SSL_CIPHER_get_name SSL_CIPHER_get_name_ptr
+#define SSL_CIPHER_get_version SSL_CIPHER_get_version_ptr
 #define SSL_ctrl SSL_ctrl_ptr
 #define SSL_set_quiet_shutdown SSL_set_quiet_shutdown_ptr
 #define SSL_CTX_check_private_key SSL_CTX_check_private_key_ptr
@@ -755,6 +856,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_CTX_set_alpn_select_cb SSL_CTX_set_alpn_select_cb_ptr
 #define SSL_CTX_set_cert_verify_callback SSL_CTX_set_cert_verify_callback_ptr
 #define SSL_CTX_set_cipher_list SSL_CTX_set_cipher_list_ptr
+#define SSL_CTX_set_ciphersuites SSL_CTX_set_ciphersuites_ptr
 #define SSL_CTX_set_client_cert_cb SSL_CTX_set_client_cert_cb_ptr
 #define SSL_CTX_set_options SSL_CTX_set_options_ptr
 #define SSL_CTX_set_quiet_shutdown SSL_CTX_set_quiet_shutdown_ptr
@@ -789,8 +891,11 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSLeay SSLeay_ptr
 #define SSL_write SSL_write_ptr
 #define TLS_method TLS_method_ptr
+#define X509_check_host X509_check_host_ptr
 #define X509_check_issued X509_check_issued_ptr
 #define X509_check_purpose X509_check_purpose_ptr
+#define X509_cmp_current_time X509_cmp_current_time_ptr
+#define X509_cmp_time X509_cmp_time_ptr
 #define X509_CRL_free X509_CRL_free_ptr
 #define X509_CRL_get0_nextUpdate X509_CRL_get0_nextUpdate_ptr
 #define X509_digest X509_digest_ptr
@@ -810,6 +915,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_get_default_cert_file X509_get_default_cert_file_ptr
 #define X509_get_default_cert_file_env X509_get_default_cert_file_env_ptr
 #define X509_get_ext X509_get_ext_ptr
+#define X509_get_ext_by_NID X509_get_ext_by_NID_ptr
 #define X509_get_ext_count X509_get_ext_count_ptr
 #define X509_get_ext_d2i X509_get_ext_d2i_ptr
 #define X509_get_issuer_name X509_get_issuer_name_ptr
@@ -827,13 +933,19 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_NAME_get_index_by_NID X509_NAME_get_index_by_NID_ptr
 #define X509_PUBKEY_get0_param X509_PUBKEY_get0_param_ptr
 #define X509_PUBKEY_get X509_PUBKEY_get_ptr
+#define X509_subject_name_hash X509_subject_name_hash_ptr
 #define X509_STORE_add_cert X509_STORE_add_cert_ptr
 #define X509_STORE_add_crl X509_STORE_add_crl_ptr
+#define X509_STORE_CTX_cleanup X509_STORE_CTX_cleanup_ptr
 #define X509_STORE_CTX_free X509_STORE_CTX_free_ptr
+#define X509_STORE_CTX_get_current_cert X509_STORE_CTX_get_current_cert_ptr
 #define X509_STORE_CTX_get0_cert X509_STORE_CTX_get0_cert_ptr
+#define X509_STORE_CTX_get0_chain X509_STORE_CTX_get0_chain_ptr
 #define X509_STORE_CTX_get0_param X509_STORE_CTX_get0_param_ptr
+#define X509_STORE_CTX_get0_store X509_STORE_CTX_get0_store_ptr
 #define X509_STORE_CTX_get0_untrusted X509_STORE_CTX_get0_untrusted_ptr
 #define X509_STORE_CTX_get1_chain X509_STORE_CTX_get1_chain_ptr
+#define X509_STORE_CTX_get1_issuer X509_STORE_CTX_get1_issuer_ptr
 #define X509_STORE_CTX_get_error X509_STORE_CTX_get_error_ptr
 #define X509_STORE_CTX_get_error_depth X509_STORE_CTX_get_error_depth_ptr
 #define X509_STORE_CTX_init X509_STORE_CTX_init_ptr
@@ -841,6 +953,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_STORE_CTX_set_flags X509_STORE_CTX_set_flags_ptr
 #define X509_STORE_CTX_set_verify_cb X509_STORE_CTX_set_verify_cb_ptr
 #define X509_STORE_free X509_STORE_free_ptr
+#define X509_STORE_get0_param X509_STORE_get0_param_ptr
 #define X509_STORE_new X509_STORE_new_ptr
 #define X509_STORE_set_flags X509_STORE_set_flags_ptr
 #define X509V3_EXT_print X509V3_EXT_print_ptr
@@ -861,6 +974,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_1_0_RTM
 // type-safe OPENSSL_sk_free
 #define sk_GENERAL_NAME_free(stack) OPENSSL_sk_free((OPENSSL_STACK*)(1 ? stack : (STACK_OF(GENERAL_NAME)*)0))
+#define sk_X509_free(stack) OPENSSL_sk_free((OPENSSL_STACK*)(1 ? stack : (STACK_OF(X509)*)0))
 
 // type-safe OPENSSL_sk_num
 #define sk_ASN1_OBJECT_num(stack) OPENSSL_sk_num((const OPENSSL_STACK*)(1 ? stack : (const STACK_OF(ASN1_OBJECT)*)0))
@@ -873,6 +987,9 @@ FOR_ALL_OPENSSL_FUNCTIONS
 
 // type-safe OPENSSL_sk_push
 #define sk_X509_push(stack,value) OPENSSL_sk_push((OPENSSL_STACK*)(1 ? stack : (STACK_OF(X509)*)0), (const void*)(1 ? value : (X509*)0))
+
+// type-safe OPENSSL_sk_pop
+#define sk_X509_pop(stack) OPENSSL_sk_pop((OPENSSL_STACK*)(1 ? stack : (STACK_OF(X509)*)0))
 
 // type-safe OPENSSL_sk_pop_free
 #define sk_X509_pop_free(stack, freefunc) OPENSSL_sk_pop_free((OPENSSL_STACK*)(1 ? stack : (STACK_OF(X509)*)0), (OPENSSL_sk_freefunc)(1 ? freefunc : (sk_X509_freefunc)0))
@@ -919,7 +1036,9 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_NAME_get0_der local_X509_NAME_get0_der
 #define X509_PUBKEY_get0_param local_X509_PUBKEY_get0_param
 #define X509_STORE_CTX_get0_cert local_X509_STORE_CTX_get0_cert
+#define X509_STORE_CTX_get0_chain local_X509_STORE_CTX_get0_chain
 #define X509_STORE_CTX_get0_untrusted local_X509_STORE_CTX_get0_untrusted
+#define X509_STORE_get0_param local_X509_STORE_get0_param
 #define X509_get0_notAfter local_X509_get0_notAfter
 #define X509_get0_notBefore local_X509_get0_notBefore
 #define X509_get0_pubkey_bitstr local_X509_get0_pubkey_bitstr
@@ -928,12 +1047,23 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_get_version local_X509_get_version
 #define X509_up_ref local_X509_up_ref
 
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_0_2_RTM
+
+#define X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS 4
+
+#define X509_check_host local_X509_check_host
+#define X509_STORE_CTX_get0_store local_X509_STORE_CTX_get0_store
+
+#endif
+
 // Restore the old names for RENAMED_FUNCTION functions.
 #define EVP_MD_CTX_free EVP_MD_CTX_destroy
 #define EVP_MD_CTX_new EVP_MD_CTX_create
+#define RSA_PKCS1_OpenSSL RSA_PKCS1_SSLeay
 #define OPENSSL_sk_free sk_free
 #define OPENSSL_sk_new_null sk_new_null
 #define OPENSSL_sk_num sk_num
+#define OPENSSL_sk_pop sk_pop
 #define OPENSSL_sk_pop_free sk_pop_free
 #define OPENSSL_sk_push sk_push
 #define OPENSSL_sk_value sk_value

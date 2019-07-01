@@ -19,7 +19,7 @@ namespace System.Collections.Generic
         /// <summary>
         /// Used by KeyValuePair.ToString to reduce generic code
         /// </summary>
-        internal static string PairToString(object key, object value)
+        internal static string PairToString(object? key, object? value)
         {
             StringBuilder s = StringBuilderCache.Acquire();
             s.Append('[');

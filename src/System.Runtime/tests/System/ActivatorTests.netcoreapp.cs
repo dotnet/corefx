@@ -7,21 +7,71 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.Remoting;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Tests
 {
-    public class ActivatorNetcoreTests : RemoteExecutorTestBase
+    public partial class ActivatorTests
     {
         [Fact]
-        public static void CreateInstance_Invalid()
+        public void CreateInstance_NonPublicValueTypeWithPrivateDefaultConstructor_Success()
         {
-            foreach (Type nonRuntimeType in Helpers.NonRuntimeTypes)
-            {
-                // Type is not a valid RuntimeType
-                AssertExtensions.Throws<ArgumentException>("type", () => Activator.CreateInstance(nonRuntimeType));
-            }
+            AssemblyName assemblyName = new AssemblyName("Assembly");
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("Module");
+            TypeBuilder typeBuilder = moduleBuilder.DefineType("Type", TypeAttributes.Public, typeof(ValueType));
+            
+            FieldBuilder fieldBuilder = typeBuilder.DefineField("_field", typeof(int), FieldAttributes.Public);
+            ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Private | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName | MethodAttributes.HideBySig, CallingConventions.Standard, new Type[0]);
+
+            ILGenerator generator = constructorBuilder.GetILGenerator();
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Ldc_I4, -1);
+            generator.Emit(OpCodes.Stfld, fieldBuilder);
+            generator.Emit(OpCodes.Ret);
+
+            Type type = typeBuilder.CreateType();
+            FieldInfo field = type.GetField("_field");
+
+            // Activator holds a cache of constructors and the types to which they belong.
+            // Test caching behaviour by activating multiple times.
+            object v1 = Activator.CreateInstance(type, nonPublic: true);
+            Assert.Equal(-1, field.GetValue(v1));
+
+            object v2 = Activator.CreateInstance(type, nonPublic: true);
+            Assert.Equal(-1, field.GetValue(v2));
+        }
+
+        [Fact]
+        public void CreateInstance_PublicOnlyValueTypeWithPrivateDefaultConstructor_ThrowsMissingMethodException()
+        {
+            AssemblyName assemblyName = new AssemblyName("Assembly");
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("Module");
+            TypeBuilder typeBuilder = moduleBuilder.DefineType("Type", TypeAttributes.Public, typeof(ValueType));
+            
+            FieldBuilder fieldBuilder = typeBuilder.DefineField("_field", typeof(int), FieldAttributes.Public);
+            ConstructorBuilder constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Private | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName | MethodAttributes.HideBySig, CallingConventions.Standard, new Type[0]);
+
+            ILGenerator generator = constructorBuilder.GetILGenerator();
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Ldc_I4, -1);
+            generator.Emit(OpCodes.Stfld, fieldBuilder);
+            generator.Emit(OpCodes.Ret);
+
+            Type type = typeBuilder.CreateType();
+
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(type));
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(type, nonPublic: false));
+
+            // Put the private default constructor into the cache and make sure we still throw if public only.
+            Assert.NotNull(Activator.CreateInstance(type, nonPublic: true));
+
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(type));
+            Assert.Throws<MissingMethodException>(() => Activator.CreateInstance(type, nonPublic: false));
         }
 
         [Theory]
@@ -204,21 +254,27 @@ namespace System.Tests
             public PublicType() { }
         }
 
-        private class PrivateType
-        {
-            public PrivateType() { }
-        }
-
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.LoadFile is not supported in AppX.")]
         public static void CreateInstanceAssemblyResolve()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 AppDomain.CurrentDomain.AssemblyResolve += (object sender, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "TestLoadAssembly.dll"));
-                ObjectHandle oh = Activator.CreateInstance(",,,,", "PublicClassSample");
-                Assert.NotNull(oh.Unwrap());
+                Assert.Throws<FileLoadException>(() => Activator.CreateInstance(",,,,", "PublicClassSample"));
             }).Dispose();
+        }
+
+        [Fact]
+        public void CreateInstance_TypeBuilder_ThrowsNotSupportedException()
+        {
+            AssemblyName assemblyName = new AssemblyName("Assembly");
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("Module");
+            TypeBuilder typeBuilder = moduleBuilder.DefineType("Type", TypeAttributes.Public);
+
+            Assert.Throws<ArgumentException>("type", () => Activator.CreateInstance(typeBuilder));
+            Assert.Throws<NotSupportedException>(() => Activator.CreateInstance(typeBuilder, new object[0]));
         }
     }
 }

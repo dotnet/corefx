@@ -37,9 +37,11 @@ namespace System.Security.Cryptography.X509Certificates
             _lazyNotAfter = DateTime.MinValue;
 
             ICertificatePalCore pal = Pal;
-            Pal = null;
             if (pal != null)
+            {
+                Pal = null;
                 pal.Dispose();
+            }
         }
 
         public X509Certificate()
@@ -459,14 +461,14 @@ namespace System.Security.Cryptography.X509Certificates
             return _lazySerialNumber ?? (_lazySerialNumber = Pal.SerialNumber);
         }
 
-        [Obsolete("This method has been deprecated.  Please use the Subject property instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated.  Please use the Subject property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public virtual string GetName()
         {
             ThrowIfInvalid();
             return Pal.LegacySubject;
         }
 
-        [Obsolete("This method has been deprecated.  Please use the Issuer property instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated.  Please use the Issuer property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public virtual string GetIssuerName()
         {
             ThrowIfInvalid();

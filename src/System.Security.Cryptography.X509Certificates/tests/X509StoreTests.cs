@@ -9,11 +9,12 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
 {
-    public class X509StoreTests : RemoteExecutorTestBase
+    public class X509StoreTests : FileCleanupTestBase
     {
         [Fact]
         public static void OpenMyStore()
@@ -310,6 +311,17 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void RemoveReadOnlyNonExistingDoesNotThrow()
+        {
+            using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
+            using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificate))
+            {
+                store.Open(OpenFlags.ReadOnly);
+                store.Remove(cert);
+            }
+        }
+
+        [Fact]
         public static void RemoveDisposedIsIgnored()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
@@ -522,8 +534,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(0, store.Certificates.Count);
             }
         }
-
-        [Fact]
+#if Unix
+        [ConditionalFact(nameof(NotRunningAsRoot))] // root can read '2.pem'
         [PlatformSpecific(TestPlatforms.Linux)] // Windows/OSX doesn't use SSL_CERT_{DIR,FILE}.
         private void X509Store_MachineStoreLoadSkipsInvalidFiles()
         {
@@ -550,7 +562,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             var psi = new ProcessStartInfo();
             psi.Environment.Add("SSL_CERT_DIR", sslCertDir);
             psi.Environment.Add("SSL_CERT_FILE", "/nonexisting");
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var store = new X509Store(StoreName.Root, StoreLocation.LocalMachine))
                 {
@@ -559,11 +571,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     // Check nr of certificates in store.
                     Assert.Equal(2, store.Certificates.Count);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
         [DllImport("libc")]
         private static extern int chmod(string path, int mode);
+        [DllImport("libc")]
+        private static extern uint geteuid();
+
+        public static bool NotRunningAsRoot => geteuid() != 0;
+#endif
     }
 }

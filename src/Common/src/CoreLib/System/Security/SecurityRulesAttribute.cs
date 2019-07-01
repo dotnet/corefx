@@ -25,4 +25,3 @@ namespace System.Security
         public SecurityRuleSet RuleSet { get; }
     }
 }
-

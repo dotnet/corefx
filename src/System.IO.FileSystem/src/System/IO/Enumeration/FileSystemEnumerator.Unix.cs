@@ -33,17 +33,8 @@ namespace System.IO.Enumeration
         // Used to get the raw entry data
         private byte[] _entryBuffer;
 
-        /// <summary>
-        /// Encapsulates a find operation.
-        /// </summary>
-        /// <param name="directory">The directory to search in.</param>
-        /// <param name="options">Enumeration options to use.</param>
-        public FileSystemEnumerator(string directory, EnumerationOptions options = null)
+        private void Init()
         {
-            _originalRootDirectory = directory ?? throw new ArgumentNullException(nameof(directory));
-            _rootDirectory = PathInternal.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
-            _options = options ?? EnumerationOptions.Default;
-
             // We need to initialize the directory handle up front to ensure
             // we immediately throw IO exceptions for missing directory/etc.
             _directoryHandle = CreateDirectoryHandle(_rootDirectory);
@@ -55,7 +46,7 @@ namespace System.IO.Enumeration
             try
             {
                 _pathBuffer = ArrayPool<char>.Shared.Rent(StandardBufferSize);
-                int size = Interop.Sys.ReadBufferSize;
+                int size = Interop.Sys.GetReadDirRBufferSize();
                 _entryBuffer = size > 0 ? ArrayPool<byte>.Shared.Rent(size) : null;
             }
             catch
@@ -113,11 +104,11 @@ namespace System.IO.Enumeration
                 // If HAVE_READDIR_R is defined for the platform FindNextEntry depends on _entryBuffer being fixed since
                 // _entry will point to a string in the middle of the array. If the array is not fixed GC can move it after
                 // the native call and _entry will point to a bogus file name. 
-                fixed (byte* _ = _entryBuffer)
+                fixed (byte* entryBufferPtr = _entryBuffer)
                 {
                     do
                     {
-                        FindNextEntry();
+                        FindNextEntry(entryBufferPtr, _entryBuffer == null ? 0 : _entryBuffer.Length);
                         if (_lastEntryFound)
                             return false;
 
@@ -175,8 +166,15 @@ namespace System.IO.Enumeration
 
         private unsafe void FindNextEntry()
         {
-            Span<byte> buffer = _entryBuffer == null ? Span<byte>.Empty : new Span<byte>(_entryBuffer);
-            int result = Interop.Sys.ReadDir(_directoryHandle, buffer, ref _entry);
+            fixed (byte* entryBufferPtr = _entryBuffer)
+            {
+                FindNextEntry(entryBufferPtr, _entryBuffer == null ? 0 : _entryBuffer.Length);
+            }
+        }
+
+        private unsafe void FindNextEntry(byte* entryBufferPtr, int bufferLength)
+        {
+            int result = Interop.Sys.ReadDirR(_directoryHandle, entryBufferPtr, bufferLength, out _entry);
             switch (result)
             {
                 case -1:

@@ -15,12 +15,12 @@ namespace System.Reflection
         {
         }
 
-        public CustomAttributeFormatException(string message)
+        public CustomAttributeFormatException(string? message)
             : this(message, null)
         {
         }
 
-        public CustomAttributeFormatException(string message, Exception inner)
+        public CustomAttributeFormatException(string? message, Exception? inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_CUSTOMATTRIBUTEFORMAT;

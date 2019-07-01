@@ -3,17 +3,21 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading;
+
+using Internal.Runtime.CompilerServices;
 
 namespace System.Globalization
 {
     public partial class CompareInfo
     {
         [NonSerialized]
-        private Interop.Globalization.SafeSortHandle _sortHandle;
+        private IntPtr _sortHandle;
 
         [NonSerialized]
         private bool _isAsciiEqualityOrdinal;
@@ -22,23 +26,15 @@ namespace System.Globalization
         {
             _sortName = culture.SortName;
 
-            if (_invariantMode)
+            if (GlobalizationMode.Invariant)
             {
                 _isAsciiEqualityOrdinal = true;
             }
             else
             {
-                Interop.Globalization.ResultCode resultCode = Interop.Globalization.GetSortHandle(GetNullTerminatedUtf8String(_sortName), out _sortHandle);
-                if (resultCode != Interop.Globalization.ResultCode.Success)
-                {
-                    _sortHandle.Dispose();
-
-                    if (resultCode == Interop.Globalization.ResultCode.OutOfMemory)
-                        throw new OutOfMemoryException();
-
-                    throw new ExternalException(SR.Arg_ExternalException);
-                }
                 _isAsciiEqualityOrdinal = (_sortName == "en-US" || _sortName == "");
+
+                _sortHandle = SortHandleCache.GetCachedSortHandle(_sortName);
             }
         }
 
@@ -162,8 +158,8 @@ namespace System.Globalization
                 return -1;
             }
 
-            // startIndex is the index into source where we start search backwards from. 
-            // leftStartIndex is the index into source of the start of the string that is 
+            // startIndex is the index into source where we start search backwards from.
+            // leftStartIndex is the index into source of the start of the string that is
             // count characters away from startIndex.
             int leftStartIndex = startIndex - count + 1;
 
@@ -210,7 +206,7 @@ namespace System.Globalization
         // that takes two spans.  But due to this issue, that's adding significant overhead.
         private unsafe int CompareString(ReadOnlySpan<char> string1, string string2, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
             Debug.Assert(string2 != null);
             Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
 
@@ -223,7 +219,7 @@ namespace System.Globalization
 
         private unsafe int CompareString(ReadOnlySpan<char> string1, ReadOnlySpan<char> string2, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
             Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
 
             fixed (char* pString1 = &MemoryMarshal.GetReference(string1))
@@ -235,36 +231,17 @@ namespace System.Globalization
 
         internal unsafe int IndexOfCore(string source, string target, int startIndex, int count, CompareOptions options, int* matchLengthPtr)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!string.IsNullOrEmpty(source));
             Debug.Assert(target != null);
             Debug.Assert((options & CompareOptions.OrdinalIgnoreCase) == 0);
-
-            int index;
-
-            if (target.Length == 0)
-            {
-                if (matchLengthPtr != null)
-                    *matchLengthPtr = 0;
-                return startIndex;
-            }
-
-            if (options == CompareOptions.Ordinal)
-            {
-                index = IndexOfOrdinal(source, target, startIndex, count, ignoreCase: false);
-                if (index != -1)
-                {
-                    if (matchLengthPtr != null)
-                        *matchLengthPtr = target.Length;
-                }
-                return index;
-            }
+            Debug.Assert((options & CompareOptions.Ordinal) == 0);
 
 #if CORECLR
             if (_isAsciiEqualityOrdinal && CanUseAsciiOrdinalForOptions(options) && source.IsFastSort() && target.IsFastSort())
             {
-                index = IndexOf(source, target, startIndex, count, GetOrdinalCompareOptions(options));
+                int index = IndexOf(source, target, startIndex, count, GetOrdinalCompareOptions(options));
                 if (index != -1)
                 {
                     if (matchLengthPtr != null)
@@ -277,7 +254,7 @@ namespace System.Globalization
             fixed (char* pSource = source)
             fixed (char* pTarget = target)
             {
-                index = Interop.Globalization.IndexOf(_sortHandle, pTarget, target.Length, pSource + startIndex, count, options, matchLengthPtr);
+                int index = Interop.Globalization.IndexOf(_sortHandle, pTarget, target.Length, pSource + startIndex, count, options, matchLengthPtr);
 
                 return index != -1 ? index + startIndex : -1;
             }
@@ -286,7 +263,7 @@ namespace System.Globalization
         // For now, this method is only called from Span APIs with either options == CompareOptions.None or CompareOptions.IgnoreCase
         internal unsafe int IndexOfCore(ReadOnlySpan<char> source, ReadOnlySpan<char> target, CompareOptions options, int* matchLengthPtr, bool fromBeginning)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
             Debug.Assert(source.Length != 0);
             Debug.Assert(target.Length != 0);
 
@@ -317,7 +294,7 @@ namespace System.Globalization
         /// <returns></returns>
         private unsafe int IndexOfOrdinalIgnoreCaseHelper(ReadOnlySpan<char> source, ReadOnlySpan<char> target, CompareOptions options, int* matchLengthPtr, bool fromBeginning)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!target.IsEmpty);
@@ -403,7 +380,7 @@ namespace System.Globalization
 
         private unsafe int IndexOfOrdinalHelper(ReadOnlySpan<char> source, ReadOnlySpan<char> target, CompareOptions options, int* matchLengthPtr, bool fromBeginning)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!target.IsEmpty);
@@ -478,7 +455,7 @@ namespace System.Globalization
 
         private unsafe int LastIndexOfCore(string source, string target, int startIndex, int count, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!string.IsNullOrEmpty(source));
             Debug.Assert(target != null);
@@ -516,7 +493,7 @@ namespace System.Globalization
 
         private bool StartsWith(string source, string prefix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!string.IsNullOrEmpty(source));
             Debug.Assert(!string.IsNullOrEmpty(prefix));
@@ -534,7 +511,7 @@ namespace System.Globalization
 
         private unsafe bool StartsWith(ReadOnlySpan<char> source, ReadOnlySpan<char> prefix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!prefix.IsEmpty);
@@ -568,7 +545,7 @@ namespace System.Globalization
 
         private unsafe bool StartsWithOrdinalIgnoreCaseHelper(ReadOnlySpan<char> source, ReadOnlySpan<char> prefix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!prefix.IsEmpty);
@@ -598,7 +575,7 @@ namespace System.Globalization
                     // uppercase both chars - notice that we need just one compare per char
                     if ((uint)(charA - 'a') <= (uint)('z' - 'a')) charA -= 0x20;
                     if ((uint)(charB - 'a') <= (uint)('z' - 'a')) charB -= 0x20;
-                    
+
                     if (charA != charB)
                         return false;
 
@@ -614,7 +591,7 @@ namespace System.Globalization
 
         private unsafe bool StartsWithOrdinalHelper(ReadOnlySpan<char> source, ReadOnlySpan<char> prefix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!prefix.IsEmpty);
@@ -633,7 +610,7 @@ namespace System.Globalization
                 {
                     int charA = *a;
                     int charB = *b;
-                    
+
                     if (charA != charB)
                         return false;
 
@@ -649,7 +626,7 @@ namespace System.Globalization
 
         private bool EndsWith(string source, string suffix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!string.IsNullOrEmpty(source));
             Debug.Assert(!string.IsNullOrEmpty(suffix));
@@ -667,7 +644,7 @@ namespace System.Globalization
 
         private unsafe bool EndsWith(ReadOnlySpan<char> source, ReadOnlySpan<char> suffix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!suffix.IsEmpty);
@@ -701,7 +678,7 @@ namespace System.Globalization
 
         private unsafe bool EndsWithOrdinalIgnoreCaseHelper(ReadOnlySpan<char> source, ReadOnlySpan<char> suffix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!suffix.IsEmpty);
@@ -731,7 +708,7 @@ namespace System.Globalization
                     // uppercase both chars - notice that we need just one compare per char
                     if ((uint)(charA - 'a') <= (uint)('z' - 'a')) charA -= 0x20;
                     if ((uint)(charB - 'a') <= (uint)('z' - 'a')) charB -= 0x20;
-                    
+
                     if (charA != charB)
                         return false;
 
@@ -747,7 +724,7 @@ namespace System.Globalization
 
         private unsafe bool EndsWithOrdinalHelper(ReadOnlySpan<char> source, ReadOnlySpan<char> suffix, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             Debug.Assert(!source.IsEmpty);
             Debug.Assert(!suffix.IsEmpty);
@@ -766,7 +743,7 @@ namespace System.Globalization
                 {
                     int charA = *a;
                     int charB = *b;
-                    
+
                     if (charA != charB)
                         return false;
 
@@ -782,7 +759,7 @@ namespace System.Globalization
 
         private unsafe SortKey CreateSortKey(string source, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             if (source==null) { throw new ArgumentNullException(nameof(source)); }
 
@@ -790,28 +767,31 @@ namespace System.Globalization
             {
                 throw new ArgumentException(SR.Argument_InvalidFlag, nameof(options));
             }
-            
+
             byte [] keyData;
             if (source.Length == 0)
-            { 
+            {
                 keyData = Array.Empty<Byte>();
             }
             else
             {
-                int sortKeyLength = Interop.Globalization.GetSortKey(_sortHandle, source, source.Length, null, 0, options);
-                keyData = new byte[sortKeyLength];
-
-                fixed (byte* pSortKey = keyData)
+                fixed (char* pSource = source)
                 {
-                    if (Interop.Globalization.GetSortKey(_sortHandle, source, source.Length, pSortKey, sortKeyLength, options) != sortKeyLength)
+                    int sortKeyLength = Interop.Globalization.GetSortKey(_sortHandle, pSource, source.Length, null, 0, options);
+                    keyData = new byte[sortKeyLength];
+
+                    fixed (byte* pSortKey = keyData)
                     {
-                        throw new ArgumentException(SR.Arg_ExternalException);
+                        if (Interop.Globalization.GetSortKey(_sortHandle, pSource, source.Length, pSortKey, sortKeyLength, options) != sortKeyLength)
+                        {
+                            throw new ArgumentException(SR.Arg_ExternalException);
+                        }
                     }
                 }
             }
 
             return new SortKey(Name, source, options, keyData);
-        }       
+        }
 
         private static unsafe bool IsSortable(char *text, int length)
         {
@@ -856,11 +836,9 @@ namespace System.Globalization
         // ---- PAL layer ends here ----
         // -----------------------------
 
-        internal unsafe int GetHashCodeOfStringCore(string source, CompareOptions options)
+        internal unsafe int GetHashCodeOfStringCore(ReadOnlySpan<char> source, CompareOptions options)
         {
-            Debug.Assert(!_invariantMode);
-
-            Debug.Assert(source != null);
+            Debug.Assert(!GlobalizationMode.Invariant);
             Debug.Assert((options & (CompareOptions.Ordinal | CompareOptions.OrdinalIgnoreCase)) == 0);
 
             if (source.Length == 0)
@@ -868,27 +846,49 @@ namespace System.Globalization
                 return 0;
             }
 
-            int sortKeyLength = Interop.Globalization.GetSortKey(_sortHandle, source, source.Length, null, 0, options);
+            // according to ICU User Guide the performance of ucol_getSortKey is worse when it is called with null output buffer
+            // the solution is to try to fill the sort key in a temporary buffer of size equal 4 x string length
+            // 1MB is the biggest array that can be rented from ArrayPool.Shared without memory allocation
+            int sortKeyLength = (source.Length > 1024 * 1024 / 4) ? 0 : 4 * source.Length;
 
-            byte[] borrowedArr = null;
-            Span<byte> span = sortKeyLength <= 512 ?
-                stackalloc byte[512] :
-                (borrowedArr = ArrayPool<byte>.Shared.Rent(sortKeyLength));
+            byte[]? borrowedArray = null;
+            Span<byte> sortKey = sortKeyLength <= 1024
+                ? stackalloc byte[1024]
+                : (borrowedArray = ArrayPool<byte>.Shared.Rent(sortKeyLength));
 
-            fixed (byte* pSortKey = &MemoryMarshal.GetReference(span))
+            fixed (char* pSource = &MemoryMarshal.GetReference(source))
             {
-                if (Interop.Globalization.GetSortKey(_sortHandle, source, source.Length, pSortKey, sortKeyLength, options) != sortKeyLength)
+                fixed (byte* pSortKey = &MemoryMarshal.GetReference(sortKey))
                 {
-                    throw new ArgumentException(SR.Arg_ExternalException);
+                    sortKeyLength = Interop.Globalization.GetSortKey(_sortHandle, pSource, source.Length, pSortKey, sortKey.Length, options);
+                }
+
+                if (sortKeyLength > sortKey.Length) // slow path for big strings
+                {
+                    if (borrowedArray != null)
+                    {
+                        ArrayPool<byte>.Shared.Return(borrowedArray);
+                    }
+
+                    sortKey = (borrowedArray = ArrayPool<byte>.Shared.Rent(sortKeyLength));
+
+                    fixed (byte* pSortKey = &MemoryMarshal.GetReference(sortKey))
+                    {
+                        sortKeyLength = Interop.Globalization.GetSortKey(_sortHandle, pSource, source.Length, pSortKey, sortKey.Length, options);
+                    }
                 }
             }
 
-            int hash = Marvin.ComputeHash32(span.Slice(0, sortKeyLength), Marvin.DefaultSeed);
-
-            // Return the borrowed array if necessary.
-            if (borrowedArr != null)
+            if (sortKeyLength == 0 || sortKeyLength > sortKey.Length) // internal error (0) or a bug (2nd call failed) in ucol_getSortKey
             {
-                ArrayPool<byte>.Shared.Return(borrowedArr);
+                throw new ArgumentException(SR.Arg_ExternalException);
+            }
+
+            int hash = Marvin.ComputeHash32(sortKey.Slice(0, sortKeyLength), Marvin.DefaultSeed);
+
+            if (borrowedArray != null)
+            {
+                ArrayPool<byte>.Shared.Return(borrowedArray);
             }
 
             return hash;
@@ -912,23 +912,9 @@ namespace System.Globalization
             return (options & CompareOptions.IgnoreSymbols) == 0;
         }
 
-        private static byte[] GetNullTerminatedUtf8String(string s)
-        {
-            int byteLen = System.Text.Encoding.UTF8.GetByteCount(s);
-
-            // Allocate an extra byte (which defaults to 0) as the null terminator.
-            byte[] buffer = new byte[byteLen + 1];
-
-            int bytesWritten = System.Text.Encoding.UTF8.GetBytes(s, 0, s.Length, buffer, 0);
-
-            Debug.Assert(bytesWritten == byteLen);
-
-            return buffer;
-        }
-        
         private SortVersion GetSortVersion()
         {
-            Debug.Assert(!_invariantMode);
+            Debug.Assert(!GlobalizationMode.Invariant);
 
             int sortVersion = Interop.Globalization.GetSortVersion(_sortHandle);
             return new SortVersion(sortVersion, LCID, new Guid(sortVersion, 0, 0, 0, 0, 0, 0,
@@ -936,6 +922,42 @@ namespace System.Globalization
                                                              (byte) ((LCID  & 0x00FF0000) >> 16),
                                                              (byte) ((LCID  & 0x0000FF00) >> 8),
                                                              (byte) (LCID  & 0xFF)));
+        }
+
+        private static class SortHandleCache
+        {
+            // in most scenarios there is a limited number of cultures with limited number of sort options
+            // so caching the sort handles and not freeing them is OK, see https://github.com/dotnet/coreclr/pull/25117 for more
+            private static readonly Dictionary<string, IntPtr> s_sortNameToSortHandleCache = new Dictionary<string, IntPtr>();
+
+            internal static IntPtr GetCachedSortHandle(string sortName)
+            {
+                lock (s_sortNameToSortHandleCache)
+                {
+                    if (!s_sortNameToSortHandleCache.TryGetValue(sortName, out IntPtr result))
+                    {
+                        Interop.Globalization.ResultCode resultCode = Interop.Globalization.GetSortHandle(sortName, out result);
+
+                        if (resultCode == Interop.Globalization.ResultCode.OutOfMemory)
+                            throw new OutOfMemoryException();
+                        else if (resultCode != Interop.Globalization.ResultCode.Success)
+                            throw new ExternalException(SR.Arg_ExternalException);
+
+                        try
+                        {
+                            s_sortNameToSortHandleCache.Add(sortName, result);
+                        }
+                        catch
+                        {
+                            Interop.Globalization.CloseSortHandle(result);
+
+                            throw;
+                        }
+                    }
+
+                    return result;
+                }
+            }
         }
 
         // See https://github.com/dotnet/coreclr/blob/master/src/utilcode/util_nodependencies.cpp#L970

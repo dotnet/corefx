@@ -683,7 +683,7 @@ namespace System.Xml.Tests
             return;
         }
 
-        //[Variation(Desc = "v109 - 386243, Adding a chameleon schema agsinst to no namaespace throws unexpected warnings", Priority = 1)]
+        //[Variation(Desc = "v109 - 386243, Adding a chameleon schema against to no namespace throws unexpected warnings", Priority = 1)]
         [InlineData()]
         [Theory]
         public void v109()
@@ -1023,7 +1023,7 @@ namespace System.Xml.Tests
             Assert.True(false);
         }
 
-        //[Variation(Desc = "615444 XmlSchema.Write ((XmlWriter)null) throws InvalidOperationException instead of ArgumenNullException")]
+        //[Variation(Desc = "615444 XmlSchema.Write ((XmlWriter)null) throws InvalidOperationException instead of ArgumentNullException")]
         [Fact]
         public void v125()
         {
@@ -1259,10 +1259,7 @@ namespace System.Xml.Tests
                 CError.Compare(exception.SourceObject != null, "SourceObject == null");
                 return;
             }
-            if (!PlatformDetection.IsNetNative) // Cannot get names of internal framework types
-            {
-                CError.Compare(exception.SourceObject.GetType().ToString(), "MS.Internal.Xml.Cache.XPathDocumentNavigator", "SourceObject.GetType");
-            }
+            CError.Compare(exception.SourceObject.GetType().ToString(), "MS.Internal.Xml.Cache.XPathDocumentNavigator", "SourceObject.GetType");
             _output.WriteLine("Exc: " + exception);
         }
 

@@ -19,7 +19,7 @@ namespace System.Diagnostics.Tracing
     internal class TraceLoggingMetadataCollector
     {
         private readonly Impl impl;
-        private readonly FieldMetadata currentGroup;
+        private readonly FieldMetadata? currentGroup;
         private int bufferedArrayFieldCount = int.MinValue;
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace System.Diagnostics.Tracing
         /// <returns>
         /// A new metadata collector that can be used to add fields to the group.
         /// </returns>
-        public TraceLoggingMetadataCollector AddGroup(string name)
+        public TraceLoggingMetadataCollector AddGroup(string? name)
         {
             TraceLoggingMetadataCollector result = this;
 
@@ -101,7 +101,7 @@ namespace System.Diagnostics.Tracing
                 this.BeginningBufferedArray) // Error, FieldMetadata's constructor will throw the appropriate exception.
             {
                 var newGroup = new FieldMetadata(
-                    name,
+                    name!,
                     TraceLoggingDataType.Struct,
                     this.Tags,
                     this.BeginningBufferedArray);
@@ -375,7 +375,7 @@ namespace System.Diagnostics.Tracing
                 this.bufferNesting--;
             }
 
-            public int Encode(byte[] metadata)
+            public int Encode(byte[]? metadata)
             {
                 int size = 0;
 

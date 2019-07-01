@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -20,7 +22,7 @@ namespace System.Collections.Concurrent
         // http://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue
 
         /// <summary>The array of items in this queue.  Each slot contains the item in that slot and its "sequence number".</summary>
-        internal readonly Slot[] _slots;
+        internal readonly Slot[] _slots; // SOS's ThreadPool command depends on this name
         /// <summary>Mask for quickly accessing a position within the queue's array.</summary>
         internal readonly int _slotsMask;
         /// <summary>The head and tail positions, with padding to help avoid false sharing contention.</summary>
@@ -33,7 +35,7 @@ namespace System.Collections.Concurrent
         internal bool _frozenForEnqueues;
 #pragma warning disable 0649 // some builds don't assign to this field
         /// <summary>The segment following this one in the queue, or null if this segment is the last in the queue.</summary>
-        internal ConcurrentQueueSegment<T> _nextSegment;
+        internal ConcurrentQueueSegment<T>? _nextSegment; // SOS's ThreadPool command depends on this name
 #pragma warning restore 0649
 
         /// <summary>Creates the segment.</summary>
@@ -112,22 +114,24 @@ namespace System.Collections.Concurrent
                 _frozenForEnqueues = true;
 
                 // Increase the tail by FreezeOffset, spinning until we're successful in doing so.
-                var spinner = new SpinWait();
+                int tail = _headAndTail.Tail;
                 while (true)
                 {
-                    int tail = Volatile.Read(ref _headAndTail.Tail);
-                    if (Interlocked.CompareExchange(ref _headAndTail.Tail, tail + FreezeOffset, tail) == tail)
+                    int oldTail = Interlocked.CompareExchange(ref _headAndTail.Tail, tail + FreezeOffset, tail);
+                    if (oldTail == tail)
                     {
                         break;
                     }
-                    spinner.SpinOnce();
+                    tail = oldTail;
                 }
             }
         }
 
         /// <summary>Tries to dequeue an element from the queue.</summary>
-        public bool TryDequeue(out T item)
+        public bool TryDequeue([MaybeNullWhen(false)] out T item)
         {
+            Slot[] slots = _slots;
+            
             // Loop in case of contention...
             var spinner = new SpinWait();
             while (true)
@@ -137,7 +141,7 @@ namespace System.Collections.Concurrent
                 int slotsIndex = currentHead & _slotsMask;
 
                 // Read the sequence number for the head position.
-                int sequenceNumber = Volatile.Read(ref _slots[slotsIndex].SequenceNumber);
+                int sequenceNumber = Volatile.Read(ref slots[slotsIndex].SequenceNumber);
 
                 // We can dequeue from this slot if it's been filled by an enqueuer, which
                 // would have left the sequence number at pos+1.
@@ -156,14 +160,14 @@ namespace System.Collections.Concurrent
                     {
                         // Successfully reserved the slot.  Note that after the above CompareExchange, other threads
                         // trying to dequeue from this slot will end up spinning until we do the subsequent Write.
-                        item = _slots[slotsIndex].Item;
+                        item = slots[slotsIndex].Item;
                         if (!Volatile.Read(ref _preservedForObservation))
                         {
                             // If we're preserving, though, we don't zero out the slot, as we need it for
                             // enumerations, peeking, ToArray, etc.  And we don't update the sequence number,
                             // so that an enqueuer will see it as full and be forced to move to a new segment.
-                            _slots[slotsIndex].Item = default(T);
-                            Volatile.Write(ref _slots[slotsIndex].SequenceNumber, currentHead + _slots.Length);
+                            slots[slotsIndex].Item = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                            Volatile.Write(ref slots[slotsIndex].SequenceNumber, currentHead + slots.Length);
                         }
                         return true;
                     }
@@ -181,7 +185,7 @@ namespace System.Collections.Concurrent
                     int currentTail = Volatile.Read(ref _headAndTail.Tail);
                     if (currentTail - currentHead <= 0 || (frozen && (currentTail - FreezeOffset - currentHead <= 0)))
                     {
-                        item = default(T);
+                        item = default!;
                         return false;
                     }
 
@@ -191,12 +195,12 @@ namespace System.Collections.Concurrent
                 }
 
                 // Lost a race. Spin a bit, then try again.
-                spinner.SpinOnce();
+                spinner.SpinOnce(sleep1Threshold: -1);
             }
         }
 
         /// <summary>Tries to peek at an element from the queue, without removing it.</summary>
-        public bool TryPeek(out T result, bool resultUsed)
+        public bool TryPeek([MaybeNullWhen(false)] out T result, bool resultUsed)
         {
             if (resultUsed)
             {
@@ -208,6 +212,8 @@ namespace System.Collections.Concurrent
                 Interlocked.MemoryBarrier();
             }
 
+            Slot[] slots = _slots;
+
             // Loop in case of contention...
             var spinner = new SpinWait();
             while (true)
@@ -217,14 +223,14 @@ namespace System.Collections.Concurrent
                 int slotsIndex = currentHead & _slotsMask;
 
                 // Read the sequence number for the head position.
-                int sequenceNumber = Volatile.Read(ref _slots[slotsIndex].SequenceNumber);
+                int sequenceNumber = Volatile.Read(ref slots[slotsIndex].SequenceNumber);
 
                 // We can peek from this slot if it's been filled by an enqueuer, which
                 // would have left the sequence number at pos+1.
                 int diff = sequenceNumber - (currentHead + 1);
                 if (diff == 0)
                 {
-                    result = resultUsed ? _slots[slotsIndex].Item : default(T);
+                    result = resultUsed ? slots[slotsIndex].Item : default!;
                     return true;
                 }
                 else if (diff < 0)
@@ -240,7 +246,7 @@ namespace System.Collections.Concurrent
                     int currentTail = Volatile.Read(ref _headAndTail.Tail);
                     if (currentTail - currentHead <= 0 || (frozen && (currentTail - FreezeOffset - currentHead <= 0)))
                     {
-                        result = default(T);
+                        result = default!;
                         return false;
                     }
 
@@ -250,7 +256,7 @@ namespace System.Collections.Concurrent
                 }
 
                 // Lost a race. Spin a bit, then try again.
-                spinner.SpinOnce();
+                spinner.SpinOnce(sleep1Threshold: -1);
             }
         }
 
@@ -261,6 +267,8 @@ namespace System.Collections.Concurrent
         /// </summary>
         public bool TryEnqueue(T item)
         {
+            Slot[] slots = _slots;
+
             // Loop in case of contention...
             var spinner = new SpinWait();
             while (true)
@@ -270,7 +278,7 @@ namespace System.Collections.Concurrent
                 int slotsIndex = currentTail & _slotsMask;
 
                 // Read the sequence number for the tail position.
-                int sequenceNumber = Volatile.Read(ref _slots[slotsIndex].SequenceNumber);
+                int sequenceNumber = Volatile.Read(ref slots[slotsIndex].SequenceNumber);
 
                 // The slot is empty and ready for us to enqueue into it if its sequence
                 // number matches the slot.
@@ -289,8 +297,8 @@ namespace System.Collections.Concurrent
                     {
                         // Successfully reserved the slot.  Note that after the above CompareExchange, other threads
                         // trying to return will end up spinning until we do the subsequent Write.
-                        _slots[slotsIndex].Item = item;
-                        Volatile.Write(ref _slots[slotsIndex].SequenceNumber, currentTail + 1);
+                        slots[slotsIndex].Item = item;
+                        Volatile.Write(ref slots[slotsIndex].SequenceNumber, currentTail + 1);
                         return true;
                     }
                 }
@@ -305,7 +313,7 @@ namespace System.Collections.Concurrent
                 }
 
                 // Lost a race. Spin a bit, then try again.
-                spinner.SpinOnce();
+                spinner.SpinOnce(sleep1Threshold: -1);
             }
         }
 
@@ -315,7 +323,7 @@ namespace System.Collections.Concurrent
         internal struct Slot
         {
             /// <summary>The item.</summary>
-            public T Item;
+            [AllowNull, MaybeNull] public T Item; // SOS's ThreadPool command depends on this being at the beginning of the struct when T is a reference type
             /// <summary>The sequence number for this slot, used to synchronize between enqueuers and dequeuers.</summary>
             public int SequenceNumber;
         }

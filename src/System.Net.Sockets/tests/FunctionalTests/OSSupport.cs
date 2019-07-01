@@ -18,7 +18,6 @@ namespace System.Net.Sockets.Tests
 #pragma warning restore
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "SupportsIPv6 factors in config data")]
         [Fact]
         public void SupportsIPv6_MatchesOSSupportsIPv6()
         {
@@ -27,7 +26,6 @@ namespace System.Net.Sockets.Tests
 #pragma warning restore
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [Fact]
         public void UseOnlyOverlappedIO_AlwaysFalse()
         {
@@ -82,7 +80,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public void IOControl_SIOCATMARK_Unix_Success()
         {
             using (var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))

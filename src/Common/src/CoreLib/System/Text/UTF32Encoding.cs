@@ -39,30 +39,27 @@ namespace System.Text
         internal static readonly UTF32Encoding s_default = new UTF32Encoding(bigEndian: false, byteOrderMark: true);
         internal static readonly UTF32Encoding s_bigEndianDefault = new UTF32Encoding(bigEndian: true, byteOrderMark: true);
 
-        private static readonly byte[] s_bigEndianPreamble = new byte[4] { 0x00, 0x00, 0xFE, 0xFF };
-        private static readonly byte[] s_littleEndianPreamble = new byte[4] { 0xFF, 0xFE, 0x00, 0x00 };
-
-        private bool _emitUTF32ByteOrderMark = false;
-        private bool _isThrowException = false;
-        private bool _bigEndian = false;
+        private readonly bool _emitUTF32ByteOrderMark = false;
+        private readonly bool _isThrowException = false;
+        private readonly bool _bigEndian = false;
 
 
-        public UTF32Encoding() : this(false, true, false)
+        public UTF32Encoding() : this(false, true)
         {
         }
 
 
         public UTF32Encoding(bool bigEndian, bool byteOrderMark) :
-            this(bigEndian, byteOrderMark, false)
-        {
-        }
-
-
-        public UTF32Encoding(bool bigEndian, bool byteOrderMark, bool throwOnInvalidCharacters) :
             base(bigEndian ? 12001 : 12000)
         {
             _bigEndian = bigEndian;
             _emitUTF32ByteOrderMark = byteOrderMark;
+        }
+
+
+        public UTF32Encoding(bool bigEndian, bool byteOrderMark, bool throwOnInvalidCharacters) :
+            this(bigEndian, byteOrderMark)
+        {
             _isThrowException = throwOnInvalidCharacters;
 
             // Encoding constructor already did this, but it'll be wrong if we're throwing exceptions
@@ -128,7 +125,7 @@ namespace System.Text
         public override unsafe int GetByteCount(string s)
         {
             // Validate input
-            if (s==null)
+            if (s == null)
                 throw new ArgumentNullException(nameof(s));
 
             fixed (char* pChars = s)
@@ -365,8 +362,7 @@ namespace System.Text
         //
         // End of standard methods copied from EncodingNLS.cs
         //
-
-        internal override unsafe int GetByteCount(char* chars, int count, EncoderNLS encoder)
+        internal override unsafe int GetByteCount(char* chars, int count, EncoderNLS? encoder)
         {
             Debug.Assert(chars != null, "[UTF32Encoding.GetByteCount]chars!=null");
             Debug.Assert(count >= 0, "[UTF32Encoding.GetByteCount]count >=0");
@@ -378,7 +374,7 @@ namespace System.Text
             char highSurrogate = '\0';
 
             // For fallback we may need a fallback buffer
-            EncoderFallbackBuffer fallbackBuffer = null;
+            EncoderFallbackBuffer? fallbackBuffer = null;
             char* charsForFallback;
 
             if (encoder != null)
@@ -388,7 +384,7 @@ namespace System.Text
 
                 // We mustn't have left over fallback data when counting
                 if (fallbackBuffer.Remaining > 0)
-                    throw new ArgumentException(SR.Format(SR.Argument_EncoderFallbackNotEmpty, this.EncodingName, encoder.Fallback.GetType()));
+                    throw new ArgumentException(SR.Format(SR.Argument_EncoderFallbackNotEmpty, this.EncodingName, encoder.Fallback?.GetType().ToString() ?? string.Empty));
             }
             else
             {
@@ -498,7 +494,7 @@ namespace System.Text
         }
 
         internal override unsafe int GetBytes(char* chars, int charCount,
-                                                 byte* bytes, int byteCount, EncoderNLS encoder)
+                                                 byte* bytes, int byteCount, EncoderNLS? encoder)
         {
             Debug.Assert(chars != null, "[UTF32Encoding.GetBytes]chars!=null");
             Debug.Assert(bytes != null, "[UTF32Encoding.GetBytes]bytes!=null");
@@ -513,7 +509,7 @@ namespace System.Text
             char highSurrogate = '\0';
 
             // For fallback we may need a fallback buffer
-            EncoderFallbackBuffer fallbackBuffer = null;
+            EncoderFallbackBuffer? fallbackBuffer = null;
             char* charsForFallback;
 
             if (encoder != null)
@@ -523,7 +519,7 @@ namespace System.Text
 
                 // We mustn't have left over fallback data when not converting
                 if (encoder._throwOnOverflow && fallbackBuffer.Remaining > 0)
-                    throw new ArgumentException(SR.Format(SR.Argument_EncoderFallbackNotEmpty, this.EncodingName, encoder.Fallback.GetType()));
+                    throw new ArgumentException(SR.Format(SR.Argument_EncoderFallbackNotEmpty, this.EncodingName, encoder.Fallback?.GetType()));
             }
             else
             {
@@ -699,12 +695,12 @@ namespace System.Text
             return (int)(bytes - byteStart);
         }
 
-        internal override unsafe int GetCharCount(byte* bytes, int count, DecoderNLS baseDecoder)
+        internal override unsafe int GetCharCount(byte* bytes, int count, DecoderNLS? baseDecoder)
         {
             Debug.Assert(bytes != null, "[UTF32Encoding.GetCharCount]bytes!=null");
             Debug.Assert(count >= 0, "[UTF32Encoding.GetCharCount]count >=0");
 
-            UTF32Decoder decoder = (UTF32Decoder)baseDecoder;
+            UTF32Decoder? decoder = (UTF32Decoder?)baseDecoder;
 
             // None so far!
             int charCount = 0;
@@ -716,7 +712,7 @@ namespace System.Text
             uint iChar = 0;
 
             // For fallback we may need a fallback buffer
-            DecoderFallbackBuffer fallbackBuffer = null;
+            DecoderFallbackBuffer? fallbackBuffer = null;
 
             // See if there's anything in our decoder
             if (decoder != null)
@@ -842,14 +838,14 @@ namespace System.Text
         }
 
         internal override unsafe int GetChars(byte* bytes, int byteCount,
-                                                char* chars, int charCount, DecoderNLS baseDecoder)
+                                                char* chars, int charCount, DecoderNLS? baseDecoder)
         {
             Debug.Assert(chars != null, "[UTF32Encoding.GetChars]chars!=null");
             Debug.Assert(bytes != null, "[UTF32Encoding.GetChars]bytes!=null");
             Debug.Assert(byteCount >= 0, "[UTF32Encoding.GetChars]byteCount >=0");
             Debug.Assert(charCount >= 0, "[UTF32Encoding.GetChars]charCount >=0");
 
-            UTF32Decoder decoder = (UTF32Decoder)baseDecoder;
+            UTF32Decoder? decoder = (UTF32Decoder?)baseDecoder;
 
             // None so far!
             char* charStart = chars;
@@ -863,7 +859,7 @@ namespace System.Text
             uint iChar = 0;
 
             // For fallback we may need a fallback buffer
-            DecoderFallbackBuffer fallbackBuffer = null;
+            DecoderFallbackBuffer? fallbackBuffer = null;
             char* charsForFallback;
 
             // See if there's anything in our decoder
@@ -871,6 +867,7 @@ namespace System.Text
             {
                 readCount = decoder.readByteCount;
                 iChar = (uint)decoder.iChar;
+                Debug.Assert(baseDecoder != null);
                 fallbackBuffer = baseDecoder.FallbackBuffer;
 
                 // Shouldn't have anything in fallback buffer for GetChars
@@ -1155,21 +1152,22 @@ namespace System.Text
         }
 
         public override ReadOnlySpan<byte> Preamble =>
-            GetType() != typeof(UTF32Encoding) ? GetPreamble() : // in case a derived UTF32Encoding overrode GetPreamble
-            _emitUTF32ByteOrderMark ? (_bigEndian ? s_bigEndianPreamble : s_littleEndianPreamble) :
-            Array.Empty<byte>();
+            GetType() != typeof(UTF32Encoding) ? new ReadOnlySpan<byte>(GetPreamble()) : // in case a derived UTF32Encoding overrode GetPreamble
+            !_emitUTF32ByteOrderMark ? default :
+            _bigEndian ? (ReadOnlySpan<byte>)new byte[4] { 0x00, 0x00, 0xFE, 0xFF } : // uses C# compiler's optimization for static byte[] data
+            (ReadOnlySpan<byte>)new byte[4] { 0xFF, 0xFE, 0x00, 0x00 };      
 
-        public override bool Equals(object value)
+        public override bool Equals(object? value)
         {
-            UTF32Encoding that = value as UTF32Encoding;
-            if (that != null)
+            if (value is UTF32Encoding that)
             {
                 return (_emitUTF32ByteOrderMark == that._emitUTF32ByteOrderMark) &&
                        (_bigEndian == that._bigEndian) &&
                        (EncoderFallback.Equals(that.EncoderFallback)) &&
                        (DecoderFallback.Equals(that.DecoderFallback));
             }
-            return (false);
+
+            return false;
         }
 
 

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 
 namespace System.Runtime.Intrinsics.X86
@@ -15,9 +16,77 @@ namespace System.Runtime.Intrinsics.X86
     {
         internal Sse2() { }
 
-        public new static bool IsSupported { get { return false; } }
+        public new static bool IsSupported { [Intrinsic] get { return false; } }
 
-                /// <summary>
+        public new abstract class X64 : Sse.X64
+        {
+            internal X64() { }
+
+            public new static bool IsSupported { [Intrinsic] get { return false; } }
+
+            /// <summary>
+            /// __int64 _mm_cvtsd_si64 (__m128d a)
+            ///   CVTSD2SI r64, xmm/m64
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static long ConvertToInt64(Vector128<double> value) { throw new PlatformNotSupportedException(); }
+            /// <summary>
+            /// __int64 _mm_cvtsi128_si64 (__m128i a)
+            ///   MOVQ reg/m64, xmm
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static long ConvertToInt64(Vector128<long> value) { throw new PlatformNotSupportedException(); }
+
+            /// <summary>
+            /// __int64 _mm_cvtsi128_si64 (__m128i a)
+            ///   MOVQ reg/m64, xmm
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static ulong ConvertToUInt64(Vector128<ulong> value) { throw new PlatformNotSupportedException(); }
+
+            /// <summary>
+            /// __m128d _mm_cvtsi64_sd (__m128d a, __int64 b)
+            ///   CVTSI2SD xmm, reg/m64
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static Vector128<double> ConvertScalarToVector128Double(Vector128<double> upper, long value) { throw new PlatformNotSupportedException(); }
+
+            /// <summary>
+            /// __m128i _mm_cvtsi64_si128 (__int64 a)
+            ///   MOVQ xmm, reg/m64
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static Vector128<long> ConvertScalarToVector128Int64(long value) { throw new PlatformNotSupportedException(); }
+
+            /// <summary>
+            /// __m128i _mm_cvtsi64_si128 (__int64 a)
+            ///   MOVQ xmm, reg/m64
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static Vector128<ulong> ConvertScalarToVector128UInt64(ulong value) { throw new PlatformNotSupportedException(); }
+
+            /// <summary>
+            /// __int64 _mm_cvttsd_si64 (__m128d a)
+            ///   CVTTSD2SI reg, xmm/m64
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static long ConvertToInt64WithTruncation(Vector128<double> value) { throw new PlatformNotSupportedException(); }
+
+            /// <summary>
+            /// void _mm_stream_si64(__int64 *p, __int64 a)
+            ///   MOVNTI m64, r64
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static unsafe void StoreNonTemporal(long* address, long value) { throw new PlatformNotSupportedException(); }
+            /// <summary>
+            /// void _mm_stream_si64(__int64 *p, __int64 a)
+            ///   MOVNTI m64, r64
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static unsafe void StoreNonTemporal(ulong* address, ulong value) { throw new PlatformNotSupportedException(); }
+        }
+
+        /// <summary>
         /// __m128i _mm_add_epi8 (__m128i a,  __m128i b)
         ///   PADDB xmm, xmm/m128
         /// </summary>
@@ -231,21 +300,21 @@ namespace System.Runtime.Intrinsics.X86
 
         /// <summary>
         /// int _mm_comieq_sd (__m128d a, __m128d b)
-        ///   COMISS xmm, xmm/m64
+        ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareEqualOrderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarOrderedEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// int _mm_ucomieq_sd (__m128d a, __m128d b)
-        ///   UCOMISS xmm, xmm/m64
+        ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareEqualUnorderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarUnorderedEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpeq_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(0)
         /// </summary>
-        public static Vector128<double> CompareEqualScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128i _mm_cmpgt_epi8 (__m128i a,  __m128i b)
@@ -270,21 +339,21 @@ namespace System.Runtime.Intrinsics.X86
 
         /// <summary>
         /// int _mm_comigt_sd (__m128d a, __m128d b)
-        ///   COMISS xmm, xmm/m64
+        ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareGreaterThanOrderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarOrderedGreaterThan(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// int _mm_ucomigt_sd (__m128d a, __m128d b)
-        ///   UCOMISS xmm, xmm/m64
+        ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareGreaterThanUnorderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarUnorderedGreaterThan(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpgt_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(6)
         /// </summary>
-        public static Vector128<double> CompareGreaterThanScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarGreaterThan(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpge_pd (__m128d a,  __m128d b)
@@ -294,21 +363,21 @@ namespace System.Runtime.Intrinsics.X86
 
         /// <summary>
         /// int _mm_comige_sd (__m128d a, __m128d b)
-        ///   COMISS xmm, xmm/m64
+        ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareGreaterThanOrEqualOrderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarOrderedGreaterThanOrEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// int _mm_ucomige_sd (__m128d a, __m128d b)
-        ///   UCOMISS xmm, xmm/m64
+        ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareGreaterThanOrEqualUnorderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarUnorderedGreaterThanOrEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpge_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(5)
         /// </summary>
-        public static Vector128<double> CompareGreaterThanOrEqualScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarGreaterThanOrEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128i _mm_cmplt_epi8 (__m128i a,  __m128i b)
@@ -333,21 +402,21 @@ namespace System.Runtime.Intrinsics.X86
 
         /// <summary>
         /// int _mm_comilt_sd (__m128d a, __m128d b)
-        ///   COMISS xmm, xmm/m64
+        ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareLessThanOrderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarOrderedLessThan(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// int _mm_ucomilt_sd (__m128d a, __m128d b)
-        ///   UCOMISS xmm, xmm/m64
+        ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareLessThanUnorderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarUnorderedLessThan(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmplt_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(1)
         /// </summary>
-        public static Vector128<double> CompareLessThanScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarLessThan(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmple_pd (__m128d a,  __m128d b)
@@ -357,21 +426,21 @@ namespace System.Runtime.Intrinsics.X86
 
         /// <summary>
         /// int _mm_comile_sd (__m128d a, __m128d b)
-        ///   COMISS xmm, xmm/m64
+        ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareLessThanOrEqualOrderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarOrderedLessThanOrEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// int _mm_ucomile_sd (__m128d a, __m128d b)
-        ///   UCOMISS xmm, xmm/m64
+        ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareLessThanOrEqualUnorderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarUnorderedLessThanOrEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmple_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(2)
         /// </summary>
-        public static Vector128<double> CompareLessThanOrEqualScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarLessThanOrEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpneq_pd (__m128d a,  __m128d b)
@@ -381,21 +450,21 @@ namespace System.Runtime.Intrinsics.X86
 
         /// <summary>
         /// int _mm_comineq_sd (__m128d a, __m128d b)
-        ///   COMISS xmm, xmm/m64
+        ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareNotEqualOrderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarOrderedNotEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// int _mm_ucomineq_sd (__m128d a, __m128d b)
-        ///   UCOMISS xmm, xmm/m64
+        ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareNotEqualUnorderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static bool CompareScalarUnorderedNotEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpneq_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(4)
         /// </summary>
-        public static Vector128<double> CompareNotEqualScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarNotEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpngt_pd (__m128d a,  __m128d b)
@@ -407,7 +476,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpngt_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(2)
         /// </summary>
-        public static Vector128<double> CompareNotGreaterThanScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarNotGreaterThan(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpnge_pd (__m128d a,  __m128d b)
@@ -419,7 +488,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpnge_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(1)
         /// </summary>
-        public static Vector128<double> CompareNotGreaterThanOrEqualScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarNotGreaterThanOrEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpnlt_pd (__m128d a,  __m128d b)
@@ -431,7 +500,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpnlt_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(5)
         /// </summary>
-        public static Vector128<double> CompareNotLessThanScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarNotLessThan(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpnle_pd (__m128d a,  __m128d b)
@@ -443,7 +512,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpnle_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(6)
         /// </summary>
-        public static Vector128<double> CompareNotLessThanOrEqualScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarNotLessThanOrEqual(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpord_pd (__m128d a,  __m128d b)
@@ -455,7 +524,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpord_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(7)
         /// </summary>
-        public static Vector128<double> CompareOrderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarOrdered(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cmpunord_pd (__m128d a,  __m128d b)
@@ -467,7 +536,7 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpunord_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(3)
         /// </summary>
-        public static Vector128<double> CompareUnorderedScalar(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
+        public static Vector128<double> CompareScalarUnordered(Vector128<double> left, Vector128<double> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128i _mm_cvtps_epi32 (__m128 a)
@@ -501,11 +570,6 @@ namespace System.Runtime.Intrinsics.X86
         public static Vector128<double> ConvertToVector128Double(Vector128<float> value) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
-        /// double _mm_cvtsd_f64(__m128d a)
-        ///   HELPER: MOVSD
-        /// </summary>
-        public static double ConvertToDouble(Vector128<double> value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
         /// int _mm_cvtsd_si32 (__m128d a)
         ///   CVTSD2SI r32, xmm/m64
         /// </summary>
@@ -516,36 +580,16 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static int ConvertToInt32(Vector128<int> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
-        /// __int64 _mm_cvtsd_si64 (__m128d a)
-        ///   CVTSD2SI r64, xmm/m64
-        /// </summary>
-        public static long ConvertToInt64(Vector128<double> value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __int64 _mm_cvtsi128_si64 (__m128i a)
-        ///   MOVQ reg/m64, xmm
-        /// </summary>
-        public static long ConvertToInt64(Vector128<long> value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
         /// int _mm_cvtsi128_si32 (__m128i a)
         ///   MOVD reg/m32, xmm
         /// </summary>
         public static uint ConvertToUInt32(Vector128<uint> value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __int64 _mm_cvtsi128_si64 (__m128i a)
-        ///   MOVQ reg/m64, xmm
-        /// </summary>
-        public static ulong ConvertToUInt64(Vector128<ulong> value) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_cvtsi32_sd (__m128d a, int b)
-        ///   CVTSI2SD xmm, reg/m64
+        ///   CVTSI2SD xmm, reg/m32
         /// </summary>
         public static Vector128<double> ConvertScalarToVector128Double(Vector128<double> upper, int value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128d _mm_cvtsi64_sd (__m128d a, int b)
-        ///   CVTSI2SD xmm, reg/m64
-        /// </summary>
-        public static Vector128<double> ConvertScalarToVector128Double(Vector128<double> upper, long value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128d _mm_cvtss_sd (__m128d a, __m128 b)
         ///   CVTSS2SD xmm, xmm/m32
@@ -557,11 +601,6 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static Vector128<int> ConvertScalarToVector128Int32(int value) { throw new PlatformNotSupportedException(); }
         /// <summary>
-        /// __m128i _mm_cvtsi64_si128 (__int64 a)
-        ///   MOVQ xmm, reg/m64
-        /// </summary>
-        public static Vector128<long> ConvertScalarToVector128Int64(long value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
         /// __m128 _mm_cvtsd_ss (__m128 a, __m128d b)
         ///   CVTSD2SS xmm, xmm/m64
         /// </summary>
@@ -571,11 +610,6 @@ namespace System.Runtime.Intrinsics.X86
         ///   MOVD xmm, reg/m32
         /// </summary>
         public static Vector128<uint> ConvertScalarToVector128UInt32(uint value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_cvtsi64_si128 (__int64 a)
-        ///   MOVQ xmm, reg/m64
-        /// </summary>
-        public static Vector128<ulong> ConvertScalarToVector128UInt64(ulong value) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128i _mm_cvttps_epi32 (__m128 a)
@@ -593,11 +627,6 @@ namespace System.Runtime.Intrinsics.X86
         ///   CVTTSD2SI reg, xmm/m64
         /// </summary>
         public static int ConvertToInt32WithTruncation(Vector128<double> value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __int64 _mm_cvttsd_si64 (__m128d a)
-        ///   CVTTSD2SI reg, xmm/m64
-        /// </summary>
-        public static long ConvertToInt64WithTruncation(Vector128<double> value) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128d _mm_div_pd (__m128d a,  __m128d b)
@@ -970,112 +999,6 @@ namespace System.Runtime.Intrinsics.X86
         public static Vector128<byte> PackUnsignedSaturate(Vector128<short> left, Vector128<short> right) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
-        /// ___m128i _mm_set_epi8 (char e15, char e14, char e13, char e12, char e11, char e10, char e9, char e8, char e7, char e6, char e5, char e4, char e3, char e2, char e1, char e0)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<sbyte> SetVector128(sbyte e15, sbyte e14, sbyte e13, sbyte e12, sbyte e11, sbyte e10, sbyte e9, sbyte e8, sbyte e7, sbyte e6, sbyte e5, sbyte e4, sbyte e3, sbyte e2, sbyte e1, sbyte e0) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// ___m128i _mm_set_epi8 (char e15, char e14, char e13, char e12, char e11, char e10, char e9, char e8, char e7, char e6, char e5, char e4, char e3, char e2, char e1, char e0)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<byte> SetVector128(byte e15, byte e14, byte e13, byte e12, byte e11, byte e10, byte e9, byte e8, byte e7, byte e6, byte e5, byte e4, byte e3, byte e2, byte e1, byte e0) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set_epi16 (short e7, short e6, short e5, short e4, short e3, short e2, short e1, short e0)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<short> SetVector128(short e7, short e6, short e5, short e4, short e3, short e2, short e1, short e0) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set_epi16 (short e7, short e6, short e5, short e4, short e3, short e2, short e1, short e0)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<ushort> SetVector128(ushort e7, ushort e6, ushort e5, ushort e4, ushort e3, ushort e2, ushort e1, ushort e0) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set_epi32 (int e3, int e2, int e1, int e0)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<int> SetVector128(int e3, int e2, int e1, int e0) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set_epi32 (int e3, int e2, int e1, int e0)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<uint> SetVector128(uint e3, uint e2, uint e1, uint e0) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set_epi64x (__int64 e1, __int64 e0)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<long> SetVector128(long e1, long e0) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set_epi64x (__int64 e1, __int64 e0)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<ulong> SetVector128(ulong e1, ulong e0) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128d _mm_set_pd (double e1, double e0)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<double> SetVector128(double e1, double e0) { throw new PlatformNotSupportedException(); }
-
-        /// <summary>
-        /// __m128d _mm_set_sd (double a)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<double> SetScalarVector128(double value) { throw new PlatformNotSupportedException(); }
-
-        /// <summary>
-        /// __m128i _mm_set1_epi8 (char a)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<byte> SetAllVector128(byte value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set1_epi8 (char a)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<sbyte> SetAllVector128(sbyte value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set1_epi16 (short a)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<short> SetAllVector128(short value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set1_epi16 (short a)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<ushort> SetAllVector128(ushort value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set1_epi32 (int a)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<int> SetAllVector128(int value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set1_epi32 (int a)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<uint> SetAllVector128(uint value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set1_epi64x (long long a)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<long> SetAllVector128(long value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_set1_epi64x (long long a)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<ulong> SetAllVector128(ulong value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128d _mm_set1_pd (double a)
-        ///   HELPER
-        /// </summary>
-        public static Vector128<double> SetAllVector128(double value) { throw new PlatformNotSupportedException(); }
-
-        /// <summary>
-        /// __m128i _mm_setzero_si128 ()
-        ///   HELPER: PXOR
-        /// __m128d _mm_setzero_pd (void)
-        ///   HELPER: XORPD
-        /// </summary>
-        public static Vector128<T> SetZeroVector128<T>() where T : struct { throw new PlatformNotSupportedException(); }
-
-        /// <summary>
         /// __m128i _mm_sad_epu8 (__m128i a,  __m128i b)
         ///   PSADBW xmm, xmm/m128
         /// </summary>
@@ -1371,6 +1294,16 @@ namespace System.Runtime.Intrinsics.X86
         ///   MOVSD m64, xmm
         /// </summary>
         public static unsafe void StoreScalar(double* address, Vector128<double> source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
+        ///   MOVQ m64, xmm
+        /// </summary>
+        public static unsafe void StoreScalar(long* address, Vector128<long> source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
+        ///   MOVQ m64, xmm
+        /// </summary>
+        public static unsafe void StoreScalar(ulong* address, Vector128<ulong> source) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// void _mm_store_si128 (__m128i* mem_addr, __m128i a)
@@ -1517,16 +1450,6 @@ namespace System.Runtime.Intrinsics.X86
         public static unsafe void StoreHigh(double* address, Vector128<double> source) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
-        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
-        ///   MOVQ m64, xmm
-        /// </summary>
-        public static unsafe void StoreLow(long* address, Vector128<long> source) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
-        ///   MOVQ m64, xmm
-        /// </summary>
-        public static unsafe void StoreLow(ulong* address, Vector128<ulong> source) { throw new PlatformNotSupportedException(); }
-        /// <summary>
         /// void _mm_storel_pd (double* mem_addr, __m128d a)
         ///   MOVLPD m64, xmm
         /// </summary>
@@ -1542,17 +1465,6 @@ namespace System.Runtime.Intrinsics.X86
         ///   MOVNTI m32, r32
         /// </summary>
         public static unsafe void StoreNonTemporal(uint* address, uint value) { throw new PlatformNotSupportedException(); }
-
-        /// <summary>
-        /// void _mm_stream_si64(__int64 *p, __int64 a)
-        ///   MOVNTI m64, r64
-        /// </summary>
-        public static unsafe void StoreNonTemporal(long* address, long value) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// void _mm_stream_si64(__int64 *p, __int64 a)
-        ///   MOVNTI m64, r64
-        /// </summary>
-        public static unsafe void StoreNonTemporal(ulong* address, ulong value) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128i _mm_sub_epi8 (__m128i a,  __m128i b)
@@ -1645,7 +1557,7 @@ namespace System.Runtime.Intrinsics.X86
         /// <summary>
         /// __m128i _mm_unpackhi_epi16 (__m128i a,  __m128i b)
         ///   PUNPCKHWD xmm, xmm/m128
-        /// </summary
+        /// </summary>
         public static Vector128<ushort> UnpackHigh(Vector128<ushort> left, Vector128<ushort> right) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_unpackhi_epi32 (__m128i a,  __m128i b)

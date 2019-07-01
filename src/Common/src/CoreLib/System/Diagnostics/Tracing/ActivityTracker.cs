@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Runtime.CompilerServices;
 #if !ES_BUILD_AGAINST_DOTNET_V35
 using Contract = System.Diagnostics.Contracts.Contract;
 #else
@@ -65,7 +66,7 @@ namespace System.Diagnostics.Tracing
                 if (m_checkedForEnable)
                     return;
                 m_checkedForEnable = true;
-                if (TplEtwProvider.Log.IsEnabled(EventLevel.Informational, TplEtwProvider.Keywords.TasksFlowActivityIds))
+                if (TplEventSource.Log.IsEnabled(EventLevel.Informational, TplEventSource.Keywords.TasksFlowActivityIds))
                     Enable();
                 if (m_current == null)
                     return;
@@ -77,11 +78,11 @@ namespace System.Diagnostics.Tracing
             var currentActivity = m_current.Value;
             var fullActivityName = NormalizeActivityName(providerName, activityName, task);
 
-            var etwLog = TplEtwProvider.Log;
-            if (etwLog.Debug)
+            var log = TplEventSource.Log;
+            if (log.Debug)
             {
-                etwLog.DebugFacilityMessage("OnStartEnter", fullActivityName);
-                etwLog.DebugFacilityMessage("OnStartEnterActivityState", ActivityInfo.LiveActivities(currentActivity));
+                log.DebugFacilityMessage("OnStartEnter", fullActivityName);
+                log.DebugFacilityMessage("OnStartEnterActivityState", ActivityInfo.LiveActivities(currentActivity));
             }
 
             if (currentActivity != null)
@@ -91,14 +92,14 @@ namespace System.Diagnostics.Tracing
                 {
                     activityId = Guid.Empty;
                     relatedActivityId = Guid.Empty;
-                    if (etwLog.Debug)
-                        etwLog.DebugFacilityMessage("OnStartRET", "Fail");
+                    if (log.Debug)
+                        log.DebugFacilityMessage("OnStartRET", "Fail");
                     return;
                 }
                 // Check for recursion, and force-stop any activities if the activity already started.
                 if ((options & EventActivityOptions.Recursive) == 0)
                 {
-                    ActivityInfo existingActivity = FindActiveActivity(fullActivityName, currentActivity);
+                    ActivityInfo? existingActivity = FindActiveActivity(fullActivityName, currentActivity);
                     if (existingActivity != null)
                     {
                         OnStop(providerName, activityName, task, ref activityId);
@@ -124,10 +125,10 @@ namespace System.Diagnostics.Tracing
             // Remember the current ID so we can log it 
             activityId = newActivity.ActivityId;
             
-            if (etwLog.Debug)
+            if (log.Debug)
             {
-                etwLog.DebugFacilityMessage("OnStartRetActivityState", ActivityInfo.LiveActivities(newActivity));
-                etwLog.DebugFacilityMessage1("OnStartRet", activityId.ToString(), relatedActivityId.ToString());
+                log.DebugFacilityMessage("OnStartRetActivityState", ActivityInfo.LiveActivities(newActivity));
+                log.DebugFacilityMessage1("OnStartRet", activityId.ToString(), relatedActivityId.ToString());
             }
         }
 
@@ -144,37 +145,37 @@ namespace System.Diagnostics.Tracing
 
             var fullActivityName = NormalizeActivityName(providerName, activityName, task);
             
-            var etwLog = TplEtwProvider.Log;
-            if (etwLog.Debug)
+            var log = TplEventSource.Log;
+            if (log.Debug)
             {
-                etwLog.DebugFacilityMessage("OnStopEnter", fullActivityName);
-                etwLog.DebugFacilityMessage("OnStopEnterActivityState", ActivityInfo.LiveActivities(m_current.Value));
+                log.DebugFacilityMessage("OnStopEnter", fullActivityName);
+                log.DebugFacilityMessage("OnStopEnterActivityState", ActivityInfo.LiveActivities(m_current.Value));
             }
 
             for (; ; ) // This is a retry loop.
             {
-                ActivityInfo currentActivity = m_current.Value;
-                ActivityInfo newCurrentActivity = null;               // if we have seen any live activities (orphans), at he first one we have seen.   
+                ActivityInfo? currentActivity = m_current.Value;
+                ActivityInfo? newCurrentActivity = null;               // if we have seen any live activities (orphans), at he first one we have seen.   
 
                 // Search to find the activity to stop in one pass.   This insures that we don't let one mistake
                 // (stopping something that was not started) cause all active starts to be stopped 
                 // By first finding the target start to stop we are more robust.  
-                ActivityInfo activityToStop = FindActiveActivity(fullActivityName, currentActivity);
+                ActivityInfo? activityToStop = FindActiveActivity(fullActivityName, currentActivity);
 
                 // ignore stops where we can't find a start because we may have popped them previously.
                 if (activityToStop == null)
                 {
                     activityId = Guid.Empty;
                     // TODO add some logging about this. Basically could not find matching start.
-                    if (etwLog.Debug)
-                        etwLog.DebugFacilityMessage("OnStopRET", "Fail");
+                    if (log.Debug)
+                        log.DebugFacilityMessage("OnStopRET", "Fail");
                     return;
                 }
 
                 activityId = activityToStop.ActivityId;
 
                 // See if there are any orphans that need to be stopped.  
-                ActivityInfo orphan = currentActivity;
+                ActivityInfo? orphan = currentActivity;
                 while (orphan != activityToStop && orphan != null)
                 {
                     if (orphan.m_stopped != 0)      // Skip dead activities.
@@ -207,10 +208,10 @@ namespace System.Diagnostics.Tracing
 
                     m_current.Value = newCurrentActivity;
 
-                    if (etwLog.Debug)
+                    if (log.Debug)
                     {
-                        etwLog.DebugFacilityMessage("OnStopRetActivityState", ActivityInfo.LiveActivities(newCurrentActivity));
-                        etwLog.DebugFacilityMessage("OnStopRet", activityId.ToString());
+                        log.DebugFacilityMessage("OnStopRetActivityState", ActivityInfo.LiveActivities(newCurrentActivity));
+                        log.DebugFacilityMessage("OnStopRet", activityId.ToString());
                     }
                     return;
                 }
@@ -228,7 +229,7 @@ namespace System.Diagnostics.Tracing
                 // Catch the not Implemented 
                 try
                 {
-                    m_current = new AsyncLocal<ActivityInfo>(ActivityChanging);
+                    m_current = new AsyncLocal<ActivityInfo?>(ActivityChanging);
                 }
                 catch (NotImplementedException) {
 #if (!ES_BUILD_PCL && ! ES_BUILD_PN)
@@ -250,9 +251,9 @@ namespace System.Diagnostics.Tracing
         /// <summary>
         /// Searched for a active (nonstopped) activity with the given name.  Returns null if not found.  
         /// </summary>
-        private ActivityInfo FindActiveActivity(string name, ActivityInfo startLocation)
+        private ActivityInfo? FindActiveActivity(string name, ActivityInfo? startLocation)
         {
-            var activity = startLocation;
+            ActivityInfo? activity = startLocation;
             while (activity != null)
             {
                 if (name == activity.m_name && activity.m_stopped == 0)
@@ -268,15 +269,32 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         private string NormalizeActivityName(string providerName, string activityName, int task)
         {
-            if (activityName.EndsWith(EventSource.s_ActivityStartSuffix, StringComparison.Ordinal))
-                activityName = activityName.Substring(0, activityName.Length - EventSource.s_ActivityStartSuffix.Length);
-            else if (activityName.EndsWith(EventSource.s_ActivityStopSuffix, StringComparison.Ordinal))
-                activityName = activityName.Substring(0, activityName.Length - EventSource.s_ActivityStopSuffix.Length);
-            else if (task != 0)
-                activityName = "task" + task.ToString();
-
             // We use provider name to distinguish between activities from different providers.
-            return providerName + activityName;
+
+            if (activityName.EndsWith(EventSource.s_ActivityStartSuffix, StringComparison.Ordinal))
+            {
+#if ES_BUILD_STANDALONE
+                return string.Concat(providerName, activityName.Substring(0, activityName.Length - EventSource.s_ActivityStartSuffix.Length));
+#else
+                return string.Concat(providerName, activityName.AsSpan(0, activityName.Length - EventSource.s_ActivityStartSuffix.Length));
+#endif
+            }
+            else if (activityName.EndsWith(EventSource.s_ActivityStopSuffix, StringComparison.Ordinal))
+            {
+#if ES_BUILD_STANDALONE
+                return string.Concat(providerName, activityName.Substring(0, activityName.Length - EventSource.s_ActivityStopSuffix.Length));
+#else
+                return string.Concat(providerName, activityName.AsSpan(0, activityName.Length - EventSource.s_ActivityStopSuffix.Length));
+#endif
+            }
+            else if (task != 0)
+            {
+                return providerName + "task" + task.ToString();
+            }
+            else
+            {
+                return providerName + activityName;
+            }
         }
 
         // *******************************************************************************
@@ -292,7 +310,7 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         private class ActivityInfo
         {
-            public ActivityInfo(string name, long uniqueId, ActivityInfo creator, Guid activityIDToRestore, EventActivityOptions options)
+            public ActivityInfo(string name, long uniqueId, ActivityInfo? creator, Guid activityIDToRestore, EventActivityOptions options)
             {
                 m_name = name;
                 m_eventOptions = options;
@@ -313,10 +331,10 @@ namespace System.Diagnostics.Tracing
                 }
             }
 
-            public static string Path(ActivityInfo activityInfo)
+            public static string Path(ActivityInfo? activityInfo)
             {
                 if (activityInfo == null)
-                    return ("");
+                    return "";
                 return Path(activityInfo.m_creator) + "/" + activityInfo.m_uniqueId.ToString();
             }
 
@@ -325,7 +343,7 @@ namespace System.Diagnostics.Tracing
                 return m_name + "(" + Path(this) + (m_stopped != 0 ? ",DEAD)" : ")");
             }
 
-            public static string LiveActivities(ActivityInfo list)
+            public static string LiveActivities(ActivityInfo? list)
             {
                 if (list == null)
                     return "";
@@ -399,7 +417,7 @@ namespace System.Diagnostics.Tracing
             private unsafe void CreateOverflowGuid(Guid* outPtr)
             {
                 // Search backwards for an ancestor that has sufficient space to put the ID.  
-                for (ActivityInfo ancestor = m_creator; ancestor != null; ancestor = ancestor.m_creator)
+                for (ActivityInfo? ancestor = m_creator; ancestor != null; ancestor = ancestor.m_creator)
                 {
                     if (ancestor.m_activityPathGuidOffset <= 10)  // we need at least 2 bytes.  
                     {
@@ -450,7 +468,7 @@ namespace System.Diagnostics.Tracing
                 byte* endPtr = ptr + 12;
                 ptr += whereToAddId;
                 if (endPtr <= ptr)
-                    return 13;                // 12 means we might exactly fit, 13 means we definately did not fit
+                    return 13;                // 12 means we might exactly fit, 13 means we definitely did not fit
 
                 if (0 < id && id <= (uint)NumberListCodes.LastImmediateValue && !overflow)
                     WriteNibble(ref ptr, endPtr, id);
@@ -539,7 +557,7 @@ namespace System.Diagnostics.Tracing
             readonly internal EventActivityOptions m_eventOptions;  // Options passed to start. 
             internal long m_lastChildID;                            // used to create a unique ID for my children activities
             internal int m_stopped;                                 // This work item has stopped
-            readonly internal ActivityInfo m_creator;               // My parent (creator).  Forms the Path() for the activity.
+            readonly internal ActivityInfo? m_creator;               // My parent (creator).  Forms the Path() for the activity.
             readonly internal Guid m_activityIdToRestore;           // The Guid to restore after a stop.
             #endregion
         }
@@ -547,10 +565,10 @@ namespace System.Diagnostics.Tracing
         // This callback is used to initialize the m_current AsyncLocal Variable.   
         // Its job is to keep the ETW Activity ID (part of thread local storage) in sync
         // with m_current.ActivityID
-        void ActivityChanging(AsyncLocalValueChangedArgs<ActivityInfo> args)
+        void ActivityChanging(AsyncLocalValueChangedArgs<ActivityInfo?> args)
         {
-            ActivityInfo cur = args.CurrentValue;
-            ActivityInfo prev = args.PreviousValue;
+            ActivityInfo? cur = args.CurrentValue;
+            ActivityInfo? prev = args.PreviousValue;
 
             // Are we popping off a value?   (we have a prev, and it creator is cur) 
             // Then check if we should use the GUID at the time of the start event
@@ -589,9 +607,9 @@ namespace System.Diagnostics.Tracing
         /// while that task is running.   Thus m_current 'flows' to any task that is caused by the current thread that
         /// last set it.   
         /// 
-        /// This variable points a a linked list that represents all Activities that have started but have not stopped.  
+        /// This variable points to a linked list that represents all Activities that have started but have not stopped.  
         /// </summary>
-        AsyncLocal<ActivityInfo> m_current;
+        AsyncLocal<ActivityInfo?>? m_current;
         bool m_checkedForEnable;
 
         // Singleton
@@ -605,7 +623,7 @@ namespace System.Diagnostics.Tracing
         #endregion
     }
 
-#if ES_BUILD_STANDALONE || ES_BUILD_PN
+#if ES_BUILD_STANDALONE
     /******************************** SUPPORT *****************************/
     /// <summary>
     /// This is supplied by the framework.   It is has the semantics that the value is copied to any new Tasks that is created
@@ -614,12 +632,8 @@ namespace System.Diagnostics.Tracing
     /// only get your thread local copy which means that you never have races.  
     /// </summary>
     /// 
-#if ES_BUILD_STANDALONE
     [EventSource(Name = "Microsoft.Tasks.Nuget")]
-#else
-    [EventSource(Name = "System.Diagnostics.Tracing.TplEtwProvider")]
-#endif
-    internal class TplEtwProvider : EventSource
+    internal class TplEventSource : EventSource
     {
         public class Keywords
         {
@@ -627,7 +641,7 @@ namespace System.Diagnostics.Tracing
             public const EventKeywords Debug = (EventKeywords)0x20000;
         }
 
-        public static TplEtwProvider Log = new TplEtwProvider();
+        public static TplEventSource Log = new TplEventSource();
         public bool Debug { get { return IsEnabled(EventLevel.Verbose, Keywords.Debug); } }
 
         public void DebugFacilityMessage(string Facility, string Message) { WriteEvent(1, Facility, Message); }

@@ -10,7 +10,6 @@ namespace System.Net.Test.Common
     {
         public static partial class Http
         {
-            private static readonly string DefaultAzureServer = "corefx-net.cloudapp.net";
             private static readonly string DefaultHttp2AzureServer = "corefx-net-http2.azurewebsites.net";
 
             public static string Host => GetValue("COREFX_HTTPHOST", DefaultAzureServer);
@@ -23,11 +22,13 @@ namespace System.Net.Test.Common
             // don't support servers that use push right now.
             public static string Http2NoPushHost => GetValue("COREFX_HTTP2NOPUSHHOST", "www.microsoft.com");
 
+            // Domain server environment.
             public static string DomainJoinedHttpHost => GetValue("COREFX_DOMAINJOINED_HTTPHOST");
-
             public static string DomainJoinedProxyHost => GetValue("COREFX_DOMAINJOINED_PROXYHOST");
-
             public static string DomainJoinedProxyPort => GetValue("COREFX_DOMAINJOINED_PROXYPORT");
+
+            // Standalone server environment.
+            public static string WindowsServerHttpHost => GetValue("COREFX_WINDOWSSERVER_HTTPHOST");
 
             public static string SSLv2RemoteServer => GetValue("COREFX_HTTPHOST_SSL2", "https://www.ssllabs.com:10200/");
             public static string SSLv3RemoteServer => GetValue("COREFX_HTTPHOST_SSL3", "https://www.ssllabs.com:10300/");
@@ -41,13 +42,13 @@ namespace System.Net.Test.Common
             public static string RevokedCertRemoteServer => GetValue("COREFX_HTTPHOST_REVOKEDCERT", "https://revoked.badssl.com/");
 
             public static string EchoClientCertificateRemoteServer => GetValue("COREFX_HTTPHOST_ECHOCLIENTCERT", "https://corefx-net-tls.azurewebsites.net/EchoClientCertificate.ashx");
+            public static string Http2ForceUnencryptedLoopback => GetValue("COREFX_HTTP2_FORCEUNENCRYPTEDLOOPBACK");
 
             private const string HttpScheme = "http";
             private const string HttpsScheme = "https";
 
             private const string EchoHandler = "Echo.ashx";
             private const string EmptyContentHandler = "EmptyContent.ashx";
-            private const string StatusCodeHandler = "StatusCode.ashx";
             private const string RedirectHandler = "Redirect.ashx";
             private const string VerifyUploadHandler = "VerifyUpload.ashx";
             private const string DeflateHandler = "Deflate.ashx";
@@ -61,6 +62,7 @@ namespace System.Net.Test.Common
             public static readonly Uri RemoteVerifyUploadServer = new Uri("http://" + Host + "/" + VerifyUploadHandler);
             public static readonly Uri SecureRemoteVerifyUploadServer = new Uri("https://" + SecureHost + "/" + VerifyUploadHandler);
             public static readonly Uri Http2RemoteVerifyUploadServer = new Uri("https://" + Http2Host + "/" + VerifyUploadHandler);
+            public static readonly Uri[] VerifyUploadServerList = new Uri[] { RemoteVerifyUploadServer, SecureRemoteVerifyUploadServer, Http2RemoteVerifyUploadServer };
 
             public static readonly Uri RemoteEmptyContentServer = new Uri("http://" + Host + "/" + EmptyContentHandler);
             public static readonly Uri RemoteDeflateServer = new Uri("http://" + Host + "/" + DeflateHandler);
@@ -95,29 +97,6 @@ namespace System.Net.Test.Common
                         EchoHandler,
                         userName,
                         password));
-            }
-
-            public static Uri StatusCodeUri(bool secure, int statusCode)
-            {
-                return new Uri(
-                    string.Format(
-                        "{0}://{1}/{2}?statuscode={3}",
-                        secure ? HttpsScheme : HttpScheme,
-                        Host,
-                        StatusCodeHandler,
-                        statusCode));
-            }
-
-            public static Uri StatusCodeUri(bool secure, int statusCode, string statusDescription)
-            {
-                return new Uri(
-                    string.Format(
-                        "{0}://{1}/{2}?statuscode={3}&statusDescription={4}",
-                        secure ? HttpsScheme : HttpScheme,
-                        Host,
-                        StatusCodeHandler,
-                        statusCode,
-                        statusDescription));
             }
 
             public static Uri RedirectUriForDestinationUri(bool secure, int statusCode, Uri destinationUri, int hops, bool relative = false)

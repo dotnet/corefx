@@ -11,7 +11,7 @@ namespace System.Data.SqlClient.SNI
     /// <summary>
     /// MARS handle
     /// </summary>
-    internal class SNIMarsHandle : SNIHandle
+    internal sealed class SNIMarsHandle : SNIHandle
     {
         private const uint ACK_THRESHOLD = 2;
 
@@ -33,27 +33,11 @@ namespace System.Data.SqlClient.SNI
         private uint _sequenceNumber;
         private SNIError _connectionError;
 
-        /// <summary>
-        /// Connection ID
-        /// </summary>
-        public override Guid ConnectionId
-        {
-            get
-            {
-                return _connectionId;
-            }
-        }
+        public override Guid ConnectionId => _connectionId;
 
-        /// <summary>
-        /// Handle status
-        /// </summary>
-        public override uint Status
-        {
-            get
-            {
-                return _status;
-            }
-        }
+        public override uint Status => _status;
+
+        public override int ReserveHeaderSize => SNISMUXHeader.HEADER_LENGTH;
 
         /// <summary>
         /// Dispose object
@@ -93,70 +77,52 @@ namespace System.Data.SqlClient.SNI
         /// <param name="flags">SMUX header flags</param>
         private void SendControlPacket(SNISMUXFlags flags)
         {
-            byte[] headerBytes = null;
-
+            SNIPacket packet = new SNIPacket(headerSize: SNISMUXHeader.HEADER_LENGTH, dataSize: 0);
             lock (this)
             {
-                GetSMUXHeaderBytes(0, (byte)flags, ref headerBytes);
+                SetupSMUXHeader(0, flags);
+                _currentHeader.Write(packet.GetHeaderBuffer(SNISMUXHeader.HEADER_LENGTH));
+                packet.SetHeaderActive();
             }
-
-            SNIPacket packet = new SNIPacket();
-            packet.SetData(headerBytes, SNISMUXHeader.HEADER_LENGTH);
-            
             _connection.Send(packet);
         }
 
-        /// <summary>
-        /// Generate SMUX header 
-        /// </summary>
-        /// <param name="length">Packet length</param>
-        /// <param name="flags">Packet flags</param>
-        /// <param name="headerBytes">Header in bytes</param>
-        private void GetSMUXHeaderBytes(int length, byte flags, ref byte[] headerBytes)
+        private void SetupSMUXHeader(int length, SNISMUXFlags flags)
         {
-            headerBytes = new byte[SNISMUXHeader.HEADER_LENGTH];
-
+            Debug.Assert(Monitor.IsEntered(this), "must take lock on self before updating mux header");
             _currentHeader.SMID = 83;
-            _currentHeader.flags = flags;
+            _currentHeader.flags = (byte)flags;
             _currentHeader.sessionId = _sessionId;
             _currentHeader.length = (uint)SNISMUXHeader.HEADER_LENGTH + (uint)length;
-            _currentHeader.sequenceNumber = ((flags == (byte)SNISMUXFlags.SMUX_FIN) || (flags == (byte)SNISMUXFlags.SMUX_ACK)) ? _sequenceNumber - 1 : _sequenceNumber++;
+            _currentHeader.sequenceNumber = ((flags == SNISMUXFlags.SMUX_FIN) || (flags == SNISMUXFlags.SMUX_ACK)) ? _sequenceNumber - 1 : _sequenceNumber++;
             _currentHeader.highwater = _receiveHighwater;
             _receiveHighwaterLastAck = _currentHeader.highwater;
-
-            BitConverter.GetBytes(_currentHeader.SMID).CopyTo(headerBytes, 0);
-            BitConverter.GetBytes(_currentHeader.flags).CopyTo(headerBytes, 1);
-            BitConverter.GetBytes(_currentHeader.sessionId).CopyTo(headerBytes, 2);
-            BitConverter.GetBytes(_currentHeader.length).CopyTo(headerBytes, 4);
-            BitConverter.GetBytes(_currentHeader.sequenceNumber).CopyTo(headerBytes, 8);
-            BitConverter.GetBytes(_currentHeader.highwater).CopyTo(headerBytes, 12);
         }
 
         /// <summary>
         /// Generate a packet with SMUX header
         /// </summary>
         /// <param name="packet">SNI packet</param>
-        /// <returns>Encapsulated SNI packet</returns>
-        private SNIPacket GetSMUXEncapsulatedPacket(SNIPacket packet)
+        /// <returns>The packet with the SMUx header set.</returns>
+        private SNIPacket SetPacketSMUXHeader(SNIPacket packet)
         {
-            uint xSequenceNumber = _sequenceNumber;
-            byte[] headerBytes = null;
-            GetSMUXHeaderBytes(packet.Length, (byte)SNISMUXFlags.SMUX_DATA, ref headerBytes);
+            Debug.Assert(packet.ReservedHeaderSize == SNISMUXHeader.HEADER_LENGTH, "mars handle attempting to mux packet without mux reservation");
 
-            SNIPacket smuxPacket = new SNIPacket(16 + packet.Length);
-            smuxPacket.Description = string.Format("({0}) SMUX packet {1}", packet.Description == null ? "" : packet.Description, xSequenceNumber);
-            smuxPacket.AppendData(headerBytes, 16);
-            smuxPacket.AppendPacket(packet);
-
-            return smuxPacket;
+            SetupSMUXHeader(packet.Length, SNISMUXFlags.SMUX_DATA);
+            _currentHeader.Write(packet.GetHeaderBuffer(SNISMUXHeader.HEADER_LENGTH));
+            packet.SetHeaderActive();
+            return packet;
         }
 
+        /// <summary>
         /// Send a packet synchronously
         /// </summary>
         /// <param name="packet">SNI packet</param>
         /// <returns>SNI error code</returns>
         public override uint Send(SNIPacket packet)
         {
+            Debug.Assert(packet.ReservedHeaderSize == SNISMUXHeader.HEADER_LENGTH, "mars handle attempting to send muxed packet without mux reservation in Send");
+
             while (true)
             {
                 lock (this)
@@ -175,7 +141,12 @@ namespace System.Data.SqlClient.SNI
                 }
             }
 
-            return _connection.Send(GetSMUXEncapsulatedPacket(packet));
+            SNIPacket muxedPacket = null;
+            lock (this)
+            {
+                muxedPacket = SetPacketSMUXHeader(packet);
+            }
+            return _connection.Send(muxedPacket);
         }
 
         /// <summary>
@@ -186,8 +157,7 @@ namespace System.Data.SqlClient.SNI
         /// <returns>SNI error code</returns>
         private uint InternalSendAsync(SNIPacket packet, SNIAsyncCallback callback)
         {
-            SNIPacket encapsulatedPacket = null;
-
+            Debug.Assert(packet.ReservedHeaderSize == SNISMUXHeader.HEADER_LENGTH, "mars handle attempting to send muxed packet without mux reservation in InternalSendAsync");
             lock (this)
             {
                 if (_sequenceNumber >= _sendHighwater)
@@ -195,18 +165,9 @@ namespace System.Data.SqlClient.SNI
                     return TdsEnums.SNI_QUEUE_FULL;
                 }
 
-                encapsulatedPacket = GetSMUXEncapsulatedPacket(packet);
-
-                if (callback != null)
-                {
-                    encapsulatedPacket.SetCompletionCallback(callback);
-                }
-                else
-                {
-                    encapsulatedPacket.SetCompletionCallback(HandleSendComplete);
-                }
-
-                return _connection.SendAsync(encapsulatedPacket, callback);
+                SNIPacket muxedPacket = SetPacketSMUXHeader(packet);
+                muxedPacket.SetCompletionCallback(callback ?? HandleSendComplete);
+                return _connection.SendAsync(muxedPacket, callback);
             }
         }
 
@@ -317,7 +278,7 @@ namespace System.Data.SqlClient.SNI
                 _packetEvent.Set();
             }
 
-            ((TdsParserStateObject)_callbackObject).ReadAsyncCallback(packet, 1);
+            ((TdsParserStateObject)_callbackObject).ReadAsyncCallback(PacketHandle.FromManagedPacket(packet), 1);
         }
 
         /// <summary>
@@ -331,7 +292,7 @@ namespace System.Data.SqlClient.SNI
             {
                 Debug.Assert(_callbackObject != null);
 
-                ((TdsParserStateObject)_callbackObject).WriteAsyncCallback(packet, sniErrorCode);
+                ((TdsParserStateObject)_callbackObject).WriteAsyncCallback(PacketHandle.FromManagedPacket(packet), sniErrorCode);
             }
         }
 
@@ -377,7 +338,7 @@ namespace System.Data.SqlClient.SNI
                     _asyncReceives--;
                     Debug.Assert(_callbackObject != null);
 
-                    ((TdsParserStateObject)_callbackObject).ReadAsyncCallback(packet, 0);
+                    ((TdsParserStateObject)_callbackObject).ReadAsyncCallback(PacketHandle.FromManagedPacket(packet), 0);
                 }
             }
 
@@ -467,7 +428,6 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Check SNI handle connection
         /// </summary>
-        /// <param name="handle"></param>
         /// <returns>SNI error status</returns>
         public override uint CheckConnection()
         {

@@ -20,12 +20,12 @@ namespace System
         public const short MinValue = unchecked((short)0x8000);
 
         // Compares this object to another object, returning an integer that
-        // indicates the relationship. 
+        // indicates the relationship.
         // Returns a value less than zero if this  object
         // null is considered to be less than any instance.
         // If object is not of type Int16, this method throws an ArgumentException.
-        // 
-        public int CompareTo(object value)
+        //
+        public int CompareTo(object? value)
         {
             if (value == null)
             {
@@ -45,7 +45,7 @@ namespace System
             return m_value - value;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is short))
             {
@@ -63,7 +63,7 @@ namespace System
         // Returns a HashCode for the Int16
         public override int GetHashCode()
         {
-            return ((int)((ushort)m_value) | (((int)m_value) << 16));
+            return m_value;
         }
 
 
@@ -72,17 +72,17 @@ namespace System
             return Number.FormatInt32(m_value, null, null);
         }
 
-        public string ToString(IFormatProvider provider)
+        public string ToString(IFormatProvider? provider)
         {
             return Number.FormatInt32(m_value, null, provider);
         }
 
-        public string ToString(string format)
+        public string ToString(string? format)
         {
             return ToString(format, null);
         }
 
-        public string ToString(string format, IFormatProvider provider)
+        public string ToString(string? format, IFormatProvider? provider)
         {
             if (m_value < 0 && format != null && format.Length > 0 && (format[0] == 'X' || format[0] == 'x'))
             {
@@ -93,7 +93,7 @@ namespace System
             return Number.FormatInt32(m_value, format, provider);
         }
 
-        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider provider = null)
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null)
         {
             if (m_value < 0 && format.Length > 0 && (format[0] == 'X' || format[0] == 'x'))
             {
@@ -116,20 +116,20 @@ namespace System
             return Parse((ReadOnlySpan<char>)s, style, NumberFormatInfo.CurrentInfo);
         }
 
-        public static short Parse(string s, IFormatProvider provider)
+        public static short Parse(string s, IFormatProvider? provider)
         {
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Parse((ReadOnlySpan<char>)s, NumberStyles.Integer, NumberFormatInfo.GetInstance(provider));
         }
 
-        public static short Parse(string s, NumberStyles style, IFormatProvider provider)
+        public static short Parse(string s, NumberStyles style, IFormatProvider? provider)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             if (s == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             return Parse((ReadOnlySpan<char>)s, style, NumberFormatInfo.GetInstance(provider));
         }
 
-        public static short Parse(ReadOnlySpan<char> s, NumberStyles style = NumberStyles.Integer, IFormatProvider provider = null)
+        public static short Parse(ReadOnlySpan<char> s, NumberStyles style = NumberStyles.Integer, IFormatProvider? provider = null)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             return Parse(s, style, NumberFormatInfo.GetInstance(provider));
@@ -137,32 +137,22 @@ namespace System
 
         private static short Parse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info)
         {
-            int i = 0;
-            try
+            Number.ParsingStatus status = Number.TryParseInt32(s, style, info, out int i);
+            if (status != Number.ParsingStatus.OK)
             {
-                i = Number.ParseInt32(s, style, info);
-            }
-            catch (OverflowException e)
-            {
-                throw new OverflowException(SR.Overflow_Int16, e);
+                Number.ThrowOverflowOrFormatException(status, TypeCode.Int16);
             }
 
-            // We need this check here since we don't allow signs to specified in hex numbers. So we fixup the result
-            // for negative numbers
-            if ((style & NumberStyles.AllowHexSpecifier) != 0)
-            { // We are parsing a hexadecimal number
-                if ((i < 0) || (i > ushort.MaxValue))
-                {
-                    throw new OverflowException(SR.Overflow_Int16);
-                }
-                return (short)i;
+            // For hex number styles AllowHexSpecifier << 6 == 0x8000 and cancels out MinValue so the check is effectively: (uint)i > ushort.MaxValue
+            // For integer styles it's zero and the effective check is (uint)(i - MinValue) > ushort.MaxValue
+            if ((uint)(i - MinValue - ((int)(style & NumberStyles.AllowHexSpecifier) << 6)) > ushort.MaxValue)
+            {
+                Number.ThrowOverflowException(TypeCode.Int16);
             }
-
-            if (i < MinValue || i > MaxValue) throw new OverflowException(SR.Overflow_Int16);
             return (short)i;
         }
 
-        public static bool TryParse(string s, out short result)
+        public static bool TryParse(string? s, out short result)
         {
             if (s == null)
             {
@@ -178,7 +168,7 @@ namespace System
             return TryParse(s, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
         }
 
-        public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out short result)
+        public static bool TryParse(string? s, NumberStyles style, IFormatProvider? provider, out short result)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
 
@@ -191,7 +181,7 @@ namespace System
             return TryParse((ReadOnlySpan<char>)s, style, NumberFormatInfo.GetInstance(provider), out result);
         }
 
-        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, out short result)
+        public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out short result)
         {
             NumberFormatInfo.ValidateParseStyleInteger(style);
             return TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
@@ -199,27 +189,12 @@ namespace System
 
         private static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, NumberFormatInfo info, out short result)
         {
-            result = 0;
-            int i;
-            if (!Number.TryParseInt32(s, style, info, out i))
+            // For hex number styles AllowHexSpecifier << 6 == 0x8000 and cancels out MinValue so the check is effectively: (uint)i > ushort.MaxValue
+            // For integer styles it's zero and the effective check is (uint)(i - MinValue) > ushort.MaxValue
+            if (Number.TryParseInt32(s, style, info, out int i) != Number.ParsingStatus.OK
+                || (uint)(i - MinValue - ((int)(style & NumberStyles.AllowHexSpecifier) << 6)) > ushort.MaxValue)
             {
-                return false;
-            }
-
-            // We need this check here since we don't allow signs to specified in hex numbers. So we fixup the result
-            // for negative numbers
-            if ((style & NumberStyles.AllowHexSpecifier) != 0)
-            { // We are parsing a hexadecimal number
-                if ((i < 0) || i > ushort.MaxValue)
-                {
-                    return false;
-                }
-                result = (short)i;
-                return true;
-            }
-
-            if (i < MinValue || i > MaxValue)
-            {
+                result = 0;
                 return false;
             }
             result = (short)i;
@@ -228,7 +203,7 @@ namespace System
 
         //
         // IConvertible implementation
-        // 
+        //
 
         public TypeCode GetTypeCode()
         {
@@ -236,77 +211,77 @@ namespace System
         }
 
 
-        bool IConvertible.ToBoolean(IFormatProvider provider)
+        bool IConvertible.ToBoolean(IFormatProvider? provider)
         {
             return Convert.ToBoolean(m_value);
         }
 
-        char IConvertible.ToChar(IFormatProvider provider)
+        char IConvertible.ToChar(IFormatProvider? provider)
         {
             return Convert.ToChar(m_value);
         }
 
-        sbyte IConvertible.ToSByte(IFormatProvider provider)
+        sbyte IConvertible.ToSByte(IFormatProvider? provider)
         {
             return Convert.ToSByte(m_value);
         }
 
-        byte IConvertible.ToByte(IFormatProvider provider)
+        byte IConvertible.ToByte(IFormatProvider? provider)
         {
             return Convert.ToByte(m_value);
         }
 
-        short IConvertible.ToInt16(IFormatProvider provider)
+        short IConvertible.ToInt16(IFormatProvider? provider)
         {
             return m_value;
         }
 
-        ushort IConvertible.ToUInt16(IFormatProvider provider)
+        ushort IConvertible.ToUInt16(IFormatProvider? provider)
         {
             return Convert.ToUInt16(m_value);
         }
 
-        int IConvertible.ToInt32(IFormatProvider provider)
+        int IConvertible.ToInt32(IFormatProvider? provider)
         {
             return Convert.ToInt32(m_value);
         }
 
-        uint IConvertible.ToUInt32(IFormatProvider provider)
+        uint IConvertible.ToUInt32(IFormatProvider? provider)
         {
             return Convert.ToUInt32(m_value);
         }
 
-        long IConvertible.ToInt64(IFormatProvider provider)
+        long IConvertible.ToInt64(IFormatProvider? provider)
         {
             return Convert.ToInt64(m_value);
         }
 
-        ulong IConvertible.ToUInt64(IFormatProvider provider)
+        ulong IConvertible.ToUInt64(IFormatProvider? provider)
         {
             return Convert.ToUInt64(m_value);
         }
 
-        float IConvertible.ToSingle(IFormatProvider provider)
+        float IConvertible.ToSingle(IFormatProvider? provider)
         {
             return Convert.ToSingle(m_value);
         }
 
-        double IConvertible.ToDouble(IFormatProvider provider)
+        double IConvertible.ToDouble(IFormatProvider? provider)
         {
             return Convert.ToDouble(m_value);
         }
 
-        decimal IConvertible.ToDecimal(IFormatProvider provider)
+        decimal IConvertible.ToDecimal(IFormatProvider? provider)
         {
             return Convert.ToDecimal(m_value);
         }
 
-        DateTime IConvertible.ToDateTime(IFormatProvider provider)
+        DateTime IConvertible.ToDateTime(IFormatProvider? provider)
         {
             throw new InvalidCastException(SR.Format(SR.InvalidCast_FromTo, "Int16", "DateTime"));
         }
 
-        object IConvertible.ToType(Type type, IFormatProvider provider)
+        object IConvertible.ToType(Type type, IFormatProvider? provider)
         {
             return Convert.DefaultToType((IConvertible)this, type, provider);
         }

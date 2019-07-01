@@ -27,18 +27,8 @@ namespace System.Numerics.Tests
 
             Assert.Throws<NullReferenceException>(() => v1.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, -1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, a.Length));
-            
-            if (!PlatformDetection.IsNetNative)
-            {
-               AssertExtensions.Throws<ArgumentException>(null, () => v1.CopyTo(a, 2));
-            }
-            else
-            {
-               // The .Net Native code generation optimizer does aggressive optimizations to range checks 
-               // which result in an ArgumentOutOfRangeException exception being thrown at runtime.
-               Assert.ThrowsAny<ArgumentException>(() => v1.CopyTo(a, 2));
-            }
+            Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, a.Length));            
+            AssertExtensions.Throws<ArgumentException>(null, () => v1.CopyTo(a, 2));
 
             v1.CopyTo(a, 1);
             v1.CopyTo(b);
@@ -327,20 +317,20 @@ namespace System.Numerics.Tests
 
             // Case W1: specified value is in the range.
             a = new Vector2(0.5f, 0.3f);
-            expected = min;
+            expected = max;
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
 
             // Normal case.
             // Case W2: specified value is bigger than max and min value.
             a = new Vector2(2.0f, 3.0f);
-            expected = min;
+            expected = max;
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
 
             // Case W3: specified value is smaller than min and max value.
             a = new Vector2(-1.0f, -2.0f);
-            expected = min;
+            expected = max;
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
         }

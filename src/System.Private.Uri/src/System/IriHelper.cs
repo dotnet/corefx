@@ -36,7 +36,7 @@ namespace System
             if (char.IsSurrogatePair(highSurr, lowSurr))
             {
                 surrogatePair = true;
-                char[] chars = new char[2] { highSurr, lowSurr };
+                ReadOnlySpan<char> chars = stackalloc char[2] { highSurr, lowSurr };
                 string surrPair = new string(chars);
                 if (((string.CompareOrdinal(surrPair, "\U00010000") >= 0)
                         && (string.CompareOrdinal(surrPair, "\U0001FFFD") <= 0)) ||
@@ -139,7 +139,7 @@ namespace System
         internal static unsafe string EscapeUnescapeIri(char* pInput, int start, int end, UriComponents component)
         {
             char[] dest = new char[end - start];
-            byte[] bytes = null;
+            byte[]? bytes = null;
 
             // Pin the array to do pointer accesses
             GCHandle destHandle = GCHandle.Alloc(dest, GCHandleType.Pinned);
@@ -198,7 +198,7 @@ namespace System
                             int startSeq = next;
                             int byteCount = 1;
                             // lazy initialization of max size, will reuse the array for next sequences
-                            if ((object)bytes == null)
+                            if ((object?)bytes == null)
                                 bytes = new byte[end - next];
 
                             bytes[0] = (byte)ch;

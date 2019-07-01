@@ -32,11 +32,6 @@ namespace System.Diagnostics
             GC.SuppressFinalize(this);
         }
 
-        private EventLogEntry(SerializationInfo info, StreamingContext context)
-        {
-            throw new PlatformNotSupportedException();
-        }
-
         /// <summary>
         /// The machine on which this event log resides.
         /// </summary>
@@ -123,7 +118,7 @@ namespace System.Diagnostics
         /// <summary>
         /// The number identifying the message for this source.
         /// </summary>
-        [Obsolete("This property has been deprecated.  Please use System.Diagnostics.EventLogEntry.InstanceId instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This property has been deprecated.  Please use System.Diagnostics.EventLogEntry.InstanceId instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public int EventID
         {
             get
@@ -281,19 +276,19 @@ namespace System.Diagnostics
 
                 int userNameLen = 256;
                 int domainNameLen = 256;
-                int sidNameUse = 0;
-                StringBuilder bufUserName = new StringBuilder(userNameLen);
-                StringBuilder bufDomainName = new StringBuilder(domainNameLen);
-                StringBuilder retUserName = new StringBuilder();
-
-                if (Interop.Kernel32.LookupAccountSid(MachineName, sid, bufUserName, ref userNameLen, bufDomainName, ref domainNameLen, ref sidNameUse) != 0)
+                unsafe
                 {
-                    retUserName.Append(bufDomainName.ToString());
-                    retUserName.Append("\\");
-                    retUserName.Append(bufUserName.ToString());
+                    fixed (char* bufUserName = new char[userNameLen])
+                    fixed (char* bufDomainName = new char[domainNameLen])
+                    {
+                        if (Interop.Advapi32.LookupAccountSid(MachineName, sid, bufUserName, ref userNameLen, bufDomainName, ref domainNameLen, out int sidNameUse) != 0)
+                        {
+                            return new string(bufDomainName) + "\\" + new string(bufUserName);
+                        }
+                    }
                 }
 
-                return retUserName.ToString();
+                return string.Empty;
             }
         }
 

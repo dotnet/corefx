@@ -108,7 +108,7 @@ check_symbol_exists(
     unistd.h
     HAVE_FTRUNCATE64)
 
-check_symbol_Exists(
+check_symbol_exists(
     posix_fadvise64
     fnctl.h
     HAVE_POSIX_FADVISE64)
@@ -117,6 +117,11 @@ check_symbol_exists(
     stat64
     sys/stat.h
     HAVE_STAT64)
+
+check_symbol_exists(
+    vfork
+    unistd.h
+    HAVE_VFORK)
 
 check_symbol_exists(
     pipe2
@@ -156,9 +161,9 @@ check_symbol_exists(
     HAVE_SCHED_SETAFFINITY)
 
 check_symbol_exists(
-    arc4random
+    arc4random_buf
     "stdlib.h"
-    HAVE_ARC4RANDOM)
+    HAVE_ARC4RANDOM_BUF)
 
 check_symbol_exists(
     TIOCGWINSZ
@@ -199,6 +204,17 @@ check_struct_has_member(
     st_birthtimespec
     "sys/types.h;sys/stat.h"
     HAVE_STAT_BIRTHTIME)
+
+check_struct_has_member(
+    "struct stat"
+    st_flags
+    "sys/types.h;sys/stat.h"
+    HAVE_STAT_FLAGS)
+
+check_symbol_exists(
+    lchflags
+    "sys/types.h;sys/stat.h"
+    HAVE_LCHFLAGS)
 
 check_struct_has_member(
     "struct stat"
@@ -350,7 +366,7 @@ check_function_exists(
 
 check_symbol_exists(
     kqueue
-    "sys/event.h"
+    "sys/types.h;sys/event.h"
     HAVE_KQUEUE)
 
 set(CMAKE_REQUIRED_FLAGS "-Werror -Wsign-conversion")
@@ -564,6 +580,7 @@ check_c_source_compiles(
     "
     #include <sys/types.h>
     #include <sys/socketvar.h>
+    #include <netinet/in.h>
     #include <netinet/ip.h>
     #include <netinet/tcp.h>
     #include <netinet/tcp_var.h>
@@ -601,16 +618,29 @@ check_symbol_exists(
     HAVE_TCP_FSM_H
 )
 
-set(CMAKE_EXTRA_INCLUDE_FILES sys/types.h net/route.h)
+set(CMAKE_EXTRA_INCLUDE_FILES sys/types.h sys/socket.h net/route.h)
 check_type_size(
     "struct rt_msghdr"
      HAVE_RT_MSGHDR
+     BUILTIN_TYPES_ONLY)
+check_type_size(
+    "struct rt_msghdr2"
+     HAVE_RT_MSGHDR2
+     BUILTIN_TYPES_ONLY)
+set(CMAKE_EXTRA_INCLUDE_FILES) # reset CMAKE_EXTRA_INCLUDE_FILES
+check_type_size(
+    "struct if_msghdr2"
+     HAVE_IF_MSGHDR2
      BUILTIN_TYPES_ONLY)
 set(CMAKE_EXTRA_INCLUDE_FILES) # reset CMAKE_EXTRA_INCLUDE_FILES
 
 check_include_files(
     "sys/types.h;sys/sysctl.h"
     HAVE_SYS_SYSCTL_H)
+
+check_include_files(
+    "stdint.h;net/if_media.h"
+    HAVE_NET_IFMEDIA_H)
 
 check_include_files(
     linux/rtnetlink.h
@@ -764,8 +794,18 @@ check_c_source_compiles(
         return x;
     }
     "
-    HAVE_TCP_H_TCP_KEEPALIVE
-)
+    HAVE_TCP_H_TCP_KEEPALIVE)
+
+check_c_source_compiles(
+    "
+    #include <unistd.h>
+    int main(void)
+    {
+        size_t result;
+        (void)__builtin_mul_overflow(0, 0, &result);
+    }
+    "
+    HAVE_BUILTIN_MUL_OVERFLOW)
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/Common/pal_config.h.in

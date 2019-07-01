@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0.
+// See THIRD-PARTY-NOTICES.TXT in the project root for license information.
 
 namespace System.Net.Http.HPack
 {
@@ -9,7 +9,7 @@ namespace System.Net.Http.HPack
         // http://httpwg.org/specs/rfc7541.html#rfc.section.4.1
         public const int RfcOverhead = 32;
 
-        public HeaderField(Span<byte> name, Span<byte> value)
+        public HeaderField(ReadOnlySpan<byte> name, ReadOnlySpan<byte> value)
         {
             // TODO: We're allocating here on every new table entry.
             // That means a poorly-behaved server could cause us to allocate repeatedly.

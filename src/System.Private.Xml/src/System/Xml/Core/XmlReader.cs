@@ -1574,12 +1574,12 @@ namespace System.Xml
 
         internal static Exception CreateReadContentAsException(string methodName, XmlNodeType nodeType, IXmlLineInfo lineInfo)
         {
-            return new InvalidOperationException(AddLineInfo(SR.Format(SR.Xml_InvalidReadContentAs, new string[] { methodName, nodeType.ToString() }), lineInfo));
+            return new InvalidOperationException(AddLineInfo(SR.Format(SR.Xml_InvalidReadContentAs, methodName, nodeType), lineInfo));
         }
 
         internal static Exception CreateReadElementContentAsException(string methodName, XmlNodeType nodeType, IXmlLineInfo lineInfo)
         {
-            return new InvalidOperationException(AddLineInfo(SR.Format(SR.Xml_InvalidReadElementContentAs, new string[] { methodName, nodeType.ToString() }), lineInfo));
+            return new InvalidOperationException(AddLineInfo(SR.Format(SR.Xml_InvalidReadElementContentAs, methodName, nodeType), lineInfo));
         }
 
         private static string AddLineInfo(string message, IXmlLineInfo lineInfo)
@@ -1849,11 +1849,7 @@ namespace System.Xml
         // NOTE: This method is called via reflection from System.Data.dll and from Analysis Services in Yukon. 
         // Do not change its signature without notifying the appropriate teams!
         // !!!!!!
-#if UAPAOT
-        public static XmlReader CreateSqlReader(Stream input, XmlReaderSettings settings, XmlParserContext inputContext)
-#else
         internal static XmlReader CreateSqlReader(Stream input, XmlReaderSettings settings, XmlParserContext inputContext)
-#endif
         {
             if (input == null)
             {

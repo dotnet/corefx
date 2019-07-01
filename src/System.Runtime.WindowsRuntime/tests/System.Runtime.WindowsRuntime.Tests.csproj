@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{C4854B44-ABFE-4BB5-8F89-F35FE6201338}</ProjectGuid>
-    <TestCategories>InnerLoop;OuterLoop</TestCategories>
     <Configurations>uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\IO\AsWinRTStreamTests.cs" />
@@ -20,8 +20,5 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Windows" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
 </Project>

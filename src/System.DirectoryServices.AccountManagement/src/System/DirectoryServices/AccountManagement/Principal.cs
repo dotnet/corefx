@@ -6,7 +6,6 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Principal;
-using System.Security.Permissions;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Collections;
@@ -1250,7 +1249,7 @@ namespace System.DirectoryServices.AccountManagement
                     return _extensionCache;
 
                 default:
-                    Debug.Fail(string.Format(CultureInfo.CurrentCulture, "Principal.GetValueForProperty: Ran off end of list looking for {0}", propertyName));
+                    Debug.Fail($"Principal.GetValueForProperty: Ran off end of list looking for {propertyName}");
                     return null;
             }
         }

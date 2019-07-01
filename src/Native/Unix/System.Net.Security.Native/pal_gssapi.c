@@ -111,7 +111,7 @@ static uint32_t NetSecurityNative_DisplayStatus(uint32_t* minorStatus,
     assert(minorStatus != NULL);
     assert(outBuffer != NULL);
 
-    uint32_t messageContext;
+    uint32_t messageContext = 0; // Must initialize to 0 before calling gss_display_status.
     GssBuffer gssBuffer = {.length = 0, .value = NULL};
     uint32_t majorStatus =
         gss_display_status(minorStatus, statusValue, statusType, GSS_C_NO_OID, &messageContext, &gssBuffer);
@@ -154,19 +154,36 @@ uint32_t NetSecurityNative_ImportPrincipalName(uint32_t* minorStatus,
     assert(outputName != NULL);
     assert(*outputName == NULL);
 
-    gss_OID nameType;
-
-    if (strchr(inputName, '/') != NULL)
+    // Principal name will usually be in the form SERVICE/HOST. But SPNEGO protocol prefers
+    // GSS_C_NT_HOSTBASED_SERVICE format. That format uses '@' separator instead of '/' between
+    // service name and host name. So convert input string into that format.
+    char* ptrSlash = memchr(inputName, '/', inputNameLen);
+    char* inputNameCopy = NULL;
+    if (ptrSlash != NULL)
     {
-        nameType = GSS_KRB5_NT_PRINCIPAL_NAME;
-    }
-    else
-    {
-        nameType = GSS_C_NT_HOSTBASED_SERVICE;
+        inputNameCopy = (char*) malloc(inputNameLen);
+        if (inputNameCopy != NULL)
+        {
+            memcpy(inputNameCopy, inputName, inputNameLen);
+            inputNameCopy[ptrSlash - inputName] = '@';
+            inputName = inputNameCopy;
+        }
+        else
+        {
+          *minorStatus = 0;
+          return GSS_S_BAD_NAME;
+        }
     }
 
     GssBuffer inputNameBuffer = {.length = inputNameLen, .value = inputName};
-    return gss_import_name(minorStatus, &inputNameBuffer, nameType, outputName);
+    uint32_t result = gss_import_name(minorStatus, &inputNameBuffer, GSS_C_NT_HOSTBASED_SERVICE, outputName);
+
+    if (inputNameCopy != NULL)
+    {
+        free(inputNameCopy);
+    }
+
+    return result;
 }
 
 uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
@@ -181,6 +198,35 @@ uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
                                           uint32_t* retFlags,
                                           int32_t* isNtlmUsed)
 {
+    return NetSecurityNative_InitSecContextEx(minorStatus,
+                                              claimantCredHandle,
+                                              contextHandle,
+                                              isNtlm,
+                                              NULL,
+                                              0,
+                                              targetName,
+                                              reqFlags,
+                                              inputBytes,
+                                              inputLength,
+                                              outBuffer,
+                                              retFlags,
+                                              isNtlmUsed);
+}
+
+uint32_t NetSecurityNative_InitSecContextEx(uint32_t* minorStatus,
+                                            GssCredId* claimantCredHandle,
+                                            GssCtxId** contextHandle,
+                                            uint32_t isNtlm,
+                                            void* cbt,
+                                            int32_t cbtSize,
+                                            GssName* targetName,
+                                            uint32_t reqFlags,
+                                            uint8_t* inputBytes,
+                                            uint32_t inputLength,
+                                            PAL_GssBuffer* outBuffer,
+                                            uint32_t* retFlags,
+                                            int32_t* isNtlmUsed)
+{
     assert(minorStatus != NULL);
     assert(contextHandle != NULL);
     assert(isNtlm == 0 || isNtlm == 1);
@@ -189,12 +235,13 @@ uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
     assert(outBuffer != NULL);
     assert(retFlags != NULL);
     assert(isNtlmUsed != NULL);
-    assert(inputBytes != NULL || inputLength == 0);
+    assert(cbt != NULL || cbtSize == 0);
 
 // Note: claimantCredHandle can be null
 // Note: *contextHandle is null only in the first call and non-null in the subsequent calls
 
 #if HAVE_GSS_SPNEGO_MECHANISM
+    gss_OID krbMech = GSS_KRB5_MECHANISM;
     gss_OID desiredMech;
     if (isNtlm)
     {
@@ -204,9 +251,8 @@ uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
     {
         desiredMech = GSS_SPNEGO_MECHANISM;
     }
-
-    gss_OID krbMech = GSS_KRB5_MECHANISM;
 #else
+    gss_OID krbMech = (gss_OID)(unsigned long)gss_mech_krb5;
     gss_OID_desc gss_mech_OID_desc;
     if (isNtlm)
     {
@@ -218,13 +264,19 @@ uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
     }
 
     gss_OID desiredMech = &gss_mech_OID_desc;
-    gss_OID krbMech = gss_mech_krb5;
 #endif
 
-    *isNtlmUsed = 1;
     GssBuffer inputToken = {.length = inputLength, .value = inputBytes};
     GssBuffer gssBuffer = {.length = 0, .value = NULL};
     gss_OID_desc* outmech;
+
+    struct gss_channel_bindings_struct gssCbt;
+    if (cbt != NULL)
+    {
+        memset(&gssCbt, 0, sizeof(struct gss_channel_bindings_struct));
+        gssCbt.application_data.length = (size_t)cbtSize;
+        gssCbt.application_data.value = cbt;
+    }
 
     uint32_t majorStatus = gss_init_sec_context(minorStatus,
                                                 claimantCredHandle,
@@ -233,18 +285,14 @@ uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
                                                 desiredMech,
                                                 reqFlags,
                                                 0,
-                                                GSS_C_NO_CHANNEL_BINDINGS,
+                                                (cbt != NULL) ? &gssCbt : GSS_C_NO_CHANNEL_BINDINGS,
                                                 &inputToken,
                                                 &outmech,
                                                 &gssBuffer,
                                                 retFlags,
                                                 NULL);
 
-    // Outmech can be null when gssntlmssp lib uses NTLM mechanism
-    if (outmech != NULL && gss_oid_equal(outmech, krbMech) != 0)
-    {
-        *isNtlmUsed = 0;
-    }
+    *isNtlmUsed = (isNtlm || majorStatus != GSS_S_COMPLETE || gss_oid_equal(outmech, krbMech) == 0) ? 1 : 0;
 
     NetSecurityNative_MoveBuffer(&gssBuffer, outBuffer);
     return majorStatus;
@@ -254,7 +302,8 @@ uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
                                             GssCtxId** contextHandle,
                                             uint8_t* inputBytes,
                                             uint32_t inputLength,
-                                            PAL_GssBuffer* outBuffer)
+                                            PAL_GssBuffer* outBuffer,
+                                            uint32_t* retFlags)
 {
     assert(minorStatus != NULL);
     assert(contextHandle != NULL);
@@ -273,11 +322,49 @@ uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
                                                   NULL,
                                                   NULL,
                                                   &gssBuffer,
-                                                  0,
+                                                  retFlags,
                                                   NULL,
                                                   NULL);
 
     NetSecurityNative_MoveBuffer(&gssBuffer, outBuffer);
+    return majorStatus;
+}
+
+uint32_t NetSecurityNative_GetUser(uint32_t* minorStatus,
+                                   GssCtxId* contextHandle,
+                                   PAL_GssBuffer* outBuffer)
+{
+    assert(minorStatus != NULL);
+    assert(contextHandle != NULL);
+    assert(outBuffer != NULL);
+
+    gss_name_t srcName = GSS_C_NO_NAME;
+
+    uint32_t majorStatus = gss_inquire_context(minorStatus,
+                                               contextHandle,
+                                               &srcName,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL);
+
+    if (majorStatus == GSS_S_COMPLETE)
+    {
+        GssBuffer gssBuffer = {.length = 0, .value = NULL};
+        majorStatus = gss_display_name(minorStatus, srcName, &gssBuffer, NULL);
+        if (majorStatus == GSS_S_COMPLETE)
+        {
+            NetSecurityNative_MoveBuffer(&gssBuffer, outBuffer);
+        }
+    }
+
+    if (srcName != NULL)
+    {
+        majorStatus = gss_release_name(minorStatus, &srcName);
+    }
+
     return majorStatus;
 }
 
@@ -416,4 +503,37 @@ uint32_t NetSecurityNative_InitiateCredWithPassword(uint32_t* minorStatus,
 {
     return NetSecurityNative_AcquireCredWithPassword(
         minorStatus, isNtlm, desiredName, password, passwdLen, GSS_C_INITIATE, outputCredHandle);
+}
+
+uint32_t NetSecurityNative_IsNtlmInstalled()
+{
+#if HAVE_GSS_SPNEGO_MECHANISM
+    gss_OID ntlmOid = GSS_NTLM_MECHANISM;
+#else
+    gss_OID ntlmOid = &gss_mech_ntlm_OID_desc;
+#endif
+
+    uint32_t majorStatus;
+    uint32_t minorStatus;
+    gss_OID_set mechSet;
+    gss_OID_desc oid;
+    uint32_t foundNtlm = 0;
+
+    majorStatus = gss_indicate_mechs(&minorStatus, &mechSet);
+    if (majorStatus == GSS_S_COMPLETE)
+    {
+        for (size_t i = 0; i < mechSet->count; i++)
+        {
+            oid = mechSet->elements[i];
+            if ((oid.length == ntlmOid->length) && (memcmp(oid.elements, ntlmOid->elements, oid.length) == 0))
+            {
+                foundNtlm = 1;
+                break;
+            }
+        }
+
+        gss_release_oid_set(&minorStatus, &mechSet);
+    }
+
+    return foundNtlm;
 }

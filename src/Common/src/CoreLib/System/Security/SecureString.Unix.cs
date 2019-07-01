@@ -10,17 +10,17 @@ using System.Text;
 namespace System.Security
 {
     // SecureString attempts to provide a defense-in-depth solution.
-    // 
+    //
     // On Windows, this is done with several mechanisms:
     // 1. keeping the data in unmanaged memory so that copies of it aren't implicitly made by the GC moving it around
     // 2. zero'ing out that unmanaged memory so that the string is reliably removed from memory when done with it
     // 3. encrypting the data while it's not being used (it's unencrypted to manipulate and use it)
-    // 
+    //
     // On Unix, we do 1 and 2, but we don't do 3 as there's no CryptProtectData equivalent.
 
     public sealed partial class SecureString
     {
-        private UnmanagedBuffer _buffer;
+        private UnmanagedBuffer? _buffer;
 
         internal SecureString(SecureString str)
         {
@@ -31,6 +31,7 @@ namespace System.Security
             // Copy the string into the newly allocated space
             if (_decryptedLength > 0)
             {
+                Debug.Assert(str._buffer != null && _buffer != null); ;
                 UnmanagedBuffer.Copy(str._buffer, _buffer, (ulong)(str._decryptedLength * sizeof(char)));
             }
         }
@@ -45,6 +46,7 @@ namespace System.Security
                 return;
             }
 
+            Debug.Assert(_buffer != null);
             // Copy the string into the newly allocated space
             byte* ptr = null;
             try
@@ -73,6 +75,7 @@ namespace System.Security
         private void ClearCore()
         {
             _decryptedLength = 0;
+            Debug.Assert(_buffer != null);
             _buffer.Clear();
         }
 
@@ -80,6 +83,7 @@ namespace System.Security
         {
             // Make sure we have enough space for the new character, then write it at the end.
             EnsureCapacity(_decryptedLength + 1);
+            Debug.Assert(_buffer != null);
             _buffer.Write((ulong)(_decryptedLength * sizeof(char)), c);
             _decryptedLength++;
         }
@@ -89,6 +93,7 @@ namespace System.Security
             // Make sure we have enough space for the new character, then shift all of the characters above it and insert it.
             EnsureCapacity(_decryptedLength + 1);
             byte* ptr = null;
+            Debug.Assert(_buffer != null);
             try
             {
                 _buffer.AcquirePointer(ref ptr);
@@ -111,6 +116,7 @@ namespace System.Security
         {
             // Shift down all values above the specified index, then null out the empty space at the end.
             byte* ptr = null;
+            Debug.Assert(_buffer != null);
             try
             {
                 _buffer.AcquirePointer(ref ptr);
@@ -132,6 +138,7 @@ namespace System.Security
         private void SetAtCore(int index, char c)
         {
             // Overwrite the character at the specified index
+            Debug.Assert(_buffer != null);
             _buffer.Write((ulong)(index * sizeof(char)), c);
         }
 
@@ -141,13 +148,14 @@ namespace System.Security
             IntPtr ptr = IntPtr.Zero;
             IntPtr result = IntPtr.Zero;
             byte* bufferPtr = null;
-            
+            Debug.Assert(_buffer != null);
+
             try
             {
                 _buffer.AcquirePointer(ref bufferPtr);
                 int resultByteLength = (length + 1) * sizeof(char);
 
-                ptr = PInvokeMarshal.AllocBSTR(length);
+                ptr = Marshal.AllocBSTR(length);
 
                 Buffer.MemoryCopy(bufferPtr, (byte*)ptr, resultByteLength, length * sizeof(char));
 
@@ -159,7 +167,7 @@ namespace System.Security
                 if (result == IntPtr.Zero && ptr != IntPtr.Zero)
                 {
                     RuntimeImports.RhZeroMemory(ptr, (UIntPtr)(length * sizeof(char)));
-                    PInvokeMarshal.FreeBSTR(ptr);
+                    Marshal.FreeBSTR(ptr);
                 }
 
                 if (bufferPtr != null)
@@ -176,6 +184,7 @@ namespace System.Security
 
             byte* bufferPtr = null;
             IntPtr stringPtr = IntPtr.Zero, result = IntPtr.Zero;
+            Debug.Assert(_buffer != null);
             try
             {
                 _buffer.AcquirePointer(ref bufferPtr);
@@ -203,7 +212,7 @@ namespace System.Security
             }
             finally
             {
-                // If there was a failure, such that result isn't initialized, 
+                // If there was a failure, such that result isn't initialized,
                 // release the string if we had one.
                 if (stringPtr != IntPtr.Zero && result == IntPtr.Zero)
                 {

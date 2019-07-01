@@ -13,7 +13,6 @@ using System.IO;
 using System.Security;
 using System.Diagnostics;
 
-#if !uapaot
 namespace System.Runtime.Serialization
 {
     internal class CodeGenerator
@@ -60,7 +59,6 @@ namespace System.Runtime.Serialization
             }
         }
 
-#if !uapaot
         private static MethodInfo s_objectToString;
         private static MethodInfo ObjectToString
         {
@@ -88,7 +86,6 @@ namespace System.Runtime.Serialization
                 return s_stringFormat;
             }
         }
-#endif
 
         private Type _delegateType;
 
@@ -123,10 +120,7 @@ namespace System.Runtime.Serialization
 
         private enum CodeGenTrace { None, Save, Tron };
         private CodeGenTrace _codeGenTrace;
-
-#if !uapaot
         private LocalBuilder _stringFormatArray;
-#endif
 
         internal CodeGenerator()
         {
@@ -946,7 +940,7 @@ namespace System.Runtime.Serialization
                         break;
                     case TypeCode.Char:
                         DiagnosticUtility.DebugAssert("Char is not a valid schema primitive and should be treated as int in DataContract");
-                        throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new NotSupportedException(SR.Format(SR.CharIsInvalidPrimitive)));
+                        throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new NotSupportedException(SR.CharIsInvalidPrimitive));
                     case TypeCode.SByte:
                     case TypeCode.Byte:
                     case TypeCode.Int16:
@@ -1620,7 +1614,6 @@ namespace System.Runtime.Serialization
             If(Cmp.NotEqualTo);
         }
 
-#if !uapaot
         internal void BeginWhileCondition()
         {
             Label startWhile = DefineLabel();
@@ -1667,9 +1660,7 @@ namespace System.Runtime.Serialization
                 Call(ObjectToString);
             }
         }
-#endif
     }
-
 
     internal class ArgBuilder
     {
@@ -1836,4 +1827,3 @@ namespace System.Runtime.Serialization
         }
     }
 }
-#endif

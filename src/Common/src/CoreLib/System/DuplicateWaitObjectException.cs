@@ -29,19 +29,19 @@ namespace System
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;
         }
 
-        public DuplicateWaitObjectException(string parameterName)
+        public DuplicateWaitObjectException(string? parameterName)
             : base(SR.Arg_DuplicateWaitObjectException, parameterName)
         {
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;
         }
 
-        public DuplicateWaitObjectException(string parameterName, string message)
+        public DuplicateWaitObjectException(string? parameterName, string? message)
             : base(message, parameterName)
         {
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;
         }
 
-        public DuplicateWaitObjectException(string message, Exception innerException)
+        public DuplicateWaitObjectException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;

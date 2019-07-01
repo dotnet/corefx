@@ -9,16 +9,19 @@ using System.Net.Test.Common;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "SslProtocols not supported on UAP")]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "SslProtocols property requires .NET 4.7.2")]
-    public abstract partial class HttpClientHandler_SslProtocols_Test : HttpClientTestBase
+    public abstract partial class HttpClientHandler_SslProtocols_Test : HttpClientHandlerTestBase
     {
+        public HttpClientHandler_SslProtocols_Test(ITestOutputHelper output) : base(output) { }
+
         [Fact]
         public void DefaultProtocols_MatchesExpected()
         {
@@ -37,6 +40,11 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(SslProtocols.Tls11 | SslProtocols.Tls12)]
         [InlineData(SslProtocols.Tls | SslProtocols.Tls12)]
         [InlineData(SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12)]
+        [InlineData(SslProtocols.Tls13)]
+        [InlineData(SslProtocols.Tls11 | SslProtocols.Tls13)]
+        [InlineData(SslProtocols.Tls12 | SslProtocols.Tls13)]
+        [InlineData(SslProtocols.Tls | SslProtocols.Tls13)]
+        [InlineData(SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13)]
         public void SetGetProtocols_Roundtrips(SslProtocols protocols)
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
@@ -55,7 +63,7 @@ namespace System.Net.Http.Functional.Tests
             }
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -82,14 +90,8 @@ namespace System.Net.Http.Functional.Tests
             // These protocols are disabled by default, so we can only connect with them explicitly.
             // On certain platforms these are completely disabled and cannot be used at all.
 #pragma warning disable 0618
-            if (PlatformDetection.IsWindows ||
-                PlatformDetection.IsOSX ||
-                (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
-                 PlatformDetection.OpenSslVersion < new Version(1, 0, 2) &&
-                 !PlatformDetection.IsDebian &&
-                 !PlatformDetection.IsRedHatFamily6))
+            if (PlatformDetection.SupportsSsl3)
             {
-                // TODO #28790: SSLv3 is supported on RHEL 6, but this test case still fails.
                 yield return new object[] { SslProtocols.Ssl3, true };
             }
             if (PlatformDetection.IsWindows && !PlatformDetection.IsWindows10Version1607OrGreater)
@@ -97,9 +99,15 @@ namespace System.Net.Http.Functional.Tests
                 yield return new object[] { SslProtocols.Ssl2, true };
             }
 #pragma warning restore 0618
+            // These protocols are new, and might not be enabled everywhere yet
+            if (PlatformDetection.IsUbuntu1810OrHigher)
+            {
+                yield return new object[] { SslProtocols.Tls13, false };
+                yield return new object[] { SslProtocols.Tls13, true };
+            }
         }
 
-        [Theory]
+        [ConditionalTheory]
         [MemberData(nameof(GetAsync_AllowedSSLVersion_Succeeds_MemberData))]
         public async Task GetAsync_AllowedSSLVersion_Succeeds(SslProtocols acceptedProtocol, bool requestOnlyThisProtocol)
         {
@@ -108,14 +116,16 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            if (UseSocketsHttpHandler)
+#pragma warning disable 0618
+            if (IsCurlHandler && PlatformDetection.IsRedHatFamily6 && acceptedProtocol == SslProtocols.Ssl3)
             {
-                // TODO #26186: SocketsHttpHandler is failing on some OSes.
-                return;
+                // Issue: #28790: SSLv3 is supported on RHEL 6, but it fails with curl.
+                throw new SkipTestException("CurlHandler (libCurl) has problems with SSL3 on RH6");
             }
+#pragma warning restore 0618
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
@@ -165,7 +175,7 @@ namespace System.Net.Http.Functional.Tests
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
                 handler.SslProtocols = sslProtocols;
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     (await RemoteServerQuery.Run(() => client.GetAsync(url), remoteServerExceptionWrapper, url)).Dispose();
                 }
@@ -205,7 +215,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_UnsupportedSSLVersion_Throws(SslProtocols sslProtocols, string url)
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (HttpClient client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.SslProtocols = sslProtocols;
                 await Assert.ThrowsAsync<HttpRequestException>(() => RemoteServerQuery.Run(() => client.GetAsync(url), remoteServerExceptionWrapper, url));
@@ -221,7 +231,7 @@ namespace System.Net.Http.Functional.Tests
             }
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
@@ -268,7 +278,7 @@ namespace System.Net.Http.Functional.Tests
             }
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.SslProtocols = allowedClientProtocols;
                 handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;

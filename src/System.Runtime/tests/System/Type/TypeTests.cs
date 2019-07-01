@@ -6,9 +6,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
-internal class Outside
+public class Outside
 {
     public class Inside
     {
@@ -20,7 +21,7 @@ internal class Outside
     public void TwoGenericMethod<T, U>() { }
 }
 
-internal class Outside<T>
+public class Outside<T>
 {
     public class Inside<U>
     {
@@ -34,7 +35,7 @@ internal class Outside<T>
 
 namespace System.Tests
 {
-    public class TypeTests
+    public partial class TypeTests
     {
         [Fact]
         public void FilterName_Get_ReturnsExpected()
@@ -237,7 +238,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Stackwalking is not supported on UaoAot")]
         public void GetTypeByName_InvokeViaReflection_Success()
         {
             MethodInfo method = typeof(Type).GetMethod("GetType", new[] { typeof(string) });
@@ -286,8 +286,7 @@ namespace System.Tests
         }
     }
 
-    public class TypeTestsExtended : RemoteExecutorTestBase
-    {
+    public class TypeTestsExtended    {
         public class ContextBoundClass : ContextBoundObject
         {
             public string Value = "The Value property.";
@@ -303,11 +302,10 @@ namespace System.Tests
                              Type.GetType(name, false, ignore) :
                                  assem.GetType(name, false, ignore);
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
         public void GetTypeByName()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
                {
                    string test1 = testtype;
                    Type t1 = Type.GetType(test1,
@@ -325,31 +323,29 @@ namespace System.Tests
                    Assert.NotNull(t2);
                    Assert.Equal(t1, t2);
 
-                   return SuccessExitCode;
+                   return RemoteExecutor.SuccessExitCode;
                }, options).Dispose();
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
         [InlineData("System.Collections.Generic.Dictionary`2[[Program, TestLoadAssembly], [Program2, TestLoadAssembly]]")]
         [InlineData("")]
         public void GetTypeByName_NoSuchType_ThrowsTypeLoadException(string typeName)
         {
-            RemoteInvoke(marshalledTypeName =>
+            RemoteExecutor.Invoke(marshalledTypeName =>
             {
                 Assert.Throws<TypeLoadException>(() => Type.GetType(marshalledTypeName, assemblyloader, typeloader, true));
                 Assert.Null(Type.GetType(marshalledTypeName, assemblyloader, typeloader, false));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, typeName).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
         public void GetTypeByNameCaseSensitiveTypeloadFailure()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
                {
                    //Type load failure due to case sensitive search of type Ptogram
                    string test3 = "System.Collections.Generic.Dictionary`2[[Program, TestLoadAssembly], [program, TestLoadAssembly]]";
@@ -371,12 +367,11 @@ namespace System.Tests
 
                    Assert.Null(t2);
 
-                   return SuccessExitCode;
+                   return RemoteExecutor.SuccessExitCode;
                }, options).Dispose();
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void IsContextful()
         {
             Assert.True(!typeof(TypeTestsExtended).IsContextful);
@@ -418,7 +413,6 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(GetInterfaceMap_TestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Type.GetInterfaceMap() is not supported on UapAot")]
         public void GetInterfaceMap(Type interfaceType, Type classType, Tuple<MethodInfo, MethodInfo>[] expectedMap)
         {
             InterfaceMapping actualMapping = classType.GetInterfaceMap(interfaceType);

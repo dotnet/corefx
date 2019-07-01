@@ -26,12 +26,9 @@ public static partial class DataContractJsonSerializerTests
 
     static DataContractJsonSerializerTests()
     {
-        if (!PlatformDetection.IsFullFramework)
-        {
-            MethodInfo method = typeof(DataContractSerializer).GetMethod(SerializationOptionSetterName, BindingFlags.NonPublic | BindingFlags.Static);
-            Assert.True(method != null, $"No method named {SerializationOptionSetterName}");
-            method.Invoke(null, new object[] { 1 }); 
-        }
+        MethodInfo method = typeof(DataContractSerializer).GetMethod(SerializationOptionSetterName, BindingFlags.NonPublic | BindingFlags.Static);
+        Assert.True(method != null, $"No method named {SerializationOptionSetterName}");
+        method.Invoke(null, new object[] { 1 }); 
     }
 #endif
     [Fact]
@@ -156,8 +153,13 @@ public static partial class DataContractJsonSerializerTests
         Assert.StrictEqual(SerializeAndDeserialize<float>((float)-1.2, "-1.2"), (float)-1.2);
         Assert.StrictEqual(SerializeAndDeserialize<float>((float)0, "0"), (float)0);
         Assert.StrictEqual(SerializeAndDeserialize<float>((float)2.3, "2.3"), (float)2.3);
-        Assert.StrictEqual(SerializeAndDeserialize<float>(float.MinValue, "-3.40282347E+38"), float.MinValue);
-        Assert.StrictEqual(SerializeAndDeserialize<float>(float.MaxValue, "3.40282347E+38"), float.MaxValue);
+    }
+
+    [Fact]
+    public static void DCJS_FloatAsRoot_NotNetFramework()
+    {
+        Assert.StrictEqual(SerializeAndDeserialize<float>(float.MinValue, "-3.4028235E+38"), float.MinValue);
+        Assert.StrictEqual(SerializeAndDeserialize<float>(float.MaxValue, "3.4028235E+38"), float.MaxValue);
     }
 
     [Fact]
@@ -222,7 +224,6 @@ public static partial class DataContractJsonSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Implemented in 4.7. and Xunit runner currently targets 4.6.1.")]
     public static void DCJS_StringAsRoot()
     {
         foreach (string value in new string[] { "abc", "  a b  ", null, "", " ", "Hello World! 漢 ñ" })
@@ -2958,6 +2959,14 @@ public static partial class DataContractJsonSerializerTests
                     );
             }
         }
+    }
+
+    [Fact]
+    public static void DCJS_DifferentCollectionsOfSameTypeAsKnownTypes()
+    {
+        Assert.Throws<InvalidOperationException>(() => {
+            (new DataContractSerializer(typeof(TypeWithKnownTypesOfCollectionsWithConflictingXmlName))).WriteObject(new MemoryStream(), new TypeWithKnownTypesOfCollectionsWithConflictingXmlName());
+        });
     }
 
     private static T SerializeAndDeserialize<T>(T value, string baseline, DataContractJsonSerializerSettings settings = null, Func<DataContractJsonSerializer> serializerFactory = null, bool skipStringCompare = false)

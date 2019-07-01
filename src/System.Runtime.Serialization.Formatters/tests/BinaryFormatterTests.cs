@@ -14,16 +14,15 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Runtime.Serialization.Formatters.Tests
 {
-    public partial class BinaryFormatterTests : RemoteExecutorTestBase
+    public partial class BinaryFormatterTests : FileCleanupTestBase
     {
-        private static unsafe bool Is64Bit => sizeof(void*) == 8;
-
         // On 32-bit we can't test these high inputs as they cause OutOfMemoryExceptions.
-        [ConditionalTheory(nameof(Is64Bit))]
+        [ConditionalTheory(typeof(Environment), nameof(Environment.Is64BitProcess))]
         [InlineData(2 * 6_584_983 - 2)] // previous limit
         [InlineData(2 * 7_199_369 - 2)] // last pre-computed prime number
         public void SerializeHugeObjectGraphs(int limit)
@@ -51,7 +50,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             object clone = BinaryFormatterHelpers.Clone(obj, null, assemblyFormat, filterLevel, typeFormat);
             // string.Empty and DBNull are both singletons
-            if (!ReferenceEquals(obj, string.Empty) && !(obj is DBNull)) 
+            if (!ReferenceEquals(obj, string.Empty) && !(obj is DBNull))
             {
                 Assert.NotSame(obj, clone);
             }
@@ -77,7 +76,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         [Theory]
         [MemberData(nameof(SerializableObjects_MemberData))]
-        public void ValidateAgainstBlobs(object obj, TypeSerializableValue[] blobs) 
+        public void ValidateAgainstBlobs(object obj, TypeSerializableValue[] blobs)
             => ValidateAndRoundtrip(obj, blobs, false);
 
         [Theory]
@@ -113,7 +112,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 var tmpList = new List<TypeSerializableValue>(blobs);
                 tmpList.RemoveAt(1);
 
-                int index = tmpList.FindIndex(b => b.Platform.IsNetfxPlatform());
+                int index = tmpList.FindIndex(b => b.Platform.ToString().StartsWith("netfx"));
                 if (index >= 0)
                     tmpList.RemoveAt(index);
 
@@ -146,7 +145,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
         {
             try
             {
+#pragma warning disable RE0001 // Regex issue: {0}
                 new Regex("*"); // parsing "*" - Quantifier {x,y} following nothing.
+#pragma warning restore RE0001 // Regex issue: {0}
             }
             catch (ArgumentException ex)
             {
@@ -504,7 +505,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
 
             // In another process, deserialize from that file and serialize to another
-            RemoteInvoke((remoteInput, remoteOutput) =>
+            RemoteExecutor.Invoke((remoteInput, remoteOutput) =>
             {
                 Assert.False(File.Exists(remoteOutput));
                 using (FileStream input = File.OpenRead(remoteInput))
@@ -512,7 +513,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 {
                     var b = new BinaryFormatter();
                     b.Serialize(output, b.Deserialize(input));
-                    return SuccessExitCode;
+                    return RemoteExecutor.SuccessExitCode;
                 }
             }, outputPath, inputPath).Dispose();
 
@@ -526,7 +527,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework fails when serializing arrays with non-zero lower bounds")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "UAPAOT does not support non-zero lower bounds")]
         public void Roundtrip_ArrayContainingArrayAtNonZeroLowerBound()
         {
             BinaryFormatterHelpers.Clone(Array.CreateInstance(typeof(uint[]), new[] { 5 }, new[] { 1 }));
@@ -565,7 +565,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
             // These types are unstable during serialization and produce different blobs.
             if (obj is WeakReference<Point> ||
                 obj is Collections.Specialized.HybridDictionary ||
-                obj is Color)
+                obj is Color ||
+                obj.GetType().FullName == "System.Collections.SortedList+SyncSortedList")
             {
                 return;
             }
@@ -641,6 +642,9 @@ namespace System.Runtime.Serialization.Formatters.Tests
             base64Blob = Encoding.UTF8.GetString(data);
 
             return Regex.Replace(base64Blob, @"Version=\d.\d.\d.\d.", "Version=0.0.0.0", RegexOptions.Multiline)
+                // Ignore the old Test key and Open public keys.
+                .Replace("PublicKeyToken=cc7b13ffcd2ddd51", "PublicKeyToken=null")
+                .Replace("PublicKeyToken=9d77cc7ad39b68eb", "PublicKeyToken=null")
                 .Replace("\r\n", string.Empty)
                 .Replace("\n", string.Empty)
                 .Replace("\r", string.Empty)

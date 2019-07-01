@@ -3,9 +3,10 @@
     <ProjectGuid>{7E0E1B11-FF70-461E-99F7-C0AF252C0C60}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
+    <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <!--Windows only files -->
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' And '$(TargetsWindows)' == 'true'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' and '$(TargetsWindows)' == 'true'">
     <Compile Include="BasicEventSourceTest\Harness\EtwListener.cs" />
     <Compile Include="BasicEventSourceTest\TestEventCounter.Etw.cs" />
     <Compile Include="BasicEventSourceTest\TestsWrite.Etw.cs" />
@@ -42,9 +43,6 @@
     <Compile Include="CustomEventSources\UseInterfaceEventSource.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ReferenceFromRuntime Include="Microsoft.Diagnostics.Tracing.TraceEvent" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="$(TraceEventPackageVersion)" />
   </ItemGroup>
 </Project>

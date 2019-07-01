@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!--
     Microsoft ResX Schema
 
@@ -560,9 +559,6 @@
     </data>
     <data name="TrustVerificationNotSupport" xml:space="preserve">
         <value>Trust verification not supported.</value>
-    </data>
-    <data name="DSUnknown" xml:space="preserve">
-        <value>Unknown error (0x{0})</value>
     </data>
     <data name="OnlyAllowSingleDimension" xml:space="preserve">
         <value>Only single dimensional arrays are supported for the requested action.</value>

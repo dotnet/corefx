@@ -39,25 +39,25 @@ namespace System
         // implementation must throw an InvalidCastException. If the value of the
         // underlying object is not within the range of the target type, the
         // implementation must throw an OverflowException.  The 
-        // IFormatProvider will be used to get a NumberFormatInfo or similar
+        // IFormatProvider? will be used to get a NumberFormatInfo or similar
         // appropriate service object, and may safely be null.
 
-        bool ToBoolean(IFormatProvider provider);
-        char ToChar(IFormatProvider provider);
-        sbyte ToSByte(IFormatProvider provider);
-        byte ToByte(IFormatProvider provider);
-        short ToInt16(IFormatProvider provider);
-        ushort ToUInt16(IFormatProvider provider);
-        int ToInt32(IFormatProvider provider);
-        uint ToUInt32(IFormatProvider provider);
-        long ToInt64(IFormatProvider provider);
-        ulong ToUInt64(IFormatProvider provider);
-        float ToSingle(IFormatProvider provider);
-        double ToDouble(IFormatProvider provider);
-        decimal ToDecimal(IFormatProvider provider);
-        DateTime ToDateTime(IFormatProvider provider);
-        string ToString(IFormatProvider provider);
-        object ToType(Type conversionType, IFormatProvider provider);
+        bool ToBoolean(IFormatProvider? provider);
+        char ToChar(IFormatProvider? provider);
+        sbyte ToSByte(IFormatProvider? provider);
+        byte ToByte(IFormatProvider? provider);
+        short ToInt16(IFormatProvider? provider);
+        ushort ToUInt16(IFormatProvider? provider);
+        int ToInt32(IFormatProvider? provider);
+        uint ToUInt32(IFormatProvider? provider);
+        long ToInt64(IFormatProvider? provider);
+        ulong ToUInt64(IFormatProvider? provider);
+        float ToSingle(IFormatProvider? provider);
+        double ToDouble(IFormatProvider? provider);
+        decimal ToDecimal(IFormatProvider? provider);
+        DateTime ToDateTime(IFormatProvider? provider);
+        string ToString(IFormatProvider? provider);
+        object ToType(Type conversionType, IFormatProvider? provider);
     }
 }
 

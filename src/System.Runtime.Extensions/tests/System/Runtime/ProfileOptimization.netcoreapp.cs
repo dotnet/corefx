@@ -5,19 +5,21 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace System.Runtime.Tests
 {
-    public class ProfileOptimizationTest : RemoteExecutorTestBase
+    public class ProfileOptimizationTest : FileCleanupTestBase
     {
-        [Fact]
+        // Active issue https://github.com/dotnet/corefx/issues/31792
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotRedHatFamily6))]
         public void ProfileOptimization_CheckFileExists()
         {
             string profileFile = GetTestFileName();
 
-            RemoteInvoke((_profileFile) =>
+            RemoteExecutor.Invoke((_profileFile) =>
             {
                 // tracking down why test sporadically fails on RedHat69
                 // write to the file first to check permissions

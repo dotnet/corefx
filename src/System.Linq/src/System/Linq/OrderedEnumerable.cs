@@ -145,9 +145,18 @@ namespace System.Linq
 
         internal OrderedEnumerable(IEnumerable<TElement> source, Func<TElement, TKey> keySelector, IComparer<TKey> comparer, bool descending, OrderedEnumerable<TElement> parent)
         {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
+            if (source is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+            if (keySelector is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
+            }
+
+            _source = source;
             _parent = parent;
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
+            _keySelector = keySelector;
             _comparer = comparer ?? Comparer<TKey>.Default;
             _descending = descending;
         }
@@ -281,8 +290,13 @@ namespace System.Linq
             return map;
         }
 
-        internal TElement ElementAt(TElement[] elements, int count, int idx) =>
-            elements[QuickSelect(ComputeMap(elements, count), count - 1, idx)];
+        internal TElement ElementAt(TElement[] elements, int count, int idx)
+        {
+            int[] map = ComputeMap(elements, count);
+            return idx == 0 ?
+                elements[Min(map, count)] :
+                elements[QuickSelect(map, count - 1, idx)];
+        }
 
         protected abstract void QuickSort(int[] map, int left, int right);
 
@@ -293,6 +307,8 @@ namespace System.Linq
         // Finds the element that would be at idx if the collection was sorted.
         // Time complexity: O(n) best and average case. O(n^2) worse case.
         protected abstract int QuickSelect(int[] map, int right, int idx);
+
+        protected abstract int Min(int[] map, int count);
     }
 
     internal sealed class EnumerableSorter<TElement, TKey> : EnumerableSorter<TElement>
@@ -488,6 +504,19 @@ namespace System.Linq
             while (left < right);
 
             return map[idx];
+        }
+
+        protected override int Min(int[] map, int count)
+        {
+            int index = 0;
+            for (int i = 1; i < count; i++)
+            {
+                if (CompareKeys(map[i], map[index]) < 0)
+                {
+                    index = i;
+                }
+            }
+            return map[index];
         }
     }
 }

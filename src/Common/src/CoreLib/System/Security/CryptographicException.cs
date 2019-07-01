@@ -22,18 +22,18 @@ namespace System.Security.Cryptography
             HResult = hr;
         }
 
-        public CryptographicException(string message)
+        public CryptographicException(string? message)
             : base(message)
         {
         }
 
-        public CryptographicException(string message, Exception inner)
+        public CryptographicException(string? message, Exception? inner)
             : base(message, inner)
         {
         }
 
-        public CryptographicException(string format, string insert)
-            : base(string.Format(CultureInfo.CurrentCulture, format, insert))
+        public CryptographicException(string format, string? insert)
+            : base(string.Format(format, insert))
         {
         }
 

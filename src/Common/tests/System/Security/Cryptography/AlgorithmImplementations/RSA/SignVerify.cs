@@ -40,8 +40,6 @@ namespace System.Security.Cryptography.Rsa.Tests
     public abstract class SignVerify
     {
         public static bool SupportsPss => RSAFactory.SupportsPss;
-        public static bool BadKeyFormatDoesntThrow => !PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer;
-        public static bool InvalidKeySizeDoesntThrow => !PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer;
 
         protected abstract byte[] SignData(RSA rsa, byte[] data, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding);
         protected abstract byte[] SignHash(RSA rsa, byte[] hash, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding);
@@ -73,6 +71,37 @@ namespace System.Security.Cryptography.Rsa.Tests
                 AssertExtensions.Throws<ArgumentNullException>("padding", () => VerifyData(rsa, new byte[1], new byte[1], HashAlgorithmName.SHA1, null));
                 AssertExtensions.Throws<ArgumentNullException>("padding", () => VerifyHash(rsa, new byte[1], new byte[1], HashAlgorithmName.SHA1, null));
             }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void UseAfterDispose(bool importKey)
+        {
+            RSA rsa = importKey ? RSAFactory.Create(TestData.RSA2048Params) : RSAFactory.Create(1024);
+            byte[] data = TestData.HelloBytes;
+            byte[] sig;
+            HashAlgorithmName alg = HashAlgorithmName.SHA1;
+            RSASignaturePadding padding = RSASignaturePadding.Pkcs1;
+
+            using (rsa)
+            {
+                sig = SignData(rsa, data, alg, padding);
+            }
+
+            Assert.Throws<ObjectDisposedException>(
+                () => VerifyData(rsa, sig, data, alg, padding));
+
+            Assert.Throws<ObjectDisposedException>(
+                () => VerifyHash(rsa, sig, data, alg, padding));
+
+            // Either set_KeySize or SignData should throw.
+            Assert.Throws<ObjectDisposedException>(
+                () =>
+                {
+                    rsa.KeySize = 1024 + 64;
+                    SignData(rsa, data, alg, padding);
+                });
         }
 
         [Fact]
@@ -112,7 +141,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        [ConditionalFact(nameof(InvalidKeySizeDoesntThrow))]
+        [Fact]
         public void ExpectedSignature_SHA1_384()
         {
             byte[] expectedSignature =
@@ -143,7 +172,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        [ConditionalFact(nameof(InvalidKeySizeDoesntThrow))]
+        [Fact]
         public void ExpectedSignature_SHA1_1032()
         {
             byte[] expectedSignature =
@@ -315,7 +344,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             Assert.Equal(expectedSignature, signature);
         }
 
-        [ConditionalFact(nameof(InvalidKeySizeDoesntThrow))]
+        [Fact]
         public void VerifySignature_SHA1_384()
         {
             byte[] signature =
@@ -331,7 +360,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             VerifySignature(signature, TestData.HelloBytes, "SHA1", TestData.RSA384Parameters);
         }
 
-        [ConditionalFact(nameof(InvalidKeySizeDoesntThrow))]
+        [Fact]
         public void VerifySignature_SHA1_1032()
         {
             byte[] signature =
@@ -527,7 +556,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        [ConditionalFact(nameof(BadKeyFormatDoesntThrow))]
+        [Fact]
         public void NegativeVerify_BadKeysize()
         {
             byte[] signature;

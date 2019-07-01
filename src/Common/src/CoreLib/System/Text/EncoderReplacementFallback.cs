@@ -85,14 +85,13 @@ namespace System.Text
             }
         }
 
-        public override bool Equals(object value)
+        public override bool Equals(object? value)
         {
-            EncoderReplacementFallback that = value as EncoderReplacementFallback;
-            if (that != null)
+            if (value is EncoderReplacementFallback that)
             {
-                return (_strDefault == that._strDefault);
+                return _strDefault == that._strDefault;
             }
-            return (false);
+            return false;
         }
 
         public override int GetHashCode()
@@ -100,8 +99,6 @@ namespace System.Text
             return _strDefault.GetHashCode();
         }
     }
-
-
 
     public sealed class EncoderReplacementFallbackBuffer : EncoderFallbackBuffer
     {

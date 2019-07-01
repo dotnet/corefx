@@ -22,7 +22,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void IntPayload()
         {
-            using (DiagnosticListener listener = new DiagnosticListener("Testing"))
+            using (DiagnosticListener listener = new DiagnosticListener("TestingIntPayload"))
             {
                 DiagnosticSource source = listener;
                 var result = new List<KeyValuePair<string, object>>();
@@ -48,7 +48,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void StructPayload()
         {
-            using (DiagnosticListener listener = new DiagnosticListener("Testing"))
+            using (DiagnosticListener listener = new DiagnosticListener("TestingStructPayload"))
             {
                 DiagnosticSource source = listener;
                 var result = new List<KeyValuePair<string, object>>();
@@ -76,7 +76,7 @@ namespace System.Diagnostics.Tests
         {
             var result = new List<KeyValuePair<string, object>>();
             var observer = new ObserverToList<TelemData>(result);
-            var listener = new DiagnosticListener("MyListener");
+            var listener = new DiagnosticListener("TestingCompleted");
             var subscription = listener.Subscribe(observer);
 
             listener.Write("IntPayload", 5);
@@ -105,7 +105,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void BasicIsEnabled()
         {
-            using (DiagnosticListener listener = new DiagnosticListener("Testing"))
+            using (DiagnosticListener listener = new DiagnosticListener("TestingBasicIsEnabled"))
             {
                 DiagnosticSource source = listener;
                 var result = new List<KeyValuePair<string, object>>();
@@ -122,7 +122,7 @@ namespace System.Diagnostics.Tests
                     return name == "StructPayload";
                 };
 
-                Assert.False(listener.IsEnabled());
+                // Assert.False(listener.IsEnabled());  Since other things might turn on all DiagnosticSources, we can't ever test that it is not enabled. 
                 using (listener.Subscribe(new ObserverToList<TelemData>(result), predicate))
                 {
                     Assert.False(source.IsEnabled("Uninteresting"));
@@ -142,7 +142,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void IsEnabledMultipleArgs()
         {
-            using (DiagnosticListener listener = new DiagnosticListener("Testing"))
+            using (DiagnosticListener listener = new DiagnosticListener("TestingIsEnabledMultipleArgs"))
             {
                 DiagnosticSource source = listener;
                 var result = new List<KeyValuePair<string, object>>();
@@ -174,21 +174,21 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void MultiSubscriber()
         {
-            using (DiagnosticListener listener = new DiagnosticListener("Testing"))
+            using (DiagnosticListener listener = new DiagnosticListener("TestingMultiSubscriber"))
             {
                 DiagnosticSource source = listener;
                 var subscriber1Result = new List<KeyValuePair<string, object>>();
                 Predicate<string> subscriber1Predicate = name => (name == "DataForSubscriber1");
-                var subscriber1Oberserver = new ObserverToList<TelemData>(subscriber1Result);
+                var subscriber1Observer = new ObserverToList<TelemData>(subscriber1Result);
 
                 var subscriber2Result = new List<KeyValuePair<string, object>>();
                 Predicate<string> subscriber2Predicate = name => (name == "DataForSubscriber2");
-                var subscriber2Oberserver = new ObserverToList<TelemData>(subscriber2Result);
+                var subscriber2Observer = new ObserverToList<TelemData>(subscriber2Result);
 
                 // Get two subscribers going. 
-                using (var subscription1 = listener.Subscribe(subscriber1Oberserver, subscriber1Predicate))
+                using (var subscription1 = listener.Subscribe(subscriber1Observer, subscriber1Predicate))
                 {
-                    using (var subscription2 = listener.Subscribe(subscriber2Oberserver, subscriber2Predicate))
+                    using (var subscription2 = listener.Subscribe(subscriber2Observer, subscriber2Predicate))
                     {
                         // Things that neither subscribe to get filtered out. 
                         if (listener.IsEnabled("DataToFilterOut"))
@@ -501,7 +501,7 @@ namespace System.Diagnostics.Tests
         /// Stresses the AllListeners by having many threads be adding and removing.
         /// </summary>
         [OuterLoop]
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35539)]
         [InlineData(100, 100)] // run multiple times to stress it further
         [InlineData(100, 100)]
         [InlineData(100, 100)]
@@ -545,7 +545,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void DoubleDisposeOfListener()
         {
-            var listener = new DiagnosticListener("MyListener");
+            var listener = new DiagnosticListener("TestingDoubleDisposeOfListener");
             int completionCount = 0;
 
             IDisposable subscription = listener.Subscribe(MakeObserver<KeyValuePair<string, object>>(_ => { }, () => completionCount++));
@@ -603,7 +603,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void SubscribeWithNullPredicate()
         {
-            using (DiagnosticListener listener = new DiagnosticListener("Testing"))
+            using (DiagnosticListener listener = new DiagnosticListener("TestingSubscribeWithNullPredicate"))
             {
                 Predicate<string> predicate = null;
                 using (listener.Subscribe(new ObserverToList<TelemData>(new List<KeyValuePair<string, object>>()), predicate))
@@ -615,7 +615,7 @@ namespace System.Diagnostics.Tests
                 }
             }
 
-            using (DiagnosticListener listener = new DiagnosticListener("Testing"))
+            using (DiagnosticListener listener = new DiagnosticListener("TestingSubscribeWithNullPredicate"))
             {
                 DiagnosticSource source = listener;
                 Func<string, object, object, bool> predicate = null;
@@ -625,6 +625,62 @@ namespace System.Diagnostics.Tests
                     Assert.True(source.IsEnabled("event", null));
                     Assert.True(source.IsEnabled("event", "arg1"));
                     Assert.True(source.IsEnabled("event", "arg1", "arg2"));
+                }
+            }
+        }
+
+        [Fact]
+        public void ActivityImportExport()
+        {
+            using (DiagnosticListener listener = new DiagnosticListener("TestingBasicIsEnabled"))
+            {
+                DiagnosticSource source = listener;
+                var result = new List<KeyValuePair<string, object>>();
+
+                bool seenPredicate = false;
+                Func<string, object, object, bool> predicate = delegate (string name, object obj1, object obj2)
+                {
+                    seenPredicate = true;
+                    return true;
+                };
+
+                Activity importerActivity = new Activity("activityImporter");
+                object importer = "MyImporterObject";
+                bool seenActivityImport = false;
+                Action<Activity, object> activityImport = delegate (Activity activity, object payload)
+                {
+                    Assert.Equal(activity.GetHashCode(), importerActivity.GetHashCode());
+                    Assert.Equal(importer, payload);
+                    seenActivityImport = true;
+
+                };
+
+                Activity exporterActivity = new Activity("activityExporter");
+                object exporter = "MyExporterObject";
+                bool seenActivityExport = false;
+                Action<Activity, object> activityExport = delegate (Activity activity, object payload)
+                {
+                    Assert.Equal(activity.GetHashCode(), exporterActivity.GetHashCode());
+                    Assert.Equal(exporter, payload);
+                    seenActivityExport = true;
+                };
+
+                // Use the Subscribe that allows you to hook the OnActivityImport and OnActivityExport calls.  
+                using (listener.Subscribe(new ObserverToList<TelemData>(result), predicate, activityImport, activityExport))
+                {
+                    if (listener.IsEnabled("IntPayload"))
+                        listener.Write("IntPayload", 5);
+
+                    Assert.True(seenPredicate);
+                    Assert.Equal(1, result.Count);
+                    Assert.Equal("IntPayload", result[0].Key);
+                    Assert.Equal(5, result[0].Value);
+
+                    listener.OnActivityImport(importerActivity, importer);
+                    Assert.True(seenActivityImport);
+
+                    listener.OnActivityExport(exporterActivity, exporter);
+                    Assert.True(seenActivityExport);
                 }
             }
         }

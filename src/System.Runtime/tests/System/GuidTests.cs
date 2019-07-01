@@ -161,19 +161,6 @@ namespace System.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr fixed a bug where Guid.TryParse throws a format or overflow exception (https://github.com/dotnet/corefx/issues/6316)")]
-        [MemberData(nameof(GuidStrings_TryParseThrows_TestData))]
-        public static void Parse_Invalid_Netfx(string input, Type exceptionType)
-        {
-            Guid result = default(Guid);
-            Assert.Throws(exceptionType, () => Guid.TryParse(input, out result));
-            Assert.Equal(default(Guid), result);
-
-            Assert.Throws(exceptionType, () => Guid.Parse(input));
-        }
-
-        [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework has a bug where Guid.TryParse throws a format or overflow exception")]
         public static void Parse_Invalid_NetcoreApp(string input, Type exceptionType)
         {
             Parse_Invalid(input, exceptionType);
@@ -336,6 +323,7 @@ namespace System.Tests
                 Assert.Equal(expected, guid1.Equals(guid2));
                 Assert.Equal(expected, guid1 == guid2);
                 Assert.Equal(!expected, guid1 != guid2);
+                Assert.Equal(expected, guid1.GetHashCode().Equals(guid2.GetHashCode()));
             }
             Assert.Equal(expected, guid1.Equals(obj));
         }
@@ -372,12 +360,25 @@ namespace System.Tests
             Assert.Equal(expected, formattable.ToString(format, null));
         }
 
+        public static IEnumerable<object[]> InvalidFormat_TestData()
+        {
+            yield return new object[] { "a" };
+            yield return new object[] { "c" };
+            yield return new object[] { "e" };
+            yield return new object[] { "m" };
+            yield return new object[] { "o" };
+            yield return new object[] { "q" };
+            yield return new object[] { "w" };
+            yield return new object[] { "y" };
+            yield return new object[] { "xx" };
+        }
+
         [Theory]
-        [InlineData("Y")]
-        [InlineData("XX")]
+        [MemberData(nameof(InvalidFormat_TestData))]
         public static void ToString_InvalidFormat_ThrowsFormatException(string format)
         {
             Assert.Throws<FormatException>(() => s_testGuid.ToString(format));
+            Assert.Throws<FormatException>(() => s_testGuid.ToString(format.ToUpperInvariant()));
         }
 
         public static IEnumerable<object[]> GuidStrings_Valid_TestData()

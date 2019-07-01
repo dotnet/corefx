@@ -9,6 +9,8 @@ namespace System.Diagnostics
 {
     public partial class Process
     {
+        private const int NanosecondsTo100NanosecondsFactor = 100;
+
         /// <summary>Gets the amount of time the process has spent running code inside the operating system core.</summary>
         public TimeSpan PrivilegedProcessorTime
         {
@@ -16,7 +18,7 @@ namespace System.Diagnostics
             {
                 EnsureState(State.HaveNonExitedId);
                 Interop.libproc.rusage_info_v3 info = Interop.libproc.proc_pid_rusage(_processId);
-                return new TimeSpan(Convert.ToInt64(info.ri_system_time));
+                return new TimeSpan(Convert.ToInt64(info.ri_system_time / NanosecondsTo100NanosecondsFactor));
             }
         }
 
@@ -54,8 +56,8 @@ namespace System.Diagnostics
                 }
 
                 // usually seconds will be negative
-                double seconds = (((long) info.ri_proc_start_abstime - (long) absoluteTime) * (double)numer / denom) / NanoSecondToSecondFactor;
-                return  DateTime.UtcNow.AddSeconds(seconds).ToLocalTime();
+                double seconds = (((long)info.ri_proc_start_abstime - (long)absoluteTime) * (double)numer / denom) / NanoSecondToSecondFactor;
+                return DateTime.UtcNow.AddSeconds(seconds).ToLocalTime();
             }
         }
 
@@ -76,7 +78,7 @@ namespace System.Diagnostics
             {
                 EnsureState(State.HaveNonExitedId);
                 Interop.libproc.rusage_info_v3 info = Interop.libproc.proc_pid_rusage(_processId);
-                return new TimeSpan(Convert.ToInt64(info.ri_system_time + info.ri_user_time));
+                return new TimeSpan(Convert.ToInt64((info.ri_system_time + info.ri_user_time) / NanosecondsTo100NanosecondsFactor));
             }
         }
 
@@ -90,7 +92,22 @@ namespace System.Diagnostics
             {
                 EnsureState(State.HaveNonExitedId);
                 Interop.libproc.rusage_info_v3 info = Interop.libproc.proc_pid_rusage(_processId);
-                return new TimeSpan(Convert.ToInt64(info.ri_user_time));
+                return new TimeSpan(Convert.ToInt64(info.ri_user_time / NanosecondsTo100NanosecondsFactor));
+            }
+        }
+
+        /// <summary>Gets parent process ID</summary>
+        private int ParentProcessId
+        {
+            get
+            {
+                EnsureState(State.HaveNonExitedId);
+                Interop.libproc.proc_taskallinfo? info = Interop.libproc.GetProcessInfoById(Id);
+
+                if (info == null)
+                    throw new Win32Exception(SR.ProcessInformationUnavailable);
+
+                return Convert.ToInt32(info.Value.pbsd.pbi_ppid);
             }
         }
 

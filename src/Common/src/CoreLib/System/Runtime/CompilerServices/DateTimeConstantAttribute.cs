@@ -14,6 +14,8 @@ namespace System.Runtime.CompilerServices
             _date = new DateTime(ticks);
         }
 
+#pragma warning disable CS8608
         public override object Value => _date;
+#pragma warning restore CS8608
     }
 }

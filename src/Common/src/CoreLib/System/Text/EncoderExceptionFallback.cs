@@ -28,14 +28,13 @@ namespace System.Text
             }
         }
 
-        public override bool Equals(object value)
+        public override bool Equals(object? value)
         {
-            EncoderExceptionFallback that = value as EncoderExceptionFallback;
-            if (that != null)
+            if (value is EncoderExceptionFallback that)
             {
-                return (true);
+                return true;
             }
-            return (false);
+            return false;
         }
 
         public override int GetHashCode()
@@ -111,20 +110,20 @@ namespace System.Text
             HResult = HResults.COR_E_ARGUMENT;
         }
 
-        public EncoderFallbackException(string message)
+        public EncoderFallbackException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_ARGUMENT;
         }
 
-        public EncoderFallbackException(string message, Exception innerException)
+        public EncoderFallbackException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_ARGUMENT;
         }
 
         internal EncoderFallbackException(
-            string message, char charUnknown, int index) : base(message)
+            string? message, char charUnknown, int index) : base(message)
         {
             _charUnknown = charUnknown;
             _index = index;
@@ -158,7 +157,7 @@ namespace System.Text
         {
             get
             {
-                return (_charUnknown);
+                return _charUnknown;
             }
         }
 
@@ -166,7 +165,7 @@ namespace System.Text
         {
             get
             {
-                return (_charUnknownHigh);
+                return _charUnknownHigh;
             }
         }
 
@@ -174,7 +173,7 @@ namespace System.Text
         {
             get
             {
-                return (_charUnknownLow);
+                return _charUnknownLow;
             }
         }
 
@@ -189,7 +188,7 @@ namespace System.Text
         // Return true if the unknown character is a surrogate pair.
         public bool IsUnknownSurrogate()
         {
-            return (_charUnknownHigh != '\0');
+            return _charUnknownHigh != '\0';
         }
     }
 }

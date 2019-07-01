@@ -210,7 +210,7 @@ namespace System.Security.Cryptography
 
             // No supported encryption algorithms produce more bytes of decryption output than there
             // were of decryption input.
-            byte[] decrypted = ArrayPool<byte>.Shared.Rent(epki.EncryptedData.Length);
+            byte[] decrypted = CryptoPool.Rent(epki.EncryptedData.Length);
             Memory<byte> decryptedMemory = decrypted;
 
             try
@@ -246,7 +246,7 @@ namespace System.Security.Cryptography
             finally
             {
                 CryptographicOperations.ZeroMemory(decryptedMemory.Span);
-                ArrayPool<byte>.Shared.Return(decrypted);
+                CryptoPool.Return(decrypted, clearSize: 0);
             }
         }
 
@@ -280,7 +280,7 @@ namespace System.Security.Cryptography
             writer.WriteInteger(0);
 
             // PKI.Algorithm (AlgorithmIdentifier)
-            WriteEncodedSpan(writer, algorithmIdentifier);
+            writer.WriteEncodedValue(algorithmIdentifier);
             
             // PKI.privateKey
             writer.WriteOctetString(privateKey);
@@ -340,7 +340,7 @@ namespace System.Security.Cryptography
                 Span<byte> salt = stackalloc byte[16];
 
                 // We need at least one block size beyond the input data size.
-                encryptedRent = ArrayPool<byte>.Shared.Rent(
+                encryptedRent = CryptoPool.Rent(
                     checked(pkcs8Span.Length + (cipher.BlockSize / 8)));
 
                 RandomNumberGenerator.Fill(salt);
@@ -385,21 +385,10 @@ namespace System.Security.Cryptography
             finally
             {
                 CryptographicOperations.ZeroMemory(encryptedSpan);
-                ArrayPool<byte>.Shared.Return(encryptedRent);
+                CryptoPool.Return(encryptedRent, clearSize: 0);
 
                 writer?.Dispose();
                 cipher.Dispose();
-            }
-        }
-
-        private static unsafe void WriteEncodedSpan(AsnWriter writer, ReadOnlySpan<byte> encodedValue)
-        {
-            fixed (byte* ptr = &MemoryMarshal.GetReference(encodedValue))
-            {
-                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, encodedValue.Length))
-                {
-                    writer.WriteEncodedValue(manager.Memory);
-                }
             }
         }
 
@@ -439,7 +428,7 @@ namespace System.Security.Cryptography
 
             // No supported encryption algorithms produce more bytes of decryption output than there
             // were of decryption input.
-            byte[] decrypted = ArrayPool<byte>.Shared.Rent(epki.EncryptedData.Length);
+            byte[] decrypted = CryptoPool.Rent(epki.EncryptedData.Length);
 
             try
             {
@@ -456,7 +445,7 @@ namespace System.Security.Cryptography
             }
             catch (CryptographicException e)
             {
-                ArrayPool<byte>.Shared.Return(decrypted);
+                CryptoPool.Return(decrypted);
                 throw new CryptographicException(SR.Cryptography_Pkcs8_EncryptedReadFailed, e);
             }
         }
@@ -472,8 +461,6 @@ namespace System.Security.Cryptography
                 current,
                 out int bytesRead);
 
-            Memory<byte> decryptedMemory = decrypted;
-
             try
             {
                 if (bytesRead != current.Length)
@@ -483,7 +470,7 @@ namespace System.Security.Cryptography
 
                 using (AsnWriter pkcs8Writer = new AsnWriter(AsnEncodingRules.BER))
                 {
-                    pkcs8Writer.WriteEncodedValue(decryptedMemory);
+                    pkcs8Writer.WriteEncodedValue(decrypted);
 
                     return WriteEncryptedPkcs8(
                         newPassword,
@@ -497,8 +484,8 @@ namespace System.Security.Cryptography
             }
             finally
             {
-                CryptographicOperations.ZeroMemory(decryptedMemory.Span);
-                ArrayPool<byte>.Shared.Return(decrypted.Array);
+                CryptographicOperations.ZeroMemory(decrypted);
+                CryptoPool.Return(decrypted.Array, clearSize: 0);
             }
         }
 
@@ -513,8 +500,6 @@ namespace System.Security.Cryptography
                 current,
                 out int bytesRead);
 
-            Memory<byte> decryptedMemory = decrypted;
-
             try
             {
                 if (bytesRead != current.Length)
@@ -524,7 +509,7 @@ namespace System.Security.Cryptography
 
                 using (AsnWriter pkcs8Writer = new AsnWriter(AsnEncodingRules.BER))
                 {
-                    pkcs8Writer.WriteEncodedValue(decryptedMemory);
+                    pkcs8Writer.WriteEncodedValue(decrypted);
 
                     return WriteEncryptedPkcs8(
                         newPasswordBytes,
@@ -538,8 +523,8 @@ namespace System.Security.Cryptography
             }
             finally
             {
-                CryptographicOperations.ZeroMemory(decryptedMemory.Span);
-                ArrayPool<byte>.Shared.Return(decrypted.Array);
+                CryptographicOperations.ZeroMemory(decrypted);
+                CryptoPool.Return(decrypted.Array, clearSize: 0);
             }
         }
     }

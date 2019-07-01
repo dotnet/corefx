@@ -119,6 +119,11 @@ namespace System.Runtime.InteropServices.Tests
             };
 
             Assert.Equal(100, Marshal.ReadByte(structure, pointerOffset));
+            // Unlike the Int16/32/64 tests that mirror this one, we aren't going to do any asserts on the value at stringOffset.
+            // The value at stringOffset is a pointer, so it is entirely possible that the first byte is 0.
+            // We tried keeping this test by summing 20 calls, but even that still resulted in 0 too often. As a result, we've
+            // decided to not try to validate this case instead of just incrementally increasing the number of iterations
+            // to avoid getting a 0 value.
             Assert.Equal(3, Marshal.ReadByte(structure, arrayOffset + sizeof(byte) * 2));
         }
 
@@ -130,13 +135,11 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Exception is wrapped in a TargetInvocationException in the .NET Framework.")]
         public void ReadByte_NullObject_ThrowsAccessViolationException()
         {
             Assert.Throws<AccessViolationException>(() => Marshal.ReadByte(null, 2));
         }
 
-#if !netstandard // TODO: Enable for netstandard2.1
         [Fact]
         public void ReadByte_NotReadable_ThrowsArgumentException()
         {
@@ -148,7 +151,6 @@ namespace System.Runtime.InteropServices.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () => Marshal.ReadByte(collectibleObject, 0));
         }
-#endif
 
         [Fact]
         public void WriteByte_ZeroPointer_ThrowsException()
@@ -158,13 +160,11 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Exception is wrapped in a TargetInvocationException in the .NET Framework.")]
         public void WriteByte_NullObject_ThrowsAccessViolationException()
         {
             Assert.Throws<AccessViolationException>(() => Marshal.WriteByte(null, 2, 0));
         }
 
-#if !netstandard // TODO: Enable for netstandard2.1
         [Fact]
         public void WriteByte_NotReadable_ThrowsArgumentException()
         {
@@ -176,7 +176,6 @@ namespace System.Runtime.InteropServices.Tests
 
             AssertExtensions.Throws<ArgumentException>(null, () => Marshal.WriteByte(collectibleObject, 0, 0));
         }
-#endif
 
         public struct BlittableStruct
         {

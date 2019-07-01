@@ -6,12 +6,15 @@ using System.Collections.Generic;
 using System.Net.Test.Common;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public abstract class IdnaProtocolTests : HttpClientTestBase
+    public abstract class IdnaProtocolTests : HttpClientHandlerTestBase
     {
         protected abstract bool SupportsIdna { get; }
+
+        public IdnaProtocolTests(ITestOutputHelper output) : base(output) { }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
         [Theory]
@@ -33,7 +36,7 @@ namespace System.Net.Http.Functional.Tests
                 handler.UseProxy = true;
                 handler.Proxy = new WebProxy(serverUrl.ToString());
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(uri);
                     Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
@@ -63,9 +66,9 @@ namespace System.Net.Http.Functional.Tests
 
             await LoopbackServer.CreateServerAsync(async (server, serverUrl) =>
             {
-                using (HttpClient client = new HttpClient(CreateHttpClientHandler()))
+                using (HttpClient client = CreateHttpClient())
                 {
-                    var request = new HttpRequestMessage(HttpMethod.Get, serverUrl);
+                    var request = new HttpRequestMessage(HttpMethod.Get, serverUrl) { Version = VersionFromUseHttp2 };
                     request.Headers.Host = hostname;
                     request.Headers.Referrer = uri;
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
@@ -98,7 +101,7 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.AllowAutoRedirect = false;
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(serverUrl);
                     Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync(
@@ -113,7 +116,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        private static IEnumerable<object[]> InternationalHostNames()
+        public static IEnumerable<object[]> InternationalHostNames()
         {
             // Latin-1 supplement
             yield return new object[] { "\u00E1.com" };

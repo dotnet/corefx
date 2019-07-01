@@ -9,12 +9,12 @@ namespace System.Net.Mail
 {
     public partial class AlternateView : System.Net.Mail.AttachmentBase
     {
-        public AlternateView(System.IO.Stream contentStream) : base (default(string)) { }
-        public AlternateView(System.IO.Stream contentStream, System.Net.Mime.ContentType contentType) : base (default(string)) { }
-        public AlternateView(System.IO.Stream contentStream, string mediaType) : base (default(string)) { }
-        public AlternateView(string fileName) : base (default(string)) { }
-        public AlternateView(string fileName, System.Net.Mime.ContentType contentType) : base (default(string)) { }
-        public AlternateView(string fileName, string mediaType) : base (default(string)) { }
+        public AlternateView(System.IO.Stream contentStream) : base (default(System.IO.Stream)) { }
+        public AlternateView(System.IO.Stream contentStream, System.Net.Mime.ContentType contentType) : base (default(System.IO.Stream)) { }
+        public AlternateView(System.IO.Stream contentStream, string mediaType) : base (default(System.IO.Stream)) { }
+        public AlternateView(string fileName) : base (default(System.IO.Stream)) { }
+        public AlternateView(string fileName, System.Net.Mime.ContentType contentType) : base (default(System.IO.Stream)) { }
+        public AlternateView(string fileName, string mediaType) : base (default(System.IO.Stream)) { }
         public System.Uri BaseUri { get { throw null; } set { } }
         public System.Net.Mail.LinkedResourceCollection LinkedResources { get { throw null; } }
         public static System.Net.Mail.AlternateView CreateAlternateViewFromString(string content) { throw null; }
@@ -33,12 +33,12 @@ namespace System.Net.Mail
     }
     public partial class Attachment : System.Net.Mail.AttachmentBase
     {
-        public Attachment(System.IO.Stream contentStream, System.Net.Mime.ContentType contentType) : base (default(string)) { }
-        public Attachment(System.IO.Stream contentStream, string name) : base (default(string)) { }
-        public Attachment(System.IO.Stream contentStream, string name, string mediaType) : base (default(string)) { }
-        public Attachment(string fileName) : base (default(string)) { }
-        public Attachment(string fileName, System.Net.Mime.ContentType contentType) : base (default(string)) { }
-        public Attachment(string fileName, string mediaType) : base (default(string)) { }
+        public Attachment(System.IO.Stream contentStream, System.Net.Mime.ContentType contentType) : base (default(System.IO.Stream)) { }
+        public Attachment(System.IO.Stream contentStream, string name) : base (default(System.IO.Stream)) { }
+        public Attachment(System.IO.Stream contentStream, string name, string mediaType) : base (default(System.IO.Stream)) { }
+        public Attachment(string fileName) : base (default(System.IO.Stream)) { }
+        public Attachment(string fileName, System.Net.Mime.ContentType contentType) : base (default(System.IO.Stream)) { }
+        public Attachment(string fileName, string mediaType) : base (default(System.IO.Stream)) { }
         public System.Net.Mime.ContentDisposition ContentDisposition { get { throw null; } }
         public string Name { get { throw null; } set { } }
         public System.Text.Encoding NameEncoding { get { throw null; } set { } }
@@ -73,20 +73,20 @@ namespace System.Net.Mail
     [System.FlagsAttribute]
     public enum DeliveryNotificationOptions
     {
+        None = 0,
+        OnSuccess = 1,
+        OnFailure = 2,
         Delay = 4,
         Never = 134217728,
-        None = 0,
-        OnFailure = 2,
-        OnSuccess = 1,
     }
     public partial class LinkedResource : System.Net.Mail.AttachmentBase
     {
-        public LinkedResource(System.IO.Stream contentStream) : base (default(string)) { }
-        public LinkedResource(System.IO.Stream contentStream, System.Net.Mime.ContentType contentType) : base (default(string)) { }
-        public LinkedResource(System.IO.Stream contentStream, string mediaType) : base (default(string)) { }
-        public LinkedResource(string fileName) : base (default(string)) { }
-        public LinkedResource(string fileName, System.Net.Mime.ContentType contentType) : base (default(string)) { }
-        public LinkedResource(string fileName, string mediaType) : base (default(string)) { }
+        public LinkedResource(System.IO.Stream contentStream) : base (default(System.IO.Stream)) { }
+        public LinkedResource(System.IO.Stream contentStream, System.Net.Mime.ContentType contentType) : base (default(System.IO.Stream)) { }
+        public LinkedResource(System.IO.Stream contentStream, string mediaType) : base (default(System.IO.Stream)) { }
+        public LinkedResource(string fileName) : base (default(System.IO.Stream)) { }
+        public LinkedResource(string fileName, System.Net.Mime.ContentType contentType) : base (default(System.IO.Stream)) { }
+        public LinkedResource(string fileName, string mediaType) : base (default(System.IO.Stream)) { }
         public System.Uri ContentLink { get { throw null; } set { } }
         public static System.Net.Mail.LinkedResource CreateLinkedResourceFromString(string content) { throw null; }
         public static System.Net.Mail.LinkedResource CreateLinkedResourceFromString(string content, System.Net.Mime.ContentType contentType) { throw null; }
@@ -141,7 +141,7 @@ namespace System.Net.Mail
         public System.Text.Encoding HeadersEncoding { get { throw null; } set { } }
         public bool IsBodyHtml { get { throw null; } set { } }
         public System.Net.Mail.MailPriority Priority { get { throw null; } set { } }
-        [System.ObsoleteAttribute("ReplyTo is obsoleted for this type.  Please use ReplyToList instead which can accept multiple addresses. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("ReplyTo is obsoleted for this type.  Please use ReplyToList instead which can accept multiple addresses. https://go.microsoft.com/fwlink/?linkid=14202")]
         public System.Net.Mail.MailAddress ReplyTo { get { throw null; } set { } }
         public System.Net.Mail.MailAddressCollection ReplyToList { get { throw null; } }
         public System.Net.Mail.MailAddress Sender { get { throw null; } set { } }
@@ -153,9 +153,9 @@ namespace System.Net.Mail
     }
     public enum MailPriority
     {
-        High = 2,
-        Low = 1,
         Normal = 0,
+        Low = 1,
+        High = 2,
     }
     public delegate void SendCompletedEventHandler(object sender, System.ComponentModel.AsyncCompletedEventArgs e);
     public partial class SmtpClient : System.IDisposable
@@ -171,6 +171,7 @@ namespace System.Net.Mail
         public string Host { get { throw null; } set { } }
         public string PickupDirectoryLocation { get { throw null; } set { } }
         public int Port { get { throw null; } set { } }
+        public System.Net.ServicePoint ServicePoint { get { throw null; } }
         public string TargetName { get { throw null; } set { } }
         public int Timeout { get { throw null; } set { } }
         public bool UseDefaultCredentials { get { throw null; } set { } }
@@ -183,20 +184,19 @@ namespace System.Net.Mail
         public void SendAsync(System.Net.Mail.MailMessage message, object userToken) { }
         public void SendAsync(string from, string recipients, string subject, string body, object userToken) { }
         public void SendAsyncCancel() { }
-        public System.Net.ServicePoint ServicePoint { get { throw null; } }
         public System.Threading.Tasks.Task SendMailAsync(System.Net.Mail.MailMessage message) { throw null; }
         public System.Threading.Tasks.Task SendMailAsync(string from, string recipients, string subject, string body) { throw null; }
     }
     public enum SmtpDeliveryFormat
     {
-        International = 1,
         SevenBit = 0,
+        International = 1,
     }
     public enum SmtpDeliveryMethod
     {
         Network = 0,
-        PickupDirectoryFromIis = 2,
         SpecifiedPickupDirectory = 1,
+        PickupDirectoryFromIis = 2,
     }
     public partial class SmtpException : System.Exception, System.Runtime.Serialization.ISerializable
     {
@@ -236,30 +236,101 @@ namespace System.Net.Mail
     }
     public enum SmtpStatusCode
     {
-        BadCommandSequence = 503,
-        CannotVerifyUserWillAttemptDelivery = 252,
-        ClientNotPermitted = 454,
-        CommandNotImplemented = 502,
-        CommandParameterNotImplemented = 504,
-        CommandUnrecognized = 500,
-        ExceededStorageAllocation = 552,
         GeneralFailure = -1,
-        HelpMessage = 214,
-        InsufficientStorage = 452,
-        LocalErrorInProcessing = 451,
-        MailboxBusy = 450,
-        MailboxNameNotAllowed = 553,
-        MailboxUnavailable = 550,
-        MustIssueStartTlsFirst = 530,
-        Ok = 250,
-        ServiceClosingTransmissionChannel = 221,
-        ServiceNotAvailable = 421,
-        ServiceReady = 220,
-        StartMailInput = 354,
-        SyntaxError = 501,
         SystemStatus = 211,
-        TransactionFailed = 554,
-        UserNotLocalTryAlternatePath = 551,
+        HelpMessage = 214,
+        ServiceReady = 220,
+        ServiceClosingTransmissionChannel = 221,
+        Ok = 250,
         UserNotLocalWillForward = 251,
+        CannotVerifyUserWillAttemptDelivery = 252,
+        StartMailInput = 354,
+        ServiceNotAvailable = 421,
+        MailboxBusy = 450,
+        LocalErrorInProcessing = 451,
+        InsufficientStorage = 452,
+        ClientNotPermitted = 454,
+        CommandUnrecognized = 500,
+        SyntaxError = 501,
+        CommandNotImplemented = 502,
+        BadCommandSequence = 503,
+        CommandParameterNotImplemented = 504,
+        MustIssueStartTlsFirst = 530,
+        MailboxUnavailable = 550,
+        UserNotLocalTryAlternatePath = 551,
+        ExceededStorageAllocation = 552,
+        MailboxNameNotAllowed = 553,
+        TransactionFailed = 554,
+    }
+}
+namespace System.Net.Mime
+{
+    public partial class ContentDisposition
+    {
+        public ContentDisposition() { }
+        public ContentDisposition(string disposition) { }
+        public System.DateTime CreationDate { get { throw null; } set { } }
+        public string DispositionType { get { throw null; } set { } }
+        public string FileName { get { throw null; } set { } }
+        public bool Inline { get { throw null; } set { } }
+        public System.DateTime ModificationDate { get { throw null; } set { } }
+        public System.Collections.Specialized.StringDictionary Parameters { get { throw null; } }
+        public System.DateTime ReadDate { get { throw null; } set { } }
+        public long Size { get { throw null; } set { } }
+        public override bool Equals(object rparam) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public override string ToString() { throw null; }
+    }
+    public partial class ContentType
+    {
+        public ContentType() { }
+        public ContentType(string contentType) { }
+        public string Boundary { get { throw null; } set { } }
+        public string CharSet { get { throw null; } set { } }
+        public string MediaType { get { throw null; } set { } }
+        public string Name { get { throw null; } set { } }
+        public System.Collections.Specialized.StringDictionary Parameters { get { throw null; } }
+        public override bool Equals(object rparam) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public override string ToString() { throw null; }
+    }
+    public static partial class DispositionTypeNames
+    {
+        public const string Attachment = "attachment";
+        public const string Inline = "inline";
+    }
+    public static partial class MediaTypeNames
+    {
+        public static partial class Application
+        {
+            public const string Json = "application/json";
+            public const string Octet = "application/octet-stream";
+            public const string Pdf = "application/pdf";
+            public const string Rtf = "application/rtf";
+            public const string Soap = "application/soap+xml";
+            public const string Xml = "application/xml";
+            public const string Zip = "application/zip";
+        }
+        public static partial class Image
+        {
+            public const string Gif = "image/gif";
+            public const string Jpeg = "image/jpeg";
+            public const string Tiff = "image/tiff";
+        }
+        public static partial class Text
+        {
+            public const string Html = "text/html";
+            public const string Plain = "text/plain";
+            public const string RichText = "text/richtext";
+            public const string Xml = "text/xml";
+        }
+    }
+    public enum TransferEncoding
+    {
+        Unknown = -1,
+        QuotedPrintable = 0,
+        Base64 = 1,
+        SevenBit = 2,
+        EightBit = 3,
     }
 }

@@ -6,10 +6,11 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using Xunit;
+using Microsoft.DotNet.RemoteExecutor;
 using Microsoft.DotNet.XUnitExtensions;
+using Xunit;
 
-public class WindowAndCursorProps : RemoteExecutorTestBase
+public class WindowAndCursorProps
 {
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
@@ -185,7 +186,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
 
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
-    public static void CursorVisible_GetUnix_ThrowsPlatformNotSupportedExeption()
+    public static void CursorVisible_GetUnix_ThrowsPlatformNotSupportedException()
     {
         Assert.Throws<PlatformNotSupportedException>(() => Console.CursorVisible);
     }
@@ -213,38 +214,27 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
     public static void Title_SetUnix_Success()
     {
-        RemoteInvoke(() =>
+        RemoteExecutor.Invoke(() =>
         {
             Console.Title = "Title set by unit test";
-            return SuccessExitCode;
+            return RemoteExecutor.SuccessExitCode;
         }).Dispose();
     }
 
     [Fact]
     [PlatformSpecific(TestPlatforms.Windows)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "// NETFX does not have the fix https://github.com/dotnet/corefx/pull/28905")]
     public static void Title_GetWindows_ReturnsNonNull()
     {
         Assert.NotNull(Console.Title);
     }
 
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     [PlatformSpecific(TestPlatforms.Windows)]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "// NETFX does not have the fix https://github.com/dotnet/corefx/pull/28905")]
     public static void Title_Get_Windows_NoNulls()
     {
         string title = Console.Title;
         string trimmedTitle = title.TrimEnd('\0');
-
-        if (PlatformDetection.IsWindowsNanoServer)
-        {
-            // Nano server titles are currently broken
-            Assert.NotEqual(trimmedTitle, title);
-        }
-        else
-        {
-            Assert.Equal(trimmedTitle, title);
-        }
+        Assert.Equal(trimmedTitle, title);
     }
 
     [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
@@ -262,7 +252,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     public static void Title_Set_Windows(int lengthOfTitle)
     {
         // Try to set the title to some other value.
-        RemoteInvoke(lengthOfTitleString =>
+        RemoteExecutor.Invoke(lengthOfTitleString =>
         {
             string newTitle = new string('a', int.Parse(lengthOfTitleString));
             Console.Title = newTitle;
@@ -276,7 +266,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
             {
                 Assert.Equal(newTitle, Console.Title);
             }
-            return SuccessExitCode;
+            return RemoteExecutor.SuccessExitCode;
         }, lengthOfTitle.ToString()).Dispose();
     }
 
@@ -294,15 +284,6 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     public static void Title_SetNull_ThrowsArgumentNullException()
     {
         AssertExtensions.Throws<ArgumentNullException>("value", () => Console.Title = null);
-    }
-
-    [Fact]
-    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-    public static void Title_SetGreaterThan24500Chars_ThrowsArgumentOutOfRangeException()
-    {
-        // We don't explicitly throw on Core as this isn't technically correct
-        string newTitle = new string('a', 24501);
-        AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => Console.Title = newTitle);
     }
 
     [Fact]

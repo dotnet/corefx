@@ -30,7 +30,7 @@ namespace System
 
             public bool IsFixedDateRule => _isFixedDateRule;
 
-            public override bool Equals(object obj) =>
+            public override bool Equals(object? obj) =>
                 obj is TransitionTime && Equals((TransitionTime)obj);
 
             public static bool operator ==(TransitionTime t1, TransitionTime t2) => t1.Equals(t2);
@@ -143,12 +143,12 @@ namespace System
                     throw new ArgumentNullException(nameof(info));
                 }
 
-                _timeOfDay = (DateTime)info.GetValue("TimeOfDay", typeof(DateTime)); // Do not rename (binary serialization)
-                _month = (byte)info.GetValue("Month", typeof(byte)); // Do not rename (binary serialization)
-                _week = (byte)info.GetValue("Week", typeof(byte)); // Do not rename (binary serialization)
-                _day = (byte)info.GetValue("Day", typeof(byte)); // Do not rename (binary serialization)
-                _dayOfWeek = (DayOfWeek)info.GetValue("DayOfWeek", typeof(DayOfWeek)); // Do not rename (binary serialization)
-                _isFixedDateRule = (bool)info.GetValue("IsFixedDateRule", typeof(bool)); // Do not rename (binary serialization)
+                _timeOfDay = (DateTime)info.GetValue("TimeOfDay", typeof(DateTime))!; // Do not rename (binary serialization)
+                _month = (byte)info.GetValue("Month", typeof(byte))!; // Do not rename (binary serialization)
+                _week = (byte)info.GetValue("Week", typeof(byte))!; // Do not rename (binary serialization)
+                _day = (byte)info.GetValue("Day", typeof(byte))!; // Do not rename (binary serialization)
+                _dayOfWeek = (DayOfWeek)info.GetValue("DayOfWeek", typeof(DayOfWeek))!; // Do not rename (binary serialization)
+                _isFixedDateRule = (bool)info.GetValue("IsFixedDateRule", typeof(bool))!; // Do not rename (binary serialization)
             }
         }
     }

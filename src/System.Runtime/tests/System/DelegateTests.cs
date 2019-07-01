@@ -461,19 +461,19 @@ namespace System.Tests
 
         private delegate void NullableDelegate(int? s);
 
-        private enum ShortEnum : short
+        public enum ShortEnum : short
         {
             One = 1,
             Seven = 7,
         }
 
-        private enum IntEnum : int
+        public enum IntEnum : int
         {
             One = 1,
             Seven = 7,
         }
 
-        private enum U4 : uint
+        public enum U4 : uint
         {
             One = 1,
             Seven = 7,
@@ -682,11 +682,10 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/coreclr#15196")]
         public static void CreateDelegate2_Target_GenericTypeParameter()
         {
 
-            Type theT = typeof(G<>).GetTypeInfo().GenericTypeParameters[0];
+            Type theT = typeof(DummyGenericClassForDelegateTests<>).GetTypeInfo().GenericTypeParameters[0];
             Type delegateType = typeof(Func<object, object, bool>);
             AssertExtensions.Throws<ArgumentException>("target", () => Delegate.CreateDelegate(delegateType, theT, "ReferenceEquals"));
         }
@@ -1199,3 +1198,5 @@ namespace System.Tests
         #endregion Test Setup
     }
 }
+
+internal class DummyGenericClassForDelegateTests<T> { }

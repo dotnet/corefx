@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,11 +76,50 @@ namespace System.Net.Http
                             needDrain = false;
                         }
 
-                        string challengeData = challenge.ChallengeData;
+                        if (NetEventSource.IsEnabled)
+                        {
+                            NetEventSource.Info(connection, $"Authentication: {challenge.AuthenticationType}, Uri: {authUri.AbsoluteUri.ToString()}");
+                        }
 
-                        string spn = "HTTP/" + authUri.IdnHost;
+                        // Calculate SPN (Service Principal Name) using the host name of the request.
+                        // Use the request's 'Host' header if available. Otherwise, use the request uri.
+                        string hostName;
+                        if (request.HasHeaders && request.Headers.Host != null)
+                        {
+                            // Use the host name without any normalization.
+                            hostName = request.Headers.Host;
+                            if (NetEventSource.IsEnabled)
+                            {
+                                NetEventSource.Info(connection, $"Authentication: {challenge.AuthenticationType}, Host: {hostName}");
+                            }
+                        }
+                        else
+                        {
+                            // Need to use FQDN normalized host so that CNAME's are traversed.
+                            // Use DNS to do the forward lookup to an A (host) record.
+                            // But skip DNS lookup on IP literals. Otherwise, we would end up
+                            // doing an unintended reverse DNS lookup.
+                            UriHostNameType hnt = authUri.HostNameType;
+                            if (hnt == UriHostNameType.IPv6 || hnt == UriHostNameType.IPv4)
+                            {
+                                hostName = authUri.IdnHost;
+                            }
+                            else
+                            {
+                                IPHostEntry result = await Dns.GetHostEntryAsync(authUri.IdnHost).ConfigureAwait(false);
+                                hostName = result.HostName;
+                            }
+                        }
+
+                        string spn = "HTTP/" + hostName;
+                        if (NetEventSource.IsEnabled)
+                        {
+                            NetEventSource.Info(connection, $"Authentication: {challenge.AuthenticationType}, SPN: {spn}");
+                        }
+
                         ChannelBinding channelBinding = connection.TransportContext?.GetChannelBinding(ChannelBindingKind.Endpoint);
                         NTAuthentication authContext = new NTAuthentication(isServer:false, challenge.SchemeName, challenge.Credential, spn, ContextFlagsPal.Connection, channelBinding);
+                        string challengeData = challenge.ChallengeData;
                         try
                         {
                             while (true)

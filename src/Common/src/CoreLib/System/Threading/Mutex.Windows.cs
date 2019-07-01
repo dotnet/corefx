@@ -3,10 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
 
 namespace System.Threading
 {
@@ -18,7 +16,7 @@ namespace System.Threading
         private const uint AccessRights =
             (uint)Interop.Kernel32.MAXIMUM_ALLOWED | Interop.Kernel32.SYNCHRONIZE | Interop.Kernel32.MUTEX_MODIFY_STATE;
 
-        private void CreateMutexCore(bool initiallyOwned, string name, out bool createdNew)
+        private void CreateMutexCore(bool initiallyOwned, string? name, out bool createdNew)
         {
             uint mutexFlags = initiallyOwned ? Interop.Kernel32.CREATE_MUTEX_INITIAL_OWNER : 0;
             SafeWaitHandle mutexHandle = Interop.Kernel32.CreateMutexEx(IntPtr.Zero, name, mutexFlags, AccessRights);
@@ -42,7 +40,7 @@ namespace System.Threading
             SafeWaitHandle = mutexHandle;
         }
 
-        private static OpenExistingResult OpenExistingWorker(string name, out Mutex result)
+        private static OpenExistingResult OpenExistingWorker(string name, out Mutex? result)
         {
             if (name == null)
             {
@@ -78,7 +76,6 @@ namespace System.Threading
                 if (Interop.Errors.ERROR_INVALID_HANDLE == errorCode)
                     return OpenExistingResult.NameInvalid;
 
-                // this is for passed through Win32Native Errors
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode, name);
             }
 
@@ -91,7 +88,7 @@ namespace System.Threading
         // in a Mutex's ACL is MUTEX_ALL_ACCESS (0x1F0001).
         public void ReleaseMutex()
         {
-            if (!Interop.Kernel32.ReleaseMutex(_waitHandle))
+            if (!Interop.Kernel32.ReleaseMutex(SafeWaitHandle))
             {
                 throw new ApplicationException(SR.Arg_SynchronizationLockException);
             }

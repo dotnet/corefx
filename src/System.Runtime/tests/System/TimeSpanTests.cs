@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static partial class TimeSpanTests
+    public partial class TimeSpanTests
     {
         [Fact]
         public static void MaxValue()
@@ -97,7 +97,7 @@ namespace System.Tests
         public static void Total_Days_Hours_Minutes_Seconds_Milliseconds(TimeSpan timeSpan, double expectedDays, double expectedHours, double expectedMinutes, double expectedSeconds, double expectedMilliseconds)
         {
             // Use ToString() to prevent any rounding errors when comparing
-            Assert.Equal(expectedDays.ToString(), timeSpan.TotalDays.ToString());
+            Assert.Equal(expectedDays.ToString("G15"), timeSpan.TotalDays.ToString("G15"));
             Assert.Equal(expectedHours, timeSpan.TotalHours);
             Assert.Equal(expectedMinutes, timeSpan.TotalMinutes);
             Assert.Equal(expectedSeconds, timeSpan.TotalSeconds);
@@ -426,28 +426,39 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => TimeSpan.FromSeconds(double.NaN)); // Value is NaN
         }
 
-        public static IEnumerable<object[]> FromMilliseconds_TestData()
+        public static IEnumerable<object[]> FromMilliseconds_TestData_NetCore()
         {
-            yield return new object[] { 1500.5, new TimeSpan(0, 0, 0, 1, 501) };
-            yield return new object[] { 2.5, new TimeSpan(0, 0, 0, 0, 3) };
-            yield return new object[] { 1.0, new TimeSpan(0, 0, 0, 0, 1) };
-            yield return new object[] { 0.0, new TimeSpan(0, 0, 0, 0, 0) };
-            yield return new object[] { -1.0, new TimeSpan(0, 0, 0, 0, -1) };
-            yield return new object[] { -2.5, new TimeSpan(0, 0, 0, 0, -3) };
-            yield return new object[] { -1500.5, new TimeSpan(0, 0, 0, -1, -501) };
+            yield return new object[] { 1500.5, new TimeSpan(15005000) };
+            yield return new object[] { 2.5, new TimeSpan(25000) };
+            yield return new object[] { 1.0, new TimeSpan(10000) };
+            yield return new object[] { 0.0, new TimeSpan(0) };
+            yield return new object[] { -1.0, new TimeSpan(-10000) };
+            yield return new object[] { -2.5, new TimeSpan(-25000) };
+            yield return new object[] { -1500.5, new TimeSpan(-15005000) };
         }
 
         [Theory]
-        [MemberData(nameof(FromMilliseconds_TestData))]
-        public static void FromMilliseconds(double value, TimeSpan expected)
+        [MemberData(nameof(FromMilliseconds_TestData_NetCore))]
+        public static void FromMilliseconds_Netcore(double value, TimeSpan expected)
         {
             Assert.Equal(expected, TimeSpan.FromMilliseconds(value));
+        }
+
+        public static IEnumerable<object[]> FromMilliseconds_TestData_Desktop()
+        {
+            yield return new object[] { 1500.5, new TimeSpan(15010000) };
+            yield return new object[] { 2.5, new TimeSpan(30000) };
+            yield return new object[] { 1.0, new TimeSpan(10000) };
+            yield return new object[] { 0.0, new TimeSpan(0) };
+            yield return new object[] { -1.0, new TimeSpan(-10000) };
+            yield return new object[] { -2.5, new TimeSpan(-30000) };
+            yield return new object[] { -1500.5, new TimeSpan(-15010000) };
         }
 
         [Fact]
         public static void FromMilliseconds_Invalid()
         {
-            double maxMilliseconds = long.MaxValue / TimeSpan.TicksPerMillisecond;
+            double maxMilliseconds = (double)TimeSpan.MaxValue.Ticks / (double)TimeSpan.TicksPerMillisecond + 1;
 
             Assert.Throws<OverflowException>(() => TimeSpan.FromMilliseconds(double.PositiveInfinity)); // Value is positive infinity
             Assert.Throws<OverflowException>(() => TimeSpan.FromMilliseconds(double.NegativeInfinity)); // Value is positive infinity
@@ -538,7 +549,6 @@ namespace System.Tests
             yield return new object[] { "1:1:1.00001", CultureInfo.InvariantCulture, new TimeSpan(36610000100) };
             yield return new object[] { "1:1:1.000001", CultureInfo.InvariantCulture, new TimeSpan(36610000010) };
             yield return new object[] { "1:1:1.0000001", CultureInfo.InvariantCulture, new TimeSpan(36610000001) };
-            yield return new object[] { "1:1:1.00000001", CultureInfo.InvariantCulture, new TimeSpan(36610000001) };
 
             // DD.HH:MM:SS
             yield return new object[] { "1.12:24:02", null, new TimeSpan(1, 12, 24, 2, 0) };
@@ -560,7 +570,6 @@ namespace System.Tests
             yield return new object[] { "1:1:.00001", CultureInfo.InvariantCulture, new TimeSpan(36600000100) };
             yield return new object[] { "1:1:.000001", CultureInfo.InvariantCulture, new TimeSpan(36600000010) };
             yield return new object[] { "1:1:.0000001", CultureInfo.InvariantCulture, new TimeSpan(36600000001) };
-            yield return new object[] { "1:1:.00000001", CultureInfo.InvariantCulture, new TimeSpan(36600000001) };
 
             // Just below overflow on various components
             yield return new object[] { "10675199", null, new TimeSpan(9223371936000000000) };
@@ -625,7 +634,7 @@ namespace System.Tests
 
             // OverflowExceptions
             yield return new object[] { "1:1:1.99999999", null, typeof(OverflowException) }; // overflowing fraction
-            yield return new object[] { "1:1:1.000000001", null, typeof(OverflowException) }; // too many leading zeroes in fraction
+
             yield return new object[] { "2147483647", null, typeof(OverflowException) }; // overflowing value == int.MaxValue
             yield return new object[] { "2147483648", null, typeof(OverflowException) }; // overflowing value == int.MaxValue + 1
             yield return new object[] { "10675200", null, typeof(OverflowException) }; // overflowing number of days
@@ -711,20 +720,32 @@ namespace System.Tests
         {
             TimeSpan result;
             Assert.Equal(expected, TimeSpan.ParseExact(input, format, new CultureInfo("en-US")));
+            Assert.Equal(expected, TimeSpan.ParseExact(input, format, new CultureInfo("en-US"), TimeSpanStyles.None));
             Assert.Equal(expected, TimeSpan.ParseExact(input, new[] { format }, new CultureInfo("en-US")));
+            Assert.Equal(expected, TimeSpan.ParseExact(input, new[] { format }, new CultureInfo("en-US"), TimeSpanStyles.None));
 
             Assert.True(TimeSpan.TryParseExact(input, format, new CultureInfo("en-US"), out result));
             Assert.Equal(expected, result);
 
+            Assert.True(TimeSpan.TryParseExact(input, format, new CultureInfo("en-US"), TimeSpanStyles.None, out result));
+            Assert.Equal(expected, result);
+
             Assert.True(TimeSpan.TryParseExact(input, new[] { format }, new CultureInfo("en-US"), out result));
+            Assert.Equal(expected, result);
+
+            Assert.True(TimeSpan.TryParseExact(input, new[] { format }, new CultureInfo("en-US"), TimeSpanStyles.None, out result));
             Assert.Equal(expected, result);
 
             if (format != "c" && format != "t" && format != "T" && format != "g" && format != "G")
             {
                 // TimeSpanStyles is interpreted only for custom formats
                 Assert.Equal(expected.Negate(), TimeSpan.ParseExact(input, format, new CultureInfo("en-US"), TimeSpanStyles.AssumeNegative));
+                Assert.Equal(expected.Negate(), TimeSpan.ParseExact(input, new string[] { format }, new CultureInfo("en-US"), TimeSpanStyles.AssumeNegative));
 
                 Assert.True(TimeSpan.TryParseExact(input, format, new CultureInfo("en-US"), TimeSpanStyles.AssumeNegative, out result));
+                Assert.Equal(expected.Negate(), result);
+
+                Assert.True(TimeSpan.TryParseExact(input, new string[] { format }, new CultureInfo("en-US"), TimeSpanStyles.AssumeNegative, out result));
                 Assert.Equal(expected.Negate(), result);
             }
             else
@@ -796,12 +817,23 @@ namespace System.Tests
         public static void ParseExactTest_Invalid(string input, string format, Type exceptionType)
         {
             Assert.Throws(exceptionType, () => TimeSpan.ParseExact(input, format, new CultureInfo("en-US")));
+            Assert.Throws(exceptionType, () => TimeSpan.ParseExact(input, format, new CultureInfo("en-US"), TimeSpanStyles.None));
+
+            Type exceptionTypeMultiple = exceptionType == typeof(OverflowException) || string.IsNullOrEmpty(format) ? typeof(FormatException) : exceptionType;
+            Assert.Throws(exceptionTypeMultiple, () => TimeSpan.ParseExact(input, new string[] { format }, new CultureInfo("en-US")));
+            Assert.Throws(exceptionTypeMultiple, () => TimeSpan.ParseExact(input, new string[] { format }, new CultureInfo("en-US"), TimeSpanStyles.None));
 
             TimeSpan result;
             Assert.False(TimeSpan.TryParseExact(input, format, new CultureInfo("en-US"), out result));
             Assert.Equal(TimeSpan.Zero, result);
 
+            Assert.False(TimeSpan.TryParseExact(input, format, new CultureInfo("en-US"), TimeSpanStyles.None, out result));
+            Assert.Equal(TimeSpan.Zero, result);
+
             Assert.False(TimeSpan.TryParseExact(input, new[] { format }, new CultureInfo("en-US"), out result));
+            Assert.Equal(TimeSpan.Zero, result);
+
+            Assert.False(TimeSpan.TryParseExact(input, new[] { format }, new CultureInfo("en-US"), TimeSpanStyles.None, out result));
             Assert.Equal(TimeSpan.Zero, result);
         }
 
@@ -815,6 +847,25 @@ namespace System.Tests
 
             Assert.Throws<FormatException>(() => TimeSpan.ParseExact("12:34:56", new string[0], null));
             Assert.False(TimeSpan.TryParseExact("12:34:56", new string[0], null, out result));
+        }
+
+        public static IEnumerable<object[]> ParseExact_InvalidStyles_TestData()
+        {
+            yield return new object[] { TimeSpanStyles.None - 1 };
+            yield return new object[] { TimeSpanStyles.AssumeNegative + 1 };
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseExact_InvalidStyles_TestData))]
+        public void ParseExact_InvalidStyles_ThrowsArgumentException(TimeSpanStyles styles)
+        {
+            TimeSpan result;
+
+            string inputString = "00:00:00";
+            AssertExtensions.Throws<ArgumentException>("styles", () => TimeSpan.ParseExact(inputString, "s", new CultureInfo("en-US"), styles));
+            AssertExtensions.Throws<ArgumentException>("styles", () => TimeSpan.ParseExact(inputString, new string[] { "s" }, new CultureInfo("en-US"), styles));
+            AssertExtensions.Throws<ArgumentException>("styles", () => TimeSpan.TryParseExact(inputString, "s", new CultureInfo("en-US"), styles, out result));
+            AssertExtensions.Throws<ArgumentException>("styles", () => TimeSpan.TryParseExact(inputString, new string[] { "s" }, new CultureInfo("en-US"), styles, out result));
         }
 
         public static IEnumerable<object[]> Subtract_TestData()
@@ -846,7 +897,7 @@ namespace System.Tests
             Assert.Throws<OverflowException>(() => TimeSpan.MinValue - new TimeSpan(1)); // Result < TimeSpan.MinValue
         }
 
-        public static IEnumerable<object[]> ToString_MemberData()
+        public static IEnumerable<object[]> ToString_TestData()
         {
             CultureInfo invariantInfo = CultureInfo.InvariantCulture;
             CultureInfo commaSeparatorInfo = new CultureInfo("fr-FR");
@@ -957,7 +1008,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(ToString_MemberData))]
+        [MemberData(nameof(ToString_TestData))]
         public static void ToString_Valid(TimeSpan input, string format, CultureInfo info, string expected)
         {
             Assert.Equal(expected, input.ToString(format, info));
@@ -971,11 +1022,17 @@ namespace System.Tests
             }
         }
 
+        public static IEnumerable<object[]> ToString_InvalidFormat_TestData()
+        {
+            yield return new object[] { "y" };
+            yield return new object[] { "cc" };
+            yield return new object[] { "F" };
+            yield return new object[] { "C" };
+        }
+
         [Theory]
-        [InlineData("y")]
-        [InlineData("cc")]
-        [InlineData("F")]
-        public static void ToString_InvalidFormat_ThrowsFormatException(string invalidFormat)
+        [MemberData(nameof(ToString_InvalidFormat_TestData))]
+        public void ToString_InvalidFormat_ThrowsFormatException(string invalidFormat)
         {
             Assert.Throws<FormatException>(() => new TimeSpan().ToString(invalidFormat));
         }

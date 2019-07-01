@@ -1,18 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{9E984EB2-827E-4029-9647-FB5F8B67C553}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <!-- Some internal types are needed, so we reference the implementation assembly, rather than the reference assembly. -->
-    <TargetingPackExclusions Include="System.IO.Pipelines" />
+    <DefaultReferenceExclusions Include="System.IO.Pipelines" />
     <ReferenceFromRuntime Include="System.IO.Pipelines" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure\HeapBufferPool.cs" />
+    <Compile Include="Infrastructure\DisposeTrackingBufferPool.cs" />
+    <Compile Include="Infrastructure\ReadOnlyStream.cs" />
+    <Compile Include="Infrastructure\WriteCheckStream.cs" />
+    <Compile Include="Infrastructure\WriteOnlyStream.cs" />
+    <Compile Include="Infrastructure\CancelledWritesStream.cs" />
+    <Compile Include="Infrastructure\CancelledReadsStream.cs" />
     <Compile Include="BackpressureTests.cs" />
+    <Compile Include="Infrastructure\ObserveDisposeStream.cs" />
+    <Compile Include="PipeReaderCopyToAsyncTests.cs" />
     <Compile Include="FlushAsyncCancellationTests.cs" />
     <Compile Include="FlushAsyncCompletionTests.cs" />
+    <Compile Include="FlushAsyncTests.cs" />
     <Compile Include="FlushResultTests.cs" />
     <Compile Include="PipeCompletionCallbacksTests.cs" />
     <Compile Include="PipeOptionsTests.cs" />
@@ -20,16 +30,24 @@
     <Compile Include="PipePoolTests.cs" />
     <Compile Include="PipeResetTests.cs" />
     <Compile Include="PipeTest.cs" />
+    <Compile Include="PipeWriterCopyToAsyncTests.cs" />
     <Compile Include="PipeWriterTests.cs" />
     <Compile Include="ReadAsyncCancellationTests.cs" />
     <Compile Include="ReadAsyncCompletionTests.cs" />
     <Compile Include="ReadResultTests.cs" />
     <Compile Include="SchedulerFacts.cs" />
-    <Compile Include="TestMemoryPool.cs" />
+    <Compile Include="StreamPipeReaderTests.cs" />
+    <Compile Include="Infrastructure\TestMemoryPool.cs" />
+    <Compile Include="StreamPipeWriterTests.cs" />
+    <Compile Include="Infrastructure\ThrowAfterNWritesStream.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="PipeLengthTests.cs" />
+    <Compile Include="BufferSegmentPoolTest.cs" />
     <Compile Include="PipeReaderWriterFacts.nonnetstandard.cs" />
     <Compile Include="PipeResetTests.nonnetstandard.cs" />
+    <Compile Include="PipePoolTests.nonnetstandard.cs" />
+    <Compile Include="PipeWriterStreamTests.nonnetstandard.cs" />
+    <Compile Include="PipeReaderStreamTests.nonnetstandard.cs" />
   </ItemGroup>
 </Project>

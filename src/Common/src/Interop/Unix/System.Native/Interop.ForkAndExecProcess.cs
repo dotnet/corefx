@@ -12,10 +12,10 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        internal static unsafe void ForkAndExecProcess(
+        internal static unsafe int ForkAndExecProcess(
             string filename, string[] argv, string[] envp, string cwd,
             bool redirectStdin, bool redirectStdout, bool redirectStderr,
-            bool setUser, uint userId, uint groupId,
+            bool setUser, uint userId, uint groupId, uint[] groups,
             out int lpChildPid, out int stdinFd, out int stdoutFd, out int stderrFd, bool shouldThrow = true)
         {
             byte** argvPtr = null, envpPtr = null;
@@ -24,25 +24,15 @@ internal static partial class Interop
             {
                 AllocNullTerminatedArray(argv, ref argvPtr);
                 AllocNullTerminatedArray(envp, ref envpPtr);
-                result = ForkAndExecProcess(
-                    filename, argvPtr, envpPtr, cwd,
-                    redirectStdin ? 1 : 0, redirectStdout ? 1 : 0, redirectStderr ? 1 :0,
-                    setUser ? 1 : 0, userId, groupId,
-                    out lpChildPid, out stdinFd, out stdoutFd, out stderrFd);
-                if (result != 0)
+                fixed (uint* pGroups = groups)
                 {
-                    // Normally we'd simply make this method return the result of the native
-                    // call and allow the caller to use GetLastWin32Error.  However, we need
-                    // to free the native arrays after calling the function, and doing so
-                    // stomps on the runtime's captured last error.  So we need to access the
-                    // error here, and without SetLastWin32Error available, we can't propagate
-                    // the error to the caller via the normal GetLastWin32Error mechanism.  We could
-                    // return 0 on success or the GetLastWin32Error value on failure, but that's
-                    // technically ambiguous, in the case of a failure with a 0 errno.  Simplest
-                    // solution then is just to throw here the same exception the Process caller
-                    // would have.  This can be revisited if we ever have another call site.
-                    throw new Win32Exception();
+                    result = ForkAndExecProcess(
+                        filename, argvPtr, envpPtr, cwd,
+                        redirectStdin ? 1 : 0, redirectStdout ? 1 : 0, redirectStderr ? 1 :0,
+                        setUser ? 1 : 0, userId, groupId, pGroups, groups?.Length ?? 0,
+                        out lpChildPid, out stdinFd, out stdoutFd, out stderrFd);
                 }
+                return result == 0 ? 0 : Marshal.GetLastWin32Error();
             }
             finally
             {
@@ -55,7 +45,7 @@ internal static partial class Interop
         private static extern unsafe int ForkAndExecProcess(
             string filename, byte** argv, byte** envp, string cwd,
             int redirectStdin, int redirectStdout, int redirectStderr,
-            int setUser, uint userId, uint groupId,
+            int setUser, uint userId, uint groupId, uint* groups, int groupsLength,
             out int lpChildPid, out int stdinFd, out int stdoutFd, out int stderrFd);
 
         private static unsafe void AllocNullTerminatedArray(string[] arr, ref byte** arrPtr)

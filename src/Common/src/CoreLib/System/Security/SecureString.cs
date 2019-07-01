@@ -69,7 +69,7 @@ namespace System.Security
             }
         }
 
-        // Do a deep-copy of the SecureString 
+        // Do a deep-copy of the SecureString
         public SecureString Copy()
         {
             lock (_methodLock)

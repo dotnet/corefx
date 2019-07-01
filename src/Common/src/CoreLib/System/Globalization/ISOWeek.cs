@@ -135,7 +135,7 @@ namespace System.Globalization
             int correction = GetWeekday(jan4.DayOfWeek) + 3;
 
             int ordinal = (week * 7) + GetWeekday(dayOfWeek) - correction;
-                
+
             return new DateTime(year, month: 1, day: 1).AddDays(ordinal - 1);
         }
 

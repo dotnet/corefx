@@ -15,12 +15,14 @@ internal static partial class Interop
     {
         internal const string RootPath = "/proc/";
         private const string ExeFileName = "/exe";
+        private const string CmdLineFileName = "/cmdline";
         private const string StatFileName = "/stat";
         private const string MapsFileName = "/maps";
         private const string FileDescriptorDirectoryName = "/fd/";
         private const string TaskDirectoryName = "/task/";
 
         internal const string SelfExeFilePath = RootPath + "self" + ExeFileName;
+        internal const string SelfCmdLineFilePath = RootPath + "self" + CmdLineFileName;
         internal const string ProcStatFilePath = RootPath + "stat";
 
         internal struct ParsedStat
@@ -33,7 +35,7 @@ internal static partial class Interop
             internal int pid;
             internal string comm;
             internal char state;
-            //internal int ppid;
+            internal int ppid;
             //internal int pgrp;
             internal int session;
             //internal int tty_nr;
@@ -85,6 +87,11 @@ internal static partial class Interop
         internal static string GetExeFilePathForProcess(int pid)
         {
             return RootPath + pid.ToString(CultureInfo.InvariantCulture) + ExeFileName;
+        }
+
+        internal static string GetCmdLinePathForProcess(int pid)
+        {
+            return RootPath + pid.ToString(CultureInfo.InvariantCulture) + CmdLineFileName;
         }
 
         internal static string GetStatFilePathForProcess(int pid)
@@ -233,7 +240,7 @@ internal static partial class Interop
             results.pid = parser.ParseNextInt32();
             results.comm = parser.MoveAndExtractNextInOuterParens();
             results.state = parser.ParseNextChar();
-            parser.MoveNextOrFail(); // ppid
+            results.ppid = parser.ParseNextInt32();
             parser.MoveNextOrFail(); // pgrp
             results.session = parser.ParseNextInt32();
             parser.MoveNextOrFail(); // tty_nr

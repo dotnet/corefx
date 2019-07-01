@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Linq;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -13,7 +14,7 @@ namespace System.Diagnostics.Tests
         public void TestModuleProperties()
         {
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;
-            Assert.True(modules.Count > 0);
+            Assert.InRange(modules.Count, 1, int.MaxValue);
 
             foreach (ProcessModule module in modules)
             {
@@ -29,11 +30,11 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Process.Modules is not supported on uap")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Process.Modules is not supported on uap")]
         public void Modules_Get_ContainsHostFileName()
         {
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;
-            Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains(HostRunnerName));
+            Assert.Contains(modules.Cast<ProcessModule>(), m => m.FileName.Contains(RemoteExecutor.HostRunnerName));
         }
 
         [Fact]

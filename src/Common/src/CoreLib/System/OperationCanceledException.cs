@@ -36,13 +36,13 @@ namespace System
             HResult = HResults.COR_E_OPERATIONCANCELED;
         }
 
-        public OperationCanceledException(string message)
+        public OperationCanceledException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_OPERATIONCANCELED;
         }
 
-        public OperationCanceledException(string message, Exception innerException)
+        public OperationCanceledException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_OPERATIONCANCELED;
@@ -55,13 +55,13 @@ namespace System
             CancellationToken = token;
         }
 
-        public OperationCanceledException(string message, CancellationToken token)
+        public OperationCanceledException(string? message, CancellationToken token)
             : this(message)
         {
             CancellationToken = token;
         }
 
-        public OperationCanceledException(string message, Exception innerException, CancellationToken token)
+        public OperationCanceledException(string? message, Exception? innerException, CancellationToken token)
             : this(message, innerException)
         {
             CancellationToken = token;

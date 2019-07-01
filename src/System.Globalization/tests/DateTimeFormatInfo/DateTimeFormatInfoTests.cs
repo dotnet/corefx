@@ -12,14 +12,14 @@ namespace System.Globalization.Tests
     {
         public static IEnumerable<object[]> DateTimeFormatInfo_TestData()
         {
-            yield return new object[] { (DateTimeFormatInfo) new CultureInfo("en-US").DateTimeFormat.Clone(), new GregorianCalendar(), "Gregorian Calendar" };
-            yield return new object[] { (DateTimeFormatInfo) new CultureInfo("ar-SA").DateTimeFormat.Clone(), new HijriCalendar(), "\u0627\u0644\u062a\u0642\u0648\u064a\u0645\u00a0\u0627\u0644\u0647\u062c\u0631\u064a" };
-            yield return new object[] { (DateTimeFormatInfo) new CultureInfo("ar-SA").DateTimeFormat.Clone(), new UmAlQuraCalendar(), "\u062a\u0642\u0648\u064a\u0645\u0020\u0627\u0645\u0020\u0627\u0644\u0642\u0631\u0649" };
-            yield return new object[] { (DateTimeFormatInfo) new CultureInfo("ja-JP").DateTimeFormat.Clone(), new JapaneseCalendar(), "\u548c\u66a6" };
-            yield return new object[] { (DateTimeFormatInfo) new CultureInfo("th-TH").DateTimeFormat.Clone(), new ThaiBuddhistCalendar(), "\u0e1e\u0e38\u0e17\u0e18\u0e28\u0e31\u0e01\u0e23\u0e32\u0e0a" };
-            yield return new object[] { (DateTimeFormatInfo) new CultureInfo("he-IL").DateTimeFormat.Clone(), new HebrewCalendar(), "\u05dc\u05d5\u05d7\u00a0\u05e9\u05e0\u05d4\u00a0\u05e2\u05d1\u05e8\u05d9" };
-            yield return new object[] { (DateTimeFormatInfo) new CultureInfo("ko-KR").DateTimeFormat.Clone(), new KoreanCalendar(), "\ub2e8\uae30" };
-            yield return new object[] { (DateTimeFormatInfo) new CultureInfo("fa-IR").DateTimeFormat.Clone(), new PersianCalendar(), "\u062a\u0642\u0648\u06cc\u0645\u0020\u0647\u062c\u0631\u06cc\u0020\u0634\u0645\u0633\u06cc" };
+            yield return new object[] { (DateTimeFormatInfo)new CultureInfo("en-US").DateTimeFormat.Clone(), new GregorianCalendar(), "Gregorian Calendar" };
+            yield return new object[] { (DateTimeFormatInfo)new CultureInfo("ar-SA").DateTimeFormat.Clone(), new HijriCalendar(), "\u0627\u0644\u062a\u0642\u0648\u064a\u0645\u00a0\u0627\u0644\u0647\u062c\u0631\u064a" };
+            yield return new object[] { (DateTimeFormatInfo)new CultureInfo("ar-SA").DateTimeFormat.Clone(), new UmAlQuraCalendar(), "\u062a\u0642\u0648\u064a\u0645\u0020\u0627\u0645\u0020\u0627\u0644\u0642\u0631\u0649" };
+            yield return new object[] { (DateTimeFormatInfo)new CultureInfo("ja-JP").DateTimeFormat.Clone(), new JapaneseCalendar(), "\u548c\u66a6" };
+            yield return new object[] { (DateTimeFormatInfo)new CultureInfo("th-TH").DateTimeFormat.Clone(), new ThaiBuddhistCalendar(), "\u0e1e\u0e38\u0e17\u0e18\u0e28\u0e31\u0e01\u0e23\u0e32\u0e0a" };
+            yield return new object[] { (DateTimeFormatInfo)new CultureInfo("he-IL").DateTimeFormat.Clone(), new HebrewCalendar(), "\u05dc\u05d5\u05d7\u00a0\u05e9\u05e0\u05d4\u00a0\u05e2\u05d1\u05e8\u05d9" };
+            yield return new object[] { (DateTimeFormatInfo)new CultureInfo("ko-KR").DateTimeFormat.Clone(), new KoreanCalendar(), "\ub2e8\uae30" };
+            yield return new object[] { (DateTimeFormatInfo)new CultureInfo("fa-IR").DateTimeFormat.Clone(), new PersianCalendar(), "\u062a\u0642\u0648\u06cc\u0645\u0020\u0647\u062c\u0631\u06cc\u0020\u0634\u0645\u0633\u06cc" };
         }
 
         public static IEnumerable<object[]> CultureNames_TestData()
@@ -34,7 +34,7 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
-        public void SeparatorsTest()
+        public void DateSeparatorTimeSeparator_Get_ReturnsExpected()
         {
             DateTimeFormatInfo dtfi = (DateTimeFormatInfo) CultureInfo.InvariantCulture.DateTimeFormat.Clone();
             Assert.False(dtfi.IsReadOnly, "IsReadOnly expected to be false");
@@ -62,7 +62,7 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(DateTimeFormatInfo_TestData))]
-        public void NativeCalendarNameTest(DateTimeFormatInfo dtfi, Calendar calendar, string nativeCalendarName)
+        public void NativeCalendarName_Get_ReturnsExpected(DateTimeFormatInfo dtfi, Calendar calendar, string nativeCalendarName)
         {
             try
             {
@@ -86,10 +86,10 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(CultureNames_TestData))]
-        public void AllDateTimePatternsTest(string cultureName)
+        public void GetAllDateTimePatterns_Invoke_ReturnsExpected(string cultureName)
         {
             char[] formats = { 'd', 'D', 'f', 'F', 'g', 'G', 'm', 'o', 'r', 's', 't', 'T', 'u', 'U', 'y' };
-            DateTimeFormatInfo dtfi = (DateTimeFormatInfo) new CultureInfo(cultureName).DateTimeFormat.Clone();
+            DateTimeFormatInfo dtfi = (DateTimeFormatInfo)new CultureInfo(cultureName).DateTimeFormat.Clone();
 
             var allPatterns = dtfi.GetAllDateTimePatterns();
             Dictionary<string, string> dic = new Dictionary<string, string>();
@@ -123,19 +123,19 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(CultureNames_TestData))]
-        public void ShortestDayNamesTest(string cultureName)
+        public void GetShortestDayName_Invoke_ReturnsExpected(string cultureName)
         {
             DateTimeFormatInfo dtfi = new CultureInfo(cultureName).DateTimeFormat;
             string [] shortestDayNames = dtfi.ShortestDayNames;
 
-            for (DayOfWeek day=DayOfWeek.Sunday; day <= DayOfWeek.Saturday; day++)
+            for (DayOfWeek day = DayOfWeek.Sunday; day <= DayOfWeek.Saturday; day++)
             {
                 Assert.Equal(shortestDayNames[(int) day], dtfi.GetShortestDayName(day));
             }
         }
 
         [Fact]
-        public void TestHebrewMonths()
+        public void Months_GetHebrew_ReturnsExpected()
         {
             CultureInfo ci = new CultureInfo("he-IL");
             ci.DateTimeFormat.Calendar = new HebrewCalendar();
@@ -160,6 +160,28 @@ namespace System.Globalization.Tests
                 Assert.Equal(dt, DateTime.ParseExact(formatted, ci.DateTimeFormat.LongDatePattern, ci));
                 dt = ci.DateTimeFormat.Calendar.AddMonths(dt, 1);
             }
+        }
+
+        [Fact]
+        public void TestFirstYearOfJapaneseEra()
+        {
+            DateTimeFormatInfo jpnFormat = new CultureInfo("ja-JP").DateTimeFormat;
+            jpnFormat.Calendar = new JapaneseCalendar();
+
+            string pattern = "gg yyyy'\u5E74' MM'\u6708' dd'\u65E5'"; // "gg yyyy'年' MM'月' dd'日'"
+            DateTime dt = new DateTime(1989, 01, 08); // Start of Heisei Era
+
+            string formattedDateWithGannen = "\u5E73\u6210 \u5143\u5E74 01\u6708 08\u65E5"; // 平成 元年 01月 08日
+            string formattedDate = dt.ToString(pattern, jpnFormat);
+
+            Assert.True(DateTime.TryParseExact(formattedDate, pattern, jpnFormat, DateTimeStyles.None, out DateTime parsedDate));
+            Assert.Equal(dt, parsedDate);
+
+            // If the formatting with Gan-nen is supported, then parsing should succeed. otherwise parsing should fail.
+            Assert.True(formattedDate.IndexOf("\u5143" /* 元 */, StringComparison.Ordinal) >= 0 ==
+                        DateTime.TryParseExact(formattedDateWithGannen, pattern, jpnFormat, DateTimeStyles.None, out parsedDate),
+                        $"Parsing '{formattedDateWithGannen}' result should match if '{formattedDate}' has Gan-nen symbol"
+            );
         }
     }
 }

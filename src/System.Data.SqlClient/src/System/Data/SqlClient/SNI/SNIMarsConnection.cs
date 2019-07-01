@@ -16,12 +16,11 @@ namespace System.Data.SqlClient.SNI
         private readonly Guid _connectionId = Guid.NewGuid();
         private readonly Dictionary<int, SNIMarsHandle> _sessions = new Dictionary<int, SNIMarsHandle>();
         private readonly byte[] _headerBytes = new byte[SNISMUXHeader.HEADER_LENGTH];
-
+        private readonly SNISMUXHeader _currentHeader = new SNISMUXHeader();
         private SNIHandle _lowerHandle;
         private ushort _nextSessionId = 0;
         private int _currentHeaderByteCount = 0;
         private int _dataBytesLeft = 0;
-        private SNISMUXHeader _currentHeader;
         private SNIPacket _currentPacket;
 
         /// <summary>
@@ -106,6 +105,11 @@ namespace System.Data.SqlClient.SNI
         /// <returns>SNI error code</returns>
         public uint ReceiveAsync(ref SNIPacket packet)
         {
+            if (packet != null)
+            {
+                packet.Release();
+                packet = null;
+            }
             lock (this)
             {
                 return _lowerHandle.ReceiveAsync(ref packet);
@@ -115,7 +119,6 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Check SNI handle connection
         /// </summary>
-        /// <param name="handle"></param>
         /// <returns>SNI error status</returns>
         public uint CheckConnection()
         {
@@ -135,6 +138,7 @@ namespace System.Data.SqlClient.SNI
             {
                 handle.HandleReceiveError(packet);
             }
+            packet?.Release();
         }
 
         /// <summary>
@@ -196,18 +200,9 @@ namespace System.Data.SqlClient.SNI
                             }
                         }
 
-                        _currentHeader = new SNISMUXHeader()
-                        {
-                            SMID = _headerBytes[0],
-                            flags = _headerBytes[1],
-                            sessionId = BitConverter.ToUInt16(_headerBytes, 2),
-                            length = BitConverter.ToUInt32(_headerBytes, 4) - SNISMUXHeader.HEADER_LENGTH,
-                            sequenceNumber = BitConverter.ToUInt32(_headerBytes, 8),
-                            highwater = BitConverter.ToUInt32(_headerBytes, 12)
-                        };
-
+                        _currentHeader.Read(_headerBytes);
                         _dataBytesLeft = (int)_currentHeader.length;
-                        _currentPacket = new SNIPacket((int)_currentHeader.length);
+                        _currentPacket = new SNIPacket(headerSize: 0, dataSize: (int)_currentHeader.length);
                     }
 
                     currentHeader = _currentHeader;

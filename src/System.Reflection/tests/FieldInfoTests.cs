@@ -47,7 +47,7 @@ namespace System.Reflection.Tests
         [InlineData(typeof(EnumAttr), "[System.Reflection.Tests.EnumAttr((System.Reflection.Tests.PublicEnum)1, name = \"EnumAttrSimple\")]")]
         [InlineData(typeof(TypeAttr), "[System.Reflection.Tests.TypeAttr(typeof(System.Object), name = \"TypeAttrSimple\")]")]
         [InlineData(typeof(Attr), "[System.Reflection.Tests.Attr((Int32)77, name = \"AttrSimple\")]")]
-        private static void CustomAttributes(Type type, string expectedToString)
+        public static void CustomAttributes(Type type, string expectedToString)
         {
             FieldInfo fieldInfo = GetField(typeof(FieldInfoTests), "fieldWithAttributes");
             CustomAttributeData attributeData = fieldInfo.CustomAttributes.First(attribute => attribute.AttributeType.Equals(type));
@@ -422,6 +422,16 @@ namespace System.Reflection.Tests
             fi.SetValue(obj, null);
             Assert.Equal(initialValue, fi.GetValue(obj));
         }
+
+        [Fact]
+        public void SecurityAttributes()
+        {
+            FieldInfo info = GetField(typeof(FieldInfoTests), nameof(FieldInfoTests.s_intField));
+
+            Assert.True(info.IsSecurityCritical);
+            Assert.False(info.IsSecuritySafeCritical);
+            Assert.False(info.IsSecurityTransparent);
+        }        
 
         private static FieldInfo GetField(Type type, string name)
         {

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Buffers;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
@@ -14,9 +13,6 @@ namespace Internal.Cryptography.Pal.AnyOS
 {
     internal sealed partial class ManagedPkcsPal : PkcsPal
     {
-        private static readonly byte[] s_rsaPkcsParameters = { 0x05, 0x00 };
-        private static readonly byte[] s_rsaOaepSha1Parameters = { 0x30, 0x00 };
-
         internal sealed class ManagedKeyTransPal : KeyTransRecipientInfoPal
         {
             private readonly KeyTransRecipientInfoAsn _asn;
@@ -53,12 +49,6 @@ namespace Internal.Cryptography.Pal.AnyOS
                         }
                         break;
                     case Oids.RsaOaep:
-                        if (parameters != null &&
-                            !parameters.Value.Span.SequenceEqual(s_rsaOaepSha1Parameters))
-                        {
-                            exception = new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                            return null;
-                        }
                         break;
                     default:
                         exception = new CryptographicException(
@@ -68,14 +58,15 @@ namespace Internal.Cryptography.Pal.AnyOS
                         return null;
                 }
 
-                return DecryptCekCore(cert, privateKey, _asn.EncryptedKey.Span, keyEncryptionAlgorithm, out exception);
+                return DecryptCekCore(cert, privateKey, _asn.EncryptedKey.Span, keyEncryptionAlgorithm, parameters, out exception);
             }
 
             internal static byte[] DecryptCekCore(
                 X509Certificate2 cert,
                 RSA privateKey,
-                ReadOnlySpan<byte> encrypedKey,
+                ReadOnlySpan<byte> encryptedKey,
                 string keyEncryptionAlgorithm,
+                ReadOnlyMemory<byte>? algorithmParameters,
                 out Exception exception)
             {
                 RSAEncryptionPadding encryptionPadding;
@@ -86,7 +77,10 @@ namespace Internal.Cryptography.Pal.AnyOS
                         encryptionPadding = RSAEncryptionPadding.Pkcs1;
                         break;
                     case Oids.RsaOaep:
-                        encryptionPadding = RSAEncryptionPadding.OaepSHA1;
+                        if (!PkcsHelpers.TryGetRsaOaepEncryptionPadding(algorithmParameters, out encryptionPadding, out exception))
+                        {
+                            return null;
+                        }
                         break;
                     default:
                         exception = new CryptographicException(
@@ -98,13 +92,13 @@ namespace Internal.Cryptography.Pal.AnyOS
 
                 if (privateKey != null)
                 {
-                    return DecryptKey(privateKey, encryptionPadding, encrypedKey, out exception);
+                    return DecryptKey(privateKey, encryptionPadding, encryptedKey, out exception);
                 }
                 else
                 {
                     using (RSA rsa = cert.GetRSAPrivateKey())
                     {
-                        return DecryptKey(rsa, encryptionPadding, encrypedKey, out exception);
+                        return DecryptKey(rsa, encryptionPadding, encryptedKey, out exception);
                     }
                 }
             }
@@ -142,20 +136,36 @@ namespace Internal.Cryptography.Pal.AnyOS
                     recipient.RecipientIdentifierType.ToString());
             }
 
-            RSAEncryptionPadding padding;
+            RSAEncryptionPadding padding = recipient.RSAEncryptionPadding ?? RSAEncryptionPadding.Pkcs1;
 
-            switch (recipient.Certificate.GetKeyAlgorithm())
+            if (padding == RSAEncryptionPadding.Pkcs1)
             {
-                case Oids.RsaOaep:
-                    padding = RSAEncryptionPadding.OaepSHA1;
-                    ktri.KeyEncryptionAlgorithm.Algorithm = new Oid(Oids.RsaOaep, Oids.RsaOaep);
-                    ktri.KeyEncryptionAlgorithm.Parameters = s_rsaOaepSha1Parameters;
-                    break;
-                default:
-                    padding = RSAEncryptionPadding.Pkcs1;
-                    ktri.KeyEncryptionAlgorithm.Algorithm = new Oid(Oids.Rsa, Oids.Rsa);
-                    ktri.KeyEncryptionAlgorithm.Parameters = s_rsaPkcsParameters;
-                    break;
+                ktri.KeyEncryptionAlgorithm.Algorithm = new Oid(Oids.Rsa, Oids.Rsa);
+                ktri.KeyEncryptionAlgorithm.Parameters = s_rsaPkcsParameters;
+            }
+            else if (padding == RSAEncryptionPadding.OaepSHA1)
+            {
+                ktri.KeyEncryptionAlgorithm.Algorithm = new Oid(Oids.RsaOaep, Oids.RsaOaep);
+                ktri.KeyEncryptionAlgorithm.Parameters = s_rsaOaepSha1Parameters;
+            }
+            else if (padding == RSAEncryptionPadding.OaepSHA256)
+            {
+                ktri.KeyEncryptionAlgorithm.Algorithm = new Oid(Oids.RsaOaep, Oids.RsaOaep);
+                ktri.KeyEncryptionAlgorithm.Parameters = s_rsaOaepSha256Parameters;
+            }
+            else if (padding == RSAEncryptionPadding.OaepSHA384)
+            {
+                ktri.KeyEncryptionAlgorithm.Algorithm = new Oid(Oids.RsaOaep, Oids.RsaOaep);
+                ktri.KeyEncryptionAlgorithm.Parameters = s_rsaOaepSha384Parameters;
+            }
+            else if (padding == RSAEncryptionPadding.OaepSHA512)
+            {
+                ktri.KeyEncryptionAlgorithm.Algorithm = new Oid(Oids.RsaOaep, Oids.RsaOaep);
+                ktri.KeyEncryptionAlgorithm.Parameters = s_rsaOaepSha512Parameters;
+            }
+            else
+            {
+                throw new CryptographicException(SR.Cryptography_Cms_UnknownAlgorithm);
             }
 
             using (RSA rsa = recipient.Certificate.GetRSAPublicKey())
@@ -179,13 +189,13 @@ namespace Internal.Cryptography.Pal.AnyOS
                 return null;
             }
 
-#if netcoreapp
+#if netcoreapp || netstandard21
             byte[] cek = null;
             int cekLength = 0;
 
             try
             {
-                cek = ArrayPool<byte>.Shared.Rent(privateKey.KeySize / 8);
+                cek = CryptoPool.Rent(privateKey.KeySize / 8);
 
                 if (!privateKey.TryDecrypt(encryptedKey, cek, encryptionPadding, out cekLength))
                 {
@@ -206,8 +216,7 @@ namespace Internal.Cryptography.Pal.AnyOS
             {
                 if (cek != null)
                 {
-                    Array.Clear(cek, 0, cekLength);
-                    ArrayPool<byte>.Shared.Return(cek);
+                    CryptoPool.Return(cek, cekLength);
                 }
             }
 #else

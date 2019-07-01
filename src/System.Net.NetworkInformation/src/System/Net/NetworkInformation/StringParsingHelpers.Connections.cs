@@ -46,19 +46,41 @@ namespace System.Net.NetworkInformation
             // First line is header in each file.
             TcpConnectionInformation[] connections = new TcpConnectionInformation[v4connections.Length + v6connections.Length - 2];
             int index = 0;
+            int skip = 0;
 
             // TCP Connections
             for (int i = 1; i < v4connections.Length; i++) // Skip first line header.
             {
                 string line = v4connections[i];
-                connections[index++] = ParseTcpConnectionInformationFromLine(line);
+                connections[index] = ParseTcpConnectionInformationFromLine(line);
+                if (connections[index].State == TcpState.Listen)
+                {
+                    skip++;
+                }
+                else
+                {
+                    index++;
+                }
             }
 
             // TCP6 Connections
             for (int i = 1; i < v6connections.Length; i++) // Skip first line header.
             {
                 string line = v6connections[i];
-                connections[index++] = ParseTcpConnectionInformationFromLine(line);
+                connections[index] = ParseTcpConnectionInformationFromLine(line);
+                if (connections[index].State == TcpState.Listen)
+                {
+                    skip++;
+                }
+                else
+                {
+                    index++;
+                }
+            }
+
+            if (skip != 0)
+            {
+                Array.Resize(ref connections, connections.Length - skip);
             }
 
             return connections;
@@ -77,24 +99,44 @@ namespace System.Net.NetworkInformation
             string tcp6FileContents = File.ReadAllText(tcp6ConnectionsFile);
             string[] v6connections = tcp6FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
-            /// First line is header in each file.
+            // First line is header in each file.
             IPEndPoint[] endPoints = new IPEndPoint[v4connections.Length + v6connections.Length - 2];
             int index = 0;
+            int skip = 0;
 
             // TCP Connections
             for (int i = 1; i < v4connections.Length; i++) // Skip first line header.
             {
-                string line = v4connections[i];
-                IPEndPoint endPoint = ParseLocalConnectionInformation(line);
-                endPoints[index++] = endPoint;
+                TcpConnectionInformation ti = ParseTcpConnectionInformationFromLine(v4connections[i]);
+                if (ti.State == TcpState.Listen)
+                {
+                    endPoints[index] = ti.LocalEndPoint;
+                    index++;
+                }
+                else
+                {
+                    skip++;
+                }
             }
 
             // TCP6 Connections
             for (int i = 1; i < v6connections.Length; i++) // Skip first line header.
             {
-                string line = v6connections[i];
-                IPEndPoint endPoint = ParseLocalConnectionInformation(line);
-                endPoints[index++] = endPoint;
+                TcpConnectionInformation ti = ParseTcpConnectionInformationFromLine(v6connections[i]);
+                if (ti.State == TcpState.Listen)
+                {
+                    endPoints[index] = ti.LocalEndPoint;
+                    index++;
+                }
+                else
+                {
+                    skip++;
+                }
+            }
+
+            if (skip != 0)
+            {
+                Array.Resize(ref endPoints, endPoints.Length - skip);
             }
 
             return endPoints;
@@ -244,16 +286,38 @@ namespace System.Net.NetworkInformation
             return ipAddress;
         }
 
-        // Parses a 128-bit IPv6 Address stored as a 32-character hex number.
+        // Parses a 128-bit IPv6 Address stored as 4 concatenated 32-bit hex numbers.
+        // If isSequence is true it assumes that hexAddress is in sequence of IPv6 bytes.
+        // First number corresponds to lower address part
+        // E.g. IP-address:                           fe80::215:5dff:fe00:402
+        //      It's bytes in direct order:           FE-80-00-00  00-00-00-00  02-15-5D-FF  FE-00-04-02
+        //      It's represenation in /proc/net/tcp6: 00-00-80-FE  00-00-00-00  FF-5D-15-02  02-04-00-FE
+        //                                             (dashes and spaces added above for readability)
         // Strings passed to this must be 32 characters in length.
-        private static IPAddress ParseIPv6HexString(string hexAddress)
+        private static IPAddress ParseIPv6HexString(string hexAddress, bool isNetworkOrder = false)
         {
             Debug.Assert(hexAddress.Length == 32);
             byte[] addressBytes = new byte[16];
-            for (int i = 0; i < 16; i++)
+            if (isNetworkOrder)
             {
-                addressBytes[i] = (byte)(HexToByte(hexAddress[(i * 2)])
-                                    + HexToByte(hexAddress[(i * 2) + 1]));
+                for (int i = 0; i < 16; i++)
+                {
+                    addressBytes[i] = (byte)(HexToByte(hexAddress[(i * 2)]) * 16
+                                           + HexToByte(hexAddress[(i * 2) + 1]));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        int srcIndex = i * 4 + 3 - j;
+                        int targetIndex = i * 4 + j;
+                        addressBytes[targetIndex] = (byte)(HexToByte(hexAddress[srcIndex * 2]) * 16
+                                                         + HexToByte(hexAddress[srcIndex * 2 + 1]));
+                    }
+                }
             }
 
             IPAddress ipAddress = new IPAddress(addressBytes);

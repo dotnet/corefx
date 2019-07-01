@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Security;
+using System.Net.Test.Common;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -92,7 +94,7 @@ namespace System.Net.Http.Functional.Tests
 
         public static Task WhenAllCompletedOrAnyFailed(params Task[] tasks)
         {
-            return TaskTimeoutExtensions.WhenAllOrAnyFailed(tasks);
+            return TaskTimeoutExtensions.WhenAllOrAnyFailed(tasks, PlatformDetection.IsArmProcess || PlatformDetection.IsArm64Process ? PassingTestTimeoutMilliseconds * 5 : PassingTestTimeoutMilliseconds);
         }
 
         public static Task WhenAllCompletedOrAnyFailedWithTimeout(int timeoutInMilliseconds, params Task[] tasks)
@@ -109,7 +111,7 @@ namespace System.Net.Http.Functional.Tests
         public static IPAddress GetIPv6LinkLocalAddress() =>
             NetworkInterface
                 .GetAllNetworkInterfaces()
-                .Where(i => i.Description != "PANGP Virtual Ethernet Adapter")      // This is a VPN adapter, but is reported as a regular Ethernet interface with
+                .Where(i => !i.Description.StartsWith("PANGP Virtual Ethernet"))    // This is a VPN adapter, but is reported as a regular Ethernet interface with
                                                                                     // a valid link-local address, but the link-local address doesn't actually work.
                                                                                     // So just manually filter it out.
                 .SelectMany(i => i.GetIPProperties().UnicastAddresses)
@@ -117,43 +119,74 @@ namespace System.Net.Http.Functional.Tests
                 .Where(a => a.IsIPv6LinkLocal)
                 .FirstOrDefault();
 
-        public static void EnsureHttp2Feature(HttpClientHandler handler)
+        public static void EnableUnencryptedHttp2IfNecessary(HttpClientHandler handler)
         {
-            // All .NET Core implementations of HttpClientHandler have HTTP/2 enabled by default except when using
-            // SocketsHttpHandler. Right now, the HTTP/2 feature is disabled on SocketsHttpHandler unless certain
-            // AppContext switches or environment variables are set. To help with testing, we can enable the HTTP/2
-            // feature for a specific handler instance by using reflection.
-            FieldInfo field_socketsHttpHandler = typeof(HttpClientHandler).GetField(
-                "_socketsHttpHandler",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-            if (field_socketsHttpHandler == null)
+            if (PlatformDetection.SupportsAlpn && !Capability.Http2ForceUnencryptedLoopback())
+            {
+                return;
+            }
+
+            FieldInfo socketsHttpHandlerField = typeof(HttpClientHandler).GetField("_socketsHttpHandler", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (socketsHttpHandlerField == null)
             {
                 // Not using .NET Core implementation, i.e. could be .NET Framework or UAP.
                 return;
             }
 
-            object _socketsHttpHandler = field_socketsHttpHandler.GetValue(handler);
-            if (_socketsHttpHandler == null)
+            object socketsHttpHandler = socketsHttpHandlerField.GetValue(handler);
+            if (socketsHttpHandler == null)
             {
                 // Not using SocketsHttpHandler, i.e. using WinHttpHandler or CurlHandler.
                 return;
             }
 
             // Get HttpConnectionSettings object from SocketsHttpHandler.
-            Type type_SocketsHttpHandler = typeof(HttpClientHandler).Assembly.GetType("System.Net.Http.SocketsHttpHandler");
-            FieldInfo field_settings = type_SocketsHttpHandler.GetField(
-                "_settings",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.NotNull(field_settings);
-            object _settings = field_settings.GetValue(_socketsHttpHandler);
-            Assert.NotNull(_settings);
+            Type socketsHttpHandlerType = typeof(HttpClientHandler).Assembly.GetType("System.Net.Http.SocketsHttpHandler");
+            FieldInfo settingsField = socketsHttpHandlerType.GetField("_settings", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.NotNull(settingsField);
+            object settings = settingsField.GetValue(socketsHttpHandler);
+            Assert.NotNull(settings);
 
-            // Set _maxHttpVersion field to HTTP/2.0.
-            Type type_HttpConnectionSettings = typeof(HttpClientHandler).Assembly.GetType("System.Net.Http.HttpConnectionSettings");
-            FieldInfo field_maxHttpVersion = type_HttpConnectionSettings.GetField(
-                "_maxHttpVersion",
-                BindingFlags.NonPublic | BindingFlags.Instance);
-            field_maxHttpVersion.SetValue(_settings, new Version(2, 0));
+            // Allow HTTP/2.0 via unencrypted socket if ALPN is not supported on platform.
+            Type httpConnectionSettingsType = typeof(HttpClientHandler).Assembly.GetType("System.Net.Http.HttpConnectionSettings");
+            FieldInfo allowUnencryptedHttp2Field = httpConnectionSettingsType.GetField("_allowUnencryptedHttp2", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.NotNull(allowUnencryptedHttp2Field);
+            allowUnencryptedHttp2Field.SetValue(settings, true);
+        }
+
+        public static bool NativeHandlerSupportsSslConfiguration()
+        {
+#if TargetsWindows
+            return true;
+#else
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return false;
+            }
+
+            // For other Unix-based systems it's true if (and only if) the currect openssl backend
+            // is used with libcurl.
+            bool hasAnyOpenSsl =
+                Interop.Http.GetSslVersionDescription()?.StartsWith(Interop.Http.OpenSslDescriptionPrefix, StringComparison.OrdinalIgnoreCase) ?? false;
+
+            if (!hasAnyOpenSsl)
+            {
+                return false;
+            }
+
+            // We're on an OpenSSL-based system, with an OpenSSL backend.
+            // Ask the product how it feels about this.
+            Type interopHttp = typeof(HttpClient).Assembly.GetType("Interop+Http");
+            PropertyInfo hasMatchingOpenSslVersion = interopHttp.GetProperty("HasMatchingOpenSslVersion", BindingFlags.Static | BindingFlags.NonPublic);
+            return (bool)hasMatchingOpenSslVersion.GetValue(null);
+#endif
+        }
+
+        public static byte[] GenerateRandomContent(int size)
+        {
+            byte[] data = new byte[size];
+            new Random(42).NextBytes(data);
+            return data;
         }
     }
 }

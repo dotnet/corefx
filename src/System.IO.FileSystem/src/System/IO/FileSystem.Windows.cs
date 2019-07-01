@@ -82,7 +82,7 @@ namespace System.IO
             int length = fullPath.Length;
 
             // We need to trim the trailing slash or the code will try to create 2 directories of the same name.
-            if (length >= 2 && PathInternal.EndsInDirectorySeparator(fullPath.AsSpan()))
+            if (length >= 2 && Path.EndsInDirectorySeparator(fullPath.AsSpan()))
                 length--;
 
             int lengthRoot = PathInternal.GetRootLength(fullPath.AsSpan());
@@ -126,9 +126,9 @@ namespace System.IO
                 {
                     int currentError = Marshal.GetLastWin32Error();
                     // While we tried to avoid creating directories that don't
-                    // exist above, there are at least two cases that will 
+                    // exist above, there are at least two cases that will
                     // cause us to see ERROR_ALREADY_EXISTS here.  FileExists
-                    // can fail because we didn't have permission to the 
+                    // can fail because we didn't have permission to the
                     // directory.  Secondly, another thread or process could
                     // create the directory between the time we check and the
                     // time we try using the directory.  Thirdly, it could
@@ -157,7 +157,7 @@ namespace System.IO
                 return;
             }
 
-            // Only throw an exception if creating the exact directory we 
+            // Only throw an exception if creating the exact directory we
             // wanted failed to work correctly.
             if (!r && (firstError != 0))
                 throw Win32Marshal.GetExceptionForWin32Error(firstError, errorString);
@@ -200,7 +200,7 @@ namespace System.IO
             int errorCode = Interop.Errors.ERROR_SUCCESS;
 
             // Neither GetFileAttributes or FindFirstFile like trailing separators
-            path = PathInternal.TrimEndingDirectorySeparator(path);
+            path = Path.TrimEndingDirectorySeparator(path);
 
             using (DisableMediaInsertionPrompt.Create())
             {
@@ -222,7 +222,7 @@ namespace System.IO
                     {
                         // Assert so we can track down other cases (if any) to add to our test suite
                         Debug.Assert(errorCode == Interop.Errors.ERROR_ACCESS_DENIED || errorCode == Interop.Errors.ERROR_SHARING_VIOLATION,
-                            $"Unexpected error code getting attributes {errorCode}");
+                            $"Unexpected error code getting attributes {errorCode} from path {path}");
 
                         // Files that are marked for deletion will not let you GetFileAttributes,
                         // ERROR_ACCESS_DENIED is given back without filling out the data struct.
@@ -234,7 +234,7 @@ namespace System.IO
                         //
                         // Ideally we'd only try again for known cases due to the potential performance
                         // hit. The last attempt to do so baked for nearly a year before we found the
-                        // pagefile.sys case. As such we're probably stuck filtering out specific 
+                        // pagefile.sys case. As such we're probably stuck filtering out specific
                         // cases that we know we don't want to retry on.
 
                         var findData = new Interop.Kernel32.WIN32_FIND_DATA();
@@ -328,7 +328,7 @@ namespace System.IO
 
         public static void MoveDirectory(string sourceFullPath, string destFullPath)
         {
-            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath))
+            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath, overwrite: false))
             {
                 int errorCode = Marshal.GetLastWin32Error();
 
@@ -343,9 +343,9 @@ namespace System.IO
             }
         }
 
-        public static void MoveFile(string sourceFullPath, string destFullPath)
+        public static void MoveFile(string sourceFullPath, string destFullPath, bool overwrite)
         {
-            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath))
+            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath, overwrite))
             {
                 throw Win32Marshal.GetExceptionForLastWin32Error();
             }
@@ -408,7 +408,7 @@ namespace System.IO
 
         private static void GetFindData(string fullPath, ref Interop.Kernel32.WIN32_FIND_DATA findData)
         {
-            using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(PathInternal.TrimEndingDirectorySeparator(fullPath), ref findData))
+            using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(Path.TrimEndingDirectorySeparator(fullPath), ref findData))
             {
                 if (handle.IsInvalid)
                 {
@@ -427,7 +427,7 @@ namespace System.IO
             // Reparse points can be used for other types of files, notably OneDrive placeholder files. We
             // should treat reparse points that are not name surrogates as any other directory, e.g. recurse
             // into them. Surrogates should just be detached.
-            // 
+            //
             // See
             // https://github.com/dotnet/corefx/issues/24250
             // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365511.aspx
@@ -500,7 +500,7 @@ namespace System.IO
                                 if (!Interop.Kernel32.DeleteVolumeMountPoint(mountPoint) && exception == null)
                                 {
                                     errorCode = Marshal.GetLastWin32Error();
-                                    if (errorCode != Interop.Errors.ERROR_SUCCESS && 
+                                    if (errorCode != Interop.Errors.ERROR_SUCCESS &&
                                         errorCode != Interop.Errors.ERROR_PATH_NOT_FOUND)
                                     {
                                         exception = Win32Marshal.GetExceptionForWin32Error(errorCode, fileName);

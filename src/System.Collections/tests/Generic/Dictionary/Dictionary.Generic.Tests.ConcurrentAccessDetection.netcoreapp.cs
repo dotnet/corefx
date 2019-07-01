@@ -28,10 +28,10 @@ namespace Generic.Dictionary
 
                 Assert.Equal(comparer, dictionary.GetType().GetField("_comparer", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(dictionary));
                 Assert.Equal(isValueType, dictionary.GetType().GetGenericArguments()[0].IsValueType);
-                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => add(dictionary)).TargetSite.Name);
-                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => get(dictionary)).TargetSite.Name);
-                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => remove(dictionary)).TargetSite.Name);
-                Assert.Equal("ThrowInvalidOperationException_ConcurrentOperationsNotSupported", Assert.Throws<InvalidOperationException>(() => removeOutParam(dictionary)).TargetSite.Name);
+                Assert.Throws<InvalidOperationException>(() => add(dictionary));
+                Assert.Throws<InvalidOperationException>(() => get(dictionary));
+                Assert.Throws<InvalidOperationException>(() => remove(dictionary));
+                Assert.Throws<InvalidOperationException>(() => removeOutParam(dictionary));
             }, TaskCreationOptions.LongRunning);
 
             // If Dictionary regresses, we do not want to hang here indefinitely
@@ -87,7 +87,7 @@ namespace Generic.Dictionary
 
     // We use a custom type instead of string because string use optimized comparer https://github.com/dotnet/coreclr/blob/master/src/System.Private.CoreLib/shared/System/Collections/Generic/Dictionary.cs#L79
     // We want to test case with _comparer = null
-    class DummyRefType
+    public class DummyRefType
     {
         public int Value { get; set; }
         public override bool Equals(object obj)
@@ -101,7 +101,7 @@ namespace Generic.Dictionary
         }
     }
 
-    class CustomEqualityComparerDummyRefType : EqualityComparer<DummyRefType>
+    public class CustomEqualityComparerDummyRefType : EqualityComparer<DummyRefType>
     {
         public override bool Equals(DummyRefType x, DummyRefType y)
         {
@@ -114,7 +114,7 @@ namespace Generic.Dictionary
         }
     }
 
-    class CustomEqualityComparerInt32ValueType : EqualityComparer<int>
+    public class CustomEqualityComparerInt32ValueType : EqualityComparer<int>
     {
         public override bool Equals(int x, int y)
         {

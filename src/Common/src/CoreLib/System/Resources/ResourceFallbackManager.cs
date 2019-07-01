@@ -27,10 +27,10 @@ namespace System.Resources
     internal class ResourceFallbackManager : IEnumerable<CultureInfo>
     {
         private CultureInfo m_startingCulture;
-        private CultureInfo m_neutralResourcesCulture;
+        private CultureInfo? m_neutralResourcesCulture;
         private bool m_useParents;
 
-        internal ResourceFallbackManager(CultureInfo startingCulture, CultureInfo neutralResourcesCulture, bool useParents)
+        internal ResourceFallbackManager(CultureInfo? startingCulture, CultureInfo? neutralResourcesCulture, bool useParents)
         {
             if (startingCulture != null)
             {

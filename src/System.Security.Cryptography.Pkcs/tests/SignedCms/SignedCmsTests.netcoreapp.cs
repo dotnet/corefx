@@ -360,6 +360,120 @@ namespace System.Security.Cryptography.Pkcs.Tests
             }
         }
 
+        [Fact]
+        public static void AddAttributeToIndefiniteLengthContent()
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.IndefiniteLengthContentDocument);
+            cms.SignerInfos[0].AddUnsignedAttribute(new Pkcs9DocumentDescription("Indefinite length test"));
+            byte[] encoded = cms.Encode();
+
+            cms = new SignedCms();
+            cms.Decode(encoded);
+            // It should sort first, because it's smaller.
+            Assert.Equal(Oids.DocumentDescription, cms.SignerInfos[0].UnsignedAttributes[0].Oid.Value);
+        }
+
+        [Fact]
+        public static void AddSigner_RSA_EphemeralKey()
+        {
+            using (RSA rsa = RSA.Create())
+            using (X509Certificate2 publicCertificate = Certificates.RSA2048SignatureOnly.GetCertificate())
+            using (X509Certificate2 certificateWithKey = Certificates.RSA2048SignatureOnly.TryGetCertificateWithPrivateKey(exportable: true))
+            {
+                if (certificateWithKey == null)
+                {
+                    return;
+                }
+
+                using (RSA privateKey = certificateWithKey.GetRSAPrivateKey())
+                using (RSA exportableKey = privateKey.MakeExportable())
+                {
+                    rsa.ImportParameters(exportableKey.ExportParameters(true));
+                }
+                using (X509Certificate2 certWithEphemeralKey = publicCertificate.CopyWithPrivateKey(rsa))
+                {
+                    ContentInfo content = new ContentInfo(new byte[] { 1, 2, 3 });
+                    SignedCms cms = new SignedCms(content, false);
+                    CmsSigner signer = new CmsSigner(certWithEphemeralKey);
+                    cms.ComputeSignature(signer);
+                }
+            }
+        }
+
+        [Fact]
+        public static void AddSigner_DSA_EphemeralKey()
+        {
+            using (DSA dsa = DSA.Create())
+            using (X509Certificate2 publicCertificate = Certificates.Dsa1024.GetCertificate())
+            using (X509Certificate2 certificateWithKey = Certificates.Dsa1024.TryGetCertificateWithPrivateKey(exportable: true))
+            {
+                if (certificateWithKey == null)
+                {
+                    return;
+                }
+
+                using (DSA privateKey = certificateWithKey.GetDSAPrivateKey())
+                using (DSA exportableKey = privateKey.MakeExportable())
+                {
+                    dsa.ImportParameters(exportableKey.ExportParameters(true));
+                }
+                using (X509Certificate2 certWithEphemeralKey = publicCertificate.CopyWithPrivateKey(dsa))
+                {
+                    ContentInfo content = new ContentInfo(new byte[] { 1, 2, 3 });
+                    SignedCms cms = new SignedCms(content, false);
+                    CmsSigner signer = new CmsSigner(certWithEphemeralKey)
+                    {
+                        DigestAlgorithm = new Oid(Oids.Sha1, Oids.Sha1)
+                    };
+                    cms.ComputeSignature(signer);
+                }
+            }
+        }
+
+        [Fact]
+        public static void AddSigner_ECDSA_EphemeralKey()
+        {
+            using (ECDsa ecdsa = ECDsa.Create())
+            using (X509Certificate2 publicCertificate = Certificates.ECDsaP256Win.GetCertificate())
+            using (X509Certificate2 certificateWithKey = Certificates.ECDsaP256Win.TryGetCertificateWithPrivateKey(exportable: true))
+            {
+                if (certificateWithKey == null)
+                {
+                    return;
+                }
+
+                using (ECDsa privateKey = certificateWithKey.GetECDsaPrivateKey())
+                using (ECDsa exportableKey = privateKey.MakeExportable())
+                {
+                    ecdsa.ImportParameters(exportableKey.ExportParameters(true));
+                }
+                using (X509Certificate2 certWithEphemeralKey = publicCertificate.CopyWithPrivateKey(ecdsa))
+                {
+                    ContentInfo content = new ContentInfo(new byte[] { 1, 2, 3 });
+                    SignedCms cms = new SignedCms(content, false);
+                    CmsSigner signer = new CmsSigner(certWithEphemeralKey);
+                    cms.ComputeSignature(signer);
+                }
+            }
+        }
+
+        [Fact]
+        public static void CreateSignature_DigestAlgorithmWithSignatureOid_Prohibited()
+        {
+            ContentInfo content = new ContentInfo(new byte[] { 1, 2, 3 });
+            SignedCms cms = new SignedCms(content);
+            using (X509Certificate2 cert = Certificates.RSAKeyTransferCapi1.TryGetCertificateWithPrivateKey())
+            {
+                CmsSigner signer = new CmsSigner(cert);
+                signer.DigestAlgorithm = new Oid(Oids.RsaPkcs1Sha256);
+
+                Assert.Throws<CryptographicException>(() => {
+                    cms.ComputeSignature(signer);
+                });
+            }
+        }
+
         private static void VerifyWithExplicitPrivateKey(X509Certificate2 cert, AsymmetricAlgorithm key)
         {
             using (var pubCert = new X509Certificate2(cert.RawData))

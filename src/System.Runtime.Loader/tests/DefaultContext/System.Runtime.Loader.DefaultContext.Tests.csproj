@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <ProjectGuid>{701CB3BC-00DC-435D-BDE4-C5FC29A708A8}</ProjectGuid>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DefaultLoadContextTest.cs" />
@@ -14,7 +14,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </ProjectReference>
   </ItemGroup>
-  <Target Name="RenameTestAssembly" AfterTargets="AfterBuild">
-    <Move SourceFiles="$(TestPath)\System.Runtime.Loader.Noop.Assembly.dll" DestinationFiles="$(TestPath)\System.Runtime.Loader.Noop.Assembly_test.dll" />
+  <Target Name="RenameTestAssembly" AfterTargets="PrepareForRun">
+    <Move SourceFiles="$(OutDir)System.Runtime.Loader.Noop.Assembly.dll" DestinationFiles="$(OutDir)System.Runtime.Loader.Noop.Assembly_test.dll" />
   </Target>
 </Project>

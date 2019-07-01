@@ -93,7 +93,6 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new Queue());
@@ -112,7 +111,6 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void DebuggerAttribute_NullQueue_ThrowsArgumentNullException()
         {
             bool threwNull = false;
@@ -850,7 +848,7 @@ namespace System.Collections.Tests
             {
                 queueMother.Enqueue(i);
             }
-            Assert.Equal(queueMother.SyncRoot.GetType(), typeof(object));
+            Assert.IsType<Queue>(queueMother.SyncRoot);
 
             var queueSon = Queue.Synchronized(queueMother);
             _queueGrandDaughter = Queue.Synchronized(queueSon);

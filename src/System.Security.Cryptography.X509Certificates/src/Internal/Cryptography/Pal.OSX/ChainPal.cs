@@ -212,11 +212,14 @@ namespace Internal.Cryptography.Pal
 
             if (!IsPolicyMatch(elements, applicationPolicy, certificatePolicy))
             {
-                Tuple<X509Certificate2, int> currentValue = elements[0];
+                for (int i = 0; i < elements.Length; i++)
+                {
+                    Tuple<X509Certificate2, int> currentValue = elements[i];
 
-                elements[0] = Tuple.Create(
-                    currentValue.Item1,
-                    currentValue.Item2 | (int)X509ChainStatusFlags.NotValidForUsage);
+                    elements[i] = Tuple.Create(
+                        currentValue.Item1,
+                        currentValue.Item2 | (int)X509ChainStatusFlags.NotValidForUsage);
+                }
             }
 
             FixupRevocationStatus(elements, revocationFlag);
@@ -413,9 +416,6 @@ namespace Internal.Cryptography.Pal
 
         private X509ChainElement BuildElement(X509Certificate2 cert, int dwStatus)
         {
-            const int errSecCertificateExpired = -67818;
-            const int errSecCertificateNotValidYet = -67819;
-
             if (dwStatus == 0)
             {
                 return new X509ChainElement(cert, Array.Empty<X509ChainStatus>(), "");
@@ -429,29 +429,30 @@ namespace Internal.Cryptography.Pal
                 if ((mapping.ChainStatusFlag & flags) == mapping.ChainStatusFlag)
                 {
                     int osStatus;
+                    string errorString;
 
                     // Disambiguate the NotTimeValid code to get the right string.
                     if (mapping.ChainStatusFlag == X509ChainStatusFlags.NotTimeValid)
                     {
-                        if (cert != null && cert.NotBefore > _verificationTime)
-                        {
-                            osStatus = errSecCertificateNotValidYet;
-                        }
-                        else
-                        {
-                            osStatus = errSecCertificateExpired;
-                        }
+                        const int errSecCertificateExpired = -67818;
+                        const int errSecCertificateNotValidYet = -67819;
+
+                        osStatus = cert != null && cert.NotBefore > _verificationTime ?
+                            errSecCertificateNotValidYet :
+                            errSecCertificateExpired;
+                        errorString = Interop.AppleCrypto.GetSecErrorString(osStatus);
                     }
                     else
                     {
                         osStatus = mapping.OSStatus;
+                        errorString = mapping.ErrorString;
                     }
 
                     statuses.Add(
                         new X509ChainStatus
                         {
                             Status = mapping.ChainStatusFlag,
-                            StatusInformation = Interop.AppleCrypto.GetSecErrorString(osStatus),
+                            StatusInformation = errorString
                         });
                 }
             }
@@ -492,11 +493,13 @@ namespace Internal.Cryptography.Pal
 
             internal readonly X509ChainStatusFlags ChainStatusFlag;
             internal readonly int OSStatus;
+            internal readonly string ErrorString;
 
             private X509ChainErrorMapping(X509ChainStatusFlags flag)
             {
                 ChainStatusFlag = flag;
                 OSStatus = Interop.AppleCrypto.GetOSStatusForChainStatus(flag);
+                ErrorString = Interop.AppleCrypto.GetSecErrorString(OSStatus);
             }
         }
     }

@@ -177,9 +177,7 @@ namespace System.IO.Packaging
             }
             catch (XmlException exception)
             {
-                var r = SR.NotAValidXmlIdString;
-                var s = SR.Format(r, id);
-                throw new XmlException(s, exception);
+                throw new XmlException(SR.Format(SR.NotAValidXmlIdString, id), exception);
             }
         }
 
@@ -448,9 +446,6 @@ namespace System.IO.Packaging
             else
                 ValidateUniqueRelationshipId(id);
 
-            //Ensure the relationship part
-            EnsureRelationshipPart();
-
             // create and add
             PackageRelationship relationship = new PackageRelationship(_package, _sourcePart, targetUri, targetMode, relationshipType, id);
             _relationships.Add(relationship);
@@ -468,9 +463,13 @@ namespace System.IO.Packaging
         /// <param name="part">part to persist to</param>
         private void WriteRelationshipPart(PackagePart part)
         {
-            using (IgnoreFlushAndCloseStream s = new IgnoreFlushAndCloseStream(part.GetStream()))
+            using (Stream partStream = part.GetStream())
+            using (IgnoreFlushAndCloseStream s = new IgnoreFlushAndCloseStream(partStream))
             {
-                s.SetLength(0);    // truncate to resolve PS 954048
+                if (_package.FileOpenAccess != FileAccess.Write)
+                {
+                    s.SetLength(0);    // truncate to resolve PS 954048
+                }
 
                 // use UTF-8 encoding by default
                 using (XmlWriter writer = XmlWriter.Create(s, new XmlWriterSettings { Encoding = System.Text.Encoding.UTF8 }))

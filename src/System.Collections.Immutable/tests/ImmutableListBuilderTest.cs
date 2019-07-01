@@ -343,7 +343,6 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableList.CreateBuilder<int>());
@@ -357,7 +356,6 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void TestDebuggerAttributes_Null()
         {
             Type proxyType = DebuggerAttributes.GetProxyType(ImmutableList.CreateBuilder<string>());
@@ -388,6 +386,31 @@ namespace System.Collections.Immutable.Tests
             var builder = new ImmutableList<int>.Builder(list);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => builder.ItemRef(5));
+        }
+
+        [Fact]
+        public void ToImmutableList()
+        {
+            ImmutableList<int>.Builder builder = ImmutableList.CreateBuilder<int>();
+            builder.Add(0);
+            builder.Add(1);
+            builder.Add(2);
+
+            var list = builder.ToImmutableList();
+            Assert.Equal(0, builder[0]);
+            Assert.Equal(1, builder[1]);
+            Assert.Equal(2, builder[2]);
+
+            builder[1] = 5;
+            Assert.Equal(5, builder[1]);
+            Assert.Equal(1, list[1]);
+
+            builder.Clear();
+            Assert.True(builder.ToImmutableList().IsEmpty);
+            Assert.False(list.IsEmpty);
+
+            ImmutableList<int>.Builder nullBuilder = null;
+            AssertExtensions.Throws<ArgumentNullException>("builder", () => nullBuilder.ToImmutableList());
         }
 
         protected override IEnumerable<T> GetEnumerableOf<T>(params T[] contents)

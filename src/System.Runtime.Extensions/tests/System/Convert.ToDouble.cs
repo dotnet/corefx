@@ -98,11 +98,15 @@ namespace System.Tests
             double[] expectedValues = { double.MinValue, double.MaxValue, 0.0, 10.0, -10.0, 0.0 };
             VerifyFromString(Convert.ToDouble, Convert.ToDouble, testValues, expectedValues);
 
-            string[] overflowValues = { Double.MaxValue.ToString(), Double.MinValue.ToString() };
-            VerifyFromStringThrows<OverflowException>(Convert.ToDouble, Convert.ToDouble, overflowValues);
-
             string[] formatExceptionValues = { "123xyz" };
             VerifyFromStringThrows<FormatException>(Convert.ToDouble, Convert.ToDouble, formatExceptionValues);
+        }
+
+        [Fact]
+        public void FromString_NotNetFramework()
+        {
+            string[] overflowValues = { Double.MaxValue.ToString(), Double.MinValue.ToString() };
+            VerifyFromString(Convert.ToDouble, Convert.ToDouble, overflowValues, new double[] { 1.7976931348623157E+308, -1.7976931348623157E+308 });
         }
 
         [Fact]

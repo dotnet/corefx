@@ -694,7 +694,7 @@ namespace System.Xml.Serialization
         {
             if (type.ContainsGenericParameters)
             {
-                throw new InvalidOperationException(SR.Format(SR.XmlUnsupportedOpenGenericType, type.ToString()));
+                throw new InvalidOperationException(SR.Format(SR.XmlUnsupportedOpenGenericType, type));
             }
             TypeDesc typeDesc = (TypeDesc)s_primitiveTypes[type];
             if (typeDesc == null)
@@ -726,7 +726,6 @@ namespace System.Xml.Serialization
             return typeDesc;
         }
 
-#if !FEATURE_SERIALIZATION_UAPAOT
         internal TypeMapping GetTypeMappingFromTypeDesc(TypeDesc typeDesc)
         {
             foreach (TypeMapping typeMapping in TypeMappings)
@@ -748,7 +747,6 @@ namespace System.Xml.Serialization
             }
             return null;
         }
-#endif
 
         private TypeDesc ImportTypeDesc(Type type, MemberInfo memberInfo, bool directReference)
         {

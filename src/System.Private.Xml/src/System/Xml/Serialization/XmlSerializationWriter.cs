@@ -37,15 +37,6 @@ namespace System.Xml.Serialization
         private bool _soap12;
         private bool _escapeName = true;
 
-#if FEATURE_SERIALIZATION_UAPAOT
-        // this method must be called before any generated serialization methods are called
-        internal void Init(XmlWriter w, XmlSerializerNamespaces namespaces, string encodingStyle, string idBase)
-        {
-            _w = w;
-            _namespaces = namespaces;
-        }
-#endif
-
         // this method must be called before any generated serialization methods are called
         internal void Init(XmlWriter w, XmlSerializerNamespaces namespaces, string encodingStyle, string idBase, TempAssembly tempAssembly)
         {
@@ -1484,7 +1475,6 @@ namespace System.Xml.Serialization
             return (bool)oIsTypeDynamic;
         }
 
-#if !FEATURE_SERIALIZATION_UAPAOT
         internal static bool IsTypeDynamic(Type[] arguments)
         {
             foreach (Type t in arguments)
@@ -1524,22 +1514,18 @@ namespace System.Xml.Serialization
                 }
             }
         }
-#endif
 
         internal static Assembly Get(string fullName)
         {
             return s_nameToAssemblyMap != null ? (Assembly)s_nameToAssemblyMap[fullName] : null;
         }
 
-#if !FEATURE_SERIALIZATION_UAPAOT
         internal static string GetName(Assembly a)
         {
             return s_assemblyToNameMap != null ? (string) s_assemblyToNameMap[a] : null;
         }
-#endif
     }
 
-#if !FEATURE_SERIALIZATION_UAPAOT
     internal class ReflectionAwareCodeGen
     {
         private const string hexDigits = "0123456789ABCDEF";
@@ -1752,7 +1738,7 @@ namespace System.Xml.Serialization
                     return fieldVariable;
                 }
             }
-            throw new InvalidOperationException(SR.Format(SR.XmlSerializerUnsupportedType, memberInfos[0].ToString()));
+            throw new InvalidOperationException(SR.Format(SR.XmlSerializerUnsupportedType, memberInfos[0]));
         }
 
         private string WriteMethodInfo(string escapedName, string typeVariable, string memberName, bool isNonPublic, params string[] paramTypes)
@@ -4426,5 +4412,4 @@ namespace System.Xml.Serialization
             return enumValue;
         }
     }
-#endif
 }

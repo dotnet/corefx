@@ -526,7 +526,7 @@ namespace System.IO
                 // When cancellation is requested, clear out all watches.  This should force any active or future reads 
                 // on the inotify handle to return 0 bytes read immediately, allowing us to wake up from the blocking call 
                 // and exit the processing loop and clean up.
-                var ctr = _cancellationToken.Register(obj => ((RunningInstance)obj).CancellationCallback(), this);
+                var ctr = _cancellationToken.UnsafeRegister(obj => ((RunningInstance)obj).CancellationCallback(), this);
                 try
                 {
                     // Previous event information
@@ -749,9 +749,9 @@ namespace System.IO
                 }
             }
 
-            /// <summary>Read events from the inotify handle into the supplied array.</summary>
-            /// <param name="events">The array into which events should be read.</param>
-            /// <returns>The number of events read and stored into the array.</returns>
+            /// <summary>Read event from the inotify handle into the supplied event object.</summary>
+            /// <param name="notifyEvent">The event object to be populated.</param>
+            /// <returns><see langword="true"/> if event was read successfully, <see langword="false"/> otherwise.</returns>
             private bool TryReadEvent(out NotifyEvent notifyEvent)
             {
                 Debug.Assert(_buffer != null);

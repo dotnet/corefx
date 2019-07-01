@@ -22,10 +22,80 @@ namespace System.Buffers.Tests
         [Fact]
         public void WritingToMultiSegmentBuffer()
         {
-            IBufferWriter<byte> bufferWriter = new TestBufferWriterMultiSegment();
+            var bufferWriter = new TestBufferWriterMultiSegment();
             bufferWriter.Write(Encoding.UTF8.GetBytes("Hello"));
             bufferWriter.Write(Encoding.UTF8.GetBytes(" World!"));
+            Assert.Equal(12, bufferWriter.Comitted.Count);
             Assert.Equal("Hello World!", bufferWriter.ToString());
+        }
+
+        [Fact]
+        public void WritingEmptyBufferToSingleSegmentEmptyBufferWriterDoesNothing()
+        {
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] { Array.Empty<byte>() }
+            );
+
+            bufferWriter.Write(Array.Empty<byte>()); // This is equivalent to: Span<byte>.Empty.CopyTo(Span<byte>.Empty);
+        }
+
+        [Fact]
+        public void WritingEmptyBufferToMultipleSegmentEmptyBufferWriterDoesNothing()
+        {
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] { Array.Empty<byte>(), Array.Empty<byte>() }
+            );
+
+            bufferWriter.Write(Array.Empty<byte>());
+        }
+
+        [Theory]
+        [InlineData(1, 0)]
+        [InlineData(10, 9)]
+        public void WritingToTooSmallSingleSegmentBufferFailsWithException(int inputSize, int destinationSize)
+        {
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] { new byte[destinationSize] }
+            );
+
+            Assert.Throws<ArgumentOutOfRangeException>(paramName: "writer", testCode: () => bufferWriter.Write(new byte[inputSize]));
+        }
+
+        [Theory]
+        [InlineData(10, 2, 2)]
+        [InlineData(10, 9, 0)]
+        public void WritingToTooSmallMultiSegmentBufferFailsWithException(int inputSize, int firstSegmentSize, int secondSegmentSize)
+        {
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] {
+                    new byte[firstSegmentSize],
+                    new byte[secondSegmentSize]
+                }
+            );
+
+            Assert.Throws<ArgumentOutOfRangeException>(
+                paramName: "writer", 
+                testCode: () => bufferWriter.Write(new byte[inputSize]));
+        }
+
+        private class MultiSegmentArrayBufferWriter<T> : IBufferWriter<T>
+        {
+            private readonly T[][] _segments;
+            private int _segmentIndex;
+
+            public MultiSegmentArrayBufferWriter(T[][] segments) => _segments = segments;
+
+            public void Advance(int size)
+            {
+                if (size != _segments[_segmentIndex].Length)
+                    throw new NotSupportedException("By design");
+
+                _segmentIndex++;
+            }
+
+            public Memory<T> GetMemory(int sizeHint = 0) => _segmentIndex < _segments.Length ? _segments[_segmentIndex] : Memory<T>.Empty;
+
+            public Span<T> GetSpan(int sizeHint = 0) => _segmentIndex < _segments.Length ? _segments[_segmentIndex] : Span<T>.Empty;
         }
 
         private class TestBufferWriterSingleSegment : IBufferWriter<byte>
@@ -38,7 +108,7 @@ namespace System.Buffers.Tests
                 _written += bytes;
             }
 
-            public Memory<byte> GetMemory(int sizeHint  = 0) => _buffer.AsMemory().Slice(_written);
+            public Memory<byte> GetMemory(int sizeHint = 0) => _buffer.AsMemory().Slice(_written);
 
             public Span<byte> GetSpan(int sizeHint) => _buffer.AsSpan().Slice(_written);
 
@@ -53,6 +123,8 @@ namespace System.Buffers.Tests
             private byte[] _current = new byte[0];
             private List<byte[]> _commited = new List<byte[]>();
 
+            public List<byte[]> Comitted => _commited;
+
             public void Advance(int bytes)
             {
                 if (bytes == 0)
@@ -61,13 +133,13 @@ namespace System.Buffers.Tests
                 _current = new byte[0];
             }
 
-            public Memory<byte> GetMemory(int sizeHint  = 0)
+            public Memory<byte> GetMemory(int sizeHint = 0)
             {
-                if (sizeHint  == 0)
-                    sizeHint  = _current.Length + 1;
-                if (sizeHint  < _current.Length)
+                if (sizeHint == 0)
+                    sizeHint = _current.Length + 1;
+                if (sizeHint < _current.Length)
                     throw new InvalidOperationException();
-                var newBuffer = new byte[sizeHint ];
+                var newBuffer = new byte[sizeHint];
                 _current.CopyTo(newBuffer.AsSpan());
                 _current = newBuffer;
                 return _current;
@@ -95,5 +167,5 @@ namespace System.Buffers.Tests
                 return builder.ToString();
             }
         }
-    }  
+    }
 }
