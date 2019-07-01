@@ -275,16 +275,16 @@ namespace System.Text.Json.Tests
             {
                 // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
                 builder.Append("\"double").Append(i).Append("\": ");
-                const string format = "{0:" + JsonTestHelper.DoubleFormatString + "}, ";
-                string str = string.Format(CultureInfo.InvariantCulture, format, Doubles[i]);
+                const string Format = "{0:" + JsonTestHelper.DoubleFormatString + "}, ";
+                string str = string.Format(CultureInfo.InvariantCulture, Format, Doubles[i]);
                 builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", str);
             }
             for (int i = 0; i < Floats.Count; i++)
             {
                 // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
                 builder.Append("\"float").Append(i).Append("\": ");
-                const string format = "{0:" + JsonTestHelper.SingleFormatString + "}, ";
-                string str = string.Format(CultureInfo.InvariantCulture, format, Floats[i]);
+                const string Format = "{0:" + JsonTestHelper.SingleFormatString + "}, ";
+                string str = string.Format(CultureInfo.InvariantCulture, Format, Floats[i]);
                 builder.AppendFormat(CultureInfo.InvariantCulture, "{0}", str);
             }
             for (int i = 0; i < Decimals.Count; i++)

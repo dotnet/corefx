@@ -64,12 +64,10 @@ namespace System.Text.Json.Tests
             // https://tools.ietf.org/html/rfc7159#section-6
             const string OneQuarticGoogol = "1e400";
 
-            // To confirm that this test is doing what it intends, one could
-            // confirm the printing precision of double, like
-            //
-            //double oneQuarticGoogol = double.Parse(OneQuarticGoogol);
-            //Assert.NotEqual(OneQuarticGoogol, oneQuarticGoogol.ToString(JsonTestHelper.DoubleFormatString));
-
+            // This just validates we write the literal number 1e400 even though it is too
+            // large to be represented by System.Double and would be converted to
+            // PositiveInfinity instead (or throw if using double.Parse on frameworks
+            // older than .NET Core 3.0).
             WriteSimpleValue(indented, OneQuarticGoogol);
         }
 
