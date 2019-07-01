@@ -638,7 +638,8 @@ void SystemNative_SysLog(SysLogPriority priority, const char* message, const cha
 
 int32_t SystemNative_WaitIdAnyExitedNoHangNoWait()
 {
-    siginfo_t siginfo = { 0 };
+    siginfo_t siginfo;
+    memset(&siginfo, 0, sizeof(siginfo));
     int32_t result;
     while (CheckInterrupted(result = waitid(P_ALL, 0, &siginfo, WEXITED | WNOHANG | WNOWAIT)));
     if (result == 0)
