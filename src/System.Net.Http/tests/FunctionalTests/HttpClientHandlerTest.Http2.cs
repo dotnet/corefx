@@ -1466,7 +1466,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(38820)]
         [ConditionalFact(nameof(SupportsAlpn))]
         [OuterLoop("Uses Task.Delay")]
         public async Task Http2_PendingSend_SendsReset()
@@ -1474,7 +1473,7 @@ namespace System.Net.Http.Functional.Tests
             var cts = new CancellationTokenSource();
 
             string content = new string('*', 300);
-            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(content), null, count: 10);
+            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(content), null, count: 60);
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
                 using (HttpClient client = CreateHttpClient())
@@ -1501,6 +1500,10 @@ namespace System.Net.Http.Functional.Tests
                     Assert.NotNull(frame); // We should get Rst before closing connection.
                     Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
                  } while (frame.Type != FrameType.RstStream);
+
+                 frame = await connection.ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds)).ConfigureAwait(false);
+                 // Make sure we do not get any frames after getting RST.
+                 Assert.Null(frame);
             });
         }
 
