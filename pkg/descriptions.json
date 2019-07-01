@@ -1,10 +1,5 @@
 [
   {
-    "Name": "CoreFx.Private.TestUtilities",
-    "Description": "Private package, which provides testing utility classes. The package is meant to be used when running CoreFX tests on a runtime.",
-    "CommonTypes": []
-  },
-  {
     "Name": "RuntimePackage",
     "Description": "Internal implementation package not meant for direct consumption.  Please do not reference directly.",
     "CommonTypes": []
@@ -28,6 +23,13 @@
       "Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo",
       "Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags",
       "Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags"
+    ]
+  },
+  {
+    "Name": "Microsoft.Bcl.HashCode",
+    "Description": "Provides the HashCode type for .NET Standard 2.0. This package is not required starting with .NET Standard 2.1 and .NET Core 3.0.",
+    "CommonTypes": [
+      "System.HashCode"
     ]
   },
   {
@@ -94,11 +96,6 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.NETCore.Runtime.Native",
-    "Description": "Support libraries for the .NET Core runtime used by .NETNative.",
-    "CommonTypes": []
-  },
-  {
     "Name": "Microsoft.NETCore.Targets",
     "Description": "Provides supporting infrastructure for portable projects: support identifiers that define framework and runtime for support targets and packages that reference the minimum supported package versions when targeting these.",
     "CommonTypes": []
@@ -149,6 +146,11 @@
     "CommonTypes": []
   },
   {
+    "Name": "Microsoft.Private.CoreFx.OOB",
+    "Description": "Package used to represent out-of-band packages that are not included in NetCoreApp.",
+    "CommonTypes": []
+  },
+  {
     "Name": "Microsoft.Private.CoreFx.UAP",
     "Description": "Package used to represent the portions of UAP that come from CoreFx.",
     "CommonTypes": []
@@ -161,11 +163,6 @@
   {
     "Name": "Microsoft.TargetingPack.Private.CoreCLR",
     "Description": "Contains a private targeting pack which contains only the CoreCLR mscorlib reference assembly. Used for producing platform specific libraries such as facades.",
-    "CommonTypes": []
-  },
-  {
-    "Name": "Microsoft.TargetingPack.Private.NETNative",
-    "Description": "Contains a private targeting pack which contains only the System.Private.* libraries that ship with the .NET Native ILC toolchain. Used for producing platform specific libraries such as facades.",
     "CommonTypes": []
   },
   {
@@ -538,6 +535,20 @@
         "System.Data.Odbc.OdbcParameter",
         "System.Data.Odbc.OdbcParameterCollection",
         "System.Data.Odbc.OdbcTransaction"
+    ]
+  },
+  {
+    "Name": "System.Data.OleDb",
+    "Description": "Provides a collection of classes for OLEDB.",
+    "CommonTypes": [
+        "System.Data.OleDb.OleDbCommand",
+        "System.Data.OleDb.OleDbCommandBuilder",
+        "System.Data.OleDb.OleDbConnection",
+        "System.Data.OleDb.OleDbDataAdapter",
+        "System.Data.OleDb.OleDbDataReader",
+        "System.Data.OleDb.OleDbParameter",
+        "System.Data.OleDb.OleDbParameterCollection",
+        "System.Data.OleDb.OleDbTransaction"
     ]
   },
   {
@@ -1043,6 +1054,15 @@
     ]
   },
   {
+    "Name": "Microsoft.Bcl.AsyncInterfaces",
+    "Description": "Provides the IAsyncEnumerable<T> and IAsyncDisposable interfaces and helper types for .NET Standard 2.0. This package is not required starting with .NET Standard 2.1 and .NET Core 3.0.",
+    "CommonTypes": [
+      "System.IAsyncDisposable",
+      "System.Collections.Generic.IAsyncEnumerable",
+      "System.Collections.Generic.IAsyncEnumerator"
+    ]
+  },
+  {
     "Name": "System.Net.Http",
     "Description": "Provides a programming interface for modern HTTP applications, including HTTP client components that allow applications to consume web services over HTTP and HTTP components that can be used by both clients and servers for parsing HTTP headers.",
     "CommonTypes": [
@@ -1246,21 +1266,6 @@
     ]
   },
   {
-    "Name": "System.Numerics.Vectors",
-    "Description": "Provides hardware-accelerated numeric types, suitable for high-performance processing and graphics applications.",
-    "CommonTypes": [
-      "System.Numerics.Matrix3x2",
-      "System.Numerics.Matrix4x4",
-      "System.Numerics.Plane",
-      "System.Numerics.Quaternion",
-      "System.Numerics.Vector2",
-      "System.Numerics.Vector3",
-      "System.Numerics.Vector4",
-      "System.Numerics.Vector",
-      "System.Numerics.Vector<T>"
-    ]
-  },
-  {
     "Name": "System.Numerics.Vectors.WindowsRuntime",
     "Description": "Provides extension methods for converting between System.Numerics.Vector2 and Windows.Foundation.Point and Size.",
     "CommonTypes": [
@@ -1427,6 +1432,14 @@
       "System.Resources.NeutralResourcesLanguageAttribute",
       "System.Resources.SatelliteContractVersionAttribute",
       "System.Resources.MissingManifestResourceException"
+    ]
+  }, 
+  {
+    "Name": "System.Resources.Extensions",
+    "Description": "Provides classes which read and write resources in a format that supports non-primitive objects.",
+    "CommonTypes": [
+        "System.Resources.Extensions.DeserializingResourceReader",
+        "System.Resources.Extensions.PreserializedResourceWriter"
     ]
   },
   {
@@ -1977,20 +1990,13 @@
   },
   {
     "Name": "System.Text.Json",
-    "Description": "Provides a fast, non-cached, forward-only way to read UTF-8 encoded JavaScript Object Notation (JSON) text.",
+    "Description": "Provides high-performance and low-allocating types that serialize objects to JavaScript Object Notation (JSON) text and deserialize JSON text to objects, with UTF-8 support built-in. Also provides types to read and write JSON text encoded as UTF-8, and to create an in-memory document object model (DOM), that is read-only, for random access of the JSON elements within a structured view of the data.",
     "CommonTypes": [
-      "System.Text.Json.Utf8JsonReader",
+      "System.Text.Json.JsonSerializer",
+      "System.Text.Json.JsonDocument",
+      "System.Text.Json.JsonElement",
       "System.Text.Json.Utf8JsonWriter",
-      "System.Text.Json.JsonDocument"
-    ]
-  },
-  {
-    "Name": "Microsoft.Bcl.Json.Sources",
-    "Description": "Provides the source code implementation of System.Text.Json as internal types. This package is only required for projects targeting .NET Framework 4.6.1+ or .NET Core 2.x; and is not for projects that can target .NET Core 3.0 and higher. For guidance on consuming the source pacakge, visit: https://aka.ms/json-source-package-guide.",
-    "CommonTypes": [
-      "System.Text.Json.Utf8JsonReader",
-      "System.Text.Json.Utf8JsonWriter",
-      "System.Text.Json.JsonDocument"
+      "System.Text.Json.Utf8JsonReader"
     ]
   },
   {

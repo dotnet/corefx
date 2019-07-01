@@ -3,14 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization.Converters
 {
     internal sealed class DefaultArrayConverter : JsonEnumerableConverter
     {
-        public override IEnumerable CreateFromList(Type elementType, IList sourceList)
+        public override IEnumerable CreateFromList(ref ReadStack state, IList sourceList, JsonSerializerOptions options)
         {
+            Type elementType = state.Current.GetElementType();
+
             Array array;
 
             if (sourceList.Count > 0 && sourceList[0] is Array probe)

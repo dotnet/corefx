@@ -14,7 +14,7 @@ namespace System.Diagnostics.Tests
         public void TestModuleProperties()
         {
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;
-            Assert.True(modules.Count > 0);
+            Assert.InRange(modules.Count, 1, int.MaxValue);
 
             foreach (ProcessModule module in modules)
             {
@@ -30,7 +30,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Process.Modules is not supported on uap")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Process.Modules is not supported on uap")]
         public void Modules_Get_ContainsHostFileName()
         {
             ProcessModuleCollection modules = Process.GetCurrentProcess().Modules;

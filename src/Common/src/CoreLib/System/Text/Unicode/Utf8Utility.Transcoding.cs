@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Diagnostics;
@@ -36,7 +35,6 @@ namespace System.Text.Unicode
         // On method return, pInputBufferRemaining and pOutputBufferRemaining will both point to where
         // the next byte would have been consumed from / the next char would have been written to.
         // inputLength in bytes, outputCharsRemaining in chars.
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static OperationStatus TranscodeToUtf16(byte* pInputBuffer, int inputLength, char* pOutputBuffer, int outputCharsRemaining, out byte* pInputBufferRemaining, out char* pOutputBufferRemaining)
         {
             Debug.Assert(inputLength >= 0, "Input length must not be negative.");

@@ -28,24 +28,18 @@ namespace System.Diagnostics.Tracing.Internal
         public static int TickCount
         { get { return System.Environment.TickCount; } }
 
-        public static string GetResourceString(string key, params object[] args)
+        public static string GetResourceString(string key, params object?[] args)
         {
-            string fmt = rm.GetString(key);
+            string? fmt = rm.GetString(key);
             if (fmt != null)
                 return string.Format(fmt, args);
 
-            string sargs = string.Empty;
-            foreach(var arg in args)
-            {
-                if (sargs != string.Empty)
-                    sargs += ", ";
-                sargs += arg.ToString();
-            }
+            string sargs = string.Join(", ", args);
 
             return key + " (" + sargs + ")";
         }
 
-        public static string GetRuntimeResourceString(string key, params object[] args)
+        public static string GetRuntimeResourceString(string key, params object?[] args)
         {
             return GetResourceString(key, args);
         }
@@ -226,7 +220,7 @@ namespace Microsoft.Reflection
         public static bool IsSealed(this Type type) { return type.IsSealed; }
         public static bool IsValueType(this Type type) { return type.IsValueType; }
         public static bool IsGenericType(this Type type) { return type.IsGenericType; }
-        public static Type BaseType(this Type type) { return type.BaseType; }
+        public static Type? BaseType(this Type type) { return type.BaseType; }
         public static Assembly Assembly(this Type type) { return type.Assembly; }
         public static TypeCode GetTypeCode(this Type type) { return Type.GetTypeCode(type); }
 
@@ -242,7 +236,7 @@ namespace Microsoft.Reflection
         public static bool IsSealed(this Type type) { return type.GetTypeInfo().IsSealed; }
         public static bool IsValueType(this Type type) { return type.GetTypeInfo().IsValueType; }
         public static bool IsGenericType(this Type type) { return type.IsConstructedGenericType; }
-        public static Type BaseType(this Type type) { return type.GetTypeInfo().BaseType; }
+        public static Type? BaseType(this Type type) { return type.GetTypeInfo().BaseType; }
         public static Assembly Assembly(this Type type) { return type.GetTypeInfo().Assembly; }
         public static IEnumerable<PropertyInfo> GetProperties(this Type type)
         {
@@ -252,7 +246,7 @@ namespace Microsoft.Reflection
             return type.GetRuntimeProperties();
 #endif
         }
-        public static MethodInfo GetGetMethod(this PropertyInfo propInfo) { return propInfo.GetMethod; }
+        public static MethodInfo? GetGetMethod(this PropertyInfo propInfo) { return propInfo.GetMethod; }
         public static Type[] GetGenericArguments(this Type type) { return type.GenericTypeArguments; }
         
         public static MethodInfo[] GetMethods(this Type type, BindingFlags flags)
@@ -313,9 +307,9 @@ namespace Microsoft.Reflection
             }
             return fieldInfos.ToArray();
         }
-        public static Type GetNestedType(this Type type, string nestedTypeName)
+        public static Type? GetNestedType(this Type type, string nestedTypeName)
         {
-            TypeInfo ti = null;
+            TypeInfo? ti = null;
             foreach(var nt in type.GetTypeInfo().DeclaredNestedTypes)
             {
                 if (nt.Name == nestedTypeName)
@@ -349,7 +343,7 @@ namespace Microsoft.Reflection
         //
         // FieldInfo extension methods
         //
-        public static object GetRawConstantValue(this FieldInfo fi)
+        public static object? GetRawConstantValue(this FieldInfo fi)
         { return fi.GetValue(null); }
 
         //

@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Security;
 
@@ -84,7 +84,7 @@ namespace Internal.Win32
         public RegistryKey? OpenSubKey(string name, bool writable)
         {
             // Make sure that the name does not contain double slahes
-            Debug.Assert(name.IndexOf("\\\\") == -1);
+            Debug.Assert(!name.Contains(@"\\"));
 
             int ret = Interop.Advapi32.RegOpenKeyEx(_hkey,
                 name,
@@ -220,7 +220,8 @@ namespace Internal.Win32
             return GetValue(name, null);
         }
 
-        public object? GetValue(string name, object? defaultValue) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        [return: NotNullIfNotNull("defaultValue")]
+        public object? GetValue(string name, object? defaultValue)
         {
             object? data = defaultValue;
             int type = 0;
@@ -370,7 +371,7 @@ namespace Internal.Win32
                         // make sure the string is null terminated before processing the data
                         if (blob.Length > 0 && blob[blob.Length - 1] != (char)0)
                         {
-                            Array.Resize(ref blob!, blob.Length + 1); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                            Array.Resize(ref blob, blob.Length + 1);
                         }
 
                         string[] strings = Array.Empty<string>();
@@ -415,13 +416,13 @@ namespace Internal.Win32
                             {
                                 if (strings.Length == stringsCount)
                                 {
-                                    Array.Resize(ref strings!, stringsCount > 0 ? stringsCount * 2 : 4); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                                    Array.Resize(ref strings, stringsCount > 0 ? stringsCount * 2 : 4);
                                 }
-                                strings![stringsCount++] = toAdd; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                                strings[stringsCount++] = toAdd;
                             }
                         }
 
-                        Array.Resize(ref strings!, stringsCount); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                        Array.Resize(ref strings, stringsCount);
                         data = strings;
                     }
                     break;

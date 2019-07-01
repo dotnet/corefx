@@ -2,15 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Collections.Generic
 {
     // Provides a read-only view of a generic dictionary.
-    public interface IReadOnlyDictionary<TKey, TValue> : IReadOnlyCollection<KeyValuePair<TKey, TValue>>
+    public interface IReadOnlyDictionary<TKey, TValue> : IReadOnlyCollection<KeyValuePair<TKey, TValue>> where TKey : notnull
     {
         bool ContainsKey(TKey key);
-        bool TryGetValue(TKey key, out TValue value);
+        bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value);
 
         TValue this[TKey key] { get; }
         IEnumerable<TKey> Keys { get; }

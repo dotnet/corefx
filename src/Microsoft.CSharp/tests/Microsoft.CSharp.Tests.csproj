@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{82B54697-0251-47A1-8546-FC507D0F3B08}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Debug;uap-Release</Configurations>
     <!-- 
     We wish to test operations that would result in
     "Operator '-' cannot be applied to operands of type 'ushort' and 'EnumArithmeticTests.UInt16Enum'"
@@ -14,6 +14,7 @@
     <Compile Include="ArrayHandling.cs" />
     <Compile Include="AssignmentTests.cs" />
     <Compile Include="BindingErrors.cs" />
+    <Compile Include="DynamicDebuggerProxyTests.cs" />
     <Compile Include="EnumUnaryOperationTests.cs" />
     <Compile Include="ExplicitConversionTests.cs" />
     <Compile Include="Helpers.cs" />
@@ -34,10 +35,7 @@
     <Compile Include="UserDefinedShortCircuitOperators.cs" />
     <Compile Include="VarArgsTests.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="AccessTests.netcoreapp.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
 </Project>

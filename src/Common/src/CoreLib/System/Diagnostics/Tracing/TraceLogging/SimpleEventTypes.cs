@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using Interlocked = System.Threading.Interlocked;
 
 #if ES_BUILD_STANDALONE
@@ -21,7 +22,7 @@ namespace System.Diagnostics.Tracing
     /// </typeparam>
     internal static class SimpleEventTypes<T>
     {
-        private static TraceLoggingEventTypes instance;
+        private static TraceLoggingEventTypes? instance;
 
         public static TraceLoggingEventTypes Instance
         {
@@ -33,6 +34,7 @@ namespace System.Diagnostics.Tracing
             var info = TraceLoggingTypeInfo.GetInstance(typeof(T), null);
             var newInstance = new TraceLoggingEventTypes(info.Name, info.Tags, new TraceLoggingTypeInfo[] { info });
             Interlocked.CompareExchange(ref instance, newInstance, null);
+            Debug.Assert(instance != null);
             return instance;
         }
     }

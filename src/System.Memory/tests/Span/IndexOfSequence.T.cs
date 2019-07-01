@@ -231,5 +231,14 @@ namespace System.SpanTests
             int index = span.IndexOf(value);
             Assert.Equal(-1, index);
         }
+
+        [Theory]
+        [MemberData(nameof(TestHelpers.IndexOfNullSequenceData), MemberType = typeof(TestHelpers))]
+        public static void IndexOfNullSequence_String(string[] spanInput, string[] searchInput, int expected)
+        {
+            Span<string> theStrings = spanInput;
+            Assert.Equal(expected, theStrings.IndexOf(searchInput));
+            Assert.Equal(expected, theStrings.IndexOf((ReadOnlySpan<string>)searchInput));
+        }
     }
 }

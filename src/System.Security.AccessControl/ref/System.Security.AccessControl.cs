@@ -297,7 +297,7 @@ namespace System.Security.AccessControl
     }
     public abstract partial class GenericSecurityDescriptor
     {
-        protected GenericSecurityDescriptor() { }
+        internal GenericSecurityDescriptor() { }
         public int BinaryLength { get { throw null; } }
         public abstract System.Security.AccessControl.ControlFlags ControlFlags { get; }
         public abstract System.Security.Principal.SecurityIdentifier Group { get; set; }
@@ -401,6 +401,7 @@ namespace System.Security.AccessControl
         public virtual void PurgeAuditRules(System.Security.Principal.IdentityReference identity) { }
         protected void ReadLock() { }
         protected void ReadUnlock() { }
+        protected System.Security.AccessControl.CommonSecurityDescriptor SecurityDescriptor { get { throw null; } }
         public void SetAccessRuleProtection(bool isProtected, bool preserveInheritance) { }
         public void SetAuditRuleProtection(bool isProtected, bool preserveInheritance) { }
         public void SetGroup(System.Security.Principal.IdentityReference identity) { }

@@ -5,7 +5,7 @@
 using System.Collections;
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -17,50 +17,40 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(state.Current.JsonPropertyInfo.ClassType == ClassType.Enumerable);
 
-            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
-            if (!jsonPropertyInfo.ShouldSerialize)
+            if (state.Current.CollectionEnumerator == null)
             {
-                // Ignore writing this property.
-                return true;
-            }
-
-            if (state.Current.Enumerator == null)
-            {
-                IEnumerable enumerable = (IEnumerable)jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue, options);
+                IEnumerable enumerable = (IEnumerable)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
 
                 if (enumerable == null)
                 {
-                    // Write a null object or enumerable.
-                    writer.WriteNull(jsonPropertyInfo.Name);
+                    if (!state.Current.JsonPropertyInfo.IgnoreNullValues)
+                    {
+                        // Write a null object or enumerable.
+                        state.Current.WriteObjectOrArrayStart(ClassType.Enumerable, writer, writeNull: true);
+                    }
+
                     return true;
                 }
 
-                state.Current.Enumerator = enumerable.GetEnumerator();
+                state.Current.CollectionEnumerator = enumerable.GetEnumerator();
 
-                if (jsonPropertyInfo.Name == null)
-                {
-                    writer.WriteStartArray();
-                }
-                else
-                {
-                    writer.WriteStartArray(jsonPropertyInfo.Name);
-                }
+                state.Current.WriteObjectOrArrayStart(ClassType.Enumerable, writer);
             }
 
-            if (state.Current.Enumerator.MoveNext())
+            if (state.Current.CollectionEnumerator.MoveNext())
             {
                 // Check for polymorphism.
                 if (elementClassInfo.ClassType == ClassType.Unknown)
                 {
-                    object currentValue = state.Current.Enumerator.Current;
+                    object currentValue = state.Current.CollectionEnumerator.Current;
                     GetRuntimeClassInfo(currentValue, ref elementClassInfo, options);
                 }
 
                 if (elementClassInfo.ClassType == ClassType.Value)
                 {
-                    elementClassInfo.GetPolicyProperty().WriteEnumerable(options, ref state.Current, writer);
+                    elementClassInfo.PolicyProperty.WriteEnumerable(ref state, writer);
                 }
-                else if (state.Current.Enumerator.Current == null)
+                else if (state.Current.CollectionEnumerator.Current == null)
                 {
                     // Write a null object or enumerable.
                     writer.WriteNullValue();
@@ -68,7 +58,7 @@ namespace System.Text.Json.Serialization
                 else
                 {
                     // An object or another enumerator requires a new stack frame.
-                    object nextValue = state.Current.Enumerator.Current;
+                    object nextValue = state.Current.CollectionEnumerator.Current;
                     state.Push(elementClassInfo, nextValue);
                 }
 
@@ -78,7 +68,7 @@ namespace System.Text.Json.Serialization
             // We are done enumerating.
             writer.WriteEndArray();
 
-            if (state.Current.PopStackOnEndArray)
+            if (state.Current.PopStackOnEndCollection)
             {
                 state.Pop();
             }

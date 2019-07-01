@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Globalization;
 
 namespace System
@@ -196,7 +195,7 @@ namespace System
 
         public static TimeSpan FromDays(double value)
         {
-            return Interval(value, MillisPerDay);
+            return Interval(value, TicksPerDay);
         }
 
         public TimeSpan Duration()
@@ -232,28 +231,27 @@ namespace System
 
         public static TimeSpan FromHours(double value)
         {
-            return Interval(value, MillisPerHour);
+            return Interval(value, TicksPerHour);
         }
 
-        private static TimeSpan Interval(double value, int scale)
+        private static TimeSpan Interval(double value, double scale)
         {
             if (double.IsNaN(value))
                 throw new ArgumentException(SR.Arg_CannotBeNaN);
-            double tmp = value * scale;
-            double millis = tmp + (value >= 0 ? 0.5 : -0.5);
-            if ((millis > long.MaxValue / TicksPerMillisecond) || (millis < long.MinValue / TicksPerMillisecond))
+            double millis = value * scale;
+            if ((millis > long.MaxValue) || (millis < long.MinValue))
                 throw new OverflowException(SR.Overflow_TimeSpanTooLong);
-            return new TimeSpan((long)millis * TicksPerMillisecond);
+            return new TimeSpan((long)millis);
         }
 
         public static TimeSpan FromMilliseconds(double value)
         {
-            return Interval(value, 1);
+            return Interval(value, TicksPerMillisecond);
         }
 
         public static TimeSpan FromMinutes(double value)
         {
-            return Interval(value, MillisPerMinute);
+            return Interval(value, TicksPerMinute);
         }
 
         public TimeSpan Negate()
@@ -265,7 +263,7 @@ namespace System
 
         public static TimeSpan FromSeconds(double value)
         {
-            return Interval(value, MillisPerSecond);
+            return Interval(value, TicksPerSecond);
         }
 
         public TimeSpan Subtract(TimeSpan ts)
@@ -384,7 +382,7 @@ namespace System
         {
             return TimeSpanParse.TryParse(input, formatProvider, out result);
         }
-        public static bool TryParseExact(string? input, string? format, IFormatProvider? formatProvider, out TimeSpan result)
+        public static bool TryParseExact(string? input, string format, IFormatProvider? formatProvider, out TimeSpan result)
         {
             if (input == null || format == null)
             {
@@ -398,7 +396,7 @@ namespace System
         {
             return TimeSpanParse.TryParseExact(input, format, formatProvider, TimeSpanStyles.None, out result);
         }
-        public static bool TryParseExact(string? input, string?[]? formats, IFormatProvider? formatProvider, out TimeSpan result)
+        public static bool TryParseExact(string? input, string[] formats, IFormatProvider? formatProvider, out TimeSpan result)
         {
             if (input == null)
             {
@@ -407,12 +405,12 @@ namespace System
             }
             return TimeSpanParse.TryParseExactMultiple(input, formats, formatProvider, TimeSpanStyles.None, out result);
         }
-        public static bool TryParseExact(ReadOnlySpan<char> input, string?[]? formats, IFormatProvider? formatProvider, out TimeSpan result)
+        public static bool TryParseExact(ReadOnlySpan<char> input, string[] formats, IFormatProvider? formatProvider, out TimeSpan result)
         {
             return TimeSpanParse.TryParseExactMultiple(input, formats, formatProvider, TimeSpanStyles.None, out result);
         }
 
-        public static bool TryParseExact(string? input, string? format, IFormatProvider? formatProvider, TimeSpanStyles styles, out TimeSpan result)
+        public static bool TryParseExact(string? input, string format, IFormatProvider? formatProvider, TimeSpanStyles styles, out TimeSpan result)
         {
             ValidateStyles(styles, nameof(styles));
             if (input == null || format == null)
@@ -429,7 +427,7 @@ namespace System
             ValidateStyles(styles, nameof(styles));
             return TimeSpanParse.TryParseExact(input, format, formatProvider, styles, out result);
         }
-        public static bool TryParseExact(string? input, string?[]? formats, IFormatProvider? formatProvider, TimeSpanStyles styles, out TimeSpan result)
+        public static bool TryParseExact(string? input, string[] formats, IFormatProvider? formatProvider, TimeSpanStyles styles, out TimeSpan result)
         {
             ValidateStyles(styles, nameof(styles));
             if (input == null)
@@ -440,7 +438,7 @@ namespace System
             return TimeSpanParse.TryParseExactMultiple(input, formats, formatProvider, styles, out result);
         }
 
-        public static bool TryParseExact(ReadOnlySpan<char> input, string?[]? formats, IFormatProvider? formatProvider, TimeSpanStyles styles, out TimeSpan result)
+        public static bool TryParseExact(ReadOnlySpan<char> input, string[] formats, IFormatProvider? formatProvider, TimeSpanStyles styles, out TimeSpan result)
         {
             ValidateStyles(styles, nameof(styles));
             return TimeSpanParse.TryParseExactMultiple(input, formats, formatProvider, styles, out result);

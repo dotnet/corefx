@@ -11,10 +11,10 @@ namespace System
     {
         public OperationCanceledException() { }
         protected OperationCanceledException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public OperationCanceledException(string message) { }
-        public OperationCanceledException(string message, System.Exception innerException) { }
-        public OperationCanceledException(string message, System.Exception innerException, System.Threading.CancellationToken token) { }
-        public OperationCanceledException(string message, System.Threading.CancellationToken token) { }
+        public OperationCanceledException(string? message) { }
+        public OperationCanceledException(string? message, System.Exception? innerException) { }
+        public OperationCanceledException(string? message, System.Exception? innerException, System.Threading.CancellationToken token) { }
+        public OperationCanceledException(string? message, System.Threading.CancellationToken token) { }
         public OperationCanceledException(System.Threading.CancellationToken token) { }
         public System.Threading.CancellationToken CancellationToken { get { throw null; } }
     }
@@ -68,17 +68,20 @@ namespace System.Runtime.CompilerServices
     public readonly partial struct ConfiguredAsyncDisposable
     {
         private readonly object _dummy;
+        private readonly int _dummyPrimitive;
         public System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable DisposeAsync() { throw null; }
     }
     public readonly partial struct ConfiguredCancelableAsyncEnumerable<T>
     {
         private readonly object _dummy;
+        private readonly int _dummyPrimitive;
         public System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable<T> ConfigureAwait(bool continueOnCapturedContext) { throw null; }
         public System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable<T>.Enumerator GetAsyncEnumerator() { throw null; }
         public System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable<T> WithCancellation(System.Threading.CancellationToken cancellationToken) { throw null; }
         public readonly partial struct Enumerator
         {
             private readonly object _dummy;
+            private readonly int _dummyPrimitive;
             public T Current { get { throw null; } }
             public System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable DisposeAsync() { throw null; }
             public System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable<bool> MoveNextAsync() { throw null; }
@@ -117,21 +120,27 @@ namespace System.Threading.Tasks
         public System.Threading.Tasks.TaskScheduler ExclusiveScheduler { get { throw null; } }
         public void Complete() { }
     }
+    public static partial class TaskAsyncEnumerableExtensions
+    {
+        public static System.Runtime.CompilerServices.ConfiguredAsyncDisposable ConfigureAwait(this System.IAsyncDisposable source, bool continueOnCapturedContext) { throw null; }
+        public static System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable<T> ConfigureAwait<T>(this System.Collections.Generic.IAsyncEnumerable<T> source, bool continueOnCapturedContext) { throw null; }
+        public static System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable<T> WithCancellation<T>(this System.Collections.Generic.IAsyncEnumerable<T> source, System.Threading.CancellationToken cancellationToken) { throw null; }
+    }
     public partial class TaskCanceledException : System.OperationCanceledException
     {
         public TaskCanceledException() { }
         protected TaskCanceledException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public TaskCanceledException(string message) { }
-        public TaskCanceledException(string message, System.Exception innerException) { }
-        public TaskCanceledException(string message, System.Exception innerException, System.Threading.CancellationToken token) { }
-        public TaskCanceledException(System.Threading.Tasks.Task task) { }
-        public System.Threading.Tasks.Task Task { get { throw null; } }
+        public TaskCanceledException(string? message) { }
+        public TaskCanceledException(string? message, System.Exception? innerException) { }
+        public TaskCanceledException(string? message, System.Exception? innerException, System.Threading.CancellationToken token) { }
+        public TaskCanceledException(System.Threading.Tasks.Task? task) { }
+        public System.Threading.Tasks.Task? Task { get { throw null; } }
     }
     public partial class TaskCompletionSource<TResult>
     {
         public TaskCompletionSource() { }
-        public TaskCompletionSource(object state) { }
-        public TaskCompletionSource(object state, System.Threading.Tasks.TaskCreationOptions creationOptions) { }
+        public TaskCompletionSource(object? state) { }
+        public TaskCompletionSource(object? state, System.Threading.Tasks.TaskCreationOptions creationOptions) { }
         public TaskCompletionSource(System.Threading.Tasks.TaskCreationOptions creationOptions) { }
         public System.Threading.Tasks.Task<TResult> Task { get { throw null; } }
         public void SetCanceled() { }
@@ -146,18 +155,15 @@ namespace System.Threading.Tasks
     }
     public static partial class TaskExtensions
     {
-        public static System.Runtime.CompilerServices.ConfiguredAsyncDisposable ConfigureAwait(this System.IAsyncDisposable source, bool continueOnCapturedContext) { throw null; }
-        public static System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable<T> ConfigureAwait<T>(this System.Collections.Generic.IAsyncEnumerable<T> source, bool continueOnCapturedContext) { throw null; }
         public static System.Threading.Tasks.Task Unwrap(this System.Threading.Tasks.Task<System.Threading.Tasks.Task> task) { throw null; }
         public static System.Threading.Tasks.Task<TResult> Unwrap<TResult>(this System.Threading.Tasks.Task<System.Threading.Tasks.Task<TResult>> task) { throw null; }
-        public static System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable<T> WithCancellation<T>(this System.Collections.Generic.IAsyncEnumerable<T> source, System.Threading.CancellationToken cancellationToken) { throw null; }
     }
     public partial class TaskSchedulerException : System.Exception
     {
         public TaskSchedulerException() { }
-        public TaskSchedulerException(System.Exception innerException) { }
+        public TaskSchedulerException(System.Exception? innerException) { }
         protected TaskSchedulerException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public TaskSchedulerException(string message) { }
-        public TaskSchedulerException(string message, System.Exception innerException) { }
+        public TaskSchedulerException(string? message) { }
+        public TaskSchedulerException(string? message, System.Exception? innerException) { }
     }
 }

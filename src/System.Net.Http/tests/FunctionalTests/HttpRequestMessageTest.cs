@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Test.Common;
-using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -17,7 +15,7 @@ namespace System.Net.Http.Functional.Tests
 {
     public class HttpRequestMessageTest : HttpClientHandlerTestBase
     {
-        Version _expectedRequestMessageVersion = !PlatformDetection.IsFullFramework ? new Version(2,0) : new Version(1, 1);
+        private readonly Version _expectedRequestMessageVersion = PlatformDetection.IsUap ? new Version(2,0) : new Version(1, 1);
 
         public HttpRequestMessageTest(ITestOutputHelper output) : base(output) { }
 
@@ -232,7 +230,7 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = CreateHttpClient())
             {
                 await LoopbackServer.CreateServerAsync(async (server, uri) =>
                 {
@@ -249,6 +247,37 @@ namespace System.Net.Http.Functional.Tests
                         await connection.SendResponseAsync();
                         await requestTask;
                     });
+                });
+            }
+        }
+
+        [Fact]
+        public async Task HttpRequest_BodylessMethod_LargeContentLength()
+        {
+            using (HttpClient client = CreateHttpClient())
+            {
+                await LoopbackServer.CreateServerAsync(async (server, uri) =>
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Head, uri);
+
+                    Task<HttpResponseMessage> requestTask = client.SendAsync(request);
+                    
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        // Content-Length greater than 2GB.
+                        string response = LoopbackServer.GetConnectionCloseResponse(
+                            HttpStatusCode.OK, "Content-Length: 2167849215\r\n\r\n");
+                        await connection.SendResponseAsync(response);
+
+                        await requestTask;
+                    });
+
+                    using (HttpResponseMessage result = requestTask.Result)
+                    {
+                        Assert.NotNull(result);
+                        Assert.NotNull(result.Content);
+                        Assert.Equal(2167849215, result.Content.Headers.ContentLength);
+                    }
                 });
             }
         }

@@ -25,7 +25,6 @@ namespace System.Xml.Serialization
         {
         }
     }
-#if !FEATURE_SERIALIZATION_UAPAOT
     internal class XmlSerializationCodeGen
     {
         private IndentedWriter _writer;
@@ -95,7 +94,7 @@ namespace System.Xml.Serialization
             if (a == null) return new TypeMapping[32];
             if (index < a.Length) return a;
             TypeMapping[] b = new TypeMapping[a.Length + 32];
-            Array.Copy(a, b, index);
+            Array.Copy(a, 0, b, 0, index);
             return b;
         }
 
@@ -407,5 +406,4 @@ namespace System.Xml.Serialization
             return mapping.TypeDesc.CanBeElementValue;
         }
     }
-#endif
 }

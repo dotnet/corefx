@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal struct WriteStack
     {
@@ -44,14 +44,23 @@ namespace System.Text.Json.Serialization
             Current.JsonClassInfo = nextClassInfo;
             Current.CurrentValue = nextValue;
 
-            if (nextClassInfo.ClassType == ClassType.Enumerable)
+            ClassType classType = nextClassInfo.ClassType;
+
+            if (classType == ClassType.Enumerable || nextClassInfo.ClassType == ClassType.Dictionary)
             {
-                Current.PopStackOnEndArray = true;
-                Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
+                Current.PopStackOnEndCollection = true;
+                Current.JsonPropertyInfo = Current.JsonClassInfo.PolicyProperty;
+            }
+            else if (classType == ClassType.IDictionaryConstructible)
+            {
+                Current.PopStackOnEndCollection = true;
+                Current.JsonPropertyInfo = Current.JsonClassInfo.PolicyProperty;
+
+                Current.IsIDictionaryConstructible = true;
             }
             else
             {
-                Debug.Assert(nextClassInfo.ClassType == ClassType.Object || nextClassInfo.ClassType == ClassType.Dictionary || nextClassInfo.ClassType == ClassType.Unknown);
+                Debug.Assert(nextClassInfo.ClassType == ClassType.Object || nextClassInfo.ClassType == ClassType.Unknown);
                 Current.PopStackOnEndObject = true;
             }
         }
@@ -60,6 +69,52 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(_index > 0);
             Current = _previous[--_index];
+        }
+
+        // Return a property path as a simple JSONPath using dot-notation when possible. When special characters are present, bracket-notation is used:
+        // $.x.y.z
+        // $['PropertyName.With.Special.Chars']
+        public string PropertyPath
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder("$");
+
+                for (int i = 0; i < _index; i++)
+                {
+                    AppendStackFrame(sb, _previous[i]);
+                }
+
+                AppendStackFrame(sb, Current);
+                return sb.ToString();
+            }
+        }
+
+        private void AppendStackFrame(StringBuilder sb, in WriteStackFrame frame)
+        {
+            // Append the property name.
+            string propertyName = frame.JsonPropertyInfo?.PropertyInfo?.Name;
+            AppendPropertyName(sb, propertyName);
+        }
+
+        private void AppendPropertyName(StringBuilder sb, string propertyName)
+        {
+            if (propertyName != null)
+            {
+                JsonEncodedText encodedPropertyName = JsonEncodedText.Encode(propertyName);
+
+                if (propertyName.IndexOfAny(ReadStack.SpecialCharacters) != -1)
+                {
+                    sb.Append(@"['");
+                    sb.Append(encodedPropertyName);
+                    sb.Append(@"']");
+                }
+                else
+                {
+                    sb.Append('.');
+                    sb.Append(encodedPropertyName);
+                }
+            }
         }
     }
 }

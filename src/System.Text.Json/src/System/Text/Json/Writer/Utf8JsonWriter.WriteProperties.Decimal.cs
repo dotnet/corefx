@@ -11,13 +11,35 @@ namespace System.Text.Json
     public sealed partial class Utf8JsonWriter
     {
         /// <summary>
+        /// Writes the pre-encoded property name and <see cref="decimal"/> value (as a JSON number) as part of a name/value pair of a JSON object.
+        /// </summary>
+        /// <param name="propertyName">The JSON encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
+        /// </remarks>
+        public void WriteNumber(JsonEncodedText propertyName, decimal value)
+            => WriteNumberHelper(propertyName.EncodedUtf8Bytes, value);
+
+        private void WriteNumberHelper(ReadOnlySpan<byte> utf8PropertyName, decimal value)
+        {
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+
+            WriteNumberByOptions(utf8PropertyName, value);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.Number;
+        }
+
+        /// <summary>
         /// Writes the property name and <see cref="decimal"/> value (as a JSON number) as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -26,6 +48,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(string propertyName, decimal value)
             => WriteNumber(propertyName.AsSpan(), value);
@@ -33,11 +56,8 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the property name and <see cref="decimal"/> value (as a JSON number) as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -46,6 +66,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, decimal value)
         {
@@ -62,9 +83,6 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
         /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -73,6 +91,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, decimal value)
         {
@@ -273,6 +292,8 @@ namespace System.Text.Json
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
+            Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
+
             if (_tokenType != JsonTokenType.None)
             {
                 WriteNewLine(output);
@@ -315,6 +336,8 @@ namespace System.Text.Json
             {
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
+
+            Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
 
             if (_tokenType != JsonTokenType.None)
             {

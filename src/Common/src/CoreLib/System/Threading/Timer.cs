@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Threading.Tasks;
@@ -291,6 +290,8 @@ namespace System.Threading
 
         #region Queue implementation
 
+        public long ActiveCount { get; private set; }
+
         public bool UpdateTimer(TimerQueueTimer timer, uint dueTime, uint period)
         {
             int nowTicks = TickCount;
@@ -305,6 +306,7 @@ namespace System.Threading
                 // If the timer wasn't previously scheduled, now add it to the right list.
                 timer._short = shouldBeShort;
                 LinkTimer(timer);
+                ++ActiveCount;
             }
             else if (timer._short != shouldBeShort)
             {
@@ -380,6 +382,8 @@ namespace System.Threading
         {
             if (timer._dueTime != Timeout.UnsignedInfinite)
             {
+                --ActiveCount;
+                Debug.Assert(ActiveCount >= 0);
                 UnlinkTimer(timer);
                 timer._prev = null;
                 timer._next = null;
@@ -470,14 +474,8 @@ namespace System.Threading
                 }
                 else
                 {
-                    if (
-#if CORECLR
-                        // Don't emit this event during EventPipeController.  This avoids initializing FrameworkEventSource during start-up which is expensive relative to the rest of start-up.
-                        !EventPipeController.Initializing &&
-#endif
-                        FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
+                    if (FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
                         FrameworkEventSource.Log.ThreadTransferSendObj(this, 1, string.Empty, true, (int)dueTime, (int)period);
-
                     success = _associatedTimerQueue.UpdateTimer(this, dueTime, period);
                 }
             }
@@ -619,7 +617,7 @@ namespace System.Threading
 
             if (toSignal is WaitHandle wh)
             {
-                EventWaitHandle.Set(wh.SafeWaitHandle!); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/2384
+                EventWaitHandle.Set(wh.SafeWaitHandle);
             }
             else
             {
@@ -831,6 +829,26 @@ namespace System.Threading
                 throw new ArgumentOutOfRangeException(nameof(period), SR.ArgumentOutOfRange_PeriodTooLarge);
 
             return _timer._timer.Change((uint)dueTime, (uint)period);
+        }
+
+        /// <summary>
+        /// Gets the number of timers that are currently active. An active timer is registered to tick at some point in the
+        /// future, and has not yet been canceled.
+        /// </summary>
+        public static long ActiveCount
+        {
+            get
+            {
+                long count = 0;
+                foreach (TimerQueue queue in TimerQueue.Instances)
+                {
+                    lock (queue)
+                    {
+                        count += queue.ActiveCount;
+                    }
+                }
+                return count;
+            }
         }
 
         public bool Dispose(WaitHandle notifyObject)

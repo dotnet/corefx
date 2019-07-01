@@ -156,8 +156,6 @@ namespace System.Xml.Serialization
 
         private void WriteArrayItems(ElementAccessor[] elements, TextAccessor text, ChoiceIdentifierAccessor choice, TypeDesc arrayTypeDesc, object o)
         {
-            TypeDesc arrayElementTypeDesc = arrayTypeDesc.ArrayElementTypeDesc;
-
             var arr = o as IList;
 
             if (arr != null)
@@ -268,8 +266,6 @@ namespace System.Xml.Serialization
 
                 if (text != null)
                 {
-                    bool useReflection = text.Mapping.TypeDesc.UseReflection;
-                    string fullTypeName = text.Mapping.TypeDesc.CSharpName;
                     WriteText(o, text);
                     return;
                 }
@@ -1001,11 +997,11 @@ namespace System.Xml.Serialization
                 {
                     if (hasRequirement(method, WritePrimitiveMethodRequirement.Raw))
                     {
-                        WriteElementString(name, ns, stringValue, xmlQualifiedName);
+                        WriteElementStringRaw(name, ns, stringValue, xmlQualifiedName);
                     }
                     else
                     {
-                        WriteElementStringRaw(name, ns, stringValue, xmlQualifiedName);
+                        WriteElementString(name, ns, stringValue, xmlQualifiedName);
                     }
                 }
 
@@ -1015,22 +1011,22 @@ namespace System.Xml.Serialization
                     {
                         if (hasRequirement(method, WritePrimitiveMethodRequirement.Raw))
                         {
-                            WriteNullableStringEncoded(name, ns, stringValue, xmlQualifiedName);
+                            WriteNullableStringEncodedRaw(name, ns, stringValue, xmlQualifiedName);
                         }
                         else
                         {
-                            WriteNullableStringEncodedRaw(name, ns, stringValue, xmlQualifiedName);
+                            WriteNullableStringEncoded(name, ns, stringValue, xmlQualifiedName);
                         }
                     }
                     else
                     {
                         if (hasRequirement(method, WritePrimitiveMethodRequirement.Raw))
                         {
-                            WriteNullableStringLiteral(name, ns, stringValue);
+                            WriteNullableStringLiteralRaw(name, ns, stringValue);
                         }
                         else
                         {
-                            WriteNullableStringLiteralRaw(name, ns, stringValue);
+                            WriteNullableStringLiteral(name, ns, stringValue);
                         }
                     }
                 }

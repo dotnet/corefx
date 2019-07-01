@@ -26,6 +26,7 @@ namespace System.Tests
             Assert.True((end - start) < 5 * size, $"Allocated too much: start: {start} end: {end} size: {size}");
         }
 
+        [ActiveIssue(37378)]
         [Fact]
         public static void GetGCMemoryInfo()
         {
@@ -36,11 +37,11 @@ namespace System.Tests
 
                 GCMemoryInfo memoryInfo1 = GC.GetGCMemoryInfo();
 
-                Assert.True(memoryInfo1.HighMemoryLoadThresholdBytes > 0);
-                Assert.True(memoryInfo1.MemoryLoadBytes > 0);
-                Assert.True(memoryInfo1.TotalAvailableMemoryBytes > 0);
-                Assert.True(memoryInfo1.HeapSizeBytes > 0);
-                Assert.True(memoryInfo1.FragmentedBytes >= 0);
+                Assert.InRange(memoryInfo1.HighMemoryLoadThresholdBytes, 1, long.MaxValue);
+                Assert.InRange(memoryInfo1.MemoryLoadBytes, 1, long.MaxValue);
+                Assert.InRange(memoryInfo1.TotalAvailableMemoryBytes, 1, long.MaxValue);
+                Assert.InRange(memoryInfo1.HeapSizeBytes, 1, long.MaxValue);
+                Assert.InRange(memoryInfo1.FragmentedBytes, 0, long.MaxValue);
 
                 GCHandle[] gch = new GCHandle[64 * 1024];
                 for (int i = 0; i < gch.Length * 2; ++i)
@@ -57,12 +58,59 @@ namespace System.Tests
 
                 GCMemoryInfo memoryInfo2 = GC.GetGCMemoryInfo();
 
-                Assert.True(memoryInfo2.HighMemoryLoadThresholdBytes == memoryInfo1.HighMemoryLoadThresholdBytes);
-                Assert.True(memoryInfo2.MemoryLoadBytes >= memoryInfo1.MemoryLoadBytes);
-                Assert.True(memoryInfo2.TotalAvailableMemoryBytes == memoryInfo1.TotalAvailableMemoryBytes);
-                Assert.True(memoryInfo2.HeapSizeBytes > memoryInfo1.HeapSizeBytes);
-                Assert.True(memoryInfo2.FragmentedBytes > memoryInfo1.FragmentedBytes);
+                Assert.Equal(memoryInfo2.HighMemoryLoadThresholdBytes, memoryInfo1.HighMemoryLoadThresholdBytes);
+                Assert.InRange(memoryInfo2.MemoryLoadBytes, memoryInfo1.MemoryLoadBytes, long.MaxValue);
+                Assert.Equal(memoryInfo2.TotalAvailableMemoryBytes, memoryInfo1.TotalAvailableMemoryBytes);
+                Assert.InRange(memoryInfo2.HeapSizeBytes, memoryInfo1.HeapSizeBytes + 1, long.MaxValue);
+                Assert.InRange(memoryInfo2.FragmentedBytes, memoryInfo1.FragmentedBytes + 1, long.MaxValue);
             }).Dispose();
+        }
+
+        [Fact]
+        public static void GetTotalAllocatedBytes()
+        {
+            byte[] stash;
+
+            long CallGetTotalAllocatedBytesAndCheck(long previous, out long differenceBetweenPreciseAndImprecise)
+            {
+                long precise = GC.GetTotalAllocatedBytes(true);
+                long imprecise = GC.GetTotalAllocatedBytes(false);
+
+                if (precise <= 0)
+                {
+                    throw new Exception($"Bytes allocated is not positive, this is unlikely. precise = {precise}");
+                }
+
+                if (imprecise < precise)
+                {
+                    throw new Exception($"Imprecise total bytes allocated less than precise, imprecise is required to be a conservative estimate (that estimates high). imprecise = {imprecise}, precise = {precise}");
+                }
+
+                if (previous > precise)
+                {
+                    throw new Exception($"Expected more memory to be allocated. previous = {previous}, precise = {precise}, difference = {previous - precise}");
+                }
+
+                differenceBetweenPreciseAndImprecise = imprecise - precise;
+                return precise;
+            }
+
+            long CallGetTotalAllocatedBytes(long previous)
+            {
+                long differenceBetweenPreciseAndImprecise;
+                previous = CallGetTotalAllocatedBytesAndCheck(previous, out differenceBetweenPreciseAndImprecise);
+                stash = new byte[differenceBetweenPreciseAndImprecise];
+                previous = CallGetTotalAllocatedBytesAndCheck(previous, out differenceBetweenPreciseAndImprecise);
+                return previous;
+            }
+
+            long previous = 0;
+
+            for (int i = 0; i < 1000; ++i)
+            {
+                stash = new byte[1234];
+                previous = CallGetTotalAllocatedBytes(previous);
+            }
         }
     }
 }

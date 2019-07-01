@@ -12,7 +12,6 @@
 ** 
 ===========================================================*/
 
-
 namespace System.Collections
 {
     ///    This is a simple implementation of IDictionary using a singly linked list. This
@@ -23,7 +22,7 @@ namespace System.Collections
     // Needs to be public to support binary serialization compatibility
     public class ListDictionaryInternal : IDictionary
     {
-        private DictionaryNode head; // Do not rename (binary serialization)
+        private DictionaryNode? head; // Do not rename (binary serialization)
         private int version; // Do not rename (binary serialization)
         private int count; // Do not rename (binary serialization)
 
@@ -31,7 +30,7 @@ namespace System.Collections
         {
         }
 
-        public object this[object key]
+        public object? this[object key]
         {
             get
             {
@@ -39,7 +38,7 @@ namespace System.Collections
                 {
                     throw new ArgumentNullException(nameof(key), SR.ArgumentNull_Key);
                 }
-                DictionaryNode node = head;
+                DictionaryNode? node = head;
 
                 while (node != null)
                 {
@@ -60,8 +59,8 @@ namespace System.Collections
 
 
                 version++;
-                DictionaryNode last = null;
-                DictionaryNode node;
+                DictionaryNode? last = null;
+                DictionaryNode? node;
                 for (node = head; node != null; node = node.next)
                 {
                     if (node.key.Equals(key))
@@ -142,7 +141,7 @@ namespace System.Collections
             }
         }
 
-        public void Add(object key, object value)
+        public void Add(object key, object? value)
         {
             if (key == null)
             {
@@ -151,8 +150,8 @@ namespace System.Collections
 
 
             version++;
-            DictionaryNode last = null;
-            DictionaryNode node;
+            DictionaryNode? last = null;
+            DictionaryNode? node;
             for (node = head; node != null; node = node.next)
             {
                 if (node.key.Equals(key))
@@ -195,7 +194,7 @@ namespace System.Collections
             {
                 throw new ArgumentNullException(nameof(key), SR.ArgumentNull_Key);
             }
-            for (DictionaryNode node = head; node != null; node = node.next)
+            for (DictionaryNode? node = head; node != null; node = node.next)
             {
                 if (node.key.Equals(key))
                 {
@@ -219,7 +218,7 @@ namespace System.Collections
             if (array.Length - index < this.Count)
                 throw new ArgumentException(SR.ArgumentOutOfRange_Index, nameof(index));
 
-            for (DictionaryNode node = head; node != null; node = node.next)
+            for (DictionaryNode? node = head; node != null; node = node.next)
             {
                 array.SetValue(new DictionaryEntry(node.key, node.value), index);
                 index++;
@@ -243,8 +242,8 @@ namespace System.Collections
                 throw new ArgumentNullException(nameof(key), SR.ArgumentNull_Key);
             }
             version++;
-            DictionaryNode last = null;
-            DictionaryNode node;
+            DictionaryNode? last = null;
+            DictionaryNode? node;
             for (node = head; node != null; node = node.next)
             {
                 if (node.key.Equals(key))
@@ -263,7 +262,7 @@ namespace System.Collections
             }
             else
             {
-                last.next = node.next;
+                last!.next = node.next;
             }
             count--;
         }
@@ -271,7 +270,7 @@ namespace System.Collections
         private class NodeEnumerator : IDictionaryEnumerator
         {
             private ListDictionaryInternal list;
-            private DictionaryNode current;
+            private DictionaryNode? current;
             private int version;
             private bool start;
 
@@ -284,7 +283,9 @@ namespace System.Collections
                 current = null;
             }
 
+#pragma warning disable CS8612 // TODO-NULLABLE: Covariance in interfaces (https://github.com/dotnet/roslyn/issues/35227)
             public object Current
+#pragma warning restore CS8612
             {
                 get
                 {
@@ -316,7 +317,7 @@ namespace System.Collections
                 }
             }
 
-            public object Value
+            public object? Value
             {
                 get
                 {
@@ -382,7 +383,7 @@ namespace System.Collections
                     throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_NeedNonNegNum);
                 if (array.Length - index < list.Count)
                     throw new ArgumentException(SR.ArgumentOutOfRange_Index, nameof(index));
-                for (DictionaryNode node = list.head; node != null; node = node.next)
+                for (DictionaryNode? node = list.head; node != null; node = node.next)
                 {
                     array.SetValue(isKeys ? node.key : node.value, index);
                     index++;
@@ -394,7 +395,7 @@ namespace System.Collections
                 get
                 {
                     int count = 0;
-                    for (DictionaryNode node = list.head; node != null; node = node.next)
+                    for (DictionaryNode? node = list.head; node != null; node = node.next)
                     {
                         count++;
                     }
@@ -427,7 +428,7 @@ namespace System.Collections
             private class NodeKeyValueEnumerator : IEnumerator
             {
                 private ListDictionaryInternal list;
-                private DictionaryNode current;
+                private DictionaryNode? current;
                 private int version;
                 private bool isKeys;
                 private bool start;
@@ -441,7 +442,7 @@ namespace System.Collections
                     current = null;
                 }
 
-                public object Current
+                public object? Current
                 {
                     get
                     {
@@ -489,9 +490,9 @@ namespace System.Collections
         [Serializable]
         private class DictionaryNode
         {
-            public object key;
-            public object value;
-            public DictionaryNode next;
+            public object key = null!;
+            public object? value;
+            public DictionaryNode? next;
         }
     }
 }

@@ -13,7 +13,6 @@ namespace System.Text.Json.Tests
         public static void DefaultJsonReaderState()
         {
             JsonReaderState state = default;
-            Assert.Equal(0, state.BytesConsumed);
 
             var expectedOption = new JsonReaderOptions
             {
@@ -27,7 +26,6 @@ namespace System.Text.Json.Tests
         public static void JsonReaderStateDefaultCtor()
         {
             var state = new JsonReaderState();
-            Assert.Equal(0, state.BytesConsumed);
 
             var expectedOption = new JsonReaderOptions
             {
@@ -41,7 +39,6 @@ namespace System.Text.Json.Tests
         public static void JsonReaderStateCtor()
         {
             var state = new JsonReaderState(default);
-            Assert.Equal(0, state.BytesConsumed);
 
             var expectedOption = new JsonReaderOptions
             {
@@ -51,7 +48,6 @@ namespace System.Text.Json.Tests
             Assert.Equal(expectedOption, state.Options);
 
             state = new JsonReaderState(new JsonReaderOptions { CommentHandling = JsonCommentHandling.Disallow, MaxDepth = 0 });
-            Assert.Equal(0, state.BytesConsumed);
             Assert.Equal(expectedOption, state.Options);
 
             expectedOption = new JsonReaderOptions
@@ -60,30 +56,27 @@ namespace System.Text.Json.Tests
                 MaxDepth = 32
             };
             state = new JsonReaderState(new JsonReaderOptions { MaxDepth = 32 });
-            Assert.Equal(0, state.BytesConsumed);
             Assert.Equal(32, state.Options.MaxDepth);
             Assert.Equal(expectedOption, state.Options);
         }
 
         [Theory]
         [InlineData(-1)]
+        [InlineData(3)]
+        [InlineData(byte.MaxValue)]
+        [InlineData(byte.MaxValue + 4)] // Other values, like byte.MaxValue + 1 overflows to 0 (i.e. JsonCommentHandling.Disallow), which is valid.
+        public static void TestCommentHandlingInvalid(int enumValue)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>("value", () => new JsonReaderOptions { CommentHandling = (JsonCommentHandling)enumValue });
+            Assert.Throws<ArgumentOutOfRangeException>("value", () => new JsonReaderState(new JsonReaderOptions { CommentHandling = (JsonCommentHandling)enumValue }));
+        }
+
+        [Theory]
+        [InlineData(-1)]
         public static void TestDepthInvalid(int depth)
         {
-            try
-            {
-                var options = new JsonReaderOptions { MaxDepth = depth };
-                Assert.True(false, "Expected ArgumentException was not thrown. Max depth must be set to greater than or equal to 0.");
-            }
-            catch (ArgumentException)
-            { }
-
-            try
-            {
-                var state = new JsonReaderState(new JsonReaderOptions { MaxDepth = depth });
-                Assert.True(false, "Expected ArgumentException was not thrown. Max depth must be set to greater than or equal to 0.");
-            }
-            catch (ArgumentException)
-            { }
+            Assert.Throws<ArgumentOutOfRangeException>("value", () => new JsonReaderOptions { MaxDepth = depth });
+            Assert.Throws<ArgumentOutOfRangeException>("value", () => new JsonReaderState(new JsonReaderOptions { MaxDepth = depth }));
         }
 
         [Fact]

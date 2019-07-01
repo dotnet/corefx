@@ -3,76 +3,140 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal struct WriteStackFrame
     {
-        // The object (POCO or IEnumerable) that is being populated
-        internal object CurrentValue;
-        internal JsonClassInfo JsonClassInfo;
+        // The object (POCO or IEnumerable) that is being populated.
+        public object CurrentValue;
+        public JsonClassInfo JsonClassInfo;
 
-        internal IEnumerator Enumerator;
+        // Support Dictionary keys.
+        public string KeyName;
 
-        // Current property values
-        internal JsonPropertyInfo JsonPropertyInfo;
+        // The current IEnumerable or IDictionary.
+        public IEnumerator CollectionEnumerator;
+        public bool PopStackOnEndCollection;
+        public bool IsIDictionaryConstructible;
+        public bool IsIDictionaryConstructibleProperty;
+
+        // The current object.
+        public bool PopStackOnEndObject;
+        public bool StartObjectWritten;
+        public bool MoveToNextProperty;
 
         // The current property.
-        internal int PropertyIndex;
+        public IEnumerator PropertyEnumerator;
+        public bool PropertyEnumeratorActive;
+        public JsonPropertyInfo JsonPropertyInfo;
 
-        // Has the Start tag been written
-        internal bool StartObjectWritten;
-
-        internal bool PopStackOnEndArray;
-        internal bool PopStackOnEndObject;
-
-        internal void Initialize(Type type, JsonSerializerOptions options)
+        public void Initialize(Type type, JsonSerializerOptions options)
         {
             JsonClassInfo = options.GetOrAddClass(type);
             if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
             {
-                JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
+                JsonPropertyInfo = JsonClassInfo.PolicyProperty;
+            }
+            else if (JsonClassInfo.ClassType == ClassType.IDictionaryConstructible)
+            {
+                JsonPropertyInfo = JsonClassInfo.PolicyProperty;
+                IsIDictionaryConstructible = true;
             }
         }
 
-        internal void Reset()
+        public void WriteObjectOrArrayStart(ClassType classType, Utf8JsonWriter writer, bool writeNull = false)
+        {
+            if (JsonPropertyInfo?.EscapedName.HasValue == true)
+            {
+                WriteObjectOrArrayStart(classType, JsonPropertyInfo.EscapedName.Value, writer, writeNull);
+            }
+            else if (KeyName != null)
+            {
+                JsonEncodedText propertyName = JsonEncodedText.Encode(KeyName);
+                WriteObjectOrArrayStart(classType, propertyName, writer, writeNull);
+            }
+            else
+            {
+                Debug.Assert(writeNull == false);
+
+                // Write start without a property name.
+                if (classType == ClassType.Object || classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible)
+                {
+                    writer.WriteStartObject();
+                    StartObjectWritten = true;
+                }
+                else
+                {
+                    Debug.Assert(classType == ClassType.Enumerable);
+                    writer.WriteStartArray();
+                }
+            }
+        }
+
+        private void WriteObjectOrArrayStart(ClassType classType, JsonEncodedText propertyName, Utf8JsonWriter writer, bool writeNull)
+        {
+            if (writeNull)
+            {
+                writer.WriteNull(propertyName);
+            }
+            else if (classType == ClassType.Object ||
+                classType == ClassType.Dictionary ||
+                classType == ClassType.IDictionaryConstructible)
+            {
+                writer.WriteStartObject(propertyName);
+                StartObjectWritten = true;
+            }
+            else
+            {
+                Debug.Assert(classType == ClassType.Enumerable);
+                writer.WriteStartArray(propertyName);
+            }
+        }
+
+        public void Reset()
         {
             CurrentValue = null;
+            CollectionEnumerator = null;
+            KeyName = null;
             JsonClassInfo = null;
-            StartObjectWritten = false;
-            EndObject();
-            EndArray();
-        }
-
-        internal void EndObject()
-        {
-            PropertyIndex = 0;
+            JsonPropertyInfo = null;
+            IsIDictionaryConstructible = false;
+            MoveToNextProperty = false;
             PopStackOnEndObject = false;
-            EndProperty();
+            PopStackOnEndCollection = false;
+            StartObjectWritten = false;
         }
 
-        internal void EndDictionary()
+        public void EndObject()
         {
-            Enumerator = null;
-            EndProperty();
+            IsIDictionaryConstructibleProperty = false;
+            JsonPropertyInfo = null;
+            MoveToNextProperty = false;
+            PopStackOnEndObject = false;
+            PropertyEnumerator = null;
+            PropertyEnumeratorActive = false;
         }
 
-        internal void EndArray()
+        public void EndDictionary()
         {
-            Enumerator = null;
-            PopStackOnEndArray = false;
-            EndProperty();
+            CollectionEnumerator = null;
+            PopStackOnEndCollection = false;
         }
 
-        internal void EndProperty()
+        public void EndArray()
         {
+            CollectionEnumerator = null;
+            PopStackOnEndCollection = false;
             JsonPropertyInfo = null;
         }
 
-        internal void NextProperty()
+        public void NextProperty()
         {
             JsonPropertyInfo = null;
-            PropertyIndex++;
+            MoveToNextProperty = false;
+            PropertyEnumeratorActive = PropertyEnumerator.MoveNext();
         }
     }
 }

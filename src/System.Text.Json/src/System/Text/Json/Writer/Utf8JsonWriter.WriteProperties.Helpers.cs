@@ -26,11 +26,18 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ValidateDepth()
+        {
+            if (CurrentDepth >= JsonConstants.MaxWriterDepth)
+                ThrowHelper.ThrowInvalidOperationException(_currentDepth);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ValidateWritingProperty()
         {
             if (!Options.SkipValidation)
             {
-                if (!_inObject)
+                if (!_inObject || _tokenType == JsonTokenType.PropertyName)
                 {
                     Debug.Assert(_tokenType != JsonTokenType.StartObject);
                     ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWritePropertyWithinArray, currentDepth: default, token: default, _tokenType);
@@ -43,7 +50,7 @@ namespace System.Text.Json
         {
             if (!Options.SkipValidation)
             {
-                if (!_inObject)
+                if (!_inObject || _tokenType == JsonTokenType.PropertyName)
                 {
                     Debug.Assert(_tokenType != JsonTokenType.StartObject);
                     ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWritePropertyWithinArray, currentDepth: default, token: default, _tokenType);
@@ -101,6 +108,8 @@ namespace System.Text.Json
             {
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
+
+            Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
 
             if (_tokenType != JsonTokenType.None)
             {
@@ -172,6 +181,8 @@ namespace System.Text.Json
             {
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
+
+            Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
 
             if (_tokenType != JsonTokenType.None)
             {

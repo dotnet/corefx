@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Runtime.Serialization;
 
 namespace System
@@ -10,7 +9,11 @@ namespace System
     public sealed partial class TimeZoneInfo
     {
         [Serializable]
-        public sealed class AdjustmentRule : IEquatable<AdjustmentRule?>, ISerializable, IDeserializationCallback
+        public sealed class AdjustmentRule :
+#nullable disable // see comment on String
+            IEquatable<AdjustmentRule>,
+#nullable restore
+            ISerializable, IDeserializationCallback
         {
             private static readonly TimeSpan DaylightDeltaAdjustment = TimeSpan.FromHours(24.0);
             private static readonly TimeSpan MaxDaylightDelta = TimeSpan.FromHours(12.0);

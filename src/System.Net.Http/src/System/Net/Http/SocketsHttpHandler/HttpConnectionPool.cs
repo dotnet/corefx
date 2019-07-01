@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http.Headers;
 using System.Net.Http.HPack;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -154,7 +155,20 @@ namespace System.Net.Http
                 {
                     _sslOptionsHttp2 = ConstructSslOptions(poolManager, sslHostName);
                     _sslOptionsHttp2.ApplicationProtocols = Http2ApplicationProtocols;
-                    _sslOptionsHttp2.AllowRenegotiation = false;
+                    
+                    // Note:
+                    // The HTTP/2 specification states:
+                    //   "A deployment of HTTP/2 over TLS 1.2 MUST disable renegotiation.
+                    //    An endpoint MUST treat a TLS renegotiation as a connection error (Section 5.4.1)
+                    //    of type PROTOCOL_ERROR."
+                    // which suggests we should do:
+                    //   _sslOptionsHttp2.AllowRenegotiation = false;
+                    // However, if AllowRenegotiation is set to false, that will also prevent
+                    // renegotation if the server denies the HTTP/2 request and causes a
+                    // downgrade to HTTP/1.1, and the current APIs don't provide a mechanism
+                    // by which AllowRenegotiation could be set back to true in that case.
+                    // For now, if an HTTP/2 server erroneously issues a renegotiation, we'll
+                    // allow it.
 
                     Debug.Assert(hostHeader != null);
                     _encodedAuthorityHostHeader = HPackEncoder.EncodeLiteralHeaderFieldWithoutIndexingToAllocatedArray(StaticTable.Authority, hostHeader);
@@ -166,6 +180,8 @@ namespace System.Net.Http
             {
                 PreAuthCredentials = new CredentialCache();
             }
+
+            if (NetEventSource.IsEnabled) Trace($"{this}");
         }
 
         private static readonly List<SslApplicationProtocol> Http2ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http2, SslApplicationProtocol.Http11 };
@@ -228,7 +244,7 @@ namespace System.Net.Http
 
             TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
             TimeSpan pooledConnectionIdleTimeout = _poolManager.Settings._pooledConnectionIdleTimeout;
-            int nowTicks = Environment.TickCount;
+            long nowTicks = Environment.TickCount64;
             List<CachedConnection> list = _idleConnections;
 
             // Try to find a usable cached connection.
@@ -339,7 +355,7 @@ namespace System.Net.Http
             if (http2Connection != null)
             {
                 TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
-                if (http2Connection.LifetimeExpired(Environment.TickCount, pooledConnectionLifetime))
+                if (http2Connection.LifetimeExpired(Environment.TickCount64, pooledConnectionLifetime))
                 {
                     // Connection expired.
                     http2Connection.Dispose();
@@ -427,7 +443,7 @@ namespace System.Net.Http
 
                         if (sslStream.SslProtocol < SslProtocols.Tls12)
                         {
-                            throw new HttpRequestException(SR.net_http_invalid_response);
+                            throw new HttpRequestException(SR.Format(SR.net_ssl_http2_requires_tls12, sslStream.SslProtocol));
                         }
 
                         http2Connection = new Http2Connection(this, sslStream);
@@ -496,7 +512,7 @@ namespace System.Net.Http
             }
 
             // If we reach this point, it means we need to fall back to a (new or existing) HTTP/1.1 connection.
-            return await GetHttpConnectionAsync(request, cancellationToken);
+            return await GetHttpConnectionAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<HttpResponseMessage> SendWithRetryAsync(HttpRequestMessage request, bool doRequestAuth, CancellationToken cancellationToken)
@@ -617,7 +633,7 @@ namespace System.Net.Http
                     case HttpConnectionKind.ProxyTunnel:
                     case HttpConnectionKind.SslProxyTunnel:
                         HttpResponseMessage response;
-                        (stream, response) = await EstablishProxyTunnel(cancellationToken).ConfigureAwait(false);
+                        (stream, response) = await EstablishProxyTunnel(request.HasHeaders ? request.Headers : null, cancellationToken).ConfigureAwait(false);
                         if (response != null)
                         {
                             // Return non-success response from proxy.
@@ -666,11 +682,16 @@ namespace System.Net.Http
         }
 
         // Returns the established stream or an HttpResponseMessage from the proxy indicating failure.
-        private async ValueTask<(Stream, HttpResponseMessage)> EstablishProxyTunnel(CancellationToken cancellationToken)
+        private async ValueTask<(Stream, HttpResponseMessage)> EstablishProxyTunnel(HttpRequestHeaders headers, CancellationToken cancellationToken)
         {
             // Send a CONNECT request to the proxy server to establish a tunnel.
             HttpRequestMessage tunnelRequest = new HttpRequestMessage(HttpMethod.Connect, _proxyUri);
             tunnelRequest.Headers.Host = $"{_host}:{_port}";    // This specifies destination host/port to connect to
+
+            if (headers != null && headers.TryGetValues(HttpKnownHeaderNames.UserAgent, out IEnumerable<string> values))
+            {
+                tunnelRequest.Headers.TryAddWithoutValidation(HttpKnownHeaderNames.UserAgent, values);
+            }
 
             HttpResponseMessage tunnelResponse = await _poolManager.SendProxyConnectAsync(tunnelRequest, _proxyUri, cancellationToken).ConfigureAwait(false);
 
@@ -791,7 +812,7 @@ namespace System.Net.Http
         /// <param name="connection">The connection to return.</param>
         public void ReturnConnection(HttpConnection connection)
         {
-            bool lifetimeExpired = connection.LifetimeExpired(Environment.TickCount, _poolManager.Settings._pooledConnectionLifetime);
+            bool lifetimeExpired = connection.LifetimeExpired(Environment.TickCount64, _poolManager.Settings._pooledConnectionLifetime);
 
             if (!lifetimeExpired)
             {
@@ -909,7 +930,7 @@ namespace System.Net.Http
 
                 // Get the current time.  This is compared against each connection's last returned
                 // time to determine whether a connection is too old and should be closed.
-                int nowTicks = Environment.TickCount;
+                long nowTicks = Environment.TickCount64;
                 Http2Connection http2Connection = _http2Connection;
 
                 if (http2Connection != null)
@@ -1024,7 +1045,7 @@ namespace System.Net.Http
                 0,                           // connection ID
                 0,                           // request ID
                 memberName,                  // method name
-                ToString() + ":" + message); // message
+                message);                    // message
 
         /// <summary>A cached idle connection and metadata about it.</summary>
         [StructLayout(LayoutKind.Auto)]
@@ -1033,7 +1054,7 @@ namespace System.Net.Http
             /// <summary>The cached connection.</summary>
             internal readonly HttpConnection _connection;
             /// <summary>The last tick count at which the connection was used.</summary>
-            internal readonly int _returnedTickCount;
+            internal readonly long _returnedTickCount;
 
             /// <summary>Initializes the cached connection and its associated metadata.</summary>
             /// <param name="connection">The connection.</param>
@@ -1041,7 +1062,7 @@ namespace System.Net.Http
             {
                 Debug.Assert(connection != null);
                 _connection = connection;
-                _returnedTickCount = Environment.TickCount;
+                _returnedTickCount = Environment.TickCount64;
             }
 
             /// <summary>Gets whether the connection is currently usable.</summary>
@@ -1056,16 +1077,16 @@ namespace System.Net.Http
             /// the nature of connection pooling.
             /// </returns>
             public bool IsUsable(
-                int nowTicks,
+                long nowTicks,
                 TimeSpan pooledConnectionLifetime,
                 TimeSpan pooledConnectionIdleTimeout,
                 bool poll = false)
             {
                 // Validate that the connection hasn't been idle in the pool for longer than is allowed.
                 if ((pooledConnectionIdleTimeout != Timeout.InfiniteTimeSpan) &&
-                    ((uint)(nowTicks - _returnedTickCount) > pooledConnectionIdleTimeout.TotalMilliseconds))
+                    ((nowTicks - _returnedTickCount) > pooledConnectionIdleTimeout.TotalMilliseconds))
                 {
-                    if (NetEventSource.IsEnabled) _connection.Trace($"Connection no longer usable. Idle {TimeSpan.FromMilliseconds((uint)(nowTicks - _returnedTickCount))} > {pooledConnectionIdleTimeout}.");
+                    if (NetEventSource.IsEnabled) _connection.Trace($"Connection no longer usable. Idle {TimeSpan.FromMilliseconds((nowTicks - _returnedTickCount))} > {pooledConnectionIdleTimeout}.");
                     return false;
                 }
 

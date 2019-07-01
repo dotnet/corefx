@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -655,14 +656,20 @@ namespace System.Diagnostics
                 eventkey?.Close();
             }
             // now create EventLog objects that point to those logs
-            EventLog[] logs = new EventLog[logNames.Length];
+            List<EventLog> logs = new List<EventLog>(logNames.Length);
             for (int i = 0; i < logNames.Length; i++)
             {
                 EventLog log = new EventLog(logNames[i], machineName);
-                logs[i] = log;
+                SafeEventLogReadHandle handle = Interop.Advapi32.OpenEventLog(machineName, logNames[i]);
+
+                if (!handle.IsInvalid)
+                {
+                    handle.Close();
+                    logs.Add(log);
+                }
             }
 
-            return logs;
+            return logs.ToArray();
         }
 
         internal static RegistryKey GetEventLogRegKey(string machine, bool writable)
@@ -832,7 +839,7 @@ namespace System.Diagnostics
             if (largestNumber > insertionStrings.Length)
             {
                 string[] newStrings = new string[largestNumber];
-                Array.Copy(insertionStrings, newStrings, insertionStrings.Length);
+                Array.Copy(insertionStrings, 0, newStrings, 0, insertionStrings.Length);
                 for (int i = insertionStrings.Length; i < newStrings.Length; i++)
                 {
                     newStrings[i] = "%" + (i + 1);

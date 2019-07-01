@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 
 namespace System
@@ -15,7 +14,9 @@ namespace System
         /// <param name="memory">The source memory from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static Memory<T> Trim<T>(this Memory<T> memory, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             ReadOnlySpan<T> span = memory.Span;
             int start = ClampStart(span, trimElement);
@@ -29,7 +30,9 @@ namespace System
         /// <param name="memory">The source memory from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static Memory<T> TrimStart<T>(this Memory<T> memory, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
             => memory.Slice(ClampStart(memory.Span, trimElement));
 
         /// <summary>
@@ -38,7 +41,9 @@ namespace System
         /// <param name="memory">The source memory from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static Memory<T> TrimEnd<T>(this Memory<T> memory, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
             => memory.Slice(0, ClampEnd(memory.Span, 0, trimElement));
 
         /// <summary>
@@ -47,7 +52,9 @@ namespace System
         /// <param name="memory">The source memory from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static ReadOnlyMemory<T> Trim<T>(this ReadOnlyMemory<T> memory, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             ReadOnlySpan<T> span = memory.Span;
             int start = ClampStart(span, trimElement);
@@ -61,7 +68,9 @@ namespace System
         /// <param name="memory">The source memory from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static ReadOnlyMemory<T> TrimStart<T>(this ReadOnlyMemory<T> memory, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
             => memory.Slice(ClampStart(memory.Span, trimElement));
 
         /// <summary>
@@ -70,7 +79,9 @@ namespace System
         /// <param name="memory">The source memory from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static ReadOnlyMemory<T> TrimEnd<T>(this ReadOnlyMemory<T> memory, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
             => memory.Slice(0, ClampEnd(memory.Span, 0, trimElement));
 
         /// <summary>
@@ -79,7 +90,9 @@ namespace System
         /// <param name="span">The source span from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static Span<T> Trim<T>(this Span<T> span, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             int start = ClampStart(span, trimElement);
             int length = ClampEnd(span, start, trimElement);
@@ -92,7 +105,9 @@ namespace System
         /// <param name="span">The source span from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static Span<T> TrimStart<T>(this Span<T> span, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
             => span.Slice(ClampStart(span, trimElement));
 
         /// <summary>
@@ -101,7 +116,9 @@ namespace System
         /// <param name="span">The source span from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static Span<T> TrimEnd<T>(this Span<T> span, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
             => span.Slice(0, ClampEnd(span, 0, trimElement));
 
         /// <summary>
@@ -110,7 +127,9 @@ namespace System
         /// <param name="span">The source span from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static ReadOnlySpan<T> Trim<T>(this ReadOnlySpan<T> span, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             int start = ClampStart(span, trimElement);
             int length = ClampEnd(span, start, trimElement);
@@ -123,7 +142,9 @@ namespace System
         /// <param name="span">The source span from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static ReadOnlySpan<T> TrimStart<T>(this ReadOnlySpan<T> span, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
             => span.Slice(ClampStart(span, trimElement));
 
         /// <summary>
@@ -132,7 +153,9 @@ namespace System
         /// <param name="span">The source span from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         public static ReadOnlySpan<T> TrimEnd<T>(this ReadOnlySpan<T> span, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
             => span.Slice(0, ClampEnd(span, 0, trimElement));
 
         /// <summary>
@@ -141,7 +164,9 @@ namespace System
         /// <param name="span">The source span from which the element is removed.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         private static int ClampStart<T>(ReadOnlySpan<T> span, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             int start = 0;
 
@@ -176,7 +201,9 @@ namespace System
         /// <param name="start">The start index from which to being searching.</param>
         /// <param name="trimElement">The specified element to look for and remove.</param>
         private static int ClampEnd<T>(ReadOnlySpan<T> span, int start, T trimElement)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             // Initially, start==len==0. If ClampStart trims all, start==len
             Debug.Assert((uint)start <= span.Length);
@@ -215,7 +242,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
         public static Memory<T> Trim<T>(this Memory<T> memory, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -241,7 +270,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
         public static Memory<T> TrimStart<T>(this Memory<T> memory, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -264,7 +295,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
         public static Memory<T> TrimEnd<T>(this Memory<T> memory, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -287,7 +320,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
         public static ReadOnlyMemory<T> Trim<T>(this ReadOnlyMemory<T> memory, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -313,7 +348,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
         public static ReadOnlyMemory<T> TrimStart<T>(this ReadOnlyMemory<T> memory, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -336,7 +373,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
         public static ReadOnlyMemory<T> TrimEnd<T>(this ReadOnlyMemory<T> memory, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -360,7 +399,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
         public static Span<T> Trim<T>(this Span<T> span, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -385,7 +426,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
         public static Span<T> TrimStart<T>(this Span<T> span, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -408,7 +451,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
         public static Span<T> TrimEnd<T>(this Span<T> span, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -431,7 +476,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
         public static ReadOnlySpan<T> Trim<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -456,7 +503,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
         public static ReadOnlySpan<T> TrimStart<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -479,7 +528,9 @@ namespace System
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
         public static ReadOnlySpan<T> TrimEnd<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             if (trimElements.Length > 1)
             {
@@ -501,7 +552,9 @@ namespace System
         /// <param name="span">The source span from which the elements are removed.</param>
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         private static int ClampStart<T>(ReadOnlySpan<T> span, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             int start = 0;
             for (; start < span.Length; start++)
@@ -523,7 +576,9 @@ namespace System
         /// <param name="start">The start index from which to being searching.</param>
         /// <param name="trimElements">The span which contains the set of elements to remove.</param>
         private static int ClampEnd<T>(ReadOnlySpan<T> span, int start, ReadOnlySpan<T> trimElements)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             // Initially, start==len==0. If ClampStart trims all, start==len
             Debug.Assert((uint)start <= span.Length);

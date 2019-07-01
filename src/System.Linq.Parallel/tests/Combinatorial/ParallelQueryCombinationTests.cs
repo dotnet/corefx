@@ -2,13 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using Xunit;
 
 namespace System.Linq.Parallel.Tests
 {
+    [ConditionalClass(typeof(ParallelQueryCombinationTests), nameof(RunSlowTests))]
     public static partial class ParallelQueryCombinationTests
     {
+        // on ARM platforms many available cores makes this unbearably slow: #36494
+        public static bool RunSlowTests => PlatformDetection.IsNotArmNorArm64Process || Environment.ProcessorCount <= 8;
+
         [Theory]
         [MemberData(nameof(UnaryOperations))]
         [MemberData(nameof(BinaryOperations))]
@@ -462,7 +467,6 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve the right collection order (.NET core bug fix https://github.com/dotnet/corefx/pull/27930)")]
         public static void GroupJoin(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Action<Operation, Operation> groupJoin = (left, right) =>
@@ -485,7 +489,6 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve the right collection order (.NET core bug fix https://github.com/dotnet/corefx/pull/27930)")]
         public static void GroupJoin_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Action<Operation, Operation> groupJoin = (left, right) =>
@@ -545,7 +548,6 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve the right collection order (.NET core bug fix https://github.com/dotnet/corefx/pull/27930)")]
         public static void Join(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Action<Operation, Operation> join = (left, right) =>
@@ -567,7 +569,6 @@ namespace System.Linq.Parallel.Tests
         [Theory]
         [MemberData(nameof(UnaryOperators))]
         [MemberData(nameof(BinaryOperators))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework doesn't preserve the right collection order (.NET core bug fix https://github.com/dotnet/corefx/pull/27930)")]
         public static void Join_NotPipelined(Labeled<Operation> source, Labeled<Operation> operation)
         {
             Action<Operation, Operation> join = (left, right) =>

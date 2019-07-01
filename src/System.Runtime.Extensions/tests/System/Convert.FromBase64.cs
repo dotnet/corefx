@@ -186,7 +186,8 @@ namespace System.Tests
         [Fact]
         public static void InvalidInput()
         {
-            Assert.Throws<ArgumentNullException>(() => Convert.FromBase64CharArray(null, 0, 3));
+            Assert.Throws<ArgumentNullException>("inArray", () => Convert.FromBase64CharArray(null, 0, 3));
+            Assert.Throws<ArgumentNullException>("s", () => Convert.FromBase64String(null));
 
             // Input must be at least 4 characters long
             VerifyInvalidInput("No");
@@ -215,22 +216,9 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void ExtraPaddingCharacter()
         {
             VerifyInvalidInput("abcdxyz=" + "=");
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void ExtraPaddingCharacterOnNetFx()
-        {
-            // This should throw a FormatException because of the extra "=". But due to a bug in NetFx, this 
-            // gets "successfully" decoded as if it were "abcdyz==".
-
-            byte[] actual = Convert.FromBase64String("abcdxyz=" + "=");
-            byte[] expected = { 0x69, 0xb7, 0x1d, 0xcb };
-            Assert.Equal<byte>(expected, actual);
         }
 
         [Fact]

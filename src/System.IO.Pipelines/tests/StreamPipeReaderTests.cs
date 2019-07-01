@@ -224,7 +224,7 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public async Task ThrowsOnReadAfterCompleteReader()
         {
-            var reader = PipeReader.Create(Stream.Null);
+            PipeReader reader = PipeReader.Create(Stream.Null);
 
             reader.Complete();
             await Assert.ThrowsAsync<InvalidOperationException>(async () => await reader.ReadAsync());
@@ -233,7 +233,7 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public void TryReadAfterCancelPendingReadReturnsTrue()
         {
-            var reader = PipeReader.Create(Stream.Null);
+            PipeReader reader = PipeReader.Create(Stream.Null);
 
             reader.CancelPendingRead();
 
@@ -482,12 +482,13 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnWriterCompletedThrowsNotSupportedException()
+        public void OnWriterCompletedNoops()
         {
+            bool fired = false;
             PipeReader reader = PipeReader.Create(Stream.Null);
-
-            Assert.Throws<NotSupportedException>(() => reader.OnWriterCompleted((_, __) => { }, null));
+            reader.OnWriterCompleted((_, __) => { fired = true; }, null);
             reader.Complete();
+            Assert.False(fired);
         }
 
         [Fact]
@@ -529,6 +530,25 @@ namespace System.IO.Pipelines.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(minimumReadSize: 0));
         }
 
+        [Fact]
+        public void LeaveUnderlyingStreamOpen()
+        {
+            var stream = new MemoryStream();
+            PipeReader reader = PipeReader.Create(stream, new StreamPipeReaderOptions(leaveOpen: true));
+
+            reader.Complete();
+
+            Assert.True(stream.CanRead);
+        }
+
+        [Fact]
+        public async Task OperationCancelledExceptionNotSwallowedIfNotThrownFromSpecifiedToken()
+        {
+            PipeReader reader = PipeReader.Create(new ThrowsOperationCanceledExceptionStream());
+
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await reader.ReadAsync());
+        }
+
         private static async Task<string> ReadFromPipeAsString(PipeReader reader)
         {
             ReadResult readResult = await reader.ReadAsync();
@@ -554,6 +574,25 @@ namespace System.IO.Pipelines.Tests
         private static object[] CreateRead(int bytesInBuffer, int bufferSize, int minimumReadSize, int[] readSizes)
         {
             return new object[] { bytesInBuffer, bufferSize, minimumReadSize, readSizes };
+        }
+
+        private class ThrowsOperationCanceledExceptionStream : ReadOnlyStream
+        {
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                throw new OperationCanceledException();
+            }
+
+            public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+                throw new OperationCanceledException();
+            }
+#if netcoreapp
+            public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+            {
+                throw new OperationCanceledException();
+            }
+#endif
         }
 
         private class ThrowAfterZeroByteReadStream : MemoryStream
@@ -583,7 +622,7 @@ namespace System.IO.Pipelines.Tests
                 return bytes;
             }
 
-#if !netstandard
+#if netcoreapp
             public override async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
             {
                 if (_throwOnNextCallToRead)

@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Security;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 using Internal.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 
 #if BIT64
 using nuint = System.UInt64;
@@ -96,8 +96,7 @@ namespace System.Runtime.InteropServices
             return string.CreateStringFromEncoding((byte*)ptr, nbBytes, Encoding.UTF8);
         }
 
-        // TODO-NULLABLE: This has different behavior from the other PtrToString(IntPtr, int) functions
-        public static unsafe string? PtrToStringUTF8(IntPtr ptr, int byteLen)
+        public static unsafe string PtrToStringUTF8(IntPtr ptr, int byteLen)
         {
             if (ptr == IntPtr.Zero)
             {
@@ -531,9 +530,8 @@ namespace System.Runtime.InteropServices
             }
         }
 
-        public static void StructureToPtr<T>(T structure, IntPtr ptr, bool fDeleteOld)
+        public static void StructureToPtr<T>([DisallowNull] T structure, IntPtr ptr, bool fDeleteOld)
         {
-            // TODO-NULLABLE-GENERIC: T cannot be null
             StructureToPtr((object)structure!, ptr, fDeleteOld);
         }
 
@@ -572,13 +570,12 @@ namespace System.Runtime.InteropServices
             PtrToStructureHelper(ptr, structure, allowValueClasses: false);
         }
 
-        public static void PtrToStructure<T>(IntPtr ptr, T structure)
+        public static void PtrToStructure<T>(IntPtr ptr, [DisallowNull] T structure)
         {
-            // TODO-NULLABLE-GENERIC: T cannot be null
             PtrToStructure(ptr, (object)structure!);
         }
 
-        // TODO-NULLABLE-GENERIC: T can be null
+        [return: MaybeNull]
         public static T PtrToStructure<T>(IntPtr ptr) => (T)PtrToStructure(ptr, typeof(T))!;
 
         public static void DestroyStructure<T>(IntPtr ptr) => DestroyStructure(ptr, typeof(T));
@@ -831,7 +828,7 @@ namespace System.Runtime.InteropServices
         /// a PROGID in the metadata then it is returned otherwise a stable PROGID
         /// is generated based on the fully qualified name of the type.
         /// </summary>
-        public static string GenerateProgIdForType(Type type)
+        public static string? GenerateProgIdForType(Type type)
         {
             if (type is null)
             {
@@ -899,10 +896,9 @@ namespace System.Runtime.InteropServices
             return GetFunctionPointerForDelegateInternal(d);
         }
 
-        public static IntPtr GetFunctionPointerForDelegate<TDelegate>(TDelegate d)
+        public static IntPtr GetFunctionPointerForDelegate<TDelegate>(TDelegate d) where TDelegate : notnull
         {
-            // TODO-NULLABLE-GENERIC: T cannot be null
-            return GetFunctionPointerForDelegate((Delegate)(object)d!);
+            return GetFunctionPointerForDelegate((Delegate)(object)d);
         }
 
         public static int GetHRForLastWin32Error()

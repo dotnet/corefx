@@ -4,28 +4,8 @@
       <TargetFramework>netcore50</TargetFramework>
       <TargetFrameworkIdentifier>.NETCore</TargetFrameworkIdentifier>
       <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-      <TargetingPackNugetPackageId>Microsoft.TargetingPack.Private.NetNative</TargetingPackNugetPackageId>
       <UWPCompatible>true</UWPCompatible>
       <CompatibleWith>netstandard1.4</CompatibleWith>
-    </TargetGroups>
-    <TargetGroups Include="netcore50aot">
-      <TargetFramework>netcore50</TargetFramework>
-      <TargetFrameworkIdentifier>.NETCore</TargetFrameworkIdentifier>
-      <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-      <PackageTargetRuntimeSuffix>aot</PackageTargetRuntimeSuffix>
-      <TargetingPackNugetPackageId>Microsoft.TargetingPack.Private.NetNative</TargetingPackNugetPackageId>
-      <UWPCompatible>true</UWPCompatible>
-      <Imports>netcore50</Imports>
-      <CompatibleWith>netstandard1.4</CompatibleWith>
-    </TargetGroups>
-    <TargetGroups Include="uap10.0.16299aot">
-      <TargetFramework>uap10.0.16299</TargetFramework>
-      <TargetFrameworkIdentifier>UAP</TargetFrameworkIdentifier>
-      <TargetFrameworkVersion>10.0.16299</TargetFrameworkVersion>
-      <PackageTargetRuntimeSuffix>aot</PackageTargetRuntimeSuffix>
-      <UWPCompatible>true</UWPCompatible>
-      <Imports>netcore50aot</Imports>
-      <CompatibleWith>uap10.0.16299;netstandard</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="uap10.0.16299">
       <TargetFramework>uap10.0.16299</TargetFramework>
@@ -35,22 +15,13 @@
       <Imports>netcore50</Imports>
       <CompatibleWith>netstandard</CompatibleWith>
     </TargetGroups>
-    <TargetGroups Include="uapvnextaot">
-      <TargetFramework>$(UAPvNextTFM)</TargetFramework>
-      <TargetFrameworkIdentifier>$(UAPvNextTFI)</TargetFrameworkIdentifier>
-      <TargetFrameworkVersion>$(UAPvNextVersion)</TargetFrameworkVersion>
-      <PackageTargetRuntimeSuffix>aot</PackageTargetRuntimeSuffix>
-      <UWPCompatible>true</UWPCompatible>
-      <Imports>uap10.0.16299aot</Imports>
-      <CompatibleWith>uapvnext;netstandard2.0</CompatibleWith>
-    </TargetGroups>
     <TargetGroups Include="uapvnext">
       <TargetFramework>$(UAPvNextTFM)</TargetFramework>
       <TargetFrameworkIdentifier>$(UAPvNextTFI)</TargetFrameworkIdentifier>
       <TargetFrameworkVersion>$(UAPvNextVersion)</TargetFrameworkVersion>
       <UWPCompatible>true</UWPCompatible>
       <Imports>uap10.0.16299</Imports>
-      <CompatibleWith>netstandard2.0</CompatibleWith>
+      <CompatibleWith>netstandard2.1</CompatibleWith>
     </TargetGroups>
     <!-- uap is an alias for uapvNext any/coreclr runtime -->
     <TargetGroups Include="uap">
@@ -59,17 +30,7 @@
       <TargetFrameworkVersion>$(UAPvNextVersion)</TargetFrameworkVersion>
       <UWPCompatible>true</UWPCompatible>
       <Imports>uapvnext</Imports>
-      <CompatibleWith>netstandard</CompatibleWith>
-    </TargetGroups>
-    <!-- uapaot is an alias for uapvNext, aot runtime -->
-    <TargetGroups Include="uapaot">
-      <TargetFramework>$(UAPvNextTFM)</TargetFramework>
-      <TargetFrameworkIdentifier>$(UAPvNextTFI)</TargetFrameworkIdentifier>
-      <TargetFrameworkVersion>$(UAPvNextVersion)</TargetFrameworkVersion>
-      <PackageTargetRuntimeSuffix>aot</PackageTargetRuntimeSuffix>
-      <UWPCompatible>true</UWPCompatible>
-      <Imports>uapvnextaot</Imports>
-      <CompatibleWith>uap;netstandard</CompatibleWith>
+      <CompatibleWith>netstandard2.1</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="netstandard1.0">
       <TargetFramework>netstandard1.0</TargetFramework>
@@ -126,6 +87,13 @@
       <UWPCompatible>true</UWPCompatible>
       <Imports>netstandard1.6</Imports>
     </TargetGroups>
+    <TargetGroups Include="netstandard2.1">
+      <TargetFramework>netstandard2.1</TargetFramework>
+      <!-- By default, netstandard libraries will be held to the UWP compatibility bar;
+           set this to false in the project to force otherwise. -->
+      <UWPCompatible>true</UWPCompatible>
+      <Imports>netstandard</Imports>
+    </TargetGroups>
     <!-- netstandard is an alias for netstandard2.0 -->
     <TargetGroups Include="netstandard">
       <TargetFramework>netstandard2.0</TargetFramework>
@@ -157,14 +125,14 @@
       <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
       <TargetFramework>netcoreapp3.0</TargetFramework>
       <Imports>netcoreapp2.2</Imports>
-      <CompatibleWith>netstandard</CompatibleWith>
+      <CompatibleWith>netstandard2.1</CompatibleWith>
     </TargetGroups>
     <!-- netcoreapp is an alias for netcoreapp3.0 -->
     <TargetGroups Include="netcoreapp">
       <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
       <TargetFramework>netcoreapp3.0</TargetFramework>
       <Imports>netcoreapp3.0</Imports>
-      <CompatibleWith>netstandard</CompatibleWith>
+      <CompatibleWith>netstandard2.1</CompatibleWith>
     </TargetGroups>
     <TargetGroups Include="net45">
       <TargetFramework>net45</TargetFramework>
@@ -241,6 +209,7 @@
     <TargetGroups Include="package">
       <!-- this targetgroup is not considered compatible with any other targetgroup so it should only
            build when specified directly or BuildAllConfigurations is set to True.  -->
+      <TargetFramework>none</TargetFramework>
     </TargetGroups>
     <TargetGroups Include="mono">
       <TargetFramework>net463</TargetFramework>

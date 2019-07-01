@@ -69,7 +69,7 @@ namespace System.Net.Http.Functional.Tests
                     handler.CookieContainer = CreateSingleCookieContainer(uri, cookieName, cookieValue);
                     handler.UseCookies = useCookies;
 
-                    using (HttpClient client = new HttpClient(handler))
+                    using (HttpClient client = CreateHttpClient(handler))
                     {
                         await client.GetAsync(uri);
                     }
@@ -109,7 +109,7 @@ namespace System.Net.Http.Functional.Tests
                     }
                     handler.CookieContainer = cookieContainer;
 
-                    using (HttpClient client = new HttpClient(handler))
+                    using (HttpClient client = CreateHttpClient(handler))
                     {
                         await client.GetAsync(uri);
                     }
@@ -122,17 +122,15 @@ namespace System.Net.Http.Functional.Tests
                 });
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Netfx handler does not support custom cookie header")]
         [Fact]
         public async Task GetAsync_AddCookieHeader_CookieHeaderSent()
         {
             await LoopbackServerFactory.CreateClientAndServerAsync(
                 async uri =>
                 {
-                    HttpClientHandler handler = CreateHttpClientHandler();
-                    using (HttpClient client = new HttpClient(handler))
+                    using (HttpClient client = CreateHttpClient())
                     {
-                        HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri) { Version = VersionFromUseHttp2 };
                         requestMessage.Headers.Add("Cookie", s_customCookieHeaderValue);
 
                         await client.SendAsync(requestMessage);
@@ -146,17 +144,15 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(30051, TargetFrameworkMonikers.Uap)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Netfx handler does not support custom cookie header")]
         [Fact]
         public async Task GetAsync_AddMultipleCookieHeaders_CookiesSent()
         {
             await LoopbackServerFactory.CreateClientAndServerAsync(
                 async uri =>
                 {
-                    HttpClientHandler handler = CreateHttpClientHandler();
-                    using (HttpClient client = new HttpClient(handler))
+                    using (HttpClient client = CreateHttpClient())
                     {
-                        HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri) { Version = VersionFromUseHttp2 };
                         requestMessage.Headers.Add("Cookie", "A=1");
                         requestMessage.Headers.Add("Cookie", "B=2");
                         requestMessage.Headers.Add("Cookie", "C=3");
@@ -208,7 +204,6 @@ namespace System.Net.Http.Functional.Tests
             return cookieHeaderValue;
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Netfx handler does not support custom cookie header")]
         [ConditionalFact]
         public async Task GetAsync_SetCookieContainerAndCookieHeader_BothCookiesSent()
         {
@@ -224,9 +219,9 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.CookieContainer = CreateSingleCookieContainer(url);
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                    var requestMessage = new HttpRequestMessage(HttpMethod.Get, url) { Version = VersionFromUseHttp2 };
                     requestMessage.Headers.Add("Cookie", s_customCookieHeaderValue);
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(requestMessage);
@@ -244,7 +239,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(30051, TargetFrameworkMonikers.Uap)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Netfx handler does not support custom cookie header")]
         [ConditionalFact]
         public async Task GetAsync_SetCookieContainerAndMultipleCookieHeaders_BothCookiesSent()
         {
@@ -260,9 +254,9 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.CookieContainer = CreateSingleCookieContainer(url);
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                    var requestMessage = new HttpRequestMessage(HttpMethod.Get, url) { Version = VersionFromUseHttp2 };
                     requestMessage.Headers.Add("Cookie", "A=1");
                     requestMessage.Headers.Add("Cookie", "B=2");
 
@@ -321,7 +315,7 @@ namespace System.Net.Http.Functional.Tests
                 handler.CookieContainer.Add(url2, new Cookie("cookie2", "value2"));
                 handler.CookieContainer.Add(unusedUrl, new Cookie("cookie3", "value3"));
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     client.DefaultRequestHeaders.ConnectionClose = true; // to avoid issues with connection pooling
                     await client.GetAsync(url1);
@@ -350,7 +344,7 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.UseCookies = useCookies;
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<HttpRequestData> serverTask = server.HandleRequestAsync(
@@ -380,7 +374,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<HttpRequestData> serverTask = server.HandleRequestAsync(
@@ -418,7 +412,7 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.CookieContainer = CreateSingleCookieContainer(url);
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<HttpRequestData> serverTask = server.HandleRequestAsync(
@@ -444,7 +438,7 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.CookieContainer = CreateSingleCookieContainer(url);
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<HttpRequestData> serverTask = server.HandleRequestAsync(
@@ -473,7 +467,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<HttpRequestData> serverTask = server.HandleRequestAsync(
@@ -512,7 +506,7 @@ namespace System.Net.Http.Functional.Tests
 
                 HttpClientHandler handler = CreateHttpClientHandler();
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     client.DefaultRequestHeaders.ConnectionClose = true; // to avoid issues with connection pooling
                     await client.GetAsync(url1);
@@ -569,7 +563,7 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.Credentials = new NetworkCredential("user", "pass");
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     await client.GetAsync(url);
 
@@ -630,11 +624,7 @@ namespace System.Net.Http.Functional.Tests
                 yield return new object[] { "ABC", "123", useCookies };
                 yield return new object[] { "Hello", "World", useCookies };
                 yield return new object[] { "foo", "bar", useCookies };
-
-                if (!PlatformDetection.IsFullFramework) {
-                    yield return new object[] { "Hello World", "value", useCookies };
-                }
-
+                yield return new object[] { "Hello World", "value", useCookies };
                 yield return new object[] { ".AspNetCore.Session", "RAExEmXpoCbueP_QYM", useCookies };
 
                 yield return new object[]
@@ -682,7 +672,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync(

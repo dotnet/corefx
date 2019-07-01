@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -12,12 +12,12 @@ namespace System.Text.Json.Serialization
         /// <returns>A <typeparamref name="TValue"/> representation of the JSON value.</returns>
         /// <param name="utf8Json">JSON text to parse.</param>
         /// <param name="options">Options to control the behavior during parsing.</param>
-        /// <exception cref="JsonReaderException">
+        /// <exception cref="JsonException">
         /// Thrown when the JSON is invalid,
         /// <typeparamref name="TValue"/> is not compatible with the JSON,
         /// or when there is remaining data in the Stream.
         /// </exception>
-        public static TValue Parse<TValue>(ReadOnlySpan<byte> utf8Json, JsonSerializerOptions options = null)
+        public static TValue Deserialize<TValue>(ReadOnlySpan<byte> utf8Json, JsonSerializerOptions options = null)
         {
             return (TValue)ParseCore(utf8Json, typeof(TValue), options);
         }
@@ -32,13 +32,12 @@ namespace System.Text.Json.Serialization
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="returnType"/> is null.
         /// </exception>
-        /// <exception cref="JsonReaderException">
+        /// <exception cref="JsonException">
         /// Thrown when the JSON is invalid,
         /// <paramref name="returnType"/> is not compatible with the JSON,
         /// or when there is remaining data in the Stream.
         /// </exception>
-
-        public static object Parse(ReadOnlySpan<byte> utf8Json, Type returnType, JsonSerializerOptions options = null)
+        public static object Deserialize(ReadOnlySpan<byte> utf8Json, Type returnType, JsonSerializerOptions options = null)
         {
             if (returnType == null)
                 throw new ArgumentNullException(nameof(returnType));
@@ -57,11 +56,9 @@ namespace System.Text.Json.Serialization
             var reader = new Utf8JsonReader(utf8Json, isFinalBlock: true, readerState);
             object result = ReadCore(returnType, options, ref reader);
 
-            readerState = reader.CurrentState;
-            if (readerState.BytesConsumed != utf8Json.Length)
+            if (reader.BytesConsumed != utf8Json.Length)
             {
-                throw new JsonReaderException(SR.Format(SR.DeserializeDataRemaining,
-                    utf8Json.Length, utf8Json.Length - readerState.BytesConsumed), readerState);
+                ThrowHelper.ThrowJsonException_DeserializeDataRemaining(utf8Json.Length, utf8Json.Length - reader.BytesConsumed);
             }
 
             return result;

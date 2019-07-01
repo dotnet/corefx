@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -15,9 +16,6 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrentCulture()
         {
-            if (PlatformDetection.IsNetNative && !PlatformDetection.IsInAppContainer) // Tide us over until .NET Native ILC tests run are run inside an appcontainer.
-                return;
-
             RemoteExecutor.Invoke(() =>
             {
                 CultureInfo newCulture = new CultureInfo(CultureInfo.CurrentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
@@ -44,9 +42,6 @@ namespace System.Globalization.Tests
         [Fact]
         public void CurrentUICulture()
         {
-            if (PlatformDetection.IsNetNative && !PlatformDetection.IsInAppContainer) // Tide us over until .NET Native ILC tests run are run inside an appcontainer.
-                return;
-
             RemoteExecutor.Invoke(() =>
             {
                 CultureInfo newUICulture = new CultureInfo(CultureInfo.CurrentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
@@ -168,13 +163,14 @@ namespace System.Globalization.Tests
         private static void CopyEssentialTestEnvironment(IDictionary<string, string> environment)
         {
             string[] essentialVariables = { "HOME", "LD_LIBRARY_PATH" };
-            foreach(string essentialVariable in essentialVariables)
-            {
-                string varValue = Environment.GetEnvironmentVariable(essentialVariable);
+            string[] prefixedVariables = { "DOTNET_", "COMPlus_" };
 
-                if (varValue != null)
+            foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
+            {
+                if (Array.FindIndex(essentialVariables, x => x.Equals(de.Key)) >= 0 ||
+                    Array.FindIndex(prefixedVariables, x => ((string)de.Key).StartsWith(x, StringComparison.OrdinalIgnoreCase)) >= 0)
                 {
-                    environment[essentialVariable] = varValue;
+                    environment[(string)de.Key] = (string)de.Value;
                 }
             }
         }

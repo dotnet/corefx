@@ -10,9 +10,32 @@ namespace System.Text.Json
     public sealed partial class Utf8JsonWriter
     {
         /// <summary>
+        /// Writes the pre-encoded text value (as a JSON string) as an element of a JSON array.
+        /// </summary>
+        /// <param name="value">The JSON encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
+        /// <remarks>
+        /// The value should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
+        public void WriteStringValue(JsonEncodedText value)
+            => WriteStringValueHelper(value.EncodedUtf8Bytes);
+
+        private void WriteStringValueHelper(ReadOnlySpan<byte> utf8Value)
+        {
+            Debug.Assert(utf8Value.Length <= JsonConstants.MaxTokenSize);
+
+            WriteStringByOptions(utf8Value);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.String;
+        }
+
+        /// <summary>
         /// Writes the string text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
+        /// <param name="value">The value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
         /// <remarks>
         /// The value is escaped before writing.
         /// </remarks>
@@ -26,9 +49,9 @@ namespace System.Text.Json
            => WriteStringValue(value.AsSpan());
 
         /// <summary>
-        /// Writes the UTF-16 text value (as a JSON string) as an element of a JSON array.
+        /// Writes the text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
+        /// <param name="value">The value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
         /// <remarks>
         /// The value is escaped before writing.
         /// </remarks>
@@ -128,13 +151,15 @@ namespace System.Text.Json
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
-            if (_tokenType != JsonTokenType.None)
+            if (_tokenType != JsonTokenType.PropertyName)
             {
-                WriteNewLine(output);
+                if (_tokenType != JsonTokenType.None)
+                {
+                    WriteNewLine(output);
+                }
+                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
+                BytesPending += indent;
             }
-
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
 
             output[BytesPending++] = JsonConstants.Quote;
 
@@ -268,13 +293,15 @@ namespace System.Text.Json
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
-            if (_tokenType != JsonTokenType.None)
+            if (_tokenType != JsonTokenType.PropertyName)
             {
-                WriteNewLine(output);
+                if (_tokenType != JsonTokenType.None)
+                {
+                    WriteNewLine(output);
+                }
+                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
+                BytesPending += indent;
             }
-
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
 
             output[BytesPending++] = JsonConstants.Quote;
 

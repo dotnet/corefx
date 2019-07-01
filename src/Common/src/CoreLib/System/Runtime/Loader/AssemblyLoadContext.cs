@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -119,7 +118,7 @@ namespace System.Runtime.Loader
         private void RaiseUnloadEvent()
         {
             // Ensure that we raise the Unload event only once
-            Interlocked.Exchange(ref _unloading, null!)?.Invoke(this); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+            Interlocked.Exchange(ref _unloading, null!)?.Invoke(this);
         }
 
         private void InitiateUnload()
@@ -187,7 +186,7 @@ namespace System.Runtime.Loader
         //
         // Inputs: The AssemblyLoadContext and AssemblyName to be loaded
         // Returns: The Loaded assembly object.
-        public event Func<AssemblyLoadContext, AssemblyName, Assembly> Resolving
+        public event Func<AssemblyLoadContext, AssemblyName, Assembly?> Resolving
         {
             add
             {
@@ -211,18 +210,20 @@ namespace System.Runtime.Loader
             }
         }
 
+#region AppDomainEvents
         // Occurs when an Assembly is loaded
-        public static event AssemblyLoadEventHandler AssemblyLoad;
+        internal static event AssemblyLoadEventHandler AssemblyLoad;
 
         // Occurs when resolution of type fails
-        public static event ResolveEventHandler TypeResolve;
+        internal static event ResolveEventHandler TypeResolve;
 
         // Occurs when resolution of resource fails
-        public static event ResolveEventHandler ResourceResolve;
+        internal static event ResolveEventHandler ResourceResolve;
 
         // Occurs when resolution of assembly fails
         // This event is fired after resolve events of AssemblyLoadContext fails
-        public static event ResolveEventHandler AssemblyResolve;
+        internal static event ResolveEventHandler AssemblyResolve;
+#endregion
 
         public static AssemblyLoadContext Default => DefaultAssemblyLoadContext.s_loadContext;
 
@@ -247,11 +248,7 @@ namespace System.Runtime.Loader
 
                 foreach (WeakReference<AssemblyLoadContext> weakAlc in alcList)
                 {
-                    AssemblyLoadContext? alc = null;
-
-                    weakAlc.TryGetTarget(out alc);
-
-                    if (alc != null)
+                    if (weakAlc.TryGetTarget(out AssemblyLoadContext? alc))
                     {
                         yield return alc;
                     }
@@ -427,7 +424,7 @@ namespace System.Runtime.Loader
             {
                 foreach (var alcAlive in s_allContexts)
                 {
-                    if (alcAlive.Value.TryGetTarget(out AssemblyLoadContext alc))
+                    if (alcAlive.Value.TryGetTarget(out AssemblyLoadContext? alc))
                     {
                         alc.RaiseUnloadEvent();
                     }
@@ -443,7 +440,7 @@ namespace System.Runtime.Loader
             }
         }
 
-        private static AsyncLocal<AssemblyLoadContext>? s_asyncLocalCurrent;
+        private static AsyncLocal<AssemblyLoadContext?>? s_asyncLocalCurrent;
 
         /// <summary>Nullable current AssemblyLoadContext used for context sensitive reflection APIs</summary>
         /// <remarks>
@@ -478,9 +475,9 @@ namespace System.Runtime.Loader
         {
             if (s_asyncLocalCurrent == null)
             {
-                Interlocked.CompareExchange<AsyncLocal<AssemblyLoadContext>?>(ref s_asyncLocalCurrent, new AsyncLocal<AssemblyLoadContext>(), null);
+                Interlocked.CompareExchange<AsyncLocal<AssemblyLoadContext?>?>(ref s_asyncLocalCurrent, new AsyncLocal<AssemblyLoadContext?>(), null);
             }
-            s_asyncLocalCurrent!.Value = value!; // TODO-NULLABLE-GENERIC
+            s_asyncLocalCurrent!.Value = value; // Remove ! when compiler specially-recognizes CompareExchange for nullability
         }
 
         /// <summary>Enter scope using this AssemblyLoadContext for ContextualReflection</summary>
@@ -554,6 +551,43 @@ namespace System.Runtime.Loader
                     AssemblyLoadContext.SetCurrentContextualReflectionContext(_predecessor);
                 }
             }
+        }
+
+        private Assembly? ResolveSatelliteAssembly(AssemblyName assemblyName)
+        {
+            // Called by native runtime when CultureName is not empty
+            Debug.Assert(assemblyName.CultureName?.Length > 0);
+
+            string satelliteSuffix = ".resources";
+
+            if (assemblyName.Name == null || !assemblyName.Name.EndsWith(satelliteSuffix, StringComparison.Ordinal))
+                return null;
+
+            string parentAssemblyName = assemblyName.Name.Substring(0, assemblyName.Name.Length - satelliteSuffix.Length);
+
+            Assembly parentAssembly = LoadFromAssemblyName(new AssemblyName(parentAssemblyName));
+
+            AssemblyLoadContext parentALC = GetLoadContext(parentAssembly)!;
+
+            string parentDirectory = Path.GetDirectoryName(parentAssembly.Location)!;
+
+            string assemblyPath = Path.Combine(parentDirectory, assemblyName.CultureName!, $"{assemblyName.Name}.dll");
+
+            if (Internal.IO.File.InternalExists(assemblyPath))
+            {
+                return parentALC.LoadFromAssemblyPath(assemblyPath);
+            }
+            else if (Path.IsCaseSensitive)
+            {
+                assemblyPath = Path.Combine(parentDirectory, assemblyName.CultureName!.ToLowerInvariant(), $"{assemblyName.Name}.dll");
+
+                if (Internal.IO.File.InternalExists(assemblyPath))
+                {
+                    return parentALC.LoadFromAssemblyPath(assemblyPath);
+                }
+            }
+
+            return null;
         }
     }
 

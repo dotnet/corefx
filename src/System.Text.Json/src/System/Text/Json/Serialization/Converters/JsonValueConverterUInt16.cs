@@ -2,34 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text.Json.Serialization.Policies;
-
 namespace System.Text.Json.Serialization.Converters
 {
-    internal sealed class JsonValueConverterUInt16 : JsonValueConverter<ushort>
+    internal sealed class JsonConverterUInt16 : JsonConverter<ushort>
     {
-        public override bool TryRead(Type valueType, ref Utf8JsonReader reader, out ushort value)
+        public override ushort Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType != JsonTokenType.Number ||
-                !reader.TryGetInt32(out int rawValue) ||
-                !JsonHelpers.IsInRangeInclusive(rawValue, ushort.MinValue, ushort.MaxValue))
-            {
-                value = default;
-                return false;
-            }
-
-            value = (ushort)rawValue;
-            return true;
+            return reader.GetUInt16();
         }
 
-        public override void Write(ushort value, Utf8JsonWriter writer)
+        public override void Write(Utf8JsonWriter writer, ushort value, JsonSerializerOptions options)
         {
             writer.WriteNumberValue(value);
-        }
-
-        public override void Write(Span<byte> escapedPropertyName, ushort value, Utf8JsonWriter writer)
-        {
-            writer.WriteNumber(escapedPropertyName, value);
         }
     }
 }

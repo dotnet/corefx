@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 
 namespace System.Globalization
@@ -14,10 +13,6 @@ namespace System.Globalization
     //  NOTE: Calendars depend on the locale name that creates it.  Only a few
     //        properties are available without locales using CalendarData.GetCalendar(CalendarData)
     //
-    // TODO-NULLABLE: this class requires refactoring for proper annotations
-    //                currently from user of this class all fields are non-nullable.
-    //                To avoid potential breaking changes lots of workaround have
-    //                been used to suppress errors
     internal partial class CalendarData
     {
         // Max calendars

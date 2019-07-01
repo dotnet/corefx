@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Configuration.Assemblies;
 using System.IO;
 using System.Runtime.Serialization;
@@ -173,7 +172,7 @@ namespace System.Reflection
 
         // The compressed version of the public key formed from a truncated hash.
         // Will throw a SecurityException if _publicKey is invalid
-        public byte[] GetPublicKeyToken()
+        public byte[]? GetPublicKeyToken()
         {
             if (_publicKeyToken == null)
                 _publicKeyToken = ComputePublicKeyToken();
@@ -227,7 +226,7 @@ namespace System.Reflection
                 if (this.Name == null)
                     return string.Empty;
                 // Do not call GetPublicKeyToken() here - that latches the result into AssemblyName which isn't a side effect we want.
-                byte[] pkt = _publicKeyToken ?? ComputePublicKeyToken();
+                byte[]? pkt = _publicKeyToken ?? ComputePublicKeyToken();
                 return AssemblyNameFormatter.ComputeDisplayName(Name, Version, CultureName, pkt, Flags, ContentType);
             }
         }

@@ -699,7 +699,6 @@ namespace System.Data.Tests
 
             /*
 			try {
-				// FIXME: LAMESPEC: Why the exception is thrown why... why... 
 				Mom.Select ("Child.Name = 'Jack'");
 Assert.False(true);
 			} catch (Exception e) {
@@ -3777,12 +3776,12 @@ Assert.False(true);
             StringWriter sw1 = new StringWriter();
             ds1.Tables[0].WriteXmlSchema(sw1);
             string xml1 = sw1.ToString();
-            Assert.True(xml1.IndexOf(@"<xs:unique name=""Constraint1"">") != -1);
+            Assert.Contains(@"<xs:unique name=""Constraint1"">", xml1, StringComparison.Ordinal);
 
             StringWriter sw2 = new StringWriter();
             ds1.Tables[1].WriteXmlSchema(sw2);
             string xml2 = sw2.ToString();
-            Assert.True(xml2.IndexOf(@"<xs:unique name=""Constraint1"">") == -1);
+            Assert.DoesNotContain(@"<xs:unique name=""Constraint1"">", xml2, StringComparison.Ordinal);
         }
 
         [Fact]

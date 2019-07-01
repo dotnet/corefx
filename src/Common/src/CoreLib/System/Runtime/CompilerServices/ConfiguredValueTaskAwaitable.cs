@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -52,7 +51,6 @@ namespace System.Runtime.CompilerServices
 
             /// <summary>Gets the result of the ValueTask.</summary>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            [StackTraceHidden]
             public void GetResult() => _value.ThrowIfCompletedUnsuccessfully();
 
             /// <summary>Schedules the continuation action for the <see cref="ConfiguredValueTaskAwaitable"/>.</summary>
@@ -158,7 +156,6 @@ namespace System.Runtime.CompilerServices
 
             /// <summary>Gets the result of the ValueTask.</summary>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            [StackTraceHidden]
             public TResult GetResult() => _value.Result;
 
             /// <summary>Schedules the continuation action for the <see cref="ConfiguredValueTaskAwaitable{TResult}"/>.</summary>

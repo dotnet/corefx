@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 /*============================================================
 **
 ** 
@@ -15,14 +14,15 @@
 ** 
 ===========================================================*/
 
-using System;
+#nullable enable
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Resources
 {
-    internal sealed class FastResourceComparer : IComparer, IEqualityComparer, IComparer<string?>, IEqualityComparer<string?> // TODO-NULLABLE: IEqualityComparer.GetHashCode does not accept nulls but Equals does
+    internal sealed class FastResourceComparer : IComparer, IEqualityComparer, IComparer<string?>, IEqualityComparer<string?>
     {
         internal static readonly FastResourceComparer Default = new FastResourceComparer();
 
@@ -33,10 +33,9 @@ namespace System.Resources
             return FastResourceComparer.HashFunction(s);
         }
 
-        public int GetHashCode(string? key) // TODO-NULLABLE: argument should be non-nullable but IEqualityComparer.Equals accepts null
+        public int GetHashCode([DisallowNull] string? key)
         {
-            Debug.Assert(key != null, "TODO-NULLABLE");
-            return FastResourceComparer.HashFunction(key);
+            return FastResourceComparer.HashFunction(key!);
         }
 
         // This hash function MUST be publically documented with the resource
