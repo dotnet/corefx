@@ -495,7 +495,7 @@ namespace System.IO.Compression
                     seekSize = 4;
                 }
 
-                bool is64bit = minimumVersion > (uint)ZipVersionNeededValues.Zip64;
+                bool is64bit = minimumVersion >= (uint)ZipVersionNeededValues.Zip64;
                 seekSize += (is64bit ? 8 : 4) * 2;   // if Zip64 read by 8 bytes else 4 bytes 2 times (compressed and uncompressed size)
 
                 if (reader.BaseStream.Length < reader.BaseStream.Position + seekSize)
