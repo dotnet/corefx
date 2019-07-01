@@ -1632,7 +1632,7 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateClientAndServerAsync(
                 async url =>
                 {
-                    using (HttpClient client = new HttpClient())
+                    using (HttpClient client = CreateHttpClient())
                     {
                         // Since we are issuing a GET request, we do not need any Transfer-Encoding headers.
                         // It is still permissible to add them, though.
@@ -2339,7 +2339,7 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateClientAndServerAsync(
                 async url =>
                 {
-                    using (HttpClient client = new HttpClient())
+                    using (HttpClient client = CreateHttpClient())
                     {
                         client.DefaultRequestHeaders.TransferEncoding.Add(new TransferCodingHeaderValue("chunked2"));
                         using (HttpResponseMessage response = await client.PostAsync(url, new StringContent(TestContent)))
