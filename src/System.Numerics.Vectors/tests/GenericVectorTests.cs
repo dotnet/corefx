@@ -616,12 +616,12 @@ namespace System.Numerics.Tests
         public void AdditionOverflowInt64() { TestAdditionOverflow<long>(); }
         private void TestAdditionOverflow<T>() where T : struct
         {
-            T maxValue = (T)(dynamic)typeof(T).GetRuntimeField("MaxValue").GetValue(null);
+            T maxValue = GetMaxValueExact<T>();
             Vector<T> maxValueVector = new Vector<T>(maxValue);
             Vector<T> secondVector = new Vector<T>(GenerateRandomValuesForVector<T>());
             Vector<T> sum = maxValueVector + secondVector;
 
-            T minValue = (T)(dynamic)typeof(T).GetRuntimeField("MinValue").GetValue(null);
+            T minValue = GetMinValueExact<T>();
             ValidateVector(sum,
                 (index, val) =>
                 {
@@ -681,12 +681,12 @@ namespace System.Numerics.Tests
         public void SubtractionOverflowInt64() { TestSubtractionOverflow<long>(); }
         private void TestSubtractionOverflow<T>() where T : struct
         {
-            T minValue = (T)(dynamic)typeof(T).GetRuntimeField("MinValue").GetValue(null);
+            T minValue = GetMinValueExact<T>();
             Vector<T> minValueVector = new Vector<T>(minValue);
             Vector<T> secondVector = new Vector<T>(GenerateRandomValuesForVector<T>());
             Vector<T> difference = minValueVector - secondVector;
 
-            T maxValue = (T)(dynamic)typeof(T).GetRuntimeField("MaxValue").GetValue(null);
+            T maxValue = GetMaxValueExact<T>();
             ValidateVector(difference,
                 (index, val) =>
                 {
@@ -2708,26 +2708,142 @@ namespace System.Numerics.Tests
 
         internal static int GetMinValue<T>() where T : struct
         {
-            if (typeof(T) == typeof(long) || typeof(T) == typeof(float) || typeof(T) == typeof(double) || typeof(T) == typeof(uint) || typeof(T) == typeof(ulong))
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(long) || typeof(T) == typeof(float) || typeof(T) == typeof(double) || typeof(T) == typeof(uint) || typeof(T) == typeof(ulong))
             {
                 return int.MinValue;
             }
-            var typeInfo = typeof(T).GetTypeInfo();
-            var field = typeInfo.GetDeclaredField("MinValue");
-            var value = field.GetValue(null);
-            return (int)(dynamic)value;
+            else if (typeof(T) == typeof(byte))
+            {
+                return byte.MinValue;
+            }
+            else if (typeof(T) == typeof(sbyte))
+            {
+                return sbyte.MinValue;
+            }
+            else if (typeof(T) == typeof(short))
+            {
+                return short.MinValue;
+            }
+            else if (typeof(T) == typeof(ushort))
+            {
+                return ushort.MinValue;
+            }
+            throw new NotSupportedException();
+        }
+
+        internal static T GetMinValueExact<T>() where T : struct
+        {
+            if (typeof(T) == typeof(byte))
+            {
+                return (T)(object)byte.MinValue;
+            }
+            else if (typeof(T) == typeof(sbyte))
+            {
+                return (T)(object)sbyte.MinValue;
+            }
+            else if (typeof(T) == typeof(ushort))
+            {
+                return (T)(object)ushort.MinValue;
+            }
+            else if (typeof(T) == typeof(short))
+            {
+                return (T)(object)short.MinValue;
+            }
+            else if (typeof(T) == typeof(int))
+            {
+                return (T)(object)int.MinValue;
+            }
+            else if (typeof(T) == typeof(long))
+            {
+                return (T)(object)long.MinValue;
+            }
+            else if (typeof(T) == typeof(float))
+            {
+                return (T)(object)float.MinValue;
+            }
+            else if (typeof(T) == typeof(double))
+            {
+                return (T)(object)double.MinValue;
+            }
+            else if (typeof(T) == typeof(uint))
+            {
+                return (T)(object)uint.MinValue;
+            }
+            else if (typeof(T) == typeof(ulong))
+            {
+                return (T)(object)ulong.MinValue;
+            }
+            throw new NotSupportedException();
         }
 
         internal static int GetMaxValue<T>() where T : struct
         {
-            if (typeof(T) == typeof(long) || typeof(T) == typeof(float) || typeof(T) == typeof(double) || typeof(T) == typeof(uint) || typeof(T) == typeof(ulong))
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(long) || typeof(T) == typeof(float) || typeof(T) == typeof(double) || typeof(T) == typeof(uint) || typeof(T) == typeof(ulong))
             {
                 return int.MaxValue;
             }
-            var typeInfo = typeof(T).GetTypeInfo();
-            var field = typeInfo.GetDeclaredField("MaxValue");
-            var value = field.GetValue(null);
-            return (int)(dynamic)value;
+            else if (typeof(T) == typeof(byte))
+            {
+                return byte.MaxValue;
+            }
+            else if (typeof(T) == typeof(sbyte))
+            {
+                return sbyte.MaxValue;
+            }
+            else if (typeof(T) == typeof(short))
+            {
+                return short.MaxValue;
+            }
+            else if (typeof(T) == typeof(ushort))
+            {
+                return ushort.MaxValue;
+            }
+            throw new NotSupportedException();
+        }
+
+        internal static T GetMaxValueExact<T>() where T : struct
+        {
+            if (typeof(T) == typeof(byte))
+            {
+                return (T)(object)byte.MaxValue;
+            }
+            else if (typeof(T) == typeof(sbyte))
+            {
+                return (T)(object)sbyte.MaxValue;
+            }
+            else if (typeof(T) == typeof(ushort))
+            {
+                return (T)(object)ushort.MaxValue;
+            }
+            else if (typeof(T) == typeof(short))
+            {
+                return (T)(object)short.MaxValue;
+            }
+            else if (typeof(T) == typeof(int))
+            {
+                return (T)(object)int.MaxValue;
+            }
+            else if (typeof(T) == typeof(long))
+            {
+                return (T)(object)long.MaxValue;
+            }
+            else if (typeof(T) == typeof(float))
+            {
+                return (T)(object)float.MaxValue;
+            }
+            else if (typeof(T) == typeof(double))
+            {
+                return (T)(object)double.MaxValue;
+            }
+            else if (typeof(T) == typeof(uint))
+            {
+                return (T)(object)uint.MaxValue;
+            }
+            else if (typeof(T) == typeof(ulong))
+            {
+                return (T)(object)ulong.MaxValue;
+            }
+            throw new NotSupportedException();
         }
 
         internal static T GetValueWithAllOnesSet<T>() where T : struct
