@@ -15,53 +15,6 @@ namespace System.Tests
         protected abstract string InvariantToStringSingle(float f, string format);
 
         [Theory]
-        [InlineData("##.#", double.Epsilon, "")]
-        [InlineData("##.#", double.MaxValue, "179769313486232000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")]
-        [InlineData("##.#", Math.E, "2.7")]
-        [InlineData("##.#", Math.PI, "3.1")]
-        [InlineData("##.#", 0.0, "")]
-        [InlineData("##.#", 0.0046, "")]
-        [InlineData("##.#", 0.005, "")]
-        [InlineData("##.#", 0.125, ".1")]
-        [InlineData("##.#", 0.5, ".5")]
-        [InlineData("##.#", 0.51, ".5")]
-        [InlineData("##.#", 0.56789, ".6")]
-        [InlineData("##.#", 0.84551240822557006, ".8")]
-        [InlineData("##.#", 1.0, "1")]
-        [InlineData("##.#", 46.5f, "46.5")]
-        [InlineData("##.#", 505.0, "505")]
-        [InlineData("##.#", 506.0, "506")]
-        [InlineData("##.#", 545.0, "545")]
-        [InlineData("##.#", 545.1, "545.1")]
-        [InlineData("##.#", 555.0, "555")]
-        [InlineData("##.#", 46500.0f, "46500")]
-        [InlineData("##.#", 65747.125, "65747.1")]
-        [InlineData("##.#", 1844674407370955.25, "1844674407370960")]
-        [InlineData("#,###.00", double.Epsilon, ".00")]
-        [InlineData("#,###.00", double.MaxValue, "179,769,313,486,232,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000,000.00")]
-        [InlineData("#,###.00", Math.E, "2.72")]
-        [InlineData("#,###.00", Math.PI, "3.14")]
-        [InlineData("#,###.00", 0.0, ".00")]
-        [InlineData("#,###.00", 0.0046, ".00")]
-        [InlineData("#,###.00", 0.005, ".01")]
-        [InlineData("#,###.00", 0.125, ".13")]
-        [InlineData("#,###.00", 0.5, ".50")]
-        [InlineData("#,###.00", 0.51, ".51")]
-        [InlineData("#,###.00", 0.56789, ".57")]
-        [InlineData("#,###.00", 0.84551240822557006, ".85")]
-        [InlineData("#,###.00", 1.0, "1.00")]
-        [InlineData("#,###.00", 46.5f, "46.50")]
-        [InlineData("#,###.00", 505.0, "505.00")]
-        [InlineData("#,###.00", 506.0, "506.00")]
-        [InlineData("#,###.00", 545.0, "545.00")]
-        [InlineData("#,###.00", 545.1, "545.10")]
-        [InlineData("#,###.00", 555.0, "555.00")]
-        [InlineData("#,###.00", 46500.0f, "46,500.00")]
-        [InlineData("#,###.00", 65747.125, "65,747.13")]
-        [InlineData("#,###.00", 1844674407370955.25, "1,844,674,407,370,960.00")]
-        public void TestFormatterDouble_Custom(string format, double value, string expectedResult) => TestFormatterDouble_Standard(value, format, expectedResult);
-
-        [Theory]
         [InlineData(double.Epsilon, "¤0.00")]
         [InlineData(double.MaxValue, "¤179,769,313,486,231,570,814,527,423,731,704,356,798,070,567,525,844,996,598,917,476,803,157,260,780,028,538,760,589,558,632,766,878,171,540,458,953,514,382,464,234,321,326,889,464,182,768,467,546,703,537,516,986,049,910,576,551,282,076,245,490,090,389,328,944,075,868,508,455,133,942,304,583,236,903,222,948,165,808,559,332,123,348,274,797,826,204,144,723,168,738,177,180,919,299,881,250,404,026,184,124,858,368.00")]
         [InlineData(Math.E, "¤2.72")]
@@ -875,58 +828,11 @@ namespace System.Tests
         [MemberData(nameof(TestFormatterDouble_InvalidMemberData))]
         public void TestFormatterDouble_Invalid(double value, string format) => Assert.Throws<FormatException>(() => InvariantToStringDouble(value, format));
 
-        private void TestFormatterDouble_Standard(double value, string format, string expectedResult)
+        protected void TestFormatterDouble_Standard(double value, string format, string expectedResult)
         {
             string actualResult = InvariantToStringDouble(value, format);
             Assert.Equal(expectedResult, actualResult);
         }
-
-        [Theory]
-        [InlineData("##.#", float.Epsilon, "")]
-        [InlineData("##.#", float.MaxValue, "340282300000000000000000000000000000000")]
-        [InlineData("##.#", MathF.E, "2.7")]
-        [InlineData("##.#", MathF.PI, "3.1")]
-        [InlineData("##.#", 0.0f, "")]
-        [InlineData("##.#", 0.0046f, "")]
-        [InlineData("##.#", 0.005f, "")]
-        [InlineData("##.#", 0.125f, ".1")]
-        [InlineData("##.#", 0.5f, ".5")]
-        [InlineData("##.#", 0.51f, ".5")]
-        [InlineData("##.#", 0.56789f, ".6")]
-        [InlineData("##.#", 0.845512390f, ".8")]
-        [InlineData("##.#", 1.0f, "1")]
-        [InlineData("##.#", 46.5f, "46.5")]
-        [InlineData("##.#", 505.0f, "505")]
-        [InlineData("##.#", 506.0f, "506")]
-        [InlineData("##.#", 545.0f, "545")]
-        [InlineData("##.#", 545.1f, "545.1")]
-        [InlineData("##.#", 555.0f, "555")]
-        [InlineData("##.#", 46500.0f, "46500")]
-        [InlineData("##.#", 65747.125f, "65747.1")]
-        [InlineData("##.#", 429496.72f, "429496.7")]
-        [InlineData("#,###.00", float.Epsilon, ".00")]
-        [InlineData("#,###.00", float.MaxValue, "340,282,300,000,000,000,000,000,000,000,000,000,000.00")]
-        [InlineData("#,###.00", MathF.E, "2.72")]
-        [InlineData("#,###.00", MathF.PI, "3.14")]
-        [InlineData("#,###.00", 0.0f, ".00")]
-        [InlineData("#,###.00", 0.0046f, ".00")]
-        [InlineData("#,###.00", 0.005f, ".01")]
-        [InlineData("#,###.00", 0.125f, ".13")]
-        [InlineData("#,###.00", 0.5f, ".50")]
-        [InlineData("#,###.00", 0.51f, ".51")]
-        [InlineData("#,###.00", 0.56789f, ".57")]
-        [InlineData("#,###.00", 0.845512390f, ".85")]
-        [InlineData("#,###.00", 1.0f, "1.00")]
-        [InlineData("#,###.00", 46.5f, "46.50")]
-        [InlineData("#,###.00", 505.0f, "505.00")]
-        [InlineData("#,###.00", 506.0f, "506.00")]
-        [InlineData("#,###.00", 545.0f, "545.00")]
-        [InlineData("#,###.00", 545.1f, "545.10")]
-        [InlineData("#,###.00", 555.0f, "555.00")]
-        [InlineData("#,###.00", 46500.0f, "46,500.00")]
-        [InlineData("#,###.00", 65747.125f, "65,747.12")]
-        [InlineData("#,###.00", 429496.72f, "429,496.70")]
-        public void TestFormatteSingle_Custom(string format, float value, string expectedResult) => TestFormatterSingle_Standard(value, format, expectedResult);
 
         [Theory]
         [InlineData(float.Epsilon, "¤0.00")]
@@ -1742,7 +1648,7 @@ namespace System.Tests
         [MemberData(nameof(TestFormatterSingle_InvalidMemberData))]
         public void TestFormatterSingle_Invalid(float value, string format) => Assert.Throws<FormatException>(() => InvariantToStringSingle(value, format));
 
-        private void TestFormatterSingle_Standard(float value, string format, string expectedResult)
+        protected void TestFormatterSingle_Standard(float value, string format, string expectedResult)
         {
             string actualResult = InvariantToStringSingle(value, format);
             Assert.Equal(expectedResult, actualResult);
