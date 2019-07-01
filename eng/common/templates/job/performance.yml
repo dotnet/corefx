@@ -1,5 +1,6 @@
 parameters:
   steps: []                       # optional -- any additional steps that need to happen before pulling down the performance repo and sending the performance benchmarks to helix (ie building your repo)
+  variables: []
   jobName: ''                     # required -- job name
   displayName: ''                 # optional -- display name for the job. Will use jobName if not passed
   pool: ''                        # required -- name of the Build pool
@@ -30,6 +31,13 @@ jobs:
         timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
 
         variables:
+
+        - ${{ each variable in parameters.variables }}:
+          - ${{ if ne(variable.name, '') }}:
+            - name: ${{ variable.name }}
+              value: ${{ variable.value }}
+          - ${{ if ne(variable.group, '') }}:
+            - group: ${{ variable.group }}
         - IsInternal: ''
         - HelixApiAccessToken: ''
         - HelixPreCommand: ''
