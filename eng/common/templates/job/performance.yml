@@ -38,6 +38,7 @@ jobs:
               value: ${{ variable.value }}
           - ${{ if ne(variable.group, '') }}:
             - group: ${{ variable.group }}
+            
         - IsInternal: ''
         - HelixApiAccessToken: ''
         - HelixPreCommand: ''
