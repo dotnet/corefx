@@ -57,7 +57,7 @@ In this document, the following terms are used:
   Framework, so you can think of CoreFX as a fork of the .NET Framework library
   stack.
 
-* **CLI** Command Line Interface --or-- Common Language Infastructure.
+* **CLI**. Command Line Interface --or-- Common Language Infastructure.
   * Command Line Interface: A tool that has no graphical interface and is
     intended to be used completely from a console/terminal. Also is commonly
     used as shorthand for the [.NET tooling][dotnet-tooling].
@@ -65,11 +65,15 @@ In this document, the following terms are used:
     IL, how to store IL as binary (assemblies), and how the runtime works. AKA:
     [ECMA-355][ECMA-355].
 
+* **CLR**. Common Language Runtime: The runtime/environment that .NET code
+  executes in. Is also commonly used to refer to the Microsoft Windows only
+  implementation
+
 ## Runtimes
 
 ### Common Language Runtime
 
-**Also referred to as**: CLR
+**Also referred to as**: CLR, VM
 
 The CLR is a virtual machine, i.e. it includes the facilities to generate and
 compile code on-the-fly using a JIT compiler. The existing Microsoft CLR
@@ -77,7 +81,7 @@ implementation is Windows only.
 
 ### Core Common Language Runtime
 
-**Also referred to as**: CoreCLR
+**Also referred to as**: CoreCLR, VM
 
 It's built from the same code base as the CLR. Originally, CoreCLR was the
 runtime of Silverlight and was designed to run on multiple platforms,
@@ -151,9 +155,6 @@ environment (AppContainer), and a set of Windows APIs to use instead of Win32
 and JavaScript. When using C# and VB.NET the .NET APIs are provided by .NET
 Core.
 
-<<<<<<< HEAD
-### .NET Native
-
 **Also referred to as**: ahead-of-time (AOT), IL compiler (ILC)
 
 .NET Native is a compiler tool chain that will produce native code ahead-of-time
@@ -174,8 +175,6 @@ application.
 UWP was the first application model that was supported by .NET Native. We now
 also support building native console applications for Windows, OS X and Linux.
 
-=======
->>>>>>> dotnet/master
 ### Rotor
 
 **Also referred to as**: Shared Source Common Language Infrastructure (SSCLI)
