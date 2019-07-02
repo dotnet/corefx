@@ -1891,7 +1891,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20844)]
         public void MeasureString_MultlineString_Width()
         {

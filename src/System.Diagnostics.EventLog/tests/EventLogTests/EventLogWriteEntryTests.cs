@@ -359,7 +359,7 @@ namespace System.Diagnostics.Tests
         public void WriteEventInstanceNull()
         {
             string source = "Source_" + nameof(WriteEventInstanceNull);
-            Assert.Throws<ArgumentNullException>(() => Helpers.RetryOnWin7(() => EventLog.WriteEvent(source, null, insertStrings)));
+            Helpers.RetryOnWin7(() => Assert.Throws<ArgumentNullException>(() => EventLog.WriteEvent(source, null, insertStrings)));
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
@@ -368,7 +368,7 @@ namespace System.Diagnostics.Tests
             string source = "Source_" + nameof(WriteEventMessageValues_OutOfRange);
             string[] message = new string[1];
             message[0] = new string('c', 32767);
-            Assert.Throws<ArgumentException>(() => Helpers.RetryOnWin7(() => EventLog.WriteEvent(source, eventInstance, message)));
+            Helpers.RetryOnWin7(() => Assert.Throws<ArgumentException>(() => EventLog.WriteEvent(source, eventInstance, message)));
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]

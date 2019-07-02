@@ -732,7 +732,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadListOfKeyValuePair()
         {
-            List<KeyValuePair<string, int>> input = JsonSerializer.Deserialize<List<KeyValuePair<string, int>>>(@"""Key"":""Key"", ""Value"":[{""123"":123},{""456"": 456}]");
+            List<KeyValuePair<string, int>> input = JsonSerializer.Deserialize<List<KeyValuePair<string, int>>>(@"[{""Key"": ""123"", ""Value"": 123},{""Key"": ""456"", ""Value"": 456}]");
 
             Assert.Equal(2, input.Count);
             Assert.Equal("123", input[0].Key);
@@ -744,7 +744,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadKeyValuePairOfList()
         {
-            KeyValuePair<string, List<int>> input = JsonSerializer.Deserialize<KeyValuePair<string, List<int>>>(@"{""Key"":""Key"", Value:[1, 2, 3]}");
+            KeyValuePair<string, List<int>> input = JsonSerializer.Deserialize<KeyValuePair<string, List<int>>>(@"{""Key"":""Key"", ""Value"":[1, 2, 3]}");
 
             Assert.Equal("Key", input.Key);
             Assert.Equal(3, input.Value.Count);

@@ -2634,6 +2634,7 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
+    [ActiveIssue(39105)]
     public static void Xml_TypeWithReadOnlyMyCollectionProperty()
     {
         var value = new TypeWithReadOnlyMyCollectionProperty();

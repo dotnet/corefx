@@ -588,6 +588,7 @@ namespace System.Drawing.Imaging.Tests
             }
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.IsDrawingSupported)]        
         public void ClearThreshold_Success()
         {

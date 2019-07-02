@@ -328,13 +328,6 @@ namespace System.Data.Tests
         }
 
         [Fact]
-        public void NotReadyTestContains_S2() // FIXME: fails in MS
-        {
-            DataTable dt = DataProvider.CreateParentDataTable();
-            Assert.Equal(false, dt.Columns.Contains(null));
-        }
-
-        [Fact]
         public void Count()
         {
             DataTable dt = DataProvider.CreateParentDataTable();

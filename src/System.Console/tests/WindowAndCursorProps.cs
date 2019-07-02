@@ -271,20 +271,6 @@ public class WindowAndCursorProps
     }
 
     [Fact]
-    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
-    public static void Title_GetWindowsUap_ThrowsIOException()
-    {
-        Assert.Throws<IOException>(() => Console.Title);
-    }
-
-    [Fact]
-    [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
-    public static void Title_SetWindowsUap_ThrowsIOException()
-    {
-        Assert.Throws<IOException>(() => Console.Title = "x");
-    }
-
-    [Fact]
     public static void Title_SetNull_ThrowsArgumentNullException()
     {
         AssertExtensions.Throws<ArgumentNullException>("value", () => Console.Title = null);

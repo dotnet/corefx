@@ -49,7 +49,7 @@ namespace System.Runtime.InteropServices.Tests
             int errorCode = -2000607220;
             ExternalException exception = new ExternalException(msg, errorCode);
             Assert.Equal(msg, exception.Message);
-            Assert.Equal(COR_E_EXTERNAL, exception.HResult);
+            Assert.Equal(errorCode, exception.HResult);
         }
     }
 }

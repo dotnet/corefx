@@ -253,6 +253,7 @@ namespace System.IO.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)] // Uses P/Invokes to create async pipe handle
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Out of current directory operation.")]
         [Fact]
         public async Task NamedPipeViaFileStream_CancellationRequested_OperationCanceled()
         {
