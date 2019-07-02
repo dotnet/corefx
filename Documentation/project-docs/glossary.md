@@ -286,8 +286,10 @@ native loop-driven Win32 model. Mono [has an implementation][mono-winforms] of
 Windows Forms, though it is not complete, since some parts of Windows Forms are
 tied to the Windows platform.
 
-Windows Forms is in maintenance mode now. That means new features will generally
-not be added.
+On Decemember 4th, 2018 [Microsoft Open Sourced Windows Forms][ui-oss]. This
+included moving the code to [GitHub under the stewardship of the .NET
+Foundation][WinForms] and enabling support for running Windows Forms on .NET
+Core (Windows Only).
 
 ### Windows Presentation Foundation
 
@@ -302,15 +304,9 @@ XML-based language which allows a declarative way to describe user interfaces
 and data binding to models (XAML is used by Silverlight, UWP, and Xamarin as
 well).
 
-The .NET platform currently doesn't contain a cross-platform XAML-based UI
-stack. There are, however, various community projects in that space:
-
-* [CSHTML5][CSHTML5]: A product to compile WPF/.NET Framework applications into
-  HTML5/CSS3/ECMAScript5 applications.
-* [WPFLight][WPFLight]: An OSS project to create WPF on top of XNA/MonoGame.
-* [Perspex][Perspex]: A cross-platform UI framework based on WPF.
-* [Granular][Granular]: A OSS project to allow WPF applications to run in the
-  browser.
+On Decemember 4th, 2018 [Microsoft Open Sourced WPF][ui-oss]. This included
+moving the code to [GitHub under the stewardship of the .NET Foundation][Wpf]
+and enabling support for running WPF on .NET Core (Windows Only).
 
 ## Engineering system
 
@@ -330,11 +326,10 @@ stack. There are, however, various community projects in that space:
 [JamesNK]: https://twitter.com/JamesNK
 [Newtonsoft.Json]: https://github.com/JamesNK/Newtonsoft.Json
 [mono-winforms]: http://www.mono-project.com/docs/gui/winforms/
-[CSHTML5]: http://www.cshtml5.com/
-[WPFLight]: https://github.com/ronnycsharp/WPFLight
-[Perspex]: https://github.com/Perspex/Perspex
-[Granular]: https://github.com/yuvaltz/Granular
 [xunit]: https://github.com/xunit
 [mc.dot.net]: https://mc.dot.net/
 [ECMA-355]: http://www.ecma-international.org/publications/standards/Ecma-335.htm
 [dotnet-tooling]: https://docs.microsoft.com/en-us/dotnet/core/tools/
+[WinForms]: https://github.com/dotnet/winforms
+[Wpf]: https://github.com/dotnet/wpf
+[ui-oss]: https://devblogs.microsoft.com/dotnet/announcing-net-core-3-preview-1-and-open-sourcing-windows-desktop-frameworks/
