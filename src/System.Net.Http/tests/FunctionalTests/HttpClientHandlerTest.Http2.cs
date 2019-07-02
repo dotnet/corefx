@@ -1117,7 +1117,8 @@ namespace System.Net.Http.Functional.Tests
                     await newConneciton.SendDefaultResponseHeadersAsync(retriedStreamId).ConfigureAwait(false);
                     await newConneciton.SendResponseDataAsync(retriedStreamId, new byte[0], endStream: true).ConfigureAwait(false);
 
-                    await newConneciton.WriteFrameAsync(goAwayFrame).ConfigureAwait(false);
+                    var goAwayFrameOnNewConnection = new GoAwayFrame(retriedStreamId, (int)ProtocolErrors.ENHANCE_YOUR_CALM, new byte[0], 0);
+                    await newConneciton.WriteFrameAsync(goAwayFrameOnNewConnection).ConfigureAwait(false);
                     await newConneciton.WaitForConnectionShutdownAsync();
                 });
 
@@ -1128,7 +1129,7 @@ namespace System.Net.Http.Functional.Tests
                 await AssertProtocolErrorAsync(sendTask2, ProtocolErrors.ENHANCE_YOUR_CALM);
                 await AssertProtocolErrorAsync(sendTask3, ProtocolErrors.ENHANCE_YOUR_CALM);
 
-                // Now that all pending responses have been sent, the client should close the connection.
+                // Now that all pending responses on the first connection have been sent, the client should close the connection.
                 await connection.WaitForConnectionShutdownAsync().ConfigureAwait(false);
 
                 HttpResponseMessage response1 = await sendTask1.ConfigureAwait(false);
