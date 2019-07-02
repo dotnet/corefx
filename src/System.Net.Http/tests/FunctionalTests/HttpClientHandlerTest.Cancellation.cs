@@ -98,7 +98,7 @@ namespace System.Net.Http.Functional.Tests
                     Task serverTask = server.AcceptConnectionAsync(async connection =>
                     {
                         await connection.ReadRequestDataAsync();
-                        await connection.SendResponseAsync(HttpStatusCode.OK, isFinal: false);
+                        await connection.SendResponseAsync(HttpStatusCode.OK, content: null, isFinal: false);
 
                         partialResponseHeadersSent.TrySetResult(true);
                         await clientFinished.Task;
@@ -155,7 +155,7 @@ namespace System.Net.Http.Functional.Tests
                         }
 
                         await connection.ReadRequestDataAsync();
-                        await connection.SendResponseAsync(HttpStatusCode.OK, headers: headers, body: "123", isFinal: false);
+                        await connection.SendResponseAsync(HttpStatusCode.OK, headers: headers, content: "123", isFinal: false);
                         responseHeadersSent.TrySetResult(true);
                         await clientFinished.Task;
                     });
@@ -216,7 +216,7 @@ namespace System.Net.Http.Functional.Tests
                         }
 
                         await connection.ReadRequestDataAsync();
-                        await connection.SendResponseAsync(HttpStatusCode.OK, headers: headers, body: "", isFinal: false);
+                        await connection.SendResponseAsync(HttpStatusCode.OK, headers: headers, isFinal: false);
                         await clientFinished.Task;
                     });
 
@@ -273,7 +273,7 @@ namespace System.Net.Http.Functional.Tests
                     Task serverTask = server.AcceptConnectionAsync(async connection =>
                     {
                         await connection.ReadRequestDataAsync();
-                        await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] { new HttpHeaderData("Content-Length", contentLength.ToString()) } , body: "", isFinal: false);
+                        await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] { new HttpHeaderData("Content-Length", contentLength.ToString()) }, isFinal: false);
                         for (int i = 0; i < responseSegments; i++)
                         {
                             await connection.SendResponseBodyAsync(responseContentSegment, isFinal: i == responseSegments - 1);

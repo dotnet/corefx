@@ -1434,18 +1434,20 @@ namespace System.Net.Http.Functional.Tests
                     switch (chunked)
                     {
                         case true:
-                            await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] { new HttpHeaderData("Transfer-Encoding", "chunked") }, body: "", isFinal: false);
-                            await connection.SendResponseAsync(body: "3\r\nhel\r\n8\r\nlo world\r\n0\r\n\r\n");
+                            await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] { new HttpHeaderData("Transfer-Encoding", "chunked") }, isFinal: false);
+                            //await connection.SendResponseAsync(body: "3\r\nhel\r\n8\r\nlo world\r\n0\r\n\r\n");
+                            await connection.SendResponseBodyAsync("3\r\nhel\r\n8\r\nlo world\r\n0\r\n\r\n");
                             break;
 
                         case false:
-                            await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] { new HttpHeaderData("Content-Length", "11")}, body: "hello world");
+                            await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] { new HttpHeaderData("Content-Length", "11")}, content: "hello world");
                             break;
 
                         case null:
                             // This inject Content-Length header with null value to hint Loopback code to not include one automatically.
-                            await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] { new HttpHeaderData("Content-Length", null)}, body: "", isFinal: false);
-                            await connection.SendResponseAsync(body: "hello world");
+                            await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] { new HttpHeaderData("Content-Length", null)}, isFinal: false);
+                            await connection.SendResponseBodyAsync("hello world");
+                            //await connection.SendResponseAsync(body: "hello world");
                             break;
                     }
                 });
@@ -1557,7 +1559,7 @@ namespace System.Net.Http.Functional.Tests
                         Task serverTask2 = server2.AcceptConnectionAsync(async connection2 =>
                         {
                             await connection2.ReadRequestDataAsync();
-                            await connection2.SendResponseAsync(HttpStatusCode.OK, isFinal : false);
+                            await connection2.SendResponseAsync(HttpStatusCode.OK, content: null, isFinal : false);
                             await unblockServers.Task;
                         });
 
@@ -1565,7 +1567,7 @@ namespace System.Net.Http.Functional.Tests
                         Task serverTask3 = server3.AcceptConnectionAsync(async connection3 =>
                         {
                             await connection3.ReadRequestDataAsync();
-                            await connection3.SendResponseAsync(HttpStatusCode.OK, new HttpHeaderData[] { new HttpHeaderData("Content-Length", "20") }, body : "", isFinal : false);
+                            await connection3.SendResponseAsync(HttpStatusCode.OK, new HttpHeaderData[] { new HttpHeaderData("Content-Length", "20") }, isFinal : false);
                             await connection3.SendResponseBodyAsync("1234567890", isFinal : false);
                             await unblockServers.Task;
                             await connection3.SendResponseBodyAsync("1234567890", isFinal : true);
@@ -1930,8 +1932,9 @@ namespace System.Net.Http.Functional.Tests
                     HttpRequestData requestData = await connection.ReadRequestDataAsync();
                     Assert.Equal(requestData.GetSingleHeaderValue("Expect"), "100-continue");
 
-                    await connection.SendResponseAsync(HttpStatusCode.Continue, body: "", isFinal: false);
-                    await connection.SendResponseAsync(body: ExpectedContent);
+                    await connection.SendResponseAsync(HttpStatusCode.Continue, isFinal: false);
+                    await connection.SendResponseAsync(HttpStatusCode.OK, new HttpHeaderData[] { new HttpHeaderData("Content-Length", ExpectedContent.Length.ToString()) }, isFinal: false);
+                    await connection.SendResponseBodyAsync(ExpectedContent);
                     await clientCompleted.Task; // make sure server closing the connection isn't what let the client complete
                 });
             });
@@ -1997,21 +2000,20 @@ namespace System.Net.Http.Functional.Tests
                     await connection.SendResponseAsync(responseStatusCode, headers: new HttpHeaderData[] {
                             new HttpHeaderData("Cookie", "ignore_cookie=choco1"),
                             new HttpHeaderData("Content-type", "text/xml"),
-                            new HttpHeaderData("Set-Cookie", SetCookieIgnored1)}, body: "", isFinal: false);
+                            new HttpHeaderData("Set-Cookie", SetCookieIgnored1)}, isFinal: false);
 
                     await connection.SendResponseAsync(responseStatusCode, headers:  new HttpHeaderData[] {
                         new HttpHeaderData("Cookie", "ignore_cookie=choco2"),
                         new HttpHeaderData("Content-type", "text/plain"),
-                        new HttpHeaderData("Set-Cookie", SetCookieIgnored2)}, body: "", isFinal: false);
+                        new HttpHeaderData("Set-Cookie", SetCookieIgnored2)}, isFinal: false);
 
-                    //byte[] body = await connection.ReadRequestBodyAsync();
                     Assert.Equal(TestString, Encoding.ASCII.GetString(requestData.Body));
 
                     // Send final status code.
                     await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] {
                         new HttpHeaderData("Cookie", CookieHeaderExpected),
                         new HttpHeaderData("Content-type", ContentTypeHeaderExpected),
-                        new HttpHeaderData("Set-Cookie", SetCookieExpected)}, body: "");
+                        new HttpHeaderData("Set-Cookie", SetCookieExpected)});
 
                     await clientFinished.Task;
                 });
@@ -2044,15 +2046,15 @@ namespace System.Net.Http.Functional.Tests
                 {
                     // Send unexpected 1xx responses.
                     HttpRequestData requestData = await connection.ReadRequestDataAsync(readBody: false);
-                    await connection.SendResponseAsync(responseStatusCode, body: "", isFinal: false);
-                    await connection.SendResponseAsync(responseStatusCode, body: "", isFinal: false);
-                    await connection.SendResponseAsync(responseStatusCode, body: "", isFinal: false);
+                    await connection.SendResponseAsync(responseStatusCode, isFinal: false);
+                    await connection.SendResponseAsync(responseStatusCode, isFinal: false);
+                    await connection.SendResponseAsync(responseStatusCode, isFinal: false);
 
                     byte[] body = await connection.ReadRequestBodyAsync();
                     Assert.Equal(TestString, Encoding.ASCII.GetString(body));
 
                     // Send final status code.
-                    await connection.SendResponseAsync(HttpStatusCode.OK, body: "");
+                    await connection.SendResponseAsync(HttpStatusCode.OK);
                     await clientFinished.Task;
                 });
             });
@@ -2084,14 +2086,14 @@ namespace System.Net.Http.Functional.Tests
                     // Send multiple 100-Continue responses.
                     for (int count=0 ; count < 4; count++)
                     {
-                        await connection.SendResponseAsync(HttpStatusCode.Continue, body: "", isFinal: false);
+                        await connection.SendResponseAsync(HttpStatusCode.Continue, isFinal: false);
                     }
 
                     byte[] body = await connection.ReadRequestBodyAsync();
                     Assert.Equal(TestString, Encoding.ASCII.GetString(body));
 
                     // Send final status code.
-                    await connection.SendResponseAsync(HttpStatusCode.OK, body: "");
+                    await connection.SendResponseAsync(HttpStatusCode.OK);
                     await clientFinished.Task;
                 });
             });
@@ -2131,7 +2133,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     await connection.ReadRequestDataAsync(readBody: false);
 
-                    await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] {new HttpHeaderData("Content-Length", $"{ResponseString.Length}")}, body: "", isFinal : false);
+                    await connection.SendResponseAsync(HttpStatusCode.OK, headers: new HttpHeaderData[] {new HttpHeaderData("Content-Length", $"{ResponseString.Length}")}, isFinal : false);
 
                     byte[] body = await connection.ReadRequestBodyAsync();
                     Assert.Equal(RequestString, Encoding.ASCII.GetString(body));
@@ -2633,7 +2635,7 @@ namespace System.Net.Http.Functional.Tests
         {
             await LoopbackServerFactory.CreateServerAsync(async (server, rootUrl) =>
             {
-                var uri = new Uri($"http://{rootUrl.Host}:{rootUrl.Port}/test[]");
+                var uri = new Uri($"{rootUrl.Scheme}://{rootUrl.Host}:{rootUrl.Port}/test[]");
                 _output.WriteLine(uri.AbsoluteUri.ToString());
 
                 using (HttpClient client = CreateHttpClient())

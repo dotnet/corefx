@@ -23,7 +23,6 @@ namespace System.Net.Test.Common
         private bool _ignoreWindowUpdates;
         public static TimeSpan Timeout => Http2LoopbackServer.Timeout;
         private int _lastStreamId;
-        private bool _shouldSendStatus;
 
         private readonly byte[] _prefix;
         public string PrefixString => Encoding.UTF8.GetString(_prefix, 0, _prefix.Length);
@@ -672,7 +671,6 @@ namespace System.Net.Test.Common
         {
             (int streamId, HttpRequestData requestData) = await ReadAndParseRequestHeaderAsync(readBody).ConfigureAwait(false);
             _lastStreamId = streamId;
-            _shouldSendStatus = true;
 
             return requestData;
         }
@@ -682,9 +680,12 @@ namespace System.Net.Test.Common
             return ReadBodyAsync();
         }
 
-        public override async Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string body = null, bool isFinal = true, int requestId = 0)
+        public override async Task SendResponseAsync(HttpStatusCode? statusCode = null, IList<HttpHeaderData> headers = null, string body = null, bool isFinal = true, int requestId = 0)
         {
-            if (headers != null & _shouldSendStatus)
+            // TODO: Header continuation support.
+            Assert.NotNull(statusCode);
+
+            if (headers != null && statusCode != null)
             {
                 bool hasDate = false;
                 bool stripContentLength = false;
@@ -722,27 +723,14 @@ namespace System.Net.Test.Common
             int streamId = requestId == 0 ? _lastStreamId : requestId;
             bool endHeaders = body != null || isFinal;
 
-            // TODO: Header continuation support.
-            Assert.False(!_shouldSendStatus && headers != null);
             if (string.IsNullOrEmpty(body))
             {
-                await SendResponseHeadersAsync(streamId, endStream: isFinal, statusCode, isTrailingHeader: false, endHeaders: endHeaders, headers);
-                _shouldSendStatus = false;
+                await SendResponseHeadersAsync(streamId, endStream: isFinal, (HttpStatusCode)statusCode, endHeaders: endHeaders, headers: headers);
             }
             else
             {
-                if (headers != null || _shouldSendStatus)
-                {
-                    await SendResponseHeadersAsync(streamId, endStream: false, statusCode, isTrailingHeader: false, endHeaders: endHeaders, headers);
-                    _shouldSendStatus = false;
-                }
+                await SendResponseHeadersAsync(streamId, endStream: false, (HttpStatusCode)statusCode, endHeaders: endHeaders, headers: headers);
                 await SendResponseBodyAsync(body, isFinal: isFinal, requestId: streamId);
-            }
-
-            // If we sent transient response, we need to send response code again.
-            if ((int)statusCode < 200)
-            {
-                _shouldSendStatus = true;
             }
         }
 

@@ -403,7 +403,6 @@ namespace System.Net.Test.Common
             private int _readEnd;
             private int _contentLength = 0;
             private bool _bodyRead = false;
-            private bool _shouldSendStatus;
 
             public Connection(Socket socket, Stream stream)
             {
@@ -678,8 +677,6 @@ namespace System.Net.Test.Common
                     requestData.Body = await ReadRequestBodyAsync().ConfigureAwait(false);
                     _bodyRead = true;
                 }
-                // After reading request, we should send status before headers.
-                _shouldSendStatus = true;
 
                 return requestData;
             }
@@ -738,7 +735,7 @@ namespace System.Net.Test.Common
                 return buffer;
             }
 
-            public override async Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null, bool isFinal = true, int requestId = 0)
+            public override async Task SendResponseAsync(HttpStatusCode? statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null, bool isFinal = true, int requestId = 0)
             {
                 string headerString = null;
                 int contentLength = -1;
@@ -775,28 +772,21 @@ namespace System.Net.Test.Common
                 }
 
                 bool endHeaders = content != null || isFinal;
-                if (_shouldSendStatus)
+                if (statusCode != null)
                 {
                     // If we need to send status line, prepped it to headers and possibly add missing headers to the end.
                     headerString =
-                        $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
+                        $"HTTP/1.1 {(int)statusCode} {GetStatusDescription((HttpStatusCode)statusCode)}\r\n" +
                         (hasDate ? "" : $"Date: {DateTimeOffset.UtcNow:R}\r\n") +
                         (!hasContentLength && !isChunked && content != null ? $"Content-length: {content.Length}\r\n" : "") +
                         headerString +
                         (endHeaders ? "\r\n" : "");
-                    _shouldSendStatus = false;
                 }
 
                 await SendResponseAsync(headerString).ConfigureAwait(false);
                 if (content != null)
                 {
                     await SendResponseBodyAsync(content, isFinal: isFinal, requestId: requestId).ConfigureAwait(false);
-                }
-
-                // If we sent transient response, we need to send response code again.
-                if ((int)statusCode < 200)
-                {
-                    _shouldSendStatus = true;
                 }
             }
 
@@ -806,7 +796,7 @@ namespace System.Net.Test.Common
             }
         }
 
-        public override async Task<HttpRequestData> HandleRequestAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null)
+        public override async Task<HttpRequestData> HandleRequestAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = "")
         {
             using (Connection connection = await EstablishConnectionAsync().ConfigureAwait(false))
             {
