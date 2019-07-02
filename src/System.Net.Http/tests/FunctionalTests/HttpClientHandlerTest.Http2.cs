@@ -1620,7 +1620,7 @@ namespace System.Net.Http.Functional.Tests
                         // Cancel client after receiving Headers or part of request body.
                         cts.Cancel();
                     }
-                    frame = await connection.ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds)).ConfigureAwait(false);
+                    frame = await connection.ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds));
                     Assert.NotNull(frame); // We should get Rst before closing connection.
                     Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
                     frameCount++;
@@ -1635,7 +1635,7 @@ namespace System.Net.Http.Functional.Tests
                 // Wait for any lingering frames or extra reset frames.
                 try
                 {
-                    frame = await connection.ReadFrameAsync(TimeSpan.FromMilliseconds(1000)).ConfigureAwait(false);
+                    frame = await connection.ReadFrameAsync(TimeSpan.FromMilliseconds(1000));
                 }
                 catch (System.OperationCanceledException) { };
                 Assert.Null(frame);    // Make sure we do not get any frames after getting Rst.
@@ -1708,7 +1708,7 @@ namespace System.Net.Http.Functional.Tests
                 Frame frame;
                 do
                 {
-                    frame = await connection.ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds)).ConfigureAwait(false);
+                    frame = await connection.ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds));
                     Assert.NotNull(frame); // We should get Rst before closing connection.
                     Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
                  } while (frame.Type != FrameType.RstStream);
