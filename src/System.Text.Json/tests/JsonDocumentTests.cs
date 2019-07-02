@@ -412,68 +412,39 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void ParseJson_Stream_Throws_ClearRentedBuffer_CodeCoverage()
+        public static void ParseJson_Stream_ClearRentedBuffer_WhenThrow_CodeCoverage()
         {
-            byte[] data = Encoding.UTF8.GetBytes(SR.Json400KB);
-            Stream stream = new ThrowOnReadStream(data);
-            JsonDocument doc = null;
-            Assert.Throws<NotImplementedException>(() =>
+            using (Stream stream = new ThrowOnReadStream(new byte[] { 1 }))
             {
-                doc = JsonDocument.Parse(stream);
-            });
-           Assert.Null(doc);
+                Assert.Throws<EndOfStreamException>(() => JsonDocument.Parse(stream));
+            }
         }
 
         [Fact]
-        public static void ParseJson_Stream_Async_Throws_ClearRentedBuffer_CodeCoverage()
+        public static void ParseJson_Stream_Async_ClearRentedBuffer_WhenThrow_CodeCoverage()
         {
-            byte[] data = Encoding.UTF8.GetBytes(SR.Json400KB);
-            Stream stream = new ThrowOnReadStream(data);
-            JsonDocument doc = null;
-            Assert.ThrowsAsync<NotImplementedException>(async () =>
+            using (Stream stream = new ThrowOnReadStream(new byte[] { 1 }))
             {
-                doc = await JsonDocument.ParseAsync(stream);
-            });
-            Assert.Null(doc);
+                Assert.ThrowsAsync<EndOfStreamException>(async () => await JsonDocument.ParseAsync(stream));
+            }
         }
 
         [Fact]
-        public static void ParseJson_Stream_CanSeekThrows_NullBuffer_CodeCoverage()
+        public static void ParseJson_Stream_ThrowsOn_ArrayPoolRent_CodeCoverage()
         {
-            byte[] data = Encoding.UTF8.GetBytes(SR.Json400KB);
-            Stream stream = new ThrowOnSeekStream(data);
-            JsonDocument doc = null;
-            Assert.Throws<NotImplementedException>(() =>
+            using (Stream stream = new ThrowOnArrayPoolRentStep(new byte[] { 1 }))
             {
-                doc = JsonDocument.Parse(stream);
-            });
-            Assert.Null(doc);
+                Assert.Throws<InsufficientMemoryException>(() => JsonDocument.Parse(stream));
+            }
         }
 
         [Fact]
-        public static void ParseJson_Stream_Async_CanSeekThrows_NullBuffer_CodeCoverage()
+        public static void ParseJson_Stream_Async_ThrowsOn_ArrayPoolRent_CodeCoverage()
         {
-            byte[] data = Encoding.UTF8.GetBytes(SR.Json400KB);
-            Stream stream = new ThrowOnSeekStream(data);
-            JsonDocument doc = null;
-            Assert.ThrowsAsync<NotImplementedException>(async () =>
+            using (Stream stream = new ThrowOnArrayPoolRentStep(new byte[] { 1 }))
             {
-                doc = await JsonDocument.ParseAsync(stream);
-            });
-            Assert.Null(doc);
-        }
-
-        [Fact]
-        public static void ParseJson_Stream_NonSeekableThrows_CodeCoverage()
-        {
-            byte[] data = Encoding.UTF8.GetBytes(SR.Json400KB);
-            Stream stream = new ThrowOnSeekStream(data);
-            JsonDocument doc = null;
-            Assert.Throws<NotImplementedException>(() =>
-            {
-                doc = JsonDocument.Parse(stream);
-            });
-            Assert.Null(doc);
+                Assert.ThrowsAsync<InsufficientMemoryException>(async () => await JsonDocument.ParseAsync(stream));
+            }
         }
 
         [Theory]
@@ -3774,6 +3745,7 @@ namespace System.Text.Json.Tests
             return s_compactJson[testCaseType] = existing;
         }
     }
+
     public class ThrowOnReadStream : MemoryStream
     {
         public ThrowOnReadStream(byte[] bytes) : base(bytes)
@@ -3782,16 +3754,16 @@ namespace System.Text.Json.Tests
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+            throw new EndOfStreamException();
         }
     }
 
-    public class ThrowOnSeekStream : MemoryStream
+    public class ThrowOnArrayPoolRentStep : MemoryStream
     {
-        public ThrowOnSeekStream(byte[] bytes) : base(bytes)
+        public ThrowOnArrayPoolRentStep(byte[] bytes) : base(bytes)
         {
         }
 
-        public override bool CanSeek => throw new NotImplementedException();
+        public override bool CanSeek => throw new InsufficientMemoryException();
     }
 }
