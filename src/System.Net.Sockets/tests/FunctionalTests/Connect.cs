@@ -96,17 +96,16 @@ namespace System.Net.Sockets.Tests
 
             // We try this a couple of times to deal with a timing race: if the Dispose happens
             // before the operation is started, we won't see a SocketException.
+            int msDelay = 100;
             await RetryHelper.ExecuteAsync(async () =>
             {
                 var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                 Task connectTask = ConnectAsync(client, new IPEndPoint(IPAddress.Parse("1.1.1.1"), 23));
 
-                if (UsesSync)
-                {
-                    // Wait a little so the operation is started.
-                    await Task.Delay(100);
-                }
+                // Wait a little so the operation is started.
+                await Task.Delay(msDelay);
+                msDelay *= 2;
                 Task disposeTask = Task.Run(() => client.Dispose());
 
                 var cts = new CancellationTokenSource();

@@ -186,7 +186,7 @@ namespace System.Net.Sockets.Tests
             // We try this a couple of times to deal with a timing race: if the Dispose happens
             // before the operation is started, the peer won't see a ConnectionReset SocketException and we won't
             // see a SocketException either.
-
+            int msDelay = 100;
             await RetryHelper.ExecuteAsync(async () =>
             {
                 (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
@@ -205,7 +205,8 @@ namespace System.Net.Sockets.Tests
                     });
 
                     // Wait a little so the operation is started.
-                    await Task.Delay(100);
+                    await Task.Delay(msDelay);
+                    msDelay *= 2;
                     Task disposeTask = Task.Run(() => socket1.Dispose());
 
                     var cts = new CancellationTokenSource();
