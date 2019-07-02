@@ -401,15 +401,7 @@ namespace System.IO
         /// </summary>
         internal static bool IsEffectivelyEmpty(ReadOnlySpan<char> path)
         {
-            if (path.IsEmpty)
-                return true;
-
-            foreach (char c in path)
-            {
-                if (c != ' ')
-                    return false;
-            }
-            return true;
+            return (path.IsEmpty || path.IndexOf(' ') > -1);
         }
     }
 }

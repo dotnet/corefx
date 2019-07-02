@@ -252,6 +252,26 @@ namespace System.IO.Tests
         }
 
         /// <summary>
+        /// Tests that a filename with just a space does not raise a watcher changed event.
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void FileSystemWatcher_File_NotifyFilter_FileWithSpaces()
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            using (var file = new TempFile(Path.Combine(testDirectory.Path, " ")))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, "*"))
+            {
+                NotifyFilters filter = NotifyFilters.LastWrite | NotifyFilters.FileName;
+                watcher.NotifyFilter = filter;
+
+                Action action = () => File.AppendAllText(file.Path, "longText!");
+                
+                ExpectNoEvent(watcher, WatcherChangeTypes.Changed, action, expectedPath: file.Path);
+            }
+        }
+
+        /// <summary>
         /// Tests the watcher behavior when two events - a Modification and a Creation - happen closely
         /// after each other.
         /// </summary>
