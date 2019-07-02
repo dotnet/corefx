@@ -6,6 +6,8 @@ using Xunit;
 using System.Configuration;
 using System.DirectoryServices;
 using System.Reflection;
+using System.Security;
+using System.Security.Permissions;
 using System.Web;
 using System.Xaml.Permissions;
 
