@@ -445,7 +445,7 @@ namespace System.Net.Http
                 }
             }
 
-            public void OnAbort(Exception abortException)
+            public void OnAbort(Exception abortException, bool canRetry = false)
             {
                 bool signalWaiter;
                 lock (SyncObject)
@@ -459,6 +459,7 @@ namespace System.Net.Http
 
                     Interlocked.CompareExchange(ref _abortException, abortException, null);
                     _state = StreamState.Aborted;
+                    _canRetry = canRetry;
 
                     signalWaiter = _hasWaiter;
                     _hasWaiter = false;
@@ -470,29 +471,9 @@ namespace System.Net.Http
                 }
             }
 
-            public void OnRefused()
+            public void OnRefused(Exception abortException = null)
             {
-                bool signalWaiter;
-                lock (SyncObject)
-                {
-                    if (NetEventSource.IsEnabled) Trace("");
-
-                    if (_disposed || _state == StreamState.Aborted)
-                    {
-                        return;
-                    }
-
-                    _state = StreamState.Aborted;
-                    _canRetry = true;
-
-                    signalWaiter = _hasWaiter;
-                    _hasWaiter = false;
-                }
-
-                if (signalWaiter)
-                {
-                    _waitSource.SetResult(true);
-                }
+                OnAbort(abortException, canRetry: true);
             }
 
             private void CheckIfDisposedOrAborted()
@@ -508,7 +489,7 @@ namespace System.Net.Http
                 {
                     if (_canRetry)
                     {
-                        throw CreateRetryException();
+                        throw new HttpRequestException(SR.net_http_request_aborted, _abortException, allowRetry: true);
                     }
 
                     throw new IOException(SR.net_http_request_aborted, _abortException);

@@ -689,7 +689,7 @@ namespace System.Net.Http
             var errorCode = (Http2ProtocolErrorCode)BinaryPrimitives.ReadInt32BigEndian(_incomingBuffer.ActiveSpan.Slice(sizeof(int)));
             if (NetEventSource.IsEnabled) Trace(frameHeader.StreamId, $"{nameof(lastValidStream)}={lastValidStream}, {nameof(errorCode)}={errorCode}");
 
-            AbortStreams(lastValidStream, new Http2ConnectionException(errorCode));
+            StartTerminatingConnection(lastValidStream, new Http2ConnectionException(errorCode));
 
             _incomingBuffer.Discard(frameHeader.Length);
         }
@@ -1278,7 +1278,7 @@ namespace System.Net.Http
         {
             // The connection has failed, e.g. failed IO or a connection-level frame error.
             Interlocked.CompareExchange(ref _abortException, abortException, null);
-            AbortStreams(0, abortException);
+            AbortStreams(abortException);
         }
 
         /// <summary>Gets whether the connection exceeded any of the connection limits.</summary>
@@ -1316,7 +1316,42 @@ namespace System.Net.Http
             return LifetimeExpired(nowTicks, connectionLifetime);
         }
 
-        private void AbortStreams(int lastValidStream, Exception abortException)
+        private void AbortStreams(Exception abortException)
+        {
+            lock (SyncObject)
+            {
+                if (NetEventSource.IsEnabled) Trace($"{nameof(abortException)}={abortException}, {nameof(_lastValidStreamId)}={_lastValidStreamId}");
+
+                bool hasAnyActiveStream = false;
+                foreach (KeyValuePair<int, Http2Stream> kvp in _httpStreams)
+                {
+                    int streamId = kvp.Key;
+                    Debug.Assert(streamId == kvp.Value.StreamId);
+
+                    kvp.Value.OnAbort(abortException);
+                    _httpStreams.Remove(streamId);
+                }
+
+                if (!hasAnyActiveStream)
+                {
+                    _disposed = true;
+                }
+
+                CheckForShutdown();
+            }
+
+            if (!_disposed)
+            {
+                _disposed = true;
+
+                // Invalidate outside of lock to avoid race with HttpPool Dispose()
+                // We should not try to grab pool lock while holding connection lock as on disposing pool,
+                // we could hold pool lock while trying to grab connection lock in Dispose().
+                _pool.InvalidateHttp2Connection(this);
+            }
+        }
+
+        private void StartTerminatingConnection(int lastValidStream, Exception abortException)
         {
             Debug.Assert(lastValidStream >= 0);
             bool isAlreadyInvalidated = _disposed;
@@ -1335,7 +1370,7 @@ namespace System.Net.Http
                     isAlreadyInvalidated = true;
                 }
 
-                if (NetEventSource.IsEnabled) Trace($"{nameof(lastValidStream)}={lastValidStream}, {nameof(abortException)}={lastValidStream}={abortException}, {nameof(_lastValidStreamId)}={_lastValidStreamId}");
+                if (NetEventSource.IsEnabled) Trace($"{nameof(lastValidStream)}={lastValidStream}, {nameof(_lastValidStreamId)}={_lastValidStreamId}");
 
                 bool hasAnyActiveStream = false;
                 foreach (KeyValuePair<int, Http2Stream> kvp in _httpStreams)
@@ -1345,14 +1380,12 @@ namespace System.Net.Http
 
                     if (streamId > lastValidStream)
                     {
-                        kvp.Value.OnAbort(abortException);
-
-                        _httpStreams.Remove(kvp.Value.StreamId);
+                        kvp.Value.OnRefused(abortException);
+                        _httpStreams.Remove(streamId);
                     }
                     else
                     {
                         if (NetEventSource.IsEnabled) Trace($"Found {nameof(streamId)} {streamId} <= {lastValidStream}.");
-
                         hasAnyActiveStream = true;
                     }
                 }

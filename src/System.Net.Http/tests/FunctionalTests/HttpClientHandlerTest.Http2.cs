@@ -689,7 +689,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ConditionalFact(nameof(SupportsAlpn))]
-        [ActiveIssue(39013)]
         public async Task GoAwayFrame_UnprocessedStreamFirstRequestFinishedFirst_RequestRestarted()
         {
             // This test case is similar to GoAwayFrame_UnprocessedStreamFirstRequestWaitsUntilSecondFinishes_RequestRestarted
@@ -734,7 +733,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ConditionalFact(nameof(SupportsAlpn))]
-        [ActiveIssue(39013)]
         public async Task GoAwayFrame_UnprocessedStreamFirstRequestWaitsUntilSecondFinishes_RequestRestarted()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -1077,6 +1075,8 @@ namespace System.Net.Http.Functional.Tests
             using (Http2LoopbackServer server = Http2LoopbackServer.CreateServer())
             using (HttpClient client = CreateHttpClient())
             {
+                server.AllowMultipleConnections = true;
+
                 (_, Http2LoopbackConnection connection) = await EstablishConnectionAndProcessOneRequestAsync(client, server);
 
                 // Issue three requests
@@ -1089,12 +1089,13 @@ namespace System.Net.Http.Functional.Tests
                 int streamId2 = await connection.ReadRequestHeaderAsync();
                 int streamId3 = await connection.ReadRequestHeaderAsync();
 
-                Assert.InRange(streamId1, int.MinValue, streamId2 - 1);
-                Assert.InRange(streamId2, int.MinValue, streamId3 - 1);
+                Assert.InRange(streamId1, 1, streamId2 - 1);
+                Assert.InRange(streamId2, streamId1 + 1, streamId3 - 1);
+                Assert.InRange(streamId3, streamId2 + 1, Int32.MaxValue);
 
                 // Send various partial responses
 
-                // First response: Don't send anything yet
+                // First response: Don't send anything yet, request will be retried on the new connection
 
                 // Second response: Send headers, no body yet
                 await connection.SendDefaultResponseHeadersAsync(streamId2);
@@ -1105,17 +1106,35 @@ namespace System.Net.Http.Functional.Tests
 
                 // Send a GOAWAY frame that indicates that we will abort all the requests.
                 var goAwayFrame = new GoAwayFrame(0, (int)ProtocolErrors.ENHANCE_YOUR_CALM, new byte[0], 0);
-                await connection.WriteFrameAsync(goAwayFrame);
+
+                Task oldRequest = Task.Run(async () =>
+                {
+                    Http2LoopbackConnection newConneciton = await server.EstablishConnectionAsync();
+
+                    int retriedStreamId = await newConneciton.ReadRequestHeaderAsync().ConfigureAwait(false);
+                    Assert.InRange(retriedStreamId, 1, Int32.MaxValue);
+
+                    await newConneciton.SendDefaultResponseHeadersAsync(retriedStreamId).ConfigureAwait(false);
+                    await newConneciton.SendResponseDataAsync(retriedStreamId, new byte[0], endStream: true).ConfigureAwait(false);
+
+                    await newConneciton.WriteFrameAsync(goAwayFrame).ConfigureAwait(false);
+                    await newConneciton.WaitForConnectionShutdownAsync();
+                });
+
+                await connection.WriteFrameAsync(goAwayFrame).ConfigureAwait(false);
 
                 // We will not send any more frames, so send EOF now, and ensure the client handles this properly.
-                connection.ShutdownSend();
 
-                await AssertProtocolErrorAsync(sendTask1, ProtocolErrors.ENHANCE_YOUR_CALM);
                 await AssertProtocolErrorAsync(sendTask2, ProtocolErrors.ENHANCE_YOUR_CALM);
                 await AssertProtocolErrorAsync(sendTask3, ProtocolErrors.ENHANCE_YOUR_CALM);
 
                 // Now that all pending responses have been sent, the client should close the connection.
-                await connection.WaitForConnectionShutdownAsync();
+                await connection.WaitForConnectionShutdownAsync().ConfigureAwait(false);
+
+                HttpResponseMessage response1 = await sendTask1.ConfigureAwait(false);
+                Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
+
+                await oldRequest;
 
                 // New request should cause a new connection
                 await EstablishConnectionAndProcessOneRequestAsync(client, server);
