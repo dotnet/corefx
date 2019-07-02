@@ -149,7 +149,7 @@ namespace System.Security.Cryptography
             tmpBuffer = GetTempBuffer(inputBuffer.AsSpan(inputOffset, inputCount), tmpBuffer);
             int bytesToTransform = _inputIndex + tmpBuffer.Length;
 
-            // To little data to decode: save data to _inputBuffer, so it can be transformed later
+            // Too little data to decode: save data to _inputBuffer, so it can be transformed later
             if (bytesToTransform < Base64InputBlockSize)
             {
                 tmpBuffer.CopyTo(_inputBuffer.AsSpan(_inputIndex));
@@ -175,7 +175,9 @@ namespace System.Security.Cryptography
             ThrowHelper.ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
 
             if (_inputBuffer == null)
+            {
                 ThrowHelper.ThrowObjectDisposed();
+            }
 
             if (inputCount == 0)
             {
@@ -247,7 +249,7 @@ namespace System.Security.Cryptography
 
         private static bool IsWhitespace(byte value)
         {
-            // We assume ASCII encoded data. If there is any non-ASCII char, so it is invalid
+            // We assume ASCII encoded data. If there is any non-ASCII char, it is invalid
             // Base64 and will be caught during decoding.
 
             // SPACE        32
@@ -258,7 +260,7 @@ namespace System.Security.Cryptography
             // CR           13
 
             // RyuJIT produces better code with the ternary. This JIT-bug is tracked in https://github.com/dotnet/coreclr/issues/914
-            return value == 32 || ((uint)value - 9 <= (13 - 9)) ? true : false;
+            return value == 32 || ((uint)value - 9 <= (13 - 9));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -385,7 +387,6 @@ namespace System.Security.Cryptography
                 ThrowInvalidOffLen();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, int inputBlockSize)
         {
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
@@ -399,7 +400,7 @@ namespace System.Security.Cryptography
         public static void ThrowInvalidOffLen() => throw new ArgumentException(SR.Argument_InvalidOffLen);
         public static void ThrowObjectDisposed() => throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
         public static void ThrowCryptographicException() => throw new CryptographicException(SR.Cryptography_SSE_InvalidDataSize);
-        internal static void ThrowBase64FormatException() => throw new FormatException();
+        public static void ThrowBase64FormatException() => throw new FormatException();
 
         public enum ExceptionArgument
         {
