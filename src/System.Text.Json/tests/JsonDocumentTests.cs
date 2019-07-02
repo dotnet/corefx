@@ -432,7 +432,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void ParseJson_Stream_ThrowsOn_ArrayPoolRent_CodeCoverage()
         {
-            using (Stream stream = new ThrowOnArrayPoolRentStep(new byte[] { 1 }))
+            using (Stream stream = new ThrowOnCanSeekStream (new byte[] { 1 }))
             {
                 Assert.Throws<InsufficientMemoryException>(() => JsonDocument.Parse(stream));
             }
@@ -441,7 +441,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void ParseJson_Stream_Async_ThrowsOn_ArrayPoolRent_CodeCoverage()
         {
-            using (Stream stream = new ThrowOnArrayPoolRentStep(new byte[] { 1 }))
+            using (Stream stream = new ThrowOnCanSeekStream (new byte[] { 1 }))
             {
                 Assert.ThrowsAsync<InsufficientMemoryException>(async () => await JsonDocument.ParseAsync(stream));
             }
@@ -3758,9 +3758,9 @@ namespace System.Text.Json.Tests
         }
     }
 
-    public class ThrowOnArrayPoolRentStep : MemoryStream
+    public class ThrowOnCanSeekStream : MemoryStream
     {
-        public ThrowOnArrayPoolRentStep(byte[] bytes) : base(bytes)
+        public ThrowOnCanSeekStream (byte[] bytes) : base(bytes)
         {
         }
 
