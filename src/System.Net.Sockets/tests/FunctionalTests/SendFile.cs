@@ -12,7 +12,7 @@ using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
-    public class SendFileTest
+    public class SendFileTest : FileCleanupTestBase
     {
         public static IEnumerable<object[]> SendFile_MemberData()
         {
@@ -188,49 +188,35 @@ namespace System.Net.Sockets.Tests
             // before the operation is started, the peer won't see a ConnectionReset SocketException and we won't
             // see a SocketException either.
 
-            SocketError? peerSocketError = null;
-            SocketError? localSocketError = null;
-            for (int i = 0; i < 10 && (!peerSocketError.HasValue || !localSocketError.HasValue); i++)
+            await RetryHelper.ExecuteAsync(async () =>
             {
                 (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
                 using (socket2)
                 {
-                    Task socketOperation = Task.Factory.StartNew(() =>
+                    Task socketOperation = Task.Run(() =>
                     {
                         // Create a large file that will cause SendFile to block until the peer starts reading.
-                        string filename = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                        string filename = GetTestFilePath();
                         using (var fs = new FileStream(filename, FileMode.CreateNew, FileAccess.Write))
                         {
                             fs.SetLength(20 * 1024 * 1024 /* 20MB */);
                         }
 
-                        try
-                        {
-                            socket1.SendFile(filename);
-                        }
-                        finally
-                        {
-                            try
-                            {
-                                File.Delete(filename);
-                            }
-                            catch
-                            {}
-                        }
-                    }, TaskCreationOptions.LongRunning);
+                        socket1.SendFile(filename);
+                    });
 
-                    // Wait a little so the operation is started, then Dispose.
+                    // Wait a little so the operation is started.
                     await Task.Delay(100);
-                    Task disposeTask = Task.Factory.StartNew(() =>
-                    {
-                        socket1.Dispose();
-                    }, TaskCreationOptions.LongRunning);
+                    Task disposeTask = Task.Run(() => socket1.Dispose());
 
-                    Task timeoutTask = Task.Delay(30000);
+                    var cts = new CancellationTokenSource();
+                    Task timeoutTask = Task.Delay(30000, cts.Token);
                     Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, socketOperation, timeoutTask));
+                    cts.Cancel();
 
                     await disposeTask;
 
+                    SocketError? localSocketError = null;
                     try
                     {
                         await socketOperation;
@@ -241,38 +227,34 @@ namespace System.Net.Sockets.Tests
                     }
                     catch (ObjectDisposedException)
                     { }
+                    Assert.Equal(SocketError.ConnectionAborted, localSocketError);
 
-                    var receiveBuffer = new byte[4096];
-                    while (true)
+                    // On OSX, we're unable to unblock the on-going socket operations and
+                    // perform an abortive close.
+                    if (!PlatformDetection.IsOSX)
                     {
-                        try
+                        SocketError? peerSocketError = null;
+                        var receiveBuffer = new byte[4096];
+                        while (true)
                         {
-                            int received = socket2.Receive(receiveBuffer);
-                            if (received == 0)
+                            try
                             {
+                                int received = socket2.Receive(receiveBuffer);
+                                if (received == 0)
+                                {
+                                    break;
+                                }
+                            }
+                            catch (SocketException se)
+                            {
+                                peerSocketError = se.SocketErrorCode;
                                 break;
                             }
                         }
-                        catch (SocketException se)
-                        {
-                            peerSocketError = se.SocketErrorCode;
-                            break;
-                        }
+                        Assert.Equal(SocketError.ConnectionReset, peerSocketError);
                     }
                 }
-
-                // On OSX, we're unable to unblock the on-going socket operations and
-                // perform an abortive close.
-                if (PlatformDetection.IsOSX)
-                {
-                    // Pretend we've observed an RST close.
-                    peerSocketError = SocketError.ConnectionReset;
-                }
-            }
-
-            Assert.Equal(SocketError.ConnectionReset, peerSocketError);
-
-            Assert.Equal(SocketError.ConnectionAborted, localSocketError);
+            }, maxAttempts: 10);
         }
 
         [OuterLoop] // TODO: Issue #11345

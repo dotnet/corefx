@@ -1075,7 +1075,7 @@ namespace System.Net.Sockets
             if (errorCode != SocketError.Success)
             {
                 Debug.Assert(acceptedSocketHandle.IsInvalid);
-                errorCode = UpdateAcceptSocketErrorForCleanedUp(errorCode);
+                UpdateAcceptSocketErrorForCleanedUp(ref errorCode);
                 UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
@@ -1158,7 +1158,7 @@ namespace System.Net.Sockets
 
             if (errorCode != SocketError.Success)
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
 
                 // Update the internal state of this socket according to the error before throwing.
                 UpdateStatusAfterSocketError(errorCode);
@@ -1219,7 +1219,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
 
                 // Update the internal state of this socket according to the error before throwing.
                 UpdateStatusAfterSocketError(errorCode);
@@ -1262,7 +1262,7 @@ namespace System.Net.Sockets
 
             if (errorCode != SocketError.Success)
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
 
                 UpdateStatusAfterSocketError(errorCode);
                 if (NetEventSource.IsEnabled) NetEventSource.Error(this, new SocketException((int)errorCode));
@@ -1351,7 +1351,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
 
                 UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
@@ -1442,7 +1442,7 @@ namespace System.Net.Sockets
             int bytesTransferred;
             errorCode = SocketPal.Receive(_handle, buffer, offset, size, socketFlags, out bytesTransferred);
 
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred);
 
             if (errorCode != SocketError.Success)
             {
@@ -1491,7 +1491,7 @@ namespace System.Net.Sockets
             int bytesTransferred;
             errorCode = SocketPal.Receive(_handle, buffer, socketFlags, out bytesTransferred);
 
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred);
 
             if (errorCode != SocketError.Success)
             {
@@ -1557,7 +1557,7 @@ namespace System.Net.Sockets
             }
 #endif
 
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred);
 
             if (errorCode != SocketError.Success)
             {
@@ -1639,7 +1639,7 @@ namespace System.Net.Sockets
             int bytesTransferred;
             SocketError errorCode = SocketPal.ReceiveMessageFrom(this, _handle, buffer, offset, size, ref socketFlags, socketAddress, out receiveAddress, out ipPacketInformation, out bytesTransferred);
 
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred);
 
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success && errorCode != SocketError.MessageSize)
@@ -1719,7 +1719,7 @@ namespace System.Net.Sockets
             int bytesTransferred;
             SocketError errorCode = SocketPal.ReceiveFrom(_handle, buffer, offset, size, socketFlags, socketAddress.Buffer, ref socketAddress.InternalSize, out bytesTransferred);
 
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred);
 
             // If the native call fails we'll throw a SocketException.
             SocketException socketException = null;
@@ -2441,7 +2441,7 @@ namespace System.Net.Sockets
                 if (ex == null)
                 {
                     SocketError errorCode = (SocketError)castedAsyncResult.ErrorCode;
-                    errorCode = UpdateConnectSocketErrorForCleanedUp(errorCode);
+                    UpdateConnectSocketErrorForCleanedUp(ref errorCode);
                     // Update the internal state of this socket according to the error before throwing.
                     SocketException se = SocketExceptionFactory.CreateSocketException((int)errorCode, castedAsyncResult.RemoteEndPoint);
                     UpdateStatusAfterSocketError(se);
@@ -2587,7 +2587,7 @@ namespace System.Net.Sockets
             // If the call failed, update our status
             if (!CheckErrorAndUpdateStatus(errorCode))
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
             }
 
             return errorCode;
@@ -2655,7 +2655,7 @@ namespace System.Net.Sockets
             // If the call failed, update our status
             if (!CheckErrorAndUpdateStatus(errorCode))
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
             }
 
             return errorCode;
@@ -2717,7 +2717,7 @@ namespace System.Net.Sockets
             errorCode = (SocketError)castedAsyncResult.ErrorCode;
             if (errorCode != SocketError.Success)
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
                 // Update the internal state of this socket according to the error before throwing.
                 UpdateStatusAfterSocketError(errorCode);
                 if (NetEventSource.IsEnabled)
@@ -2870,7 +2870,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails synchronously.
             if (!CheckErrorAndUpdateStatus(errorCode))
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
                 // Update the internal state of this socket according to the error before throwing.
                 _rightEndPoint = oldEndPoint;
 
@@ -2926,7 +2926,7 @@ namespace System.Net.Sockets
             SocketError errorCode = (SocketError)castedAsyncResult.ErrorCode;
             if (errorCode != SocketError.Success)
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
                 UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
@@ -3023,7 +3023,7 @@ namespace System.Net.Sockets
 
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Interop.Winsock.WSARecv returns:{errorCode} returning AsyncResult:{asyncResult}");
 
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred: 0);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred: 0);
             if (CheckErrorAndUpdateStatus(errorCode))
             {
 #if DEBUG
@@ -3098,7 +3098,7 @@ namespace System.Net.Sockets
 
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Interop.Winsock.WSARecv returns:{errorCode} returning AsyncResult:{asyncResult}");
 
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred: 0);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred: 0);
             if (!CheckErrorAndUpdateStatus(errorCode))
             {
             }
@@ -3186,7 +3186,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call failed asynchronously.
             errorCode = (SocketError)castedAsyncResult.ErrorCode;
 
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred);
             if (errorCode != SocketError.Success)
             {
                 // Update the internal state of this socket according to the error before throwing.
@@ -3292,7 +3292,7 @@ namespace System.Net.Sockets
             }
 
             // Throw an appropriate SocketException if the native call fails synchronously.
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred: 0);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred: 0);
             if (!CheckErrorAndUpdateStatus(errorCode))
             {
                 // Update the internal state of this socket according to the error before throwing.
@@ -3376,7 +3376,7 @@ namespace System.Net.Sockets
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"bytesTransferred:{bytesTransferred}");
 
             SocketError errorCode = (SocketError)castedAsyncResult.ErrorCode;
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred);
             // Throw an appropriate SocketException if the native call failed asynchronously.
             if (errorCode != SocketError.Success && errorCode != SocketError.MessageSize)
             {
@@ -3511,7 +3511,7 @@ namespace System.Net.Sockets
             }
 
             // Throw an appropriate SocketException if the native call fails synchronously.
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred: 0);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred: 0);
             if (!CheckErrorAndUpdateStatus(errorCode))
             {
                 // Update the internal state of this socket according to the error before throwing.
@@ -3592,7 +3592,7 @@ namespace System.Net.Sockets
 
             // Throw an appropriate SocketException if the native call failed asynchronously.
             SocketError errorCode = (SocketError)castedAsyncResult.ErrorCode;
-            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
+            UpdateReceiveSocketErrorForCleanedUp(ref errorCode, bytesTransferred);
             if (errorCode != SocketError.Success)
             {
                 UpdateStatusAfterSocketErrorAndThrowException(errorCode);
@@ -3691,7 +3691,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails synchronously.
             if (!CheckErrorAndUpdateStatus(errorCode))
             {
-                errorCode = UpdateAcceptSocketErrorForCleanedUp(errorCode);
+                UpdateAcceptSocketErrorForCleanedUp(ref errorCode);
                 throw new SocketException((int)errorCode);
             }
         }
@@ -3760,7 +3760,7 @@ namespace System.Net.Sockets
             SocketError errorCode = (SocketError)castedAsyncResult.ErrorCode;
             if (errorCode != SocketError.Success)
             {
-                errorCode = UpdateAcceptSocketErrorForCleanedUp(errorCode);
+                UpdateAcceptSocketErrorForCleanedUp(ref errorCode);
                 UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
@@ -4479,7 +4479,7 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
-                errorCode = UpdateConnectSocketErrorForCleanedUp(errorCode);
+                UpdateConnectSocketErrorForCleanedUp(ref errorCode);
                 // Update the internal state of this socket according to the error before throwing.
                 SocketException socketException = SocketExceptionFactory.CreateSocketException((int)errorCode, endPointSnapshot);
                 UpdateStatusAfterSocketError(socketException);
@@ -4921,7 +4921,7 @@ namespace System.Net.Sockets
 
             if (!CheckErrorAndUpdateStatus(errorCode))
             {
-                errorCode = UpdateConnectSocketErrorForCleanedUp(errorCode);
+                UpdateConnectSocketErrorForCleanedUp(ref errorCode);
                 // Update the internal state of this socket according to the error before throwing.
                 _rightEndPoint = oldEndPoint;
 
@@ -5271,54 +5271,38 @@ namespace System.Net.Sockets
         // Helper for SendFile implementations
         private static FileStream OpenFile(string name) => string.IsNullOrEmpty(name) ? null : File.OpenRead(name);
 
-        private SocketError UpdateReceiveSocketErrorForCleanedUp(SocketError socketErrorIn, int bytesTransferred)
+        private void UpdateReceiveSocketErrorForCleanedUp(ref SocketError socketError, int bytesTransferred)
         {
             // We use bytesTransferred for checking CleanedUp.
             // When there is a SocketError, bytesTransferred is zero.
             // An interrupted UDP receive on Linux returns SocketError.Success and bytesTransferred zero.
             if (bytesTransferred == 0 && CleanedUp)
             {
-                return IsConnectionOriented ? SocketError.ConnectionAborted : SocketError.Interrupted;
-            }
-            else
-            {
-                return socketErrorIn;
+                socketError = IsConnectionOriented ? SocketError.ConnectionAborted : SocketError.Interrupted;
             }
         }
 
-        private SocketError UpdateSendSocketErrorForCleanedUp(SocketError socketErrorIn)
+        private void UpdateSendSocketErrorForCleanedUp(ref SocketError socketError)
         {
             if (CleanedUp)
             {
-                return IsConnectionOriented ? SocketError.ConnectionAborted : SocketError.Interrupted;
-            }
-            else
-            {
-                return socketErrorIn;
+                socketError = IsConnectionOriented ? SocketError.ConnectionAborted : SocketError.Interrupted;
             }
         }
 
-        private SocketError UpdateConnectSocketErrorForCleanedUp(SocketError socketErrorIn)
+        private void UpdateConnectSocketErrorForCleanedUp(ref SocketError socketError)
         {
             if (CleanedUp)
             {
-                return SocketError.NotSocket;
-            }
-            else
-            {
-                return socketErrorIn;
+                socketError = SocketError.NotSocket;
             }
         }
 
-        private SocketError UpdateAcceptSocketErrorForCleanedUp(SocketError socketErrorIn)
+        private void UpdateAcceptSocketErrorForCleanedUp(ref SocketError socketError)
         {
             if (CleanedUp)
             {
-                return SocketError.Interrupted;
-            }
-            else
-            {
-                return socketErrorIn;
+                socketError = SocketError.Interrupted;
             }
         }
 

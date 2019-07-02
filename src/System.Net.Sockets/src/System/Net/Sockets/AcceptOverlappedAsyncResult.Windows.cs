@@ -34,10 +34,11 @@ namespace System.Net.Sockets
 
                 // set the socket context
                 bool refAdded = false;
+                SafeHandle safeHandle = _listenSocket.SafeHandle;
                 try
                 {
-                    _listenSocket.SafeHandle.DangerousAddRef(ref refAdded);
-                    IntPtr handle = _listenSocket.SafeHandle.DangerousGetHandle();
+                    safeHandle.DangerousAddRef(ref refAdded);
+                    IntPtr handle = safeHandle.DangerousGetHandle();
 
                     _listenSocket.GetAcceptExSockaddrs(
                         Marshal.UnsafeAddrOfPinnedArrayElement(_buffer, 0),
@@ -73,7 +74,7 @@ namespace System.Net.Sockets
                 {
                     if (refAdded)
                     {
-                        _listenSocket.SafeHandle.DangerousRelease();
+                        safeHandle.DangerousRelease();
                     }
                 }
 

@@ -196,16 +196,10 @@ namespace System.Net.Sockets
             return errorCode;
         }
 
-        private bool InnerReleaseHandle()
+        private bool DoReleaseHandle()
         {
-            bool aborted = false;
-
-            if (_asyncContext != null)
-            {
-                aborted = _asyncContext.StopAndAbort();
-            }
-
-            return aborted;
+            // If we've aborted async operations, return true to cause an abortive close.
+            return _asyncContext?.StopAndAbort() ?? false;
         }
 
         internal sealed partial class InnerSafeCloseSocket : SafeHandleMinusOneIsInvalid
@@ -253,7 +247,7 @@ namespace System.Net.Sockets
                 // case we need to do some recovery.
                 if (!_abortive)
                 {
-                    if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"handle:{handle} Following 'blockable' branch.");
+                    if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"handle:{handle} Following 'non-abortive' branch.");
 
                     // Close, and if its errno is other than EWOULDBLOCK, there's nothing more to do - we either succeeded or failed.
                     errorCode = CloseHandle(handle);
@@ -273,7 +267,7 @@ namespace System.Net.Sockets
                     // The socket could not be made blocking; fall through to the regular abortive close.
                 }
 
-                // By default or non abortive path failed, set linger timeout to zero to get an abortive close (RST).
+                // By default or if the non-abortive path failed, set linger timeout to zero to get an abortive close (RST).
                 var linger = new Interop.Sys.LingerOption
                 {
                     OnOff = 1,
@@ -367,7 +361,7 @@ namespace System.Net.Sockets
             internal unsafe bool TryUnblockSocket()
             {
                 // Calling 'close' on a socket that has pending blocking calls (e.g. recv, send, accept, ...)
-                // may block indefinitly. This is a best effort attempt to not get blocked and make those operations return.
+                // may block indefinitely. This is a best-effort attempt to not get blocked and make those operations return.
                 // We need to ensure we keep the expected TCP behavior that is observed by the socket peer (FIN vs RST close).
                 // What we do here isn't specified by POSIX and doesn't work on all OSes.
                 // On Linux this works well.
@@ -385,7 +379,6 @@ namespace System.Net.Sockets
                 int type = 0;
                 int optLen = sizeof(int);
                 Interop.Error err = Interop.Sys.GetSockOpt(this, SocketOptionLevel.Socket, SocketOptionName.Type, (byte*)&type, &optLen);
-                Debug.Assert(err == Interop.Error.SUCCESS);
                 if (err == Interop.Error.SUCCESS)
                 {
                     if (type == (int)SocketType.Stream)
@@ -398,6 +391,7 @@ namespace System.Net.Sockets
                     }
                 }
 
+                // We've cancelled on-going operations, return true to cause an abortive close.
                 return true;
             }
         }

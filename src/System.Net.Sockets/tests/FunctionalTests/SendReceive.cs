@@ -956,31 +956,29 @@ namespace System.Net.Sockets.Tests
         {
             // We try this a couple of times to deal with a timing race: if the Dispose happens
             // before the operation is started, we won't see a SocketException.
-
-            SocketError? localSocketError = null;
-            bool disposedException = false;
-            for (int i = 0; i < 10 && !localSocketError.HasValue; i++)
+            await RetryHelper.ExecuteAsync(async () =>
             {
                 var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 socket.BindToAnonymousPort(IPAddress.Loopback);
 
-                Task receiveTask = Task.Factory.StartNew(() =>
-                {
-                    ReceiveAsync(socket, new ArraySegment<byte>(new byte[1])).GetAwaiter().GetResult();
-                }, TaskCreationOptions.LongRunning);
+                Task receiveTask = ReceiveAsync(socket, new ArraySegment<byte>(new byte[1]));
 
-                // Wait a little so the operation is started, then Dispose.
-                await Task.Delay(100);
-                Task disposeTask = Task.Factory.StartNew(() =>
+                if (UsesSync)
                 {
-                    socket.Dispose();
-                }, TaskCreationOptions.LongRunning);
+                    // Wait a little so the operation is started.
+                    await Task.Delay(100);
+                }
+                Task disposeTask = Task.Run(() => socket.Dispose());
 
-                Task timeoutTask = Task.Delay(30000);
+                var cts = new CancellationTokenSource();
+                Task timeoutTask = Task.Delay(30000, cts.Token);
                 Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, receiveTask, timeoutTask));
+                cts.Cancel();
 
                 await disposeTask;
 
+                SocketError? localSocketError = null;
+                bool disposedException = false;
                 try
                 {
                     await receiveTask;
@@ -996,17 +994,10 @@ namespace System.Net.Sockets.Tests
 
                 if (UsesApm)
                 {
-                    break;
+                    Assert.Null(localSocketError);
+                    Assert.True(disposedException);
                 }
-            }
-            if (UsesApm)
-            {
-                Assert.Null(localSocketError);
-                Assert.True(disposedException);
-            }
-            else
-            {
-                if (UsesSync)
+                else if (UsesSync)
                 {
                     Assert.Equal(SocketError.Interrupted, localSocketError);
                 }
@@ -1014,7 +1005,7 @@ namespace System.Net.Sockets.Tests
                 {
                     Assert.Equal(SocketError.OperationAborted, localSocketError);
                 }
-            }
+            }, maxAttempts: 10);
         }
 
         [Theory]
@@ -1026,42 +1017,44 @@ namespace System.Net.Sockets.Tests
             // before the operation is started, the peer won't see a ConnectionReset SocketException and we won't
             // see a SocketException either.
 
-            SocketError? peerSocketError = null;
-            SocketError? localSocketError = null;
-            bool disposedException = false;
-            for (int i = 0; i < 10 && (!peerSocketError.HasValue || (!localSocketError.HasValue && !UsesApm)); i++)
+            await RetryHelper.ExecuteAsync(async () =>
             {
                 (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
                 using (socket2)
                 {
-                    Task socketOperation = Task.Factory.StartNew(() =>
+                    Task socketOperation;
+                    if (receiveOrSend)
                     {
-                        if (receiveOrSend)
-                        {
-                            ReceiveAsync(socket1, new ArraySegment<byte>(new byte[1])).GetAwaiter().GetResult();
-                        }
-                        else
+                        socketOperation = ReceiveAsync(socket1, new ArraySegment<byte>(new byte[1]));
+                    }
+                    else
+                    {
+                        socketOperation = Task.Run(() =>
                         {
                             var buffer = new ArraySegment<byte>(new byte[4096]);
                             while (true)
                             {
                                 SendAsync(socket1, buffer).GetAwaiter().GetResult();
                             }
-                        }
-                    }, TaskCreationOptions.LongRunning);
+                        });
+                    }
 
-                    // Wait a little so the operation is started, then Dispose.
-                    await Task.Delay(100);
-                    Task disposeTask = Task.Factory.StartNew(() =>
+                    if (UsesSync)
                     {
-                        socket1.Dispose();
-                    }, TaskCreationOptions.LongRunning);
+                        // Wait a little so the operation is started.
+                        await Task.Delay(100);
+                    }
+                    Task disposeTask = Task.Run(() => socket1.Dispose());
 
-                    Task timeoutTask = Task.Delay(30000);
+                    var cts = new CancellationTokenSource();
+                    Task timeoutTask = Task.Delay(30000, cts.Token);
                     Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, socketOperation, timeoutTask));
+                    cts.Cancel();
 
                     await disposeTask;
 
+                    SocketError? localSocketError = null;
+                    bool disposedException = false;
                     try
                     {
                         await socketOperation;
@@ -1075,52 +1068,46 @@ namespace System.Net.Sockets.Tests
                         disposedException = true;
                     }
 
-                    var receiveBuffer = new ArraySegment<byte>(new byte[4096]);
-                    while (true)
+                    if (UsesApm)
                     {
-                        try
+                        Assert.Null(localSocketError);
+                        Assert.True(disposedException);
+                    }
+                    else if (UsesSync)
+                    {
+                        Assert.Equal(SocketError.ConnectionAborted, localSocketError);
+                    }
+                    else
+                    {
+                        Assert.Equal(SocketError.OperationAborted, localSocketError);
+                    }
+
+                    // On OSX, we're unable to unblock the on-going socket operations and
+                    // perform an abortive close.
+                    if (!(UsesSync && PlatformDetection.IsOSX))
+                    {
+                        SocketError? peerSocketError = null;
+                        var receiveBuffer = new ArraySegment<byte>(new byte[4096]);
+                        while (true)
                         {
-                            int received = await ReceiveAsync(socket2, receiveBuffer);
-                            if (received == 0)
+                            try
                             {
+                                int received = await ReceiveAsync(socket2, receiveBuffer);
+                                if (received == 0)
+                                {
+                                    break;
+                                }
+                            }
+                            catch (SocketException se)
+                            {
+                                peerSocketError = se.SocketErrorCode;
                                 break;
                             }
                         }
-                        catch (SocketException se)
-                        {
-                            peerSocketError = se.SocketErrorCode;
-                            break;
-                        }
+                        Assert.Equal(SocketError.ConnectionReset, peerSocketError);
                     }
                 }
-
-                // On OSX, we're unable to unblock the on-going socket operations and
-                // perform an abortive close.
-                if (UsesSync && PlatformDetection.IsOSX)
-                {
-                    // Pretend we've observed an RST close.
-                    peerSocketError = SocketError.ConnectionReset;
-                }
-            }
-
-            Assert.Equal(SocketError.ConnectionReset, peerSocketError);
-
-            if (UsesApm)
-            {
-                Assert.Null(localSocketError);
-                Assert.True(disposedException);
-            }
-            else
-            {
-                if (UsesSync)
-                {
-                    Assert.Equal(SocketError.ConnectionAborted, localSocketError);
-                }
-                else
-                {
-                    Assert.Equal(SocketError.OperationAborted, localSocketError);
-                }
-            }
+            }, maxAttempts: 10);
         }
     }
 

@@ -2676,8 +2676,7 @@ int32_t SystemNative_Disconnect(intptr_t socket)
     // On Linux, we can disconnect a socket by connecting to AF_UNSPEC.
     // For TCP sockets, this causes an abortive close.
 
-    // We don't need to clear the address, only the sa_family will be used.
-    struct sockaddr addr;
+    struct sockaddr addr = { 0 };
     addr.sa_family = AF_UNSPEC;
 
     err = connect(fd, &addr, sizeof(addr));
@@ -2685,9 +2684,8 @@ int32_t SystemNative_Disconnect(intptr_t socket)
     // disconnectx causes a FIN close on OSX. It's the best we can do.
     err = disconnectx(fd, SAE_ASSOCID_ANY, SAE_CONNID_ANY);
 #else
-    (void)fd;
-    err = -1;
-    errno = ENOSYS;
+    // best-effort, this may cause a FIN close.
+    err = shutdown(fd, SHUT_RDWR);
 #endif
 
     return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);

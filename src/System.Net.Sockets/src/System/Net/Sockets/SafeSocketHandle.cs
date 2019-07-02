@@ -150,7 +150,7 @@ namespace System.Net.Sockets
                 innerSocket.LogRemainingOperations();
 #endif
 
-                InnerReleaseHandle();
+                DoReleaseHandle();
                 innerSocket.Close(abortive: true);
             }
 
@@ -183,7 +183,7 @@ namespace System.Net.Sockets
                         sw.SpinOnce();
                     }
 
-                    abortive |= InnerReleaseHandle();
+                    abortive |= DoReleaseHandle();
 
                     innerSocket.Close(abortive);
                 }
@@ -201,6 +201,10 @@ namespace System.Net.Sockets
         {
             private InnerSafeCloseSocket() : base(true) { }
 
+            // Indicates whether a Socket is shutdown cleanly or whether it was
+            // closed with on-going operations that should be aborted.
+            // For TCP, an abortive close causes the peer to see a RST-close (connection reset by peer)
+            // instead of the clean FIN-close.
             private bool _abortive = true;
 
             public override bool IsInvalid

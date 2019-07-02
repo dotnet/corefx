@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -95,31 +96,28 @@ namespace System.Net.Sockets.Tests
 
             // We try this a couple of times to deal with a timing race: if the Dispose happens
             // before the operation is started, we won't see a SocketException.
-
-            SocketError? localSocketError = null;
-            bool disposedException = false;
-            for (int i = 0; i < 10 && !localSocketError.HasValue; i++)
+            await RetryHelper.ExecuteAsync(async () =>
             {
                 var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-                Task connectTask = Task.Factory.StartNew(() =>
+                Task connectTask = ConnectAsync(client, new IPEndPoint(IPAddress.Parse("1.1.1.1"), 23));
+
+                if (UsesSync)
                 {
-                    ConnectAsync(client, new IPEndPoint(IPAddress.Parse("1.1.1.1"), 23)).GetAwaiter().GetResult();
-                }, TaskCreationOptions.LongRunning);
+                    // Wait a little so the operation is started.
+                    await Task.Delay(100);
+                }
+                Task disposeTask = Task.Run(() => client.Dispose());
 
-                // Wait a little so the operation is started, then Dispose.
-                await Task.Delay(100);
-                Task disposeTask = Task.Factory.StartNew(() =>
-                {
-                    client.Dispose();
-                }, TaskCreationOptions.LongRunning);
-
-                Task timeoutTask = Task.Delay(30000);
-
+                var cts = new CancellationTokenSource();
+                Task timeoutTask = Task.Delay(30000, cts.Token);
                 Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, connectTask, timeoutTask));
+                cts.Cancel();
 
                 await disposeTask;
 
+                SocketError? localSocketError = null;
+                bool disposedException = false;
                 try
                 {
                     await connectTask;
@@ -127,10 +125,7 @@ namespace System.Net.Sockets.Tests
                 catch (SocketException se)
                 {
                     // On connection timeout, retry.
-                    if (se.SocketErrorCode == SocketError.TimedOut)
-                    {
-                        continue;
-                    }
+                    Assert.NotEqual(SocketError.TimedOut, se.SocketErrorCode);
 
                     localSocketError = se.SocketErrorCode;
                 }
@@ -141,17 +136,10 @@ namespace System.Net.Sockets.Tests
 
                 if (usesApm)
                 {
-                    break;
+                    Assert.Null(localSocketError);
+                    Assert.True(disposedException);
                 }
-            }
-            if (usesApm)
-            {
-                Assert.Null(localSocketError);
-                Assert.True(disposedException);
-            }
-            else
-            {
-                if (UsesSync)
+                else if (UsesSync)
                 {
                     Assert.Equal(SocketError.NotSocket, localSocketError);
                 }
@@ -159,7 +147,7 @@ namespace System.Net.Sockets.Tests
                 {
                     Assert.Equal(SocketError.OperationAborted, localSocketError);
                 }
-            }
+            }, maxAttempts: 10);
         }
     }
 

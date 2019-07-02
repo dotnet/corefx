@@ -1108,10 +1108,11 @@ namespace System.Net.Sockets
             IntPtr remoteAddr;
 
             bool refAdded = false;
+            SafeHandle safeHandle = _currentSocket.SafeHandle;
             try
             {
-                _currentSocket.SafeHandle.DangerousAddRef(ref refAdded);
-                IntPtr handle = _currentSocket.SafeHandle.DangerousGetHandle();
+                safeHandle.DangerousAddRef(ref refAdded);
+                IntPtr handle = safeHandle.DangerousGetHandle();
 
                 Debug.Assert(_singleBufferHandleState == SingleBufferHandleState.Set);
                 bool userBuffer = _count >= _acceptAddressBufferCount;
@@ -1148,7 +1149,7 @@ namespace System.Net.Sockets
             {
                 if (refAdded)
                 {
-                    _currentSocket.SafeHandle.DangerousRelease();
+                    safeHandle.DangerousRelease();
                 }
             }
 

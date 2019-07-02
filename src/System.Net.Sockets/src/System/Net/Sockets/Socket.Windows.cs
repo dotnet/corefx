@@ -228,7 +228,7 @@ namespace System.Net.Sockets
 
             if (errorCode != SocketError.Success)
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
 
                 UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
@@ -254,7 +254,7 @@ namespace System.Net.Sockets
             // Check for synchronous exception
             if (!CheckErrorAndUpdateStatus(errorCode))
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
                 throw new SocketException((int)errorCode);
             }
 
@@ -290,7 +290,7 @@ namespace System.Net.Sockets
             SocketError errorCode = (SocketError)castedAsyncResult.ErrorCode;
             if (errorCode != SocketError.Success)
             {
-                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+                UpdateSendSocketErrorForCleanedUp(ref errorCode);
                 UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
         }

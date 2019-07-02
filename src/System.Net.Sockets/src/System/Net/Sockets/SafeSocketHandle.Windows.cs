@@ -108,7 +108,7 @@ namespace System.Net.Sockets
             return CreateSocket(InnerSafeCloseSocket.Accept(socketHandle, socketAddress, ref socketAddressSize));
         }
 
-        private bool InnerReleaseHandle()
+        private bool DoReleaseHandle()
         {
             // Keep m_IocpBoundHandle around after disposing it to allow freeing NativeOverlapped.
             // ThreadPoolBoundHandle allows FreeNativeOverlapped even after it has been disposed.
@@ -117,6 +117,8 @@ namespace System.Net.Sockets
                 _iocpBoundHandle.Dispose();
             }
 
+            // On Unix, we use the return value of DoReleaseHandle to cause an abortive close.
+            // On Windows, this is handled in TryUnblockSocket.
             return false;
         }
 
@@ -235,6 +237,7 @@ namespace System.Net.Sockets
             internal unsafe bool TryUnblockSocket()
             {
                 // Try to cancel all pending IO.
+                // If we've canceled oprations, we return true to cause an abortive close.
                 return Interop.Kernel32.CancelIoEx(this, null);
             }
         }
