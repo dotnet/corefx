@@ -1601,77 +1601,6 @@ namespace System.Text.Json.Tests
             }
         }
 
-/*        [Fact]
-        [InlineData("\"789\"")]
-        public static void ReadNonNumber(string str)
-        {
-            using (JsonDocument doc = JsonDocument.Parse(str))
-            {
-                JsonElement root = doc.RootElement;
-
-                Assert.Equal(JsonValueType.String, root.Type);
-
-                Assert.False(root.TryGetSingle(out float floatVal));
-                Assert.Equal(0, floatVal);
-
-                Assert.False(root.TryGetDouble(out double doubleVal));
-                Assert.Equal(0, doubleVal);
-
-                Assert.False(root.TryGetDecimal(out decimal decimalVal));
-                Assert.Equal(0, decimalVal);
-
-                Assert.False(root.TryGetSByte(out sbyte sbyteVal));
-                Assert.Equal(0, sbyteVal);
-
-                Assert.False(root.TryGetByte(out byte byteVal));
-                Assert.Equal(0, byteVal);
-
-                Assert.False(root.TryGetInt16(out short shortVal));
-                Assert.Equal(0, shortVal);
-
-                Assert.False(root.TryGetUInt16(out ushort ushortVal));
-                Assert.Equal(0, ushortVal);
-
-                Assert.False(root.TryGetInt32(out int intVal));
-                Assert.Equal(0, intVal);
-
-                Assert.False(root.TryGetUInt32(out uint uintVal));
-                Assert.Equal(0U, uintVal);
-
-                Assert.False(root.TryGetInt64(out long longVal));
-                Assert.Equal(0L, longVal);
-
-                Assert.False(root.TryGetUInt64(out ulong ulongVal));
-                Assert.Equal(0UL, ulongVal);
-
-                Assert.Throws<FormatException>(() => root.GetSingle());
-                Assert.Throws<FormatException>(() => root.GetDouble());
-                Assert.Throws<FormatException>(() => root.GetDecimal());
-                Assert.Throws<FormatException>(() => root.GetSByte());
-                Assert.Throws<FormatException>(() => root.GetByte());
-                Assert.Throws<FormatException>(() => root.GetInt16());
-                Assert.Throws<FormatException>(() => root.GetUInt16());
-                Assert.Throws<FormatException>(() => root.GetInt32());
-                Assert.Throws<FormatException>(() => root.GetUInt32());
-                Assert.Throws<FormatException>(() => root.GetInt64());
-                Assert.Throws<FormatException>(() => root.GetUInt64());
-
-                Assert.Equal(str, root.GetString());
-//                const string ThrowsAnyway = "throws-anyway";
-//                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
-//                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
-//                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
-                Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
-                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
-                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
-                Assert.Throws<InvalidOperationException>(() => root.GetGuid());
-                Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
-                Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
-                Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
-                Assert.Throws<InvalidOperationException>(() => root.GetBoolean());
-            }
-        }*/
-
         [Fact]
         public static void ReadTooPreciseDouble()
         {
@@ -2711,9 +2640,13 @@ namespace System.Text.Json.Tests
                     test++;
                 }
 
-/*                structEnumerable.Reset();
+                structEnumerator.Reset();
+
                 Assert.True(structEnumerator.MoveNext());
-                Assert.Equal(0, structEnumerator.Current.GetInt32());*/
+                Assert.Equal(0, structEnumerator.Current.GetInt32());
+
+                Assert.True(structEnumerator.MoveNext());
+                Assert.Equal(1, structEnumerator.Current.GetInt32());
 
                 Assert.True(structEnumerator.MoveNext());
                 Assert.Equal(2, structEnumerator.Current.GetInt32());
@@ -2880,6 +2813,16 @@ namespace System.Text.Json.Tests
                     Assert.Equal(test, property.Value.GetInt32());
                     test++;
                 }
+
+                structEnumerator.Reset();
+
+                Assert.True(structEnumerator.MoveNext());
+                Assert.Equal("name0", structEnumerator.Current.Name);
+                Assert.Equal(0, structEnumerator.Current.Value.GetInt32());
+
+                Assert.True(structEnumerator.MoveNext());
+                Assert.Equal("name1", structEnumerator.Current.Name);
+                Assert.Equal(1, structEnumerator.Current.Value.GetInt32());
 
                 Assert.True(structEnumerator.MoveNext());
                 Assert.Equal("name2", structEnumerator.Current.Name);

@@ -497,6 +497,7 @@ namespace System.Text.Json
                     {
                         if (shouldThrow)
                         {
+                            // Default case would only hit if TokenType equals JsonTokenType.EndObject or JsonTokenType.EndArray in which case it would never be sequence
                             Debug.Assert(!reader.HasValueSequence);
                             byte displayByte = reader.ValueSpan[0];                          
 
