@@ -1,15 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information. 
 
-//
-// System.ComponentModel.CultureInfoConverter test cases
-//
-// Authors:
-// 	Gert Driesen (drieseng@users.sourceforge.net)
-//
-// (c) 2008 Gert Driesen
-//
-
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
@@ -57,6 +48,7 @@ namespace System.ComponentModel.Tests
             yield return ConvertTest.Valid(CultureInfo.InvariantCulture, "(Default)");
             yield return ConvertTest.Valid(CultureInfo.InvariantCulture, "(Default)", CultureInfo.InvariantCulture);
             yield return ConvertTest.Valid(new CultureInfo("nl-BE"), "nl-BE");
+            yield return ConvertTest.Valid(1, "1");
 
             yield return ConvertTest.CantConvertTo(CultureInfo.InvariantCulture, typeof(object));
             yield return ConvertTest.CantConvertTo(CultureInfo.InvariantCulture, typeof(CultureInfo));
@@ -113,11 +105,6 @@ namespace System.ComponentModel.Tests
         {
             yield return new object[] { new CultureInfo("fr-FR"), new CultureInfo("fr-FR").Name };
             yield return new object[] { new CultureInfo("es-MX"), new CultureInfo("es-MX").Name };
-            // .NET Framework throws NullReferenceException.
-            if (!PlatformDetection.IsFullFramework)
-            {
-                yield return new object[] { null, null };
-            }
         }
 
         [Theory]
@@ -126,6 +113,13 @@ namespace System.ComponentModel.Tests
         {
             var converter = new SubCultureInfoConverter();
             Assert.Equal(expected, converter.GetCultureName(culture));
+        }
+
+        [Fact]
+        public void GetCultureName_NullCulture_ThrowsArgumentNullException()
+        {
+            var converter = new SubCultureInfoConverter();
+            Assert.Throws<ArgumentNullException>("culture", () => converter.GetCultureName(null));
         }
 
         public static IEnumerable<object[]> ConvertFrom_OverridenGetCultureName_TestData()
