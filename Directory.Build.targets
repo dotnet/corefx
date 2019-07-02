@@ -100,11 +100,7 @@
       <RefPath>$(RefRootPath)uap10.0.16299/</RefPath>
     </BinPlaceConfiguration>
     <!-- for BuildAllConfigurations make sure all refpaths are created.  -->
-    <_TargetGroupsWithIsAot Condition="'$(BuildAllConfigurations)' == 'true'" Include="@(TargetGroups)">
-      <IsAot>$([System.String]::new('%(Identity)').Contains('aot'))</IsAot>
-    </_TargetGroupsWithIsAot>
-    <BinPlaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'"
-                           Include="@(_TargetGroupsWithIsAot->WithMetadataValue('IsAot', 'false'))">
+    <BinPlaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'" Include="@(TargetGroups)">
       <RefPath>$(RefRootPath)%(Identity)/</RefPath>
     </BinPlaceConfiguration>
     <!-- for BuildAllConfigurations make sure runtimepaths are created for all vertical targetgroups. -->
@@ -137,7 +133,7 @@
 
   <Target Name="GenerateReferenceSource">
     <PropertyGroup>
-      <_RefSourceFileOutputPath>$(MSBuildProjectDirectory)/../ref/$(AssemblyName).cs</_RefSourceFileOutputPath>
+      <_RefSourceFileOutputPath>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '..', 'ref', '$(AssemblyName).cs'))</_RefSourceFileOutputPath>
       <_ExcludeAPIList>$(RepositoryEngineeringDir)DefaultGenApiDocIds.txt</_ExcludeAPIList>
       <_LicenseHeaderTxtPath>$(RepositoryEngineeringDir)LicenseHeader.txt</_LicenseHeaderTxtPath>
     </PropertyGroup>
@@ -145,7 +141,7 @@
     <PropertyGroup>
       <_GenAPICmd>$(_GenAPICommand)</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) "@(IntermediateAssembly)"</_GenAPICmd>
-      <_GenAPICmd>$(_GenAPICmd) --lib-path "$(RefPath)"</_GenAPICmd>
+      <_GenAPICmd>$(_GenAPICmd) --lib-path "$(RefPath.Trim('\/'))"</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) --out "$(_RefSourceFileOutputPath)"</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) --exclude-attributes-list "$(_ExcludeAPIList)"</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) --header-file "$(_LicenseHeaderTxtPath)"</_GenAPICmd>
@@ -155,6 +151,9 @@
     <Exec Command="$(_GenAPICmd)" />
     <Message Text="Generated reference assembly source code: $(_RefSourceFileOutputPath)" />
   </Target>
+
+  <!-- Import Packaging targets -->
+  <Import Project="$(RepositoryEngineeringDir)Packaging.targets" />
 
   <Import Project="$(RepositoryEngineeringDir)DisableSourceControlManagement.targets" Condition="'$(EnableSourceLink)' == 'false'" />
 

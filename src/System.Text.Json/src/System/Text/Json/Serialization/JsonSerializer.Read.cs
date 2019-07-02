@@ -22,6 +22,7 @@ namespace System.Text.Json
             try
             {
                 JsonReaderState initialState = default;
+                long initialBytesConsumed = default;
 
                 while (true)
                 {
@@ -31,6 +32,7 @@ namespace System.Text.Json
                         // as we don't know if the next token is an opening object or
                         // array brace.
                         initialState = reader.CurrentState;
+                        initialBytesConsumed = reader.BytesConsumed;
                     }
 
                     if (!reader.Read())
@@ -58,9 +60,9 @@ namespace System.Text.Json
                             readStack.Push();
                             readStack.Current.Drain = true;
                         }
-                        else if (readStack.Current.IsProcessingValue)
+                        else if (readStack.Current.IsProcessingValue())
                         {
-                            if (!HandleObjectAsValue(tokenType, options, ref reader, ref readStack, ref initialState))
+                            if (!HandleObjectAsValue(tokenType, options, ref reader, ref readStack, ref initialState, initialBytesConsumed))
                             {
                                 // Need more data
                                 break;
@@ -92,11 +94,11 @@ namespace System.Text.Json
                     }
                     else if (tokenType == JsonTokenType.StartArray)
                     {
-                        if (!readStack.Current.IsProcessingValue)
+                        if (!readStack.Current.IsProcessingValue())
                         {
                             HandleStartArray(options, ref reader, ref readStack);
                         }
-                        else if (!HandleObjectAsValue(tokenType, options, ref reader, ref readStack, ref initialState))
+                        else if (!HandleObjectAsValue(tokenType, options, ref reader, ref readStack, ref initialState, initialBytesConsumed))
                         {
                             // Need more data
                             break;
@@ -108,7 +110,7 @@ namespace System.Text.Json
                     }
                     else if (tokenType == JsonTokenType.Null)
                     {
-                        HandleNull(ref reader, ref readStack, options);
+                        HandleNull(ref reader, ref readStack);
                     }
                 }
             }
@@ -141,7 +143,8 @@ namespace System.Text.Json
             JsonSerializerOptions options,
             ref Utf8JsonReader reader,
             ref ReadStack readStack,
-            ref JsonReaderState initialState)
+            ref JsonReaderState initialState,
+            long initialBytesConsumed)
         {
             if (readStack.ReadAhead)
             {
@@ -153,11 +156,11 @@ namespace System.Text.Json
                 // HandleValue below.
 
                 reader = new Utf8JsonReader(
-                    reader.OriginalSpan.Slice(checked((int)initialState.BytesConsumed)),
+                    reader.OriginalSpan.Slice(checked((int)initialBytesConsumed)),
                     isFinalBlock: reader.IsFinalBlock,
                     state: initialState);
                 Debug.Assert(reader.BytesConsumed == 0);
-                readStack.BytesConsumed += initialState.BytesConsumed;
+                readStack.BytesConsumed += initialBytesConsumed;
 
                 if (!complete)
                 {

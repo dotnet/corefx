@@ -12,9 +12,20 @@ namespace System.Text.Json
         // If the exception source is this value, the serializer will re-throw as JsonException.
         public const string ExceptionSourceValueToRethrowAsJsonException = "System.Text.Json.Rethrowable";
 
-        public static ArgumentException GetArgumentException_MaxDepthMustBePositive()
+        public static ArgumentOutOfRangeException GetArgumentOutOfRangeException_MaxDepthMustBePositive(string parameterName)
         {
-            return GetArgumentException(SR.MaxDepthMustBePositive);
+            return GetArgumentOutOfRangeException(parameterName, SR.MaxDepthMustBePositive);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static ArgumentOutOfRangeException GetArgumentOutOfRangeException(string parameterName, string message)
+        {
+            return new ArgumentOutOfRangeException(parameterName, message);
+        }
+
+        public static ArgumentOutOfRangeException GetArgumentOutOfRangeException_CommentEnumMustBeInRange(string parameterName)
+        {
+            return GetArgumentOutOfRangeException(parameterName, SR.CommentHandlingMustBeValid);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -221,7 +232,7 @@ namespace System.Text.Json
             JsonTokenType actualType)
         {
             return GetInvalidOperationException(
-                SR.Format(SR.JsonElementHasWrongType, expectedType.ToValueType(), actualType.ToValueType()));
+                SR.Format(SR.JsonElementHasWrongType, expectedType.ToValueKind(), actualType.ToValueKind()));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -230,7 +241,7 @@ namespace System.Text.Json
             JsonTokenType actualType)
         {
             return GetInvalidOperationException(
-                SR.Format(SR.JsonElementHasWrongType, expectedTypeName, actualType.ToValueType()));
+                SR.Format(SR.JsonElementHasWrongType, expectedTypeName, actualType.ToValueKind()));
         }
 
         public static void ThrowJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte = default, ReadOnlySpan<byte> bytes = default)
@@ -366,6 +377,9 @@ namespace System.Text.Json
                 case ExceptionResource.UnexpectedEndOfDataWhileReadingComment:
                     message = SR.Format(SR.UnexpectedEndOfDataWhileReadingComment);
                     break;
+                case ExceptionResource.UnexpectedEndOfLineSeparator:
+                    message = SR.Format(SR.UnexpectedEndOfLineSeparator);
+                    break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
                     break;
@@ -461,7 +475,9 @@ namespace System.Text.Json
             {
                 case ExceptionResource.MismatchedObjectArray:
                     Debug.Assert(token == JsonConstants.CloseBracket || token == JsonConstants.CloseBrace);
-                    message = SR.Format(SR.MismatchedObjectArray, (char)token);
+                    message = (tokenType == JsonTokenType.PropertyName) ?
+                        SR.Format(SR.CannotWriteEndAfterProperty, (char)token) :
+                        SR.Format(SR.MismatchedObjectArray, (char)token);
                     break;
                 case ExceptionResource.DepthTooLarge:
                     message = SR.Format(SR.DepthTooLarge, currentDepth & JsonConstants.RemoveFlagsBitMask, JsonConstants.MaxWriterDepth);
@@ -476,7 +492,9 @@ namespace System.Text.Json
                     message = SR.Format(SR.CannotWriteValueWithinObject, tokenType);
                     break;
                 case ExceptionResource.CannotWritePropertyWithinArray:
-                    message = SR.Format(SR.CannotWritePropertyWithinArray, tokenType);
+                    message = (tokenType == JsonTokenType.PropertyName) ?
+                        SR.Format(SR.CannotWritePropertyAfterProperty) :
+                        SR.Format(SR.CannotWritePropertyWithinArray, tokenType);
                     break;
                 case ExceptionResource.CannotWriteValueAfterPrimitive:
                     message = SR.Format(SR.CannotWriteValueAfterPrimitive, tokenType);
@@ -503,11 +521,23 @@ namespace System.Text.Json
 
             switch (numericType)
             {
+                case NumericType.Byte:
+                    message = SR.FormatByte;
+                    break;
+                case NumericType.SByte:
+                    message = SR.FormatSByte;
+                    break;
+                case NumericType.Int16:
+                    message = SR.FormatInt16;
+                    break;
                 case NumericType.Int32:
                     message = SR.FormatInt32;
                     break;
                 case NumericType.Int64:
                     message = SR.FormatInt64;
+                    break;
+                case NumericType.UInt16:
+                    message = SR.FormatUInt16;
                     break;
                 case NumericType.UInt32:
                     message = SR.FormatUInt32;
@@ -600,14 +630,19 @@ namespace System.Text.Json
         TrailingCommaNotAllowedBeforeObjectEnd,
         InvalidCharacterAtStartOfComment,
         UnexpectedEndOfDataWhileReadingComment,
+        UnexpectedEndOfLineSeparator,
         ExpectedOneCompleteToken,
-        NotEnoughData
+        NotEnoughData,
     }
 
     internal enum NumericType
     {
+        Byte,
+        SByte,
+        Int16,
         Int32,
         Int64,
+        UInt16,
         UInt32,
         UInt64,
         Single,

@@ -36,6 +36,22 @@
     
   </Target>
 
+  <Target Name="AddConflictResolutionAssetsForTests"
+          BeforeTargets="_HandlePackageFileConflicts"
+          Condition="'$(IsTestProject)' == 'true' and '@(DefaultReferenceExclusions)' != ''">
+    <ItemGroup>
+      <Reference Include="@(DefaultReferenceExclusions->'$(RefPath)%(Identity).dll')" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RemoveConflictResolutionAssetsForTests"
+          AfterTargets="_HandlePackageFileConflicts"
+          Condition="'$(IsTestProject)' == 'true' and '@(DefaultReferenceExclusions)' != ''">
+    <ItemGroup>
+      <Reference Remove="@(DefaultReferenceExclusions->'$(RefPath)%(Identity).dll')" />
+    </ItemGroup>
+  </Target>
+
   <PropertyGroup>
     <!--
     Hack workaround to skip the GenerateCompiledExpressionsTempFile target in
@@ -53,16 +69,5 @@
        by the NuGet package generation -->
   <Target Name="GetDocumentationFile"
           Returns="$(DocumentationFile)"/>
-
-  <!-- This target will be moved into buildtools. Checked in here for now to add validationand in order not to block buildtools ingestion. -->
-  <Target Name="ValidateExcludeCompileDesktop" AfterTargets="GetPackageDependencies" Inputs="%(Dependency.Identity);%(Dependency.TargetFramework)" Outputs="unused">
-    <PropertyGroup>
-      <_excludeCompile Condition="@(Dependency->WithMetadataValue('Exclude', 'Compile')->Count()) == @(Dependency->Count())">true</_excludeCompile>
-    </PropertyGroup>
-    <Error Text="Cannot have Exclude=Compile dependencies when targeting a desktop TFM. @(Dependency). You can exclude the reference asset in the package by setting the ExcludeReferenceAssets property to true in your project." 
-           Condition="$([System.String]::Copy('%(Dependency.TargetFramework)').StartsWith('net4')) AND 
-                      '$(_excludeCompile)' == 'true' AND
-                      '%(Dependency.Identity)' != '_._'" />
-  </Target>
 
 </Project>

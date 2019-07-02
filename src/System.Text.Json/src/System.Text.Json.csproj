@@ -24,6 +24,7 @@
     <Compile Include="System\Text\Json\JsonHelpers.Date.cs" />
     <Compile Include="System\Text\Json\JsonTokenType.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\EnumConverterOptions.cs" />
+    <Compile Include="System\Text\Json\Serialization\ExtensionDataWriteStatus.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonStringEnumConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonDefaultNamingPolicy.cs" />
     <Compile Include="System\Text\Json\ThrowHelper.cs" />
@@ -35,11 +36,12 @@
     <Compile Include="System\Text\Json\Document\JsonDocument.StackRow.cs" />
     <Compile Include="System\Text\Json\Document\JsonDocument.StackRowStack.cs" />
     <Compile Include="System\Text\Json\Document\JsonDocument.TryGetProperty.cs" />
+    <Compile Include="System\Text\Json\Document\JsonDocumentOptions.cs" />
     <Compile Include="System\Text\Json\Document\JsonElement.cs" />
     <Compile Include="System\Text\Json\Document\JsonElement.ArrayEnumerator.cs" />
     <Compile Include="System\Text\Json\Document\JsonElement.ObjectEnumerator.cs" />
     <Compile Include="System\Text\Json\Document\JsonProperty.cs" />
-    <Compile Include="System\Text\Json\Document\JsonValueType.cs" />
+    <Compile Include="System\Text\Json\Document\JsonValueKind.cs" />
     <Compile Include="System\Text\Json\Reader\ConsumeNumberResult.cs" />
     <Compile Include="System\Text\Json\Reader\ConsumeTokenResult.cs" />
     <Compile Include="System\Text\Json\Reader\JsonReaderHelper.cs" />
@@ -50,7 +52,6 @@
     <Compile Include="System\Text\Json\Reader\Utf8JsonReader.cs" />
     <Compile Include="System\Text\Json\Reader\Utf8JsonReader.MultiSegment.cs" />
     <Compile Include="System\Text\Json\Reader\Utf8JsonReader.TryGet.cs" />
-    <Compile Include="System\Text\Json\Serialization\ClassMaterializer.cs" />
     <Compile Include="System\Text\Json\Serialization\ClassType.cs" />
     <Compile Include="System\Text\Json\Serialization\ConverterList.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultArrayConverter.cs" />
@@ -130,8 +131,8 @@
     <Compile Include="System\Text\Json\Serialization\PropertyRef.cs" />
     <Compile Include="System\Text\Json\Serialization\ReadStack.cs" />
     <Compile Include="System\Text\Json\Serialization\ReadStackFrame.cs" />
-    <Compile Include="System\Text\Json\Serialization\ReflectionEmitMaterializer.cs" />
-    <Compile Include="System\Text\Json\Serialization\ReflectionMaterializer.cs" />
+    <Compile Include="System\Text\Json\Serialization\ReflectionEmitMemberAccessor.cs" />
+    <Compile Include="System\Text\Json\Serialization\ReflectionMemberAccessor.cs" />
     <Compile Include="System\Text\Json\Serialization\WriteStack.cs" />
     <Compile Include="System\Text\Json\Serialization\WriteStackFrame.cs" />
     <Compile Include="System\Text\Json\Writer\JsonWriterHelper.cs" />
