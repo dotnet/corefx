@@ -54,6 +54,8 @@ else {
     $SetupArguments = "--repository https://github.com/$Repository --branch $Branch --get-perf-hash --commit-sha $CommitSha $CommonSetupArguments"
     
     git clone --branch master --depth 1 --quiet https://github.com/dotnet/performance $PerformanceDirectory
+    cd $PerformanceDirectory
+    git checkout 7ab9543c50c15f0356b3d166b317f44611bf4cc2
 }
 
 if ($UseCoreRun) {
