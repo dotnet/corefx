@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Drawing;
+using System.Globalization;
 using Xunit;
 using static System.Drawing.FontConverter;
 
@@ -38,16 +39,18 @@ namespace System.ComponentModel.TypeConverterTests
 
     public class FontConverterTest
     {
+        public static char sep = CultureInfo.CurrentCulture.TextInfo.ListSeparator[0];
+
         [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(TestConvertFormData))]
-        public void TestConvertFrom(string input, string name, float size, GraphicsUnit units, FontStyle fontStyle)
+        public void TestConvertFrom(string input, string expectedName, float expectedSize, GraphicsUnit expectedUnits, FontStyle expectedFontStyle)
         {
             FontConverter converter = new FontConverter();
             Font font = (Font)converter.ConvertFrom(input);
-            Assert.Equal(name, font.Name);
-            Assert.Equal(size, font.Size);
-            Assert.Equal(units, font.Unit);
-            Assert.Equal(fontStyle, font.Style);
+            Assert.Equal(expectedName, font.Name);
+            Assert.Equal(expectedSize, font.Size);
+            Assert.Equal(expectedUnits, font.Unit);
+            Assert.Equal(expectedFontStyle, font.Style);
         }
 
         [ConditionalTheory(Helpers.IsDrawingSupported)]
@@ -78,32 +81,35 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var data = new TheoryData<string, string, float, GraphicsUnit, FontStyle>()
             {
-                { "Courier New", "Courier New", 8.25f, GraphicsUnit.Point, FontStyle.Regular },
-                { "Courier New, 11", "Courier New", 11f, GraphicsUnit.Point, FontStyle.Regular },
-                { "Arial, 11px", "Arial", 11f, GraphicsUnit.Pixel, FontStyle.Regular },
-                { "Courier New, 11 px", "Courier New", 11f, GraphicsUnit.Pixel, FontStyle.Regular },
-                { "Courier New, 11 px, style=Regular", "Courier New", 11f, GraphicsUnit.Pixel, FontStyle.Regular },
-                { "Courier New, style=Bold", "Courier New", 8.25f, GraphicsUnit.Point, FontStyle.Bold },
-                { "Courier New, 11 px, style=Bold, Italic", "Courier New", 11f, GraphicsUnit.Pixel, FontStyle.Bold | FontStyle.Italic },
-                { "Courier New, 11 px, style=Regular, Italic", "Courier New", 11f, GraphicsUnit.Pixel, FontStyle.Regular | FontStyle.Italic },
-                { "Courier New, 11 px, style=Bold, Italic, Strikeout", "Courier New", 11f, GraphicsUnit.Pixel, FontStyle.Bold | FontStyle.Italic | FontStyle.Strikeout },
-                { "Arial, 11 px, style=Bold, Italic, Strikeout", "Arial", 11f, GraphicsUnit.Pixel, FontStyle.Bold | FontStyle.Italic | FontStyle.Strikeout },
-                { "11px", "Microsoft Sans Serif", 8.25f, GraphicsUnit.Point, FontStyle.Regular },
-                { "Style=Bold", "Microsoft Sans Serif", 8.25f, GraphicsUnit.Point, FontStyle.Regular },
-                { "arIAL, 10, style=bold", "Arial", 10f, GraphicsUnit.Point, FontStyle.Bold },
-                { "Arial, 10,", "Arial", 10f, GraphicsUnit.Point, FontStyle.Regular },
-                { "Arial,", "Arial", 8.25f, GraphicsUnit.Point, FontStyle.Regular },
-                { "Arial, 10, style=12", "Arial", 10f, GraphicsUnit.Point, FontStyle.Underline | FontStyle.Strikeout },
+                { $"Courier New", "Courier New", 8.25f, GraphicsUnit.Point, FontStyle.Regular },
+                { $"Courier New, 11", "Courier New", 11f, GraphicsUnit.Point, FontStyle.Regular },
+                { $"Arial{sep} 11px", "Arial", 11f, GraphicsUnit.Pixel, FontStyle.Regular },
+                { $"Courier New{sep} 11 px", "Courier New", 11f, GraphicsUnit.Pixel, FontStyle.Regular },
+                { $"Courier New{sep} 11 px{sep} style=Regular", "Courier New", 11f, GraphicsUnit.Pixel, FontStyle.Regular },
+                { $"Courier New{sep} style=Bold", "Courier New", 8.25f, GraphicsUnit.Point, FontStyle.Bold },
+                { $"Courier New{sep} 11 px{sep} style=Bold{sep} Italic", "Courier New", 11f, GraphicsUnit.Pixel, FontStyle.Bold | FontStyle.Italic },
+                { $"Courier New{sep} 11 px{sep} style=Regular, Italic", "Courier New", 11f, GraphicsUnit.Pixel, FontStyle.Regular | FontStyle.Italic },
+                { $"Courier New{sep} 11 px{sep} style=Bold{sep} Italic{sep} Strikeout", "Courier New", 11f, GraphicsUnit.Pixel, FontStyle.Bold | FontStyle.Italic | FontStyle.Strikeout },
+                { $"Arial{sep} 11 px{sep} style=Bold, Italic, Strikeout", "Arial", 11f, GraphicsUnit.Pixel, FontStyle.Bold | FontStyle.Italic | FontStyle.Strikeout },
+                { $"11px", "Microsoft Sans Serif", 8.25f, GraphicsUnit.Point, FontStyle.Regular },
+                { $"Style=Bold", "Microsoft Sans Serif", 8.25f, GraphicsUnit.Point, FontStyle.Regular },
+                { $"arIAL{sep} 10{sep} style=bold", "Arial", 10f, GraphicsUnit.Point, FontStyle.Bold },
+                { $"Arial{sep} 10{sep}", "Arial", 10f, GraphicsUnit.Point, FontStyle.Regular },
+                { $"Arial{sep}", "Arial", 8.25f, GraphicsUnit.Point, FontStyle.Regular },
+                { $"Arial{sep} 10{sep} style=12", "Arial", 10f, GraphicsUnit.Point, FontStyle.Underline | FontStyle.Strikeout },
             };
 
             if (!PlatformDetection.IsFullFramework)
             {
                 // FullFramework style keyword is case sensitive.
-                data.Add("Courier New, Style=Bold", "Courier New", 8.25f, GraphicsUnit.Point, FontStyle.Bold);
-                data.Add("11px, Style=Bold", "Microsoft Sans Serif", 8.25f, GraphicsUnit.Point, FontStyle.Bold);
+                data.Add($"Courier New{sep} Style=Bold", "Courier New", 8.25f, GraphicsUnit.Point, FontStyle.Bold);
+                data.Add($"11px{sep} Style=Bold", "Microsoft Sans Serif", 8.25f, GraphicsUnit.Point, FontStyle.Bold);
 
                 // FullFramework disregards all arguments if the font name is an empty string.
-                data.Add(", 10, style=bold", "", 10f, GraphicsUnit.Point, FontStyle.Bold);
+                if (PlatformDetection.IsWindows10Version1607OrGreater)
+                {
+                    data.Add($"{sep} 10{sep} style=bold", "", 10f, GraphicsUnit.Point, FontStyle.Bold); // empty string is not a installed font on Windows 7 and windows 8.
+                }
             }
 
             return data;
@@ -111,22 +117,22 @@ namespace System.ComponentModel.TypeConverterTests
 
         public static TheoryData<string> ArgumentExceptionFontConverterData() => new TheoryData<string>()
         {
-            { "Courier New, 11 px, type=Bold, Italic" },
-            { "Courier New, , Style=Bold" },
-            { "Courier New, 11, Style=" },
-            { "Courier New, 11, Style=RandomEnum" },
-            { "Arial, 10, style=bold," },
-            { "Arial, 10, style=null" },
-            { "Arial, 10, style=abc#" },
-            { "Arial, 10, style=##" },
-            { "Arial, 10display, style=bold" },
-            { "Arial, 10style, style=bold" },
+            { $"Courier New{sep} 11 px{sep} type=Bold{sep} Italic" },
+            { $"Courier New{sep} {sep} Style=Bold" },
+            { $"Courier New{sep} 11{sep} Style=" },
+            { $"Courier New{sep} 11{sep} Style=RandomEnum" },
+            { $"Arial{sep} 10{sep} style=bold{sep}" },
+            { $"Arial{sep} 10{sep} style=null" },
+            { $"Arial{sep} 10{sep} style=abc#" },
+            { $"Arial{sep} 10{sep} style=##" },
+            { $"Arial{sep} 10display{sep} style=bold" },
+            { $"Arial{sep} 10style{sep} style=bold" },
         };
 
         public static TheoryData<string> InvalidEnumArgumentExceptionFontConverterData() => new TheoryData<string>()
         {
-            { "Arial, 10, style=56" },
-            { "Arial, 10, style=-1" },
+            { $"Arial{sep} 10{sep} style=56" },
+            { $"Arial{sep} 10{sep} style=-1" },
         };
     }
 
@@ -137,7 +143,7 @@ namespace System.ComponentModel.TypeConverterTests
         {
             FontUnitConverter converter = new FontUnitConverter();
             var values = converter.GetStandardValues();
-            Assert.Equal(6, values.Count);
+            Assert.Equal(6, values.Count); // The six supported values of Graphics unit: World, Pixel, Point, Inch, Document, Millimeter.
 
             foreach (var item in values)
             {
