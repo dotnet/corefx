@@ -1581,7 +1581,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ConditionalTheory(nameof(SupportsAlpn))]
-        //[OuterLoop("Uses Task.Delay")]
+        [OuterLoop("Uses Task.Delay")]
         [InlineData(false)]
         [InlineData(true)]
         public async Task Http2_PendingSend_SendsReset(bool waitForData)
