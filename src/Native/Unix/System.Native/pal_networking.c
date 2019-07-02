@@ -2676,7 +2676,8 @@ int32_t SystemNative_Disconnect(intptr_t socket)
     // On Linux, we can disconnect a socket by connecting to AF_UNSPEC.
     // For TCP sockets, this causes an abortive close.
 
-    struct sockaddr addr = { 0 };
+    struct sockaddr addr;
+    memset(&addr, 0, sizeof(addr));
     addr.sa_family = AF_UNSPEC;
 
     err = connect(fd, &addr, sizeof(addr));
