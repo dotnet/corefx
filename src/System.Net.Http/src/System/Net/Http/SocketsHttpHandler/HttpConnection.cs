@@ -548,7 +548,7 @@ namespace System.Net.Http
                     ParseStatusLine(await ReadNextResponseHeaderLineAsync().ConfigureAwait(false), response);
                 }
 
-                // Parse the response headers.
+                // Parse the response headers.  Logic after this point depends on being able to examine headers in the response object.
                 while (true)
                 {
                     ArraySegment<byte> line = await ReadNextResponseHeaderLineAsync(foldedHeadersAllowed: true).ConfigureAwait(false);
@@ -566,7 +566,7 @@ namespace System.Net.Http
                     if ((int)response.StatusCode >= 300 &&
                         request.Content != null &&
                         (request.Content.Headers.ContentLength == null || request.Content.Headers.ContentLength.GetValueOrDefault() > Expect100ErrorSendThreshold) &&
-                        !((int)response.StatusCode == 401 && AuthenticationHelper.IsSessionAuthenticationChallenge(response)))
+                        !AuthenticationHelper.IsSessionAuthenticationChallenge(response))
                     {
                         // For error final status codes, try to avoid sending the payload if its size is unknown or if it's known to be "big".
                         // If we already sent a header detailing the size of the payload, if we then don't send that payload, the server may wait
@@ -583,7 +583,8 @@ namespace System.Net.Http
                     }
                     else
                     {
-                        // For any success status codes or for errors when the request content length is known to be small, send the payload
+                        // For any success status codes, for errors when the request content length is known to be small,
+                        // or for session-based authentication challenges, send the payload
                         // (if there is one... if there isn't, Content is null and thus allowExpect100ToContinue is also null, we won't get here).
                         allowExpect100ToContinue.TrySetResult(true);
                     }
