@@ -45,6 +45,7 @@ namespace System.Diagnostics.Tracing
             _group = CounterGroup.GetCounterGroup(eventSource);
             _group.Add(this);
             Name = name;
+            DisplayUnits = string.Empty;
             EventSource = eventSource;
         }
 
@@ -68,16 +69,36 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public void AddMetadata(string key, string? value)
         {
-            lock (MyLock)
+            lock (this)
             {
                 _metadata ??= new Dictionary<string, string?>();
                 _metadata.Add(key, value);
             }
         }
 
-        public string? DisplayName { get; set; }
+        private string _displayName = "";
+        public string DisplayName
+        {
+            set
+            {
+                if (value == null)
+                    throw new ArgumentException("Cannot set null as DisplayName");
+                _displayName = value;
+            }
+            get { return _displayName; }
+        }
 
-        public string? DisplayUnits { get; set; }
+        private string _displayUnits = "";
+        public string DisplayUnits
+        {
+            set
+            {
+                if (value == null)
+                    throw new ArgumentException("Cannot set null as DisplayUnits");
+                _displayUnits = value;
+            }
+            get { return _displayUnits; }
+        }
 
         public string Name { get; }
 
@@ -90,9 +111,6 @@ namespace System.Diagnostics.Tracing
 
         internal abstract void WritePayload(float intervalSec, int pollingIntervalMillisec);
 
-        // arbitrarily we use name as the lock object.  
-        internal object MyLock { get { return Name; } }
-
         internal void ReportOutOfBandMessage(string message)
         {
             EventSource.ReportOutOfBandMessage(message, true);
@@ -100,6 +118,8 @@ namespace System.Diagnostics.Tracing
 
         internal string GetMetadataString()
         {
+            Debug.Assert(Monitor.IsEntered(this));
+
             if (_metadata == null)
             {
                 return "";
