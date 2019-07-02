@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -13,10 +13,10 @@ namespace System.Text.Json.Serialization
         /// <param name="value">The value to convert.</param>
         /// <param name="options">Options to control the conversion behavior.</param>
         /// <remarks>Using a <see cref="System.String"/> is not as efficient as using UTF-8
-        /// encoding since the implementation internally uses UTF-8. See also <see cref="ToUtf8Bytes"/>
-        /// and <see cref="WriteAsync"/>.
+        /// encoding since the implementation internally uses UTF-8. See also <see cref="SerializeToUtf8Bytes"/>
+        /// and <see cref="SerializeAsync"/>.
         /// </remarks>
-        public static string ToString<TValue>(TValue value, JsonSerializerOptions options = null)
+        public static string Serialize<TValue>(TValue value, JsonSerializerOptions options = null)
         {
             return ToStringInternal(value, typeof(TValue), options);
         }
@@ -29,10 +29,10 @@ namespace System.Text.Json.Serialization
         /// <param name="type">The type of the <paramref name="value"/> to convert.</param>
         /// <param name="options">Options to control the conversion behavior.</param>
         /// <remarks>Using a <see cref="System.String"/> is not as efficient as using UTF-8
-        /// encoding since the implementation internally uses UTF-8. See also <see cref="ToUtf8Bytes"/>
-        /// and <see cref="WriteAsync"/>.
+        /// encoding since the implementation internally uses UTF-8. See also <see cref="SerializeToUtf8Bytes"/>
+        /// and <see cref="SerializeAsync"/>.
         /// </remarks>
-        public static string ToString(object value, Type type, JsonSerializerOptions options = null)
+        public static string Serialize(object value, Type type, JsonSerializerOptions options = null)
         {
             VerifyValueAndType(value, type);
 

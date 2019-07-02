@@ -101,16 +101,6 @@ namespace System
 
         private UriSyntaxFlags _flags;
 
-        // Some flags (specified in c_UpdatableFlags) besides being set in the ctor, can also be set at a later
-        // point. Such "updatable" flags can be set using SetUpdatableFlags(); if this method is called,
-        // the value specified in the ctor is ignored (i.e. for all c_UpdatableFlags the value in m_Flags is
-        // ignored), and the new value is used (i.e. for all c_UpdatableFlags the value in m_UpdatableFlags is used).
-        private volatile UriSyntaxFlags _updatableFlags;
-        private volatile bool _updatableFlagsUsed;
-
-        // The following flags can be updated at any time.
-        private const UriSyntaxFlags c_UpdatableFlags = UriSyntaxFlags.UnEscapeDotsAndSlashes;
-
         private int _port;
         private string _scheme;
 
@@ -178,26 +168,7 @@ namespace System
 
         private bool IsFullMatch(UriSyntaxFlags flags, UriSyntaxFlags expected)
         {
-            // Return true, if masking the current set of flags with 'flags' equals 'expected'.
-            // Definition 'current set of flags': 
-            // a) if updatable flags were never set: m_Flags
-            // b) if updatable flags were set: set union between all flags in m_Flags which are not updatable
-            //    (i.e. not part of c_UpdatableFlags) and all flags in m_UpdatableFlags
-
-            UriSyntaxFlags mergedFlags;
-
-            // if none of the flags in 'flags' is an updatable flag, we ignore m_UpdatableFlags
-            if (((flags & c_UpdatableFlags) == 0) || !_updatableFlagsUsed)
-            {
-                mergedFlags = _flags;
-            }
-            else
-            {
-                // mask m_Flags to only use the flags not in c_UpdatableFlags
-                mergedFlags = (_flags & (~c_UpdatableFlags)) | _updatableFlags;
-            }
-
-            return (mergedFlags & flags) == expected;
+            return (_flags & flags) == expected;
         }
 
         //
@@ -217,11 +188,11 @@ namespace System
             lock (s_table)
             {
                 syntax._flags &= ~UriSyntaxFlags.V1_UnknownUri;
-                UriParser oldSyntax = (UriParser)s_table[lwrCaseSchemeName];
+                UriParser? oldSyntax = (UriParser?)s_table[lwrCaseSchemeName];
                 if (oldSyntax != null)
                     throw new InvalidOperationException(SR.Format(SR.net_uri_AlreadyRegistered, oldSyntax.SchemeName));
 
-                oldSyntax = (UriParser)s_tempTable[syntax.SchemeName];
+                oldSyntax = (UriParser?)s_tempTable[syntax.SchemeName];
                 if (oldSyntax != null)
                 {
                     // optimization on schemeName, will try to keep the first reference
@@ -243,12 +214,12 @@ namespace System
         internal static UriParser FindOrFetchAsUnknownV1Syntax(string lwrCaseScheme)
         {
             // check may be other thread just added one
-            UriParser syntax = (UriParser)s_table[lwrCaseScheme];
+            UriParser? syntax = (UriParser?)s_table[lwrCaseScheme];
             if (syntax != null)
             {
                 return syntax;
             }
-            syntax = (UriParser)s_tempTable[lwrCaseScheme];
+            syntax = (UriParser?)s_tempTable[lwrCaseScheme];
             if (syntax != null)
             {
                 return syntax;
@@ -265,8 +236,8 @@ namespace System
             }
         }
 
-        internal static UriParser GetSyntax(string lwrCaseScheme) =>
-            (UriParser)(s_table[lwrCaseScheme] ?? s_tempTable[lwrCaseScheme]);
+        internal static UriParser? GetSyntax(string lwrCaseScheme) =>
+            (UriParser?)(s_table[lwrCaseScheme] ?? s_tempTable[lwrCaseScheme]);
 
         //
         // Builtin and User Simple syntaxes do not need custom validation/parsing (i.e. virtual method calls),
@@ -299,21 +270,6 @@ namespace System
         }
 
         //
-        // This method is used to update flags. The scenario where this is needed is when the user specifies
-        // flags in the config file. The config file is read after UriParser instances were created.
-        //
-        internal void SetUpdatableFlags(UriSyntaxFlags flags)
-        {
-            Debug.Assert(!_updatableFlagsUsed,
-                "SetUpdatableFlags() already called. It can only be called once per parser.");
-            Debug.Assert((flags & (~c_UpdatableFlags)) == 0, "Only updatable flags can be set.");
-
-            // No locks necessary. Reordering won't happen due to volatile.
-            _updatableFlags = flags;
-            _updatableFlagsUsed = true;
-        }
-
-        //
         // These are simple internal wrappers that will call virtual protected methods
         // (to avoid "protected internal" signatures in the public docs)
         //
@@ -329,12 +285,12 @@ namespace System
             return effectiveParser;
         }
 
-        internal void InternalValidate(Uri thisUri, out UriFormatException parsingError)
+        internal void InternalValidate(Uri thisUri, out UriFormatException? parsingError)
         {
             InitializeAndValidate(thisUri, out parsingError);
         }
 
-        internal string InternalResolve(Uri thisBaseUri, Uri uriLink, out UriFormatException parsingError)
+        internal string? InternalResolve(Uri thisBaseUri, Uri uriLink, out UriFormatException? parsingError)
         {
             return Resolve(thisBaseUri, uriLink, out parsingError);
         }

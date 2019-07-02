@@ -20,6 +20,8 @@ namespace System.IO
 {
     public sealed partial class DirectoryInfo : FileSystemInfo
     {
+        private bool _isNormalized;
+
         public DirectoryInfo(string path)
         {
             Init(originalPath: path,
@@ -42,9 +44,11 @@ namespace System.IO
 
             _name = fileName ?? (PathInternal.IsRoot(fullPath.AsSpan()) ?
                     fullPath.AsSpan() :
-                    Path.GetFileName(PathInternal.TrimEndingDirectorySeparator(fullPath.AsSpan()))).ToString();
+                    Path.GetFileName(Path.TrimEndingDirectorySeparator(fullPath.AsSpan()))).ToString();
 
             FullPath = fullPath;
+
+            _isNormalized = isNormalized;
         }
 
         public DirectoryInfo Parent
@@ -54,7 +58,7 @@ namespace System.IO
                 // FullPath might end in either "parent\child" or "parent\child\", and in either case we want 
                 // the parent of child, not the child. Trim off an ending directory separator if there is one,
                 // but don't mangle the root.
-                string parentName = Path.GetDirectoryName(PathInternal.IsRoot(FullPath.AsSpan()) ? FullPath : PathInternal.TrimEndingDirectorySeparator(FullPath));
+                string parentName = Path.GetDirectoryName(PathInternal.IsRoot(FullPath.AsSpan()) ? FullPath : Path.TrimEndingDirectorySeparator(FullPath));
                 return parentName != null ? 
                     new DirectoryInfo(parentName, isNormalized: true) :
                     null;
@@ -72,8 +76,8 @@ namespace System.IO
 
             string newPath = Path.GetFullPath(Path.Combine(FullPath, path));
 
-            ReadOnlySpan<char> trimmedNewPath = PathInternal.TrimEndingDirectorySeparator(newPath.AsSpan());
-            ReadOnlySpan<char> trimmedCurrentPath = PathInternal.TrimEndingDirectorySeparator(FullPath.AsSpan());
+            ReadOnlySpan<char> trimmedNewPath = Path.TrimEndingDirectorySeparator(newPath.AsSpan());
+            ReadOnlySpan<char> trimmedCurrentPath = Path.TrimEndingDirectorySeparator(FullPath.AsSpan());
 
             // We want to make sure the requested directory is actually under the subdirectory.
             if (trimmedNewPath.StartsWith(trimmedCurrentPath, PathInternal.StringComparison)
@@ -165,7 +169,7 @@ namespace System.IO
         public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern, EnumerationOptions enumerationOptions)
             => InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Both, enumerationOptions);
 
-        internal static IEnumerable<FileSystemInfo> InternalEnumerateInfos(
+        private IEnumerable<FileSystemInfo> InternalEnumerateInfos(
             string path,
             string searchPattern,
             SearchTarget searchTarget,
@@ -175,16 +179,16 @@ namespace System.IO
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options);
+            _isNormalized &= FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options.MatchType);
 
             switch (searchTarget)
             {
                 case SearchTarget.Directories:
-                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, options);
+                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, options, _isNormalized);
                 case SearchTarget.Files:
-                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, options);
+                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, options, _isNormalized);
                 case SearchTarget.Both:
-                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, options);
+                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, options, _isNormalized);
                 default:
                     throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(searchTarget));
             }

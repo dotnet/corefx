@@ -4,8 +4,9 @@
 
 using System.Collections;
 using System.Diagnostics;
+using System.Text.Json.Serialization.Converters;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -22,13 +23,12 @@ namespace System.Text.Json.Serialization
             Debug.Assert(jsonPropertyInfo != null);
 
             // A nested object or dictionary so push new frame.
-            if (state.Current.PropertyInitialized)
+            if (state.Current.CollectionPropertyInitialized)
             {
-                JsonClassInfo classInfoTemp = jsonPropertyInfo.RuntimeClassInfo;
                 state.Push();
                 state.Current.JsonClassInfo = jsonPropertyInfo.ElementClassInfo;
                 state.Current.InitializeJsonPropertyInfo();
-                state.Current.PropertyInitialized = true;
+                state.Current.CollectionPropertyInitialized = true;
 
                 ClassType classType = state.Current.JsonClassInfo.ClassType;
                 if (classType == ClassType.Value &&
@@ -39,18 +39,38 @@ namespace System.Text.Json.Serialization
                 }
 
                 JsonClassInfo classInfo = state.Current.JsonClassInfo;
-                state.Current.ReturnValue = classInfo.CreateObject();
+
+                if (state.Current.IsProcessingIDictionaryConstructible)
+                {
+                    state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateObject();
+                }
+                else
+                {
+                    if (classInfo.CreateObject == null)
+                    {
+                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type, reader, state.JsonPath);
+                        return;
+                    }
+                    state.Current.ReturnValue = classInfo.CreateObject();
+                }
+
                 return;
             }
 
-            state.Current.PropertyInitialized = true;
+            state.Current.CollectionPropertyInitialized = true;
 
-            // If current property is already set (from a constructor, for example) leave as-is.
-            if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) == null)
+            if (state.Current.IsProcessingIDictionaryConstructible)
+            {
+                JsonClassInfo dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
+                state.Current.TempDictionaryValues = (IDictionary)dictionaryClassInfo.CreateObject();
+            }
+            // Else if current property is already set (from a constructor, for example), leave as-is.
+            else if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) == null)
             {
                 // Create the dictionary.
                 JsonClassInfo dictionaryClassInfo = jsonPropertyInfo.RuntimeClassInfo;
                 IDictionary value = (IDictionary)dictionaryClassInfo.CreateObject();
+
                 if (value != null)
                 {
                     if (state.Current.ReturnValue != null)
@@ -71,11 +91,27 @@ namespace System.Text.Json.Serialization
             if (state.Current.IsDictionaryProperty)
             {
                 // We added the items to the dictionary already.
-                state.Current.ResetProperty();
+                state.Current.EndProperty();
+            }
+            else if (state.Current.IsIDictionaryConstructibleProperty)
+            {
+                Debug.Assert(state.Current.TempDictionaryValues != null);
+                JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
+                state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, converter.CreateFromDictionary(ref state, state.Current.TempDictionaryValues, options));
+                state.Current.EndProperty();
             }
             else
             {
-                object value = state.Current.ReturnValue;
+                object value;
+                if (state.Current.TempDictionaryValues != null)
+                {
+                    JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
+                    value = converter.CreateFromDictionary(ref state, state.Current.TempDictionaryValues, options);
+                }
+                else
+                {
+                    value = state.Current.ReturnValue;
+                }
 
                 if (state.IsLastFrame)
                 {

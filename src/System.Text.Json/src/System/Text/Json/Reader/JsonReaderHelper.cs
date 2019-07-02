@@ -28,25 +28,27 @@ namespace System.Text.Json
             return (newLines, lastLineFeedIndex);
         }
 
-        internal static JsonValueType ToValueType(this JsonTokenType tokenType)
+        internal static JsonValueKind ToValueKind(this JsonTokenType tokenType)
         {
             switch (tokenType)
             {
                 case JsonTokenType.None:
-                    return JsonValueType.Undefined;
+                    return JsonValueKind.Undefined;
                 case JsonTokenType.StartArray:
-                    return JsonValueType.Array;
+                    return JsonValueKind.Array;
                 case JsonTokenType.StartObject:
-                    return JsonValueType.Object;
+                    return JsonValueKind.Object;
                 case JsonTokenType.String:
                 case JsonTokenType.Number:
                 case JsonTokenType.True:
                 case JsonTokenType.False:
                 case JsonTokenType.Null:
-                    return (JsonValueType)((byte)tokenType - 3);
+                    // This is the offset between the set of literals within JsonValueType and JsonTokenType
+                    // Essentially: JsonTokenType.Null - JsonValueType.Null
+                    return (JsonValueKind)((byte)tokenType - 4);
                 default:
                     Debug.Fail($"No mapping for token type {tokenType}");
-                    return JsonValueType.Undefined;
+                    return JsonValueKind.Undefined;
             }
         }
 
@@ -275,10 +277,16 @@ namespace System.Text.Json
             sourceUnescaped = sourceUnescaped.Slice(0, written);
             Debug.Assert(!sourceUnescaped.IsEmpty);
 
+            if (sourceUnescaped.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
+                && JsonHelpers.TryParseAsISO(sourceUnescaped, out DateTime tmp, out int bytesConsumed)
+                && sourceUnescaped.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (sourceUnescaped.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(sourceUnescaped, out value, out int bytesConsumed)
-                && sourceUnescaped.Length == bytesConsumed;
+            return false;
         }
 
         public static bool TryGetEscapedDateTimeOffset(ReadOnlySpan<byte> source, out DateTimeOffset value)
@@ -295,10 +303,16 @@ namespace System.Text.Json
             sourceUnescaped = sourceUnescaped.Slice(0, written);
             Debug.Assert(!sourceUnescaped.IsEmpty);
 
+            if (sourceUnescaped.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
+                && JsonHelpers.TryParseAsISO(sourceUnescaped, out DateTimeOffset tmp, out int bytesConsumed)
+                && sourceUnescaped.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (sourceUnescaped.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(sourceUnescaped, out value, out int bytesConsumed)
-                && sourceUnescaped.Length == bytesConsumed;
+            return false;
         }
 
         public static bool TryGetEscapedGuid(ReadOnlySpan<byte> source, out Guid value)
@@ -316,8 +330,15 @@ namespace System.Text.Json
             utf8Unescaped = utf8Unescaped.Slice(0, written);
             Debug.Assert(!utf8Unescaped.IsEmpty);
 
+            if (utf8Unescaped.Length == JsonConstants.MaximumFormatGuidLength 
+                && Utf8Parser.TryParse(utf8Unescaped, out Guid tmp, out _, 'D'))
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (utf8Unescaped.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(utf8Unescaped, out value, out _, 'D');
+            return false;
         }
     }
 }

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -17,7 +17,7 @@ namespace System.Text.Json.Serialization
         /// <typeparamref name="TValue"/> is not compatible with the JSON,
         /// or when there is remaining data in the Stream.
         /// </exception>
-        public static TValue Parse<TValue>(ReadOnlySpan<byte> utf8Json, JsonSerializerOptions options = null)
+        public static TValue Deserialize<TValue>(ReadOnlySpan<byte> utf8Json, JsonSerializerOptions options = null)
         {
             return (TValue)ParseCore(utf8Json, typeof(TValue), options);
         }
@@ -37,8 +37,7 @@ namespace System.Text.Json.Serialization
         /// <paramref name="returnType"/> is not compatible with the JSON,
         /// or when there is remaining data in the Stream.
         /// </exception>
-
-        public static object Parse(ReadOnlySpan<byte> utf8Json, Type returnType, JsonSerializerOptions options = null)
+        public static object Deserialize(ReadOnlySpan<byte> utf8Json, Type returnType, JsonSerializerOptions options = null)
         {
             if (returnType == null)
                 throw new ArgumentNullException(nameof(returnType));
@@ -59,8 +58,7 @@ namespace System.Text.Json.Serialization
 
             if (reader.BytesConsumed != utf8Json.Length)
             {
-                readerState = reader.CurrentState;
-                ThrowHelper.ThrowJsonException_DeserializeDataRemaining(utf8Json.Length, utf8Json.Length - readerState.BytesConsumed);
+                ThrowHelper.ThrowJsonException_DeserializeDataRemaining(utf8Json.Length, utf8Json.Length - reader.BytesConsumed);
             }
 
             return result;

@@ -516,6 +516,13 @@ namespace System.Runtime.CompilerServices
             m_task = box; // important: this must be done before storing stateMachine into box.StateMachine!
             box.StateMachine = stateMachine;
             box.Context = currentContext;
+
+            // Finally, log the creation of the state machine box object / task for this async method.
+            if (AsyncCausalityTracer.LoggingOn)
+            {
+                AsyncCausalityTracer.TraceOperationCreation(box, "Async: " + stateMachine.GetType().Name);
+            }
+
             return box;
         }
 
@@ -563,13 +570,13 @@ namespace System.Runtime.CompilerServices
             {
                 Debug.Assert(s is AsyncStateMachineBox<TStateMachine>);
                 // Only used privately to pass directly to EC.Run
-                Unsafe.As<AsyncStateMachineBox<TStateMachine>>(s).StateMachine.MoveNext();
+                Unsafe.As<AsyncStateMachineBox<TStateMachine>>(s).StateMachine!.MoveNext();
             }
 
             /// <summary>A delegate to the <see cref="MoveNext()"/> method.</summary>
             private Action? _moveNextAction;
             /// <summary>The state machine itself.</summary>
-            [AllowNull, MaybeNull] public TStateMachine StateMachine = default!; // mutable struct; do not make this readonly. SOS DumpAsync command depends on this name.  // TODO-NULLABLE: Remove ! when nullable attributes are respected
+            [AllowNull, MaybeNull] public TStateMachine StateMachine = default; // mutable struct; do not make this readonly. SOS DumpAsync command depends on this name.
             /// <summary>Captured ExecutionContext with which to invoke <see cref="MoveNextAction"/>; may be null.</summary>
             public ExecutionContext? Context;
 
@@ -594,7 +601,8 @@ namespace System.Runtime.CompilerServices
                 ExecutionContext? context = Context;
                 if (context == null)
                 {
-                    StateMachine.MoveNext();
+                    Debug.Assert(StateMachine != null);
+                    StateMachine!.MoveNext(); // TODO-NULLABLE: remove ! when Debug.Assert on fields is respected (https://github.com/dotnet/roslyn/issues/36830)
                 }
                 else
                 {
@@ -613,7 +621,7 @@ namespace System.Runtime.CompilerServices
                     // Clear out state now that the async method has completed.
                     // This avoids keeping arbitrary state referenced by lifted locals
                     // if this Task / state machine box is held onto.
-                    StateMachine = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                    StateMachine = default;
                     Context = default;
 
 #if !CORERT
@@ -634,7 +642,7 @@ namespace System.Runtime.CompilerServices
             }
 
             /// <summary>Gets the state machine as a boxed object.  This should only be used for debugging purposes.</summary>
-            IAsyncStateMachine IAsyncStateMachineBox.GetStateMachineObject() => StateMachine; // likely boxes, only use for debugging
+            IAsyncStateMachine IAsyncStateMachineBox.GetStateMachineObject() => StateMachine!; // likely boxes, only use for debugging
         }
 
         /// <summary>Gets the <see cref="System.Threading.Tasks.Task{TResult}"/> for this builder.</summary>

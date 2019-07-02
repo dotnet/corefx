@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -178,6 +179,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        [OuterLoop("Uses external servers")]
         public async Task UseDefaultCredentials_SetToFalseAndServerNeedsAuth_StatusCodeUnauthorized(bool useProxy)
         {
             HttpClientHandler handler = CreateHttpClientHandler();
@@ -1522,19 +1524,11 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task Dispose_DisposingHandlerCancelsActiveOperationsWithoutResponses()
         {
-            if (UseSocketsHttpHandler)
+            await LoopbackServerFactory.CreateServerAsync(async (server1, url1) =>
             {
-                // TODO #23131: The SocketsHttpHandler isn't correctly handling disposal of the handler.
-                // It should cause the outstanding requests to be canceled with OperationCanceledExceptions,
-                // whereas currently it's resulting in ObjectDisposedExceptions.
-                return;
-            }
-
-            await LoopbackServer.CreateServerAsync(async (server1, url1) =>
-            {
-                await LoopbackServer.CreateServerAsync(async (server2, url2) =>
+                await LoopbackServerFactory.CreateServerAsync(async (server2, url2) =>
                 {
-                    await LoopbackServer.CreateServerAsync(async (server3, url3) =>
+                    await LoopbackServerFactory.CreateServerAsync(async (server3, url3) =>
                     {
                         var unblockServers = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -1547,18 +1541,19 @@ namespace System.Net.Http.Functional.Tests
                         // Second server connects and sends some but not all headers
                         Task serverTask2 = server2.AcceptConnectionAsync(async connection2 =>
                         {
-                            await connection2.ReadRequestHeaderAndSendCustomResponseAsync($"HTTP/1.1 200 OK\r\n");
+                            await connection2.ReadRequestDataAsync();
+                            await connection2.SendResponseAsync(HttpStatusCode.OK, isFinal : false);
                             await unblockServers.Task;
                         });
 
                         // Third server connects and sends all headers and some but not all of the body
                         Task serverTask3 = server3.AcceptConnectionAsync(async connection3 =>
                         {
-                            await connection3.ReadRequestHeaderAndSendCustomResponseAsync($"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nContent-Length: 20\r\n\r\n");
-                            await connection3.Writer.WriteAsync("1234567890");
+                            await connection3.ReadRequestDataAsync();
+                            await connection3.SendResponseAsync(HttpStatusCode.OK, new HttpHeaderData[] { new HttpHeaderData("Content-Length", "20") }, body : "", isFinal : false);
+                            await connection3.SendResponseBodyAsync("1234567890", isFinal : false);
                             await unblockServers.Task;
-                            await connection3.Writer.WriteAsync("1234567890");
-                            connection3.Socket.Shutdown(SocketShutdown.Send);
+                            await connection3.SendResponseBodyAsync("1234567890", isFinal : true);
                         });
 
                         // Make three requests
@@ -1572,8 +1567,8 @@ namespace System.Net.Http.Functional.Tests
                         } // Dispose the handler while requests are still outstanding
 
                         // Requests 1 and 2 should be canceled as we haven't finished receiving their headers
-                        await Assert.ThrowsAsync<TaskCanceledException>(() => get1);
-                        await Assert.ThrowsAsync<TaskCanceledException>(() => get2);
+                        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => get1);
+                        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => get2);
 
                         // Request 3 should still be active, and we should be able to receive all of the data.
                         unblockServers.SetResult(true);
@@ -1866,11 +1861,14 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(false, "1.1")]
         [InlineData(true, "1.1")]
         [InlineData(null, "1.1")]
+        [InlineData(false, "2.0")]
+        [InlineData(true, "2.0")]
+        [InlineData(null, "2.0")]
         public async Task PostAsync_ExpectContinue_Success(bool? expectContinue, string version)
         {
             using (HttpClient client = CreateHttpClient())
             {
-                var req = new HttpRequestMessage(HttpMethod.Post, Configuration.Http.RemoteEchoServer)
+                var req = new HttpRequestMessage(HttpMethod.Post, version == "2.0" ? Configuration.Http.Http2RemoteEchoServer : Configuration.Http.RemoteEchoServer)
                 {
                     Content = new StringContent("Test String", Encoding.UTF8),
                     Version = new Version(version)
@@ -1883,7 +1881,7 @@ namespace System.Net.Http.Functional.Tests
                     if (UseSocketsHttpHandler)
                     {
                         const string ExpectedReqHeader = "\"Expect\": \"100-continue\"";
-                        if (expectContinue == true && version == "1.1")
+                        if (expectContinue == true && (version == "1.1" || version == "2.0"))
                         {
                             Assert.Contains(ExpectedReqHeader, await response.Content.ReadAsStringAsync());
                         }

@@ -28,7 +28,6 @@ namespace System.Security.Cryptography.Rsa.Tests
     public abstract class EncryptDecrypt
     {
         public static bool SupportsSha2Oaep => RSAFactory.SupportsSha2Oaep;
-        private static bool EphemeralKeysAreExportable => !PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer;
 
         protected abstract byte[] Encrypt(RSA rsa, byte[] data, RSAEncryptionPadding padding);
         protected abstract byte[] Decrypt(RSA rsa, byte[] data, RSAEncryptionPadding padding);
@@ -41,6 +40,24 @@ namespace System.Security.Cryptography.Rsa.Tests
                 AssertExtensions.Throws<ArgumentNullException>("padding", () => Encrypt(rsa, TestData.HelloBytes, null));
                 AssertExtensions.Throws<ArgumentNullException>("padding", () => Decrypt(rsa, TestData.HelloBytes, null));
             }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void UseAfterDispose(bool importKey)
+        {
+            RSA rsa = importKey ? RSAFactory.Create(TestData.RSA2048Params) : RSAFactory.Create(1024);
+            byte[] data = TestData.HelloBytes;
+            byte[] enc;
+
+            using (rsa)
+            {
+                enc = Encrypt(rsa, data, RSAEncryptionPadding.Pkcs1);
+            }
+
+            Assert.Throws<ObjectDisposedException>(
+                () => Decrypt(rsa, enc, RSAEncryptionPadding.Pkcs1));
         }
 
         [Fact]
@@ -584,7 +601,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
+        [Fact]
         public void RsaDecryptAfterExport()
         {
             byte[] output;

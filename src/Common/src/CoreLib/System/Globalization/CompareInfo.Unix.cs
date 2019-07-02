@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading;
 
 using Internal.Runtime.CompilerServices;
 
@@ -15,7 +17,7 @@ namespace System.Globalization
     public partial class CompareInfo
     {
         [NonSerialized]
-        private Interop.Globalization.SafeSortHandle _sortHandle = null!; // initialized in helper called by ctors
+        private IntPtr _sortHandle;
 
         [NonSerialized]
         private bool _isAsciiEqualityOrdinal;
@@ -30,17 +32,9 @@ namespace System.Globalization
             }
             else
             {
-                Interop.Globalization.ResultCode resultCode = Interop.Globalization.GetSortHandle(GetNullTerminatedUtf8String(_sortName), out _sortHandle);
-                if (resultCode != Interop.Globalization.ResultCode.Success)
-                {
-                    _sortHandle.Dispose();
-
-                    if (resultCode == Interop.Globalization.ResultCode.OutOfMemory)
-                        throw new OutOfMemoryException();
-
-                    throw new ExternalException(SR.Arg_ExternalException);
-                }
                 _isAsciiEqualityOrdinal = (_sortName == "en-US" || _sortName == "");
+
+                _sortHandle = SortHandleCache.GetCachedSortHandle(_sortName);
             }
         }
 
@@ -852,33 +846,52 @@ namespace System.Globalization
                 return 0;
             }
 
-            fixed (char* pSource = source)
+            // according to ICU User Guide the performance of ucol_getSortKey is worse when it is called with null output buffer
+            // the solution is to try to fill the sort key in a temporary buffer of size equal 4 x string length
+            // 1MB is the biggest array that can be rented from ArrayPool.Shared without memory allocation
+            int sortKeyLength = (source.Length > 1024 * 1024 / 4) ? 0 : 4 * source.Length;
+
+            byte[]? borrowedArray = null;
+            Span<byte> sortKey = sortKeyLength <= 1024
+                ? stackalloc byte[1024]
+                : (borrowedArray = ArrayPool<byte>.Shared.Rent(sortKeyLength));
+
+            fixed (char* pSource = &MemoryMarshal.GetReference(source))
             {
-                int sortKeyLength = Interop.Globalization.GetSortKey(_sortHandle, pSource, source.Length, null, 0, options);
-
-                byte[]? borrowedArr = null;
-                Span<byte> span = sortKeyLength <= 512 ?
-                    stackalloc byte[512] :
-                    (borrowedArr = ArrayPool<byte>.Shared.Rent(sortKeyLength));
-
-                fixed (byte* pSortKey = &MemoryMarshal.GetReference(span))
+                fixed (byte* pSortKey = &MemoryMarshal.GetReference(sortKey))
                 {
-                    if (Interop.Globalization.GetSortKey(_sortHandle, pSource, source.Length, pSortKey, sortKeyLength, options) != sortKeyLength)
+                    sortKeyLength = Interop.Globalization.GetSortKey(_sortHandle, pSource, source.Length, pSortKey, sortKey.Length, options);
+                }
+
+                if (sortKeyLength > sortKey.Length) // slow path for big strings
+                {
+                    if (borrowedArray != null)
                     {
-                        throw new ArgumentException(SR.Arg_ExternalException);
+                        ArrayPool<byte>.Shared.Return(borrowedArray);
+                    }
+
+                    sortKey = (borrowedArray = ArrayPool<byte>.Shared.Rent(sortKeyLength));
+
+                    fixed (byte* pSortKey = &MemoryMarshal.GetReference(sortKey))
+                    {
+                        sortKeyLength = Interop.Globalization.GetSortKey(_sortHandle, pSource, source.Length, pSortKey, sortKey.Length, options);
                     }
                 }
-
-                int hash = Marvin.ComputeHash32(span.Slice(0, sortKeyLength), Marvin.DefaultSeed);
-
-                // Return the borrowed array if necessary.
-                if (borrowedArr != null)
-                {
-                    ArrayPool<byte>.Shared.Return(borrowedArr);
-                }
-
-                return hash;
             }
+
+            if (sortKeyLength == 0 || sortKeyLength > sortKey.Length) // internal error (0) or a bug (2nd call failed) in ucol_getSortKey
+            {
+                throw new ArgumentException(SR.Arg_ExternalException);
+            }
+
+            int hash = Marvin.ComputeHash32(sortKey.Slice(0, sortKeyLength), Marvin.DefaultSeed);
+
+            if (borrowedArray != null)
+            {
+                ArrayPool<byte>.Shared.Return(borrowedArray);
+            }
+
+            return hash;
         }
 
         private static CompareOptions GetOrdinalCompareOptions(CompareOptions options)
@@ -899,20 +912,6 @@ namespace System.Globalization
             return (options & CompareOptions.IgnoreSymbols) == 0;
         }
 
-        private static byte[] GetNullTerminatedUtf8String(string s)
-        {
-            int byteLen = System.Text.Encoding.UTF8.GetByteCount(s);
-
-            // Allocate an extra byte (which defaults to 0) as the null terminator.
-            byte[] buffer = new byte[byteLen + 1];
-
-            int bytesWritten = System.Text.Encoding.UTF8.GetBytes(s, 0, s.Length, buffer, 0);
-
-            Debug.Assert(bytesWritten == byteLen);
-
-            return buffer;
-        }
-
         private SortVersion GetSortVersion()
         {
             Debug.Assert(!GlobalizationMode.Invariant);
@@ -923,6 +922,42 @@ namespace System.Globalization
                                                              (byte) ((LCID  & 0x00FF0000) >> 16),
                                                              (byte) ((LCID  & 0x0000FF00) >> 8),
                                                              (byte) (LCID  & 0xFF)));
+        }
+
+        private static class SortHandleCache
+        {
+            // in most scenarios there is a limited number of cultures with limited number of sort options
+            // so caching the sort handles and not freeing them is OK, see https://github.com/dotnet/coreclr/pull/25117 for more
+            private static readonly Dictionary<string, IntPtr> s_sortNameToSortHandleCache = new Dictionary<string, IntPtr>();
+
+            internal static IntPtr GetCachedSortHandle(string sortName)
+            {
+                lock (s_sortNameToSortHandleCache)
+                {
+                    if (!s_sortNameToSortHandleCache.TryGetValue(sortName, out IntPtr result))
+                    {
+                        Interop.Globalization.ResultCode resultCode = Interop.Globalization.GetSortHandle(sortName, out result);
+
+                        if (resultCode == Interop.Globalization.ResultCode.OutOfMemory)
+                            throw new OutOfMemoryException();
+                        else if (resultCode != Interop.Globalization.ResultCode.Success)
+                            throw new ExternalException(SR.Arg_ExternalException);
+
+                        try
+                        {
+                            s_sortNameToSortHandleCache.Add(sortName, result);
+                        }
+                        catch
+                        {
+                            Interop.Globalization.CloseSortHandle(result);
+
+                            throw;
+                        }
+                    }
+
+                    return result;
+                }
+            }
         }
 
         // See https://github.com/dotnet/coreclr/blob/master/src/utilcode/util_nodependencies.cpp#L970

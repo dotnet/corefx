@@ -6,7 +6,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     /// <summary>
     /// Provides functionality to serialize objects or value types to JSON and
@@ -22,15 +22,17 @@ namespace System.Text.Json.Serialization
             try
             {
                 JsonReaderState initialState = default;
+                long initialBytesConsumed = default;
 
                 while (true)
                 {
-                    if (options.ReadAhead)
+                    if (readStack.ReadAhead)
                     {
                         // When we're reading ahead we always have to save the state
                         // as we don't know if the next token is an opening object or
                         // array brace.
                         initialState = reader.CurrentState;
+                        initialBytesConsumed = reader.BytesConsumed;
                     }
 
                     if (!reader.Read())
@@ -58,15 +60,15 @@ namespace System.Text.Json.Serialization
                             readStack.Push();
                             readStack.Current.Drain = true;
                         }
-                        else if (readStack.Current.IsProcessingValue)
+                        else if (readStack.Current.IsProcessingValue())
                         {
-                            if (!HandleObjectAsValue(tokenType, options, ref reader, ref readStack, ref initialState))
+                            if (!HandleObjectAsValue(tokenType, options, ref reader, ref readStack, ref initialState, initialBytesConsumed))
                             {
                                 // Need more data
                                 break;
                             }
                         }
-                        else if (readStack.Current.IsProcessingDictionary)
+                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingIDictionaryConstructible)
                         {
                             HandleStartDictionary(options, ref reader, ref readStack);
                         }
@@ -81,7 +83,7 @@ namespace System.Text.Json.Serialization
                         {
                             readStack.Pop();
                         }
-                        else if (readStack.Current.IsProcessingDictionary)
+                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingIDictionaryConstructible)
                         {
                             HandleEndDictionary(options, ref reader, ref readStack);
                         }
@@ -92,11 +94,11 @@ namespace System.Text.Json.Serialization
                     }
                     else if (tokenType == JsonTokenType.StartArray)
                     {
-                        if (!readStack.Current.IsProcessingValue)
+                        if (!readStack.Current.IsProcessingValue())
                         {
                             HandleStartArray(options, ref reader, ref readStack);
                         }
-                        else if (!HandleObjectAsValue(tokenType, options, ref reader, ref readStack, ref initialState))
+                        else if (!HandleObjectAsValue(tokenType, options, ref reader, ref readStack, ref initialState, initialBytesConsumed))
                         {
                             // Need more data
                             break;
@@ -108,14 +110,27 @@ namespace System.Text.Json.Serialization
                     }
                     else if (tokenType == JsonTokenType.Null)
                     {
-                        HandleNull(ref reader, ref readStack, options);
+                        HandleNull(ref reader, ref readStack);
                     }
                 }
             }
-            catch (JsonReaderException e)
+            catch (JsonReaderException ex)
             {
                 // Re-throw with Path information.
-                ThrowHelper.ReThrowWithPath(e, readStack.JsonPath);
+                ThrowHelper.ReThrowWithPath(readStack, ex);
+            }
+            catch (FormatException ex) when (ex.Source == ThrowHelper.ExceptionSourceValueToRethrowAsJsonException)
+            {
+                ThrowHelper.ReThrowWithPath(readStack, reader, ex);
+            }
+            catch (InvalidOperationException ex) when (ex.Source == ThrowHelper.ExceptionSourceValueToRethrowAsJsonException)
+            {
+                ThrowHelper.ReThrowWithPath(readStack, reader, ex);
+            }
+            catch (JsonException ex)
+            {
+                ThrowHelper.AddExceptionInformation(readStack, reader, ex);
+                throw;
             }
 
             readStack.BytesConsumed += reader.BytesConsumed;
@@ -128,9 +143,10 @@ namespace System.Text.Json.Serialization
             JsonSerializerOptions options,
             ref Utf8JsonReader reader,
             ref ReadStack readStack,
-            ref JsonReaderState initialState)
+            ref JsonReaderState initialState,
+            long initialBytesConsumed)
         {
-            if (options.ReadAhead)
+            if (readStack.ReadAhead)
             {
                 // Attempt to skip to make sure we have all the data we need.
                 bool complete = reader.TrySkip();
@@ -140,11 +156,11 @@ namespace System.Text.Json.Serialization
                 // HandleValue below.
 
                 reader = new Utf8JsonReader(
-                    reader.OriginalSpan.Slice(checked((int)initialState.BytesConsumed)),
+                    reader.OriginalSpan.Slice(checked((int)initialBytesConsumed)),
                     isFinalBlock: reader.IsFinalBlock,
                     state: initialState);
                 Debug.Assert(reader.BytesConsumed == 0);
-                readStack.BytesConsumed += initialState.BytesConsumed;
+                readStack.BytesConsumed += initialBytesConsumed;
 
                 if (!complete)
                 {

@@ -10,13 +10,51 @@ namespace System.Text.Json.Serialization.Tests
     public static class CyclicTests
     {
         [Fact]
-        public static void WriteCyclicFail()
+        public static void WriteCyclicFailDefault()
         {
             TestClassWithCycle obj = new TestClassWithCycle();
             obj.Parent = obj;
 
-            // We don't allow graph cycles; we throw InvalidOperation instead of an unrecoverable StackOverflow.
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.ToString(obj));
+            // We don't allow graph cycles; we throw JsonException instead of an unrecoverable StackOverflow.
+            Assert.Throws<JsonException>(() => JsonSerializer.Serialize(obj));
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(10)]
+        [InlineData(70)]
+        public static void WriteCyclicFail(int depth)
+        {
+            var rootObj = new TestClassWithCycle("root");
+            CreateObjectHierarchy(1, depth, rootObj);
+
+            {
+                var options = new JsonSerializerOptions();
+                options.MaxDepth = depth + 1;
+
+                // No exception since depth was not passed.
+                string json = JsonSerializer.Serialize(rootObj, options);
+                Assert.False(string.IsNullOrEmpty(json));
+            }
+
+            {
+                var options = new JsonSerializerOptions();
+                options.MaxDepth = depth;
+                Assert.Throws<JsonException>(() => JsonSerializer.Serialize(rootObj, options));
+            }
+        }
+
+        private static TestClassWithCycle CreateObjectHierarchy(int i, int max, TestClassWithCycle previous)
+        {
+            if (i == max)
+            {
+                return null;
+            }
+
+            var obj = new TestClassWithCycle(i.ToString());
+            previous.Parent = obj;
+            return CreateObjectHierarchy(++i, max, obj);
         }
 
         [Fact]
@@ -25,7 +63,7 @@ namespace System.Text.Json.Serialization.Tests
             TestClassWithArrayOfElementsOfTheSameClass obj = new TestClassWithArrayOfElementsOfTheSameClass();
 
             // A cycle in just Types (not data) is allowed.
-            string json = JsonSerializer.ToString(obj);
+            string json = JsonSerializer.Serialize(obj);
             Assert.Equal(@"{""Array"":null}", json);
         }
 
@@ -39,10 +77,10 @@ namespace System.Text.Json.Serialization.Tests
             root.Children.Add(new TestClassWithCycle("child2"));
 
             // A cycle in just Types (not data) is allowed.
-            string json = JsonSerializer.ToString(root);
+            string json = JsonSerializer.Serialize(root);
 
             // Round-trip the JSON.
-            TestClassWithCycle rootCopy = JsonSerializer.Parse<TestClassWithCycle>(json);
+            TestClassWithCycle rootCopy = JsonSerializer.Deserialize<TestClassWithCycle>(json);
             Assert.Equal("root", rootCopy.Name);
             Assert.Equal(2, rootCopy.Children.Count);
 

@@ -104,17 +104,15 @@ namespace System.Runtime.Intrinsics
         public static System.Runtime.Intrinsics.Vector128<T> WithLower<T>(this System.Runtime.Intrinsics.Vector128<T> vector, System.Runtime.Intrinsics.Vector64<T> value) where T : struct { throw null; }
         public static System.Runtime.Intrinsics.Vector128<T> WithUpper<T>(this System.Runtime.Intrinsics.Vector128<T> vector, System.Runtime.Intrinsics.Vector64<T> value) where T : struct { throw null; }
     }
-    public readonly partial struct Vector128<T> : System.IEquatable<System.Runtime.Intrinsics.Vector128<T>>, System.IFormattable where T : struct
+    public readonly partial struct Vector128<T> : System.IEquatable<System.Runtime.Intrinsics.Vector128<T>> where T : struct
     {
         private readonly int _dummyPrimitive;
         public static int Count { get { throw null; } }
         public static System.Runtime.Intrinsics.Vector128<T> Zero { get { throw null; } }
-        public override bool Equals(object obj) { throw null; }
+        public override bool Equals(object? obj) { throw null; }
         public bool Equals(System.Runtime.Intrinsics.Vector128<T> other) { throw null; }
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
-        public string ToString(string format) { throw null; }
-        public string ToString(string format, System.IFormatProvider formatProvider) { throw null; }
     }
     public static partial class Vector256
     {
@@ -211,17 +209,15 @@ namespace System.Runtime.Intrinsics
         public static System.Runtime.Intrinsics.Vector256<T> WithLower<T>(this System.Runtime.Intrinsics.Vector256<T> vector, System.Runtime.Intrinsics.Vector128<T> value) where T : struct { throw null; }
         public static System.Runtime.Intrinsics.Vector256<T> WithUpper<T>(this System.Runtime.Intrinsics.Vector256<T> vector, System.Runtime.Intrinsics.Vector128<T> value) where T : struct { throw null; }
     }
-    public readonly partial struct Vector256<T> : System.IEquatable<System.Runtime.Intrinsics.Vector256<T>>, System.IFormattable where T : struct
+    public readonly partial struct Vector256<T> : System.IEquatable<System.Runtime.Intrinsics.Vector256<T>> where T : struct
     {
         private readonly int _dummyPrimitive;
         public static int Count { get { throw null; } }
         public static System.Runtime.Intrinsics.Vector256<T> Zero { get { throw null; } }
-        public override bool Equals(object obj) { throw null; }
+        public override bool Equals(object? obj) { throw null; }
         public bool Equals(System.Runtime.Intrinsics.Vector256<T> other) { throw null; }
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
-        public string ToString(string format) { throw null; }
-        public string ToString(string format, System.IFormatProvider formatProvider) { throw null; }
     }
     public static partial class Vector64
     {
@@ -290,17 +286,15 @@ namespace System.Runtime.Intrinsics
         public static System.Runtime.Intrinsics.Vector128<T> ToVector128<T>(this System.Runtime.Intrinsics.Vector64<T> vector) where T : struct { throw null; }
         public static System.Runtime.Intrinsics.Vector64<T> WithElement<T>(this System.Runtime.Intrinsics.Vector64<T> vector, int index, T value) where T : struct { throw null; }
     }
-    public readonly partial struct Vector64<T> : System.IEquatable<System.Runtime.Intrinsics.Vector64<T>>, System.IFormattable where T : struct
+    public readonly partial struct Vector64<T> : System.IEquatable<System.Runtime.Intrinsics.Vector64<T>> where T : struct
     {
         private readonly int _dummyPrimitive;
         public static int Count { get { throw null; } }
         public static System.Runtime.Intrinsics.Vector64<T> Zero { get { throw null; } }
-        public override bool Equals(object obj) { throw null; }
+        public override bool Equals(object? obj) { throw null; }
         public bool Equals(System.Runtime.Intrinsics.Vector64<T> other) { throw null; }
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
-        public string ToString(string format) { throw null; }
-        public string ToString(string format, System.IFormatProvider formatProvider) { throw null; }
     }
 }
 namespace System.Runtime.Intrinsics.X86
@@ -1656,22 +1650,6 @@ namespace System.Runtime.Intrinsics.X86
         public static System.Runtime.Intrinsics.Vector128<double> RoundToZeroScalar(System.Runtime.Intrinsics.Vector128<double> upper, System.Runtime.Intrinsics.Vector128<double> value) { throw null; }
         public static System.Runtime.Intrinsics.Vector128<float> RoundToZeroScalar(System.Runtime.Intrinsics.Vector128<float> value) { throw null; }
         public static System.Runtime.Intrinsics.Vector128<float> RoundToZeroScalar(System.Runtime.Intrinsics.Vector128<float> upper, System.Runtime.Intrinsics.Vector128<float> value) { throw null; }
-        public static bool TestAllOnes(System.Runtime.Intrinsics.Vector128<byte> value) { throw null; }
-        public static bool TestAllOnes(System.Runtime.Intrinsics.Vector128<short> value) { throw null; }
-        public static bool TestAllOnes(System.Runtime.Intrinsics.Vector128<int> value) { throw null; }
-        public static bool TestAllOnes(System.Runtime.Intrinsics.Vector128<long> value) { throw null; }
-        public static bool TestAllOnes(System.Runtime.Intrinsics.Vector128<sbyte> value) { throw null; }
-        public static bool TestAllOnes(System.Runtime.Intrinsics.Vector128<ushort> value) { throw null; }
-        public static bool TestAllOnes(System.Runtime.Intrinsics.Vector128<uint> value) { throw null; }
-        public static bool TestAllOnes(System.Runtime.Intrinsics.Vector128<ulong> value) { throw null; }
-        public static bool TestAllZeros(System.Runtime.Intrinsics.Vector128<byte> left, System.Runtime.Intrinsics.Vector128<byte> right) { throw null; }
-        public static bool TestAllZeros(System.Runtime.Intrinsics.Vector128<short> left, System.Runtime.Intrinsics.Vector128<short> right) { throw null; }
-        public static bool TestAllZeros(System.Runtime.Intrinsics.Vector128<int> left, System.Runtime.Intrinsics.Vector128<int> right) { throw null; }
-        public static bool TestAllZeros(System.Runtime.Intrinsics.Vector128<long> left, System.Runtime.Intrinsics.Vector128<long> right) { throw null; }
-        public static bool TestAllZeros(System.Runtime.Intrinsics.Vector128<sbyte> left, System.Runtime.Intrinsics.Vector128<sbyte> right) { throw null; }
-        public static bool TestAllZeros(System.Runtime.Intrinsics.Vector128<ushort> left, System.Runtime.Intrinsics.Vector128<ushort> right) { throw null; }
-        public static bool TestAllZeros(System.Runtime.Intrinsics.Vector128<uint> left, System.Runtime.Intrinsics.Vector128<uint> right) { throw null; }
-        public static bool TestAllZeros(System.Runtime.Intrinsics.Vector128<ulong> left, System.Runtime.Intrinsics.Vector128<ulong> right) { throw null; }
         public static bool TestC(System.Runtime.Intrinsics.Vector128<byte> left, System.Runtime.Intrinsics.Vector128<byte> right) { throw null; }
         public static bool TestC(System.Runtime.Intrinsics.Vector128<short> left, System.Runtime.Intrinsics.Vector128<short> right) { throw null; }
         public static bool TestC(System.Runtime.Intrinsics.Vector128<int> left, System.Runtime.Intrinsics.Vector128<int> right) { throw null; }
@@ -1680,14 +1658,6 @@ namespace System.Runtime.Intrinsics.X86
         public static bool TestC(System.Runtime.Intrinsics.Vector128<ushort> left, System.Runtime.Intrinsics.Vector128<ushort> right) { throw null; }
         public static bool TestC(System.Runtime.Intrinsics.Vector128<uint> left, System.Runtime.Intrinsics.Vector128<uint> right) { throw null; }
         public static bool TestC(System.Runtime.Intrinsics.Vector128<ulong> left, System.Runtime.Intrinsics.Vector128<ulong> right) { throw null; }
-        public static bool TestMixOnesZeros(System.Runtime.Intrinsics.Vector128<byte> left, System.Runtime.Intrinsics.Vector128<byte> right) { throw null; }
-        public static bool TestMixOnesZeros(System.Runtime.Intrinsics.Vector128<short> left, System.Runtime.Intrinsics.Vector128<short> right) { throw null; }
-        public static bool TestMixOnesZeros(System.Runtime.Intrinsics.Vector128<int> left, System.Runtime.Intrinsics.Vector128<int> right) { throw null; }
-        public static bool TestMixOnesZeros(System.Runtime.Intrinsics.Vector128<long> left, System.Runtime.Intrinsics.Vector128<long> right) { throw null; }
-        public static bool TestMixOnesZeros(System.Runtime.Intrinsics.Vector128<sbyte> left, System.Runtime.Intrinsics.Vector128<sbyte> right) { throw null; }
-        public static bool TestMixOnesZeros(System.Runtime.Intrinsics.Vector128<ushort> left, System.Runtime.Intrinsics.Vector128<ushort> right) { throw null; }
-        public static bool TestMixOnesZeros(System.Runtime.Intrinsics.Vector128<uint> left, System.Runtime.Intrinsics.Vector128<uint> right) { throw null; }
-        public static bool TestMixOnesZeros(System.Runtime.Intrinsics.Vector128<ulong> left, System.Runtime.Intrinsics.Vector128<ulong> right) { throw null; }
         public static bool TestNotZAndNotC(System.Runtime.Intrinsics.Vector128<byte> left, System.Runtime.Intrinsics.Vector128<byte> right) { throw null; }
         public static bool TestNotZAndNotC(System.Runtime.Intrinsics.Vector128<short> left, System.Runtime.Intrinsics.Vector128<short> right) { throw null; }
         public static bool TestNotZAndNotC(System.Runtime.Intrinsics.Vector128<int> left, System.Runtime.Intrinsics.Vector128<int> right) { throw null; }

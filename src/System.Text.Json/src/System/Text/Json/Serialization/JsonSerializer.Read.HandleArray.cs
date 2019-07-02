@@ -5,9 +5,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.Json.Serialization.Policies;
+using System.Text.Json.Serialization.Converters;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -44,39 +44,42 @@ namespace System.Text.Json.Serialization
 
             Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
 
-            if (state.Current.PropertyInitialized)
+            if (state.Current.CollectionPropertyInitialized)
             {
                 // A nested json array so push a new stack frame.
                 Type elementType = jsonPropertyInfo.ElementClassInfo.Type;
 
                 state.Push();
                 state.Current.Initialize(elementType, options);
-                state.Current.PropertyInitialized = true;
+            }
+
+            state.Current.CollectionPropertyInitialized = true;
+            jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
+            if (state.Current.JsonClassInfo.ClassType == ClassType.Value)
+            {
+                state.Current.JsonPropertyInfo.Read(JsonTokenType.StartObject, ref state, ref reader);
             }
             else
             {
-                state.Current.PropertyInitialized = true;
-            }
-
-            jsonPropertyInfo = state.Current.JsonPropertyInfo;
-
-            // If current property is already set (from a constructor, for example) leave as-is.
-            if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) == null)
-            {
-                // Create the enumerable.
-                object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state, options);
-
-                // If value is not null, then we don't have a converter so apply the value.
-                if (value != null)
+                // If current property is already set (from a constructor, for example) leave as-is.
+                if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) == null)
                 {
-                    if (state.Current.ReturnValue != null)
+                    // Create the enumerable.
+                    object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state, options);
+
+                    // If value is not null, then we don't have a converter so apply the value.
+                    if (value != null)
                     {
-                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
-                    }
-                    else
-                    {
-                        // Primitive arrays being returned without object
-                        state.Current.SetReturnValue(value);
+                        if (state.Current.ReturnValue != null)
+                        {
+                            state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                        }
+                        else
+                        {
+                            // Primitive arrays being returned without object
+                            state.Current.SetReturnValue(value);
+                        }
                     }
                 }
             }
@@ -115,7 +118,7 @@ namespace System.Text.Json.Serialization
             else if (state.Current.IsEnumerableProperty)
             {
                 // We added the items to the list already.
-                state.Current.ResetProperty();
+                state.Current.EndProperty();
                 return false;
             }
 
@@ -128,7 +131,7 @@ namespace System.Text.Json.Serialization
                     state.Current.ReturnValue = value;
                     return true;
                 }
-                else if (state.Current.IsEnumerable || state.Current.IsDictionary)
+                else if (state.Current.IsEnumerable || state.Current.IsDictionary || state.Current.IsIDictionaryConstructible)
                 {
                     // Returning a non-converted list.
                     return true;
@@ -162,7 +165,12 @@ namespace System.Text.Json.Serialization
                 }
                 else
                 {
-                    ((IList)state.Current.ReturnValue).Add(value);
+                    if (!(state.Current.ReturnValue is IList list))
+                    {
+                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(value.GetType(), reader, state.JsonPath);
+                        return;
+                    }
+                    list.Add(value);
                 }
             }
             else if (!setPropertyDirectly && state.Current.IsEnumerableProperty)
@@ -193,14 +201,17 @@ namespace System.Text.Json.Serialization
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
-                if (!dictionary.Contains(key))
-                {
-                    dictionary.Add(key, value);
-                }
-                else
-                {
-                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.JsonPath);
-                }
+                dictionary[key] = value;
+            }
+            else if (state.Current.IsIDictionaryConstructible ||
+                (state.Current.IsIDictionaryConstructibleProperty && !setPropertyDirectly))
+            {
+                Debug.Assert(state.Current.TempDictionaryValues != null);
+                IDictionary dictionary = (IDictionary)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.TempDictionaryValues);
+
+                string key = state.Current.KeyName;
+                Debug.Assert(!string.IsNullOrEmpty(key));
+                dictionary[key] = value;
             }
             else
             {
@@ -256,14 +267,16 @@ namespace System.Text.Json.Serialization
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
-                if (!dictionary.ContainsKey(key)) // The IDictionary.TryAdd extension method is not available in netstandard.
-                {
-                    dictionary.Add(key, value);
-                }
-                else
-                {
-                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.JsonPath);
-                }
+                dictionary[key] = value;
+            }
+            else if (state.Current.IsProcessingIDictionaryConstructible)
+            {
+                Debug.Assert(state.Current.TempDictionaryValues != null);
+                IDictionary<string, TProperty> dictionary = (IDictionary<string, TProperty>)state.Current.TempDictionaryValues;
+
+                string key = state.Current.KeyName;
+                Debug.Assert(!string.IsNullOrEmpty(key));
+                dictionary[key] = value;
             }
             else
             {

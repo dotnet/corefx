@@ -210,18 +210,20 @@ namespace System.Runtime.Loader
             }
         }
 
+#region AppDomainEvents
         // Occurs when an Assembly is loaded
-        public static event AssemblyLoadEventHandler AssemblyLoad;
+        internal static event AssemblyLoadEventHandler AssemblyLoad;
 
         // Occurs when resolution of type fails
-        public static event ResolveEventHandler TypeResolve;
+        internal static event ResolveEventHandler TypeResolve;
 
         // Occurs when resolution of resource fails
-        public static event ResolveEventHandler ResourceResolve;
+        internal static event ResolveEventHandler ResourceResolve;
 
         // Occurs when resolution of assembly fails
         // This event is fired after resolve events of AssemblyLoadContext fails
-        public static event ResolveEventHandler AssemblyResolve;
+        internal static event ResolveEventHandler AssemblyResolve;
+#endregion
 
         public static AssemblyLoadContext Default => DefaultAssemblyLoadContext.s_loadContext;
 
@@ -246,11 +248,7 @@ namespace System.Runtime.Loader
 
                 foreach (WeakReference<AssemblyLoadContext> weakAlc in alcList)
                 {
-                    AssemblyLoadContext? alc = null;
-
-                    weakAlc.TryGetTarget(out alc);
-
-                    if (alc != null)
+                    if (weakAlc.TryGetTarget(out AssemblyLoadContext? alc))
                     {
                         yield return alc;
                     }
@@ -277,6 +275,7 @@ namespace System.Runtime.Loader
             return null;
         }
 
+#if !CORERT
         [System.Security.DynamicSecurityMethod] // Methods containing StackCrawlMark local var has to be marked DynamicSecurityMethod
         public Assembly LoadFromAssemblyName(AssemblyName assemblyName)
         {
@@ -287,6 +286,7 @@ namespace System.Runtime.Loader
             StackCrawlMark stackMark = StackCrawlMark.LookForMyCaller;
             return Assembly.Load(assemblyName, ref stackMark, this);
         }
+#endif
 
         // These methods load assemblies into the current AssemblyLoadContext
         // They may be used in the implementation of an AssemblyLoadContext derivation
@@ -426,7 +426,7 @@ namespace System.Runtime.Loader
             {
                 foreach (var alcAlive in s_allContexts)
                 {
-                    if (alcAlive.Value.TryGetTarget(out AssemblyLoadContext alc))
+                    if (alcAlive.Value.TryGetTarget(out AssemblyLoadContext? alc))
                     {
                         alc.RaiseUnloadEvent();
                     }

@@ -274,7 +274,7 @@ namespace StaticTestGenerator
             // Invalid command line arguments.
             Console.WriteLine("Usage: <output_directory> <helper_assemblies_directory> <test_assembly_path> <xunit_console_options>");
             Console.WriteLine("    Example:");
-            Console.WriteLine(@"   dotnet run d:\tmpoutput d:\repos\corefx\artifacts\bin\testhost\netcoreapp-Windows_NT-Debug-x64\shared\Microsoft.NETCore.App\9.9.9 d:\repos\corefx\artifacts\bin\System.Runtime.Tests\netcoreapp-Windows_NT-Debug\System.Runtime.Tests.dll");
+            Console.WriteLine(@"   dotnet run d:\tmpoutput d:\repos\corefx\artifacts\bin\testhost\netcoreapp-Windows_NT-Debug-x64\shared\Microsoft.NETCore.App\$(ProductVersion) d:\repos\corefx\artifacts\bin\System.Runtime.Tests\netcoreapp-Windows_NT-Debug\System.Runtime.Tests.dll");
             testAssemblyPath = string.Empty;
             runtimeAssembliesPath = string.Empty;
             outputPath = string.Empty;
@@ -1129,7 +1129,6 @@ public static class Test
     <Reference Include=""xunit.core""><HintPath>#HelperAssemblyLocation#xunit.core.dll</HintPath></Reference>
     <Reference Include=""xunit.assert""><HintPath>#HelperAssemblyLocation#xunit.assert.dll</HintPath></Reference>
     <Reference Include=""xunit.abstractions""><HintPath>#HelperAssemblyLocation#xunit.abstractions.dll</HintPath></Reference>
-    <Reference Include=""CoreFx.Private.TestUtilities""><HintPath>#HelperAssemblyLocation#CoreFx.Private.TestUtilities.dll</HintPath></Reference>
     <Reference Include=""System.Runtime.CompilerServices.Unsafe""><HintPath>#HelperAssemblyLocation#System.Runtime.CompilerServices.Unsafe.dll</HintPath></Reference>
     <Reference Include=""Microsoft.DotNet.XUnitExtensions""><HintPath>#HelperAssemblyLocation#Microsoft.DotNet.XUnitExtensions.dll</HintPath></Reference>
     <Reference Include=""#TestAssembly#""><HintPath>#TestAssemblyLocation#</HintPath></Reference>

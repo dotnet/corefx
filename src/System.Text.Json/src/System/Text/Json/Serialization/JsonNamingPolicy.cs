@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     /// <summary>
     /// Determines the naming policy used to convert a string-based name to another format, such as a camel-casing format.
@@ -18,6 +18,8 @@ namespace System.Text.Json.Serialization
         /// Returns the naming policy for camel-casing.
         /// </summary>
         public static JsonNamingPolicy CamelCase { get; } = new JsonCamelCaseNamePolicy();
+
+        internal static JsonNamingPolicy Default { get; } = new JsonDefaultNamingPolicy();
 
         /// <summary>
         /// When overridden in a derived class, converts the specified name according to the policy.

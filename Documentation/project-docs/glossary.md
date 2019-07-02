@@ -151,6 +151,7 @@ environment (AppContainer), and a set of Windows APIs to use instead of Win32
 and JavaScript. When using C# and VB.NET the .NET APIs are provided by .NET
 Core.
 
+<<<<<<< HEAD
 ### .NET Native
 
 **Also referred to as**: ahead-of-time (AOT), IL compiler (ILC)
@@ -173,6 +174,8 @@ application.
 UWP was the first application model that was supported by .NET Native. We now
 also support building native console applications for Windows, OS X and Linux.
 
+=======
+>>>>>>> dotnet/master
 ### Rotor
 
 **Also referred to as**: Shared Source Common Language Infrastructure (SSCLI)

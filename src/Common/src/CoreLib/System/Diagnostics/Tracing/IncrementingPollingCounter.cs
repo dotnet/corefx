@@ -56,7 +56,7 @@ namespace System.Diagnostics.Tracing
         {
             try
             {
-                lock (MyLock)
+                lock (this)
                 {
                     _increment = _totalValueProvider();
                 }
@@ -70,7 +70,7 @@ namespace System.Diagnostics.Tracing
         internal override void WritePayload(float intervalSec, int pollingIntervalMillisec)
         {
             UpdateMetric();
-            lock (MyLock)     // Lock the counter
+            lock (this)     // Lock the counter
             {
                 IncrementingCounterPayload payload = new IncrementingCounterPayload();
                 payload.Name = Name;
@@ -81,6 +81,7 @@ namespace System.Diagnostics.Tracing
                 payload.CounterType = "Sum";
                 payload.Metadata = GetMetadataString();
                 payload.Increment = _increment - _prevIncrement;
+                payload.DisplayUnits = DisplayUnits ?? "";
                 _prevIncrement = _increment;
                 EventSource.Write("EventCounters", new EventSourceOptions() { Level = EventLevel.LogAlways }, new IncrementingPollingCounterPayloadType(payload));
             }
