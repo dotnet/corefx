@@ -548,19 +548,6 @@ namespace System.Net.Http
                     ParseStatusLine(await ReadNextResponseHeaderLineAsync().ConfigureAwait(false), response);
                 }
 
-                // Now that we've received our final status line, wait for the request content to fully send.
-                // In most common scenarios, the server won't send back a response until all of the request
-                // content has been received, so this task should generally already be complete.
-                if (sendRequestContentTask != null)
-                {
-                    Task sendTask = sendRequestContentTask;
-                    sendRequestContentTask = null;
-                    await sendTask.ConfigureAwait(false);
-                }
-
-                // Now we are sure that the request was fully sent.
-                if (NetEventSource.IsEnabled) Trace("Request is fully sent.");
-
                 // Parse the response headers.
                 while (true)
                 {
@@ -607,6 +594,19 @@ namespace System.Net.Http
                 {
                     _connectionClose = true;
                 }
+
+                // Now that we've received our final status line, wait for the request content to fully send.
+                // In most common scenarios, the server won't send back a response until all of the request
+                // content has been received, so this task should generally already be complete.
+                if (sendRequestContentTask != null)
+                {
+                    Task sendTask = sendRequestContentTask;
+                    sendRequestContentTask = null;
+                    await sendTask.ConfigureAwait(false);
+                }
+
+                // Now we are sure that the request was fully sent.
+                if (NetEventSource.IsEnabled) Trace("Request is fully sent.");
 
                 // We're about to create the response stream, at which point responsibility for canceling
                 // the remainder of the response lies with the stream.  Thus we dispose of our registration
