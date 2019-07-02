@@ -1502,8 +1502,7 @@ namespace System.Net.Http.Functional.Tests
                  } while (frame.Type != FrameType.RstStream);
 
                  frame = await connection.ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds)).ConfigureAwait(false);
-                 // Make sure we do not get any frames after getting RST.
-                 Assert.Null(frame);
+                 Assert.Null(frame);    // Make sure we do not get any frames after getting RST.
             });
         }
 
