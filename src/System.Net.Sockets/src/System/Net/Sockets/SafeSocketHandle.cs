@@ -179,7 +179,7 @@ namespace System.Net.Sockets
                         // Try to make those on-going calls return.
                         // On Linux, TryUnblockSocket will unblock current operations but it doesn't prevent
                         // a new one from starting. So we must call TryUnblockSocket multiple times.
-                        abortive |= innerSocket.TryUnblockSocket();
+                        abortive |= innerSocket.TryUnblockSocket(abortive);
                         sw.SpinOnce();
                     }
 

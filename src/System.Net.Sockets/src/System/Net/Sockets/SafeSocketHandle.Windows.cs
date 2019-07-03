@@ -234,7 +234,7 @@ namespace System.Net.Sockets
                 return result;
             }
 
-            internal unsafe bool TryUnblockSocket()
+            internal unsafe bool TryUnblockSocket(bool abortive)
             {
                 // Try to cancel all pending IO.
                 // If we've canceled operations, we return true to cause an abortive close.

@@ -358,7 +358,7 @@ namespace System.Net.Sockets
                 return res;
             }
 
-            internal unsafe bool TryUnblockSocket()
+            internal unsafe bool TryUnblockSocket(bool abortive)
             {
                 // Calling 'close' on a socket that has pending blocking calls (e.g. recv, send, accept, ...)
                 // may block indefinitely. This is a best-effort attempt to not get blocked and make those operations return.
@@ -368,12 +368,15 @@ namespace System.Net.Sockets
                 // On OSX, TCP connections will be closed with a FIN close instead of an abortive RST close.
                 // And, pending TCP connect operations and UDP receive are not abortable.
 
-                // Don't touch sockets which don't have the CLOEXEC flag set. These may be shared
-                // with other processes and we want to avoid disconnecting them.
-                int fdFlags = Interop.Sys.Fcntl.GetFD(this);
-                if (fdFlags == 0)
+                // Unless we're doing an abortive close, don't touch sockets which don't have the CLOEXEC flag set.
+                // These may be shared with other processes and we want to avoid disconnecting them.
+                if (!abortive)
                 {
-                    return false;
+                    int fdFlags = Interop.Sys.Fcntl.GetFD(this);
+                    if (fdFlags == 0)
+                    {
+                        return false;
+                    }
                 }
 
                 int type = 0;
