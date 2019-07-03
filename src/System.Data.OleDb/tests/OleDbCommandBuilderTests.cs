@@ -94,11 +94,11 @@ namespace System.Data.OleDb.Tests
                 {
                     AssertExtensions.Throws<ArgumentNullException>(
                         () => builder.QuoteIdentifier(null, command.Connection), 
-                        $"Value cannot be null.\r\nParameter name: unquotedIdentifier");
+                        $"Value cannot be null. (Parameter \'unquotedIdentifier\')");
 
                     AssertExtensions.Throws<ArgumentNullException>(
                         () => builder.UnquoteIdentifier(null, command.Connection), 
-                        $"Value cannot be null.\r\nParameter name: quotedIdentifier");
+                        $"Value cannot be null. (Parameter \'quotedIdentifier\')");
                 }
                 command.CommandType = CommandType.Text;
             });

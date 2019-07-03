@@ -23,7 +23,7 @@ namespace System.Data.OleDb.Tests
                 Assert.Equal(UpdateRowSource.FirstReturnedRecord, cmd.UpdatedRowSource);
                 AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     () => cmd.UpdatedRowSource = (UpdateRowSource)InvalidValue, 
-                    $"The {nameof(UpdateRowSource)} enumeration value, {InvalidValue}, is invalid.\r\nParameter name: {nameof(UpdateRowSource)}"
+                    $"The {nameof(UpdateRowSource)} enumeration value, {InvalidValue}, is invalid. (Parameter \'{nameof(UpdateRowSource)}\')"
                 );
             }
         }
@@ -36,7 +36,7 @@ namespace System.Data.OleDb.Tests
             {
                 AssertExtensions.Throws<ArgumentException>(
                     () => cmd.CommandTimeout = InvalidValue, 
-                    $"Invalid CommandTimeout value {InvalidValue}; the value must be >= 0.\r\nParameter name: {nameof(cmd.CommandTimeout)}"
+                    $"Invalid CommandTimeout value {InvalidValue}; the value must be >= 0. (Parameter \'{nameof(cmd.CommandTimeout)}\')"
                 );
             }
         }
@@ -63,7 +63,7 @@ namespace System.Data.OleDb.Tests
             {
                 AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     () => cmd.CommandType = (CommandType)InvalidValue, 
-                    $"The CommandType enumeration value, {InvalidValue}, is invalid.\r\nParameter name: {nameof(cmd.CommandType)}"
+                    $"The CommandType enumeration value, {InvalidValue}, is invalid. (Parameter \'{nameof(cmd.CommandType)}\')"
                 );
             }
         }
@@ -151,7 +151,7 @@ namespace System.Data.OleDb.Tests
             RunTest((command, tableName) => {
                 AssertExtensions.Throws<ArgumentNullException>(
                     () => command.Parameters.Add(null), 
-                    $"The {nameof(OleDbParameterCollection)} only accepts non-null {nameof(OleDbParameter)} type objects.\r\nParameter name: value"
+                    $"The {nameof(OleDbParameterCollection)} only accepts non-null {nameof(OleDbParameter)} type objects. (Parameter \'value\')"
                 );
                 command.CommandText = "SELECT * FROM " + tableName + " WHERE NumPlants = ?";
                 command.Parameters.Add(new OleDbParameter("@p1", 7));
