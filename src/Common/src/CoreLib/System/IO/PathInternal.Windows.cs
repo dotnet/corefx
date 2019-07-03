@@ -401,7 +401,7 @@ namespace System.IO
         /// </summary>
         internal static bool IsEffectivelyEmpty(ReadOnlySpan<char> path)
         {
-            return (path.IsEmpty || path.IndexOf(' ') > -1);
+            return path.IsWhiteSpace();
         }
     }
 }
