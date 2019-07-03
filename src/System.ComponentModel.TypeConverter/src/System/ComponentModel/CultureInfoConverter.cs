@@ -158,12 +158,11 @@ namespace System.ComponentModel
                     return GetCultureName(c);
                 }
             }
-            if (destinationType == typeof(InstanceDescriptor) && value is CultureInfo)
+            if (destinationType == typeof(InstanceDescriptor) && value is CultureInfo cultureValue)
             {
-                CultureInfo c = (CultureInfo)value;
                 return new InstanceDescriptor(
                     typeof(CultureInfo).GetConstructor(new Type[] { typeof(string) }),
-                    new object[] { c.Name }
+                    new object[] { cultureValue.Name }
                 );
             }
 
