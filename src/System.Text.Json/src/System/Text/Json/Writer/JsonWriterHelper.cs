@@ -172,13 +172,22 @@ namespace System.Text.Json
                 return;
             }
 
+            //The non digit character inside the number
             byte val = utf8FormattedNumber[i];
 
             if (val == '.')
             {
                 i++;
+
+                while (i < utf8FormattedNumber.Length && JsonHelpers.IsDigit(utf8FormattedNumber[i]))
+                {
+                    i++;
+                }
             }
-            else if (val == 'e' || val == 'E')
+
+            val = utf8FormattedNumber[i];
+
+            if (val == 'e' || val == 'E')
             {
                 i++;
 
