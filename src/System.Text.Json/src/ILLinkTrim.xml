@@ -8,11 +8,11 @@
       <!-- Instantiated via reflection -->
       <method name=".ctor" />
     </type>
-    <type fullname="System.Text.Json.Serialization.JsonConverterEnum`1">
+    <type fullname="System.Text.Json.Serialization.Converters.JsonConverterEnum`1">
       <!-- Instantiated via reflection -->
       <method name=".ctor" />
     </type>
-    <type fullname="System.Text.Json.Serialization.JsonKeyValuePairConverter`2">
+    <type fullname="System.Text.Json.Serialization.Converters.JsonKeyValuePairConverter`2">
       <!-- Instantiated via reflection -->
       <method name=".ctor" />
     </type>
