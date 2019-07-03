@@ -55,10 +55,10 @@ namespace System.ComponentModel.TypeConverterTests
 
         [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(ArgumentExceptionFontConverterData))]
-        public void InvalidInputThrowsArgumentException(string input, string paramName)
+        public void InvalidInputThrowsArgumentException(string input, string paramName, string netfxParamName)
         {
             FontConverter converter = new FontConverter();
-            Assert.Throws<ArgumentException>(paramName, () => converter.ConvertFrom(input));
+            AssertExtensions.Throws<ArgumentException>(paramName, netfxParamName, () => converter.ConvertFrom(input));
         }
 
         [ConditionalTheory(Helpers.IsDrawingSupported)]
@@ -115,24 +115,24 @@ namespace System.ComponentModel.TypeConverterTests
             return data;
         }
 
-        public static TheoryData<string, string> ArgumentExceptionFontConverterData() => new TheoryData<string, string>()
+        public static TheoryData<string, string, string> ArgumentExceptionFontConverterData() => new TheoryData<string, string, string>()
         {
-            { $"Courier New{s_Separator} 11 px{s_Separator} type=Bold{s_Separator} Italic", "units" },
-            { $"Courier New{s_Separator} {s_Separator} Style=Bold", "sizeStr" },
-            { $"Courier New{s_Separator} 11{s_Separator} Style=", "value" },
-            { $"Courier New{s_Separator} 11{s_Separator} Style=RandomEnum", null },
-            { $"Arial{s_Separator} 10{s_Separator} style=bold{s_Separator}", "value" },
-            { $"Arial{s_Separator} 10{s_Separator} style=null", null },
-            { $"Arial{s_Separator} 10{s_Separator} style=abc#", null },
-            { $"Arial{s_Separator} 10{s_Separator} style=##", null },
-            { $"Arial{s_Separator} 10display{s_Separator} style=bold", null },
-            { $"Arial{s_Separator} 10style{s_Separator} style=bold", "units" },
+            { $"Courier New{s_Separator} 11 px{s_Separator} type=Bold{s_Separator} Italic", "units", null },
+            { $"Courier New{s_Separator} {s_Separator} Style=Bold", "sizeStr", null },
+            { $"Courier New{s_Separator} 11{s_Separator} Style=", "value", null },
+            { $"Courier New{s_Separator} 11{s_Separator} Style=RandomEnum", null, null },
+            { $"Arial{s_Separator} 10{s_Separator} style=bold{s_Separator}", "value", null },
+            { $"Arial{s_Separator} 10{s_Separator} style=null", null, null },
+            { $"Arial{s_Separator} 10{s_Separator} style=abc#", null, null },
+            { $"Arial{s_Separator} 10{s_Separator} style=##", null, null },
+            { $"Arial{s_Separator} 10display{s_Separator} style=bold", null, null },
+            { $"Arial{s_Separator} 10style{s_Separator} style=bold", "units", null },
         };
 
         public static TheoryData<string, string> InvalidEnumArgumentExceptionFontConverterData() => new TheoryData<string, string>()
         {
-            { $"Arial{s_Separator} 10{s_Separator} style=56", "styleStr" },
-            { $"Arial{s_Separator} 10{s_Separator} style=-1", "styleStr" },
+            { $"Arial{s_Separator} 10{s_Separator} style=56", "style" },
+            { $"Arial{s_Separator} 10{s_Separator} style=-1", "style" },
         };
     }
 

@@ -14,7 +14,7 @@ namespace System.Drawing
 {
     public class FontConverter : TypeConverter
     {
-        private const string StyleHdr = "style=";
+        private const string StylePrefix = "style=";
 
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
@@ -103,12 +103,11 @@ namespace System.Drawing
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
-            if (!(value is string))
+            if (!(value is string font))
             {
                 return base.ConvertFrom(context, culture, value);
             }
 
-            string font = (string)value;
             font = font.Trim();
 
             // Expected string format: "name[, size[, units[, style=style1[, style2[...]]]]]"
@@ -125,7 +124,7 @@ namespace System.Drawing
 
             char separator = culture.TextInfo.ListSeparator[0]; // For vi-VN: ','
             string fontName = font; // start with the assumption that only the font name was provided.
-            string styleStr = null;
+            string style = null;
             string sizeStr = null;
             float fontSize = 8.25f;
             FontStyle fontStyle = FontStyle.Regular;
@@ -146,18 +145,12 @@ namespace System.Drawing
             {
                 // Get the style index (if any). The size is a bit problematic because it can be formatted differently 
                 // depending on the culture, we'll parse it last.
-                int styleIndex = font.IndexOf(StyleHdr, StringComparison.CurrentCultureIgnoreCase);
+                int styleIndex = culture.CompareInfo.IndexOf(font, StylePrefix, CompareOptions.IgnoreCase);
 
                 if (styleIndex != -1)
                 {
                     // style found.
-                    styleStr = font.Substring(styleIndex, font.Length - styleIndex);
-
-                    // Expected style format ~ "style=Italic, Bold"
-                    if (!styleStr.StartsWith(StyleHdr, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        throw new ArgumentException(SR.Format(SR.TextParseFailedFormat, font, $"name{separator} size[units[{separator} style=style1[{separator} style2{separator} ...]]]"), nameof(styleStr));
-                    }
+                    style = font.Substring(styleIndex, font.Length - styleIndex);
 
                     // Get the mid-substring containing the size information.
                     sizeStr = font.Substring(nameIndex + 1, styleIndex - nameIndex - 1);
@@ -171,7 +164,7 @@ namespace System.Drawing
                 // Parse size.
                 (string size, string unit) unitTokens = ParseSizeTokens(sizeStr, separator);
 
-                if (unitTokens.size!= null)
+                if (unitTokens.size != null)
                 {
                     try
                     {
@@ -190,12 +183,11 @@ namespace System.Drawing
                     units = ParseGraphicsUnits(unitTokens.unit);
                 }
 
-                if (styleStr != null)
+                if (style != null)
                 {
                     // Parse FontStyle                        
-                    int eqIndex = styleStr.IndexOf("=");
-                    styleStr = styleStr.Substring(eqIndex + 1);
-                    string[] styleTokens = styleStr.Split(separator);
+                    style = style.Substring(6); // style string always starts with style=
+                    string[] styleTokens = style.Split(separator);
 
                     for (int tokenCount = 0; tokenCount < styleTokens.Length; tokenCount++)
                     {
@@ -208,7 +200,7 @@ namespace System.Drawing
                         FontStyle validBits = FontStyle.Regular | FontStyle.Bold | FontStyle.Italic | FontStyle.Underline | FontStyle.Strikeout;
                         if ((fontStyle | validBits) != validBits)
                         {
-                            throw new InvalidEnumArgumentException(nameof(styleStr), (int)fontStyle, typeof(FontStyle));
+                            throw new InvalidEnumArgumentException(nameof(style), (int)fontStyle, typeof(FontStyle));
                         }
                     }
                 }
@@ -292,7 +284,7 @@ namespace System.Drawing
                     break;
 
                 default:
-                    throw new ArgumentException(null, nameof(units));
+                    throw new ArgumentException(SR.Format(SR.InvalidArgumentValue, units), nameof(units));
             }
 
             return fontSizeUnit;
