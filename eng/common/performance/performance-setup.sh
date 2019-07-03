@@ -101,7 +101,8 @@ if [ -z "$configurations" ]; then
     configurations="CompliationMode=$compilation_mode"
 fi
 
-if [ -z "$corerootdirectory" ]; then
+if [ -z "$core_root_directory" ]; then
+    echo "CoreRoot not specified"
     use_core_run=false
 fi
 
