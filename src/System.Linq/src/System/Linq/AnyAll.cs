@@ -57,15 +57,9 @@ namespace System.Linq
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
-            foreach (TSource element in source)
-            {
-                if (predicate(element))
-                {
-                    return true;
-                }
-            }
+            source.TryGetFirst(predicate, out bool found);
 
-            return false;
+            return found;
         }
 
         public static bool All<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)

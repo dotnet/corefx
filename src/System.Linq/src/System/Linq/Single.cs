@@ -60,28 +60,21 @@ namespace System.Linq
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
-            using (IEnumerator<TSource> e = source.GetEnumerator())
-            {
-                while (e.MoveNext())
-                {
-                    TSource result = e.Current;
-                    if (predicate(result))
-                    {
-                        while (e.MoveNext())
-                        {
-                            if (predicate(e.Current))
-                            {
-                                ThrowHelper.ThrowMoreThanOneMatchException();
-                            }
-                        }
+            var result = TryGetSingle(source, predicate, out bool found, out bool foundSingle);
 
-                        return result;
-                    }
-                }
+            if (!foundSingle)
+            {
+                ThrowHelper.ThrowMoreThanOneMatchException();
+                return default;
             }
 
-            ThrowHelper.ThrowNoMatchException();
-            return default;
+            if (!found)
+            {
+                ThrowHelper.ThrowNoMatchException();
+                return default;
+            }
+
+            return result;
         }
 
         [return: MaybeNull]
@@ -136,27 +129,89 @@ namespace System.Linq
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
-            using (IEnumerator<TSource> e = source.GetEnumerator())
+            var result = TryGetSingle(source, predicate, out bool found, out bool foundSingle);
+
+            if (!foundSingle)
             {
-                while (e.MoveNext())
+                ThrowHelper.ThrowMoreThanOneMatchException();
+
+                return default;
+            }
+
+            return result;
+        }
+
+        private static TSource TryGetSingle<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found, out bool foundSingle)
+        {
+            if (source == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+
+            if (predicate == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
+            }
+
+            TSource result = default!;
+            found = false;
+
+            if (source is TSource[] array)
+            {
+                foreach (TSource element in array)
                 {
-                    TSource result = e.Current;
-                    if (predicate(result))
+                    if (predicate(element))
                     {
-                        while (e.MoveNext())
+                        if (found)
                         {
-                            if (predicate(e.Current))
-                            {
-                                ThrowHelper.ThrowMoreThanOneMatchException();
-                            }
+                            foundSingle = false;
+                            return default!;
                         }
 
-                        return result;
+                        found = true;
+                        result = element;
+                    }
+                }
+
+                foundSingle = true;
+            }
+            else if (source is List<TSource> list)
+            {
+                foreach (TSource element in list)
+                {
+                    if (predicate(element))
+                    {
+                        if (found)
+                        {
+                            foundSingle = false;
+                            return default!;
+                        }
+
+                        found = true;
+                        result = element;
+                    }
+                }
+            }
+            else
+            {
+                foreach (TSource element in source)
+                {
+                    if (predicate(element))
+                    {
+                        if (found)
+                        {
+                            foundSingle = false;
+                            return default!;
+                        }
+
+                        found = true;
+                        result = element;
                     }
                 }
             }
 
-            return default!;
+            foundSingle = true;
+            return result;
         }
     }
 }
