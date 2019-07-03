@@ -5,6 +5,8 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
+using System.Threading;
 
 namespace System.IO.Pipelines
 {
@@ -16,6 +18,7 @@ namespace System.IO.Pipelines
         private const int InitialCallbacksSize = 1;
 
         private bool _isCompleted;
+        private ExceptionDispatchInfo _exceptionInfo;
         private Exception _exception;
 
         private PipeCompletionCallback _firstCallback;
@@ -24,7 +27,7 @@ namespace System.IO.Pipelines
 
         public bool IsCompleted => _isCompleted;
 
-        public bool IsFaulted => _exception != null;
+        public bool IsFaulted => _exceptionInfo != null;
 
         public PipeCompletionCallbacks TryComplete(Exception exception = null)
         {
@@ -34,9 +37,9 @@ namespace System.IO.Pipelines
                 if (exception != null)
                 {
                     // We really want to capture the preceeding stacktrace into the exception,
-                    // if it hasn't already been thrown (and thus is a transfer exception),
+                    // if it hasn't already been thrown (and thus isn't a transfer exception),
                     // but there currently isn't a way of doing that.
-                    _exception = exception;
+                    _exceptionInfo = ExceptionDispatchInfo.Capture(exception);
                 }
             }
 
@@ -94,7 +97,7 @@ namespace System.IO.Pipelines
                 return false;
             }
 
-            if (_exception != null)
+            if (_exceptionInfo != null)
             {
                 ThrowLatchedException();
             }
@@ -112,7 +115,7 @@ namespace System.IO.Pipelines
 
             var callbacks = new PipeCompletionCallbacks(s_completionCallbackPool,
                 _callbackCount,
-                _exception,
+                _exceptionInfo?.SourceException,
                 _firstCallback,
                 _callbacks);
 
@@ -127,20 +130,43 @@ namespace System.IO.Pipelines
             Debug.Assert(IsCompleted);
             Debug.Assert(_callbacks == null);
             _isCompleted = false;
-            _exception = null;
+            _exceptionInfo = null;
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private void ThrowLatchedException()
         {
+            // Only throw first exception using Edi
+            Exception exception = Interlocked.Exchange(ref _exception, _exceptionInfo.SourceException);
+
+            if (exception is null)
+            {
+                _exceptionInfo.Throw();
+            }
+
             // Throw a new exception so as not to corrupt stack trace, as may be thrown multiple times
-            if (_exception is OperationCanceledException ex)
+            throw GetNewException();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private Exception GetNewException()
+        {
+            if (_exception is OperationCanceledException oce)
             {
                 // Differentate OperationCanceled exceptions so Cancellation signals are propergated.
-                throw new OperationCanceledException(ex.Message, ex);
+                return new OperationCanceledException(oce.Message, oce, oce.CancellationToken);
+            }
+            else if (_exception is InvalidOperationException ioe)
+            {
+                return new InvalidOperationException(ioe.Message, ioe);
+            }
+            else if (_exception is ObjectDisposedException ode)
+            {
+                return new ObjectDisposedException(ode.Message, ode);
             }
             else
             {
-                throw new IOException(_exception.Message, _exception);
+                return new IOException(_exception.Message, _exception);
             }
         }
 
