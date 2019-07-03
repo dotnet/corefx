@@ -29,14 +29,6 @@ namespace System.Tests
         [Fact]
         public static void GetGCMemoryInfo()
         {
-            for(int i = 0; i < 1000; i++)
-            {
-                ReRunGetGCMemoryInfo();
-            }
-        }
-
-        private static void ReRunGetGCMemoryInfo()
-        {
             RemoteExecutor.Invoke(() =>
             {
                 // Allows to update the value returned by GC.GetGCMemoryInfo
@@ -93,9 +85,7 @@ namespace System.Tests
                     }
                 }
             }).Dispose();
-
         }
-
 
         [Fact]
         public static void GetTotalAllocatedBytes()
