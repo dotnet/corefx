@@ -77,15 +77,23 @@ jobs:
           continueOnError: ${{ parameters.continueOnError }}
         - script: $(Python) $(PerformanceDirectory)/scripts/ci_setup.py $(SetupArguments)
           displayName: Run ci setup script
+        - task: PublishBuildArtifacts@1
+          displayName: Publish Artifacts
+          inputs:
+            PathToPublish: $(PayloadDirectory)
+            PublishLocation: Container
+            ArtifactName: $(_BuildConfig)
+          continueOnError: true
+          condition: succeeded()
         # Run perf testing in helix
-        - template: /eng/common/templates/steps/perf-send-to-helix.yml
-          parameters:
-            HelixSource: '$(HelixSourcePrefix)/$(Build.Repository.Name)/$(Build.SourceBranch)' # sources must start with pr/, official/, prodcon/, or agent/
-            HelixType: 'test/performance/$(Kind)/$(_Framework)/$(Architecture)'
-            HelixAccessToken: $(HelixApiAccessToken)
-            HelixTargetQueues: $(Queue)
-            HelixPreCommands: $(HelixPreCommand)
-            Creator: $(Creator)
-            WorkItemTimeout: 4:00 # 4 hours
-            WorkItemDirectory: '$(WorkItemDirectory)' # WorkItemDirectory can not be empty, so we send it some docs to keep it happy
-            CorrelationPayloadDirectory: '$(PayloadDirectory)' # it gets checked out to a folder with shorter path than WorkItemDirectory so we can avoid file name too long exceptions
+        # - template: /eng/common/templates/steps/perf-send-to-helix.yml
+        #   parameters:
+        #     HelixSource: '$(HelixSourcePrefix)/$(Build.Repository.Name)/$(Build.SourceBranch)' # sources must start with pr/, official/, prodcon/, or agent/
+        #     HelixType: 'test/performance/$(Kind)/$(_Framework)/$(Architecture)'
+        #     HelixAccessToken: $(HelixApiAccessToken)
+        #     HelixTargetQueues: $(Queue)
+        #     HelixPreCommands: $(HelixPreCommand)
+        #     Creator: $(Creator)
+        #     WorkItemTimeout: 4:00 # 4 hours
+        #     WorkItemDirectory: '$(WorkItemDirectory)' # WorkItemDirectory can not be empty, so we send it some docs to keep it happy
+        #     CorrelationPayloadDirectory: '$(PayloadDirectory)' # it gets checked out to a folder with shorter path than WorkItemDirectory so we can avoid file name too long exceptions
