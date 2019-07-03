@@ -13,7 +13,7 @@
     <WorkItemCommand>$HELIX_CORRELATION_PAYLOAD/performance/scripts/benchmarks_ci.py --csproj $HELIX_CORRELATION_PAYLOAD/performance/$(TargetCsproj)</WorkItemCommand>
     <CliArguments>--dotnet-versions $DOTNET_VERSION --cli-source-info args --cli-branch $PERFLAB_BRANCH --cli-commit-sha $PERFLAB_HASH --cli-repository https://github.com/$PERFLAB_REPO --cli-source-timestamp $PERFLAB_BUILDTIMESTAMP</CliArguments>
     <Python>python3</Python>
-    <CoreRun>$HELIX_CORRELATION_PAYLOAD/Core_Root/CoreRun.exe</CoreRun>
+    <CoreRun>$HELIX_CORRELATION_PAYLOAD/Core_Root/corerun</CoreRun>
     <HelixPreCommands>$(HelixPreCommands);chmod +x $HELIX_CORRELATION_PAYLOAD/performance/tools/machine-setup.sh;. $HELIX_CORRELATION_PAYLOAD/performance/tools/machine-setup.sh</HelixPreCommands>
     <ArtifactsDirectory>$HELIX_CORRELATION_PAYLOAD/artifacts/BenchmarkDotNet.Artifacts</ArtifactsDirectory>
   </PropertyGroup>
