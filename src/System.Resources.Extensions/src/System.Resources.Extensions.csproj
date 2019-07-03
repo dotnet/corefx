@@ -25,6 +25,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Memory" />
+    <Reference Condition="'$(DotNetBuildFromSource)' == 'true'" Include="System.Memory" />
+    <!-- Visual studio needs to be able to load this assembly and cannot upgrade the version of System.Memory used -->
+    <Reference Condition="'$(DotNetBuildFromSource)' != 'true'" Include="$(NuGetPackageRoot)System.Memory\4.5.2\lib\netstandard2.0\System.Memory.dll" />
   </ItemGroup>
 </Project>

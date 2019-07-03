@@ -46,6 +46,9 @@
 
     <!-- UWP test tools -->
     <PackageReference Include="Microsoft.DotNet.UAP.TestTools" Version="$(MicrosoftDotNetUapTestToolsPackageVersion)" Condition="$(TargetGroup.StartsWith('uap'))" PrivateAssets="all" IsImplicitlyDefined="true" />
+    
+    <!-- Restore old System.Memory to use for VS compatibility -->
+    <PackageReference Include="System.Memory" Version="4.5.2" ExcludeAssets="All" />
   </ItemGroup>
 
   <UsingTask TaskName="Microsoft.DotNet.Arcade.Sdk.SaveItems" AssemblyFile="$(ArcadeSdkBuildTasksAssembly)" />
