@@ -951,7 +951,6 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
         public async Task UdpReceiveGetsCanceledByDispose()
         {
             // We try this a couple of times to deal with a timing race: if the Dispose happens
