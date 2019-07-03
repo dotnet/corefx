@@ -92,13 +92,26 @@ namespace System.Data.OleDb.Tests
                 command.CommandText = @"SELECT * FROM " + tableName;
                 using (var builder = (OleDbCommandBuilder)OleDbFactory.Instance.CreateCommandBuilder())
                 {
-                    AssertExtensions.Throws<ArgumentNullException>(
-                        () => builder.QuoteIdentifier(null, command.Connection), 
-                        $"Value cannot be null. (Parameter \'unquotedIdentifier\')");
+                    if (PlatformDetection.IsFullFramework)
+                    {
+                        AssertExtensions.Throws<ArgumentNullException>(
+                            () => builder.QuoteIdentifier(null, command.Connection), 
+                            $"Value cannot be null.\r\nParameter name: unquotedIdentifier");
 
-                    AssertExtensions.Throws<ArgumentNullException>(
-                        () => builder.UnquoteIdentifier(null, command.Connection), 
-                        $"Value cannot be null. (Parameter \'quotedIdentifier\')");
+                        AssertExtensions.Throws<ArgumentNullException>(
+                            () => builder.UnquoteIdentifier(null, command.Connection), 
+                            $"Value cannot be null.\r\nParameter name: quotedIdentifier");
+                    }
+                    else
+                    {
+                        AssertExtensions.Throws<ArgumentNullException>(
+                            () => builder.QuoteIdentifier(null, command.Connection), 
+                            $"Value cannot be null. (Parameter \'unquotedIdentifier\')");
+
+                        AssertExtensions.Throws<ArgumentNullException>(
+                            () => builder.UnquoteIdentifier(null, command.Connection), 
+                            $"Value cannot be null. (Parameter \'quotedIdentifier\')");
+                    }
                 }
                 command.CommandType = CommandType.Text;
             });
