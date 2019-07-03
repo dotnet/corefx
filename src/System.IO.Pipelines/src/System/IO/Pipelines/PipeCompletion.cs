@@ -5,7 +5,6 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 
 namespace System.IO.Pipelines
 {
@@ -25,7 +24,7 @@ namespace System.IO.Pipelines
 
         public bool IsCompleted => _isCompleted;
 
-        public bool IsFaulted => _exception is object;
+        public bool IsFaulted => _exception != null;
 
         public PipeCompletionCallbacks TryComplete(Exception exception = null)
         {
@@ -34,24 +33,14 @@ namespace System.IO.Pipelines
                 _isCompleted = true;
                 if (exception != null)
                 {
-                    CaptureExceptionStackTrace(exception);
+                    // We really want to capture the preceeding stacktrace into the exception,
+                    // if it hasn't already been thrown (and thus is a transfer exception),
+                    // but there currently isn't a way of doing that.
+                    _exception = exception;
                 }
             }
 
             return GetCallbacks();
-        }
-
-        private void CaptureExceptionStackTrace(Exception exception)
-        {
-            try
-            {
-                // Throw to capture caller stack trace in exception; as it may be a new exception that hasn't been thrown.
-                ExceptionDispatchInfo.Capture(exception).Throw();
-            }
-            catch (Exception ex)
-            {
-                _exception = ex;
-            }
         }
 
         public PipeCompletionCallbacks AddCallback(Action<Exception, object> callback, object state)
@@ -144,7 +133,15 @@ namespace System.IO.Pipelines
         private void ThrowLatchedException()
         {
             // Throw a new exception so as not to corrupt stack trace, as may be thrown multiple times
-            throw new IOException(_exception.Message, _exception);
+            if (_exception is OperationCanceledException ex)
+            {
+                // Differentate OperationCanceled exceptions so Cancellation signals are propergated.
+                throw new OperationCanceledException(ex.Message, ex);
+            }
+            else
+            {
+                throw new IOException(_exception.Message, _exception);
+            }
         }
 
         public override string ToString()
