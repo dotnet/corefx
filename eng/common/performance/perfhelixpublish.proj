@@ -21,13 +21,17 @@
     <WorkItemCommand>$(RunDirectory)/performance/scripts/benchmarks_ci.py --csproj $(RunDirectory)/performance/$(TargetCsproj)</WorkItemCommand>
     <CliArguments>--dotnet-versions $DOTNET_VERSION --cli-source-info args --cli-branch $PERFLAB_BRANCH --cli-commit-sha $PERFLAB_HASH --cli-repository https://github.com/$PERFLAB_REPO --cli-source-timestamp $PERFLAB_BUILDTIMESTAMP</CliArguments>
     <Python>python3</Python>
-    <CoreRun>$HELIX_WORKITEM_PAYLOAD/Core_Root/corerun</CoreRun>
+    <CoreRun>$(RunDirectory)/Core_Root/corerun</CoreRun>
     <HelixPreCommands>$(HelixPreCommands);chmod +x $(RunDirectory)/performance/tools/machine-setup.sh;. $(RunDirectory)/performance/tools/machine-setup.sh</HelixPreCommands>
     <ArtifactsDirectory>$(RunDirectory)/artifacts/BenchmarkDotNet.Artifacts</ArtifactsDirectory>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseCoreRun)' == 'true'">
     <CoreRunArgument>--corerun $(CoreRun)</CoreRunArgument>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseCoreRun)' == 'true' and '$(AGENT_OS)' != 'Windows_NT'">
+    <HelixPreCommands>$(HelixPreCommands);chmod +x $(CoreRun)</HelixPreCommands>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(WorkItemCommand)' != ''">
