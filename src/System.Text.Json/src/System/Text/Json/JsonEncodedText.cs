@@ -51,7 +51,7 @@ namespace System.Text.Json
 
             return Encode(value.AsSpan(), encoder);
         }
-
+        
         /// <summary>
         /// Encodes the text value as a JSON string.
         /// </summary>
@@ -116,12 +116,7 @@ namespace System.Text.Json
 
         private static JsonEncodedText EncodeHelper(ReadOnlySpan<byte> utf8Value, JavaScriptEncoder encoder)
         {
-            if (encoder == null)
-            {
-                encoder = JavaScriptEncoder.Default;
-            }
-
-            int idx = encoder.FindFirstCharacterToEncodeUtf8(utf8Value);
+            int idx = JsonWriterHelper.NeedsEscaping(utf8Value, encoder);
 
             if (idx != -1)
             {
@@ -146,19 +141,9 @@ namespace System.Text.Json
                 stackalloc byte[length] :
                 (valueArray = ArrayPool<byte>.Shared.Rent(length));
 
-            OperationStatus result = encoder.EncodeUtf8(utf8Value, escapedValue, out int bytesConsumed, out int bytesWritten);
-            Debug.Assert(result != OperationStatus.DestinationTooSmall);
-            Debug.Assert(result != OperationStatus.NeedMoreData);
+            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, encoder, out int written);
 
-            if (result == OperationStatus.InvalidData)
-            {
-                throw new Exception();
-            }
-
-            Debug.Assert(result == OperationStatus.Done);
-            Debug.Assert(bytesConsumed == utf8Value.Length);
-
-            byte[] escapedString = escapedValue.Slice(0, bytesWritten).ToArray();
+            byte[] escapedString = escapedValue.Slice(0, written).ToArray();
 
             if (valueArray != null)
             {

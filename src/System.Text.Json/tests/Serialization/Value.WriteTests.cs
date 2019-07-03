@@ -55,12 +55,12 @@ namespace System.Text.Json.Serialization.Tests
 
             {
                 Uri uri = new Uri("https://domain/path");
-                Assert.Equal(@"""https:\u002f\u002fdomain\u002fpath""", JsonSerializer.Serialize(uri));
+                Assert.Equal(@"""https:\/\/domain\/path""", JsonSerializer.Serialize(uri));
             }
 
             {
                 Uri.TryCreate("~/path", UriKind.RelativeOrAbsolute, out Uri uri);
-                Assert.Equal(@"""~\u002fpath""", JsonSerializer.Serialize(uri));
+                Assert.Equal(@"""~\/path""", JsonSerializer.Serialize(uri));
             }
         }
     }

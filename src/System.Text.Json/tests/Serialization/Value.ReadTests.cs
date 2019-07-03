@@ -295,8 +295,8 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveUri()
         {
-            Uri uri = JsonSerializer.Deserialize<Uri>(@"""https://domain/path""");
-            Assert.Equal("https:\u002f\u002fdomain\u002fpath", uri.ToString());
+            Uri uri = JsonSerializer.Deserialize<Uri>(@"""https:\/\/domain\/path""");
+            Assert.Equal("https://domain/path", uri.ToString());
 
             uri = JsonSerializer.Deserialize<Uri>(@"""~/path""");
             Assert.Equal("~/path", uri.ToString());

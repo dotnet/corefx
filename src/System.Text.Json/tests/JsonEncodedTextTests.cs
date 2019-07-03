@@ -12,6 +12,18 @@ namespace System.Text.Json.Tests
     public static partial class JsonEncodedTextTests
     {
         [Fact]
+        public static void LatinCharsSameAsDefaultEncoder()
+        {
+            for (int i = 0; i <= 127; i++)
+            {
+                JsonEncodedText textBuiltin = JsonEncodedText.Encode(((char)i).ToString());
+                JsonEncodedText textEncoder = JsonEncodedText.Encode(((char)i).ToString(), JavaScriptEncoder.Default);
+
+                Assert.Equal(textEncoder, textBuiltin);
+            }
+        }
+
+        [Fact]
         public static void Default()
         {
             JsonEncodedText text = default;
@@ -43,7 +55,7 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [MemberData(nameof(JsonEncodedTextStrings))]
-        public static void NullEncoderMeansDefault(string message, string expectedMessage)
+        public static void NullEncoder(string message, string expectedMessage)
         {
             JsonEncodedText text = JsonEncodedText.Encode(message, null);
             JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan(), null);
@@ -218,7 +230,7 @@ namespace System.Text.Json.Tests
                 var builder = new StringBuilder();
                 for (int i = 0; i < stringLength; i++)
                 {
-                    builder.Append("\\u003e");
+                    builder.Append("\\u003E");
                 }
                 string expectedMessage = builder.ToString();
 
@@ -285,7 +297,7 @@ namespace System.Text.Json.Tests
                 var builder = new StringBuilder();
                 for (int i = 0; i < stringLength; i++)
                 {
-                    builder.Append("\\u003e");
+                    builder.Append("\\u003E");
                 }
                 byte[] expectedBytes = Encoding.UTF8.GetBytes(builder.ToString());
 
@@ -323,10 +335,11 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [MemberData(nameof(InvalidUTF8Strings))]
-        public static void InvalidUTF8(byte[] dataUtf8)
+        [MemberData(nameof(UTF8ReplacementCharacterStrings))]
+        public static void ReplacementCharacterUTF8(byte[] dataUtf8, string expected)
         {
-            Assert.Throws<ArgumentException>(() => JsonEncodedText.Encode(dataUtf8));
+            JsonEncodedText text = JsonEncodedText.Encode(dataUtf8);
+            Assert.Equal(expected, text.ToString());
         }
 
         [Fact]
@@ -355,19 +368,19 @@ namespace System.Text.Json.Tests
             }
         }
 
-        public static IEnumerable<object[]> InvalidUTF8Strings
+        public static IEnumerable<object[]> UTF8ReplacementCharacterStrings
         {
             get
             {
                 return new List<object[]>
                 {
-                    new object[] { new byte[] { 34, 97, 0xc3, 0x28, 98, 34 } },
-                    new object[] { new byte[] { 34, 97, 0xa0, 0xa1, 98, 34 } },
-                    new object[] { new byte[] { 34, 97, 0xe2, 0x28, 0xa1, 98, 34 } },
-                    new object[] { new byte[] { 34, 97, 0xe2, 0x82, 0x28, 98, 34 } },
-                    new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0xbc, 98, 34 } },
-                    new object[] { new byte[] { 34, 97, 0xf0, 0x90, 0x28, 0xbc, 98, 34 } },
-                    new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0x28, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xc3, 0x28, 98, 34 }, "\\u0022a\\uFFFD(b\\u0022" },
+                    new object[] { new byte[] { 34, 97, 0xa0, 0xa1, 98, 34 }, "\\u0022a\\uFFFD\\uFFFDb\\u0022" },
+                    new object[] { new byte[] { 34, 97, 0xe2, 0x28, 0xa1, 98, 34 }, "\\u0022a\\uFFFD(\\uFFFDb\\u0022" },
+                    new object[] { new byte[] { 34, 97, 0xe2, 0x82, 0x28, 98, 34 }, "\\u0022a\\uFFFD(b\\u0022" },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0xbc, 98, 34 }, "\\u0022a\\uFFFD(\\uFFFD\\uFFFDb\\u0022" },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x90, 0x28, 0xbc, 98, 34 }, "\\u0022a\\uFFFD(\\uFFFDb\\u0022" },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0x28, 98, 34 }, "\\u0022a\\uFFFD(\\uFFFD(b\\u0022" },
                 };
             }
         }
@@ -405,6 +418,63 @@ namespace System.Text.Json.Tests
                     new object[] { "ééééé\\u003E\\u003Eêêêêê", "ééééé\\\\\\u0075\\u0030\\u0030\\u0033\\u0045\\\\\\u0075\\u0030\\u0030\\u0033\\u0045êêêêê" },
                 };
             }
+        }
+
+        /// <summary>
+        /// This is not a recommended way to customize the escaping, but is present here for test purposes.
+        /// </summary>
+        public sealed class CustomEncoderAllowingPlusSign : JavaScriptEncoder
+        {
+            public CustomEncoderAllowingPlusSign() { }
+
+            public override bool WillEncode(int unicodeScalar)
+            {
+                if (unicodeScalar == '+')
+                {
+                    return false;
+                }
+
+                return Default.WillEncode(unicodeScalar);
+            }
+
+            public unsafe override int FindFirstCharacterToEncode(char* text, int textLength)
+            {
+                return Default.FindFirstCharacterToEncode(text, textLength);
+            }
+
+
+            public override int MaxOutputCharactersPerInputCharacter
+            {
+                get
+                {
+                    return Default.MaxOutputCharactersPerInputCharacter;
+                }
+            }
+
+            public unsafe override bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
+            {
+                return Default.TryEncodeUnicodeScalar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten);
+            }
+        }
+
+        [Fact]
+        public static void CustomEncoderClass()
+        {
+            const string message = "a+";
+            const string expected = "a\\u002B";
+            JsonEncodedText text;
+
+            text = JsonEncodedText.Encode(message);
+            Assert.Equal(expected, text.ToString());
+
+            text = JsonEncodedText.Encode(message, null);
+            Assert.Equal(expected, text.ToString());
+
+            text = JsonEncodedText.Encode(message, JavaScriptEncoder.Default);
+            Assert.Equal(expected, text.ToString());
+
+            text = JsonEncodedText.Encode(message, new CustomEncoderAllowingPlusSign());
+            Assert.Equal("a+", text.ToString());
         }
     }
 }

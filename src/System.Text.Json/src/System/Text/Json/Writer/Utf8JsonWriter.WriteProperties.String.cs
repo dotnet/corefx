@@ -260,7 +260,7 @@ namespace System.Text.Json
                     }
                 }
 
-                JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+                JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, encoder: null, out int written);
                 utf8PropertyName = escapedPropertyName.Slice(0, written);
             }
 
@@ -768,7 +768,7 @@ namespace System.Text.Json
                 stackalloc byte[length] :
                 (valueArray = ArrayPool<byte>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndex, out int written);
+            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndex, encoder: null, out int written);
 
             WriteStringByOptions(escapedPropertyName, escapedValue.Slice(0, written));
 
@@ -837,7 +837,7 @@ namespace System.Text.Json
                 stackalloc byte[length] :
                 (propertyArray = ArrayPool<byte>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndex, out int written);
+            JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndex, encoder: null, out int written);
 
             WriteStringByOptions(escapedPropertyName.Slice(0, written), escapedValue);
 
@@ -1020,7 +1020,7 @@ namespace System.Text.Json
                     }
                 }
 
-                JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, out int written);
+                JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, encoder: null, out int written);
                 utf8Value = escapedValue.Slice(0, written);
             }
 
@@ -1044,7 +1044,7 @@ namespace System.Text.Json
                     }
                 }
 
-                JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+                JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, encoder: null, out int written);
                 utf8PropertyName = escapedPropertyName.Slice(0, written);
             }
 
@@ -1089,7 +1089,7 @@ namespace System.Text.Json
                     }
                 }
 
-                JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, out int written);
+                JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, encoder: null, out int written);
                 utf8Value = escapedValue.Slice(0, written);
             }
 
@@ -1182,7 +1182,7 @@ namespace System.Text.Json
                     }
                 }
 
-                JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+                JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, encoder: null, out int written);
                 utf8PropertyName = escapedPropertyName.Slice(0, written);
             }
 

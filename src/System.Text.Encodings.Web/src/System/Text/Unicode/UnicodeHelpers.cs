@@ -135,19 +135,9 @@ namespace System.Text.Unicode
             }
 
             uint tempValue = source[index];
-            if (!UnicodeUtility.IsAsciiCodePoint(tempValue))
-            {
-                goto NotAscii;
-            }
 
-        Finish:
-
-            bytesConsumed = index + 1;
-            Debug.Assert(1 <= bytesConsumed && bytesConsumed <= 4); // Valid subsequences are always length [1..4]
-            result = tempValue;
-            return OperationStatus.Done;
-
-        NotAscii:
+            // Ascii was checked for previously.
+            Debug.Assert(!UnicodeUtility.IsAsciiCodePoint(tempValue));
 
             // Per Table 3-7, the beginning of a multibyte sequence must be a code unit in
             // the range [C2..F4]. If it's outside of that range, it's either a standalone
@@ -279,6 +269,13 @@ namespace System.Text.Unicode
             bytesConsumed = index;
             result = ReplacementChar;
             return OperationStatus.NeedMoreData;
+
+        Finish:
+
+            bytesConsumed = index + 1;
+            Debug.Assert(1 <= bytesConsumed && bytesConsumed <= 4); // Valid subsequences are always length [1..4]
+            result = tempValue;
+            return OperationStatus.Done;
         }
 
         /// <summary>
