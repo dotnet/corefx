@@ -17,7 +17,7 @@ namespace System.IO.Pipelines
         private const int InitialCallbacksSize = 1;
 
         private bool _isCompleted;
-        private ExceptionDispatchInfo _exceptionInfo;
+        private Exception _exception;
 
         private PipeCompletionCallback _firstCallback;
         private PipeCompletionCallback[] _callbacks;
@@ -25,7 +25,7 @@ namespace System.IO.Pipelines
 
         public bool IsCompleted => _isCompleted;
 
-        public bool IsFaulted => _exceptionInfo != null;
+        public bool IsFaulted => _exception is object;
 
         public PipeCompletionCallbacks TryComplete(Exception exception = null)
         {
@@ -34,10 +34,24 @@ namespace System.IO.Pipelines
                 _isCompleted = true;
                 if (exception != null)
                 {
-                    _exceptionInfo = ExceptionDispatchInfo.Capture(exception);
+                    CaptureExceptionStackTrace(exception);
                 }
             }
+
             return GetCallbacks();
+        }
+
+        private void CaptureExceptionStackTrace(Exception exception)
+        {
+            try
+            {
+                // Throw to capture caller stack trace in exception; as it may be a new exception that hasn't been thrown.
+                ExceptionDispatchInfo.Capture(exception).Throw();
+            }
+            catch (Exception ex)
+            {
+                _exception = ex;
+            }
         }
 
         public PipeCompletionCallbacks AddCallback(Action<Exception, object> callback, object state)
@@ -91,7 +105,7 @@ namespace System.IO.Pipelines
                 return false;
             }
 
-            if (_exceptionInfo != null)
+            if (_exception != null)
             {
                 ThrowLatchedException();
             }
@@ -109,7 +123,7 @@ namespace System.IO.Pipelines
 
             var callbacks = new PipeCompletionCallbacks(s_completionCallbackPool,
                 _callbackCount,
-                _exceptionInfo?.SourceException,
+                _exception,
                 _firstCallback,
                 _callbacks);
 
@@ -124,13 +138,13 @@ namespace System.IO.Pipelines
             Debug.Assert(IsCompleted);
             Debug.Assert(_callbacks == null);
             _isCompleted = false;
-            _exceptionInfo = null;
+            _exception = null;
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private void ThrowLatchedException()
         {
-            _exceptionInfo.Throw();
+            // Throw a new exception so as not to corrupt stack trace, as may be thrown multiple times
+            throw new IOException(_exception.Message, _exception);
         }
 
         public override string ToString()
