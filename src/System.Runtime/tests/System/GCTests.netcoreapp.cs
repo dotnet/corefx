@@ -64,6 +64,8 @@ namespace System.Tests
                     Assert.Equal(memoryInfo2.HighMemoryLoadThresholdBytes, memoryInfo1.HighMemoryLoadThresholdBytes);
 
                     // TODO: the following test fails. Disabling now while figuring what  range of values is actually expected here.
+                    //       see: https://github.com/dotnet/corefx/issues/37378
+                    //
                     //scenario = nameof(memoryInfo2.MemoryLoadBytes);
                     //Assert.InRange(memoryInfo2.MemoryLoadBytes, memoryInfo1.MemoryLoadBytes, long.MaxValue);
 
