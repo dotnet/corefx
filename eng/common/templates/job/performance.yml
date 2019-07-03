@@ -82,7 +82,7 @@ jobs:
           inputs:
             PathToPublish: $(PayloadDirectory)
             PublishLocation: Container
-            ArtifactName: $(_BuildConfig)
+            ArtifactName: $(_BuildConfig).$(Queue)
           continueOnError: true
           condition: succeeded()
         # Run perf testing in helix
