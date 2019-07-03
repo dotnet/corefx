@@ -140,7 +140,11 @@ namespace System.Net.Http.Functional.Tests
             },
             async server =>
             {
-                HttpRequestData requestData = await server.HandleRequestAsync(HttpStatusCode.OK, headers);
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    await connection.ReadRequestDataAsync();
+                    await connection.SendResponseAsync(HttpStatusCode.OK, headers);
+                });
             });
         }
 

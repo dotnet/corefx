@@ -36,7 +36,7 @@ namespace System.Net.Test.Common
     public abstract class GenericLoopbackServer : IDisposable
     {
         // Accept a new connection, process a single request and send the specified response, and gracefully close the connection.
-        public abstract Task<HttpRequestData> HandleRequestAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null);
+        public abstract Task<HttpRequestData> HandleRequestAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = "");
 
         // Accept a new connection, and hand it to provided delegate.
         public abstract Task AcceptConnectionAsync(Func<GenericLoopbackConnection, Task> funcAsync);

@@ -740,7 +740,6 @@ namespace System.Net.Test.Common
                 string headerString = null;
                 int contentLength = -1;
                 bool isChunked = false;
-                bool hasDate = false;
                 bool hasContentLength  = false;
 
                 if (headers != null)
@@ -762,10 +761,6 @@ namespace System.Net.Test.Common
                         {
                             isChunked = true;
                         }
-                        else if (headerData.Name.Equals("Date", StringComparison.OrdinalIgnoreCase))
-                        {
-                            hasDate = true;
-                        }
 
                         headerString = headerString + $"{headerData.Name}: {headerData.Value}\r\n";
                     }
@@ -777,7 +772,6 @@ namespace System.Net.Test.Common
                     // If we need to send status line, prepped it to headers and possibly add missing headers to the end.
                     headerString =
                         $"HTTP/1.1 {(int)statusCode} {GetStatusDescription((HttpStatusCode)statusCode)}\r\n" +
-                        (hasDate ? "" : $"Date: {DateTimeOffset.UtcNow:R}\r\n") +
                         (!hasContentLength && !isChunked && content != null ? $"Content-length: {content.Length}\r\n" : "") +
                         headerString +
                         (endHeaders ? "\r\n" : "");
@@ -801,8 +795,29 @@ namespace System.Net.Test.Common
             using (Connection connection = await EstablishConnectionAsync().ConfigureAwait(false))
             {
                 HttpRequestData requestData = await connection.ReadRequestDataAsync().ConfigureAwait(false);
-                await connection.SendResponseAsync(statusCode, headers, content: content).ConfigureAwait(false);
 
+                // For historical reasons, we added Date and "Connection: close" (to improve test reliability)
+                bool hasDate = false;
+                List<HttpHeaderData> newHeaders = new List<HttpHeaderData>();
+                if (headers != null)
+                {
+                    foreach (var header in headers)
+                    {
+                        newHeaders.Add(header);
+                        if (header.Name.Equals("Date", StringComparison.OrdinalIgnoreCase))
+                        {
+                            hasDate = true;
+                        }
+                    }
+                }
+
+                newHeaders.Add(new HttpHeaderData("Connection", "Close"));
+                if (!hasDate)
+                {
+                    newHeaders.Add(new HttpHeaderData("Date", "{DateTimeOffset.UtcNow:R}"));
+                }
+
+                await connection.SendResponseAsync(statusCode, newHeaders, content: content).ConfigureAwait(false);
                 return requestData;
             }
         }

@@ -143,7 +143,7 @@ namespace System.Net.Test.Common
         // GenericLoopbackServer implementation
         //
 
-        public override async Task<HttpRequestData> HandleRequestAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null)
+        public override async Task<HttpRequestData> HandleRequestAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = "")
         {
             Http2LoopbackConnection connection = await EstablishConnectionAsync().ConfigureAwait(false);
 
