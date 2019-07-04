@@ -15,6 +15,7 @@
     <InboxOnTargetFramework Include="net45">
       <FrameworkReference>System.ComponentModel.DataAnnotations</FrameworkReference>
     </InboxOnTargetFramework>
+    <InboxOnTargetFramework Include="uap10.0.16299" />
     <InboxOnTargetFramework Include="win8" />
     <InboxOnTargetFramework Include="portable-net45+win8" />
     <ValidatePackageSuppression Include="PermitMissingImplementation">
@@ -22,10 +23,7 @@
       <Value>.NETStandard,Version=v1.1;.NETStandard,Version=v1.2;.NETStandard,Version=v1.3</Value>
     </ValidatePackageSuppression>
     <ValidatePackageSuppression Include="TreatAsOutOfBox">
-      <Value>.NETCoreApp;UAP</Value>
-    </ValidatePackageSuppression>
-    <ValidatePackageSuppression Include="PermitInbox">
-      <Value>UAP</Value>
+      <Value>.NETCoreApp</Value>
     </ValidatePackageSuppression>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
