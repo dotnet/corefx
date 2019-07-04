@@ -30,9 +30,9 @@
     <CoreRunArgument>--corerun $(CoreRun)</CoreRunArgument>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(UseCoreRun)' == 'true' and '$(AGENT_OS)' != 'Windows_NT'">
+  <!-- <PropertyGroup Condition="'$(UseCoreRun)' == 'true' and '$(AGENT_OS)' != 'Windows_NT'">
     <HelixPreCommands>$(HelixPreCommands);chmod +x $(CoreRun)</HelixPreCommands>
-  </PropertyGroup>
+  </PropertyGroup> -->
 
   <PropertyGroup Condition="'$(WorkItemCommand)' != ''">
     <WorkItemCommand>$(Python) $(WorkItemCommand) --incremental no --architecture $(Architecture) -f $(_Framework) $(PerfLabArguments)</WorkItemCommand>
