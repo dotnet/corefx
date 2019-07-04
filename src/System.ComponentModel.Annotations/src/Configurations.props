@@ -1,10 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
-   	<PackageConfigurations>
-      netstandard2.1; 
-    </PackageConfigurations>
     <BuildConfigurations>
-      $(PackageConfigurations)
+      netstandard2.1; 
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

@@ -1,6 +1,9 @@
 ﻿<Project DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
+    <ProjectReference Include="..\ref\System.ComponentModel.Annotations.csproj">
+     <SupportedFramework>netcoreapp3.0;$(AllXamarinFrameworks)</SupportedFramework>
+    </ProjectReference>
     <ProjectReference Include="..\src\System.ComponentModel.Annotations.csproj" />
     <HarvestIncludePaths Include="ref/netcore50;lib/netcore50" />
     <HarvestIncludePaths Include="ref/netstandard1.1" />
@@ -12,7 +15,6 @@
     <InboxOnTargetFramework Include="net45">
       <FrameworkReference>System.ComponentModel.DataAnnotations</FrameworkReference>
     </InboxOnTargetFramework>
-    <InboxOnTargetFramework Include="uap10.0.16299" />
     <InboxOnTargetFramework Include="win8" />
     <InboxOnTargetFramework Include="portable-net45+win8" />
     <ValidatePackageSuppression Include="PermitMissingImplementation">
@@ -20,7 +22,7 @@
       <Value>.NETStandard,Version=v1.1;.NETStandard,Version=v1.2;.NETStandard,Version=v1.3</Value>
     </ValidatePackageSuppression>
     <ValidatePackageSuppression Include="TreatAsOutOfBox">
-      <Value>.NETCoreApp</Value>
+      <Value>.NETCoreApp;UAP</Value>
     </ValidatePackageSuppression>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
