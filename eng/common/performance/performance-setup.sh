@@ -149,7 +149,7 @@ else
 fi
 
 if [[ "$use_core_run" = true ]]; then
-    new_core_root=$workitem_directory/Core_Root
+    new_core_root=$payload_directory/Core_Root
     mv $core_root_directory $new_core_root
 fi
 
