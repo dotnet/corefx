@@ -153,7 +153,7 @@ namespace System.Net.Test.Common
             // So, send a GOAWAY frame now so the client won't inadvertantly try to reuse the connection.
             await connection.SendGoAway(streamId).ConfigureAwait(false);
 
-            if (content == null)
+            if (string.IsNullOrEmpty(content))
             {
                 await connection.SendResponseHeadersAsync(streamId, endStream: true, statusCode, isTrailingHeader: false, headers : headers).ConfigureAwait(false);
             }
