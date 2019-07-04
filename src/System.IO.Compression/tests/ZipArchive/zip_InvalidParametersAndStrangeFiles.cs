@@ -306,6 +306,33 @@ namespace System.IO.Compression.Tests
             }
         }
 
+
+        [Fact]
+        public static async Task UnseekableVeryLargeArchive_DataDescriptor_Read_Zip64()
+        {
+            MemoryStream stream = await LocalMemoryStream.readAppFileAsync(strange("veryLarge.zip"));
+
+            using (
+                ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
+            {
+                ZipArchiveEntry e = archive.GetEntry("bigFile.bin");
+                using (var ms = new MemoryStream())
+                using (Stream source = e.Open())
+                {
+                    byte[] buffer = new byte[s_bufferSize];
+                    int read;
+                    int count = 1;
+                    while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
+                    {
+                        ms.Write(buffer, 0, read);
+                        if (count++ == 2)
+                            break;      // We don't want to inflate this large archive entirely
+                    }
+                    Assert.Equal(s_bufferSize * 2, ms.Length);
+                }
+            }
+        }
+
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Fix not shipped for full framework.")]
         public static async Task ZipArchive_CorruptedLocalHeader_UncompressedSize_NotMatchWithCentralDirectory()
