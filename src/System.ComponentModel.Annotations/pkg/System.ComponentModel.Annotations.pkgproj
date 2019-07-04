@@ -24,6 +24,9 @@
     <ValidatePackageSuppression Include="TreatAsOutOfBox">
       <Value>.NETCoreApp;UAP</Value>
     </ValidatePackageSuppression>
+    <ValidatePackageSuppression Include="PermitInbox">
+      <Value>UAP</Value>
+    </ValidatePackageSuppression>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>
