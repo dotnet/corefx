@@ -471,11 +471,6 @@ namespace System.Net.Http
                 }
             }
 
-            public void OnRefused(Exception abortException = null)
-            {
-                OnAbort(abortException, canRetry: true);
-            }
-
             private void CheckIfDisposedOrAborted()
             {
                 Debug.Assert(Monitor.IsEntered(SyncObject));

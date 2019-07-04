@@ -659,7 +659,7 @@ namespace System.Net.Http
 
             if (protocolError == Http2ProtocolErrorCode.RefusedStream)
             {
-                http2Stream.OnRefused();
+                http2Stream.OnAbort(null, canRetry: true);
             }
             else
             {
@@ -1318,11 +1318,15 @@ namespace System.Net.Http
 
         private void AbortStreams(Exception abortException)
         {
+            // Invalidate outside of lock to avoid race with HttpPool Dispose()
+            // We should not try to grab pool lock while holding connection lock as on disposing pool,
+            // we could hold pool lock while trying to grab connection lock in Dispose().
+            _pool.InvalidateHttp2Connection(this);
+
             lock (SyncObject)
             {
-                if (NetEventSource.IsEnabled) Trace($"{nameof(abortException)}={abortException}, {nameof(_lastValidStreamId)}={_lastValidStreamId}");
+                if (NetEventSource.IsEnabled) Trace($"{nameof(abortException)}={abortException}");
 
-                bool hasAnyActiveStream = false;
                 foreach (KeyValuePair<int, Http2Stream> kvp in _httpStreams)
                 {
                     int streamId = kvp.Key;
@@ -1332,29 +1336,19 @@ namespace System.Net.Http
                     _httpStreams.Remove(streamId);
                 }
 
-                if (!hasAnyActiveStream)
-                {
-                    _disposed = true;
-                }
-
-                CheckForShutdown();
-            }
-
-            if (!_disposed)
-            {
                 _disposed = true;
-
-                // Invalidate outside of lock to avoid race with HttpPool Dispose()
-                // We should not try to grab pool lock while holding connection lock as on disposing pool,
-                // we could hold pool lock while trying to grab connection lock in Dispose().
-                _pool.InvalidateHttp2Connection(this);
+                CheckForShutdown();
             }
         }
 
         private void StartTerminatingConnection(int lastValidStream, Exception abortException)
         {
             Debug.Assert(lastValidStream >= 0);
-            bool isAlreadyInvalidated = _disposed;
+
+            // Invalidate outside of lock to avoid race with HttpPool Dispose()
+            // We should not try to grab pool lock while holding connection lock as on disposing pool,
+            // we could hold pool lock while trying to grab connection lock in Dispose().
+            _pool.InvalidateHttp2Connection(this);
 
             lock (SyncObject)
             {
@@ -1367,25 +1361,25 @@ namespace System.Net.Http
                     // We have already received GOAWAY before
                     // In this case the smaller valid stream is used
                     _lastValidStreamId = Math.Min(_lastValidStreamId, lastValidStream);
-                    isAlreadyInvalidated = true;
                 }
 
                 if (NetEventSource.IsEnabled) Trace($"{nameof(lastValidStream)}={lastValidStream}, {nameof(_lastValidStreamId)}={_lastValidStreamId}");
 
                 bool hasAnyActiveStream = false;
+
                 foreach (KeyValuePair<int, Http2Stream> kvp in _httpStreams)
                 {
                     int streamId = kvp.Key;
                     Debug.Assert(streamId == kvp.Value.StreamId);
 
-                    if (streamId > lastValidStream)
+                    if (streamId > _lastValidStreamId)
                     {
-                        kvp.Value.OnRefused(abortException);
+                        kvp.Value.OnAbort(abortException, canRetry: true);
                         _httpStreams.Remove(streamId);
                     }
                     else
                     {
-                        if (NetEventSource.IsEnabled) Trace($"Found {nameof(streamId)} {streamId} <= {lastValidStream}.");
+                        if (NetEventSource.IsEnabled) Trace($"Found {nameof(streamId)} {streamId} <= {_lastValidStreamId}.");
                         hasAnyActiveStream = true;
                     }
                 }
@@ -1396,14 +1390,6 @@ namespace System.Net.Http
                 }
 
                 CheckForShutdown();
-            }
-
-            if (!isAlreadyInvalidated)
-            {
-                // Invalidate outside of lock to avoid race with HttpPool Dispose()
-                // We should not try to grab pool lock while holding connection lock as on disposing pool,
-                // we could hold pool lock while trying to grab connection lock in Dispose().
-                _pool.InvalidateHttp2Connection(this);
             }
         }
 
