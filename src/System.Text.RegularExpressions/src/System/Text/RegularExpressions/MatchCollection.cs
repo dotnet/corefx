@@ -81,12 +81,13 @@ namespace System.Text.RegularExpressions
             }
         }
 
+
+        IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
+        
         /// <summary>
         /// Provides an enumerator in the same order as Item[i].
         /// </summary>
-        public IEnumerator GetEnumerator() => new Enumerator(this);
-
-        IEnumerator<Match> IEnumerable<Match>.GetEnumerator() => new Enumerator(this);
+        public IEnumerator<Match> GetEnumerator() => new Enumerator(this);
 
         private Match GetMatch(int i)
         {
