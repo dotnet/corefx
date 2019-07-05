@@ -1017,7 +1017,7 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(() => string.Compare(value, value, StringComparison.CurrentCulture - 1));
             Assert.Throws<ArgumentException>(() => string.Compare(value, value, StringComparison.OrdinalIgnoreCase + 1));
             Assert.Throws<ArgumentException>(() => string.Compare(value, value, (StringComparison)6));
-            
+
             Assert.Throws<ArgumentException>(() => value.AsSpan().CompareTo(value.AsSpan(), StringComparison.CurrentCulture - 1));
             Assert.Throws<ArgumentException>(() => value.AsSpan().CompareTo(value.AsSpan(), StringComparison.OrdinalIgnoreCase + 1));
             Assert.Throws<ArgumentException>(() => value.AsSpan().CompareTo(value.AsSpan(), (StringComparison)6));
@@ -1312,10 +1312,10 @@ namespace System.Tests
         [Fact]
         public static void ContainsUnknownComparisonType_StringComparison()
         {
-            ReadOnlySpan<char> span = "456".AsSpan();
-            Assert.Throws<ArgumentException>(() => span.CompareTo(span, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>(() => span.CompareTo(span, StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>(() => span.CompareTo(span, (StringComparison)6));
+            string value = "456";
+            Assert.Throws<ArgumentException>(() => value.AsSpan().CompareTo(value.AsSpan(), StringComparison.CurrentCulture - 1));
+            Assert.Throws<ArgumentException>(() => value.AsSpan().CompareTo(value.AsSpan(), StringComparison.OrdinalIgnoreCase + 1));
+            Assert.Throws<ArgumentException>(() => value.AsSpan().CompareTo(value.AsSpan(), (StringComparison)6));
         }
 
         [Fact]
@@ -6981,10 +6981,9 @@ namespace System.Tests
             Assert.Throws<ArgumentException>(() => s1.StartsWith(s1, StringComparison.OrdinalIgnoreCase + 1));
             Assert.Throws<ArgumentException>(() => s1.StartsWith(s1, (StringComparison)6));
 
-            ReadOnlySpan<char> span = s1.AsSpan();
-            Assert.Throws<ArgumentException>(() => span.CompareTo(span, StringComparison.CurrentCulture - 1));
-            Assert.Throws<ArgumentException>(() => span.CompareTo(span, StringComparison.OrdinalIgnoreCase + 1));
-            Assert.Throws<ArgumentException>(() => span.CompareTo(span, (StringComparison)6));
+            Assert.Throws<ArgumentException>(() => s1.AsSpan().CompareTo(s1.AsSpan(), StringComparison.CurrentCulture - 1));
+            Assert.Throws<ArgumentException>(() => s1.AsSpan().CompareTo(s1.AsSpan(), StringComparison.OrdinalIgnoreCase + 1));
+            Assert.Throws<ArgumentException>(() => s1.AsSpan().CompareTo(s1.AsSpan(), (StringComparison)6));
         }
 
         [Fact]
