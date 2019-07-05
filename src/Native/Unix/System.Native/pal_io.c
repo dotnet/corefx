@@ -49,6 +49,25 @@ extern int     getpeereid(int, uid_t *__restrict__, gid_t *__restrict__);
 extern ssize_t  getline(char **, size_t *, FILE *);
 #endif
 
+#if defined(__linux__)
+#if defined(__x86_64__)
+#define PAL_COPY_FILE_RANGE_SYSCALL 326
+#elif defined(__i386__)
+#define PAL_COPY_FILE_RANGE_SYSCALL 377
+#elif defined(__arm__)
+#define PAL_COPY_FILE_RANGE_SYSCALL 391
+#elif defined(__aarch64__)
+#define PAL_COPY_FILE_RANGE_SYSCALL 285
+#else
+#    include <syscall.h>
+#    if defined(__NR_copy_file_range)
+#        define PAL_COPY_FILE_RANGE_SYSCALL __NR_copy_file_range
+#    else
+#        warning copy_file_range() unavailable
+#    endif
+#endif
+#endif // __linux__
+
 #if HAVE_STAT64
 #define stat_ stat64
 #define fstat_ fstat64
@@ -1186,7 +1205,146 @@ static int32_t CopyFile_ReadWrite(int inFd, int outFd)
     free(buffer);
     return 0;
 }
+
+static int32_t CopyFileMetadata(int inFd, int outFd, struct stat_ *sourceStat)
+{
+    // Now that the data from the file has been copied, copy over metadata
+    // from the source file.  First copy the file times.
+    // If futimes nor futimens are available on this platform, file times will
+    // not be copied over.
+    int ret;
+
+    while ((ret = fstat_(inFd, sourceStat)) < 0 && errno == EINTR);
+    if (ret == 0)
+    {
+#if HAVE_FUTIMENS
+        // futimens is prefered because it has a higher resolution.
+        struct timespec origTimes[2];
+        origTimes[0].tv_sec = (time_t)sourceStat->st_atime;
+        origTimes[0].tv_nsec = ST_ATIME_NSEC(sourceStat);
+        origTimes[1].tv_sec = (time_t)sourceStat->st_mtime;
+        origTimes[1].tv_nsec = ST_MTIME_NSEC(sourceStat);
+        while ((ret = futimens(outFd, origTimes)) < 0 && errno == EINTR);
+#elif HAVE_FUTIMES
+        struct timeval origTimes[2];
+        origTimes[0].tv_sec = sourceStat->st_atime;
+        origTimes[0].tv_usec = ST_ATIME_NSEC(sourceStat) / 1000;
+        origTimes[1].tv_sec = sourceStat->st_mtime;
+        origTimes[1].tv_usec = ST_MTIME_NSEC(sourceStat) / 1000;
+        while ((ret = futimes(outFd, origTimes)) < 0 && errno == EINTR);
+#endif
+    }
+    if (ret != 0)
+    {
+        return -1;
+    }
+
+    // Then copy permissions.
+    while ((ret = fchmod(outFd, sourceStat->st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))) < 0 && errno == EINTR);
+    if (ret != 0)
+    {
+        return -1;
+    }
+
+    return 0;
+}
 #endif // !HAVE_FCOPYFILE
+
+#if HAVE_SENDFILE_4
+static uint64_t TryCopyWithSendfile(int inFd, int outFd, const struct stat_ *sourceStat, int64_t startOffset)
+{
+    // If sendfile is available (Linux), try to use it, as the whole copy
+    // can be performed in the kernel, without lots of unnecessary copying.
+
+    // On 32-bit, if you use 64-bit offsets, the last argument of `sendfile' will be a
+    // `size_t' a 32-bit integer while the `st_size' field of the stat structure will be off64_t.
+    // So `size' will have to be `uint64_t'. In all other cases, it will be `size_t'.
+    uint64_t size = (uint64_t)sourceStat->st_size - (uint64_t)startOffset;
+    static bool sendFileUnavailable = false;
+
+    if (sendFileUnavailable)
+    {
+        return size;
+    }
+
+    // Note that per man page for large files, you have to iterate until the
+    // whole file is copied (Linux has a limit of 0x7ffff000 bytes copied).
+    while (size > 0)
+    {
+        ssize_t sent = sendfile(outFd, inFd, NULL, (size >= SSIZE_MAX ? SSIZE_MAX : (size_t)size));
+        if (sent < 0)
+        {
+            if (errno == ENOSYS)
+            {
+                // If sendfile is unavailable in this kernel, size will
+                // remain untouched, so it's fine for concurrent threads to
+                // write to sendFileUnavailable.
+                sendFileUnavailable = true;
+            }
+
+            break;
+        }
+        else
+        {
+            assert((size_t)sent <= size);
+            size -= (size_t)sent;
+        }
+    }
+
+    return size;
+}
+#endif // HAVE_SENDFILE_4
+
+#if defined(PAL_COPY_FILE_RANGE_SYSCALL)
+static loff_t CopyFileRange(int inFd, loff_t *inOff, int outFd, loff_t *outOff, size_t len, unsigned int flags)
+{
+    return syscall(PAL_COPY_FILE_RANGE_SYSCALL, inFd, inOff, outFd, outOff, len, flags);
+}
+
+static uint64_t TryCopyWithCopyFileRange(int inFd, int outFd, const struct stat_ *sourceStat, int64_t startOffset)
+{
+    // As is the case with sendfile(2), copy_file_range(2) will perform an in-kernel
+    // copy of two file descriptors, without copying between userland and the kernel.
+    // It'll try filesystem-specific operations to copy the content, sometimes avoiding
+    // copies altogether (for instance, in NFS shares, copies can happen server-side,
+    // without going back and forth the network).
+    loff_t offIn = startOffset;
+    loff_t offOut = startOffset;
+    size_t toCopy = (size_t)sourceStat->st_size - (size_t)startOffset;
+    static bool copyFileRangeUnavailable = false;
+
+    if (copyFileRangeUnavailable)
+    {
+        return toCopy;
+    }
+
+    while (toCopy) {
+        loff_t copied = CopyFileRange(inFd, &offIn, outFd, &offOut, toCopy, 0);
+
+        // copy_file_range() does not seem to return EINTR according to its man page.
+        if (copied == -1)
+        {
+            if (errno == ENOSYS)
+            {
+                // If copy_file_range is unavailable in this kernel, size
+                // will remain untouched, so it's fine for concurrent
+                // threads to write to sendFileUnavailable.
+                copyFileRangeUnavailable = true;
+            }
+
+            break;
+        }
+
+        toCopy -= (size_t)copied;
+        if (toCopy == 0)
+        {
+            break;
+        }
+    }
+
+    return toCopy;
+}
+#endif // defined(PAL_COPY_FILE_RANGE_SYSCALL)
 
 int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
 {
@@ -1199,99 +1357,55 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
     // Copy data and metadata.
     return fcopyfile(inFd, outFd, NULL, COPYFILE_ALL) == 0 ? 0 : -1;
 #else
-    // Get the stats on the source file.
+
     int ret;
     struct stat_ sourceStat;
-    bool copied = false;
-#if HAVE_SENDFILE_4
-    // If sendfile is available (Linux), try to use it, as the whole copy
-    // can be performed in the kernel, without lots of unnecessary copying.
+
+#if defined(PAL_COPY_FILE_RANGE_SYSCALL) || HAVE_SENDFILE_4
+    uint64_t bytesToCopy = 0;
+    int64_t startOffset = 0;
+
+    // Only need to call fstat(2) now if copy_file_range(2) or sendfile(2) are
+    // available.
     while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR);
     if (ret != 0)
     {
         return -1;
     }
+#endif // defined(PAL_COPY_FILE_RANGE_SYSCALL) || HAVE_SENDFILE_4
 
-
-    // On 32-bit, if you use 64-bit offsets, the last argument of `sendfile' will be a
-    // `size_t' a 32-bit integer while the `st_size' field of the stat structure will be off64_t.
-    // So `size' will have to be `uint64_t'. In all other cases, it will be `size_t'.
-    uint64_t size = (uint64_t)sourceStat.st_size;
-
-    // Note that per man page for large files, you have to iterate until the
-    // whole file is copied (Linux has a limit of 0x7ffff000 bytes copied).
-    while (size > 0)
+#if defined(PAL_COPY_FILE_RANGE_SYSCALL)
+    bytesToCopy = TryCopyWithCopyFileRange(inFd, outFd, &sourceStat, startOffset);
+    if (bytesToCopy == 0)
     {
-        ssize_t sent = sendfile(outFd, inFd, NULL, (size >= SSIZE_MAX ? SSIZE_MAX : (size_t)size));
-        if (sent < 0)
-        {
-            if (errno != EINVAL && errno != ENOSYS)
-            {
-                return -1;
-            }
-            else
-            {
-                break;
-            }
-        }
-        else
-        {
-            assert((size_t)sent <= size);
-            size -= (size_t)sent;
-        }
+        return CopyFileMetadata(inFd, outFd, &sourceStat);
     }
-    if (size == 0)
+
+    startOffset += (off_t)(sourceStat.st_size - (off_t)bytesToCopy);
+    // copy_file_range couldn't be used, either because we're in an older kernel or
+    // glibc without the userland fallback, or some unspecified error happened;
+    // try sendfile now from the point it stopped.
+#endif // defined(PAL_COPY_FILE_RANGE_SYSCALL)
+
+#if HAVE_SENDFILE_4
+    bytesToCopy = TryCopyWithSendfile(inFd, outFd, &sourceStat, startOffset);
+    if (bytesToCopy == 0)
     {
-        copied = true;
+        return CopyFileMetadata(inFd, outFd, &sourceStat);
     }
+
     // sendfile couldn't be used; fall back to a manual copy below. This could happen
     // if we're on an old kernel, for example, where sendfile could only be used
     // with sockets and not regular files.
 #endif // HAVE_SENDFILE_4
 
     // Manually read all data from the source and write it to the destination.
-    if (!copied && CopyFile_ReadWrite(inFd, outFd) != 0)
+    if (CopyFile_ReadWrite(inFd, outFd) != 0)
     {
         return -1;
     }
 
-    // Now that the data from the file has been copied, copy over metadata
-    // from the source file.  First copy the file times.
-    // If futimes nor futimes are available on this platform, file times will
-    // not be copied over.
-    while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR);
-    if (ret == 0)
-    {
-#if HAVE_FUTIMENS
-        // futimens is prefered because it has a higher resolution.
-        struct timespec origTimes[2];
-        origTimes[0].tv_sec = (time_t)sourceStat.st_atime;
-        origTimes[0].tv_nsec = ST_ATIME_NSEC(&sourceStat);
-        origTimes[1].tv_sec = (time_t)sourceStat.st_mtime;
-        origTimes[1].tv_nsec = ST_MTIME_NSEC(&sourceStat);
-        while ((ret = futimens(outFd, origTimes)) < 0 && errno == EINTR);
-#elif HAVE_FUTIMES
-        struct timeval origTimes[2];
-        origTimes[0].tv_sec = sourceStat.st_atime;
-        origTimes[0].tv_usec = ST_ATIME_NSEC(&sourceStat) / 1000;
-        origTimes[1].tv_sec = sourceStat.st_mtime;
-        origTimes[1].tv_usec = ST_MTIME_NSEC(&sourceStat) / 1000;
-        while ((ret = futimes(outFd, origTimes)) < 0 && errno == EINTR);
-#endif
-    }
-    if (ret != 0)
-    {
-        return -1;
-    }
-
-    // Then copy permissions.
-    while ((ret = fchmod(outFd, sourceStat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))) < 0 && errno == EINTR);
-    if (ret != 0)
-    {
-        return -1;
-    }
-
-    return 0;
+    return CopyFileMetadata(inFd, outFd, &sourceStat);
 #endif // HAVE_FCOPYFILE
 }
 
