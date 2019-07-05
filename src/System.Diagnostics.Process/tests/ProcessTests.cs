@@ -1105,6 +1105,10 @@ namespace System.Diagnostics.Tests
             {
                 //System.DirectoryServices is not supported on all platforms
             }
+            catch (InvalidOperationException)
+            {
+                //Remote Registry service is disabled
+            }
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: https://github.com/dotnet/corefx/issues/32780
