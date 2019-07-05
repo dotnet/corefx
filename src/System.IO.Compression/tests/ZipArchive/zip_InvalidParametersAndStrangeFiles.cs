@@ -312,23 +312,19 @@ namespace System.IO.Compression.Tests
         {
             MemoryStream stream = await LocalMemoryStream.readAppFileAsync(strange("veryLarge.zip"));
 
-            using (
-                ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
+            using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
             {
                 ZipArchiveEntry e = archive.GetEntry("bigFile.bin");
-                using (var ms = new MemoryStream())
                 using (Stream source = e.Open())
                 {
                     byte[] buffer = new byte[s_bufferSize];
                     int read;
-                    int count = 1;
                     while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
                     {
-                        ms.Write(buffer, 0, read);
-                        if (count++ == 2)
-                            break;      // We don't want to inflate this large archive entirely
+                        if (read == s_bufferSize * 2) // We don't want to inflate this large archive entirely
+                            break;                    // just making sure it read successfully
                     }
-                    Assert.Equal(s_bufferSize * 2, ms.Length);
+                    Assert.Equal(s_bufferSize * 2, read);
                 }
             }
         }
