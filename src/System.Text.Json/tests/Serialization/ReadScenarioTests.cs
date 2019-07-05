@@ -8,14 +8,18 @@ using Xunit;
 namespace System.Text.Json.Tests.Serialization
 {
     /// <summary>
-    /// Catch-all location for general user reported scenarios that aren't specific to one serialization feature.
+    /// Catch-all location for combined read scenarios (user reported and otherwise) that aren't
+    /// specific to one serialization feature.
     /// </summary>
-    public class UserReports
+    public class ReadScenarioTests
     {
         [Fact]
-        public void Issue38568()
+        public void StringEnumUriAndCustomDateTimeConverter()
         {
-            // https://github.com/dotnet/corefx/issues/38568
+            // Validating a scenario reported with https://github.com/dotnet/corefx/issues/38568.
+            // Our DateTime parsing is ISO 8601 strict, more flexible parsing is possible by
+            // writing a simple converter. String based enum parsing is handled by registering
+            // a custom built-in parser (JsonStringEnumConverter). Uri is handled implicitly.
 
             string json =
                 @"{" +
