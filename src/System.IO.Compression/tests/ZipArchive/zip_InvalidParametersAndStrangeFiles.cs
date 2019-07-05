@@ -321,10 +321,10 @@ namespace System.IO.Compression.Tests
                     int read;
                     while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
                     {
-                        if (read == s_bufferSize * 2) // We don't want to inflate this large archive entirely
-                            break;                    // just making sure it read successfully
+                        if (read == s_bufferSize)   // We don't want to inflate this large archive entirely
+                            break;                  // just making sure it read successfully
                     }
-                    Assert.Equal(s_bufferSize * 2, read);
+                    Assert.Equal(s_bufferSize, read);
                 }
             }
         }
