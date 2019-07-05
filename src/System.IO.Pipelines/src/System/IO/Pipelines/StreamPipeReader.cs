@@ -220,7 +220,7 @@ namespace System.IO.Pipelines
                 _streamReadTask = ReadStreamAsync(cancellationToken);
 
                 // Completed the stream read inline because it was synchronous and there was no exception thrown
-                if (_streamReadTask.IsCompletedSuccessfully && _edi == null)
+                if (_streamReadTask.IsCompleted && _edi == null)
                 {
                     return new ValueTask<ReadResult>(GetReadResult());
                 }
