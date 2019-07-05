@@ -1255,9 +1255,9 @@ namespace System.Net.Http.Functional.Tests
         public async Task Http2_InitialWindowSize_ClientDoesNotExceedWindows()
         {
             const int DefaultInitialWindowSize = 65535;
-            const int ContentSize = 100_000;
+            const int ContentSize = DefaultInitialWindowSize + 1000;
 
-            var content = new ByteArrayContent(TestHelper.GenerateRandomContent(ContentSize));
+            var content = new ByteAtATimeContent(ContentSize);
 
             using (var server = Http2LoopbackServer.CreateServer())
             using (HttpClient client = CreateHttpClient())

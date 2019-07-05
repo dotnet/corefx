@@ -147,12 +147,9 @@ namespace System.Net.Http
                         return;
                     }
 
-                    if (_abortException == null)
-                    {
-                        // If we are still processing the response after receiving response headers,
-                        // this will give us a chance to propagate exception up.
-                        Interlocked.CompareExchange(ref _abortException, e, null);
-                    }
+                    // If we are still processing the response after receiving response headers,
+                    // this will give us a chance to propagate exception up.
+                    Interlocked.CompareExchange(ref _abortException, e, null);
 
                     throw;
                 }
@@ -910,6 +907,23 @@ namespace System.Net.Http
                     }
 
                     return new ValueTask(http2Stream.SendDataAsync(buffer, cancellationToken));
+                }
+
+                public override Task FlushAsync(CancellationToken cancellationToken)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return Task.FromCanceled(cancellationToken);
+                    }
+
+                    Http2Stream http2Stream = _http2Stream;
+
+                    if (http2Stream == null)
+                    {
+                        return Task.CompletedTask;
+                    }
+
+                    return http2Stream._connection.FlushAsync();
                 }
             }
         }
