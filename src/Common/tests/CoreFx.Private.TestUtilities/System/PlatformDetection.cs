@@ -49,7 +49,7 @@ namespace System
                 if (IsWindows)
                 {
 #endif
-                    return IsNotWindowsNanoServer && IsNotWindowsServerCore && !IsUap;
+                    return IsNotWindowsNanoServer && IsNotWindowsServerCore && !IsUap && IsNotArmProcess;
 #if netcoreapp
                 }
                 else if (IsOSX)
