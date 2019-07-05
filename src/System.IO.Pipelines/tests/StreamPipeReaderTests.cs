@@ -269,13 +269,16 @@ namespace System.IO.Pipelines.Tests
             PipeReader reader = PipeReader.Create(stream);
 
             ValueTask<ReadResult> task = reader.ReadAsync();
-
             reader.CancelPendingRead();
+            ReadResult readResult = await task;
+            Assert.True(readResult.IsCanceled);
+            reader.AdvanceTo(readResult.Buffer.End);
 
             stream.WaitForReadTask.TrySetResult(null);
 
-            ReadResult readResult = await task;
-            Assert.True(readResult.IsCanceled);
+            readResult = await reader.ReadAsync();
+            Assert.True(readResult.IsCompleted);
+
             reader.Complete();
         }
 
