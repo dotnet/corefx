@@ -4,12 +4,9 @@
 
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Net.Test.Common;
-
+using System.Reflection;
 using Xunit.Abstractions;
-using System.Collections.Generic;
-using System.Text;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -39,7 +36,13 @@ namespace System.Net.Http.Functional.Tests
         protected HttpClient CreateHttpClient(HttpMessageHandler handler)
         {
             var client = new HttpClient(handler);
-            SetDefaultRequestVersion(client, VersionFromUseHttp2);
+
+            // Always set the default request version to HTTP/2.
+            // The actual version used will be determined by the server (either loopback server or remote server).
+            // Note that if you create the HttpRequestMessage explicitly, you will need to set its Version explicitly
+            // because it defaults to 1.1.
+
+            SetDefaultRequestVersion(client, HttpVersion.Version20);
             return client;
         }
 
