@@ -43,7 +43,7 @@ namespace System.Net.Http
         private int _pendingWindowUpdate;
         private long _idleSinceTickCount;
         private int _pendingWriters;
-        private bool _hasAfterPendingWriteFrames;
+        private bool _lastPendingWriterShouldFlush;
 
         private bool _disposed;
         // anything else than -1 means that connection is being terminated
@@ -146,7 +146,7 @@ namespace System.Net.Http
             _outgoingBuffer.Commit(4);
 
             await _stream.WriteAsync(_outgoingBuffer.ActiveMemory).ConfigureAwait(false);
-            _outgoingBuffer.Discard(_outgoingBuffer.ActiveMemory.Length);
+            _outgoingBuffer.Discard(_outgoingBuffer.ActiveLength);
 
             _expectingSettingsAck = true;
 
@@ -156,12 +156,12 @@ namespace System.Net.Http
         private async Task EnsureIncomingBytesAsync(int minReadBytes)
         {
             if (NetEventSource.IsEnabled) Trace($"{nameof(minReadBytes)}={minReadBytes}");
-            if (_incomingBuffer.ActiveSpan.Length >= minReadBytes)
+            if (_incomingBuffer.ActiveLength >= minReadBytes)
             {
                 return;
             }
 
-            int bytesNeeded = minReadBytes - _incomingBuffer.ActiveSpan.Length;
+            int bytesNeeded = minReadBytes - _incomingBuffer.ActiveLength;
             _incomingBuffer.EnsureAvailableSpace(bytesNeeded);
             int bytesRead = await ReadAtLeastAsync(_stream, _incomingBuffer.AvailableMemory, bytesNeeded).ConfigureAwait(false);
             _incomingBuffer.Commit(bytesRead);
@@ -169,8 +169,8 @@ namespace System.Net.Http
 
         private async Task FlushOutgoingBytesAsync()
         {
-            if (NetEventSource.IsEnabled) Trace($"{nameof(_outgoingBuffer.ActiveSpan.Length)}={_outgoingBuffer.ActiveSpan.Length}");
-            Debug.Assert(_outgoingBuffer.ActiveSpan.Length > 0);
+            if (NetEventSource.IsEnabled) Trace($"{nameof(_outgoingBuffer.ActiveLength)}={_outgoingBuffer.ActiveLength}");
+            Debug.Assert(_outgoingBuffer.ActiveLength > 0);
 
             try
             {
@@ -183,8 +183,8 @@ namespace System.Net.Http
             }
             finally
             {
-                _hasAfterPendingWriteFrames = false;
-                _outgoingBuffer.Discard(_outgoingBuffer.ActiveMemory.Length);
+                _lastPendingWriterShouldFlush = false;
+                _outgoingBuffer.Discard(_outgoingBuffer.ActiveLength);
             }
         }
 
@@ -200,7 +200,7 @@ namespace System.Net.Http
             {
                 if (initialFrame && NetEventSource.IsEnabled)
                 {
-                    string response = Encoding.ASCII.GetString(_incomingBuffer.ActiveSpan.Slice(0, Math.Min(20, _incomingBuffer.ActiveSpan.Length)));
+                    string response = Encoding.ASCII.GetString(_incomingBuffer.ActiveSpan.Slice(0, Math.Min(20, _incomingBuffer.ActiveLength)));
                     Trace($"HTTP/2 handshake failed. Server returned {response}");
                 }
 
@@ -689,21 +689,10 @@ namespace System.Net.Http
             _incomingBuffer.Discard(frameHeader.Length);
         }
 
-        internal async Task FlushAsync() // no cancellation token: we don't want individual operation tokens applying to the whole connection
+        internal async Task FlushAsync(CancellationToken cancellationToken = default)
         {
-            if (NetEventSource.IsEnabled) Trace("");
-            await AcquireWriteLockAsync(default).ConfigureAwait(false);
-            try
-            {
-                if (_outgoingBuffer.ActiveSpan.Length > 0)
-                {
-                    await FlushOutgoingBytesAsync().ConfigureAwait(false);
-                }
-            }
-            finally
-            {
-                _writerLock.Release();
-            }
+            await StartWriteAsync(0, cancellationToken).ConfigureAwait(false);
+            FinishWrite(FlushTiming.Now);
         }
 
         private async ValueTask<Memory<byte>> StartWriteAsync(int writeBytes, CancellationToken cancellationToken = default)
@@ -721,7 +710,7 @@ namespace System.Net.Http
                 }
 
                 int totalBufferLength = _outgoingBuffer.Capacity;
-                int activeBufferLength = _outgoingBuffer.ActiveSpan.Length;
+                int activeBufferLength = _outgoingBuffer.ActiveLength;
 
                 if (totalBufferLength >= UnflushedOutgoingBufferSize &&
                     writeBytes >= totalBufferLength - activeBufferLength &&
@@ -729,7 +718,7 @@ namespace System.Net.Http
                 {
                     // If the buffer has already grown to 32k, does not have room for the next request,
                     // and is non-empty, flush the current contents to the wire.
-                    await FlushOutgoingBytesAsync().ConfigureAwait(false);
+                    await FlushOutgoingBytesAsync().ConfigureAwait(false); // we explicitly do not pass cancellationToken here, as this flush impacts more than just this operation
                 }
 
                 _outgoingBuffer.EnsureAvailableSpace(writeBytes);
@@ -762,12 +751,14 @@ namespace System.Net.Http
             {
                 // We must flush if the caller requires it or if this or a recent frame wanted to be flushed
                 // once there were no more pending writers that themselves could have forced the flush.
-                _hasAfterPendingWriteFrames |= (flush == FlushTiming.AfterPendingWrites);
-                if (flush == FlushTiming.Now || (_pendingWriters == 0 && _hasAfterPendingWriteFrames))
+                _lastPendingWriterShouldFlush |= (flush == FlushTiming.AfterPendingWrites);
+                if (flush == FlushTiming.Now || (_pendingWriters == 0 && _lastPendingWriterShouldFlush))
                 {
                     Debug.Assert(_inProgressWrite == null);
-
-                    _inProgressWrite = FlushOutgoingBytesAsync();
+                    if (_outgoingBuffer.ActiveLength > 0)
+                    {
+                        _inProgressWrite = FlushOutgoingBytesAsync();
+                    }
                 }
             }
             finally
@@ -794,12 +785,13 @@ namespace System.Net.Http
                         // If a pending waiter is canceled, we may end up in a situation where a previously written frame
                         // saw that there were pending writers and as such deferred its flush to them, but if/when that pending
                         // writer is canceled, nothing may end up flushing the deferred work (at least not promptly).  To compensate,
-                        // if a pending writer does end up being canceled, we queue a flush.  We can't check whether there's such a pending
-                        // operation because we failed to acquire the lock that protects that state.  But we can at least only
-                        // do the queue if our decrement caused the pending count to reach 0: if it's still higher than zero,
-                        // then there's at least one other pending writer who can handle the flush.  Worst case, we queue a flush
-                        // that ends up being a nop.
-                        ThreadPool.UnsafeQueueUserWorkItem(thisRef => thisRef.LogExceptions(thisRef.FlushAsync()), this, preferLocal: false);
+                        // if a pending writer does end up being canceled, we flush asynchronously.  We can't check whether there's such
+                        // a pending operation because we failed to acquire the lock that protects that state.  But we can at least only
+                        // do the flush if our decrement caused the pending count to reach 0: if it's still higher than zero, then there's
+                        // at least one other pending writer who can handle the flush.  Worst case, we pay for a flush that ends up being
+                        // a nop.  Note: we explicitly do not pass in the cancellationToken; if we're here, it's almost certainly because
+                        // cancellation was requested, and it's because of that cancellation that we need to flush.
+                        LogExceptions(FlushAsync());
                     }
 
                     throw;
@@ -823,7 +815,7 @@ namespace System.Net.Http
             FrameHeader frameHeader = new FrameHeader(0, FrameType.Settings, FrameFlags.Ack, 0);
             frameHeader.WriteTo(writeBuffer);
 
-            FinishWrite(FlushTiming.Now); // RFC7540: "The recipient MUST immediately emit a SETTINGS frame with the ACK flag set"
+            FinishWrite(FlushTiming.AfterPendingWrites);
         }
 
         private async Task SendPingAckAsync(ReadOnlyMemory<byte> pingContent)
@@ -839,7 +831,7 @@ namespace System.Net.Http
 
             pingContent.CopyTo(writeBuffer);
 
-            FinishWrite(FlushTiming.Now); // RFC7540: "PING responses SHOULD be given higher priority than any other frame."
+            FinishWrite(FlushTiming.AfterPendingWrites);
         }
 
         private async Task SendRstStreamAsync(int streamId, Http2ProtocolErrorCode errorCode)
@@ -1000,7 +992,7 @@ namespace System.Net.Http
         private void WriteHeaders(HttpRequestMessage request)
         {
             if (NetEventSource.IsEnabled) Trace("");
-            Debug.Assert(_headerBuffer.ActiveMemory.Length == 0);
+            Debug.Assert(_headerBuffer.ActiveLength == 0);
 
             // HTTP2 does not support Transfer-Encoding: chunked, so disable this on the request.
             request.Headers.TransferEncodingChunked = false;
@@ -1166,7 +1158,7 @@ namespace System.Net.Http
             }
             finally
             {
-                _headerBuffer.Discard(_headerBuffer.ActiveMemory.Length);
+                _headerBuffer.Discard(_headerBuffer.ActiveLength);
                 _headerSerializationLock.Release();
             }
 

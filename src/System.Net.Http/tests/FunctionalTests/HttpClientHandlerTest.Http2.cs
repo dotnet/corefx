@@ -1504,7 +1504,7 @@ namespace System.Net.Http.Functional.Tests
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
-            var content = new ByteArrayContent(TestHelper.GenerateRandomContent(ContentSize));
+            var content = new ByteAtATimeContent(ContentSize);
 
             using (var server = Http2LoopbackServer.CreateServer())
             using (HttpClient client = CreateHttpClient(handler))
