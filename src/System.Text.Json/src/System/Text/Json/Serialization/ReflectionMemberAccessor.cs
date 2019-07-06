@@ -152,5 +152,21 @@ namespace System.Text.Json
                 set(ref Unsafe.Unbox<TClass>(obj), value);
             };
         }
+
+        public override Func<object, TProperty> CreatePropertyGetter<TClass, TProperty>(FieldInfo fieldInfo)
+        {
+            return delegate (object obj)
+            {
+                return (TProperty)fieldInfo.GetValue(obj);
+            };
+        }
+
+        public override Action<object, TProperty> CreatePropertySetter<TClass, TProperty>(FieldInfo fieldInfo)
+        {
+            return delegate (object obj, TProperty value)
+            {
+                fieldInfo.SetValue(obj, value);
+            };
+        }
     }
 }

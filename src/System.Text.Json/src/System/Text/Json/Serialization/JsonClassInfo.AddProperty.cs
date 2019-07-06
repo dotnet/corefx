@@ -23,7 +23,7 @@ namespace System.Text.Json
                 options : options);
         }
 
-        private JsonPropertyInfo AddProperty(Type propertyType, PropertyInfo propertyInfo, Type classType, JsonSerializerOptions options)
+        private JsonPropertyInfo AddProperty(Type propertyType, MemberInfo propertyInfo, Type classType, JsonSerializerOptions options)
         {
             JsonPropertyInfo jsonInfo;
 
@@ -86,7 +86,7 @@ namespace System.Text.Json
             Type declaredPropertyType,
             Type runtimePropertyType,
             Type implementedPropertyType,
-            PropertyInfo propertyInfo,
+            MemberInfo propertyInfo,
             Type parentClassType,
             JsonConverter converter,
             JsonSerializerOptions options)

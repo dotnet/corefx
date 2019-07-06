@@ -25,36 +25,48 @@ namespace System.Text.Json
             Type declaredPropertyType,
             Type runtimePropertyType,
             Type implementedPropertyType,
-            PropertyInfo propertyInfo,
+            MemberInfo propertyInfo,
             Type elementType,
             JsonConverter converter,
             JsonSerializerOptions options)
         {
             base.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, elementType, converter, options);
 
-            if (propertyInfo != null &&
-                // We only want to get the getter and setter if we are going to use them.
-                // If the declared type is not the property info type, then we are just
-                // getting metadata on how best to (de)serialize derived types.
-                declaredPropertyType == propertyInfo.PropertyType)
+            switch (propertyInfo)
             {
-                if (propertyInfo.GetMethod?.IsPublic == true)
-                {
-                    HasGetter = true;
-                    Get = options.MemberAccessorStrategy.CreatePropertyGetter<TClass, TDeclaredProperty>(propertyInfo);
-                }
+                case PropertyInfo property when property.PropertyType == declaredPropertyType:
+                    if (property.GetMethod?.IsPublic == true)
+                    {
+                        HasGetter = true;
+                        Get = options.MemberAccessorStrategy.CreatePropertyGetter<TClass, TDeclaredProperty>(property);
+                    }
 
-                if (propertyInfo.SetMethod?.IsPublic == true)
-                {
+                    if (property.SetMethod?.IsPublic == true)
+                    {
+                        HasSetter = true;
+                        Set = options.MemberAccessorStrategy.CreatePropertySetter<TClass, TDeclaredProperty>(property);
+                    }
+
+                    break;
+
+                case FieldInfo field when field.FieldType == declaredPropertyType:
+                    HasGetter = true;
+                    Get = options.MemberAccessorStrategy.CreatePropertyGetter<TClass, TDeclaredProperty>(field);
+
+                    if (!field.IsInitOnly)
+                    {
+                        HasSetter = true;
+                        Set = options.MemberAccessorStrategy.CreatePropertySetter<TClass, TDeclaredProperty>(field);
+                    }
+
+                    break;
+
+                default:
+                    IsPropertyPolicy = true;
+                    HasGetter = true;
                     HasSetter = true;
-                    Set = options.MemberAccessorStrategy.CreatePropertySetter<TClass, TDeclaredProperty>(propertyInfo);
-                }
-            }
-            else
-            {
-                IsPropertyPolicy = true;
-                HasGetter = true;
-                HasSetter = true;
+
+                    break;
             }
 
             GetPolicies();

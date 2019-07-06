@@ -135,16 +135,18 @@ namespace System.Text.Json
         }
 
         public override Func<object, TProperty> CreatePropertyGetter<TClass, TProperty>(PropertyInfo propertyInfo) =>
-            (Func<object, TProperty>)CreatePropertyGetter(propertyInfo, typeof(TClass));
+            (Func<object, TProperty>)CreatePropertyGetter(typeof(TClass), propertyInfo.PropertyType, propertyInfo);
 
-        private static Delegate CreatePropertyGetter(PropertyInfo propertyInfo, Type classType)
+        public override Func<object, TProperty> CreatePropertyGetter<TClass, TProperty>(FieldInfo propertyInfo) =>
+            (Func<object, TProperty>)CreatePropertyGetter(typeof(TClass), propertyInfo.FieldType, propertyInfo);
+
+        private static Delegate CreatePropertyGetter(Type classType, Type propertyType, MemberInfo propertyInfo)
         {
-            MethodInfo realMethod = propertyInfo.GetGetMethod();
             Type objectType = typeof(object);
 
             var dynamicMethod = new DynamicMethod(
-                realMethod.Name,
-                propertyInfo.PropertyType,
+                propertyInfo.Name + "Getter",
+                propertyType,
                 new[] { objectType },
                 typeof(ReflectionEmitMemberAccessor).Module,
                 skipVisibility: true);
@@ -153,34 +155,52 @@ namespace System.Text.Json
 
             generator.Emit(OpCodes.Ldarg_0);
 
-            if (classType.IsValueType)
+            switch (propertyInfo)
             {
-                generator.Emit(OpCodes.Unbox, classType);
-                generator.Emit(OpCodes.Call, realMethod);
-            }
-            else
-            {
-                generator.Emit(OpCodes.Castclass, classType);
-                generator.Emit(OpCodes.Callvirt, realMethod);
+                case PropertyInfo property:
+                    MethodInfo realMethod = property.GetGetMethod();
+
+                    if (classType.IsValueType)
+                    {
+                        generator.Emit(OpCodes.Unbox, classType);
+                        generator.Emit(OpCodes.Call, realMethod);
+                    }
+                    else
+                    {
+                        generator.Emit(OpCodes.Castclass, classType);
+                        generator.Emit(OpCodes.Callvirt, realMethod);
+                    }
+
+                    break;
+
+                case FieldInfo field:
+                    generator.Emit(classType.IsValueType ? OpCodes.Unbox : OpCodes.Castclass, classType);
+                    generator.Emit(OpCodes.Ldfld, field);
+                    break;
+
+                default:
+                    throw new NotSupportedException();
             }
 
             generator.Emit(OpCodes.Ret);
 
-            return dynamicMethod.CreateDelegate(typeof(Func<,>).MakeGenericType(objectType, propertyInfo.PropertyType));
+            return dynamicMethod.CreateDelegate(typeof(Func<,>).MakeGenericType(objectType, propertyType));
         }
 
         public override Action<object, TProperty> CreatePropertySetter<TClass, TProperty>(PropertyInfo propertyInfo) =>
-            (Action<object, TProperty>)CreatePropertySetter(propertyInfo, typeof(TClass));
+            (Action<object, TProperty>)CreatePropertySetter(typeof(TClass), propertyInfo.PropertyType, propertyInfo);
 
-        private static Delegate CreatePropertySetter(PropertyInfo propertyInfo, Type classType)
+        public override Action<object, TProperty> CreatePropertySetter<TClass, TProperty>(FieldInfo propertyInfo) =>
+            (Action<object, TProperty>)CreatePropertySetter(typeof(TClass), propertyInfo.FieldType, propertyInfo);
+
+        private static Delegate CreatePropertySetter(Type classType, Type propertyType, MemberInfo propertyInfo)
         {
-            MethodInfo realMethod = propertyInfo.GetSetMethod();
             Type objectType = typeof(object);
 
             var dynamicMethod = new DynamicMethod(
-                realMethod.Name,
+                propertyInfo.Name + "Setter",
                 typeof(void),
-                new[] { objectType, propertyInfo.PropertyType },
+                new[] { objectType, propertyType },
                 typeof(ReflectionEmitMemberAccessor).Module,
                 skipVisibility: true);
 
@@ -188,22 +208,39 @@ namespace System.Text.Json
 
             generator.Emit(OpCodes.Ldarg_0);
 
-            if (classType.IsValueType)
+            switch (propertyInfo)
             {
-                generator.Emit(OpCodes.Unbox, classType);
-                generator.Emit(OpCodes.Ldarg_1);
-                generator.Emit(OpCodes.Call, realMethod);
+                case PropertyInfo property:
+                    MethodInfo realMethod = property.GetSetMethod();
+
+                    if (classType.IsValueType)
+                    {
+                        generator.Emit(OpCodes.Unbox, classType);
+                        generator.Emit(OpCodes.Ldarg_1);
+                        generator.Emit(OpCodes.Call, realMethod);
+                    }
+                    else
+                    {
+                        generator.Emit(OpCodes.Castclass, classType);
+                        generator.Emit(OpCodes.Ldarg_1);
+                        generator.Emit(OpCodes.Callvirt, realMethod);
+                    }
+
+                    break;
+
+                case FieldInfo field:
+                    generator.Emit(classType.IsValueType ? OpCodes.Unbox : OpCodes.Castclass, classType);
+                    generator.Emit(OpCodes.Ldarg_1);
+                    generator.Emit(OpCodes.Stfld, field);
+                    break;
+
+                default:
+                    throw new NotSupportedException();
             }
-            else
-            {
-                generator.Emit(OpCodes.Castclass, classType);
-                generator.Emit(OpCodes.Ldarg_1);
-                generator.Emit(OpCodes.Callvirt, realMethod);
-            };
 
             generator.Emit(OpCodes.Ret);
 
-            return dynamicMethod.CreateDelegate(typeof(Action<,>).MakeGenericType(objectType, propertyInfo.PropertyType));
+            return dynamicMethod.CreateDelegate(typeof(Action<,>).MakeGenericType(objectType, propertyType));
         }
     }
 }

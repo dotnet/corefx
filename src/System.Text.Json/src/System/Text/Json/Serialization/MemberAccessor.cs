@@ -59,7 +59,9 @@ namespace System.Text.Json
         }
 
         public abstract Func<object, TProperty> CreatePropertyGetter<TClass, TProperty>(PropertyInfo propertyInfo);
+        public abstract Func<object, TProperty> CreatePropertyGetter<TClass, TProperty>(FieldInfo propertyInfo);
 
         public abstract Action<object, TProperty> CreatePropertySetter<TClass, TProperty>(PropertyInfo propertyInfo);
+        public abstract Action<object, TProperty> CreatePropertySetter<TClass, TProperty>(FieldInfo propertyInfo);
     }
 }

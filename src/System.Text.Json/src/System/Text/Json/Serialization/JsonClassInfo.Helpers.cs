@@ -130,7 +130,7 @@ namespace System.Text.Json
         public static Type GetImplementedCollectionType(
             Type parentClassType,
             Type queryType,
-            PropertyInfo propertyInfo,
+            MemberInfo propertyInfo,
             out JsonConverter converter,
             JsonSerializerOptions options)
         {
