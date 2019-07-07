@@ -2,7 +2,7 @@
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
 
   <PropertyGroup>
-    <BuildDependsOnTargets>FilterProjects;GenerateLaunchSettingsFiles</BuildDependsOnTargets>
+    <BuildDependsOnTargets>FilterProjects</BuildDependsOnTargets>
     <BuildDependsOnTargets Condition="'$(BinplaceTestSharedFramework)' == 'true'">$(BuildDependsOnTargets);GenerateTestSharedFrameworkDepsFile</BuildDependsOnTargets>
     <BuildDependsOnTargets Condition="'$(PlatformManifestFile)' != ''">$(BuildDependsOnTargets);GenerateFileVersionProps</BuildDependsOnTargets>
   </PropertyGroup>
@@ -26,22 +26,6 @@
                                    Exclude="$(TestHostRuntimePath)dotnet-Microsoft.XmlSerializer.Generator.*"
                                    TargetPath="runtimes/" />
     </ItemGroup>
-  </Target>
-
-  <!-- Generate launch settings support files to enable VS debugging. -->
-  <Target Name="GenerateLaunchSettingsFiles" Condition="'$(EnableLaunchSettings)' == 'true'">
-    <PropertyGroup>
-      <_TestProjectRootDir>$(SourceDir)</_TestProjectRootDir>
-      <_TestProjectRootDir Condition="'$(DirectoryToBuild)'!=''">$(DirectoryToBuild)</_TestProjectRootDir>
-    </PropertyGroup>
-    <ItemGroup>
-      <!-- Keep in sync with pattern for test projects in tests.proj -->
-      <TestProjects Include="$(_TestProjectRootDir)*\tests\**\*.Tests.csproj" />
-    </ItemGroup>
-
-    <MSBuild Projects="@(TestProjects)"
-             Targets="GenerateLaunchSettingsFile"
-             ContinueOnError="ErrorAndContinue" />
   </Target>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
