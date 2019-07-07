@@ -26,7 +26,7 @@ namespace System.Data.SqlClient.Tests
 
         public static bool IsConnectionStringConfigured() => s_tcpConnStr != string.Empty;
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ExecuteScalarTest()
         {
@@ -48,7 +48,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ExecuteScalarErrorTest()
         {
@@ -72,7 +72,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ExecuteNonQueryTest()
         {
@@ -94,7 +94,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ExecuteNonQueryErrorTest()
         {
@@ -132,7 +132,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ExecuteReaderTest()
         {
@@ -181,7 +181,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ExecuteReaderWithCommandBehaviorTest()
         {
@@ -253,7 +253,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ExecuteScalarAsyncTest()
         {
@@ -275,7 +275,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ExecuteScalarAsyncErrorTest()
         {
@@ -299,7 +299,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ExecuteNonQueryAsyncTest()
         {
@@ -321,7 +321,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ExecuteNonQueryAsyncErrorTest()
         {
@@ -344,7 +344,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ExecuteReaderAsyncTest()
         {
@@ -442,7 +442,7 @@ namespace System.Data.SqlClient.Tests
             }, s_tcpConnStr).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ConnectionOpenTest()
         {
@@ -480,7 +480,7 @@ namespace System.Data.SqlClient.Tests
             }).Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework,  "Feature not available on Framework")]
         public void ConnectionOpenAsyncTest()
         {

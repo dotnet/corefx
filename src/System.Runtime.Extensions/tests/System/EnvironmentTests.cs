@@ -456,9 +456,9 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.Personal)]
         [InlineData(Environment.SpecialFolder.ProgramFiles)]
         [InlineData(Environment.SpecialFolder.CommonProgramFiles)]
-        [InlineData(Environment.SpecialFolder.AdminTools)]
+        // [InlineData(Environment.SpecialFolder.AdminTools)] // Not available on ARM32
         //[InlineData(Environment.SpecialFolder.CDBurning)]  // Not available on Server Core
-        [InlineData(Environment.SpecialFolder.CommonAdminTools)]
+        // [InlineData(Environment.SpecialFolder.CommonAdminTools)] // Not available on ARM32
         [InlineData(Environment.SpecialFolder.CommonDocuments)]
         [InlineData(Environment.SpecialFolder.CommonMusic)]
         // [InlineData(Environment.SpecialFolder.CommonOemLinks)]

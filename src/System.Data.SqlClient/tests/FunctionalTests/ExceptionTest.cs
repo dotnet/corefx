@@ -19,7 +19,7 @@ namespace System.Data.SqlClient.Tests
         private const string execReaderFailedMessage = "ExecuteReader requires an open and available Connection. The connection's current state is closed.";
         private const string orderIdQuery = "select orderid from orders where orderid < 10250";
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void ExceptionTests()
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
@@ -47,7 +47,7 @@ namespace System.Data.SqlClient.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void IndependentConnectionExceptionTestOpenConnection()
         {
             // Test exceptions for existing connection to ensure proper exception and call stack
@@ -76,7 +76,7 @@ namespace System.Data.SqlClient.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [InlineData(@"np:\\.\pipe\sqlbad\query")]
         [InlineData(@"np:\\.\pipe\MSSQL$NonExistentInstance\sql\query")]
         [InlineData(@"\\.\pipe\sqlbad\query")]

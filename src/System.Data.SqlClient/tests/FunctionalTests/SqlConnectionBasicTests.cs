@@ -11,7 +11,7 @@ namespace System.Data.SqlClient.Tests
 {
     public class SqlConnectionBasicTests
     {
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void ConnectionTest()
         {
             using (TestTdsServer server = TestTdsServer.StartTestServer())

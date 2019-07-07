@@ -15,7 +15,7 @@ namespace Microsoft.Win32.SystemEventsTests
             return SendMessage(User32.WM_ENDSESSION, ended ? (IntPtr)1 : (IntPtr)0, (IntPtr)lParam);
         }
 
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [InlineData(User32.ENDSESSION_LOGOFF, SessionEndReasons.Logoff)]
         [InlineData(User32.ENDSESSION_LOGOFF | User32.ENDSESSION_CRITICAL, SessionEndReasons.Logoff)]
         [InlineData(User32.ENDSESSION_LOGOFF | User32.ENDSESSION_CLOSEAPP, SessionEndReasons.Logoff)]

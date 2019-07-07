@@ -39,7 +39,8 @@ namespace System
         public static bool IsNotInAppContainer => !IsInAppContainer;
         public static bool IsWinRTSupported => IsWindows && !IsWindows7;
         public static bool IsNotWinRTSupported => !IsWinRTSupported;
-        public static bool IsSoundPlaySupported => IsWindows && IsNotWindowsNanoServer;
+        public static bool IsNotWindowsArmProcess => !IsWindows || IsNotArmProcess;
+        public static bool IsSoundPlaySupported => IsWindows && IsNotWindowsNanoServer && IsNotArmProcess;
 
         // >= Windows 10 Anniversary Update
         public static bool IsWindows10Version1607OrGreater => IsWindows &&

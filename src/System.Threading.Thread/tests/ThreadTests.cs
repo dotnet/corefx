@@ -1109,7 +1109,7 @@ namespace System.Threading.Threads.Tests
             Thread.Yield();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))] // #39266
         [PlatformSpecific(TestPlatforms.Windows)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "SetPrincipal doesn't work on UAP.")]
         public static void WindowsPrincipalPolicyTest_Windows()

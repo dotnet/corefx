@@ -12,21 +12,21 @@ namespace System.Data.SqlClient.Tests
     {
         private const string badServer = "92B96911A0BD43E8ADA4451031F7E7CF";
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void IsSynchronized_Success()
         {
             ICollection c = CreateCollection();
             Assert.False(c.IsSynchronized);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void SyncRoot_Success()
         {
             ICollection c = CreateCollection();
             Assert.Same(c, c.SyncRoot);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void Indexer_Success()
         {
             SqlErrorCollection c = CreateCollection();
@@ -34,7 +34,7 @@ namespace System.Data.SqlClient.Tests
             Assert.Same(c[0], c[0]);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void Indexer_Throws()
         {
             SqlErrorCollection c = CreateCollection();
@@ -43,13 +43,13 @@ namespace System.Data.SqlClient.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => c[c.Count]);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void CopyTo_Success()
         {
             ValidateCopyTo((collection, array, index) => collection.CopyTo(array, index));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void CopyTo_NonGeneric_Success()
         {
             ValidateCopyTo((collection, array, index) => ((ICollection)collection).CopyTo(array, index));
@@ -69,13 +69,13 @@ namespace System.Data.SqlClient.Tests
             Assert.Null(destination[4]);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void CopyTo_Throws()
         {
             ValidateCopyToThrows((collection, array, index) => collection.CopyTo(array, index));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void CopyTo_NonGeneric_Throws()
         {
             ValidateCopyToThrows((collection, array, index) => ((ICollection)collection).CopyTo(array, index), c =>
@@ -100,7 +100,7 @@ namespace System.Data.SqlClient.Tests
             additionalValidation?.Invoke(c);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void GetEnumerator_Success()
         {
             SqlErrorCollection c = CreateCollection();

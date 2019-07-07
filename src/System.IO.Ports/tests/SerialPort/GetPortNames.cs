@@ -62,7 +62,7 @@ namespace System.IO.Ports.Tests
         /// Test that the test helpers have found every port that SerialPort.GetPortNames has found
         /// This catches regressions in the test helpers, eg GH #18928 / #20668
         /// </summary>
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void AllGetPortNamesAreInHelperPorts()
         {
             string[] helperPortNames = PortHelper.GetPorts();

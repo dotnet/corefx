@@ -170,7 +170,7 @@ namespace Microsoft.Win32.SystemEventsTests
             }
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         public void SignalsUserPreferenceEventsAsynchronouslyOnThemeChanged()
         {
             var changing = new AutoResetEvent(false);
@@ -227,7 +227,7 @@ namespace Microsoft.Win32.SystemEventsTests
             }
         }
 
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsArmProcess))]
         [MemberData(nameof(PreferenceChangingCases))]
         public void SignalsUserPreferenceEventsSynchronously(int message, int uiAction, string area, UserPreferenceCategory expectedCategory)
         {
