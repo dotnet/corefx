@@ -359,7 +359,11 @@ namespace System.IO.Pipelines
 
                 if (returnSegment.Length > 0)
                 {
+#if netcoreapp
                     InnerStream.Write(returnSegment.Memory.Span);
+#else
+                    InnerStream.Write(returnSegment.Memory);
+#endif
                 }
 
                 returnSegment.ResetMemory();
