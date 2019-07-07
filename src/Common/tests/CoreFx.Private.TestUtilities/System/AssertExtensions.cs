@@ -348,14 +348,14 @@ namespace System
             try
             {
                 action(span);
-                Assert.False(true, "Expected exception: " + typeof(E).GetType());
+                throw new XunitException($"Expected exception: : {typeof(E).GetType()} -> Actual: No exception thrown");
             }
             catch (E)
             {
             }
             catch (Exception wrongException)
             {
-                Assert.False(true, "Wrong exception thrown: Expected " + typeof(E).GetType() + ": Actual: " + wrongException.GetType());
+                throw new XunitException($"Wrong exception thrown: Expected exception: : {typeof(E).GetType()} -> Actual: {wrongException.GetType()}");
             }
         }
 
@@ -364,14 +364,14 @@ namespace System
             try
             {
                 action(span);
-                Assert.False(true, "Expected exception: " + typeof(E).GetType());
+                throw new XunitException($"Expected exception: : {typeof(E).GetType()} -> Actual: No exception thrown");
             }
             catch (E)
             {
             }
             catch (Exception wrongException)
             {
-                Assert.False(true, "Wrong exception thrown: Expected " + typeof(E).GetType() + ": Actual: " + wrongException.GetType());
+                throw new XunitException($"Wrong exception thrown: Expected exception: : {typeof(E).GetType()} -> Actual: {wrongException.GetType()}");
             }
         }
     }
