@@ -239,7 +239,11 @@ namespace System.IO.Pipelines
 
             if (!_leaveOpen)
             {
+#if netcoreapp
                 await InnerStream.DisposeAsync().ConfigureAwait(false);
+#else
+                InnerStream.Dispose();
+#endif
             }
         }
 
