@@ -22,23 +22,17 @@ namespace System.IO.Pipelines
         /// <summary>
         /// Creates a new instance of <see cref="StreamPipeReaderOptions"/>.
         /// </summary>
-        public StreamPipeReaderOptions(MemoryPool<byte> pool = null, int bufferSize = DefaultBufferSize, int minimumReadSize = DefaultMinimumReadSize, bool leaveOpen = false)
+        public StreamPipeReaderOptions(MemoryPool<byte> pool = null, int bufferSize = -1, int minimumReadSize = DefaultMinimumReadSize, bool leaveOpen = false)
         {
             Pool = pool ?? MemoryPool<byte>.Shared;
 
-            if (bufferSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(bufferSize));
-            }
+            BufferSize =
+                bufferSize == -1 ? DefaultBufferSize :
+                bufferSize <= 0 ? throw new ArgumentOutOfRangeException(nameof(bufferSize)) :
+                bufferSize;
 
-            BufferSize = bufferSize;
+            MinimumReadSize = minimumReadSize > 0 ? minimumReadSize : throw new ArgumentOutOfRangeException(nameof(minimumReadSize));
 
-            if (minimumReadSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(minimumReadSize));
-            }
-
-            MinimumReadSize = minimumReadSize;
             LeaveOpen = leaveOpen;
         }
 
