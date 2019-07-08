@@ -77,7 +77,7 @@
     <!-- Docs -->
     <MicrosoftPrivateIntellisensePackageVersion>3.0.0-preview9-190909-1</MicrosoftPrivateIntellisensePackageVersion>
     <!-- ILLink -->
-    <ILLinkTasksPackageVersion>0.1.5-preview-1461378</ILLinkTasksPackageVersion>
+    <ILLinkTasksPackageVersion>0.1.6-prerelease.19358.2</ILLinkTasksPackageVersion>
   </PropertyGroup>
   <!-- Override isolated build dependency versions with versions from Repo API. -->
   <Import Project="$(DotNetPackageVersionPropsPath)" Condition="'$(DotNetPackageVersionPropsPath)' != ''" />
