@@ -161,8 +161,11 @@ namespace System.Linq
             }
             else if (source is List<TSource> list)
             {
-                foreach (TSource element in list)
+                TSource element;
+                for (int i = 0; i < list.Count; ++i)
                 {
+                    element = list[i];
+
                     if (predicate(element))
                     {
                         if (found)
