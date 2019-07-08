@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using System.Runtime.InteropServices;
 
 namespace System.IO.Tests
 {
@@ -46,6 +47,22 @@ namespace System.IO.Tests
             string testFile = GetTestFilePath();
             File.Create(testFile).Dispose();
             Assert.Throws<IOException>(() => Copy(testFile, testFile));
+        }
+
+        [DllImport("libc", SetLastError = true)]
+        private static extern int symlink(string target, string linkpath);
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void DanglingSymlinkCopy()
+        {
+            string dangling_symlink = GetTestFileName();
+            string missing_target = GetTestFileName();
+            string dangling_symlink_new_location = GetTestFileName();
+            Assert.False(File.Exists(missing_target));
+            Assert.Equal(0, symlink(missing_target, dangling_symlink));
+            Copy(dangling_symlink, dangling_symlink_new_location);
+            Assert.True(File.Exists(dangling_symlink_new_location)); // File.Exists returns true for dangling symlinks
         }
 
         [Fact]

@@ -734,3 +734,11 @@ DLLEXPORT int32_t SystemNative_LChflags(const char* path, uint32_t flags);
  * Returns true (non-zero) if supported, false (zero) if not.
  */
 DLLEXPORT int32_t SystemNative_LChflagsCanSetHiddenFlag(void);
+/**
+* Creates a symbolic link at "linkPath", pointing at "target".
+* "target" may or may not exist (dangling symbolic links are valid filesystem objects)
+* Returns 0 on success; otherwise, returns -1 and errno is set.
+*/
+DLLEXPORT int32_t SystemNative_Symlink(const char* target, const char* linkPath);
+
+END_EXTERN_C
