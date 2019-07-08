@@ -161,8 +161,7 @@ namespace System.Security.Cryptography
                 return 0;
             }
 
-            ConvertFromBase64(tmpBuffer, outputBuffer.AsSpan(outputOffset), out int consumed, out int written);
-            Debug.Assert(consumed == bytesToTransform);
+            ConvertFromBase64(tmpBuffer, outputBuffer.AsSpan(outputOffset), out _, out int written);
 
             ReturnToCryptoPool(tmpBufferArray, tmpBuffer.Length);
 
@@ -210,7 +209,6 @@ namespace System.Security.Cryptography
             byte[] output = new byte[outputSize];
 
             ConvertFromBase64(tmpBuffer, output, out int consumed, out int written);
-            Debug.Assert(consumed == bytesToTransform);
             Debug.Assert(written == outputSize);
 
             ReturnToCryptoPool(tmpBufferArray, tmpBuffer.Length);
@@ -298,8 +296,6 @@ namespace System.Security.Cryptography
                 transformBuffer = transformBufferArray = CryptoPool.Rent(bytesToTransform);
             }
 
-            transformBuffer = transformBuffer.Slice(0, bytesToTransform);
-
             // Copy _inputBuffer to transformBuffer and append tmpBuffer
             Debug.Assert(_inputIndex < _inputBuffer.Length);
             _inputBuffer.AsSpan(0, _inputIndex).CopyTo(transformBuffer);
@@ -307,12 +303,18 @@ namespace System.Security.Cryptography
 
             // Save data that won't be transformed to _inputBuffer, so it can be transformed later
             _inputIndex = bytesToTransform & 3;     // bit hack for % 4
+            bytesToTransform -= _inputIndex;        // only transform up to the next multiple of 4
             Debug.Assert(_inputIndex < _inputBuffer.Length);
             tmpBuffer.Slice(tmpBuffer.Length - _inputIndex).CopyTo(_inputBuffer);
 
+            transformBuffer = transformBuffer.Slice(0, bytesToTransform);
             OperationStatus status = Base64.DecodeFromUtf8(transformBuffer, outputBuffer, out consumed, out written);
 
-            if (status != OperationStatus.Done)
+            if (status == OperationStatus.Done)
+            {
+                Debug.Assert(consumed == bytesToTransform);
+            }
+            else
             {
                 Debug.Assert(status == OperationStatus.InvalidData);
                 ThrowHelper.ThrowBase64FormatException();

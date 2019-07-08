@@ -38,7 +38,9 @@ namespace System.Security.Cryptography.Encoding.Tests
 
         public static IEnumerable<object[]> TestData_Ascii_Whitespace()
         {
+            yield return new object[] { "fo", "\tZ\tm8=\r" };
             yield return new object[] { "fo", "\tZ\tm8=\n" };
+            yield return new object[] { "fo", "\tZ\tm8=\r\n" };
             yield return new object[] { "foo", " Z m 9 v" };
         }
 
@@ -48,6 +50,7 @@ namespace System.Security.Cryptography.Encoding.Tests
             yield return new object[] { "Zm9v////", 0, 4, "foo" };
             yield return new object[] { "////Zm9v", 4, 4, "foo" };
             yield return new object[] { "////Zm9v////", 4, 4, "foo" };
+            yield return new object[] { "Zm9vYmFyYm", 0, 10, "foobar" };
         }
 
         [Fact]
@@ -151,17 +154,33 @@ namespace System.Security.Cryptography.Encoding.Tests
         }
 
         [Theory, MemberData(nameof(TestData_LongBlock_Ascii))]
-        public static void ValidateFromBase64TransformFinalBlock(string expected, string encoding)
+        public static void ValidateFromBase64TransformFinalBlock(string expected, string encoded)
         {
             using (var transform = new FromBase64Transform())
             {
-                byte[] inputBytes = Text.Encoding.ASCII.GetBytes(encoding);
+                byte[] inputBytes = Text.Encoding.ASCII.GetBytes(encoded);
                 Assert.True(inputBytes.Length > 4);
 
                 // Test passing blocks > 4 characters to TransformFinalBlock (supported)
                 byte[] outputBytes = transform.TransformFinalBlock(inputBytes, 0, inputBytes.Length);
                 string outputString = Text.Encoding.ASCII.GetString(outputBytes, 0, outputBytes.Length);
                 Assert.Equal(expected, outputString);
+            }
+        }
+
+        [Theory, MemberData(nameof(TestData_LongBlock_Ascii))]
+        public static void ValidateFromBase64TransformBlock(string expected, string encoded)
+        {
+            using (var transform = new FromBase64Transform())
+            {
+                byte[] inputBytes = Text.Encoding.ASCII.GetBytes(encoded);
+                Assert.True(inputBytes.Length > 4);
+
+                byte[] outputBytes = new byte[100];
+                int bytesWritten = transform.TransformBlock(inputBytes, 0, inputBytes.Length, outputBytes, 0);
+                string outputText = Text.Encoding.ASCII.GetString(outputBytes, 0, bytesWritten);
+
+                Assert.Equal(expected, outputText);
             }
         }
 
