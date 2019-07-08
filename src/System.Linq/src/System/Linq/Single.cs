@@ -45,7 +45,7 @@ namespace System.Linq
             }
 
             ThrowHelper.ThrowMoreThanOneElementException();
-            return default;
+            return default(TSource);
         }
 
         public static TSource Single<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
@@ -60,18 +60,9 @@ namespace System.Linq
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
-            var result = TryGetSingle(source, predicate, out bool found, out bool foundSingle);
-
-            if (!foundSingle)
-            {
-                ThrowHelper.ThrowMoreThanOneMatchException();
-                return default;
-            }
-
-            if (!found)
+            if (!TryGetSingle(source, predicate, out TSource result))
             {
                 ThrowHelper.ThrowNoMatchException();
-                return default;
             }
 
             return result;
@@ -129,19 +120,15 @@ namespace System.Linq
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
-            var result = TryGetSingle(source, predicate, out bool found, out bool foundSingle);
-
-            if (!foundSingle)
+            if (!TryGetSingle(source, predicate, out TSource result))
             {
-                ThrowHelper.ThrowMoreThanOneMatchException();
-
-                return default;
+                return default!;
             }
 
             return result;
         }
 
-        private static TSource TryGetSingle<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found, out bool foundSingle)
+        private static bool TryGetSingle<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource result)
         {
             if (source == null)
             {
@@ -153,8 +140,8 @@ namespace System.Linq
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
-            TSource result = default!;
-            found = false;
+            result = default!;
+            bool found = false;
 
             if (source is TSource[] array)
             {
@@ -164,16 +151,13 @@ namespace System.Linq
                     {
                         if (found)
                         {
-                            foundSingle = false;
-                            return default!;
+                            ThrowHelper.ThrowMoreThanOneMatchException();
                         }
 
                         found = true;
                         result = element;
                     }
                 }
-
-                foundSingle = true;
             }
             else if (source is List<TSource> list)
             {
@@ -183,8 +167,7 @@ namespace System.Linq
                     {
                         if (found)
                         {
-                            foundSingle = false;
-                            return default!;
+                            ThrowHelper.ThrowMoreThanOneMatchException();
                         }
 
                         found = true;
@@ -200,8 +183,7 @@ namespace System.Linq
                     {
                         if (found)
                         {
-                            foundSingle = false;
-                            return default!;
+                            ThrowHelper.ThrowMoreThanOneMatchException();
                         }
 
                         found = true;
@@ -210,8 +192,7 @@ namespace System.Linq
                 }
             }
 
-            foundSingle = true;
-            return result;
+            return found;
         }
     }
 }
