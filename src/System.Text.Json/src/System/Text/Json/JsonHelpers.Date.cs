@@ -173,18 +173,21 @@ namespace System.Text.Json
             // Notes:
             //
             // "T" is optional per spec, but _only_ when times are used alone. In our
-            // case, we're reading out a complete date & time (5.4.2.1b).
+            // case, we're reading out a complete date & time and as such require "T".
+            // (5.4.2.1b).
             //
-            // For [timeX] We allow seconds to omitted per 5.3.1.3a "Representations
+            // For [timeX] We allow seconds to be omitted per 5.3.1.3a "Representations
             // with reduced precision". 5.3.1.3b allows just specifying the hour, but
             // we currently don't permit this.
             //
             // Decimal fractions are allowed for hours, minutes and seconds (5.3.14).
-            // Lower order components can't follow, i.e. you can have T23.3, but not
-            // T23.3:04. There must be one digit, but the max number of digits is
-            // implemenation defined. We currently allow up to 16 digits of fractional
-            // seconds only. While we support 16 fractional digits we only parse the
-            // first seven, anything past that is considered a zero.
+            // We only allow fractions for seconds currently. Lower order components
+            // can't follow, i.e. you can have T23.3, but not T23.3:04. There must be
+            // one digit, but the max number of digits is implemenation defined. We
+            // currently allow up to 16 digits of fractional seconds only. While we
+            // support 16 fractional digits we only parse the first seven, anything
+            // past that is considered a zero. This is to stay compatible with the
+            // DateTime implementation which is limited to this resolution.
 
             if (source.Length < 16)
             {
@@ -210,7 +213,7 @@ namespace System.Text.Json
             byte curByte = source[16];
             int sourceIndex = 17;
 
-            // TZD ['Z'|'+'|'-'] or a seconds separator [':'] is valid at this point
+            // Either a TZD ['Z'|'+'|'-'] or a seconds separator [':'] is valid at this point
             switch (curByte)
             {
                 case JsonConstants.UtcOffsetToken:
@@ -245,7 +248,7 @@ namespace System.Text.Json
             curByte = source[19];
             sourceIndex = 20;
 
-            // TZD ['Z'|'+'|'-'] or a seconds fraction separator ['.'] is valid at this point
+            // Either a TZD ['Z'|'+'|'-'] or a seconds decimal fraction separator ['.'] is valid at this point
             switch (curByte)
             {
                 case JsonConstants.UtcOffsetToken:

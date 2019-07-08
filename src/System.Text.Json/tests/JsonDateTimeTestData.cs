@@ -154,6 +154,8 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"1997-07-16T19:20:304555555\"" };
 
             // Invalid fractions.
+            yield return new object[] { "\"1997-07-16T19.45\"" };
+            yield return new object[] { "\"1997-07-16T19:20.45\"" };
             yield return new object[] { "\"1997-07-16T19:20:30a\"" };
             yield return new object[] { "\"1997-07-16T19:20:30,45\"" };
             yield return new object[] { "\"1997-07-16T19:20:30.\"" };
