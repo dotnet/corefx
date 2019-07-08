@@ -195,7 +195,7 @@ namespace System.Security.Cryptography
             tmpBuffer = GetTempBuffer(inputBuffer.AsSpan(inputOffset, inputCount), tmpBuffer);
             int bytesToTransform = _inputIndex + tmpBuffer.Length;
 
-            // To little data to decode
+            // Too little data to decode
             if (bytesToTransform < Base64InputBlockSize)
             {
                 // reinitialize the transform
@@ -259,7 +259,6 @@ namespace System.Security.Cryptography
             // FORM FEED    12
             // CR           13
 
-            // RyuJIT produces better code with the ternary. This JIT-bug is tracked in https://github.com/dotnet/coreclr/issues/914
             return value == 32 || ((uint)value - 9 <= (13 - 9));
         }
 
@@ -289,6 +288,7 @@ namespace System.Security.Cryptography
         private void ConvertFromBase64(Span<byte> tmpBuffer, Span<byte> outputBuffer, out int consumed, out int written)
         {
             int bytesToTransform = _inputIndex + tmpBuffer.Length;
+            Debug.Assert(bytesToTransform >= 4);
 
             // Common case for bytesToTransform = 4
             byte[] transformBufferArray = null;
