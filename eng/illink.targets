@@ -101,9 +101,22 @@
       <!-- Add project references first to give precedence to project-specific files -->
       <_DependencyDirectories Condition="'%(_DependencyDirectoriesTemp.ReferenceSourceTarget)'=='ProjectReference'" Include="%(_DependencyDirectoriesTemp.Identity)" />
       <_DependencyDirectories Condition="'%(_DependencyDirectoriesTemp.ReferenceSourceTarget)'!='ProjectReference'" Include="%(_DependencyDirectoriesTemp.Identity)" />
+      <!-- Remove trailing slash to work around response file parsing behavior -->
+      <_DependencyDirectoriesSlash Include="@(_DependencyDirectories)">
+        <PathWithSlash>$([MSBuild]::EnsureTrailingSlash('%(Identity)'))</PathWithSlash>
+      </_DependencyDirectoriesSlash>
+      <_DependencyDirectoriesNoSlash Include="@(_DependencyDirectoriesSlash)">
+        <PathWithoutSlash>$([System.String]::new('%(PathWithSlash)').TrimEnd($([System.IO.Path]::DirectorySeparatorChar)))</PathWithoutSlash>
+      </_DependencyDirectoriesNoSlash>
+      <_DependencyDirectories Remove="@(_DependencyDirectories)" />
+      <_DependencyDirectories Include="%(_DependencyDirectoriesNoSlash.PathWithoutSlash)" />
     </ItemGroup>
 
-    <ILLink AssemblyPaths="$(ILLinkTrimInputAssembly);@(_DependencyDirectories)"
+    <PropertyGroup>
+      <ILLinkArgs Condition="@(_DependencyDirectories->Count()) > 0">$(ILLinkArgs) -d @(_DependencyDirectories->'"%(Identity)"', ' -d ')</ILLinkArgs>
+    </PropertyGroup>
+
+    <ILLink AssemblyPaths="$(ILLinkTrimInputAssembly)"
             RootAssemblyNames=""
             OutputDirectory="$(ILLinkTrimOutputPath)"
             ClearInitLocals="$(ILLinkClearInitLocals)"
