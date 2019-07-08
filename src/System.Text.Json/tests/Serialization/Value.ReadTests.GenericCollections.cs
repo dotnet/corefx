@@ -21,7 +21,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(3, result[1][0]);
             Assert.Equal(4, result[1][1]);
 
-            GenericListWrapper<StringListWrapper> result2 = JsonSerializer.Parse<GenericListWrapper<StringListWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericListWrapper<StringListWrapper> result2 = JsonSerializer.Deserialize<GenericListWrapper<StringListWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
 
             Assert.Equal("1", result2[0][0]);
             Assert.Equal("2", result2[0][1]);
@@ -39,7 +39,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(3, result[1][0]);
             Assert.Equal(4, result[1][1]);
 
-            GenericListWrapper<string[]> result2 = JsonSerializer.Parse<GenericListWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericListWrapper<string[]> result2 = JsonSerializer.Deserialize<GenericListWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]");
 
             Assert.Equal("1", result2[0][0]);
             Assert.Equal("2", result2[0][1]);
@@ -57,7 +57,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(3, result[1][0]);
             Assert.Equal(4, result[1][1]);
 
-            StringListWrapper[] result2 = JsonSerializer.Parse<StringListWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]");
+            StringListWrapper[] result2 = JsonSerializer.Deserialize<StringListWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]");
             Assert.Equal("1", result2[0][0]);
             Assert.Equal("2", result2[0][1]);
             Assert.Equal("3", result2[1][0]);
@@ -74,11 +74,11 @@ namespace System.Text.Json.Serialization.Tests
             i = JsonSerializer.Deserialize<List<int>>(Encoding.UTF8.GetBytes(@"[]"));
             Assert.Equal(0, i.Count);
 
-            StringListWrapper i2 = JsonSerializer.Parse<StringListWrapper>(@"[""1"",""2""]");
+            StringListWrapper i2 = JsonSerializer.Deserialize<StringListWrapper>(@"[""1"",""2""]");
             Assert.Equal("1", i2[0]);
             Assert.Equal("2", i2[1]);
 
-            i2 = JsonSerializer.Parse<StringListWrapper>(@"[]");
+            i2 = JsonSerializer.Deserialize<StringListWrapper>(@"[]");
             Assert.Equal(0, i2.Count);
         }
 
@@ -97,7 +97,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<GenericIEnumerableWrapper<StringIEnumerableWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIEnumerableWrapper<StringIEnumerableWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -115,7 +115,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<GenericIEnumerableWrapper<int[]>>(@"[[1,2],[3, 4]]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIEnumerableWrapper<int[]>>(@"[[1,2],[3, 4]]"));
         }
 
         [Fact]
@@ -133,7 +133,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<StringIEnumerableWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIEnumerableWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -151,8 +151,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, result.Count());
 
             // There is no way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<StringIEnumerableWrapper>(@"[""1"",""2""]"));
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<StringIEnumerableWrapper>(@"[]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIEnumerableWrapper>(@"[""1"",""2""]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIEnumerableWrapper>(@"[]"));
         }
 
         [Fact]
@@ -169,7 +169,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            GenericIListWrapper<StringIListWrapper> result2 = JsonSerializer.Parse<GenericIListWrapper<StringIListWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericIListWrapper<StringIListWrapper> result2 = JsonSerializer.Deserialize<GenericIListWrapper<StringIListWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 1;
 
             foreach (StringIListWrapper il in result2)
@@ -195,7 +195,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            GenericIListWrapper<string[]> result2 = JsonSerializer.Parse<GenericIListWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericIListWrapper<string[]> result2 = JsonSerializer.Deserialize<GenericIListWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 1;
 
             foreach (string[] arr in result2)
@@ -221,7 +221,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            StringIListWrapper[] result2 = JsonSerializer.Parse<StringIListWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]");
+            StringIListWrapper[] result2 = JsonSerializer.Deserialize<StringIListWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 1;
 
             foreach (StringIListWrapper il in result2)
@@ -247,7 +247,7 @@ namespace System.Text.Json.Serialization.Tests
             result = JsonSerializer.Deserialize<IList<int>>(Encoding.UTF8.GetBytes(@"[]"));
             Assert.Equal(0, result.Count());
 
-            StringIListWrapper result2 = JsonSerializer.Parse<StringIListWrapper>(@"[""1"",""2""]");
+            StringIListWrapper result2 = JsonSerializer.Deserialize<StringIListWrapper>(@"[""1"",""2""]");
             expected = 1;
 
             foreach (string str in result2)
@@ -255,7 +255,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal($"{expected++}", str);
             }
 
-            result2 = JsonSerializer.Parse<StringIListWrapper>(@"[]");
+            result2 = JsonSerializer.Deserialize<StringIListWrapper>(@"[]");
             Assert.Equal(0, result2.Count());
         }
 
@@ -273,7 +273,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            GenericICollectionWrapper<StringICollectionWrapper> result2 = JsonSerializer.Parse<GenericICollectionWrapper<StringICollectionWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericICollectionWrapper<StringICollectionWrapper> result2 = JsonSerializer.Deserialize<GenericICollectionWrapper<StringICollectionWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 1;
 
             foreach (StringICollectionWrapper ic in result2)
@@ -299,7 +299,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            GenericICollectionWrapper<string[]> result2 = JsonSerializer.Parse<GenericICollectionWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericICollectionWrapper<string[]> result2 = JsonSerializer.Deserialize<GenericICollectionWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 1;
 
             foreach (string[] arr in result2)
@@ -340,7 +340,7 @@ namespace System.Text.Json.Serialization.Tests
             result = JsonSerializer.Deserialize<ICollection<int>>(Encoding.UTF8.GetBytes(@"[]"));
             Assert.Equal(0, result.Count());
 
-            StringICollectionWrapper result2 = JsonSerializer.Parse<StringICollectionWrapper>(@"[""1"",""2""]");
+            StringICollectionWrapper result2 = JsonSerializer.Deserialize<StringICollectionWrapper>(@"[""1"",""2""]");
             expected = 1;
 
             foreach (string str in result2)
@@ -348,7 +348,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal($"{expected++}", str);
             }
 
-            result2 = JsonSerializer.Parse<StringICollectionWrapper>(Encoding.UTF8.GetBytes(@"[]"));
+            result2 = JsonSerializer.Deserialize<StringICollectionWrapper>(Encoding.UTF8.GetBytes(@"[]"));
             Assert.Equal(0, result2.Count());
         }
 
@@ -367,7 +367,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // There's no way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<GenericIReadOnlyCollectionWrapper<StringIReadOnlyCollectionWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIReadOnlyCollectionWrapper<StringIReadOnlyCollectionWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -384,7 +384,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<GenericIReadOnlyCollectionWrapper<int[]>>(@"[[1,2],[3,4]]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIReadOnlyCollectionWrapper<int[]>>(@"[[1,2],[3,4]]"));
         }
 
         [Fact]
@@ -402,7 +402,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<StringIReadOnlyCollectionWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIReadOnlyCollectionWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -420,7 +420,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, result.Count());
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<StringIReadOnlyCollectionWrapper>(@"[""1"",""2""]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIReadOnlyCollectionWrapper>(@"[""1"",""2""]"));
         }
 
         [Fact]
@@ -437,7 +437,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<GenericIReadOnlyListWrapper<StringIReadOnlyListWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIReadOnlyListWrapper<StringIReadOnlyListWrapper>>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -455,7 +455,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<GenericIReadOnlyListWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIReadOnlyListWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -473,7 +473,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<StringIReadOnlyListWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIReadOnlyListWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]"));
         }
 
         [Fact]
@@ -491,7 +491,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, result.Count());
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<StringIReadOnlyListWrapper>(@"[""1"",""2""]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIReadOnlyListWrapper>(@"[""1"",""2""]"));
         }
 
         [Fact]
@@ -510,7 +510,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(new HashSet<int> { 1, 2 }, result.Last());
             }
 
-            GenericISetWrapper<StringISetWrapper> result2 = JsonSerializer.Parse<GenericISetWrapper<StringISetWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericISetWrapper<StringISetWrapper> result2 = JsonSerializer.Deserialize<GenericISetWrapper<StringISetWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
 
             if (result2.First().Contains("1"))
             {
@@ -609,7 +609,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            GenericStackWrapper<StringStackWrapper> result2 = JsonSerializer.Parse<GenericStackWrapper<StringStackWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericStackWrapper<StringStackWrapper> result2 = JsonSerializer.Deserialize<GenericStackWrapper<StringStackWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 4;
 
             foreach (StringStackWrapper st in result2)
@@ -637,7 +637,7 @@ namespace System.Text.Json.Serialization.Tests
                 expected = 1;
             }
 
-            GenericStackWrapper<string[]> result2 = JsonSerializer.Parse<GenericStackWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericStackWrapper<string[]> result2 = JsonSerializer.Deserialize<GenericStackWrapper<string[]>>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 3;
 
             foreach (string[] arr in result2)
@@ -667,7 +667,7 @@ namespace System.Text.Json.Serialization.Tests
                 expected = 4;
             }
 
-            StringStackWrapper[] result2 = JsonSerializer.Parse<StringStackWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]");
+            StringStackWrapper[] result2 = JsonSerializer.Deserialize<StringStackWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 2;
 
             foreach (StringStackWrapper st in result2)
@@ -695,7 +695,7 @@ namespace System.Text.Json.Serialization.Tests
             result = JsonSerializer.Deserialize<Stack<int>>(Encoding.UTF8.GetBytes(@"[]"));
             Assert.Equal(0, result.Count());
 
-            StringStackWrapper result2 = JsonSerializer.Parse<StringStackWrapper>(@"[""1"",""2""]");
+            StringStackWrapper result2 = JsonSerializer.Deserialize<StringStackWrapper>(@"[""1"",""2""]");
             expected = 2;
 
             foreach (string str in result2)
@@ -703,7 +703,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal($"{expected--}", str);
             }
 
-            result2 = JsonSerializer.Parse<StringStackWrapper>(@"[]");
+            result2 = JsonSerializer.Deserialize<StringStackWrapper>(@"[]");
             Assert.Equal(0, result2.Count());
         }
 
@@ -721,7 +721,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            GenericQueueWrapper<StringQueueWrapper> result2 = JsonSerializer.Parse<GenericQueueWrapper<StringQueueWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericQueueWrapper<StringQueueWrapper> result2 = JsonSerializer.Deserialize<GenericQueueWrapper<StringQueueWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 1;
 
             foreach (StringQueueWrapper q in result2)
@@ -792,7 +792,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            GenericHashSetWrapper<StringHashSetWrapper> result2 = JsonSerializer.Parse<GenericHashSetWrapper<StringHashSetWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericHashSetWrapper<StringHashSetWrapper> result2 = JsonSerializer.Deserialize<GenericHashSetWrapper<StringHashSetWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 1;
 
             foreach (StringHashSetWrapper hs in result2)
@@ -863,7 +863,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            GenericLinkedListWrapper<StringLinkedListWrapper> result2 = JsonSerializer.Parse<GenericLinkedListWrapper<StringLinkedListWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
+            GenericLinkedListWrapper<StringLinkedListWrapper> result2 = JsonSerializer.Deserialize<GenericLinkedListWrapper<StringLinkedListWrapper>>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 1;
 
             foreach (StringLinkedListWrapper l in result2)
@@ -934,7 +934,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            StringSortedSetWrapper[] result2 = JsonSerializer.Parse<StringSortedSetWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]");
+            StringSortedSetWrapper[] result2 = JsonSerializer.Deserialize<StringSortedSetWrapper[]>(@"[[""1"",""2""],[""3"",""4""]]");
             expected = 1;
 
             foreach (StringSortedSetWrapper s in result2)
@@ -1025,23 +1025,23 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadSimpleTestClass_GenericCollectionWrappers()
         {
-            SimpleTestClassWithGenericCollectionWrappers obj = JsonSerializer.Parse<SimpleTestClassWithGenericCollectionWrappers>(SimpleTestClassWithGenericCollectionWrappers.s_json);
+            SimpleTestClassWithGenericCollectionWrappers obj = JsonSerializer.Deserialize<SimpleTestClassWithGenericCollectionWrappers>(SimpleTestClassWithGenericCollectionWrappers.s_json);
             obj.Verify();
         }
 
         [Fact]
         public static void ReadSimpleTestClass_GenericWrappers_NoAddMethod_Throws()
         {
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClassWithStringIEnumerableWrapper>(SimpleTestClassWithStringIEnumerableWrapper.s_json));
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClassWithStringIReadOnlyCollectionWrapper>(SimpleTestClassWithStringIReadOnlyCollectionWrapper.s_json));
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClassWithStringIReadOnlyListWrapper>(SimpleTestClassWithStringIReadOnlyListWrapper.s_json));
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClassWithStringToStringIReadOnlyDictionaryWrapper>(SimpleTestClassWithStringToStringIReadOnlyDictionaryWrapper.s_json));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIEnumerableWrapper>(SimpleTestClassWithStringIEnumerableWrapper.s_json));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIReadOnlyCollectionWrapper>(SimpleTestClassWithStringIReadOnlyCollectionWrapper.s_json));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIReadOnlyListWrapper>(SimpleTestClassWithStringIReadOnlyListWrapper.s_json));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringToStringIReadOnlyDictionaryWrapper>(SimpleTestClassWithStringToStringIReadOnlyDictionaryWrapper.s_json));
         }
 
         [Fact]
         public static void ReadPrimitiveStringCollection_Throws()
         {
-            Assert.Throws<InvalidCastException>(() => JsonSerializer.Parse<StringCollection>(@"[""1"", ""2""]"));
+            Assert.Throws<InvalidCastException>(() => JsonSerializer.Deserialize<StringCollection>(@"[""1"", ""2""]"));
         }
     }
 }
