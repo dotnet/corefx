@@ -186,7 +186,7 @@ public class WindowAndCursorProps
 
     [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
-    public static void CursorVisible_GetUnix_ThrowsPlatformNotSupportedExeption()
+    public static void CursorVisible_GetUnix_ThrowsPlatformNotSupportedException()
     {
         Assert.Throws<PlatformNotSupportedException>(() => Console.CursorVisible);
     }
@@ -268,16 +268,6 @@ public class WindowAndCursorProps
             }
             return RemoteExecutor.SuccessExitCode;
         }, lengthOfTitle.ToString()).Dispose();
-    }
-
-    public static void Title_GetWindowsUap_ThrowsIOException()
-    {
-        Assert.Throws<IOException>(() => Console.Title);
-    }
-
-    public static void Title_SetWindowsUap_ThrowsIOException(int lengthOfTitle)
-    {
-        Assert.Throws<IOException>(() => Console.Title = "x");
     }
 
     [Fact]

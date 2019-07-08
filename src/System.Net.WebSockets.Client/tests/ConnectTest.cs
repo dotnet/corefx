@@ -91,8 +91,9 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [ActiveIssue(39271)]
         [OuterLoop("Uses external servers")]
-        [ConditionalTheory(nameof(WebSocketsSupported))]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public async Task ConnectAsync_AddHostHeader_Success()
         {
             Uri server = System.Net.Test.Common.Configuration.WebSockets.RemoteEchoServer;

@@ -23,12 +23,12 @@ namespace System.Text.Json
             Debug.Assert(jsonPropertyInfo != null);
 
             // A nested object or dictionary so push new frame.
-            if (state.Current.PropertyInitialized)
+            if (state.Current.CollectionPropertyInitialized)
             {
                 state.Push();
                 state.Current.JsonClassInfo = jsonPropertyInfo.ElementClassInfo;
                 state.Current.InitializeJsonPropertyInfo();
-                state.Current.PropertyInitialized = true;
+                state.Current.CollectionPropertyInitialized = true;
 
                 ClassType classType = state.Current.JsonClassInfo.ClassType;
                 if (classType == ClassType.Value &&
@@ -53,10 +53,11 @@ namespace System.Text.Json
                     }
                     state.Current.ReturnValue = classInfo.CreateObject();
                 }
+
                 return;
             }
 
-            state.Current.PropertyInitialized = true;
+            state.Current.CollectionPropertyInitialized = true;
 
             if (state.Current.IsProcessingIDictionaryConstructible)
             {
@@ -98,14 +99,14 @@ namespace System.Text.Json
             if (state.Current.IsDictionaryProperty)
             {
                 // We added the items to the dictionary already.
-                state.Current.ResetProperty();
+                state.Current.EndProperty();
             }
             else if (state.Current.IsIDictionaryConstructibleProperty)
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
                 JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
                 state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, converter.CreateFromDictionary(ref state, state.Current.TempDictionaryValues, options));
-                state.Current.ResetProperty();
+                state.Current.EndProperty();
             }
             else
             {

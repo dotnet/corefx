@@ -64,7 +64,7 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 | [System.Globalization](https://github.com/dotnet/corefx/labels/area-System.Globalization)     | **[@krwq](https://github.com/krwq)**, [@tarekgh](https://github.com/tarekgh) |  |
 | [System.IO](https://github.com/dotnet/corefx/labels/area-System.IO)                           | **[@JeremyKuhne](https://github.com/JeremyKuhne)**, [@carlossanlop](https://github.com/carlossanlop) |  |
 | [System.IO.Compression](https://github.com/dotnet/corefx/labels/area-System.IO.Compression)   | **[@carlossanlop](https://github.com/carlossanlop)**, [@ahsonkhan](https://github.com/ahsonkhan), [@ViktorHofer](https://github.com/ViktorHofer) |  |
-| [System.IO.Packaging](https://github.com/dotnet/corefx/labels/area-System.IO.Packaging)       | [@JeremyKuhne](https://github.com/JeremyKuhne) |  |
+| [System.IO.Packaging](https://github.com/dotnet/corefx/labels/area-System.IO.Packaging)       | **[@JeremyKuhne](https://github.com/JeremyKuhne)**, [@carlossanlop](https://github.com/carlossanlop) |  |
 | [System.IO.Pipelines](https://github.com/dotnet/corefx/labels/area-System.IO.Pipelines)       | [@davidfowl](https://github.com/davidfowl), [@halter73](https://github.com/halter73), [@jkotalik](https://github.com/jkotalik), [@anurse](https://github.com/anurse) |  |
 | [System.Linq](https://github.com/dotnet/corefx/labels/area-System.Linq)                       | [@maryamariyan](https://github.com/maryamariyan) |  |
 | [System.Linq.Expressions](https://github.com/dotnet/corefx/labels/area-System.Linq.Expressions) | [@cston](https://github.com/cston), [@333fred](https://github.com/333fred) | Archived component - limited churn/contributions (see [#33170](https://github.com/dotnet/corefx/issues/33170)) |
@@ -95,6 +95,7 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 | [System.Text.Encoding](https://github.com/dotnet/corefx/labels/area-System.Text.Encoding)     | **[@layomia](https://github.com/layomia)**, [@krwq](https://github.com/krwq), [@tarekgh](https://github.com/tarekgh) |  |
 | [System.Text.Encodings.Web](https://github.com/dotnet/corefx/labels/area-System.Text.Encodings.Web) | **[@GrabYourPitchforks](https://github.com/GrabYourPitchforks)**, [@layomia](https://github.com/layomia), [@tarekgh](https://github.com/tarekgh) |  |
 | [System.Text.Json](https://github.com/dotnet/corefx/labels/area-System.Text.Json)             | **[@ahsonkhan](https://github.com/ahsonkhan)**, [@steveharter](https://github.com/steveharter) |  |
+| [System.Text.Unicode](https://github.com/dotnet/corefx/labels/area-System.Text.Encodings.Web) | **[@GrabYourPitchforks](https://github.com/GrabYourPitchforks)**, [@layomia](https://github.com/layomia), [@tarekgh](https://github.com/tarekgh) |  |
 | [System.Text.RegularExpressions](https://github.com/dotnet/corefx/labels/area-System.Text.RegularExpressions) | **[@ViktorHofer](https://github.com/ViktorHofer)**, [@maryamariyan](https://github.com/maryamariyan) |  |
 | [System.Threading](https://github.com/dotnet/corefx/labels/area-System.Threading)             | **[@kouvel](https://github.com/kouvel)** |  |
 | [System.Threading.Channels](https://github.com/dotnet/corefx/labels/area-System.Threading.Channels) | **[@tarekgh](https://github.com/tarekgh)**, [@stephentoub](https://github.com/stephentoub) |  |

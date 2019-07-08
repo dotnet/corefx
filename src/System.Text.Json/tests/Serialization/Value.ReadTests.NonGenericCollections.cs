@@ -13,7 +13,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadGenericIEnumerableOfIEnumerable()
         {
-            IEnumerable<IEnumerable> result = JsonSerializer.Parse<IEnumerable<IEnumerable>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            IEnumerable<IEnumerable> result = JsonSerializer.Deserialize<IEnumerable<IEnumerable>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (IEnumerable ie in result)
@@ -31,7 +31,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadIEnumerableOfArray()
         {
-            IEnumerable result = JsonSerializer.Parse<IEnumerable>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            IEnumerable result = JsonSerializer.Deserialize<IEnumerable>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (JsonElement arr in result)
@@ -46,7 +46,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadArrayOfIEnumerable()
         {
-            IEnumerable[] result = JsonSerializer.Parse<IEnumerable[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            IEnumerable[] result = JsonSerializer.Deserialize<IEnumerable[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (IEnumerable arr in result)
@@ -61,7 +61,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveIEnumerable()
         {
-            IEnumerable result = JsonSerializer.Parse<IEnumerable>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            IEnumerable result = JsonSerializer.Deserialize<IEnumerable>(Encoding.UTF8.GetBytes(@"[1,2]"));
             int expected = 1;
 
             foreach (JsonElement i in result)
@@ -69,7 +69,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(expected++, i.GetInt32());
             }
 
-            result = JsonSerializer.Parse<IEnumerable>(Encoding.UTF8.GetBytes(@"[]"));
+            result = JsonSerializer.Deserialize<IEnumerable>(Encoding.UTF8.GetBytes(@"[]"));
 
             int count = 0;
             IEnumerator e = result.GetEnumerator();
@@ -83,7 +83,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadGenericIListOfIList()
         {
-            IList<IList> result = JsonSerializer.Parse<IList<IList>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            IList<IList> result = JsonSerializer.Deserialize<IList<IList>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (IList list in result)
@@ -109,7 +109,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadIListOfArray()
         {
-            IList result = JsonSerializer.Parse<IList>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            IList result = JsonSerializer.Deserialize<IList>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (JsonElement arr in result)
@@ -124,7 +124,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadArrayOfIList()
         {
-            IList[] result = JsonSerializer.Parse<IList[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            IList[] result = JsonSerializer.Deserialize<IList[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (IList arr in result)
@@ -139,7 +139,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveIList()
         {
-            IList result = JsonSerializer.Parse<IList>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            IList result = JsonSerializer.Deserialize<IList>(Encoding.UTF8.GetBytes(@"[1,2]"));
             int expected = 1;
 
             foreach (JsonElement i in result)
@@ -147,7 +147,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(expected++, i.GetInt32());
             }
 
-            result = JsonSerializer.Parse<IList>(Encoding.UTF8.GetBytes(@"[]"));
+            result = JsonSerializer.Deserialize<IList>(Encoding.UTF8.GetBytes(@"[]"));
 
             int count = 0;
             IEnumerator e = result.GetEnumerator();
@@ -169,7 +169,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadGenericICollectionOfICollection()
         {
-            ICollection<ICollection> result = JsonSerializer.Parse<ICollection<ICollection>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            ICollection<ICollection> result = JsonSerializer.Deserialize<ICollection<ICollection>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (ICollection ie in result)
@@ -187,7 +187,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadICollectionOfArray()
         {
-            ICollection result = JsonSerializer.Parse<ICollection>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            ICollection result = JsonSerializer.Deserialize<ICollection>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (JsonElement arr in result)
@@ -202,7 +202,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadArrayOfICollection()
         {
-            ICollection[] result = JsonSerializer.Parse<ICollection[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            ICollection[] result = JsonSerializer.Deserialize<ICollection[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (ICollection arr in result)
@@ -217,7 +217,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveICollection()
         {
-            ICollection result = JsonSerializer.Parse<ICollection>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            ICollection result = JsonSerializer.Deserialize<ICollection>(Encoding.UTF8.GetBytes(@"[1,2]"));
             int expected = 1;
 
             foreach (JsonElement i in result)
@@ -225,7 +225,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(expected++, i.GetInt32());
             }
 
-            result = JsonSerializer.Parse<ICollection>(Encoding.UTF8.GetBytes(@"[]"));
+            result = JsonSerializer.Deserialize<ICollection>(Encoding.UTF8.GetBytes(@"[]"));
 
             int count = 0;
             IEnumerator e = result.GetEnumerator();
@@ -239,7 +239,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadGenericStackOfStack()
         {
-            Stack<Stack> result = JsonSerializer.Parse<Stack<Stack>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            Stack<Stack> result = JsonSerializer.Deserialize<Stack<Stack>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 4;
 
             foreach (Stack stack in result)
@@ -254,7 +254,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadStackOfArray()
         {
-            Stack result = JsonSerializer.Parse<Stack>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            Stack result = JsonSerializer.Deserialize<Stack>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 3;
 
             foreach (JsonElement arr in result)
@@ -270,7 +270,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadArrayOfStack()
         {
-            Stack[] result = JsonSerializer.Parse<Stack[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            Stack[] result = JsonSerializer.Deserialize<Stack[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 2;
 
             foreach (Stack arr in result)
@@ -286,7 +286,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveStack()
         {
-            Stack result = JsonSerializer.Parse<Stack>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            Stack result = JsonSerializer.Deserialize<Stack>(Encoding.UTF8.GetBytes(@"[1,2]"));
             int expected = 2;
 
             foreach (JsonElement i in result)
@@ -294,7 +294,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(expected--, i.GetInt32());
             }
 
-            result = JsonSerializer.Parse<Stack>(Encoding.UTF8.GetBytes(@"[]"));
+            result = JsonSerializer.Deserialize<Stack>(Encoding.UTF8.GetBytes(@"[]"));
 
             int count = 0;
             IEnumerator e = result.GetEnumerator();
@@ -311,7 +311,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadGenericQueueOfQueue()
         {
-            Queue<Queue> result = JsonSerializer.Parse<Queue<Queue>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            Queue<Queue> result = JsonSerializer.Deserialize<Queue<Queue>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (Queue ie in result)
@@ -326,7 +326,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadQueueOfArray()
         {
-            Queue result = JsonSerializer.Parse<Queue>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            Queue result = JsonSerializer.Deserialize<Queue>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (JsonElement arr in result)
@@ -341,7 +341,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadArrayOfQueue()
         {
-            Queue[] result = JsonSerializer.Parse<Queue[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            Queue[] result = JsonSerializer.Deserialize<Queue[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (Queue arr in result)
@@ -356,7 +356,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveQueue()
         {
-            Queue result = JsonSerializer.Parse<Queue>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            Queue result = JsonSerializer.Deserialize<Queue>(Encoding.UTF8.GetBytes(@"[1,2]"));
             int expected = 1;
 
             foreach (JsonElement i in result)
@@ -364,7 +364,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(expected++, i.GetInt32());
             }
 
-            result = JsonSerializer.Parse<Queue>(Encoding.UTF8.GetBytes(@"[]"));
+            result = JsonSerializer.Deserialize<Queue>(Encoding.UTF8.GetBytes(@"[]"));
 
             int count = 0;
             IEnumerator e = result.GetEnumerator();
@@ -381,7 +381,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadArrayListOfArray()
         {
-            ArrayList result = JsonSerializer.Parse<ArrayList>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            ArrayList result = JsonSerializer.Deserialize<ArrayList>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (JsonElement arr in result)
@@ -407,7 +407,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadArrayOfArrayList()
         {
-            ArrayList[] result = JsonSerializer.Parse<ArrayList[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            ArrayList[] result = JsonSerializer.Deserialize<ArrayList[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
             int expected = 1;
 
             foreach (ArrayList arr in result)
@@ -422,7 +422,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveArrayList()
         {
-            ArrayList result = JsonSerializer.Parse<ArrayList>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            ArrayList result = JsonSerializer.Deserialize<ArrayList>(Encoding.UTF8.GetBytes(@"[1,2]"));
             int expected = 1;
 
             foreach (JsonElement i in result)
@@ -430,7 +430,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(expected++, i.GetInt32());
             }
 
-            result = JsonSerializer.Parse<ArrayList>(Encoding.UTF8.GetBytes(@"[]"));
+            result = JsonSerializer.Deserialize<ArrayList>(Encoding.UTF8.GetBytes(@"[]"));
 
             int count = 0;
             IEnumerator e = result.GetEnumerator();

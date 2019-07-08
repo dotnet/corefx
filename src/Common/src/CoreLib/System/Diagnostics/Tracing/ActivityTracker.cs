@@ -269,15 +269,32 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         private string NormalizeActivityName(string providerName, string activityName, int task)
         {
-            if (activityName.EndsWith(EventSource.s_ActivityStartSuffix, StringComparison.Ordinal))
-                activityName = activityName.Substring(0, activityName.Length - EventSource.s_ActivityStartSuffix.Length);
-            else if (activityName.EndsWith(EventSource.s_ActivityStopSuffix, StringComparison.Ordinal))
-                activityName = activityName.Substring(0, activityName.Length - EventSource.s_ActivityStopSuffix.Length);
-            else if (task != 0)
-                activityName = "task" + task.ToString();
-
             // We use provider name to distinguish between activities from different providers.
-            return providerName + activityName;
+
+            if (activityName.EndsWith(EventSource.s_ActivityStartSuffix, StringComparison.Ordinal))
+            {
+#if ES_BUILD_STANDALONE
+                return string.Concat(providerName, activityName.Substring(0, activityName.Length - EventSource.s_ActivityStartSuffix.Length));
+#else
+                return string.Concat(providerName, activityName.AsSpan(0, activityName.Length - EventSource.s_ActivityStartSuffix.Length));
+#endif
+            }
+            else if (activityName.EndsWith(EventSource.s_ActivityStopSuffix, StringComparison.Ordinal))
+            {
+#if ES_BUILD_STANDALONE
+                return string.Concat(providerName, activityName.Substring(0, activityName.Length - EventSource.s_ActivityStopSuffix.Length));
+#else
+                return string.Concat(providerName, activityName.AsSpan(0, activityName.Length - EventSource.s_ActivityStopSuffix.Length));
+#endif
+            }
+            else if (task != 0)
+            {
+                return providerName + "task" + task.ToString();
+            }
+            else
+            {
+                return providerName + activityName;
+            }
         }
 
         // *******************************************************************************

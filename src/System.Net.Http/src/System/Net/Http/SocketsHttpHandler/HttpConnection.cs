@@ -109,24 +109,7 @@ namespace System.Net.Http
 
             _weakThisRef = new WeakReference<HttpConnection>(this);
 
-            if (NetEventSource.IsEnabled)
-            {
-                if (pool.IsSecure)
-                {
-                    var sslStream = (SslStream)_stream;
-                    Trace(
-                        $"Secure connection created to {pool}. " +
-                        $"SslProtocol:{sslStream.SslProtocol}, " +
-                        $"CipherAlgorithm:{sslStream.CipherAlgorithm}, CipherStrength:{sslStream.CipherStrength}, " +
-                        $"HashAlgorithm:{sslStream.HashAlgorithm}, HashStrength:{sslStream.HashStrength}, " +
-                        $"KeyExchangeAlgorithm:{sslStream.KeyExchangeAlgorithm}, KeyExchangeStrength:{sslStream.KeyExchangeStrength}, " +
-                        $"LocalCert:{sslStream.LocalCertificate}, RemoteCert:{sslStream.RemoteCertificate}");
-                }
-                else
-                {
-                    Trace($"Connection created to {pool}.");
-                }
-            }
+            if (NetEventSource.IsEnabled) TraceConnection(_stream);
         }
 
         public void Dispose() => Dispose(disposing: true);
@@ -149,28 +132,9 @@ namespace System.Net.Http
                     ValueTask<int>? readAheadTask = ConsumeReadAheadTask();
                     if (readAheadTask != null)
                     {
-                        _ = IgnoreExceptionsAsync(readAheadTask.GetValueOrDefault());
+                        IgnoreExceptions(readAheadTask.GetValueOrDefault());
                     }
                 }
-            }
-        }
-
-        /// <summary>Awaits a task, ignoring any resulting exceptions.</summary>
-        private static async Task IgnoreExceptionsAsync(ValueTask<int> task)
-        {
-            try { await task.ConfigureAwait(false); } catch { }
-        }
-
-        /// <summary>Awaits a task, logging any resulting exceptions (which are otherwise ignored).</summary>
-        private async Task LogExceptionsAsync(Task task)
-        {
-            try
-            {
-                await task.ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                if (NetEventSource.IsEnabled) Trace($"Exception from asynchronous processing: {e}");
             }
         }
 
@@ -721,7 +685,7 @@ namespace System.Net.Http
                 // hook up a continuation that will log it.
                 if (sendRequestContentTask != null && !sendRequestContentTask.IsCompletedSuccessfully)
                 {
-                    _ = LogExceptionsAsync(sendRequestContentTask);
+                    LogExceptions(sendRequestContentTask);
                 }
 
                 // Now clean up the connection.
@@ -998,8 +962,6 @@ namespace System.Net.Http
             }
         }
 
-        private static bool IsDigit(byte c) => (uint)(c - '0') <= '9' - '0';
-
         private void WriteToBuffer(ReadOnlySpan<byte> source)
         {
             Debug.Assert(source.Length <= _writeBuffer.Length - _writeOffset);
@@ -1271,7 +1233,7 @@ namespace System.Net.Http
             {
                 if (_allowedReadLineBytes < buffer.Length)
                 {
-                    throw new HttpRequestException(SR.Format(SR.net_http_response_headers_exceeded_length, _pool.Settings._maxResponseHeadersLength));
+                    throw new HttpRequestException(SR.Format(SR.net_http_response_headers_exceeded_length, _pool.Settings._maxResponseHeadersLength * 1024L));
                 }
 
                 line = default;
@@ -1382,7 +1344,7 @@ namespace System.Net.Http
         {
             if (_allowedReadLineBytes < 0)
             {
-                throw new HttpRequestException(SR.Format(SR.net_http_response_headers_exceeded_length, _pool.Settings._maxResponseHeadersLength));
+                throw new HttpRequestException(SR.Format(SR.net_http_response_headers_exceeded_length, _pool.Settings._maxResponseHeadersLength * 1024L));
             }
         }
 
@@ -1874,13 +1836,13 @@ namespace System.Net.Http
 
         public sealed override string ToString() => $"{nameof(HttpConnection)}({_pool})"; // Description for diagnostic purposes
 
-        internal sealed override void Trace(string message, [CallerMemberName] string memberName = null) =>
+        public sealed override void Trace(string message, [CallerMemberName] string memberName = null) =>
             NetEventSource.Log.HandlerMessage(
-                _pool?.GetHashCode() ?? 0,    // pool ID
-                GetHashCode(),                // connection ID
-                _currentRequest?.GetHashCode() ?? 0,  // request ID
-                memberName,                   // method name
-                ToString() + ": " + message); // message
+                _pool?.GetHashCode() ?? 0,           // pool ID
+                GetHashCode(),                       // connection ID
+                _currentRequest?.GetHashCode() ?? 0, // request ID
+                memberName,                          // method name
+                message);                            // message
     }
 
     internal sealed class HttpConnectionWithFinalizer : HttpConnection

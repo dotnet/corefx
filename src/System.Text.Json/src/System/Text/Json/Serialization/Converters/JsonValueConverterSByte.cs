@@ -8,25 +8,12 @@ namespace System.Text.Json.Serialization.Converters
     {
         public override sbyte Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType != JsonTokenType.Number ||
-                !reader.TryGetInt32(out int rawValue) ||
-                !JsonHelpers.IsInRangeInclusive(rawValue, sbyte.MinValue, sbyte.MaxValue))
-            {
-                ThrowHelper.ThrowJsonException();
-                return default;
-            }
-
-            return (sbyte)reader.GetInt32();
+            return reader.GetSByte();
         }
 
         public override void Write(Utf8JsonWriter writer, sbyte value, JsonSerializerOptions options)
         {
             writer.WriteNumberValue(value);
-        }
-
-        public override void Write(Utf8JsonWriter writer, sbyte value, JsonEncodedText propertyName, JsonSerializerOptions options)
-        {
-            writer.WriteNumber(propertyName, value);
         }
     }
 }

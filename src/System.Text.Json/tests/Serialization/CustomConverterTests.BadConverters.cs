@@ -29,11 +29,6 @@ namespace System.Text.Json.Serialization.Tests
             {
                 throw new SuccessException();
             }
-
-            public override void Write(Utf8JsonWriter writer, Customer value, JsonEncodedText propertyName, JsonSerializerOptions options)
-            {
-                throw new SuccessException();
-            }
         }
 
         [Fact]
@@ -43,23 +38,23 @@ namespace System.Text.Json.Serialization.Tests
             options.Converters.Add(new BadCustomerConverter());
 
             // Incompatible types.
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Parse<int>("0", options));
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.ToString(0, options));
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Parse<PocoWithNoBaseClass>("{}", options));
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.ToString(new PocoWithNoBaseClass(), options));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<int>("0", options));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(0, options));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<PocoWithNoBaseClass>("{}", options));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new PocoWithNoBaseClass(), options));
 
             // Contravariant to Customer.
-            Assert.Throws<SuccessException>(() => JsonSerializer.Parse<DerivedCustomer>("{}", options));
-            Assert.Throws<SuccessException>(() => JsonSerializer.ToString(new DerivedCustomer(), options));
+            Assert.Throws<SuccessException>(() => JsonSerializer.Deserialize<DerivedCustomer>("{}", options));
+            Assert.Throws<SuccessException>(() => JsonSerializer.Serialize(new DerivedCustomer(), options));
 
             // Covariant to Customer.
-            Assert.Throws<SuccessException>(() => JsonSerializer.Parse<Customer>("{}", options));
-            Assert.Throws<SuccessException>(() => JsonSerializer.ToString(new Customer(), options));
-            Assert.Throws<SuccessException>(() => JsonSerializer.ToString<Customer>(new DerivedCustomer(), options));
+            Assert.Throws<SuccessException>(() => JsonSerializer.Deserialize<Customer>("{}", options));
+            Assert.Throws<SuccessException>(() => JsonSerializer.Serialize(new Customer(), options));
+            Assert.Throws<SuccessException>(() => JsonSerializer.Serialize<Customer>(new DerivedCustomer(), options));
 
-            Assert.Throws<SuccessException>(() => JsonSerializer.Parse<Person>("{}", options));
-            Assert.Throws<SuccessException>(() => JsonSerializer.ToString<Person>(new Customer(), options));
-            Assert.Throws<SuccessException>(() => JsonSerializer.ToString<Person>(new DerivedCustomer(), options));
+            Assert.Throws<SuccessException>(() => JsonSerializer.Deserialize<Person>("{}", options));
+            Assert.Throws<SuccessException>(() => JsonSerializer.Serialize<Person>(new Customer(), options));
+            Assert.Throws<SuccessException>(() => JsonSerializer.Serialize<Person>(new DerivedCustomer(), options));
         }
 
         private class CanConvertNullConverterAttribute : JsonConverterAttribute
@@ -81,8 +76,8 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void AttributeCreateConverterFail()
         {
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.ToString(new PocoWithNullConverter()));
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Parse<PocoWithNullConverter>("{}"));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new PocoWithNullConverter()));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<PocoWithNullConverter>("{}"));
         }
 
         private class ConverterThatReturnsNull : JsonConverterFactory
@@ -104,8 +99,8 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.Converters.Add(new ConverterThatReturnsNull());
 
-            Assert.Throws<ArgumentNullException>(() => JsonSerializer.ToString(0, options));
-            Assert.Throws<ArgumentNullException>(() => JsonSerializer.Parse<int>("0", options));
+            Assert.Throws<ArgumentNullException>(() => JsonSerializer.Serialize(0, options));
+            Assert.Throws<ArgumentNullException>(() => JsonSerializer.Deserialize<int>("0", options));
         }
 
         private class Level1
@@ -126,55 +121,113 @@ namespace System.Text.Json.Serialization.Tests
 
         private class Level3
         {
+            // If true, read\write too much instead of too little.
+            public bool ReadWriteTooMuch { get; set; }
         }
 
-        private class Level3ConverterThatDoesntReadOrWrite : JsonConverter<Level3>
+        private class Level3ConverterThatsBad: JsonConverter<Level3>
         {
             public override Level3 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
+                Assert.Equal(JsonTokenType.StartObject, reader.TokenType);
+
+                reader.Read();
+                Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+
+                reader.Read();
+                Assert.True(reader.TokenType == JsonTokenType.True || reader.TokenType == JsonTokenType.False);
+
+                // Determine if we should read too much.
+                if (reader.TokenType == JsonTokenType.True)
+                {
+                    // Do the correct read.
+                    reader.Read();
+                    Assert.Equal(JsonTokenType.EndObject, reader.TokenType);
+
+                    // Do an extra read.
+                    reader.Read();
+                    Assert.Equal(JsonTokenType.EndArray, reader.TokenType);
+
+                    // End on EndObject token so it looks good, but wrong depth.
+                    reader.Read();
+                    Assert.Equal(JsonTokenType.EndObject, reader.TokenType);
+                }
+
                 return new Level3();
             }
 
             public override void Write(Utf8JsonWriter writer, Level3 value, JsonSerializerOptions options)
             {
-                writer.WriteStartObject();
-            }
-
-            public override void Write(Utf8JsonWriter writer, Level3 value, JsonEncodedText propertyName, JsonSerializerOptions options)
-            {
-                writer.WriteStartObject(propertyName);
+                if (value.ReadWriteTooMuch)
+                {
+                    writer.WriteStartObject();
+                }
             }
         }
 
         [Fact]
         public static void ConverterReadTooLittle()
         {
-            const string json = @"{""Level2"":{""Level3s"":[{}]}}";
+            const string json = @"{""Level2"":{""Level3s"":[{""ReadWriteTooMuch"":false}]}}";
 
             var options = new JsonSerializerOptions();
-            options.Converters.Add(new Level3ConverterThatDoesntReadOrWrite());
+            options.Converters.Add(new Level3ConverterThatsBad());
 
             try
             {
-                JsonSerializer.Parse<Level1>(json, options);
+                JsonSerializer.Deserialize<Level1>(json, options);
                 Assert.True(false, "Expected exception");
             }
             catch (JsonException ex)
             {
-                Assert.Contains("$.Level2.Level3s[0]", ex.ToString());
-                Assert.Equal(ex.Path, "$.Level2.Level3s[0]");
+                Assert.Contains("$.Level2.Level3s[1]", ex.ToString());
+                Assert.Equal(ex.Path, "$.Level2.Level3s[1]");
             }
         }
 
         [Fact]
-        public static void ConverterWroteTooLittle()
+        public static void ConverterReadTooMuch()
         {
+            const string json = @"{""Level2"":{""Level3s"":[{""ReadWriteTooMuch"":true}]}}";
+
             var options = new JsonSerializerOptions();
-            options.Converters.Add(new Level3ConverterThatDoesntReadOrWrite());
+            options.Converters.Add(new Level3ConverterThatsBad ());
 
             try
             {
-                JsonSerializer.ToString(new Level1(), options);
+                JsonSerializer.Deserialize<Level1>(json, options);
+                Assert.True(false, "Expected exception");
+            }
+            catch (JsonException ex)
+            {
+                Assert.Contains("$.Level2.Level3s[1]", ex.ToString());
+                Assert.Equal(ex.Path, "$.Level2.Level3s[1]");
+            }
+        }
+
+        [Fact]
+        public static void ConverterWroteNothing()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new Level3ConverterThatsBad());
+
+            // Not writing is allowed.
+            string str = JsonSerializer.Serialize(new Level1(), options);
+            Assert.False(string.IsNullOrEmpty(str));
+        }
+
+        [Fact]
+        public static void ConverterWroteTooMuch()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new Level3ConverterThatsBad());
+
+            try
+            {
+                var l1 = new Level1();
+                l1.Level2.Level3s[0].ReadWriteTooMuch = true;
+
+                JsonSerializer.Serialize(l1, options);
                 Assert.True(false, "Expected exception");
             }
             catch (JsonException ex)
@@ -194,8 +247,8 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void PropertyHasMoreThanOneConverter()
         {
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.ToString(new PocoWithTwoConvertersOnProperty()));
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Parse<PocoWithTwoConvertersOnProperty>("{}"));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new PocoWithTwoConvertersOnProperty()));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<PocoWithTwoConvertersOnProperty>("{}"));
         }
 
         [CanConvertNullConverter]
@@ -208,8 +261,8 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void TypeHasMoreThanOneConverter()
         {
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.ToString(new PocoWithTwoConverters()));
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Parse<PocoWithTwoConverters>("{}"));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new PocoWithTwoConverters()));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<PocoWithTwoConverters>("{}"));
         }
     }
 }

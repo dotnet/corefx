@@ -29,7 +29,7 @@ namespace System.Text.Json
         public IList TempEnumerableValues;
 
         // Has an array or dictionary property been initialized.
-        public bool PropertyInitialized;
+        public bool CollectionPropertyInitialized;
 
         // Support IDictionary constructible types, i.e. types that we
         // support by passing and IDictionary to their constructors:
@@ -38,10 +38,13 @@ namespace System.Text.Json
 
         // For performance, we order the properties by the first deserialize and PropertyIndex helps find the right slot quicker.
         public int PropertyIndex;
-        public HashSet<PropertyRef> PropertyRefCache;
+        public List<PropertyRef> PropertyRefCache;
 
         // The current JSON data for a property does not match a given POCO, so ignore the property (recursively).
         public bool Drain;
+
+        public bool IsCollectionForClass => IsEnumerable || IsDictionary || IsIDictionaryConstructible;
+        public bool IsCollectionForProperty => IsEnumerableProperty || IsDictionaryProperty || IsIDictionaryConstructibleProperty;
 
         public bool IsIDictionaryConstructible => JsonClassInfo.ClassType == ClassType.IDictionaryConstructible;
         public bool IsDictionary => JsonClassInfo.ClassType == ClassType.Dictionary;
@@ -64,41 +67,31 @@ namespace System.Text.Json
         public bool IsProcessingIDictionaryConstructible => IsIDictionaryConstructible || IsIDictionaryConstructibleProperty;
         public bool IsProcessingEnumerable => IsEnumerable || IsEnumerableProperty;
 
-        public bool IsProcessingValue
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // Determine whether a StartObject or StartArray token should be treated as a value.
+        public bool IsProcessingValue()
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
+            if (SkipProperty)
             {
-                if (JsonPropertyInfo == null || SkipProperty)
-                {
-                    return false;
-                }
-
-                if (PropertyInitialized)
-                {
-                    if ((IsEnumerable || IsDictionary || IsIDictionaryConstructible) &&
-                        JsonClassInfo.ElementClassInfo.ClassType == ClassType.Unknown)
-                    {
-                        return true;
-                    }
-                    else if ((IsEnumerableProperty || IsDictionaryProperty || IsIDictionaryConstructibleProperty) &&
-                        JsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Unknown)
-                    {
-                        return true;
-                    }
-                }
-
-                // We've got a property info. If we're a Value or polymorphic Value
-                // (ClassType.Unknown), return true.
-                ClassType type = JsonPropertyInfo.ClassType;
-                return type == ClassType.Value || type == ClassType.Unknown ||
-                    KeyName != null  && (
-                    (IsDictionary && JsonClassInfo.ElementClassInfo.ClassType == ClassType.Unknown) ||
-                    (IsDictionaryProperty && JsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Unknown) ||
-                    (IsIDictionaryConstructible && JsonClassInfo.ElementClassInfo.ClassType == ClassType.Unknown) ||
-                    (IsIDictionaryConstructibleProperty && JsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Unknown)
-                    );
+                return false;
             }
+
+            ClassType classType;
+
+            if (CollectionPropertyInitialized)
+            {
+                classType = JsonPropertyInfo.ElementClassInfo.ClassType;
+            }
+            else if (JsonPropertyInfo == null)
+            {
+                classType = JsonClassInfo.ClassType;
+            }
+            else
+            {
+                classType = JsonPropertyInfo.ClassType;
+            }
+
+            return classType == ClassType.Value || classType == ClassType.Unknown;
         }
 
         public void Initialize(Type type, JsonSerializerOptions options)
@@ -114,7 +107,7 @@ namespace System.Text.Json
                 JsonClassInfo.ClassType == ClassType.Dictionary ||
                 JsonClassInfo.ClassType == ClassType.IDictionaryConstructible)
             {
-                JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
+                JsonPropertyInfo = JsonClassInfo.PolicyProperty;
             }
         }
 
@@ -122,26 +115,24 @@ namespace System.Text.Json
         {
             Drain = false;
             JsonClassInfo = null;
-            KeyName = null;
             PropertyRefCache = null;
             ReturnValue = null;
             EndObject();
         }
 
-        public void ResetProperty()
+        public void EndObject()
         {
-            PropertyInitialized = false;
+            PropertyIndex = 0;
+            EndProperty();
+        }
+        public void EndProperty()
+        {
+            CollectionPropertyInitialized = false;
             JsonPropertyInfo = null;
             TempEnumerableValues = null;
             TempDictionaryValues = null;
             JsonPropertyName = null;
             KeyName = null;
-        }
-
-        public void EndObject()
-        {
-            PropertyIndex = 0;
-            ResetProperty();
         }
 
         public static object CreateEnumerableValue(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options)
@@ -154,7 +145,7 @@ namespace System.Text.Json
                 IList converterList;
                 if (jsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Value)
                 {
-                    converterList = jsonPropertyInfo.ElementClassInfo.GetPolicyProperty().CreateConverterList();
+                    converterList = jsonPropertyInfo.ElementClassInfo.PolicyProperty.CreateConverterList();
                 }
                 else
                 {
@@ -201,12 +192,12 @@ namespace System.Text.Json
 
         public Type GetElementType()
         {
-            if (IsEnumerableProperty || IsDictionaryProperty || IsIDictionaryConstructibleProperty)
+            if (IsCollectionForProperty)
             {
                 return JsonPropertyInfo.ElementClassInfo.Type;
             }
 
-            if (IsEnumerable || IsDictionary || IsIDictionaryConstructible)
+            if (IsCollectionForClass)
             {
                 return JsonClassInfo.ElementClassInfo.Type;
             }

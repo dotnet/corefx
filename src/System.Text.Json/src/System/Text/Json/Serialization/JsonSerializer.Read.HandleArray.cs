@@ -44,20 +44,16 @@ namespace System.Text.Json
 
             Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
 
-            if (state.Current.PropertyInitialized)
+            if (state.Current.CollectionPropertyInitialized)
             {
                 // A nested json array so push a new stack frame.
                 Type elementType = jsonPropertyInfo.ElementClassInfo.Type;
 
                 state.Push();
                 state.Current.Initialize(elementType, options);
-                state.Current.PropertyInitialized = true;
-            }
-            else
-            {
-                state.Current.PropertyInitialized = true;
             }
 
+            state.Current.CollectionPropertyInitialized = true;
             jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
             if (state.Current.JsonClassInfo.ClassType == ClassType.Value)
@@ -122,7 +118,7 @@ namespace System.Text.Json
             else if (state.Current.IsEnumerableProperty)
             {
                 // We added the items to the list already.
-                state.Current.ResetProperty();
+                state.Current.EndProperty();
                 return false;
             }
 

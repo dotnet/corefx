@@ -30,19 +30,19 @@ namespace System.Text.Json
         private JsonTokenType TokenType => _parent?.GetJsonTokenType(_idx) ?? JsonTokenType.None;
 
         /// <summary>
-        ///   The <see cref="JsonValueType"/> that the value is.
+        ///   The <see cref="JsonValueKind"/> that the value is.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public JsonValueType Type => TokenType.ToValueType();
+        public JsonValueKind ValueKind => TokenType.ToValueKind();
 
         /// <summary>
         ///   Get the value at a specified index when the current value is a
-        ///   <see cref="JsonValueType.Array"/>.
+        ///   <see cref="JsonValueKind.Array"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Array"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Array"/>.
         /// </exception>
         /// <exception cref="IndexOutOfRangeException">
         ///   <paramref name="index"/> is not in the range [0, <see cref="GetArrayLength"/>()).
@@ -65,7 +65,7 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>The number of values contained within the current array value.</returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Array"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Array"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -93,7 +93,7 @@ namespace System.Text.Json
         /// </returns>
         /// <seealso cref="EnumerateObject"/>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Object"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
         /// <exception cref="KeyNotFoundException">
         ///   No property was found with the requested name.
@@ -137,7 +137,7 @@ namespace System.Text.Json
         /// </returns>
         /// <seealso cref="EnumerateObject"/>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Object"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
         /// <exception cref="KeyNotFoundException">
         ///   No property was found with the requested name.
@@ -176,7 +176,7 @@ namespace System.Text.Json
         ///   A <see cref="JsonElement"/> representing the value of the requested property.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Object"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
         /// <exception cref="KeyNotFoundException">
         ///   No property was found with the requested name.
@@ -216,7 +216,7 @@ namespace System.Text.Json
         ///   <see langword="true"/> if the property was found, <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Object"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///   <paramref name="propertyName"/> is <see langword="null"/>.
@@ -255,7 +255,7 @@ namespace System.Text.Json
         /// </returns>
         /// <seealso cref="EnumerateObject"/>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Object"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -291,7 +291,7 @@ namespace System.Text.Json
         /// </returns>
         /// <seealso cref="EnumerateObject"/>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Object"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -311,8 +311,8 @@ namespace System.Text.Json
         /// </remarks>
         /// <returns>The value of the element as a <see cref="bool"/>.</returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is neither <see cref="JsonValueType.True"/> or
-        ///   <see cref="JsonValueType.False"/>.
+        ///   This value's <see cref="ValueKind"/> is neither <see cref="JsonValueKind.True"/> or
+        ///   <see cref="JsonValueKind.False"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -338,7 +338,7 @@ namespace System.Text.Json
         /// </remarks>
         /// <returns>The value of the element as a <see cref="string"/>.</returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is neither <see cref="JsonValueType.String"/> nor <see cref="JsonValueType.Null"/>.
+        ///   This value's <see cref="ValueKind"/> is neither <see cref="JsonValueKind.String"/> nor <see cref="JsonValueKind.Null"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -363,7 +363,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.String"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -383,7 +383,7 @@ namespace System.Text.Json
         /// </remarks>
         /// <returns>The value decode to bytes.</returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.String"/>.
         /// </exception>
         /// <exception cref="FormatException">
         ///   The value is not encoded as base 64 text and hence cannot be decoded to bytes.
@@ -403,6 +403,204 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        ///   Attempts to represent the current JSON number as an <see cref="sbyte"/>.
+        /// </summary>
+        /// <param name="value">Receives the value.</param>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <returns>
+        ///   <see langword="true"/> if the number can be represented as an <see cref="sbyte"/>,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        [CLSCompliant(false)]
+        public bool TryGetSByte(out sbyte value)
+        {
+            CheckValidInstance();
+
+            return _parent.TryGetValue(_idx, out value);
+        }
+
+        /// <summary>
+        ///   Gets the current JSON number as an <see cref="sbyte"/>.
+        /// </summary>
+        /// <returns>The current JSON number as an <see cref="sbyte"/>.</returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value cannot be represented as an <see cref="sbyte"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        [CLSCompliant(false)]
+        public sbyte GetSByte()
+        {
+            if (TryGetSByte(out sbyte value))
+            {
+                return value;
+            }
+
+            throw new FormatException();
+        }
+
+        /// <summary>
+        ///   Attempts to represent the current JSON number as a <see cref="byte"/>.
+        /// </summary>
+        /// <param name="value">Receives the value.</param>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <returns>
+        ///   <see langword="true"/> if the number can be represented as a <see cref="byte"/>,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public bool TryGetByte(out byte value)
+        {
+            CheckValidInstance();
+
+            return _parent.TryGetValue(_idx, out value);
+        }
+
+        /// <summary>
+        ///   Gets the current JSON number as a <see cref="byte"/>.
+        /// </summary>
+        /// <returns>The current JSON number as a <see cref="byte"/>.</returns>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value cannot be represented as a <see cref="byte"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public byte GetByte()
+        {
+            if (TryGetByte(out byte value))
+            {
+                return value;
+            }
+
+            throw new FormatException();
+        }
+
+        /// <summary>
+        ///   Attempts to represent the current JSON number as an <see cref="short"/>.
+        /// </summary>
+        /// <param name="value">Receives the value.</param>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <returns>
+        ///   <see langword="true"/> if the number can be represented as an <see cref="short"/>,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public bool TryGetInt16(out short value)
+        {
+            CheckValidInstance();
+
+            return _parent.TryGetValue(_idx, out value);
+        }
+
+        /// <summary>
+        ///   Gets the current JSON number as an <see cref="short"/>.
+        /// </summary>
+        /// <returns>The current JSON number as an <see cref="short"/>.</returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value cannot be represented as an <see cref="short"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public short GetInt16()
+        {
+            if (TryGetInt16(out short value))
+            {
+                return value;
+            }
+
+            throw new FormatException();
+        }
+
+        /// <summary>
+        ///   Attempts to represent the current JSON number as a <see cref="ushort"/>.
+        /// </summary>
+        /// <param name="value">Receives the value.</param>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <returns>
+        ///   <see langword="true"/> if the number can be represented as a <see cref="ushort"/>,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        [CLSCompliant(false)]
+        public bool TryGetUInt16(out ushort value)
+        {
+            CheckValidInstance();
+
+            return _parent.TryGetValue(_idx, out value);
+        }
+
+        /// <summary>
+        ///   Gets the current JSON number as a <see cref="ushort"/>.
+        /// </summary>
+        /// <returns>The current JSON number as a <see cref="ushort"/>.</returns>
+        /// <remarks>
+        ///   This method does not parse the contents of a JSON string value.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value cannot be represented as a <see cref="ushort"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        [CLSCompliant(false)]
+        public ushort GetUInt16()
+        {
+            if (TryGetUInt16(out ushort value))
+            {
+                return value;
+            }
+
+            throw new FormatException();
+        }
+
+        /// <summary>
         ///   Attempts to represent the current JSON number as an <see cref="int"/>.
         /// </summary>
         /// <param name="value">Receives the value.</param>
@@ -414,7 +612,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -431,7 +629,7 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>The current JSON number as an <see cref="int"/>.</returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="FormatException">
         ///   The value cannot be represented as an <see cref="int"/>.
@@ -461,7 +659,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -482,7 +680,7 @@ namespace System.Text.Json
         ///   This method does not parse the contents of a JSON string value.
         /// </remarks>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="FormatException">
         ///   The value cannot be represented as a <see cref="uint"/>.
@@ -513,7 +711,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -533,7 +731,7 @@ namespace System.Text.Json
         ///   This method does not parse the contents of a JSON string value.
         /// </remarks>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="FormatException">
         ///   The value cannot be represented as a <see cref="long"/>.
@@ -563,7 +761,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -584,7 +782,7 @@ namespace System.Text.Json
         ///   This method does not parse the contents of a JSON string value.
         /// </remarks>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="FormatException">
         ///   The value cannot be represented as a <see cref="ulong"/>.
@@ -624,7 +822,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -652,7 +850,7 @@ namespace System.Text.Json
         ///   </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="FormatException">
         ///   The value cannot be represented as a <see cref="double"/>.
@@ -691,7 +889,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -719,7 +917,7 @@ namespace System.Text.Json
         ///   </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="FormatException">
         ///   The value cannot be represented as a <see cref="float"/>.
@@ -749,7 +947,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -770,7 +968,7 @@ namespace System.Text.Json
         ///   This method does not parse the contents of a JSON string value.
         /// </remarks>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
         /// </exception>
         /// <exception cref="FormatException">
         ///   The value cannot be represented as a <see cref="decimal"/>.
@@ -801,7 +999,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.String"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -821,7 +1019,7 @@ namespace System.Text.Json
         /// </remarks>
         /// <returns>The value of the element as a <see cref="DateTime"/>.</returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.String"/>.
         /// </exception>
         /// <exception cref="FormatException">
         ///   The value cannot be represented as a <see cref="DateTime"/>.
@@ -852,7 +1050,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.String"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -872,7 +1070,7 @@ namespace System.Text.Json
         /// </remarks>
         /// <returns>The value of the element as a <see cref="DateTimeOffset"/>.</returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.String"/>.
         /// </exception>
         /// <exception cref="FormatException">
         ///   The value cannot be represented as a <see cref="DateTimeOffset"/>.
@@ -903,7 +1101,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.String"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -923,7 +1121,7 @@ namespace System.Text.Json
         /// </remarks>
         /// <returns>The value of the element as a <see cref="Guid"/>.</returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.String"/>.
         /// </exception>
         /// <exception cref="FormatException">
         ///   The value cannot be represented as a <see cref="Guid"/>.
@@ -981,7 +1179,7 @@ namespace System.Text.Json
         ///   <see langword="false" /> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.String"/>.
         /// </exception>
         /// <remarks>
         ///   This method is functionally equal to doing an ordinal comparison of <paramref name="text" /> and
@@ -1008,7 +1206,7 @@ namespace System.Text.Json
         ///   <paramref name="utf8Text" />, <see langword="false" /> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.String"/>.
         /// </exception>
         /// <remarks>
         ///   This method is functionally equal to doing an ordinal comparison of the string produced by UTF-8 decoding
@@ -1037,7 +1235,7 @@ namespace System.Text.Json
         ///   <see langword="false" /> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.String"/>.
         /// </exception>
         /// <remarks>
         ///   This method is functionally equal to doing an ordinal comparison of <paramref name="text" /> and
@@ -1076,7 +1274,7 @@ namespace System.Text.Json
         /// <param name="propertyName">The name for this value within the JSON object.</param>
         /// <param name="writer">The writer.</param>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        ///   This value's <see cref="ValueKind"/> is <see cref="JsonValueKind.Undefined"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -1090,7 +1288,7 @@ namespace System.Text.Json
         /// <param name="propertyName">The name for this value within the JSON object.</param>
         /// <param name="writer">The writer.</param>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        ///   This value's <see cref="ValueKind"/> is <see cref="JsonValueKind.Undefined"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -1105,12 +1303,30 @@ namespace System.Text.Json
         /// <summary>
         ///   Write the element into the provided writer as a named JSON object property.
         /// </summary>
+        /// <param name="propertyName">The pre-encoded name for this value within the JSON object.</param>
+        /// <param name="writer">The writer.</param>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="ValueKind"/> is <see cref="JsonValueKind.Undefined"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void WriteProperty(JsonEncodedText propertyName, Utf8JsonWriter writer)
+        {
+            CheckValidInstance();
+
+            _parent.WriteElementTo(_idx, writer, propertyName);
+        }
+
+        /// <summary>
+        ///   Write the element into the provided writer as a named JSON object property.
+        /// </summary>
         /// <param name="utf8PropertyName">
         ///   The name for this value within the JSON object, as UTF-8 text.
         /// </param>
         /// <param name="writer">The writer.</param>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        ///   This value's <see cref="ValueKind"/> is <see cref="JsonValueKind.Undefined"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -1127,7 +1343,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="writer">The writer.</param>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        ///   This value's <see cref="ValueKind"/> is <see cref="JsonValueKind.Undefined"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -1146,7 +1362,7 @@ namespace System.Text.Json
         ///   An enumerator to enumerate the values in the JSON array represented by this JsonElement.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Array"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Array"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -1172,7 +1388,7 @@ namespace System.Text.Json
         ///   An enumerator to enumerate the properties in the JSON object represented by this JsonElement.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Object"/>.
+        ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Object"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -1196,19 +1412,19 @@ namespace System.Text.Json
         /// </summary>
         /// <remarks>
         ///   <para>
-        ///     For <see cref="JsonValueType.Null"/>, <see cref="string.Empty"/> is returned.
+        ///     For <see cref="JsonValueKind.Null"/>, <see cref="string.Empty"/> is returned.
         ///   </para>
         ///
         ///   <para>
-        ///     For <see cref="JsonValueType.True"/>, <see cref="bool.TrueString"/> is returned.
+        ///     For <see cref="JsonValueKind.True"/>, <see cref="bool.TrueString"/> is returned.
         ///   </para>
         ///
         ///   <para>
-        ///     For <see cref="JsonValueType.False"/>, <see cref="bool.FalseString"/> is returned.
+        ///     For <see cref="JsonValueKind.False"/>, <see cref="bool.FalseString"/> is returned.
         ///   </para>
         /// 
         ///   <para>
-        ///     For <see cref="JsonValueType.String"/>, the value of <see cref="GetString"/>() is returned.
+        ///     For <see cref="JsonValueKind.String"/>, the value of <see cref="GetString"/>() is returned.
         ///   </para>
         ///
         ///   <para>
@@ -1284,6 +1500,7 @@ namespace System.Text.Json
             }
         }
 
-        private string DebuggerDisplay => $"Type = {Type} : \"{ToString()}\"";
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string DebuggerDisplay => $"ValueKind = {ValueKind} : \"{ToString()}\"";
     }
 }

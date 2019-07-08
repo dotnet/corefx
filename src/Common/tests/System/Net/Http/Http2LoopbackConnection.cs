@@ -15,13 +15,14 @@ using Xunit;
 
 namespace System.Net.Test.Common
 {
-    public class Http2LoopbackConnection
+    public class Http2LoopbackConnection : GenericLoopbackConnection
     {
         private Socket _connectionSocket;
         private Stream _connectionStream;
         private bool _ignoreSettingsAck;
         private bool _ignoreWindowUpdates;
         public static TimeSpan Timeout => Http2LoopbackServer.Timeout;
+        private int _lastStreamId;
 
         private readonly byte[] _prefix;
         public string PrefixString => Encoding.UTF8.GetString(_prefix, 0, _prefix.Length);
@@ -114,7 +115,7 @@ namespace System.Net.Test.Common
         public async Task<Frame> ReadFrameAsync(TimeSpan timeout)
         {
             using CancellationTokenSource timeoutCts = new CancellationTokenSource(timeout);
-            return await ReadFrameAsync(timeoutCts.Token);
+            return await ReadFrameAsync(timeoutCts.Token).ConfigureAwait(false);
         }
 
         private async Task<Frame> ReadFrameAsync(CancellationToken cancellationToken)
@@ -234,16 +235,20 @@ namespace System.Net.Test.Common
             _ignoreWindowUpdates = false;
         }
 
-        // This is similiar to WaitForConnectionShutdownAsync but will send GOAWAY for you
+        // This is similar to WaitForConnectionShutdownAsync but will send GOAWAY for you
         // and will ignore any errors if client has already shutdown
         public async Task ShutdownIgnoringErrorsAsync(int lastStreamId)
         {
             try
             {
-                await SendGoAway(lastStreamId);
-                await WaitForConnectionShutdownAsync();
+                await SendGoAway(lastStreamId).ConfigureAwait(false);
+                await WaitForConnectionShutdownAsync().ConfigureAwait(false);
             }
             catch (IOException)
+            {
+                // Ignore connection errors
+            }
+            catch (SocketException)
             {
                 // Ignore connection errors
             }
@@ -324,11 +329,32 @@ namespace System.Net.Test.Common
             }
         }
 
-        private static int EncodeString(string value, Span<byte> headerBlock)
+        private static int EncodeString(string value, Span<byte> headerBlock, bool huffmanEncode)
         {
-            int bytesGenerated = EncodeInteger(value.Length, 0, 0x80, headerBlock);
+            byte[] data = Encoding.ASCII.GetBytes(value);
+            byte prefix;
 
-            bytesGenerated += Encoding.ASCII.GetBytes(value.AsSpan(), headerBlock.Slice(bytesGenerated));
+            if (!huffmanEncode)
+            {
+                prefix = 0;
+            }
+            else
+            {
+                int len = HuffmanEncoder.GetEncodedLength(data);
+
+                byte[] huffmanData = new byte[len];
+                HuffmanEncoder.Encode(data, huffmanData);
+
+                data = huffmanData;
+                prefix = 0x80;
+            }
+
+            int bytesGenerated = 0;
+
+            bytesGenerated += EncodeInteger(data.Length, prefix, 0x80, headerBlock);
+
+            data.AsSpan().CopyTo(headerBlock.Slice(bytesGenerated));
+            bytesGenerated += data.Length;
 
             return bytesGenerated;
         }
@@ -458,12 +484,12 @@ namespace System.Net.Test.Common
             }
         }
 
-        private static int EncodeHeader(HttpHeaderData headerData, Span<byte> headerBlock)
+        public static int EncodeHeader(HttpHeaderData headerData, Span<byte> headerBlock)
         {
-            // Always encode as literal, no indexing
+            // Always encode as literal, no indexing.
             int bytesGenerated = EncodeInteger(0, 0, 0b11110000, headerBlock);
-            bytesGenerated += EncodeString(headerData.Name, headerBlock.Slice(bytesGenerated));
-            bytesGenerated += EncodeString(headerData.Value, headerBlock.Slice(bytesGenerated));
+            bytesGenerated += EncodeString(headerData.Name, headerBlock.Slice(bytesGenerated), headerData.HuffmanEncoded);
+            bytesGenerated += EncodeString(headerData.Value, headerBlock.Slice(bytesGenerated), headerData.HuffmanEncoded);
             return bytesGenerated;
         }
 
@@ -522,6 +548,7 @@ namespace System.Net.Test.Common
             Assert.Equal(FrameFlags.EndHeaders, FrameFlags.EndHeaders & headersFrame.Flags);
 
             int streamId = headersFrame.StreamId;
+            requestData.RequestId = streamId;
 
             Memory<byte> data = headersFrame.Data;
             int i = 0;
@@ -530,7 +557,7 @@ namespace System.Net.Test.Common
                 (int bytesConsumed, HttpHeaderData headerData) = DecodeHeader(data.Span.Slice(i));
 
                 byte[] headerRaw = data.Span.Slice(i, bytesConsumed).ToArray();
-                headerData = new HttpHeaderData(headerData.Name, headerData.Value, headerRaw);
+                headerData = new HttpHeaderData(headerData.Name, headerData.Value, headerData.HuffmanEncoded, headerRaw);
 
                 requestData.Headers.Add(headerData);
                 i += bytesConsumed;
@@ -543,7 +570,7 @@ namespace System.Net.Test.Common
             if (readBody && (frame.Flags & FrameFlags.EndStream) == 0)
             {
                 // Read body until end of stream if needed.
-                requestData.Body = await ReadBodyAsync();
+                requestData.Body = await ReadBodyAsync().ConfigureAwait(false);
             }
 
             return (streamId, requestData);
@@ -559,7 +586,11 @@ namespace System.Net.Test.Common
         {
             PingFrame ping = new PingFrame(new byte[8] { 1, 2, 3, 4, 50, 60, 70, 80 }, FrameFlags.None, 0);
             await WriteFrameAsync(ping).ConfigureAwait(false);
-            await ReadFrameAsync(Timeout).ConfigureAwait(false);
+            Frame pingAck = await ReadFrameAsync(Timeout).ConfigureAwait(false);
+            if (pingAck.Type != FrameType.Ping || !pingAck.AckFlag)
+            {
+                throw new Exception("Expected PING ACK");
+            }
         }
 
         public async Task SendDefaultResponseHeadersAsync(int streamId)
@@ -578,7 +609,7 @@ namespace System.Net.Test.Common
             await WriteFrameAsync(headersFrame).ConfigureAwait(false);
         }
 
-        public async Task SendResponseHeadersAsync(int streamId, bool endStream = true, HttpStatusCode statusCode = HttpStatusCode.OK, bool isTrailingHeader = false, IList<HttpHeaderData> headers = null)
+        public async Task SendResponseHeadersAsync(int streamId, bool endStream = true, HttpStatusCode statusCode = HttpStatusCode.OK, bool isTrailingHeader = false, bool endHeaders = true, IList<HttpHeaderData> headers = null)
         {
             // For now, only support headers that fit in a single frame
             byte[] headerBlock = new byte[Frame.MaxFrameLength];
@@ -598,7 +629,7 @@ namespace System.Net.Test.Common
                 }
             }
 
-            FrameFlags flags = FrameFlags.EndHeaders;
+            FrameFlags flags = endHeaders ? FrameFlags.EndHeaders : FrameFlags.None;
             if (endStream)
             {
                 flags |= FrameFlags.EndStream;
@@ -614,7 +645,7 @@ namespace System.Net.Test.Common
             await WriteFrameAsync(dataFrame).ConfigureAwait(false);
         }
 
-        public async Task SendResponseBodyAsync(int streamId, ReadOnlyMemory<byte> responseBody)
+        public async Task SendResponseBodyAsync(int streamId, ReadOnlyMemory<byte> responseBody, bool isFinal = true)
         {
             // Only support response body if it fits in a single frame, for now
             // In the future we should separate the body into chunks as needed,
@@ -624,7 +655,42 @@ namespace System.Net.Test.Common
                 throw new Exception("Response body too long");
             }
 
-            await SendResponseDataAsync(streamId, responseBody, true).ConfigureAwait(false);
+            await SendResponseDataAsync(streamId, responseBody, isFinal).ConfigureAwait(false);
+        }
+
+        public override void Dispose()
+        {
+            ShutdownIgnoringErrorsAsync(_lastStreamId).GetAwaiter().GetResult();
+        }
+
+        //
+        // GenericLoopbackServer implementation
+        //
+
+        public override async Task<HttpRequestData> ReadRequestDataAsync(bool readBody = true)
+        {
+            (int streamId, HttpRequestData requestData) = await ReadAndParseRequestHeaderAsync(readBody).ConfigureAwait(false);
+            _lastStreamId = streamId;
+
+            return requestData;
+        }
+
+        public override Task<Byte[]> ReadRequestBodyAsync()
+        {
+            return ReadBodyAsync();
+        }
+
+        public override Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string body = null, bool isFinal = true, int requestId = 0)
+        {
+            int streamId = requestId == 0 ? _lastStreamId : requestId;
+            bool endHeaders = body != null || isFinal;
+            return SendResponseHeadersAsync(streamId, endStream : isFinal, statusCode, isTrailingHeader : false, endHeaders : endHeaders, headers);
+        }
+
+        public override Task SendResponseBodyAsync(byte[] body, bool isFinal = true, int requestId = 0)
+        {
+            int streamId = requestId == 0 ? _lastStreamId : requestId;
+            return SendResponseBodyAsync(streamId, body, isFinal);
         }
     }
 }

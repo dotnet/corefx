@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Converters;
 
@@ -35,21 +36,15 @@ namespace System.Text.Json
 
         public ClassType ClassType;
 
-        // After the property is added, clear any state not used later.
-        public void ClearUnusedValuesAfterAdd()
-        {
-            NameAsString = null;
-            NameUsedToCompareAsString = null;
-        }
-
         public abstract JsonConverter ConverterBase { get; set; }
 
         // Copy any settings defined at run-time to the new property.
         public void CopyRuntimeSettingsTo(JsonPropertyInfo other)
         {
-            other.Name = Name;
-            other.NameUsedToCompare = NameUsedToCompare;
             other.EscapedName = EscapedName;
+            other.Name = Name;
+            other.NameAsString = NameAsString;
+            other.PropertyNameKey = PropertyNameKey;
         }
 
         public abstract IList CreateConverterList();
@@ -123,20 +118,11 @@ namespace System.Text.Json
             // At this point propertyName is valid UTF16, so just call the simple UTF16->UTF8 encoder.
             Name = Encoding.UTF8.GetBytes(NameAsString);
 
-            // Set the compare name.
-            if (Options.PropertyNameCaseInsensitive)
-            {
-                NameUsedToCompareAsString = NameAsString.ToUpperInvariant();
-                NameUsedToCompare = Encoding.UTF8.GetBytes(NameUsedToCompareAsString);
-            }
-            else
-            {
-                NameUsedToCompareAsString = NameAsString;
-                NameUsedToCompare = Name;
-            }
-
             // Cache the escaped name.
             EscapedName = JsonEncodedText.Encode(Name);
+
+            ulong key = JsonClassInfo.GetKey(Name);
+            PropertyNameKey = key;
         }
 
         private void DetermineSerializationCapabilities()
@@ -268,12 +254,6 @@ namespace System.Text.Json
 
         public abstract Type GetConcreteType(Type type);
 
-        private static void GetOriginalValues(ref Utf8JsonReader reader, out JsonTokenType tokenType, out int depth)
-        {
-            tokenType = reader.TokenType;
-            depth = reader.CurrentDepth;
-        }
-
         public virtual void GetPolicies()
         {
             DetermineSerializationCapabilities();
@@ -344,9 +324,8 @@ namespace System.Text.Json
         public byte[] Name { get; private set; }
         public string NameAsString { get; private set; }
 
-        // Used to support case-insensitive comparison
-        public byte[] NameUsedToCompare { get; private set; }
-        public string NameUsedToCompareAsString { get; private set; }
+        // Key for fast property name lookup.
+        public ulong PropertyNameKey { get; set; }
 
         // Options can be referenced here since all JsonPropertyInfos originate from a JsonClassInfo that is cached on JsonSerializerOptions.
         protected JsonSerializerOptions Options { get; set; }
@@ -368,14 +347,18 @@ namespace System.Text.Json
             if (ElementClassInfo != null)
             {
                 // Forward the setter to the value-based JsonPropertyInfo.
-                JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
-                propertyInfo.OnReadEnumerable(tokenType, ref state, ref reader);
+                JsonPropertyInfo propertyInfo = ElementClassInfo.PolicyProperty;
+                propertyInfo.ReadEnumerable(tokenType, ref state, ref reader);
             }
             else
             {
-                GetOriginalValues(ref reader, out JsonTokenType originalTokenType, out int originalDepth);
+                JsonTokenType originalTokenType = reader.TokenType;
+                int originalDepth = reader.CurrentDepth;
+                long originalBytesConsumed = reader.BytesConsumed;
+
                 OnRead(tokenType, ref state, ref reader);
-                VerifyRead(originalTokenType, originalDepth, ref state, ref reader);
+
+                VerifyRead(originalTokenType, originalDepth, originalBytesConsumed, ref state, ref reader);
             }
         }
 
@@ -383,9 +366,13 @@ namespace System.Text.Json
         {
             Debug.Assert(ShouldDeserialize);
 
-            GetOriginalValues(ref reader, out JsonTokenType originalTokenType, out int originalDepth);
+            JsonTokenType originalTokenType = reader.TokenType;
+            int originalDepth = reader.CurrentDepth;
+            long originalBytesConsumed = reader.BytesConsumed;
+
             OnReadEnumerable(tokenType, ref state, ref reader);
-            VerifyRead(originalTokenType, originalDepth, ref state, ref reader);
+
+            VerifyRead(originalTokenType, originalDepth, originalBytesConsumed, ref state, ref reader);
         }
 
         public JsonClassInfo RuntimeClassInfo
@@ -421,45 +408,49 @@ namespace System.Text.Json
         public bool ShouldSerialize { get; private set; }
         public bool ShouldDeserialize { get; private set; }
 
-        private void VerifyRead(JsonTokenType originalTokenType, int originalDepth, ref ReadStack state, ref Utf8JsonReader reader)
+        private void VerifyRead(JsonTokenType tokenType, int depth, long bytesConsumed, ref ReadStack state, ref Utf8JsonReader reader)
         {
-            // We don't have a single call to ThrowHelper since the line number captured during throw may be useful for diagnostics.
-            switch (originalTokenType)
+            switch (tokenType)
             {
                 case JsonTokenType.StartArray:
                     if (reader.TokenType != JsonTokenType.EndArray)
                     {
-                        // todo issue #38550 blocking this: originalDepth != reader.CurrentDepth + 1
                         ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
                     }
+                    else if (depth != reader.CurrentDepth)
+                    {
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                    }
+
+                    // Should not be possible to have not read anything.
+                    Debug.Assert(bytesConsumed < reader.BytesConsumed);
                     break;
 
                 case JsonTokenType.StartObject:
                     if (reader.TokenType != JsonTokenType.EndObject)
                     {
-                        // todo issue #38550 blocking this: originalDepth != reader.CurrentDepth + 1
                         ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
                     }
+                    else if (depth != reader.CurrentDepth)
+                    {
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                    }
+
+                    // Should not be possible to have not read anything.
+                    Debug.Assert(bytesConsumed < reader.BytesConsumed);
                     break;
 
                 default:
                     // Reading a single property value.
-                    if (reader.TokenType != originalTokenType)
+                    if (reader.BytesConsumed != bytesConsumed)
                     {
-                        // todo issue #38550 blocking this: originalDepth != reader.CurrentDepth + 1
                         ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
                     }
 
-                    break;
-            }
-        }
+                    // Should not be possible to change token type.
+                    Debug.Assert(reader.TokenType == tokenType);
 
-        private void VerifyWrite(int originalDepth, ref WriteStack state, ref Utf8JsonWriter writer)
-        {
-            // todo issue #38550 blocking this: originalDepth != reader.CurrentDepth
-            if (originalDepth != writer.CurrentDepth)
-            {
-                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+                    break;
             }
         }
 
@@ -467,36 +458,49 @@ namespace System.Text.Json
         {
             Debug.Assert(ShouldSerialize);
 
-            if (state.Current.Enumerator != null)
+            if (state.Current.CollectionEnumerator != null)
             {
                 // Forward the setter to the value-based JsonPropertyInfo.
-                JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
-                propertyInfo.OnWriteEnumerable(ref state.Current, writer);
+                JsonPropertyInfo propertyInfo = ElementClassInfo.PolicyProperty;
+                propertyInfo.WriteEnumerable(ref state, writer);
             }
             else
             {
                 int originalDepth = writer.CurrentDepth;
+
                 OnWrite(ref state.Current, writer);
-                VerifyWrite(originalDepth, ref state, ref writer);
+
+                if (originalDepth != writer.CurrentDepth)
+                {
+                    ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+                }
             }
         }
 
         public void WriteDictionary(ref WriteStack state, Utf8JsonWriter writer)
         {
             Debug.Assert(ShouldSerialize);
-
             int originalDepth = writer.CurrentDepth;
+
             OnWriteDictionary(ref state.Current, writer);
-            VerifyWrite(originalDepth, ref state, ref writer);
+
+            if (originalDepth != writer.CurrentDepth)
+            {
+                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+            }
         }
 
         public void WriteEnumerable(ref WriteStack state, Utf8JsonWriter writer)
         {
             Debug.Assert(ShouldSerialize);
-
             int originalDepth = writer.CurrentDepth;
+
             OnWriteEnumerable(ref state.Current, writer);
-            VerifyWrite(originalDepth, ref state, ref writer);
+
+            if (originalDepth != writer.CurrentDepth)
+            {
+                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+            }
         }
     }
 }

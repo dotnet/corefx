@@ -87,12 +87,10 @@ namespace System.Text.Json.Serialization
             {
                 if (EscapedName.HasValue)
                 {
-                    Converter.Write(writer, value, EscapedName.Value, Options);
+                    writer.WritePropertyName(EscapedName.Value);
                 }
-                else
-                {
-                    Converter.Write(writer, value, Options);
-                }
+
+                Converter.Write(writer, value, Options);
             }
         }
 
@@ -105,17 +103,17 @@ namespace System.Text.Json.Serialization
         {
             if (Converter != null)
             {
-                Debug.Assert(current.Enumerator != null);
+                Debug.Assert(current.CollectionEnumerator != null);
 
                 TConverter value;
-                if (current.Enumerator is IEnumerator<TConverter> enumerator)
+                if (current.CollectionEnumerator is IEnumerator<TConverter> enumerator)
                 {
                     // Avoid boxing for strongly-typed enumerators such as returned from IList<T>.
                     value = enumerator.Current;
                 }
                 else
                 {
-                    value = (TConverter)current.Enumerator.Current;
+                    value = (TConverter)current.CollectionEnumerator.Current;
                 }
 
                 if (value == null)

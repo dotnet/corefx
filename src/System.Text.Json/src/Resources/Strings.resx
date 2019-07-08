@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -153,6 +153,9 @@
   <data name="CannotWritePropertyWithinArray" xml:space="preserve">
     <value>Cannot write a JSON property within an array or as the first JSON token. Current token type is '{0}'.</value>
   </data>
+  <data name="CannotWritePropertyAfterProperty" xml:space="preserve">
+    <value>Cannot write a JSON property name following another property name. A JSON value is missing.</value>
+  </data>
   <data name="CannotWriteValueAfterPrimitive" xml:space="preserve">
     <value>Cannot write a JSON value after a single JSON value. Current token type is '{0}'.</value>
   </data>
@@ -240,8 +243,14 @@
   <data name="MaxDepthMustBePositive" xml:space="preserve">
     <value>Max depth must be positive.</value>
   </data>
+  <data name="CommentHandlingMustBeValid" xml:space="preserve">
+    <value>The JsonCommentHandling enum must be set to one of the supported values.</value>
+  </data>
   <data name="MismatchedObjectArray" xml:space="preserve">
     <value>'{0}' is invalid without a matching open.</value>
+  </data>
+  <data name="CannotWriteEndAfterProperty" xml:space="preserve">
+    <value>'{0}' is invalid following a property name.</value>
   </data>
   <data name="ObjectDepthTooLarge" xml:space="preserve">
     <value>The maximum configured depth of {0} has been exceeded. Cannot read next JSON object.</value>
@@ -253,22 +262,22 @@
     <value>The JSON value is either too large or too small for a Decimal.</value>
   </data>
   <data name="FormatDouble" xml:space="preserve">
-    <value>The JSON value is either too large or too small for a Double.</value>
+    <value>Either the JSON value is not in a supported format, or is out of bounds for a Double.</value>
   </data>
   <data name="FormatInt32" xml:space="preserve">
-    <value>The JSON value is either of incorrect numeric format, or too large or too small for an Int32.</value>
+    <value>Either the JSON value is not in a supported format, or is out of bounds for an Int32.</value>
   </data>
   <data name="FormatInt64" xml:space="preserve">
-    <value>The JSON value is either of incorrect numeric format, or too large or too small for an Int64.</value>
+    <value>Either the JSON value is not in a supported format, or is out of bounds for an Int64.</value>
   </data>
   <data name="FormatSingle" xml:space="preserve">
-    <value>The JSON value is either too large or too small for a Single.</value>
+    <value>Either the JSON value is not in a supported format, or is out of bounds for a Single.</value>
   </data>
   <data name="FormatUInt32" xml:space="preserve">
-    <value>The JSON value is either of incorrect numeric format, or too large or too small for a UInt32.</value>
+    <value>Either the JSON value is not in a supported format, or is out of bounds for a UInt32.</value>
   </data>
   <data name="FormatUInt64" xml:space="preserve">
-    <value>The JSON value is either of incorrect numeric format, or too large or too small for a UInt64.</value>
+    <value>Either the JSON value is not in a supported format, or is out of bounds for a UInt64.</value>
   </data>
   <data name="RequiredDigitNotFoundAfterDecimal" xml:space="preserve">
     <value>'{0}' is invalid within a number, immediately after a decimal point ('.'). Expected a digit ('0'-'9').</value>
@@ -287,9 +296,6 @@
   </data>
   <data name="ZeroDepthAtEnd" xml:space="preserve">
     <value>Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed.</value>
-  </data>
-  <data name="DeserializeCannotBeNull" xml:space="preserve">
-    <value>The JSON value cannot be null.</value>
   </data>
   <data name="DeserializeDataRemaining" xml:space="preserve">
     <value>The provided data of length {0} has remaining bytes {1}.</value>
@@ -369,6 +375,9 @@
   <data name="NotEnoughData" xml:space="preserve">
     <value>There is not enough data to read through the entire JSON array or object.</value>
   </data>
+  <data name="UnexpectedEndOfLineSeparator" xml:space="preserve">
+    <value>Found invalid line or paragraph separator character while reading a comment.</value>
+  </data>
   <data name="JsonSerializerDoesNotSupportComments" xml:space="preserve">
     <value>Comments cannot be stored when deserializing objects, only the Skip and Disallow comment handling modes are supported.</value>
   </data>
@@ -393,10 +402,25 @@
   <data name="SerializationConverterWrite" xml:space="preserve">
     <value>The converter '{0}' wrote too much or not enough.</value>
   </data>
+  <data name="SerializerDictionaryKeyNull" xml:space="preserve">
+    <value>The dictionary key policy '{0}' cannot return a null key.</value>
+  </data>
   <data name="SerializationDuplicateAttribute" xml:space="preserve">
     <value>The attribute '{0}' cannot exist more than once on '{1}'.</value>
   </data>
   <data name="SerializeUnableToSerialize" xml:space="preserve">
     <value>The object or value could not be serialized. Path: {0}.</value>
+  </data>
+  <data name="FormatByte" xml:space="preserve">
+    <value>Either the JSON value is not in a supported format, or is out of bounds for an unsigned byte.</value>
+  </data>
+  <data name="FormatInt16" xml:space="preserve">
+    <value>Either the JSON value is not in a supported format, or is out of bounds for an Int16.</value>
+  </data>
+  <data name="FormatSByte" xml:space="preserve">
+    <value>Either the JSON value is not in a supported format, or is out of bounds for a signed byte.</value>
+  </data>
+  <data name="FormatUInt16" xml:space="preserve">
+    <value>Either the JSON value is not in a supported format, or is out of bounds for a UInt16.</value>
   </data>
 </root>

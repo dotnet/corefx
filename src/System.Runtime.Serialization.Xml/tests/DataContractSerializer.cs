@@ -2419,16 +2419,6 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
     }
 
-    //[Fact]
-    // This also fails without using reflection based fallback
-    public static void DCS_GenericICollectionOfDateTime()
-    {
-        var value = new TypeImplementsGenericICollection<DateTime>() { new DateTime(2000, 1, 2, 3, 4, 5), new DateTime(2011, 2, 3, 4, 5, 6) };
-        var deserialized = DataContractSerializerHelper.SerializeAndDeserialize(value, @"<ArrayOfdateTime xmlns=""http://schemas.microsoft.com/2003/10/Serialization/Arrays"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><dateTime>2000-01-02T03:04:05-08:00</dateTime><dateTime>2011-02-03T04:05:06-08:00</dateTime></ArrayOfdateTime>");
-        Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
-    }
-
     [Fact]
     public static void DCS_GenericICollectionOfDecimal()
     {
@@ -4090,6 +4080,20 @@ public static partial class DataContractSerializerTests
         Assert.Throws<InvalidOperationException>(() => {
             (new DataContractSerializer(typeof(TypeWithKnownTypesOfCollectionsWithConflictingXmlName))).WriteObject(new MemoryStream(), new TypeWithKnownTypesOfCollectionsWithConflictingXmlName());
         });
+    }
+
+    [Fact]
+    public static void DCS_ReadObject_XmlDictionaryReaderMaxStringContentLengthExceedsQuota()
+    {
+        DataContractSerializer dcs = new DataContractSerializer(typeof(TypeA));
+        int maxStringContentLength = 1024;
+        var type = new TypeA { Name = "BOOM!".PadLeft(maxStringContentLength + 1, ' ') };
+        MemoryStream ms = new MemoryStream();
+        dcs.WriteObject(ms, type);
+        ms.Position = 0;
+        XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(ms, new System.Xml.XmlDictionaryReaderQuotas() { MaxStringContentLength = maxStringContentLength });
+
+        Assert.Throws<System.Runtime.Serialization.SerializationException>(() => { dcs.ReadObject(reader); });
     }
 
     private static T DeserializeString<T>(string stringToDeserialize, bool shouldReportDeserializationExceptions = true, DataContractSerializerSettings settings = null, Func<DataContractSerializer> serializerFactory = null)

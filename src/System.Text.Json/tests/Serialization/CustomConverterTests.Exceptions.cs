@@ -20,28 +20,23 @@ namespace System.Text.Json.Serialization.Tests
             {
                 throw new TException();
             }
-
-            public override void Write(Utf8JsonWriter writer, int value, JsonEncodedText propertyName, JsonSerializerOptions options)
-            {
-                throw new TException();
-            }
         }
 
-        public static void ConverterFailNoRethrow<TException>() where TException : Exception, new()
+        private static void ConverterFailNoRethrow<TException>() where TException : Exception, new()
         {
             var options = new JsonSerializerOptions();
             JsonConverter converter = new FailConverter<TException>();
             options.Converters.Add(converter);
 
-            Assert.Throws<TException>(() => JsonSerializer.Parse<int>("0", options));
-            Assert.Throws<TException>(() => JsonSerializer.Parse<int[]>("[0]", options));
-            Assert.Throws<TException>(() => JsonSerializer.ToString(0, options));
-            Assert.Throws<TException>(() => JsonSerializer.ToString(new int[] { 0 }, options));
+            Assert.Throws<TException>(() => JsonSerializer.Deserialize<int>("0", options));
+            Assert.Throws<TException>(() => JsonSerializer.Deserialize<int[]>("[0]", options));
+            Assert.Throws<TException>(() => JsonSerializer.Serialize(0, options));
+            Assert.Throws<TException>(() => JsonSerializer.Serialize(new int[] { 0 }, options));
 
             var obj = new Dictionary<string, int>();
             obj["key"] = 0;
 
-            Assert.Throws<TException>(() => JsonSerializer.ToString(obj, options));
+            Assert.Throws<TException>(() => JsonSerializer.Serialize(obj, options));
         }
 
         [Fact]

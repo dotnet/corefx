@@ -35,10 +35,13 @@ namespace System.Text.Json.Serialization.Tests
         public SampleEnumByte MyByteEnum { get; set; }
         public SampleEnum MyEnum { get; set; }
         public SampleEnumInt16 MyInt16Enum { get; set; }
+        public SampleEnumInt32 MyInt32Enum { get; set; }
         public SampleEnumInt64 MyInt64Enum { get; set; }
-        public SampleEnumUInt32 MyUInt32Enum { get; set; }
         public SampleEnumUInt16 MyUInt16Enum { get; set; }
+        public SampleEnumUInt32 MyUInt32Enum { get; set; }
         public SampleEnumUInt64 MyUInt64Enum { get; set; }
+        public SimpleStruct MySimpleStruct { get; set; }
+        public SimpleTestStruct MySimpleTestStruct { get; set; }      
         public short[] MyInt16Array { get; set; }
         public int[] MyInt32Array { get; set; }
         public long[] MyInt64Array { get; set; }
@@ -73,8 +76,7 @@ namespace System.Text.Json.Serialization.Tests
         public IReadOnlyCollection<string> MyStringIReadOnlyCollectionT { get; set; }
         public IReadOnlyList<string> MyStringIReadOnlyListT { get; set; }
         public ISet<string> MyStringISetT { get; set; }
-        //todo: enable once we can write a custom converter for KeyValuePair:
-        // public KeyValuePair<string, string> MyStringToStringKeyValuePair { get; set; }
+        public KeyValuePair<string, string> MyStringToStringKeyValuePair { get; set; }
         public IDictionary MyStringToStringIDict { get; set; }
         public Dictionary<string, string> MyStringToStringGenericDict { get; set; }
         public IDictionary<string, string> MyStringToStringGenericIDict { get; set; }
@@ -122,14 +124,18 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyGuid"" : ""1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6""," +
                 @"""MyUri"" : ""https:\/\/github.com\/dotnet\/corefx""," +
                 @"""MyEnum"" : 2," + // int by default
-                //@"""MyStringToStringKeyValuePair"" : {""Key"" : ""myKey"", ""Value"" : ""myValue""}," +
+                @"""MyInt64Enum"" : -9223372036854775808," +
+                @"""MyUInt64Enum"" : 18446744073709551615," +
+                @"""MyStringToStringKeyValuePair"" : {""Key"" : ""myKey"", ""Value"" : ""myValue""}," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringGenericDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringGenericIDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringGenericIReadOnlyDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringImmutableDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIImmutableDict"" : {""key"" : ""value""}," +
-                @"""MyStringToStringImmutableSortedDict"" : {""key"" : ""value""}";
+                @"""MyStringToStringImmutableSortedDict"" : {""key"" : ""value""}," +
+                @"""MySimpleStruct"" : {""One"" : 11, ""Two"" : 1.9999, ""Three"" : 33}," +
+                @"""MySimpleTestStruct"" : {""MyInt64"" : 64, ""MyString"" :""Hello"", ""MyInt32Array"" : [32]}";
 
         private const string s_partialJsonArrays =
                 @"""MyInt16Array"" : [1]," +
@@ -206,7 +212,8 @@ namespace System.Text.Json.Serialization.Tests
             MyGuid = new Guid("1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6");
             MyUri = new Uri("https://github.com/dotnet/corefx");
             MyEnum = SampleEnum.Two;
-
+            MyInt64Enum = SampleEnumInt64.MinNegative;
+            MyUInt64Enum = SampleEnumUInt64.Max;
             MyInt16Array = new short[] { 1 };
             MyInt32Array = new int[] { 2 };
             MyInt64Array = new long[] { 3 };
@@ -227,6 +234,8 @@ namespace System.Text.Json.Serialization.Tests
             MyGuidArray = new Guid[] { new Guid("1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6") };
             MyUriArray = new Uri[] { new Uri("https://github.com/dotnet/corefx") };
             MyEnumArray = new SampleEnum[] { SampleEnum.Two };
+            MySimpleStruct = new SimpleStruct { One = 11, Two = 1.9999 };
+            MySimpleTestStruct = new SimpleTestStruct { MyInt64 = 64, MyString = "Hello", MyInt32Array = new int[] { 32 } };
 
             MyInt16TwoDimensionArray = new int[2][];
             MyInt16TwoDimensionArray[0] = new int[] { 10, 11 };
@@ -267,7 +276,7 @@ namespace System.Text.Json.Serialization.Tests
             MyStringIReadOnlyListT = new string[] { "Hello" };
             MyStringISetT = new HashSet<string> { "Hello" };
 
-            //MyStringToStringKeyValuePair = new KeyValuePair<string, string>("myKey", "myValue");
+            MyStringToStringKeyValuePair = new KeyValuePair<string, string>("myKey", "myValue");
             MyStringToStringIDict = new Dictionary<string, string> { { "key", "value" } };
 
             MyStringToStringGenericDict = new Dictionary<string, string> { { "key", "value" } };
@@ -319,6 +328,13 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(new Guid("1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6"), MyGuid);
             Assert.Equal(new Uri("https://github.com/dotnet/corefx"), MyUri);
             Assert.Equal(SampleEnum.Two, MyEnum);
+            Assert.Equal(SampleEnumInt64.MinNegative, MyInt64Enum);
+            Assert.Equal(SampleEnumUInt64.Max, MyUInt64Enum);
+            Assert.Equal(11, MySimpleStruct.One);
+            Assert.Equal(1.9999, MySimpleStruct.Two);
+            Assert.Equal(64, MySimpleTestStruct.MyInt64);
+            Assert.Equal("Hello", MySimpleTestStruct.MyString);
+            Assert.Equal(32, MySimpleTestStruct.MyInt32Array[0]);
 
             Assert.Equal((short)1, MyInt16Array[0]);
             Assert.Equal((int)2, MyInt32Array[0]);
@@ -460,8 +476,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("value", MyStringToStringIImmutableDict["key"]);
             Assert.Equal("value", MyStringToStringImmutableSortedDict["key"]);
 
-            //Assert.Equal("myKey", MyStringToStringKeyValuePair.Key);
-            //Assert.Equal("myValue", MyStringToStringKeyValuePair.Value);
+            Assert.Equal("myKey", MyStringToStringKeyValuePair.Key);
+            Assert.Equal("myValue", MyStringToStringKeyValuePair.Value);
 
             Assert.Equal(2, MyStringStackT.Count);
             Assert.True(MyStringStackT.Contains("Hello"));
