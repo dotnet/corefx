@@ -50,16 +50,6 @@ namespace System.Linq
 
         public static TSource Single<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
-            {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
-            }
-
-            if (predicate == null)
-            {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
-            }
-
             if (!TryGetSingle(source, predicate, out TSource result))
             {
                 ThrowHelper.ThrowNoMatchException();
@@ -110,20 +100,7 @@ namespace System.Linq
         [return: MaybeNull]
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            if (source == null)
-            {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
-            }
-
-            if (predicate == null)
-            {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
-            }
-
-            if (!TryGetSingle(source, predicate, out TSource result))
-            {
-                return default!;
-            }
+            TryGetSingle(source, predicate, out TSource result);
 
             return result;
         }
@@ -154,8 +131,8 @@ namespace System.Linq
                             ThrowHelper.ThrowMoreThanOneMatchException();
                         }
 
-                        found = true;
                         result = element;
+                        found = true;
                     }
                 }
             }
@@ -173,8 +150,8 @@ namespace System.Linq
                             ThrowHelper.ThrowMoreThanOneMatchException();
                         }
 
-                        found = true;
                         result = element;
+                        found = true;
                     }
                 }
             }
@@ -189,8 +166,8 @@ namespace System.Linq
                             ThrowHelper.ThrowMoreThanOneMatchException();
                         }
 
-                        found = true;
                         result = element;
+                        found = true;
                     }
                 }
             }
