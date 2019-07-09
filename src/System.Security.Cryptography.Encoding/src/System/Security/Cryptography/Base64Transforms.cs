@@ -122,6 +122,8 @@ namespace System.Security.Cryptography
 
         // Converting from Base64 generates 3 bytes output from each 4 bytes input block
         private const int Base64InputBlockSize = 4;
+        // A buffer with size 32 is stack allocated, to cover common cases and benefit from JIT's optimizations.
+        private const int StackAllocSize = 32;
         public int InputBlockSize => 1;
         public int OutputBlockSize => 3;
         public bool CanTransformMultipleBlocks => false;
@@ -140,8 +142,8 @@ namespace System.Security.Cryptography
 
             // The common case is inputCount = InputBlockSize
             byte[] tmpBufferArray = null;
-            Span<byte> tmpBuffer = stackalloc byte[InputBlockSize];
-            if (inputCount > InputBlockSize)
+            Span<byte> tmpBuffer = stackalloc byte[StackAllocSize];
+            if (inputCount > StackAllocSize)
             {
                 tmpBuffer = tmpBufferArray = CryptoPool.Rent(inputCount);
             }
@@ -185,8 +187,8 @@ namespace System.Security.Cryptography
 
             // The common case is inputCount <= Base64InputBlockSize
             byte[] tmpBufferArray = null;
-            Span<byte> tmpBuffer = stackalloc byte[Base64InputBlockSize];
-            if (inputCount > Base64InputBlockSize)
+            Span<byte> tmpBuffer = stackalloc byte[StackAllocSize];
+            if (inputCount > StackAllocSize)
             {
                 tmpBuffer = tmpBufferArray = CryptoPool.Rent(inputCount);
             }
@@ -288,10 +290,9 @@ namespace System.Security.Cryptography
             int bytesToTransform = _inputIndex + tmpBuffer.Length;
             Debug.Assert(bytesToTransform >= 4);
 
-            // Common case for bytesToTransform = 4
             byte[] transformBufferArray = null;
-            Span<byte> transformBuffer = stackalloc byte[4];
-            if (bytesToTransform > 4)
+            Span<byte> transformBuffer = stackalloc byte[StackAllocSize];
+            if (bytesToTransform > StackAllocSize)
             {
                 transformBuffer = transformBufferArray = CryptoPool.Rent(bytesToTransform);
             }
