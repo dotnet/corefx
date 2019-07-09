@@ -692,7 +692,7 @@ namespace Microsoft.Win32
                     hInstance = hInstance
                 };
 
-                if (Interop.User32.RegisterClassW(windowClass) == 0)
+                if (Interop.User32.RegisterClassW(ref windowClass) == 0)
                 {
                     _windowProc = null;
                     Debug.WriteLine("Unable to register broadcast window class: {0}", Marshal.GetLastWin32Error());
