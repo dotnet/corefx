@@ -124,7 +124,7 @@ namespace System.Drawing
                 Font iconTitleFont = null;
 
                 var itfont = new SafeNativeMethods.LOGFONT();
-                bool result = UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETICONTITLELOGFONT, Marshal.SizeOf(itfont), itfont, 0);
+                bool result = UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETICONTITLELOGFONT, Marshal.SizeOf(itfont), ref itfont, 0);
 
                 if (result)
                 {
@@ -245,11 +245,6 @@ namespace System.Drawing
 
         private static Font GetFontFromData(SafeNativeMethods.LOGFONT logFont)
         {
-            if (logFont == null)
-            {
-                return null;
-            }
-
             Font font = null;
             try
             {

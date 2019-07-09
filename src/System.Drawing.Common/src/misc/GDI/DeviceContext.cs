@@ -244,36 +244,17 @@ namespace System.Drawing.Internal
             {
                 case DeviceContextType.Display:
                     Debug.Assert(disposing, "WARNING: Finalizing a Display DeviceContext.\r\nReleaseDC may fail when not called from the same thread GetDC was called from.");
-
                     ((IDeviceContext)this).ReleaseHdc();
                     break;
-
                 case DeviceContextType.Information:
                 case DeviceContextType.NamedDevice:
-
-                    // CreateDC and CreateIC add an HDC handle to the HandleCollector; to remove it properly we need 
-                    // to call DeleteHDC.
-#if TRACK_HDC
-                    Debug.WriteLine( DbgUtil.StackTraceToStr( string.Format("DC.DeleteHDC(hdc=0x{0:x8})", unchecked((int) _hDC))));
-#endif
-
-                    IntUnsafeNativeMethods.DeleteHDC(new HandleRef(this, _hDC));
-
-                    _hDC = IntPtr.Zero;
-                    break;
-
-                case DeviceContextType.Memory:
-
-                    // CreatCompatibleDC adds a GDI handle to HandleCollector, to remove it properly we need to call 
-                    // DeleteDC.
-#if TRACK_HDC
-                    Debug.WriteLine( DbgUtil.StackTraceToStr( string.Format("DC.DeleteDC(hdc=0x{0:x8})", unchecked((int) _hDC))));
-#endif
                     IntUnsafeNativeMethods.DeleteDC(new HandleRef(this, _hDC));
-
                     _hDC = IntPtr.Zero;
                     break;
-
+                case DeviceContextType.Memory:
+                    IntUnsafeNativeMethods.DeleteDC(new HandleRef(this, _hDC));
+                    _hDC = IntPtr.Zero;
+                    break;
                 // case DeviceContextType.Metafile: - not yet supported.
                 case DeviceContextType.Unknown:
                 default:
