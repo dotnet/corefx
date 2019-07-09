@@ -167,6 +167,7 @@ namespace System.ServiceProcess.Tests
         }
 
         [Fact]
+        [OuterLoop]
         public static void SetDisplayName_GetServiceName()
         {
             var keyIsoDisplayName = new ServiceController(KeyIsoSvcName).DisplayName;
