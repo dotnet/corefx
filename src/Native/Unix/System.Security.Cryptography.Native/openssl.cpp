@@ -1462,7 +1462,7 @@ static int32_t EnsureOpenSsl11Initialized()
             OPENSSL_INIT_ADD_ALL_DIGESTS |
             OPENSSL_INIT_LOAD_CONFIG |
         // Do not unload on process exit, as the CLR may still have threads running
-            OPENSSL_INIT_NO_ATEXIT
+            OPENSSL_INIT_NO_ATEXIT |
         // ERR_load_crypto_strings
             OPENSSL_INIT_LOAD_CRYPTO_STRINGS |
             OPENSSL_INIT_LOAD_SSL_STRINGS,
