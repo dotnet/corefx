@@ -42,7 +42,6 @@ namespace Microsoft.Win32
         private volatile IntPtr _windowHandle;
         private Interop.User32.WndProc _windowProc;
         private Interop.Kernel32.ConsoleCtrlHandlerRoutine _consoleHandler;
-        private IntPtr _consoleHandlerPointer;
 
         // The set of events we respond to.
         private static readonly object s_onUserPreferenceChangingEvent = new object();
@@ -426,8 +425,10 @@ namespace Microsoft.Win32
 
                 if (Interop.User32.IsWindow(handle) && DefWndProc != IntPtr.Zero)
                 {
-                    // set our sentinel value that we will look for upon initialization to indicate
-                    // the window class belongs to an unloaded appdomain and therefore should not be used.
+                    // We used to use this as a sentinel to identify window classes we created on
+                    // other appdomains. We still want to set to the default WNDPROC to prevent
+                    // messages coming back to managed code if our callback gets collected.
+
                     if (IntPtr.Size == 4)
                     {
                         // In a 32-bit process we must call the non-'ptr' version of these APIs
@@ -444,7 +445,7 @@ namespace Microsoft.Win32
                 if (Interop.User32.IsWindow(handle) && !Interop.User32.DestroyWindow(handle))
                 {
                     // We may not have been able to destroy the window if we're shutdown from another thread.
-                    // Attempt to close the window by sending the WM_CLOSE message instead. (Messages always
+                    // Attempt to close the window by posting a WM_CLOSE message instead. (Messages always
                     // fire on the same thread.)
                     Interop.User32.PostMessageW(handle, Interop.User32.WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
                 }
@@ -663,7 +664,6 @@ namespace Microsoft.Win32
         private unsafe void Initialize()
         {
             _consoleHandler = new Interop.Kernel32.ConsoleCtrlHandlerRoutine(ConsoleHandlerProc);
-            _consoleHandlerPointer = Marshal.GetFunctionPointerForDelegate(_consoleHandler);
 
             if (!Interop.Kernel32.SetConsoleCtrlHandler(_consoleHandler, true))
             {
