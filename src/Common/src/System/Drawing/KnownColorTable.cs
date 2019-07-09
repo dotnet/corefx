@@ -60,13 +60,13 @@ namespace System.Drawing
             // SystemColors. In order to avoid a static dependency on SystemEvents since it is not available on all platforms 
             // and as such we don't want to bring it into the shared framework. We use the desktop identity for SystemEvents
             // since it is stable and will remain stable for compatibility whereas the core identity could change.
-            Type systemEventsType = Type.GetType("Microsoft.Win32.SystemEvents, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", throwOnError: false);
+            Type systemEventsType = Type.GetType("Microsoft.Win32.SystemEvents, Microsoft.Win32.SystemEvents", throwOnError: false);
             EventInfo upEventInfo = systemEventsType?.GetEvent("UserPreferenceChanging", BindingFlags.Public | BindingFlags.Static);
 
             if (upEventInfo != null)
             {
                 // Delegate TargetType
-                Type userPrefChangingDelegateType = Type.GetType("Microsoft.Win32.UserPreferenceChangingEventHandler, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", throwOnError: false);
+                Type userPrefChangingDelegateType = Type.GetType("Microsoft.Win32.UserPreferenceChangingEventHandler, Microsoft.Win32.SystemEvents", throwOnError: false);
                 Debug.Assert(userPrefChangingDelegateType != null);
 
                 if (userPrefChangingDelegateType != null)
@@ -83,9 +83,8 @@ namespace System.Drawing
                     }
 
                     // Retrieving getter of the category property of the UserPreferenceChangingEventArgs.
-                    Type argsType = Type.GetType("Microsoft.Win32.UserPreferenceChangingEventArgs, System, Version = 4.0.0.0, Culture = neutral, PublicKeyToken = b77a5c561934e089", throwOnError: false);
-                    PropertyInfo categoryProperty = argsType?.GetProperty("Category", BindingFlags.Instance | BindingFlags.Public);
-                    s_categoryGetter = categoryProperty?.GetGetMethod();
+                    Type argsType = Type.GetType("Microsoft.Win32.UserPreferenceChangingEventArgs, Microsoft.Win32.SystemEvents", throwOnError: false);
+                    s_categoryGetter = argsType?.GetMethod("get_Category", BindingFlags.Instance | BindingFlags.Public);
                     Debug.Assert(s_categoryGetter != null);
                 }
             }
