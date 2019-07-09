@@ -4993,8 +4993,8 @@ namespace System.Text.Json.Tests
         public static void WriteString_NullPropertyName_DateTimeOffset()
         {
             WriteNullPropertyName_Simple(
-                DateTimeOffset.UnixEpoch,
-                "\"1970-01-01T00:00:00+00:00\"",
+                DateTimeOffset.MinValue,
+                "\"0001-01-01T00:00:00+00:00\"",
                 (writer, name, value) => writer.WriteString(name, value),
                 (writer, name, value) => writer.WriteString(name, value),
                 (writer, name, value) => writer.WriteString(name, value));
@@ -5184,7 +5184,7 @@ namespace System.Text.Json.Tests
             {
                 writer.WriteStartObject();
 
-                ReadOnlySpan<char> nullStringSpan = nullString;
+                ReadOnlySpan<char> nullStringSpan = nullString.AsSpan();
                 charSpanAction(writer, nullStringSpan, value);
             
                 byteSpanAction(writer, ReadOnlySpan<byte>.Empty, value);
@@ -5225,7 +5225,7 @@ namespace System.Text.Json.Tests
             {
                 writer.WriteStartObject();
 
-                ReadOnlySpan<char> nullStringSpan = nullString;
+                ReadOnlySpan<char> nullStringSpan = nullString.AsSpan();
                 charSpanAction(writer, nullStringSpan);
                 cleanupAction?.Invoke(writer);
 
@@ -5255,7 +5255,7 @@ namespace System.Text.Json.Tests
 
                 stringAction(writer, nullString);
 
-                ReadOnlySpan<char> nullStringSpan = nullString;
+                ReadOnlySpan<char> nullStringSpan = nullString.AsSpan();
                 charSpanAction(writer, nullStringSpan);
 
                 byteSpanAction(writer, ReadOnlySpan<byte>.Empty);
@@ -5283,7 +5283,7 @@ namespace System.Text.Json.Tests
 
                 stringAction(writer, nullString);
 
-                ReadOnlySpan<char> nullStringSpan = nullString;
+                ReadOnlySpan<char> nullStringSpan = nullString.AsSpan();
                 charSpanAction(writer, nullStringSpan);
 
                 byteSpanAction(writer, ReadOnlySpan<byte>.Empty);
