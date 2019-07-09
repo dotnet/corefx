@@ -99,34 +99,34 @@ namespace System.ComponentModel.TypeConverterTests
                 { $"Arial{s_Separator} 10{s_Separator}", "Arial", 10f, GraphicsUnit.Point, FontStyle.Regular },
                 { $"Arial{s_Separator}", "Arial", 8.25f, GraphicsUnit.Point, FontStyle.Regular },
                 { $"Arial{s_Separator} 10{s_Separator} style=12", "Arial", 10f, GraphicsUnit.Point, FontStyle.Underline | FontStyle.Strikeout },
+                { $"Courier New{s_Separator} Style=Bold", "Courier New", 8.25f, GraphicsUnit.Point, FontStyle.Bold }, // FullFramework style keyword is case sensitive.
+                { $"11px{s_Separator} Style=Bold", "Microsoft Sans Serif", 8.25f, GraphicsUnit.Point, FontStyle.Bold}
             };
 
-            if (!PlatformDetection.IsFullFramework)
+            // FullFramework disregards all arguments if the font name is an empty string.
+            // Empty string is not an installed font on Windows 7, windows 8 and some versions of windows 10.
+            if (EmptyFontPresent)
             {
-                // FullFramework style keyword is case sensitive.
-                data.Add($"Courier New{s_Separator} Style=Bold", "Courier New", 8.25f, GraphicsUnit.Point, FontStyle.Bold);
-                data.Add($"11px{s_Separator} Style=Bold", "Microsoft Sans Serif", 8.25f, GraphicsUnit.Point, FontStyle.Bold);
-
-                // empty string is not an installed font on Windows 7, windows 8 and some versions of windows 10.
-                if (EmptyFontPresent)
-                {
-                    data.Add($"{s_Separator} 10{s_Separator} style=bold", "", 10f, GraphicsUnit.Point, FontStyle.Bold);
-                }
-                else
-                {
-                    data.Add($"{s_Separator} 10{s_Separator} style=bold", "Microsoft Sans Serif", 10f, GraphicsUnit.Point, FontStyle.Bold);
-                }
+                data.Add($"{s_Separator} 10{s_Separator} style=bold", "", 10f, GraphicsUnit.Point, FontStyle.Bold);
             }
             else
             {
-                // FullFramework disregards all arguments if the font name is an empty string.
-                data.Add($"{s_Separator} 10{s_Separator} style=bold", "Microsoft Sans Serif", 8.25f, GraphicsUnit.Point, FontStyle.Regular);
+                data.Add($"{s_Separator} 10{s_Separator} style=bold", "Microsoft Sans Serif", 10f, GraphicsUnit.Point, FontStyle.Bold);
             }
 
             return data;
         }
 
-        private static bool EmptyFontPresent => new InstalledFontCollection().Families.Select(t => t.Name).Contains(string.Empty);
+        private static bool EmptyFontPresent
+        {
+            get
+            {
+                using (var installedFonts = new InstalledFontCollection())
+                {
+                    return installedFonts.Families.Select(t => t.Name).Contains(string.Empty);
+                }
+            }
+        }
 
         public static TheoryData<string, string, string> ArgumentExceptionFontConverterData() => new TheoryData<string, string, string>()
         {
