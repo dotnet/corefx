@@ -14,7 +14,7 @@ using System.Threading;
 namespace Microsoft.Win32
 {
     /// <summary>
-    /// Provides a set of global system events to callers.
+    ///  Provides a set of global system events to callers.
     /// </summary>
     public sealed class SystemEvents
     {
@@ -109,7 +109,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs when the display settings are changing.
+        ///  Occurs when the display settings are changing.
         /// </summary>
         public static event EventHandler DisplaySettingsChanging
         {
@@ -124,7 +124,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs when the user changes the display settings.
+        ///  Occurs when the user changes the display settings.
         /// </summary>
         public static event EventHandler DisplaySettingsChanged
         {
@@ -139,8 +139,8 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs before the thread that listens for system events is terminated.
-        ///           Delegates will be invoked on the events thread.
+        ///  Occurs before the thread that listens for system events is terminated.
+        ///  Delegates will be invoked on the events thread.
         /// </summary>
         public static event EventHandler EventsThreadShutdown
         {
@@ -156,7 +156,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs when the user adds fonts to or removes fonts from the system.
+        ///  Occurs when the user adds fonts to or removes fonts from the system.
         /// </summary>
         public static event EventHandler InstalledFontsChanged
         {
@@ -171,7 +171,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs when the system is running out of available RAM.
+        ///  Occurs when the system is running out of available RAM.
         /// </summary>
         [Obsolete("This event has been deprecated. https://go.microsoft.com/fwlink/?linkid=14202")]
         [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
@@ -189,8 +189,8 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs when the user switches to an application that uses a different 
-        ///       palette.
+        ///  Occurs when the user switches to an application that uses a different
+        ///  palette.
         /// </summary>
         public static event EventHandler PaletteChanged
         {
@@ -206,7 +206,7 @@ namespace Microsoft.Win32
 
 
         /// <summary>
-        /// Occurs when the user suspends or resumes the system.
+        ///  Occurs when the user suspends or resumes the system.
         /// </summary>
         public static event PowerModeChangedEventHandler PowerModeChanged
         {
@@ -222,7 +222,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs when the user is logging off or shutting down the system.
+        ///  Occurs when the user is logging off or shutting down the system.
         /// </summary>
         public static event SessionEndedEventHandler SessionEnded
         {
@@ -238,7 +238,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs when the user is trying to log off or shutdown the system.
+        ///  Occurs when the user is trying to log off or shutdown the system.
         /// </summary>
         public static event SessionEndingEventHandler SessionEnding
         {
@@ -254,7 +254,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs when a user session switches.
+        ///  Occurs when a user session switches.
         /// </summary>
         public static event SessionSwitchEventHandler SessionSwitch
         {
@@ -271,7 +271,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs when the user changes the time on the system clock.
+        ///   Occurs when the user changes the time on the system clock.
         /// </summary>
         public static event EventHandler TimeChanged
         {
@@ -287,7 +287,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs when a windows timer interval has expired.
+        ///  Occurs when a windows timer interval has expired.
         /// </summary>
         public static event TimerElapsedEventHandler TimerElapsed
         {
@@ -304,7 +304,7 @@ namespace Microsoft.Win32
 
 
         /// <summary>
-        /// Occurs when a user preference has changed.
+        ///  Occurs when a user preference has changed.
         /// </summary>
         public static event UserPreferenceChangedEventHandler UserPreferenceChanged
         {
@@ -319,7 +319,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Occurs when a user preference is changing.
+        ///  Occurs when a user preference is changing.
         /// </summary>
         public static event UserPreferenceChangingEventHandler UserPreferenceChanging
         {
@@ -358,8 +358,8 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Console handler we add in case we are a console application or a service.
-        /// Without this we will not get end session events.
+        ///  Console handler we add in case we are a console application or a service.
+        ///  Without this we will not get end session events.
         /// </summary>
         private bool ConsoleHandlerProc(int signalType)
         {
@@ -390,7 +390,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        /// Creates a new window timer associated with the system events window.
+        ///  Creates a new window timer associated with the system events window.
         /// </summary>
         public static IntPtr CreateTimer(int interval)
         {
@@ -457,13 +457,13 @@ namespace Microsoft.Win32
 
             if (_consoleHandler != null)
             {
-                Interop.Kernel32.SetConsoleCtrlHandler(_consoleHandlerPointer, false);
+                Interop.Kernel32.SetConsoleCtrlHandler(_consoleHandler, false);
                 _consoleHandler = null;
             }
         }
 
         /// <summary>
-        /// Creates the static resources needed by system events.
+        ///  Creates the static resources needed by system events.
         /// </summary>
         private static void EnsureSystemEvents(bool requireHandle)
         {
@@ -665,7 +665,7 @@ namespace Microsoft.Win32
             _consoleHandler = new Interop.Kernel32.ConsoleCtrlHandlerRoutine(ConsoleHandlerProc);
             _consoleHandlerPointer = Marshal.GetFunctionPointerForDelegate(_consoleHandler);
 
-            if (!Interop.Kernel32.SetConsoleCtrlHandler(_consoleHandlerPointer, true))
+            if (!Interop.Kernel32.SetConsoleCtrlHandler(_consoleHandler, true))
             {
                 Debug.Fail("Failed to install console handler.");
                 _consoleHandler = null;
@@ -714,9 +714,9 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///     Called on the control's owning thread to perform the actual callback.
-        ///     This empties this control's callback queue, propagating any exceptions
-        ///     back as needed.
+        ///  Called on the control's owning thread to perform the actual callback.
+        ///  This empties this control's callback queue, propagating any exceptions
+        ///  back as needed.
         /// </summary>
         [SuppressMessage("Microsoft.Security", "CA2102:CatchNonClsCompliantExceptionsInGeneralHandlers")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -769,7 +769,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///     Executes the given delegate asynchronously on the thread that listens for system events.  Similar to Control.BeginInvoke().
+        ///  Executes the given delegate asynchronously on the thread that listens for system events.  Similar to Control.BeginInvoke().
         /// </summary>
         public static void InvokeOnEventsThread(Delegate method)
         {
@@ -804,9 +804,8 @@ namespace Microsoft.Win32
             Interop.User32.PostMessageW(new HandleRef(s_systemEvents, s_systemEvents._windowHandle), s_threadCallbackMessage, IntPtr.Zero, IntPtr.Zero);
         }
 
-        /// <internalonly/>
         /// <summary>
-        /// Kills the timer specified by the given id.
+        ///  Kills the timer specified by the given id.
         /// </summary>
         public static void KillTimer(IntPtr timerId)
         {
@@ -822,8 +821,8 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      Callback that handles the create timer
-        ///      user message.
+        ///  Callback that handles the create timer
+        ///  user message.
         /// </summary>
         private IntPtr OnCreateTimer(IntPtr wParam)
         {
@@ -833,7 +832,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      Handler that raises the DisplaySettings changing event
+        ///  Handler that raises the DisplaySettings changing event
         /// </summary>
         private void OnDisplaySettingsChanging()
         {
@@ -841,7 +840,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      Handler that raises the DisplaySettings changed event
+        ///  Handler that raises the DisplaySettings changed event
         /// </summary>
         private void OnDisplaySettingsChanged()
         {
@@ -849,7 +848,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      Handler for any event that fires a standard EventHandler delegate.
+        ///  Handler for any event that fires a standard EventHandler delegate.
         /// </summary>
         private void OnGenericEvent(object eventKey)
         {
@@ -862,8 +861,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      Callback that handles the KillTimer
-        ///      user message.        
+        ///  Callback that handles the KillTimer user message.
         /// </summary>
         private bool OnKillTimer(IntPtr wParam)
         {
@@ -872,7 +870,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      Handler for WM_POWERBROADCAST.
+        ///  Handler for WM_POWERBROADCAST.
         /// </summary>
         private void OnPowerModeChanged(IntPtr wParam)
         {
@@ -905,7 +903,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      Handler for WM_ENDSESSION.
+        ///  Handler for WM_ENDSESSION.
         /// </summary>
         private void OnSessionEnded(IntPtr wParam, IntPtr lParam)
         {
@@ -927,7 +925,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      Handler for WM_QUERYENDSESSION.
+        ///  Handler for WM_QUERYENDSESSION.
         /// </summary>
         private int OnSessionEnding(IntPtr lParam)
         {
@@ -957,11 +955,11 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      Handler for WM_THEMECHANGED
-        ///      Whidbey note: Before Whidbey, we used to fire UserPreferenceChanged with category
-        ///      set to Window. In Whidbey, we support visual styles and need a new category Theme 
-        ///      since Window is too general. We fire UserPreferenceChanged with this category, but
-        ///      for backward compat, we also fire it with category set to Window.
+        ///  Handler for WM_THEMECHANGED
+        ///  Whidbey note: Before Whidbey, we used to fire UserPreferenceChanged with category
+        ///  set to Window. In Whidbey, we support visual styles and need a new category Theme
+        ///  since Window is too general. We fire UserPreferenceChanged with this category, but
+        ///  for backward compat, we also fire it with category set to Window.
         /// </summary>
         private void OnThemeChanged()
         {
@@ -979,7 +977,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      Handler for WM_SETTINGCHANGE and WM_SYSCOLORCHANGE.
+        ///  Handler for WM_SETTINGCHANGE and WM_SYSCOLORCHANGE.
         /// </summary>
         private void OnUserPreferenceChanged(int msg, IntPtr wParam, IntPtr lParam)
         {
@@ -996,7 +994,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      Handler for WM_TIMER.
+        ///  Handler for WM_TIMER.
         /// </summary>
         private void OnTimerElapsed(IntPtr wParam)
         {
@@ -1130,7 +1128,7 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      A standard Win32 window proc for our broadcast window.
+        ///  A standard Win32 window proc for our broadcast window.
         /// </summary>
         [SuppressMessage("Microsoft.Security", "CA2102:CatchNonClsCompliantExceptionsInGeneralHandlers")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -1253,10 +1251,10 @@ namespace Microsoft.Win32
         }
 
         /// <summary>
-        ///      This is the method that runs our window thread.  This method
-        ///      creates a window and spins up a message loop.  The window
-        ///      is made visible with a size of 0, 0, so that it will trap
-        ///      global broadcast messages.
+        ///  This is the method that runs our window thread.  This method
+        ///  creates a window and spins up a message loop.  The window
+        ///  is made visible with a size of 0, 0, so that it will trap
+        ///  global broadcast messages.
         /// </summary>
         [SuppressMessage("Microsoft.Security", "CA2102:CatchNonClsCompliantExceptionsInGeneralHandlers")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
