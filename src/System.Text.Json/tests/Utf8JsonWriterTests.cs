@@ -5071,7 +5071,7 @@ namespace System.Text.Json.Tests
                     "value",
                     () => writer.WriteCommentValue(nullString));
 
-                ReadOnlySpan<char> nullStringSpan = nullString;
+                ReadOnlySpan<char> nullStringSpan = nullString.AsSpan();
                 writer.WriteCommentValue(nullStringSpan);
 
                 writer.WriteCommentValue(ReadOnlySpan<byte>.Empty);
