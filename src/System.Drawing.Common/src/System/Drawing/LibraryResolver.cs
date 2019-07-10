@@ -3,16 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace System.Drawing
 {
-    internal static class LibraryResolver
+    class LibraryResolver
     {
-        internal static Dictionary<string, Func<IntPtr>> LibraryLoaders = new Dictionary<string, Func<IntPtr>>();
-
         static LibraryResolver()
         {
             // Hook our custom resolver
@@ -21,12 +19,17 @@ namespace System.Drawing
 
         private static IntPtr DllImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
         {
-            if (LibraryLoaders.TryGetValue(libraryName, out Func<IntPtr> loader))
-            {
-                return loader();
-            }
+            if (libraryName == LibcupsNative.LibraryName)
+                return LibcupsNative.LoadLibcups();
+            if (libraryName == SafeNativeMethods.Gdip.LibraryName)
+                return SafeNativeMethods.Gdip.LoadNativeLibrary();
 
             return IntPtr.Zero;
+        }
+
+        internal static void EnsureRegistered()
+        {
+            // dummy call to trigger the static constructor
         }
     }
 }

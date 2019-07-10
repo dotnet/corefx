@@ -13,7 +13,7 @@ namespace System.Drawing.Printing
 
         static LibcupsNative()
         {
-            LibraryResolver.LibraryLoaders.Add(LibraryName, LoadLibcups);
+            LibraryResolver.EnsureRegistered();
         }
 
         internal static IntPtr LoadLibcups()
