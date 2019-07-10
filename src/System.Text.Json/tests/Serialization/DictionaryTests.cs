@@ -146,7 +146,7 @@ namespace System.Text.Json.Serialization.Tests
             const string ReorderedJsonString = @"{""Hello2"":""World2"",""Hello"":""World""}";
 
             {
-                IDictionaryWrapper obj = JsonSerializer.Deserialize<IDictionaryWrapper>(JsonString);
+                WrapperForIDictionary obj = JsonSerializer.Deserialize<WrapperForIDictionary>(JsonString);
                 Assert.Equal("World", ((JsonElement)obj["Hello"]).GetString());
                 Assert.Equal("World2", ((JsonElement)obj["Hello2"]).GetString());
 

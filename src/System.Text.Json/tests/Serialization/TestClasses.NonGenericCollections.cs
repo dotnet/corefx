@@ -10,8 +10,8 @@ namespace System.Text.Json.Serialization.Tests
 {
     public class SimpleTestClassWithNonGenericCollectionWrappers : ITestClass
     {
-        public IListWrapper MyIListWrapper { get; set; }
-        public IDictionaryWrapper MyIDictionaryWrapper { get; set; }
+        public WrapperForIList MyIListWrapper { get; set; }
+        public WrapperForIDictionary MyIDictionaryWrapper { get; set; }
         public HashtableWrapper MyHashtableWrapper { get; set; }
         public ArrayListWrapper MyArrayListWrapper { get; set; }
         public SortedListWrapper MySortedListWrapper { get; set; }
@@ -29,8 +29,8 @@ namespace System.Text.Json.Serialization.Tests
 
         public void Initialize()
         {
-            MyIListWrapper = new IListWrapper() { "Hello" };
-            MyIDictionaryWrapper = new IDictionaryWrapper() { { "key", "value" } };
+            MyIListWrapper = new WrapperForIList() { "Hello" };
+            MyIDictionaryWrapper = new WrapperForIDictionary() { { "key", "value" } };
             MyHashtableWrapper = new HashtableWrapper(new List<KeyValuePair<string, object>> { new KeyValuePair<string, object>("key", "value" ) });
             MyArrayListWrapper = new ArrayListWrapper() { "Hello" };
             MySortedListWrapper = new SortedListWrapper() { { "key", "value" } };
@@ -48,7 +48,7 @@ namespace System.Text.Json.Serialization.Tests
 
     public class SimpleTestClassWithIEnumerableWrapper
     {
-        public IEnumerableWrapper MyIEnumerableWrapper { get; set; }
+        public WrapperForIEnumerable MyIEnumerableWrapper { get; set; }
 
         public static readonly string s_json =
             @"{" +
@@ -60,13 +60,13 @@ namespace System.Text.Json.Serialization.Tests
         // Call only when testing serialization.
         public void Initialize()
         {
-            MyIEnumerableWrapper = new IEnumerableWrapper(new List<object> { "Hello" });
+            MyIEnumerableWrapper = new WrapperForIEnumerable(new List<object> { "Hello" });
         }
     }
 
     public class SimpleTestClassWithICollectionWrapper
     {
-        public ICollectionWrapper MyICollectionWrapper { get; set; }
+        public WrapperForICollection MyICollectionWrapper { get; set; }
 
         public static readonly string s_json =
             @"{" +
@@ -78,7 +78,7 @@ namespace System.Text.Json.Serialization.Tests
         // Call only when testing serialization.
         public void Initialize()
         {
-            MyICollectionWrapper = new ICollectionWrapper(new List<object> { "Hello" });
+            MyICollectionWrapper = new WrapperForICollection(new List<object> { "Hello" });
         }
     }
 
@@ -118,13 +118,13 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
-    public class IEnumerableWrapper : IEnumerable
+    public class WrapperForIEnumerable : IEnumerable
     {
         private readonly List<object> _list = new List<object>();
 
-        public IEnumerableWrapper() { }
+        public WrapperForIEnumerable() { }
 
-        public IEnumerableWrapper(List<object> items)
+        public WrapperForIEnumerable(List<object> items)
         {
             foreach (object item in items)
             {
@@ -138,13 +138,13 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
-    public class ICollectionWrapper : ICollection
+    public class WrapperForICollection : ICollection
     {
         private readonly List<object> _list = new List<object>();
 
-        public ICollectionWrapper() { }
+        public WrapperForICollection() { }
 
-        public ICollectionWrapper(List<object> items)
+        public WrapperForICollection(List<object> items)
         {
             foreach (object item in items)
             {
@@ -169,7 +169,7 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
-    public class IListWrapper : IList
+    public class WrapperForIList : IList
     {
         private readonly List<object> _list = new List<object>();
 
@@ -231,7 +231,7 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
-    public class IDictionaryWrapper : IDictionary
+    public class WrapperForIDictionary : IDictionary
     {
         private readonly Dictionary<string, object> _dictionary = new Dictionary<string, object>();
 

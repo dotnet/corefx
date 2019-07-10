@@ -25,7 +25,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIEnumerableWrapper<IEnumerableWrapper>>(@"[[1,2],[3,4]]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericIEnumerableWrapper<WrapperForIEnumerable>>(@"[[1,2],[3,4]]"));
         }
 
         [Fact]
@@ -94,10 +94,10 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            GenericIListWrapper<IListWrapper> result2 = JsonSerializer.Deserialize<GenericIListWrapper<IListWrapper>>(@"[[1,2],[3,4]]");
+            GenericIListWrapper<WrapperForIList> result2 = JsonSerializer.Deserialize<GenericIListWrapper<WrapperForIList>>(@"[[1,2],[3,4]]");
             expected = 1;
 
-            foreach (IListWrapper list in result2)
+            foreach (WrapperForIList list in result2)
             {
                 foreach (JsonElement i in list)
                 {
@@ -157,7 +157,7 @@ namespace System.Text.Json.Serialization.Tests
             }
             Assert.Equal(0, count);
 
-            IListWrapper result2 = JsonSerializer.Deserialize<IListWrapper>(@"[1,2]");
+            WrapperForIList result2 = JsonSerializer.Deserialize<WrapperForIList>(@"[1,2]");
             expected = 1;
 
             foreach (JsonElement i in result2)
@@ -181,7 +181,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // No way to populate this collection.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericICollectionWrapper<ICollectionWrapper>>(@"[[1,2],[3,4]]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GenericICollectionWrapper<WrapperForICollection>>(@"[[1,2],[3,4]]"));
         }
 
         [Fact]

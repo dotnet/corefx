@@ -125,14 +125,13 @@ namespace System.Text.Json
                 Type typeToConvert = converter?.TypeToConvert;
                 if (typeToConvert == null)
                 {
-                    // Might need conditional here.
-                    if (!IsNativelySupportedCollection(declaredPropertyType))
+                    if (IsNativelySupportedCollection(declaredPropertyType))
                     {
-                        typeToConvert = declaredPropertyType;
+                        typeToConvert = implementedPropertyType;
                     }
                     else
                     {
-                        typeToConvert = implementedPropertyType;
+                        typeToConvert = declaredPropertyType;
                     }
                 }
 

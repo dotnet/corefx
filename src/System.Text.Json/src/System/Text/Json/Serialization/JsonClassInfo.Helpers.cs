@@ -75,16 +75,66 @@ namespace System.Text.Json
             typeof(IEnumerable<>),
         };
 
+        // Any additional natively supported generic collection must be registered here.
+        private static readonly HashSet<string> s_nativelySupportedGenericCollections = new HashSet<string>()
+        {
+            ListGenericTypeName,
+            EnumerableGenericInterfaceTypeName,
+            ListGenericInterfaceTypeName,
+            CollectionGenericInterfaceTypeName,
+            ReadOnlyListGenericInterfaceTypeName,
+            ReadOnlyCollectionGenericInterfaceTypeName,
+            SetGenericInterfaceTypeName,
+            StackGenericTypeName,
+            QueueGenericTypeName,
+            HashSetGenericTypeName,
+            LinkedListGenericTypeName,
+            SortedSetGenericTypeName,
+            DictionaryInterfaceTypeName,
+            DictionaryGenericTypeName,
+            DictionaryGenericInterfaceTypeName,
+            ReadOnlyDictionaryGenericInterfaceTypeName,
+            SortedDictionaryGenericTypeName,
+            KeyValuePairGenericTypeName,
+            DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName,
+            DefaultImmutableEnumerableConverter.ImmutableListGenericTypeName,
+            DefaultImmutableEnumerableConverter.ImmutableListGenericInterfaceTypeName,
+            DefaultImmutableEnumerableConverter.ImmutableStackGenericTypeName,
+            DefaultImmutableEnumerableConverter.ImmutableStackGenericInterfaceTypeName,
+            DefaultImmutableEnumerableConverter.ImmutableQueueGenericTypeName,
+            DefaultImmutableEnumerableConverter.ImmutableQueueGenericInterfaceTypeName,
+            DefaultImmutableEnumerableConverter.ImmutableSortedSetTypeName,
+            DefaultImmutableEnumerableConverter.ImmutableSortedSetGenericTypeName,
+            DefaultImmutableEnumerableConverter.ImmutableHashSetGenericTypeName,
+            DefaultImmutableEnumerableConverter.ImmutableSetGenericInterfaceTypeName,
+            DefaultImmutableDictionaryConverter.ImmutableDictionaryGenericTypeName,
+            DefaultImmutableDictionaryConverter.ImmutableDictionaryGenericInterfaceTypeName,
+            DefaultImmutableDictionaryConverter.ImmutableSortedDictionaryGenericTypeName,
+        };
+
+        // Any additional natively supported non-generic collection must be registered here.
+        private static readonly HashSet<string> s_nativelySupportedNonGenericCollections = new HashSet<string>()
+        {
+            EnumerableInterfaceTypeName,
+            CollectionInterfaceTypeName,
+            ListInterfaceTypeName,
+            DictionaryInterfaceTypeName,
+            StackTypeName,
+            QueueTypeName,
+            HashtableTypeName,
+            ArrayListTypeName,
+            SortedListTypeName,
+        };
+
         public static Type GetImplementedCollectionType(Type queryType)
         {
             Debug.Assert(queryType != null);
 
-            if (queryType.IsAbstract ||
-                queryType.IsInterface ||
-                !(typeof(IEnumerable).IsAssignableFrom(queryType)) ||
+            if (!(typeof(IEnumerable).IsAssignableFrom(queryType)) ||
                 queryType == typeof(string) ||
+                queryType.IsAbstract ||
+                queryType.IsInterface ||
                 queryType.IsArray ||
-                queryType == typeof(object) ||
                 IsNativelySupportedCollection(queryType))
             {
                 return queryType;
@@ -207,75 +257,16 @@ namespace System.Text.Json
             }
         }
 
-        // Any additional natively supported collections must be registered here.
         public static bool IsNativelySupportedCollection(Type queryType)
         {
-            if (queryType == null)
-            {
-                return false;
-            }
+            Debug.Assert(queryType != null);
 
             if (queryType.IsGenericType)
             {
-                Type typeDef = queryType.GetGenericTypeDefinition();
+                return s_nativelySupportedGenericCollections.Contains(queryType.GetGenericTypeDefinition().FullName);
+            }
 
-                switch (typeDef.FullName)
-                {
-                    case ListGenericTypeName:
-                    case EnumerableGenericInterfaceTypeName:
-                    case ListGenericInterfaceTypeName:
-                    case CollectionGenericInterfaceTypeName:
-                    case ReadOnlyListGenericInterfaceTypeName:
-                    case ReadOnlyCollectionGenericInterfaceTypeName:
-                    case SetGenericInterfaceTypeName:
-                    case StackGenericTypeName:
-                    case QueueGenericTypeName:
-                    case HashSetGenericTypeName:
-                    case LinkedListGenericTypeName:
-                    case SortedSetGenericTypeName:
-                    case DictionaryInterfaceTypeName:
-                    case DictionaryGenericTypeName:
-                    case DictionaryGenericInterfaceTypeName:
-                    case ReadOnlyDictionaryGenericInterfaceTypeName:
-                    case SortedDictionaryGenericTypeName:
-                    case KeyValuePairGenericTypeName:
-                    case DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName:
-                    case DefaultImmutableEnumerableConverter.ImmutableListGenericTypeName:
-                    case DefaultImmutableEnumerableConverter.ImmutableListGenericInterfaceTypeName:
-                    case DefaultImmutableEnumerableConverter.ImmutableStackGenericTypeName:
-                    case DefaultImmutableEnumerableConverter.ImmutableStackGenericInterfaceTypeName:
-                    case DefaultImmutableEnumerableConverter.ImmutableQueueGenericTypeName:
-                    case DefaultImmutableEnumerableConverter.ImmutableQueueGenericInterfaceTypeName:
-                    case DefaultImmutableEnumerableConverter.ImmutableSortedSetTypeName:
-                    case DefaultImmutableEnumerableConverter.ImmutableSortedSetGenericTypeName:
-                    case DefaultImmutableEnumerableConverter.ImmutableHashSetGenericTypeName:
-                    case DefaultImmutableEnumerableConverter.ImmutableSetGenericInterfaceTypeName:
-                    case DefaultImmutableDictionaryConverter.ImmutableDictionaryGenericTypeName:
-                    case DefaultImmutableDictionaryConverter.ImmutableDictionaryGenericInterfaceTypeName:
-                    case DefaultImmutableDictionaryConverter.ImmutableSortedDictionaryGenericTypeName:
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-            else
-            {
-                switch (queryType.FullName)
-                {
-                    case EnumerableInterfaceTypeName:
-                    case CollectionInterfaceTypeName:
-                    case ListInterfaceTypeName:
-                    case DictionaryInterfaceTypeName:
-                    case StackTypeName:
-                    case QueueTypeName:
-                    case HashtableTypeName:
-                    case ArrayListTypeName:
-                    case SortedListTypeName:
-                        return true;
-                    default:
-                        return false;
-                }
-            }
+            return s_nativelySupportedNonGenericCollections.Contains(queryType.FullName);
         }
 
         // The following methods were copied verbatim from AspNetCore:

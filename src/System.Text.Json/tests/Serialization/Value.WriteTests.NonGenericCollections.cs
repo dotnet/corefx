@@ -22,7 +22,7 @@ namespace System.Text.Json.Serialization.Tests
             string json = JsonSerializer.Serialize(input);
             Assert.Equal("[[1,2],[3,4]]", json);
 
-            IEnumerableWrapper input2 = new IEnumerableWrapper(new List<object>
+            WrapperForIEnumerable input2 = new WrapperForIEnumerable(new List<object>
             {
                 new List<object>() { 1, 2 },
                 new List<object>() { 3, 4 },
@@ -77,7 +77,7 @@ namespace System.Text.Json.Serialization.Tests
             string json = JsonSerializer.Serialize(input);
             Assert.Equal("[[1,2],[3,4]]", json);
 
-            IListWrapper input2 = new IListWrapper
+            WrapperForIList input2 = new WrapperForIList
             {
                 new List<object>() { 1, 2 },
                 new List<object>() { 3, 4 },
@@ -145,10 +145,10 @@ namespace System.Text.Json.Serialization.Tests
             string json = JsonSerializer.Serialize(input);
             Assert.Equal("[[1,2],[3,4]]", json);
 
-            GenericICollectionWrapper<ICollectionWrapper> input2 = new GenericICollectionWrapper<ICollectionWrapper>
+            GenericICollectionWrapper<WrapperForICollection> input2 = new GenericICollectionWrapper<WrapperForICollection>
             {
-                new ICollectionWrapper(new List<object> { 1, 2 }),
-                new ICollectionWrapper(new List<object> { 3, 4 }),
+                new WrapperForICollection(new List<object> { 1, 2 }),
+                new WrapperForICollection(new List<object> { 3, 4 }),
             };
 
             json = JsonSerializer.Serialize(input2);
