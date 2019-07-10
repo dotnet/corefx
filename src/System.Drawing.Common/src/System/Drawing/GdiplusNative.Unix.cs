@@ -17,7 +17,7 @@ namespace System.Drawing
     {
         internal unsafe partial class Gdip
         {
-            private const string LibraryName = "libgdiplus";
+            internal const string LibraryName = "libgdiplus";
             public static IntPtr Display = IntPtr.Zero;
 
             // Indicates whether X11 is available. It's available on Linux but not on recent macOS versions
@@ -27,7 +27,7 @@ namespace System.Drawing
                 !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
                 Environment.GetEnvironmentVariable("SYSTEM_DRAWING_COMMON_FORCE_X11") != null;
 
-            private static IntPtr LoadNativeLibrary()
+            internal static IntPtr LoadNativeLibrary()
             {
                 string libraryName;
 
@@ -93,7 +93,7 @@ namespace System.Drawing
 
             private static void PlatformInitialize()
             {
-                LibraryResolver.LibraryLoaders.Add(LibraryName, LoadNativeLibrary);
+                LibraryResolver.EnsureRegistered();
             }
 
             // Imported functions

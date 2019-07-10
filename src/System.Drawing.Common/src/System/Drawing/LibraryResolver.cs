@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing
 {
-    class LibraryResolver
+    internal static class LibraryResolver
     {
         static LibraryResolver()
         {
