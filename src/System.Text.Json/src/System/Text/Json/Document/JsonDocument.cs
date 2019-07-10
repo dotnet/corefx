@@ -757,129 +757,6 @@ namespace System.Text.Json
 
         internal void WriteElementTo(
             int index,
-            Utf8JsonWriter writer,
-            ReadOnlySpan<char> propertyName)
-        {
-            CheckNotDisposed();
-
-            DbRow row = _parsedData.Get(index);
-
-            switch (row.TokenType)
-            {
-                case JsonTokenType.StartObject:
-                    writer.WriteStartObject(propertyName);
-                    WriteComplexElement(index, writer);
-                    return;
-                case JsonTokenType.StartArray:
-                    writer.WriteStartArray(propertyName);
-                    WriteComplexElement(index, writer);
-                    return;
-                case JsonTokenType.String:
-                    WriteString(propertyName, row, writer);
-                    return;
-                case JsonTokenType.True:
-                    writer.WriteBoolean(propertyName, value: true);
-                    return;
-                case JsonTokenType.False:
-                    writer.WriteBoolean(propertyName, value: false);
-                    return;
-                case JsonTokenType.Null:
-                    writer.WriteNull(propertyName);
-                    return;
-                case JsonTokenType.Number:
-                    writer.WriteNumber(
-                        propertyName,
-                        _utf8Json.Slice(row.Location, row.SizeOrLength).Span);
-                    return;
-            }
-
-            Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
-        }
-
-        internal void WriteElementTo(
-            int index,
-            Utf8JsonWriter writer,
-            JsonEncodedText propertyName)
-        {
-            CheckNotDisposed();
-
-            DbRow row = _parsedData.Get(index);
-
-            switch (row.TokenType)
-            {
-                case JsonTokenType.StartObject:
-                    writer.WriteStartObject(propertyName);
-                    WriteComplexElement(index, writer);
-                    return;
-                case JsonTokenType.StartArray:
-                    writer.WriteStartArray(propertyName);
-                    WriteComplexElement(index, writer);
-                    return;
-                case JsonTokenType.String:
-                    WriteString(propertyName, row, writer);
-                    return;
-                case JsonTokenType.True:
-                    writer.WriteBoolean(propertyName, value: true);
-                    return;
-                case JsonTokenType.False:
-                    writer.WriteBoolean(propertyName, value: false);
-                    return;
-                case JsonTokenType.Null:
-                    writer.WriteNull(propertyName);
-                    return;
-                case JsonTokenType.Number:
-                    writer.WriteNumber(
-                        propertyName,
-                        _utf8Json.Slice(row.Location, row.SizeOrLength).Span);
-                    return;
-            }
-
-            Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
-        }
-
-        internal void WriteElementTo(
-            int index,
-            Utf8JsonWriter writer,
-            ReadOnlySpan<byte> propertyName)
-        {
-            CheckNotDisposed();
-
-            DbRow row = _parsedData.Get(index);
-
-            switch (row.TokenType)
-            {
-                case JsonTokenType.StartObject:
-                    writer.WriteStartObject(propertyName);
-                    WriteComplexElement(index, writer);
-                    return;
-                case JsonTokenType.StartArray:
-                    writer.WriteStartArray(propertyName);
-                    WriteComplexElement(index, writer);
-                    return;
-                case JsonTokenType.String:
-                    WriteString(propertyName, row, writer);
-                    return;
-                case JsonTokenType.True:
-                    writer.WriteBoolean(propertyName, value: true);
-                    return;
-                case JsonTokenType.False:
-                    writer.WriteBoolean(propertyName, value: false);
-                    return;
-                case JsonTokenType.Null:
-                    writer.WriteNull(propertyName);
-                    return;
-                case JsonTokenType.Number:
-                    writer.WriteNumber(
-                        propertyName,
-                        _utf8Json.Slice(row.Location, row.SizeOrLength).Span);
-                    return;
-            }
-
-            Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
-        }
-
-        internal void WriteElementTo(
-            int index,
             Utf8JsonWriter writer)
         {
             CheckNotDisposed();
@@ -1033,22 +910,6 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteString(JsonEncodedText propertyName, in DbRow row, Utf8JsonWriter writer)
-        {
-            ArraySegment<byte> rented = default;
-
-            try
-            {
-                writer.WriteString(
-                    propertyName,
-                    UnescapeString(row, out rented));
-            }
-            finally
-            {
-                ClearAndReturn(rented);
-            }
-        }
-
         private void WriteString(ReadOnlySpan<byte> propertyName, in DbRow row, Utf8JsonWriter writer)
         {
             ArraySegment<byte> rented = default;
@@ -1062,23 +923,6 @@ namespace System.Text.Json
             finally
             {
                 ClearAndReturn(rented);
-            }
-        }
-
-        private void WriteString(ReadOnlySpan<char> propertyName, in DbRow row, Utf8JsonWriter writer)
-        {
-            ArraySegment<byte> rented = default;
-
-            try
-            {
-                writer.WriteString(
-                    propertyName,
-                    UnescapeString(row, out rented));
-            }
-            finally
-            {
-                ClearAndReturn(rented);
-
             }
         }
 
