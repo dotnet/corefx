@@ -27,8 +27,15 @@ namespace System.IO.Pipelines
         /// <param name="exception">Optional <see cref="Exception"/> indicating a failure that's causing the pipeline to complete.</param>
         public virtual ValueTask CompleteAsync(Exception exception = null)
         {
-            Complete(exception);
-            return default;
+            try
+            {
+                Complete(exception);
+                return default;
+            }
+            catch (Exception ex)
+            {
+                return new ValueTask(Task.FromException(ex));
+            }
         }
 
         /// <summary>

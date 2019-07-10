@@ -278,7 +278,7 @@ namespace System.IO.Pipelines
                 reg = cancellationToken.UnsafeRegister(state => ((StreamPipeWriter)state).Cancel(), this);
             }
 
-            if (_bytesBuffered > 0)
+            if (_tailBytesBuffered > 0)
             {
                 // Update any buffered data
                 _tail.End += _tailBytesBuffered;
@@ -344,7 +344,7 @@ namespace System.IO.Pipelines
         {
             // Write all completed segments and whatever remains in the current segment
             // and flush the result.
-            if (_bytesBuffered > 0)
+            if (_tailBytesBuffered > 0)
             {
                 // Update any buffered data
                 _tail.End += _tailBytesBuffered;
