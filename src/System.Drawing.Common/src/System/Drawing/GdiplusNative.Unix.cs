@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Printing;
@@ -92,20 +93,7 @@ namespace System.Drawing
 
             private static void PlatformInitialize()
             {
-                NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), DllImportResolver);
-            }
-
-            public static IntPtr DllImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
-            {
-                switch (libraryName)
-                {
-                    case LibraryName:
-                        return LoadNativeLibrary();
-                    case LibcupsNative.LibraryName:
-                        return LibcupsNative.LoadLibcups();
-                }
-
-                return IntPtr.Zero;
+                LibraryResolver.LibraryLoaders.Add(LibraryName, LoadNativeLibrary);
             }
 
             // Imported functions

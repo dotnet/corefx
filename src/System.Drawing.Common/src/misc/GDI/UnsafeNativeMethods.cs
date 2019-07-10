@@ -9,18 +9,12 @@ namespace System.Drawing.Internal
 {
     internal static partial class IntUnsafeNativeMethods
     {
-        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true, EntryPoint = "GetDC")]
-        public static extern IntPtr GetDC(HandleRef hWnd);
-
         /// <summary>
         /// NOTE: DeleteDC is to be used to delete the hdc created from CreateCompatibleDC ONLY. All other hdcs should
         /// be deleted with DeleteHDC.
         /// </summary>
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
         public static extern bool DeleteDC(HandleRef hDC);
-
-        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true)]
-        public static extern int ReleaseDC(HandleRef hWnd, HandleRef hDC);
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern IntPtr CreateDC(string lpszDriverName, string lpszDeviceName, string lpszOutput, HandleRef /*DEVMODE*/ lpInitData);

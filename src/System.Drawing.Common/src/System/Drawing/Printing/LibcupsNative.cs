@@ -10,7 +10,11 @@ namespace System.Drawing.Printing
     internal static class LibcupsNative
     {
         internal const string LibraryName = "libcups";
-        private static IntPtr s_libcupsHandle = LoadLibcups();
+
+        static LibcupsNative()
+        {
+            LibraryResolver.LibraryLoaders.Add(LibraryName, LoadLibcups);
+        }
 
         internal static IntPtr LoadLibcups()
         {

@@ -115,6 +115,7 @@
     <Compile Include="System\Drawing\Brush.cs" />
     <Compile Include="System\Drawing\Font.cs" />
     <Compile Include="System\Drawing\FontFamily.cs" />
+    <Compile Include="System\Drawing\ScreenDC.cs" />
     <Compile Include="System\Drawing\SolidBrush.cs" />
     <Compile Include="System\Drawing\SystemBrushes.cs" />
     <Compile Include="System\Drawing\TextureBrush.cs" />
@@ -331,6 +332,7 @@
     <Compile Include="System\Drawing\Drawing2D\CustomLineCap.Unix.cs" />
     <Compile Include="System\Drawing\Drawing2D\GraphicsPath.Unix.cs" />
     <Compile Include="System\Drawing\Text\PrivateFontCollection.Unix.cs" />
+    <Compile Include="System\Drawing\LibraryResolver.cs" />
     <Compile Include="misc\ExternDll.Unix.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
@@ -374,8 +376,5 @@
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="System\Drawing\ScreenDC.cs" />
   </ItemGroup>
 </Project>
