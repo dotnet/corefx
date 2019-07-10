@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace System.Drawing.Common.System.Drawing
+namespace System.Drawing
 {
     internal static class LibraryResolver
     {
