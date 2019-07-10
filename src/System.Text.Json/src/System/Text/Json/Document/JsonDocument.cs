@@ -75,6 +75,21 @@ namespace System.Text.Json
             }
         }
 
+        /// <summary>
+        ///  Write the document into the provided writer as a JSON value.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <exception cref="InvalidOperationException">
+        ///   This <see cref="RootElement"/>'s <see cref="JsonElement.ValueKind"/> would result in an invalid JSON.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void WriteTo(Utf8JsonWriter writer)
+        {
+            RootElement.WriteTo(writer);
+        }
+
         internal JsonTokenType GetJsonTokenType(int index)
         {
             CheckNotDisposed();
