@@ -710,6 +710,7 @@ namespace System.Drawing
             public IntPtr hSetupTemplate;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
         public struct ICONINFO
         {
             public uint fIcon;
@@ -719,6 +720,7 @@ namespace System.Drawing
             public IntPtr hbmColor;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
         public struct BITMAP
         {
             public uint bmType;

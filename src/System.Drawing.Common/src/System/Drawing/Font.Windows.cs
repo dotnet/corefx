@@ -368,53 +368,6 @@ namespace System.Drawing
             }
         }
 
-        public unsafe void ToLogFont(object logFont, Graphics graphics)
-        {
-            if (logFont == null)
-            {
-                throw new ArgumentNullException(nameof(logFont));
-            }
-
-            if (Marshal.SizeOf(logFont.GetType()) != sizeof(SafeNativeMethods.LOGFONT))
-            {
-                // If we don't actually have an object that is LOGFONT in size, trying to pass
-                // it to GDI+ is likely to cause an AV.
-                throw new ArgumentException();
-            }
-
-            SafeNativeMethods.LOGFONT nativeLogFont = ToLogFontInternal(graphics);
-            Marshal.PtrToStructure(new IntPtr(&nativeLogFont), logFont);
-        }
-
-        private unsafe SafeNativeMethods.LOGFONT ToLogFontInternal(Graphics graphics)
-        {
-            if (graphics == null)
-            {
-                throw new ArgumentNullException(nameof(graphics));
-            }
-
-            SafeNativeMethods.LOGFONT logFont = new SafeNativeMethods.LOGFONT();
-            Gdip.CheckStatus(Gdip.GdipGetLogFontW(
-                new HandleRef(this, NativeFont), new HandleRef(graphics, graphics.NativeGraphics), ref logFont));
-
-            // Prefix the string with '@' if this is a gdiVerticalFont.
-            if (_gdiVerticalFont)
-            {
-                int fullLength = logFont.lfFaceName.Length;
-                Span<char> temp = stackalloc char[fullLength];
-                temp[0] = '@';
-                logFont.lfFaceName.Slice(0, fullLength - 1).CopyTo(temp.Slice(1));
-                temp.CopyTo(logFont.lfFaceName);
-            }
-
-            if (logFont.lfCharSet == 0)
-            {
-                logFont.lfCharSet = _gdiCharSet;
-            }
-
-            return logFont;
-        }
-
         /// <summary>
         /// Returns a handle to this <see cref='Font'/>.
         /// </summary>
