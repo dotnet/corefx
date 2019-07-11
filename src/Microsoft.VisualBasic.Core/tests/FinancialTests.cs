@@ -9,7 +9,7 @@ namespace Microsoft.VisualBasic.Tests
 {
     public class FinancialTests
     {
-        private static bool IsNotArmOrAlpine() => !PlatformDetection.IsArmProcess && !PlatformDetection.IsAlpine;
+        private static bool IsNotArmOrAlpine() => !PlatformDetection.IsArmOrArm64Process && !PlatformDetection.IsAlpine;
 
         /// <summary>
         /// The accuracy of some numeric parsing and formatting has been increased,
