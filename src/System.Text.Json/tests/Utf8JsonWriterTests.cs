@@ -3747,6 +3747,13 @@ namespace System.Text.Json.Tests
             doubles[2] = double.MinValue;
             doubles[3] = 12.345e1;
             doubles[4] = -123.45e1;
+            doubles[5] = 6.022e-23;
+            doubles[6] = -6.022e-23;
+            doubles[7] = 1e200;
+            doubles[8] = -1e200;
+            doubles[9] = 1e-200;
+            doubles[10] = -1e-200;
+
             for (int i = 5; i < numberOfItems; i++)
             {
                 var value = random.NextDouble();
