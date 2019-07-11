@@ -105,9 +105,9 @@ public class Program
 
         void ValidateContent(string expectedContent, string actualContent)
         {
-            if (actualContent != null && actualContent != expectedContent)
+            if (actualContent != expectedContent)
             {
-                throw new Exception("Unexpected response.  Got: " + actualContent);
+                throw new Exception($"Expected response content \"{expectedContent}\", got \"{actualContent}\"");
             }
         }
 
@@ -298,7 +298,7 @@ public class Program
                 {
                     ValidateResponse(m);
                     string r = await m.Content.ReadAsStringAsync();
-                    if(r != "") throw new Exception($"Got unexpected response: {r}");
+                    if (r != "") throw new Exception($"Got unexpected response: {r}");
                 }
             }),
         };
@@ -656,17 +656,16 @@ public class Program
     }
 }
 
-static class RandomExtensions
+internal static class RandomExtensions
 {
-
     public static string GetRandomSubstring(this Random random, string input)
     {
-        var offset = random.Next(0, input.Length);
-        var length = random.Next(0, input.Length - offset + 1);
+        int offset = random.Next(0, input.Length);
+        int length = random.Next(0, input.Length - offset + 1);
         return input.Substring(offset, length);
     }
 
-    public static bool NextBoolean(this Random random, double probability)
+    public static bool NextBoolean(this Random random, double probability = 0.5)
     {
         if (probability < 0 || probability > 1)
             throw new ArgumentOutOfRangeException("probability", "must be between 0 and 1");
