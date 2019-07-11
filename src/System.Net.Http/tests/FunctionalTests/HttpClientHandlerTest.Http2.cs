@@ -1784,6 +1784,59 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [ConditionalFact(nameof(SupportsAlpn))]
+        public async Task Http2Connection_Should_Wrap_HttpContent_InvalidOperationException()
+        {
+            // test for #39295
+            var throwingContent = new ThrowingContent(() => new InvalidOperationException());
+
+            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Post, url);
+                    request.Version = new Version(2, 0);
+                    request.Content = throwingContent;
+
+                    HttpRequestException exn = await Assert.ThrowsAnyAsync<HttpRequestException>(async () => await client.SendAsync(request));
+                    Assert.IsType<InvalidOperationException>(exn.InnerException);
+                }
+            },
+            async server =>
+            {
+                Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
+                await connection.WaitForConnectionShutdownAsync();
+            });
+        }
+
+        [ConditionalFact(nameof(SupportsAlpn))]
+        public async Task Http2Connection_Should_Not_Wrap_HttpContent_CustomException()
+        {
+            // Assert existing HttpConnection behaviour in which custom HttpContent exception types are surfaced as-is
+            // c.f. https://github.com/dotnet/corefx/issues/39295#issuecomment-510569836
+
+            var throwingContent = new ThrowingContent(() => new CustomException());
+
+            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Post, url);
+                    request.Version = new Version(2, 0);
+                    request.Content = throwingContent;
+
+                    await Assert.ThrowsAnyAsync<CustomException>(async () => await client.SendAsync(request));
+                }
+            },
+            async server =>
+            {
+                Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
+                await connection.WaitForConnectionShutdownAsync();
+            });
+        }
+
+        private class CustomException : Exception { }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]

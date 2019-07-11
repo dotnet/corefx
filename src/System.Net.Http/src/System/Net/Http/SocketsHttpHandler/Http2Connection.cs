@@ -1595,7 +1595,8 @@ namespace System.Net.Http
 
                 if (e is IOException ||
                     e is ObjectDisposedException ||
-                    e is Http2ProtocolException)
+                    e is Http2ProtocolException ||
+                    e is InvalidOperationException)
                 {
                     replacementException = new HttpRequestException(SR.net_http_client_execution_error, _abortException ?? e);
                 }
