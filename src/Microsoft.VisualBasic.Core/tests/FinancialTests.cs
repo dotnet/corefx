@@ -3,29 +3,25 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace Microsoft.VisualBasic.Tests
 {
     public class FinancialTests
     {
+        private static bool IsNotArmOrAlpine() => !PlatformDetection.IsArmProcess && !PlatformDetection.IsAlpine;
+
         /// <summary>
         /// The accuracy of some numeric parsing and formatting has been increased,
         /// so this will use correct value if the tests run on Full Framework.
         /// </summary>
         private static void AreEqual<T>(T expectedOld, T expectedNew, T actual)
         {
-            if (PlatformDetection.IsArmProcess || PlatformDetection.IsAlpine)
-            {
-                // some tests fail due to precision
-                return;
-            }
             T expected = PlatformDetection.IsFullFramework ? expectedOld : expectedNew;
             Assert.Equal(expected, actual);
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(IsNotArmOrAlpine))] // some tests fail due to precision
         [InlineData(0, 1.0, 1.0, 1.0, 1.0, 0, 0)]
         [InlineData(2000.0, 500.0, 2.0, 1.0, 2.0, 1500.0, 1500.0)]
         [InlineData(10000.0, 4350.0, 84.0, 35.0, 2.0, 57.3268063538875, 57.32680635388748)]
@@ -73,7 +69,7 @@ namespace Microsoft.VisualBasic.Tests
             AreEqual(-4182.65729113816, -4182.657291138164, Financial.FV(0.0083, 15, 263.0));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(IsNotArmOrAlpine))] // some tests fail due to precision
         [InlineData(0, 1.0, 1.0, 0, 0, DueDate.EndOfPeriod, 0, 0)]
         [InlineData(0.1 / 12, 12.0, 48.0, -20000.0, 0, DueDate.BegOfPeriod, 133.00409235109, 133.00409235108953)]
         [InlineData(0.008, 4, 12, 3000, 0, 0, -18.2133959841799, -18.21339598417987)]
@@ -212,7 +208,7 @@ namespace Microsoft.VisualBasic.Tests
             AreEqual(131.224540233228, 131.2245402332282, Financial.Pmt(0.007, 25, -3000));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(IsNotArmOrAlpine))] // some tests fail due to precision
         [InlineData(0, 1.0, 1.0, 0, 0, DueDate.EndOfPeriod, 0, 0)]
         [InlineData(0.02 / 12, 1.0, 24, -10000, 0, DueDate.BegOfPeriod, 424.694809003121, 424.6948090031214)]
         [InlineData(0.008, 4, 12, 3000, 0, DueDate.EndOfPeriod, -244.976482926292, -244.97648292629228)]
@@ -232,7 +228,7 @@ namespace Microsoft.VisualBasic.Tests
             AreEqual(-244.976482926292, -244.97648292629228, Financial.PPmt(0.008, 4, 12, 3000));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(IsNotArmOrAlpine))] // some tests fail due to precision
         [InlineData(0, 0, 0, 0, DueDate.EndOfPeriod, 0, 0)]
         [InlineData(0.02 / 12, 12.0, -100.0, -100.0, DueDate.BegOfPeriod, 1287.10048252122, 1287.1004825212165)]
         [InlineData(0.008, 31, 2000.0, 0, DueDate.EndOfPeriod, -54717.4159104136, -54717.41591041358)]
@@ -254,7 +250,7 @@ namespace Microsoft.VisualBasic.Tests
             AreEqual(-2952.94485232014, -2952.944852320145, Financial.PV(0.008, 4, 12, 3000));
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(IsNotArmOrAlpine))] // some tests fail due to precision
         [InlineData(1.0, 1.0, 1.0, 0, DueDate.EndOfPeriod, 0, -2, -2)]
         [InlineData(24.0, -800.0, 10000.0, 0.0, DueDate.BegOfPeriod, 0.1, 0.0676702786565114, 0.06767027865651142)]
         [InlineData(12, -263.0, 3000, 0, DueDate.EndOfPeriod, 0.1, 0.00788643837763396, 0.007886438377633958)]
@@ -317,6 +313,5 @@ namespace Microsoft.VisualBasic.Tests
         {
             Assert.Throws<ArgumentException>(() => Financial.SYD(Cost, Salvage, Life, Period));
         }
-
     }
 }
