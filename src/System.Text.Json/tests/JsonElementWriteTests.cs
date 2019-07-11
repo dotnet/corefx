@@ -4,6 +4,8 @@
 
 using Xunit;
 using System.Buffers;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace System.Text.Json.Tests
 {
@@ -27,6 +29,24 @@ namespace System.Text.Json.Tests
         public static void WriteNumber(bool indented)
         {
             WriteSimpleValue(indented, "42");
+        }
+
+        [Theory]
+        [InlineData("12E-3")]
+        [InlineData("12e+3")]
+        //        [InlineData("1.2e+13")] Enable after https://github.com/dotnet/corefx/issues/39139 resolved
+        //        [InlineData("1.2E-3")]
+        public static void WriteScientificNumber(string value)
+        {
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            using (JsonDocument doc = JsonDocument.Parse($" [ {value} ]", s_options))
+            {
+                JsonElement target = doc.RootElement[0];
+
+                var writer = new Utf8JsonWriter(buffer);
+
+                target.WriteValue(writer);
+            }
         }
 
         [Theory]
@@ -435,6 +455,121 @@ null,
   ""m\u00eal\u00e9e"": 1e6
 }",
                 "{\"m\\u00eal\\u00e9e\":1e6}");
+        }
+
+        [Fact]
+        public static void WriteValueUnicodeEscapeSequence()
+        {
+            char[] chars = new char[] { (char)0x0421, (char)0x0430, (char)0x0439, (char)0x043D, ' ', (char)0x0443, (char)0x0443, '?', (char)0x04E9, (char)0x04E9 };
+            string json = $"[\"{new string(chars)}\"]";
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            byte[] temp = Encoding.UTF8.GetBytes(json);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(temp, 1);
+            string expectedStr = $"{GetEscapedExpectedString(false, new string(chars), StringEscapeHandling.EscapeNonAscii)}";
+
+            using (JsonDocument doc = JsonDocument.Parse(sequence, s_options))
+            {
+                JsonElement target = doc.RootElement[0];
+
+                var writer = new Utf8JsonWriter(buffer);
+                target.WriteValue(writer);
+                writer.Flush();
+                string str = Encoding.UTF8.GetString(buffer.WrittenSpan);
+                AssertContents(expectedStr, buffer);
+            }
+        }
+
+        [Fact]
+        public static void WriteValueSurrogatesEscapeSequence()
+        {
+            char[] chars = new char[] { (char)0xD800, (char)0xDC00, (char)0xD803, (char)0xDE6D, (char)0xD834, (char)0xDD1E, (char)0xDBFF, (char)0xDFFF };
+            string json = $"[\"{new string(chars)}\"]";
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            byte[] temp = Encoding.UTF8.GetBytes(json);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(temp, 1);
+            string expectedStr = $"{GetEscapedExpectedString(false, new string(chars), StringEscapeHandling.EscapeNonAscii)}";
+
+            using (JsonDocument doc = JsonDocument.Parse(sequence, s_options))
+            {
+                JsonElement target = doc.RootElement[0];
+
+                var writer = new Utf8JsonWriter(buffer);
+                target.WriteValue(writer);
+                writer.Flush();
+                AssertContents(expectedStr, buffer);
+            }
+        }
+
+        [Fact]
+        public static void WriteValueSurrogatesEscapeString()
+        {
+            char[] chars = new char[] { (char)0xD800, (char)0xDC00, (char)0xD803, (char)0xDE6D, (char)0xD834, (char)0xDD1E, (char)0xDBFF, (char)0xDFFF };
+            string json = $"[\"{new string(chars)}\"]";
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            string expectedStr = $"{GetEscapedExpectedString(false, new string(chars), StringEscapeHandling.EscapeNonAscii)}";
+
+            using (JsonDocument doc = JsonDocument.Parse(json, s_options))
+            {
+                JsonElement target = doc.RootElement[0];
+
+                var writer = new Utf8JsonWriter(buffer);
+                target.WriteValue(writer);
+                writer.Flush();
+                AssertContents(expectedStr, buffer);
+            }
+        }
+
+        [ActiveIssue(39397)]
+        [Fact]
+        public static void WriteValueSequenceWithInvalidSurrogatesShouldThrow()
+        {
+            char[] chars = new char[] { '[', '"', (char)0xDC00, (char)0xD800, (char)0xD803, '"', ']' };
+            var buffer = new ArrayBufferWriter<byte>(128);
+            byte[] temp = Encoding.UTF8.GetBytes(chars);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(temp, 1);
+
+            using (JsonDocument doc = JsonDocument.Parse(sequence, s_options))
+            {
+                JsonElement target = doc.RootElement[0];
+                var writer = new Utf8JsonWriter(buffer);
+
+                Assert.Throws<ArgumentException>(() => target.WriteValue(writer));
+            }
+        }
+
+        [ActiveIssue(39397)]
+        [Fact]
+        public static void WriteValueBytesWithInvalidSurrogatesShouldThrow()
+        {
+            char[] chars = new char[] { '[', '"', (char)0xDC00, (char)0xD800, (char)0xD803, '"', ']' };
+            var buffer = new ArrayBufferWriter<byte>(128);
+            byte[] temp = Encoding.UTF8.GetBytes(chars);
+
+            using (JsonDocument doc = JsonDocument.Parse(temp, s_options))
+            {
+                JsonElement target = doc.RootElement[0];
+                var writer = new Utf8JsonWriter(buffer);
+                target.WriteValue(writer);
+
+                Assert.Throws<ArgumentException>(() => target.WriteValue(writer));
+            }
+        }
+
+        private static string GetEscapedExpectedString(bool prettyPrint, string value, StringEscapeHandling escaping)
+        {
+            var ms = new MemoryStream();
+            TextWriter streamWriter = new StreamWriter(ms, new UTF8Encoding(false), 1024, true);
+
+            var json = new JsonTextWriter(streamWriter)
+            {
+                Formatting = prettyPrint ? Formatting.Indented : Formatting.None,
+                StringEscapeHandling = escaping
+            };
+
+            json.WriteValue(value);
+            json.Flush();
+
+            return Encoding.UTF8.GetString(ms.ToArray());
         }
 
         [Theory]

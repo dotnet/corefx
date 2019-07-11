@@ -2306,6 +2306,57 @@ namespace System.Text.Json.Tests
         [InlineData(true, false)]
         [InlineData(false, true)]
         [InlineData(false, false)]
+        public void WriteBase64StringEscapeLengthBigger(bool formatted, bool skipValidation)
+        {
+            string propertyName = "<aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaessage";
+            byte[] value = { 1, 2, 3, 4, 5 };
+            string expectedStr = GetBase64ExpectedString(prettyPrint: formatted, propertyName, value);
+
+            JsonEncodedText encodedPropertyName = JsonEncodedText.Encode(propertyName);
+
+            byte[] utf8PropertyName = Encoding.UTF8.GetBytes("<aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaessage");
+
+            var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
+
+            for (int i = 0; i < 4; i++)
+            {
+                var output = new ArrayBufferWriter<byte>(32);
+                var jsonUtf8 = new Utf8JsonWriter(output, options);
+
+                jsonUtf8.WriteStartObject();
+
+                switch (i)
+                {
+                    case 0:
+                        jsonUtf8.WriteBase64String(propertyName, value);
+                        jsonUtf8.WriteBase64String(propertyName, value);
+                        break;
+                    case 1:
+                        jsonUtf8.WriteBase64String(propertyName.AsSpan(), value);
+                        jsonUtf8.WriteBase64String(propertyName.AsSpan(), value);
+                        break;
+                    case 2:
+                        jsonUtf8.WriteBase64String(utf8PropertyName, value);
+                        jsonUtf8.WriteBase64String(utf8PropertyName, value);
+                        break;
+                    case 3:
+                        jsonUtf8.WriteBase64String(encodedPropertyName, value);
+                        jsonUtf8.WriteBase64String(encodedPropertyName, value);
+                        break;
+                }
+
+                jsonUtf8.WriteEndObject();
+                jsonUtf8.Flush();
+
+                AssertContents(expectedStr, output);
+            }
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
         public void WritePartialBase64String(bool formatted, bool skipValidation)
         {
             var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
@@ -3085,6 +3136,18 @@ namespace System.Text.Json.Tests
 
                 AssertContents(expectedStr, output);
             }
+        }
+
+        [Fact]
+        public void EscapeSurrogatePairsThrowsHighSurrogateMissing()
+        {
+            var propertyArray = new char[] { 'a', (char)0xD800, (char)0xDC00, (char)0xDE6D, 'a' };
+            string propertyName = new string(propertyArray);
+            string value = new string(propertyArray);
+            var output = new ArrayBufferWriter<byte>(12);
+            var jsonUtf8 = new Utf8JsonWriter(output);
+
+            Assert.Throws<ArgumentException>(() => jsonUtf8.WriteString(propertyName, value));
         }
 
         [Theory]
