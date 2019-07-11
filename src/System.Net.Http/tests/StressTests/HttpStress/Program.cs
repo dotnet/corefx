@@ -25,6 +25,7 @@ using System.Diagnostics.Tracing;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Web;
 
 /// <summary>
 /// Simple HttpClient stress app that launches Kestrel in-proc and runs many concurrent requests of varying types against it.
@@ -155,6 +156,19 @@ public class Program
                 {
                     ValidateResponse(m, httpVersion);
                     ValidateContent(contentSource, await m.Content.ReadAsStringAsync());
+                }
+            }),
+
+            ("GET Parameters",
+            async ctx =>
+            {
+                Version httpVersion = ctx.GetRandomVersion(httpVersions);
+                (string queryString, string expectedString) variables = GetGetQueryParameters(contentSource, ctx);
+                using (var req = new HttpRequestMessage(HttpMethod.Get, serverUri + "/variables" + variables.queryString) { Version = httpVersion })
+                using (HttpResponseMessage m = await ctx.HttpClient.SendAsync(req))
+                {
+                    ValidateResponse(m, httpVersion);
+                    ValidateContent(variables.expectedString, await m.Content.ReadAsStringAsync());
                 }
             }),
 
@@ -436,6 +450,19 @@ public class Program
                             }
                         }
                     });
+                    endpoints.MapGet("/variables", async context =>
+                    {
+                        string queryString = context.Request.QueryString.Value;
+                        var nameValueCollection = HttpUtility.ParseQueryString(queryString);
+
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < nameValueCollection.Count; i++)
+                        {
+                            sb.Append(nameValueCollection[$"Var{i}"]);
+                        }
+
+                        await context.Response.WriteAsync(sb.ToString());
+                    });
                     endpoints.MapGet("/abort", async context =>
                     {
                         // Server writes some content, then aborts the connection
@@ -586,6 +613,24 @@ public class Program
         GC.KeepAlive(listener);
     }
 
+    private static (string, string) GetGetQueryParameters(string contentSource, ClientContext clientContext)
+    {
+        StringBuilder queryString = new StringBuilder();
+        queryString.Append($"?Var{0}={contentSource}");
+        string expectedString = contentSource;
+
+        int num = clientContext.GetRandomInt(100);
+
+        for (int i = 1; i < num; i++)
+        {
+            string vari = clientContext.GetRandomSubstring(contentSource);
+            expectedString += vari;
+            queryString.Append($"&Var{i}={vari}");
+        }
+
+        return (queryString.ToString(), expectedString);
+    }
+
     /// <summary>Client context containing information pertaining to a single worker.</summary>
     private sealed class ClientContext
     {
@@ -614,6 +659,8 @@ public class Program
             int length = _random.Next(0, input.Length - offset + 1);
             return input.Substring(offset, length);
         }
+
+        public int GetRandomInt(int maxValue) => _random.Next(0, maxValue);
 
         public Version GetRandomVersion(Version[] versions) =>
             versions[_random.Next(0, versions.Length)];
