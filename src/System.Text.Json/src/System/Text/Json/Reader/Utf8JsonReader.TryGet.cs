@@ -311,7 +311,7 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value represents a number less than <see cref="float.MinValue"/> or greater 
+        /// On any framework that is not .NET Core 3.0 or higher, thrown if the JSON token value represents a number less than <see cref="float.MinValue"/> or greater 
         /// than <see cref="float.MaxValue"/>.
         /// </exception>
         public float GetSingle()
@@ -334,7 +334,7 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value represents a number less than <see cref="double.MinValue"/> or greater 
+        /// On any framework that is not .NET Core 3.0 or higher, thrown if the JSON token value represents a number less than <see cref="double.MinValue"/> or greater 
         /// than <see cref="double.MaxValue"/>.
         /// </exception>
         public double GetDouble()
@@ -845,8 +845,7 @@ namespace System.Text.Json
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
             if (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
-                && JsonHelpers.TryParseAsISO(span, out DateTime tmp, out int bytesConsumed)
-                && span.Length == bytesConsumed)
+                && JsonHelpers.TryParseAsISO(span, out DateTime tmp))
             {
                 value = tmp;
                 return true;
@@ -910,8 +909,7 @@ namespace System.Text.Json
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
             if (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
-                && JsonHelpers.TryParseAsISO(span, out DateTimeOffset tmp, out int bytesConsumed)
-                && span.Length == bytesConsumed)
+                && JsonHelpers.TryParseAsISO(span, out DateTimeOffset tmp))
             {
                 value = tmp;
                 return true;

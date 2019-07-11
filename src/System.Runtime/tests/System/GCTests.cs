@@ -273,7 +273,7 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentNullException>("obj", () => GC.SuppressFinalize(null)); // Obj is null
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void ReRegisterForFinalize()
         {
             ReRegisterForFinalizeTest.Run();
@@ -487,6 +487,7 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => GC.WaitForFullGCComplete(-2));
         }
 
+        [ActiveIssue(39374)]
         [Theory]
         [InlineData(true, -1)]
         [InlineData(false, -1)]
@@ -741,7 +742,7 @@ namespace System.Tests
             }, size.ToString(), options).Dispose();
         }
 
-        public static void TestWait(bool approach, int timeout)
+        private static void TestWait(bool approach, int timeout)
         {
             GCNotificationStatus result = GCNotificationStatus.Failed;
             Thread cancelProc = null;
@@ -786,7 +787,7 @@ namespace System.Tests
             }
         }
 
-        public static void CancelProc()
+        private static void CancelProc()
         {
             Thread.Sleep(500);
             GC.CancelFullGCNotification();
