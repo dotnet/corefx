@@ -92,6 +92,9 @@ namespace System.Text.Json
         ///   Write the property into the provided writer as a named JSON object property.
         /// </summary>
         /// <param name="writer">The writer.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   Parameter <paramref name="writer"/> of type <see cref="Utf8JsonWriter"/> should not be null.
+        /// </exception>
         /// <exception cref="ArgumentException">
         ///   This <see cref="Name"/>'s length is too large to be a JSON object property.
         /// </exception>
@@ -103,6 +106,11 @@ namespace System.Text.Json
         /// </exception>>
         public void WriteTo(Utf8JsonWriter writer)
         {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
             writer.WritePropertyName(Name);
             Value.WriteTo(writer);
         }

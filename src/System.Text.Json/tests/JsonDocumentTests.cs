@@ -1740,6 +1740,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void CheckUseAfterDispose()
         {
+            var buffer = new ArrayBufferWriter<byte>(1024);
             using (JsonDocument doc = JsonDocument.Parse("{\"First\":1}", default))
             {
                 JsonElement root = doc.RootElement;
@@ -1780,19 +1781,19 @@ namespace System.Text.Json.Tests
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = default;
+                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
                     root.WriteTo(writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = default;
+                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
                     doc.WriteTo(writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = default;
+                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
                     property.WriteTo(writer);
                 });
             }
@@ -1841,9 +1842,28 @@ namespace System.Text.Json.Tests
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                Utf8JsonWriter writer = default;
+                var buffer = new ArrayBufferWriter<byte>(1024);
+                Utf8JsonWriter writer = new Utf8JsonWriter(buffer);                
                 root.WriteTo(writer);
             });
+        }
+
+        [Fact]
+        public static void CheckByPassingNullWriter()
+        {
+            using (JsonDocument doc = JsonDocument.Parse("{\"First\":1}", default))
+            {
+                var expectedErrorMessage = @"Value cannot be null. (Parameter 'writer')";
+                AssertExtensions.Throws<ArgumentNullException>(() => doc.WriteTo(null), expectedErrorMessage);
+
+                JsonElement root = doc.RootElement;
+                AssertExtensions.Throws<ArgumentNullException>(() => root.WriteTo(null), expectedErrorMessage);
+
+                foreach (JsonProperty property in root.EnumerateObject())
+                {
+                    AssertExtensions.Throws<ArgumentNullException>(() => property.WriteTo(null), expectedErrorMessage);
+                }
+            }
         }
 
         [Fact]

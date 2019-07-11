@@ -1272,6 +1272,9 @@ namespace System.Text.Json
         ///   Write the element into the provided writer as a JSON value.
         /// </summary>
         /// <param name="writer">The writer.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   Parameter <paramref name="writer"/> of type <see cref="Utf8JsonWriter"/> should not be null.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is <see cref="JsonValueKind.Undefined"/>.
         /// </exception>
@@ -1280,6 +1283,11 @@ namespace System.Text.Json
         /// </exception>
         public void WriteTo(Utf8JsonWriter writer)
         {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
             CheckValidInstance();
 
             _parent.WriteElementTo(_idx, writer);

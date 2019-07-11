@@ -79,6 +79,9 @@ namespace System.Text.Json
         ///  Write the document into the provided writer as a JSON value.
         /// </summary>
         /// <param name="writer"></param>
+        /// <exception cref="ArgumentNullException">
+        ///   Parameter <paramref name="writer"/> of type <see cref="Utf8JsonWriter"/> should not be null.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
         ///   This <see cref="RootElement"/>'s <see cref="JsonElement.ValueKind"/> would result in an invalid JSON.
         /// </exception>
@@ -87,6 +90,11 @@ namespace System.Text.Json
         /// </exception>
         public void WriteTo(Utf8JsonWriter writer)
         {
+            if (writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+
             RootElement.WriteTo(writer);
         }
 
