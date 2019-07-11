@@ -18,7 +18,9 @@ namespace System.Runtime.Tests
 
             foreach (MemberInfo internalMember in internalMembers)
             {
-                Assert.Empty(internalMember.GetCustomAttributes().Where(a => NullableAttributesFilter(a)));
+                Assert.Empty(internalMember.GetCustomAttributes().Where(a =>
+                    a.GetType().FullName.Equals(NullableAttributeFullName) ||
+                    a.GetType().FullName.Equals(NullableContextAttributeFullName)));
             }
         }
 
@@ -36,12 +38,8 @@ namespace System.Runtime.Tests
         {
             Assembly assembly = Assembly.Load("mscorlib");
             Module module = assembly.Modules.First();
-            Assert.Empty(module.CustomAttributes.Where(a => a.GetType().FullName.Equals(NullablePublicOnlyAttributeFullName)));
-        }
-
-        private static bool NullableAttributesFilter(Attribute attribute)
-        {
-            return attribute.GetType().FullName.Equals(NullableAttributeFullName) || attribute.GetType().FullName.Equals(NullableContextAttributeFullName);
+            Assert.Empty(module.CustomAttributes.Where(a =>
+                a.GetType().FullName.Equals(NullablePublicOnlyAttributeFullName)));
         }
     }
 }

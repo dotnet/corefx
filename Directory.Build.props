@@ -256,7 +256,6 @@
     <!-- default to allowing all language features -->
     <LangVersion>latest</LangVersion>
     <LangVersion Condition="'$(Language)' == 'C#'">preview</LangVersion>
-    <!-- Enables Strict mode for Roslyn compiler -->
     <Features>strict;nullablePublicOnly</Features>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
