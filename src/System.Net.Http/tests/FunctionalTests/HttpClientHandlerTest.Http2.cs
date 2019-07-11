@@ -1802,11 +1802,7 @@ namespace System.Net.Http.Functional.Tests
                     Assert.IsType<InvalidOperationException>(exn.InnerException);
                 }
             },
-            async server =>
-            {
-                Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
-                await connection.WaitForConnectionShutdownAsync();
-            });
+            async server => await server.EstablishConnectionAsync());
         }
 
         [ConditionalFact(nameof(SupportsAlpn))]
@@ -1828,11 +1824,7 @@ namespace System.Net.Http.Functional.Tests
                     await Assert.ThrowsAnyAsync<CustomException>(async () => await client.SendAsync(request));
                 }
             },
-            async server =>
-            {
-                Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
-                await connection.WaitForConnectionShutdownAsync();
-            });
+            async server => await server.EstablishConnectionAsync());
         }
 
         private class CustomException : Exception { }
