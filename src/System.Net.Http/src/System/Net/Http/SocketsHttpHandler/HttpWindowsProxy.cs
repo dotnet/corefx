@@ -250,8 +250,8 @@ namespace System.Net.Http
             {
                 if (Uri.TryCreate(proxyString, UriKind.Absolute, out Uri proxyUri))
                 {
-                    if (insecureProxy == null) insecureProxy = proxyUri;
-                    if (secureProxy == null) secureProxy = proxyUri;
+                    insecureProxy ??= proxyUri;
+                    secureProxy ??= proxyUri;
                 }
             }
             else if (destUri == null)
