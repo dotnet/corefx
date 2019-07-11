@@ -189,6 +189,11 @@ namespace System.Text.Json
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
             }
 
+            if (delegateKey.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayTypeName))
+            {
+                return ((ImmutableCollectionCreator)createRangeDelegateObj).CreateImmutableCollection(sourceList);
+            }
+
             JsonSerializerOptions.ImmutableCreateRangeDelegate<TRuntimeProperty> createRangeDelegate = (
                 (JsonSerializerOptions.ImmutableCreateRangeDelegate<TRuntimeProperty>)createRangeDelegateObj);
 

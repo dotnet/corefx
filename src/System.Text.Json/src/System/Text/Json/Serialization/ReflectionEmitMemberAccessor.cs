@@ -6,6 +6,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -57,6 +58,26 @@ namespace System.Text.Json
             if (createRange == null)
             {
                 return null;
+            }
+
+            if (constructingType.FullName == DefaultImmutableEnumerableConverter.ImmutableArrayTypeName)
+            {
+                Type immutableArrayType = constructingType.Assembly.GetType(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName);
+                immutableArrayType = immutableArrayType.MakeGenericType(elementType);
+
+                Type creatorType = typeof(ImmutableCollectionCreatorHelper<,>).MakeGenericType(elementType, immutableArrayType);
+
+                ConstructorInfo constructor = typeof(ImmutableCollectionCreatorHelper<string, string>).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, binder: null, Type.EmptyTypes, modifiers: null);
+
+                ImmutableCollectionCreator creator = (ImmutableCollectionCreator)Activator.CreateInstance(
+                    creatorType,
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                    binder: null,
+                    args: null,
+                    culture: null);
+
+                creator.RegisterCreatorDelegateFromMethod(createRange);
+                return creator;
             }
 
             return createRange.CreateDelegate(

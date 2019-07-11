@@ -11,6 +11,51 @@ namespace System.Text.Json.Serialization.Tests
     public static partial class ValueTests
     {
         [Fact]
+        public static void WriteImmutableArrayOfImmutableArray()
+        {
+            ImmutableArray<ImmutableArray<int>> input = ImmutableArray.CreateRange(new List<ImmutableArray<int>>{
+                ImmutableArray.CreateRange(new List<int>() { 1, 2 }),
+                ImmutableArray.CreateRange(new List<int>() { 3, 4 })
+            });
+
+            string json = JsonSerializer.Serialize(input);
+            Assert.Equal("[[1,2],[3,4]]", json);
+        }
+
+        [Fact]
+        public static void WriteImmutableArrayOfArray()
+        {
+            ImmutableArray<int[]> input = ImmutableArray.CreateRange(new List<int[]>
+            {
+                new int[] { 1, 2 },
+                new int[] { 3, 4 }
+            });
+
+            string json = JsonSerializer.Serialize(input);
+            Assert.Equal("[[1,2],[3,4]]", json);
+        }
+
+        [Fact]
+        public static void WriteArrayOfImmutableArray()
+        {
+            ImmutableArray<int>[] input = new ImmutableArray<int>[2];
+            input[0] = ImmutableArray.CreateRange(new List<int>() { 1, 2 });
+            input[1] = ImmutableArray.CreateRange(new List<int>() { 3, 4 });
+
+            string json = JsonSerializer.Serialize(input);
+            Assert.Equal("[[1,2],[3,4]]", json);
+        }
+
+        [Fact]
+        public static void WriteSimpleImmutableArray()
+        {
+            ImmutableArray<int> input = ImmutableArray.CreateRange(new List<int> { 1, 2 });
+
+            string json = JsonSerializer.Serialize(input);
+            Assert.Equal("[1,2]", json);
+        }
+
+        [Fact]
         public static void WriteIImmutableListTOfIImmutableListT()
         {
             IImmutableList<IImmutableList<int>> input = ImmutableList.CreateRange(new List<IImmutableList<int>>{

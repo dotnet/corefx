@@ -57,6 +57,7 @@ namespace System.Text.Json.Serialization.Tests
         public object MyStringIImmutableQueueT { get; set; }
         public object MyStringIImmutableSetT { get; set; }
         public object MyStringImmutableHashSetT { get; set; }
+        public object MyStringImmutableArray { get; set; }
         public object MyStringImmutableListT { get; set; }
         public object MyStringImmutableStackT { get; set; }
         public object MyStringImmutablQueueT { get; set; }
@@ -121,6 +122,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyStringHashSetT"" : [""Hello""]," +
                 @"""MyStringLinkedListT"" : [""Hello""]," +
                 @"""MyStringSortedSetT"" : [""Hello""]," +
+                @"""MyStringImmutableArray"" : [""Hello""]," +
                 @"""MyStringIImmutableListT"" : [""Hello""]," +
                 @"""MyStringIImmutableStackT"" : [""Hello""]," +
                 @"""MyStringIImmutableQueueT"" : [""Hello""]," +
@@ -188,6 +190,7 @@ namespace System.Text.Json.Serialization.Tests
             MyStringLinkedListT = new LinkedList<string>(new List<string>() { "Hello" });
             MyStringSortedSetT = new SortedSet<string>(new List<string>() { "Hello" });
 
+            MyStringImmutableArray = ImmutableArray.CreateRange(new List<string> { "Hello" });
             MyStringIImmutableListT = ImmutableList.CreateRange(new List<string> { "Hello" });
             MyStringIImmutableStackT = ImmutableStack.CreateRange(new List<string> { "Hello" });
             MyStringIImmutableQueueT = ImmutableQueue.CreateRange(new List<string> { "Hello" });
@@ -273,6 +276,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", ((LinkedList<string>)MyStringLinkedListT).First());
             Assert.Equal("Hello", ((SortedSet<string>)MyStringSortedSetT).First());
 
+            Assert.Equal("Hello", ((ImmutableArray<string>)MyStringImmutableArray)[0]);
             Assert.Equal("Hello", ((IImmutableList<string>)MyStringIImmutableListT)[0]);
             Assert.Equal("Hello", ((IImmutableStack<string>)MyStringIImmutableStackT).First());
             Assert.Equal("Hello", ((IImmutableQueue<string>)MyStringIImmutableQueueT).First());
