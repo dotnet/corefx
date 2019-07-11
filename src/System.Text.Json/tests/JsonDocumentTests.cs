@@ -1740,9 +1740,10 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void CheckUseAfterDispose()
         {
-            using (JsonDocument doc = JsonDocument.Parse("true", default))
+            using (JsonDocument doc = JsonDocument.Parse("{\"First\":1}", default))
             {
                 JsonElement root = doc.RootElement;
+                JsonProperty property = root.EnumerateObject().First();
                 doc.Dispose();
 
                 Assert.Throws<ObjectDisposedException>(() => root.ValueKind);
@@ -1787,6 +1788,12 @@ namespace System.Text.Json.Tests
                 {
                     Utf8JsonWriter writer = default;
                     doc.WriteTo(writer);
+                });
+
+                Assert.Throws<ObjectDisposedException>(() =>
+                {
+                    Utf8JsonWriter writer = default;
+                    property.WriteTo(writer);
                 });
             }
         }
@@ -3672,44 +3679,8 @@ namespace System.Text.Json.Tests
             return s_compactJson[testCaseType] = existing;
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteNumber(bool indented)
-        {
-            WriteSimpleValue(indented, "42");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteNumberScientific(bool indented)
-        {
-            WriteSimpleValue(indented, "1e6");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteNumberOverprecise(bool indented)
-        {
-            // This value is a reference "potential interoperability problem" from
-            // https://tools.ietf.org/html/rfc7159#section-6
-            const string PrecisePi = "3.141592653589793238462643383279";
-
-            // To confirm that this test is doing what it intends, one could
-            // confirm the printing precision of double, like
-            //
-            //double precisePi = double.Parse(PrecisePi);
-            //Assert.NotEqual(PrecisePi, precisePi.ToString(JsonTestHelper.DoubleFormatString));
-
-            WriteSimpleValue(indented, PrecisePi);
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteNumberTooLargeScientific(bool indented)
+        [Fact]
+        public static void WriteNumberTooLargeScientific()
         {
             // This value is a reference "potential interoperability problem" from
             // https://tools.ietf.org/html/rfc7159#section-6
@@ -3719,352 +3690,13 @@ namespace System.Text.Json.Tests
             // large to be represented by System.Double and would be converted to
             // PositiveInfinity instead (or throw if using double.Parse on frameworks
             // older than .NET Core 3.0).
-            WriteSimpleValue(indented, OneQuarticGoogol);
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteAsciiString(bool indented)
-        {
-            WriteSimpleValue(indented, "\"pizza\"");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteEscapedString(bool indented)
-        {
-            WriteSimpleValue(indented, "\"p\\u0069zza\"", "\"pizza\"");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteNonAsciiString(bool indented)
-        {
-            // In the JSON input the U+00ED (lowercase i, acute) is a literal char,
-            // therefore is ingested as the UTF-8 sequence [ C3 AD ].
-            //
-            // When writing it back out, the writer turns it into a JSON string
-            // using escaped codepoint syntax.
-            //
-            // The subtlety of the input vs output is the number of backslashes (and
-            // the hex casing is different to show the difference more aggressively).
-            WriteSimpleValue(indented, "\"p\u00CDzza\"", "\"p\\u00cdzza\"");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteEscapedNonAsciiString(bool indented)
-        {
-            // In the JSON input the U+00ED (lowercase i, acute) is a literal char,
-            // therefore is ingested as the UTF-8 sequence [ C3 AD ].
-            //
-            // When writing it back out, the writer turns it into a JSON string
-            // using escaped codepoint syntax.
-            //
-            // The subtlety of the input vs output is the number of backslashes (and
-            // the hex casing is different to show the difference more aggressively).
-            //
-            // The U+007A (lowercase z) is just to make sure nothing weird happens
-            // between the de-escape and the UTF-8.
-            WriteSimpleValue(indented, "\"p\u00CDz\\u007Aa\"", "\"p\\u00cdzza\"");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteTrue(bool indented)
-        {
-            WriteSimpleValue(indented, "true");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteFalse(bool indented)
-        {
-            WriteSimpleValue(indented, "false");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteNull(bool indented)
-        {
-            WriteSimpleValue(indented, "null");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteEmptyArray(bool indented)
-        {
-            WriteComplexValue(
-                indented,
-                "[        ]",
-                "[]",
-                "[]");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteEmptyObject(bool indented)
-        {
-            WriteComplexValue(
-                indented,
-                "{     }",
-                "{}",
-                "{}");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteEmptyCommentedArray(bool indented)
-        {
-            WriteComplexValue(
-                indented,
-                "[ /* \"No values here\" */    ]",
-                "[]",
-                "[]");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteEmptyCommentedObject(bool indented)
-        {
-            WriteComplexValue(
-                indented,
-                "{ /* Technically empty */ }",
-                "{}",
-                "{}");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteSimpleArray(bool indented)
-        {
-            WriteComplexValue(
-                indented,
-                @"[ 2, 4, 
-6                       , 0
-
-
-, 1       ]",
-                @"[
-  2,
-  4,
-  6,
-  0,
-  1
-]",
-                "[2,4,6,0,1]");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteSimpleObject(bool indented)
-        {
-            WriteComplexValue(
-                indented,
-                @"{ ""r""   : 2,
-// Comments make everything more interesting.
-            ""d"":
-2
-}",
-                @"{
-  ""r"": 2,
-  ""d"": 2
-}",
-                "{\"r\":2,\"d\":2}");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteEverythingArray(bool indented)
-        {
-            WriteComplexValue(
-                indented,
-                @"
-
-[
-        ""Once upon a midnight dreary"",
-        42, /* Yep */ 1e400,
-        3.141592653589793238462643383279,
-false,
-true,
-null,
-  ""Escaping is not requ\u0069red"",
-// More comments, more problems?
- ""Some th\u0069ngs get lost in the " + "m\u00EAl\u00E9e" + @""",
-// Array with an array (primes)
-[ 2, 3, 5, 7, /*9,*/ 11],
-{ ""obj"": [ 21, { ""deep obj"": [
-        ""Once upon a midnight dreary"",
-        42, /* Yep */ 1e400,
-        3.141592653589793238462643383279,
-false,
-true,
-null,
-  ""Escaping is not requ\u0069red"",
-// More comments, more problems?
- ""Some th\u0069ngs get lost in the " + "m\u00EAl\u00E9e" + @"""
-
-], ""more deep"": false },
-12 ], ""second property"": null }]
-",
-                @"[
-  ""Once upon a midnight dreary"",
-  42,
-  1e400,
-  3.141592653589793238462643383279,
-  false,
-  true,
-  null,
-  ""Escaping is not required"",
-  ""Some things get lost in the m\u00eal\u00e9e"",
-  [
-    2,
-    3,
-    5,
-    7,
-    11
-  ],
-  {
-    ""obj"": [
-      21,
-      {
-        ""deep obj"": [
-          ""Once upon a midnight dreary"",
-          42,
-          1e400,
-          3.141592653589793238462643383279,
-          false,
-          true,
-          null,
-          ""Escaping is not required"",
-          ""Some things get lost in the m\u00eal\u00e9e""
-        ],
-        ""more deep"": false
-      },
-      12
-    ],
-    ""second property"": null
-  }
-]",
-                "[\"Once upon a midnight dreary\",42,1e400,3.141592653589793238462643383279," +
-                    "false,true,null,\"Escaping is not required\"," +
-                    "\"Some things get lost in the m\\u00eal\\u00e9e\",[2,3,5,7,11]," +
-                    "{\"obj\":[21,{\"deep obj\":[\"Once upon a midnight dreary\",42,1e400," +
-                    "3.141592653589793238462643383279,false,true,null,\"Escaping is not required\"," +
-                    "\"Some things get lost in the m\\u00eal\\u00e9e\"],\"more deep\":false},12]," +
-                    "\"second property\":null}]");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteEverythingObject(bool indented)
-        {
-            WriteComplexValue(
-                indented,
-                "{" +
-                    "\"int\": 42," +
-                    "\"quadratic googol\": 1e400," +
-                    "\"precisePi\": 3.141592653589793238462643383279," +
-                    "\"lit0\": null,\"lit1\":  false,/*guess next*/\"lit2\": true," +
-                    "\"ascii\": \"pizza\"," +
-                    "\"escaped\": \"p\\u0069zza\"," +
-                    "\"utf8\": \"p\u00CDzza\"," +
-                    "\"utf8ExtraEscape\": \"p\u00CDz\\u007Aa\"," +
-                    "\"arr\": [\"hello\", \"sa\\u0069lor\", 21, \"blackjack!\" ]," +
-                    "\"obj\": {" +
-                        "\"arr\": [ 1, 3, 5, 7, /*9,*/ 11] " +
-                    "}}",
-                @"{
-  ""int"": 42,
-  ""quadratic googol"": 1e400,
-  ""precisePi"": 3.141592653589793238462643383279,
-  ""lit0"": null,
-  ""lit1"": false,
-  ""lit2"": true,
-  ""ascii"": ""pizza"",
-  ""escaped"": ""pizza"",
-  ""utf8"": ""p\u00cdzza"",
-  ""utf8ExtraEscape"": ""p\u00cdzza"",
-  ""arr"": [
-    ""hello"",
-    ""sailor"",
-    21,
-    ""blackjack!""
-  ],
-  ""obj"": {
-    ""arr"": [
-      1,
-      3,
-      5,
-      7,
-      11
-    ]
-  }
-}",
-                "{\"int\":42,\"quadratic googol\":1e400,\"precisePi\":3.141592653589793238462643383279," +
-                    "\"lit0\":null,\"lit1\":false,\"lit2\":true,\"ascii\":\"pizza\",\"escaped\":\"pizza\"," +
-                    "\"utf8\":\"p\\u00cdzza\",\"utf8ExtraEscape\":\"p\\u00cdzza\"," +
-                    "\"arr\":[\"hello\",\"sailor\",21,\"blackjack!\"]," +
-                    "\"obj\":{\"arr\":[1,3,5,7,11]}}");
-        }
-
-        [Fact]
-        public static void WriteIncredibleDepth()
-        {
-            const int TargetDepth = 500;
-            JsonDocumentOptions optionsCopy = s_options;
-            optionsCopy.MaxDepth = TargetDepth + 1;
-            const int SpacesPre = 12;
-            const int SpacesSplit = 85;
-            const int SpacesPost = 4;
-
-            byte[] jsonIn = new byte[SpacesPre + TargetDepth + SpacesSplit + TargetDepth + SpacesPost];
-            jsonIn.AsSpan(0, SpacesPre).Fill((byte)' ');
-            Span<byte> openBrackets = jsonIn.AsSpan(SpacesPre, TargetDepth);
-            openBrackets.Fill((byte)'[');
-            jsonIn.AsSpan(SpacesPre + TargetDepth, SpacesSplit).Fill((byte)' ');
-            Span<byte> closeBrackets = jsonIn.AsSpan(SpacesPre + TargetDepth + SpacesSplit, TargetDepth);
-            closeBrackets.Fill((byte)']');
-            jsonIn.AsSpan(SpacesPre + TargetDepth + SpacesSplit + TargetDepth).Fill((byte)' ');
-
-            var buffer = new ArrayBufferWriter<byte>(jsonIn.Length);
-            using (JsonDocument doc = JsonDocument.Parse(jsonIn, optionsCopy))
-            {
-                var writer = new Utf8JsonWriter(buffer);
-                doc.WriteTo(writer);
-                writer.Flush();
-
-                ReadOnlySpan<byte> formatted = buffer.WrittenSpan;
-
-                Assert.Equal(TargetDepth + TargetDepth, formatted.Length);
-                Assert.True(formatted.Slice(0, TargetDepth).SequenceEqual(openBrackets), "OpenBrackets match");
-                Assert.True(formatted.Slice(TargetDepth).SequenceEqual(closeBrackets), "CloseBrackets match");
-            }
-        }
-
-        private static void WriteSimpleValue(bool indented, string jsonIn, string jsonOut = null)
-        {
             var buffer = new ArrayBufferWriter<byte>(1024);
-            using (JsonDocument doc = JsonDocument.Parse(jsonIn))
+            var expectedNonIndentedJson = $"[{OneQuarticGoogol}]";
+            using (JsonDocument doc = JsonDocument.Parse($"[ {OneQuarticGoogol} ]"))
             {
                 var options = new JsonWriterOptions
                 {
-                    Indented = indented,
+                    Indented = false,
                 };
 
                 var writer = new Utf8JsonWriter(buffer, options);
@@ -4072,36 +3704,7 @@ null,
                 doc.WriteTo(writer);
                 writer.Flush();
 
-                AssertContents(jsonOut ?? jsonIn, buffer);
-            }
-        }
-
-        private static void WriteComplexValue(
-            bool indented,
-            string jsonIn,
-            string expectedIndent,
-            string expectedMinimal)
-        {
-            var buffer = new ArrayBufferWriter<byte>(1024);
-            using (JsonDocument doc = JsonDocument.Parse(jsonIn, s_options))
-            {
-                var options = new JsonWriterOptions
-                {
-                    Indented = indented,
-                };
-
-                var writer = new Utf8JsonWriter(buffer, options);
-                doc.WriteTo(writer);
-                writer.Flush();
-
-                if (indented && s_replaceNewlines)
-                {
-                    AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
-                }
-
-                AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
+                AssertContents(expectedNonIndentedJson, buffer);
             }
         }
 
