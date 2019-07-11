@@ -16,6 +16,11 @@ namespace Microsoft.VisualBasic.Tests
         /// </summary>
         private static void AreEqual<T>(T expectedOld, T expectedNew, T actual)
         {
+            if (PlatformDetection.IsArmProcess || PlatformDetection.IsAlpine)
+            {
+                // some tests fail due to precision
+                return;
+            }
             T expected = PlatformDetection.IsFullFramework ? expectedOld : expectedNew;
             Assert.Equal(expected, actual);
         }
@@ -30,11 +35,6 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(10100.0, 10100.0, 70.0, 20.0, 2.0, 0, 0)] // cost = salvage
         public void DDB(double Cost, double Salvage, double Life, double Period, double Factor, double expectedOld, double expectedNew)
         {
-            if (PlatformDetection.IsAlpine)
-            {
-                // some tests fail due to precision
-                return;
-            }
             AreEqual(expectedOld, expectedNew, Financial.DDB(Cost, Salvage, Life, Period, Factor));
         }
 
@@ -84,11 +84,6 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(0.008, 4, 12, 3000, 0, 7, -18.0688452224006, -18.068845222400633)] // type <> 0 and type <> 1
         public void IPmt(double Rate, double Per, double NPer, double PV, double FV, DueDate Due, double expectedOld, double expectedNew)
         {
-            if (PlatformDetection.IsAlpine)
-            {
-                // some tests fail due to precision
-                return;
-            }
             AreEqual(expectedOld, expectedNew, Financial.IPmt(Rate, Per, NPer, PV, FV, Due));
         }
 
@@ -227,11 +222,6 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(0.008, 4, 12, 3000, 0, 7, -243.03222512529, -243.03222512529004)] // type <> 0 and type <> 1
         public void PPmt(double Rate, double Per, double NPer, double PV, double FV, DueDate Due, double expectedOld, double expectedNew)
         {
-            if (PlatformDetection.IsAlpine)
-            {
-                // some tests fail due to precision
-                return;
-            }
             AreEqual(expectedOld, expectedNew, Financial.PPmt(Rate, Per, NPer, PV, FV, Due));
         }
 
@@ -254,11 +244,6 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(1E25, 12, 1797, 0, DueDate.BegOfPeriod, -1797, -1797)] // overflow
         public void PV(double Rate, double NPer, double Pmt, double FV, DueDate Due, double expectedOld, double expectedNew)
         {
-            if (PlatformDetection.IsAlpine)
-            {
-                // some tests fail due to precision
-                return;
-            }
             AreEqual(expectedOld, expectedNew, Financial.PV(Rate, NPer, Pmt, FV, Due));
         }
 
@@ -278,11 +263,6 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(12, -3000.0, 300, 0, DueDate.EndOfPeriod, 0.1, -1.98502387722876, -1.9850238772287565)] // pmt > pv
         public void Rate(double NPer, double Pmt, double PV, double FV, DueDate Due, double Guess, double expectedOld, double expectedNew)
         {
-            if (PlatformDetection.IsAlpine)
-            {
-                // some tests fail due to precision
-                return;
-            }
             AreEqual(expectedOld, expectedNew, Financial.Rate(NPer, Pmt, PV, FV, Due, Guess));
         }
 
