@@ -664,12 +664,4 @@ internal static class RandomExtensions
         int length = random.Next(0, input.Length - offset + 1);
         return input.Substring(offset, length);
     }
-
-    public static bool NextBoolean(this Random random, double probability = 0.5)
-    {
-        if (probability < 0 || probability > 1)
-            throw new ArgumentOutOfRangeException("probability", "must be between 0 and 1");
-
-        return random.NextDouble() < probability;
-    }
 }
