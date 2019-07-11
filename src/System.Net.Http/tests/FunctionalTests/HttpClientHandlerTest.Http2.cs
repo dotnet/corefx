@@ -36,7 +36,8 @@ namespace System.Net.Http.Functional.Tests
                 string text = e.ToString();
                 if (allowConnectionRefused && (
                     text.Contains("No connection could be made because the target machine actively refused it.") ||
-                    text.Contains("An existing connection was forcibly closed by the remote host.")))
+                    text.Contains("An existing connection was forcibly closed by the remote host.") ||
+                    text.Contains("Connection refused")))
                 {
                     return;
                 }
