@@ -197,6 +197,7 @@ namespace System.Net.Http
 
             if (value.IndexOfAny(s_proxyDelimiters) == -1)
             {
+                // Optimize out an allocation from Split() when no delimiters are present.
                 ParseProxyConfigPart(value, ref insecureProxy, ref secureProxy);
                 return;
             }
