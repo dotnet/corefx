@@ -677,7 +677,7 @@ namespace Microsoft.Win32
                 ".NET-BroadcastEventWindow.{0:x}.0",
                 AppDomain.CurrentDomain.GetHashCode());
 
-            fixed (char* c = s_className)
+            fixed (char* className = s_className)
             {
                 // It is important that we stash the delegate to ensure it doesn't
                 // get collected by the GC.
@@ -688,7 +688,7 @@ namespace Microsoft.Win32
                 {
                     hbrBackground = (IntPtr)(Interop.User32.COLOR_WINDOW + 1),
                     lpfnWndProc = Marshal.GetFunctionPointerForDelegate(_windowProc),
-                    lpszClassName = c,
+                    lpszClassName = className,
                     hInstance = hInstance
                 };
 
@@ -956,8 +956,8 @@ namespace Microsoft.Win32
 
         /// <summary>
         ///  Handler for WM_THEMECHANGED
-        ///  Whidbey note: Before Whidbey, we used to fire UserPreferenceChanged with category
-        ///  set to Window. In Whidbey, we support visual styles and need a new category Theme
+        ///  VS 2005 note: Before VS 2005, we used to fire UserPreferenceChanged with category
+        ///  set to Window. In VS 2005, we support visual styles and need a new category Theme
         ///  since Window is too general. We fire UserPreferenceChanged with this category, but
         ///  for backward compat, we also fire it with category set to Window.
         /// </summary>
