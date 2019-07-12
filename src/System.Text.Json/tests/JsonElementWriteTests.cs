@@ -550,18 +550,18 @@ null,
 
         private static string GetEscapedExpectedString(string value, StringEscapeHandling escaping)
         {
-            var ms = new MemoryStream();
-            TextWriter streamWriter = new StreamWriter(ms, new UTF8Encoding(false), 1024, true);
-
-            var json = new JsonTextWriter(streamWriter)
+            using (var ms = new MemoryStream())
+            using (TextWriter streamWriter = new StreamWriter(ms, new UTF8Encoding(false), 1024, true))
+            using (var json = new JsonTextWriter(streamWriter)
             {
                 StringEscapeHandling = escaping
-            };
+            })
+            {
+                json.WriteValue(value);
+                json.Flush();
 
-            json.WriteValue(value);
-            json.Flush();
-
-            return Encoding.UTF8.GetString(ms.ToArray());
+                return Encoding.UTF8.GetString(ms.ToArray());
+            }
         }
 
         [Theory]
