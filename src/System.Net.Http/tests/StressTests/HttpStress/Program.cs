@@ -45,7 +45,7 @@ public class Program
         cmd.AddOption(new Option("-aspnetlog", "Enable ASP.NET warning and error logging.") { Argument = new Argument<bool>("enable", false) });
         cmd.AddOption(new Option("-listOps", "List available options.") { Argument = new Argument<bool>("enable", false) });
         cmd.AddOption(new Option("-seed", "Seed for generating pseudo-random parameters for a given -n argument.") { Argument = new Argument<int?>("seed", null)});
-        cmd.AddOption(new Option("-p", "Max number of query paramters for a request.") { Argument = new Argument<int>("queryParameters", 1) });
+        cmd.AddOption(new Option("-p", "Max number of query parameters for a request.") { Argument = new Argument<int>("queryParameters", 1) });
 
         ParseResult cmdline = cmd.Parse(args);
         if (cmdline.Errors.Count > 0)
