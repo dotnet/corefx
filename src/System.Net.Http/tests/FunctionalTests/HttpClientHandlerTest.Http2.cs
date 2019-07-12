@@ -1790,6 +1790,7 @@ namespace System.Net.Http.Functional.Tests
             // test for #39295
             var throwingContent = new ThrowingContent(() => new InvalidOperationException());
 
+            var tcs = new TaskCompletionSource<bool>();
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
                 using (HttpClient client = CreateHttpClient())
@@ -1800,9 +1801,14 @@ namespace System.Net.Http.Functional.Tests
 
                     HttpRequestException exn = await Assert.ThrowsAnyAsync<HttpRequestException>(async () => await client.SendAsync(request));
                     Assert.IsType<InvalidOperationException>(exn.InnerException);
+                    await tcs.Task; // prevent disposal of client until server has completed operations
                 }
             },
-            async server => await server.EstablishConnectionAsync());
+            async server =>
+            {
+                await server.EstablishConnectionAsync();
+                tcs.SetResult(false);
+            });
         }
 
         [ConditionalFact(nameof(SupportsAlpn))]
@@ -1813,6 +1819,7 @@ namespace System.Net.Http.Functional.Tests
 
             var throwingContent = new ThrowingContent(() => new CustomException());
 
+            var tcs = new TaskCompletionSource<bool>();
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
                 using (HttpClient client = CreateHttpClient())
@@ -1822,9 +1829,14 @@ namespace System.Net.Http.Functional.Tests
                     request.Content = throwingContent;
 
                     await Assert.ThrowsAnyAsync<CustomException>(async () => await client.SendAsync(request));
+                    await tcs.Task; // prevent disposal of client until server has completed operations
                 }
             },
-            async server => await server.EstablishConnectionAsync());
+            async server =>
+            {
+                await server.EstablishConnectionAsync();
+                tcs.SetResult(false);
+            });
         }
 
         private class CustomException : Exception { }
