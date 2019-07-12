@@ -444,7 +444,7 @@ namespace System.Drawing.Tests
             }
             else
             {
-                AssertExtensions.Throws<FileNotFoundException>(() => Icon.ExtractAssociatedIcon("http://microsoft.com"), new FileNotFoundException().Message);
+                Assert.Throws<FileNotFoundException>(() => Icon.ExtractAssociatedIcon("http://microsoft.com"));
             }
         }
 

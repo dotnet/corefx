@@ -170,7 +170,7 @@ namespace System.Drawing
             filePath = Path.GetFullPath(filePath);
             if (!File.Exists(filePath))
             {
-                throw new FileNotFoundException(new FileNotFoundException().Message, filePath);
+                throw new FileNotFoundException(message: null, fileName: filePath);
             }
 
             // ExtractAssociatedIcon copies the loaded path into the buffer that it is passed.
