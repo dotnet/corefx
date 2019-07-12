@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 using Xunit;
 using Xunit.Abstractions;
-using System.Collections;
+using System.Runtime.CompilerServices;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -1718,6 +1718,55 @@ namespace System.Net.Http.Functional.Tests
                     Assert.NotNull(frame); // We should get Rst before closing connection.
                     Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
                  } while (frame.Type != FrameType.RstStream);
+            });
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Task<WeakReference> GetAndDropResponse(HttpClient client, HttpRequestMessage request)
+        {
+            return Task.Run(async () =>
+            {
+                HttpResponseMessage r = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                return new WeakReference(await r.Content.ReadAsStreamAsync());
+            });
+        }
+
+        [ActiveIssue(39420)]
+        [ConditionalFact(nameof(SupportsAlpn))]
+        public async Task Http2_PendingReceive_ResponseDropped_SendsReset()
+        {
+            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Get, url);
+                    request.Version = new Version(2, 0);
+
+                    WeakReference wr = await GetAndDropResponse(client, request);
+                    while (wr.IsAlive)
+                    {
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
+                        await Task.Delay(100);
+                    }
+                }
+            },
+            async server =>
+            {
+                Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
+
+                (int streamId, HttpRequestData requestData) = await connection.ReadAndParseRequestHeaderAsync(readBody: false);
+                _output.WriteLine($"{DateTime.Now} Connection established");
+
+                await connection.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.OK);
+
+                Frame frame;
+                do
+                {
+                    frame = await connection.ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds));
+                    Assert.NotNull(frame); // We should get Rst before closing connection.
+                    Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
+                } while (frame.Type != FrameType.RstStream);
             });
         }
 
