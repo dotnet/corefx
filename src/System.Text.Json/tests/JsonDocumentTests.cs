@@ -28,18 +28,6 @@ namespace System.Text.Json.Tests
         private static readonly Dictionary<TestCaseType, string> s_compactJson =
             new Dictionary<TestCaseType, string>();
 
-        private const string CompiledNewline = @"
-";
-
-        private static readonly JsonDocumentOptions s_options =
-            new JsonDocumentOptions
-            {
-                CommentHandling = JsonCommentHandling.Skip,
-            };
-
-        private static readonly bool s_replaceNewlines =
-            !StringComparer.Ordinal.Equals(CompiledNewline, Environment.NewLine);
-
         public static IEnumerable<object[]> BadBOMCases { get; } =
             new object[][]
             {
@@ -1851,18 +1839,9 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void CheckByPassingNullWriter()
         {
-            using (JsonDocument doc = JsonDocument.Parse("{\"First\":1}", default))
+            using (JsonDocument doc = JsonDocument.Parse("true", default))
             {
-                var expectedErrorMessage = @"Value cannot be null. (Parameter 'writer')";
-                AssertExtensions.Throws<ArgumentNullException>(() => doc.WriteTo(null), expectedErrorMessage);
-
-                JsonElement root = doc.RootElement;
-                AssertExtensions.Throws<ArgumentNullException>(() => root.WriteTo(null), expectedErrorMessage);
-
-                foreach (JsonProperty property in root.EnumerateObject())
-                {
-                    AssertExtensions.Throws<ArgumentNullException>(() => property.WriteTo(null), expectedErrorMessage);
-                }
+                AssertExtensions.Throws<ArgumentNullException>("writer", () => doc.WriteTo(null));
             }
         }
 
@@ -3714,13 +3693,7 @@ namespace System.Text.Json.Tests
             var expectedNonIndentedJson = $"[{OneQuarticGoogol}]";
             using (JsonDocument doc = JsonDocument.Parse($"[ {OneQuarticGoogol} ]"))
             {
-                var options = new JsonWriterOptions
-                {
-                    Indented = false,
-                };
-
-                var writer = new Utf8JsonWriter(buffer, options);
-
+                var writer = new Utf8JsonWriter(buffer, default);
                 doc.WriteTo(writer);
                 writer.Flush();
 

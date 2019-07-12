@@ -3,23 +3,25 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
-using System.Collections;
-using System.Globalization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System.IO;
-using Xunit;
-using System.Buffers.Text;
-using System.IO.Tests;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+using Xunit;
 
 namespace System.Text.Json.Tests
 {
     public static class JsonPropertyTests
     {
+
+        [Fact]
+        public static void CheckByPassingNullWriter()
+        {
+            using (JsonDocument doc = JsonDocument.Parse("{\"First\":1}", default))
+            {
+                foreach (JsonProperty property in doc.RootElement.EnumerateObject())
+                {
+                    AssertExtensions.Throws<ArgumentNullException>("writer", () => property.WriteTo(null));
+                }
+            }
+        }
 
         [Theory]
         [InlineData(false)]

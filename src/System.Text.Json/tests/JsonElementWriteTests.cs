@@ -21,6 +21,16 @@ namespace System.Text.Json.Tests
         private static readonly bool s_replaceNewlines =
             !StringComparer.Ordinal.Equals(CompiledNewline, Environment.NewLine);
 
+        [Fact]
+        public static void CheckByPassingNullWriter()
+        {
+            using (JsonDocument doc = JsonDocument.Parse("true", default))
+            {
+                JsonElement root = doc.RootElement;
+                AssertExtensions.Throws<ArgumentNullException>("writer", () => root.WriteTo(null));
+            }
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -903,33 +913,10 @@ null,
                 {
                     foreach (JsonElement val in root.EnumerateArray())
                     {
-                        JsonTestHelper.AssertThrows<InvalidOperationException>(
-                            ref writer,
-                            (ref Utf8JsonWriter w) =>
-                            {
-                                w.WritePropertyName(CharLabel);
-                            });
-
-                        JsonTestHelper.AssertThrows<InvalidOperationException>(
-                            ref writer,
-                            (ref Utf8JsonWriter w) =>
-                            {
-                                w.WritePropertyName(CharLabel.AsSpan());
-                            });
-
-                        JsonTestHelper.AssertThrows<InvalidOperationException>(
-                            ref writer,
-                            (ref Utf8JsonWriter w) =>
-                            {
-                                w.WritePropertyName(byteUtf8);
-                            });
-
-                        JsonTestHelper.AssertThrows<InvalidOperationException>(
-                            ref writer,
-                            (ref Utf8JsonWriter w) =>
-                            {
-                                w.WritePropertyName(JsonEncodedText.Encode(CharLabel));
-                            });
+                        Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(CharLabel));
+                        Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(CharLabel.AsSpan()));
+                        Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(byteUtf8));
+                        Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(JsonEncodedText.Encode(CharLabel)));
                     }
 
                     writer.Flush();
@@ -974,9 +961,7 @@ null,
                 {
                     foreach (JsonElement val in root.EnumerateArray())
                     {
-                        JsonTestHelper.AssertThrows<InvalidOperationException>(
-                            ref writer,
-                            (ref Utf8JsonWriter w) => val.WriteTo(w));
+                        Assert.Throws<InvalidOperationException>(() => val.WriteTo(writer));
                     }
 
                     writer.WriteEndObject();

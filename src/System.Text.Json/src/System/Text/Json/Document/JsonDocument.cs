@@ -80,7 +80,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="writer"></param>
         /// <exception cref="ArgumentNullException">
-        ///   Parameter <paramref name="writer"/> of type <see cref="Utf8JsonWriter"/> should not be null.
+        ///   The <paramref name="writer"/> parameter is <see langword="null"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         ///   This <see cref="RootElement"/>'s <see cref="JsonElement.ValueKind"/> would result in an invalid JSON.

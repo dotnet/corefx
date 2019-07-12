@@ -93,7 +93,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="writer">The writer.</param>
         /// <exception cref="ArgumentNullException">
-        ///   Parameter <paramref name="writer"/> of type <see cref="Utf8JsonWriter"/> should not be null.
+        ///   The <paramref name="writer"/> parameter is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
         ///   This <see cref="Name"/>'s length is too large to be a JSON object property.

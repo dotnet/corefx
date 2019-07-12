@@ -1273,7 +1273,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="writer">The writer.</param>
         /// <exception cref="ArgumentNullException">
-        ///   Parameter <paramref name="writer"/> of type <see cref="Utf8JsonWriter"/> should not be null.
+        ///   The <paramref name="writer"/> parameter is <see langword="null"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is <see cref="JsonValueKind.Undefined"/>.
