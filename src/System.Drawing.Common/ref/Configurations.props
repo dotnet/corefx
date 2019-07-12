@@ -1,14 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
-    <PackageConfigurations>
-      netcoreapp;
-      netstandard;
-      net461;
-      uap;
-    </PackageConfigurations>
     <BuildConfigurations>
-      $(PackageConfigurations);
-      netfx;
+      netcoreapp;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
