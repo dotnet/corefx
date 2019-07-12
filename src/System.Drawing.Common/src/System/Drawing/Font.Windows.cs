@@ -291,7 +291,9 @@ namespace System.Drawing
                 return FromLogFontInternal(ref logFont, hdc);
             }
 
-            if (Marshal.SizeOf(lf.GetType()) != sizeof(SafeNativeMethods.LOGFONT))
+            Type type = lf.GetType();
+            int nativeSize = sizeof(SafeNativeMethods.LOGFONT);
+            if (Marshal.SizeOf(type) != nativeSize)
             {
                 // If we don't actually have an object that is LOGFONT in size, trying to pass
                 // it to GDI+ is likely to cause an AV.
@@ -300,7 +302,19 @@ namespace System.Drawing
 
             // Now that we know the marshalled size is the same as LOGFONT, copy in the data
             logFont = new SafeNativeMethods.LOGFONT();
-            Marshal.StructureToPtr(lf, new IntPtr(&logFont), fDeleteOld: false);
+
+            if (!type.IsValueType)
+            {
+                // Only works with non value types
+                Marshal.StructureToPtr(lf, new IntPtr(&logFont), fDeleteOld: false);
+            }
+            else
+            {
+                GCHandle handle = GCHandle.Alloc(lf, GCHandleType.Pinned);
+                Buffer.MemoryCopy((byte*)handle.AddrOfPinnedObject(), &logFont, nativeSize, nativeSize);
+                handle.Free();
+            }
+
             return FromLogFontInternal(ref logFont, hdc);
         }
 

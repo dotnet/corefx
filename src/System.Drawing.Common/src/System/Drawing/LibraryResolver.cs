@@ -13,7 +13,6 @@ namespace System.Drawing
     {
         static LibraryResolver()
         {
-            // Hook our custom resolver
             NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), DllImportResolver);
         }
 

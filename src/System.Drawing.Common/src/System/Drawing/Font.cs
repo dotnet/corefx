@@ -286,7 +286,9 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(logFont));
             }
 
-            if (Marshal.SizeOf(logFont.GetType()) != sizeof(SafeNativeMethods.LOGFONT))
+            Type type = logFont.GetType();
+            int nativeSize = sizeof(SafeNativeMethods.LOGFONT);
+            if (Marshal.SizeOf(type) != nativeSize)
             {
                 // If we don't actually have an object that is LOGFONT in size, trying to pass
                 // it to GDI+ is likely to cause an AV.
@@ -294,7 +296,19 @@ namespace System.Drawing
             }
 
             SafeNativeMethods.LOGFONT nativeLogFont = ToLogFontInternal(graphics);
-            Marshal.PtrToStructure(new IntPtr(&nativeLogFont), logFont);
+
+            if (!type.IsValueType)
+            {
+                // Unfortunately PtrToStructure requires that the passed in object not be a value type.
+                // The underlying runtime code supports it, and perhaps there is another way to do this.
+                Marshal.PtrToStructure(new IntPtr(&nativeLogFont), logFont);
+            }
+            else
+            {
+                GCHandle handle = GCHandle.Alloc(logFont, GCHandleType.Pinned);
+                Buffer.MemoryCopy(&nativeLogFont, (byte*)handle.AddrOfPinnedObject(), nativeSize, nativeSize);
+                handle.Free();
+            }
         }
 
         private unsafe SafeNativeMethods.LOGFONT ToLogFontInternal(Graphics graphics)
