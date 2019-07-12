@@ -46,11 +46,13 @@ This would likely result in a `NotSupportedException` when using the set-accesso
 
 Authenticated Encryption (AE) support is provided for AES-CCM and AES-GCM via `System.Security.Cryptography.AesCcm` and `System.Security.Cryptography.AesGcm`, respectively.
 
-On macOS the AesCcm and AesGcm classes use OpenSSL for support.
+On macOS the system libraries do not support AES-CCM or AES-GCM for 3rd party code, so the AesCcm and AesGcm classes use OpenSSL for support.
 Users on macOS need to obtain an appropriate copy of OpenSSL (libcrypto) for these types to function, and it must be in a path that the system would load a library from by default.
 Obtaining OpenSSL from a package manager, such as Homebrew, is recommended (but not required).
 The libcrypto.0.9.7.dylib and libcrypto.0.9.8.dylib libraries included in macOS are from older versions of OpenSSL, and will not be used.
 The libcrypto.35.dylib, libcrypto.41.dylib, and libcrypto.42.dylib are LibreSSL, and will not be used.
+
+On Windows and Linux the implementations of AES-CCM and AES-GCM are provided by the system libraries.
 
 ### AES-GCM
 
