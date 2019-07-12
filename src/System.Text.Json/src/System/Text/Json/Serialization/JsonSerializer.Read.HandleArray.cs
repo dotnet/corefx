@@ -51,13 +51,9 @@ namespace System.Text.Json
 
                 state.Push();
                 state.Current.Initialize(elementType, options);
-                state.Current.CollectionPropertyInitialized = true;
-            }
-            else
-            {
-                state.Current.CollectionPropertyInitialized = true;
             }
 
+            state.Current.CollectionPropertyInitialized = true;
             jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
             if (state.Current.JsonClassInfo.ClassType == ClassType.Value)
@@ -122,7 +118,7 @@ namespace System.Text.Json
             else if (state.Current.IsEnumerableProperty)
             {
                 // We added the items to the list already.
-                state.Current.ResetProperty();
+                state.Current.EndProperty();
                 return false;
             }
 
@@ -211,7 +207,7 @@ namespace System.Text.Json
                 (state.Current.IsIDictionaryConstructibleProperty && !setPropertyDirectly))
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
-                IDictionary dictionary = (IDictionary)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.TempDictionaryValues);
+                IDictionary dictionary = (IDictionary)state.Current.TempDictionaryValues;
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));

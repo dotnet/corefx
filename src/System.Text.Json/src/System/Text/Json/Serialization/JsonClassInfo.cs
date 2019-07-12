@@ -30,6 +30,7 @@ namespace System.Text.Json
 
         internal delegate object ConstructorDelegate();
         internal ConstructorDelegate CreateObject { get; private set; }
+        internal ConstructorDelegate CreateConcreteDictionary { get; private set; }
 
         internal ClassType ClassType { get; private set; }
 
@@ -116,10 +117,14 @@ namespace System.Text.Json
                             }
                         }
 
+                        if (DetermineExtensionDataProperty(cache))
+                        {
+                            // Remove from cache since it is handled independently.
+                            cache.Remove(DataExtensionProperty.NameAsString);
+                        }
+
                         // Set as a unit to avoid concurrency issues.
                         PropertyCache = cache;
-
-                        DetermineExtensionDataProperty();
                     }
                     break;
                 case ClassType.Enumerable:
@@ -128,8 +133,19 @@ namespace System.Text.Json
                         // Add a single property that maps to the class type so we can have policies applied.
                          AddPolicyProperty(type, options);
 
-                        // Use the type from the property policy to get any late-bound concrete types (from an interface like IDictionary).
-                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(PolicyProperty.RuntimePropertyType);
+                        Type objectType;
+                        if (IsNativelySupportedCollection(type))
+                        {
+                            // Use the type from the property policy to get any late-bound concrete types (from an interface like IDictionary).
+                            objectType = PolicyProperty.RuntimePropertyType;
+                        }
+                        else
+                        {
+                            // We need to create the declared instance for types implementing natively supported collections.
+                            objectType = PolicyProperty.DeclaredPropertyType;
+                        }
+
+                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(objectType);
 
                         // Create a ClassInfo that maps to the element type which is used for (de)serialization and policies.
                         Type elementType = GetElementType(type, parentType: null, memberInfo: null, options: options);
@@ -143,8 +159,10 @@ namespace System.Text.Json
 
                         Type elementType = GetElementType(type, parentType: null, memberInfo: null, options: options);
 
-                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(
-                            typeof(Dictionary<,>).MakeGenericType(typeof(string), elementType));
+                       CreateConcreteDictionary = options.MemberAccessorStrategy.CreateConstructor(
+                           typeof(Dictionary<,>).MakeGenericType(typeof(string), elementType));
+
+                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(PolicyProperty.DeclaredPropertyType);
 
                         // Create a ClassInfo that maps to the element type which is used for (de)serialization and policies.
                         ElementClassInfo = options.GetOrAddClass(elementType);
@@ -165,9 +183,9 @@ namespace System.Text.Json
             }
         }
 
-        private void DetermineExtensionDataProperty()
+        private bool DetermineExtensionDataProperty(Dictionary<string, JsonPropertyInfo> cache)
         {
-            JsonPropertyInfo jsonPropertyInfo = GetPropertyThatHasAttribute(typeof(JsonExtensionDataAttribute));
+            JsonPropertyInfo jsonPropertyInfo = GetPropertyWithUniqueAttribute(typeof(JsonExtensionDataAttribute), cache);
             if (jsonPropertyInfo != null)
             {
                 Type declaredPropertyType = jsonPropertyInfo.DeclaredPropertyType;
@@ -178,16 +196,17 @@ namespace System.Text.Json
                 }
 
                 DataExtensionProperty = jsonPropertyInfo;
+                return true;
             }
+
+            return false;
         }
 
-        private JsonPropertyInfo GetPropertyThatHasAttribute(Type attributeType)
+        private JsonPropertyInfo GetPropertyWithUniqueAttribute(Type attributeType, Dictionary<string, JsonPropertyInfo> cache)
         {
-            Debug.Assert(PropertyCache != null);
-
             JsonPropertyInfo property = null;
 
-            foreach (JsonPropertyInfo jsonPropertyInfo in PropertyCache.Values)
+            foreach (JsonPropertyInfo jsonPropertyInfo in cache.Values)
             {
                 Attribute attribute = jsonPropertyInfo.PropertyInfo.GetCustomAttribute(attributeType);
                 if (attribute != null)
@@ -381,23 +400,26 @@ namespace System.Text.Json
         // Return the element type of the IEnumerable or return null if not an IEnumerable.
         public static Type GetElementType(Type propertyType, Type parentType, MemberInfo memberInfo, JsonSerializerOptions options)
         {
-            if (!typeof(IEnumerable).IsAssignableFrom(propertyType))
+            // We want to handle as the implemented collection type, if applicable.
+            Type implementedType = GetImplementedCollectionType(propertyType);
+
+            if (!typeof(IEnumerable).IsAssignableFrom(implementedType))
             {
                 return null;
             }
 
             // Check for Array.
-            Type elementType = propertyType.GetElementType();
+            Type elementType = implementedType.GetElementType();
             if (elementType != null)
             {
                 return elementType;
             }
 
             // Check for Dictionary<TKey, TValue> or IEnumerable<T>
-            if (propertyType.IsGenericType)
+            if (implementedType.IsGenericType)
             {
-                Type[] args = propertyType.GetGenericArguments();
-                ClassType classType = GetClassType(propertyType, options);
+                Type[] args = implementedType.GetGenericArguments();
+                ClassType classType = GetClassType(implementedType, options);
 
                 if ((classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible) &&
                     args.Length >= 2 && // It is >= 2 in case there is a IDictionary<TKey, TValue, TSomeExtension>.
@@ -412,10 +434,10 @@ namespace System.Text.Json
                 }
             }
 
-            if (propertyType.IsAssignableFrom(typeof(IList)) ||
-                propertyType.IsAssignableFrom(typeof(IDictionary)) ||
-                IsDeserializedByConstructingWithIList(propertyType) ||
-                IsDeserializedByConstructingWithIDictionary(propertyType))
+            if (implementedType.IsAssignableFrom(typeof(IList)) ||
+                implementedType.IsAssignableFrom(typeof(IDictionary)) ||
+                IsDeserializedByConstructingWithIList(implementedType) ||
+                IsDeserializedByConstructingWithIDictionary(implementedType))
             {
                 return typeof(object);
             }
@@ -427,35 +449,42 @@ namespace System.Text.Json
         {
             Debug.Assert(type != null);
 
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            // We want to handle as the implemented collection type, if applicable.
+            Type implementedType = GetImplementedCollectionType(type);
+
+            if (implementedType.IsGenericType && implementedType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                type = Nullable.GetUnderlyingType(type);
+                implementedType = Nullable.GetUnderlyingType(implementedType);
             }
 
-            if (type == typeof(object))
+            if (implementedType == typeof(object))
             {
                 return ClassType.Unknown;
             }
 
-            if (options.HasConverter(type))
+            if (options.HasConverter(implementedType))
             {
                 return ClassType.Value;
             }
 
-            if (DefaultImmutableDictionaryConverter.IsImmutableDictionary(type) ||
-                IsDeserializedByConstructingWithIDictionary(type))
+            if (DefaultImmutableDictionaryConverter.IsImmutableDictionary(implementedType) ||
+                IsDeserializedByConstructingWithIDictionary(implementedType))
             {
                 return ClassType.IDictionaryConstructible;
             }
 
-            if (typeof(IDictionary).IsAssignableFrom(type) ||
-                (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
-                type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))))
+            if (typeof(IDictionary).IsAssignableFrom(implementedType) || IsDictionaryClassType(implementedType))
             {
+                // Special case for immutable dictionaries
+                if (type != implementedType && !IsNativelySupportedCollection(type))
+                {
+                    return ClassType.IDictionaryConstructible;
+                }
+
                 return ClassType.Dictionary;
             }
 
-            if (typeof(IEnumerable).IsAssignableFrom(type))
+            if (typeof(IEnumerable).IsAssignableFrom(implementedType))
             {
                 return ClassType.Enumerable;
             }
@@ -463,92 +492,10 @@ namespace System.Text.Json
             return ClassType.Object;
         }
 
-        public const string ImmutableNamespaceName = "System.Collections.Immutable";
-
-        private const string EnumerableGenericInterfaceTypeName = "System.Collections.Generic.IEnumerable`1";
-        private const string EnumerableInterfaceTypeName = "System.Collections.IEnumerable";
-
-        private const string ListGenericInterfaceTypeName = "System.Collections.Generic.IList`1";
-        private const string ListInterfaceTypeName = "System.Collections.IList";
-
-        private const string CollectionGenericInterfaceTypeName = "System.Collections.Generic.ICollection`1";
-        private const string CollectionInterfaceTypeName = "System.Collections.ICollection";
-
-        private const string ReadOnlyListGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyList`1";
-
-        private const string ReadOnlyCollectionGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyCollection`1";
-
-        public const string HashtableTypeName = "System.Collections.Hashtable";
-        public const string SortedListTypeName = "System.Collections.SortedList";
-
-        public const string StackTypeName = "System.Collections.Stack";
-        public const string QueueTypeName = "System.Collections.Queue";
-        public const string ArrayListTypeName = "System.Collections.ArrayList";
-
-        public static bool IsDeserializedByAssigningFromList(Type type)
+        public static bool IsDictionaryClassType(Type type)
         {
-            if (type.IsGenericType)
-            {
-                switch (type.GetGenericTypeDefinition().FullName)
-                {
-                    case EnumerableGenericInterfaceTypeName:
-                    case ListGenericInterfaceTypeName:
-                    case CollectionGenericInterfaceTypeName:
-                    case ReadOnlyListGenericInterfaceTypeName:
-                    case ReadOnlyCollectionGenericInterfaceTypeName:
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-            else
-            {
-                switch (type.FullName)
-                {
-                    case EnumerableInterfaceTypeName:
-                    case ListInterfaceTypeName:
-                    case CollectionInterfaceTypeName:
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        }
-
-        public static bool IsSetInterface(Type type)
-        {
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISet<>);
-        }
-
-        public static bool HasConstructorThatTakesGenericIEnumerable(Type type, JsonSerializerOptions options)
-        {
-            Type elementType = GetElementType(type, parentType: null, memberInfo: null, options);
-            return type.GetConstructor(new Type[] { typeof(List<>).MakeGenericType(elementType) }) != null;
-        }
-
-        public static bool IsDeserializedByConstructingWithIList(Type type)
-        {
-            switch (type.FullName)
-            {
-                case StackTypeName:
-                case QueueTypeName:
-                case ArrayListTypeName:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        public static bool IsDeserializedByConstructingWithIDictionary(Type type)
-        {
-            switch (type.FullName)
-            {
-                case HashtableTypeName:
-                case SortedListTypeName:
-                    return true;
-                default:
-                    return false;
-            }
+            return (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
+                type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>)));
         }
     }
 }

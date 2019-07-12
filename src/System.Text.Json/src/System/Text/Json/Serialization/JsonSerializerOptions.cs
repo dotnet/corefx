@@ -175,7 +175,9 @@ namespace System.Text.Json
                 VerifyMutable();
 
                 if (value < 0)
+                {
                     throw ThrowHelper.GetArgumentOutOfRangeException_MaxDepthMustBePositive(nameof(value));
+                }
 
                 _maxDepth = value;
                 EffectiveMaxDepth = (value == 0 ? JsonReaderOptions.DefaultMaxDepth : value);
@@ -337,7 +339,7 @@ namespace System.Text.Json
 
             if (!_objectJsonProperties.TryGetValue(objectType, out JsonPropertyInfo propertyInfo))
             {
-                propertyInfo = JsonClassInfo.CreateProperty(objectType, objectType, null, typeof(object), options);
+                propertyInfo = JsonClassInfo.CreateProperty(objectType, objectType, objectType, null, typeof(object), options);
                 _objectJsonProperties[objectType] = propertyInfo;
             }
 

@@ -31,9 +31,7 @@
   <Target Name="ValidateTestProjectConfigurations"
           BeforeTargets="CoreCompile"
           Condition="'$(IsTestProject)' == 'true' and '$(IsTestSupportProject)' != 'true' and '$(TargetsNetStandard)' == 'true'">
-
     <Error Text="Targeting .NET Standard in a test project isn't supported." />
-    
   </Target>
 
   <PropertyGroup>

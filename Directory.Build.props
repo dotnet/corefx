@@ -207,22 +207,17 @@
   <!-- Import packaging props -->
   <Import Project="$(RepositoryEngineeringDir)Packaging.props" />
 
-  <!-- Set the kind of PDB to Portable and turn on SourceLink (fetching source from GitHub) -->
   <PropertyGroup>
     <!-- Always pass portable to override arcade sdk which uses embedded for local builds -->
     <DebugType>portable</DebugType>
 
     <!-- Empty DebugType when building for netfx and in windows so that it is set to full or pdbonly later -->
     <DebugType Condition="'$(TargetsNetFx)' == 'true' AND '$(OS)' == 'Windows_NT'" />
-
-    <!-- Rhel 6 and FreeBSD doesn't support the source control git package so disable SourceLink -->
-    <EnableSourceLink Condition="$(RuntimeOS.StartsWith('rhel.6')) OR '$(_runtimeOSFamily)' == 'FreeBSD'">false</EnableSourceLink>
-    <!-- is not supported on ARM platforms either. -->
-    <EnableSourceLink Condition="'$(HostArch)' == 'Arm' OR '$(HostArch)' == 'Arm64'">false</EnableSourceLink>
-    <!-- Disable source link on local builds. -->
+    
+    <!-- Workaround for codecov issue https://github.com/tonerdo/coverlet/issues/312 -->
     <EnableSourceLink Condition="'$(ContinuousIntegrationBuild)' != 'true' and '$(OfficialBuildId)' == ''">false</EnableSourceLink>
   </PropertyGroup>
-
+    
   <!-- Set up Default symbol and optimization for Configuration -->
   <Choose>
     <When Condition="'$(ConfigurationGroup)'=='Debug'">
@@ -263,7 +258,6 @@
     <LangVersion Condition="'$(Language)' == 'C#'">preview</LangVersion>
     <!-- Enables Strict mode for Roslyn compiler -->
     <Features>strict</Features>
-    <Features Condition="'$(IsTestProject)' != 'true'">$(Features);nullablePublicOnly</Features>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Deterministic>true</Deterministic>
@@ -335,11 +329,20 @@
     <BinPlaceUAPFramework Condition="'$(_bc_TargetGroup)' == 'uap'">true</BinPlaceUAPFramework>
     <BinPlaceNETFXRuntime Condition="'$(_bc_TargetGroup)' == 'netfx'">true</BinPlaceNETFXRuntime>
 
-    <NETCoreAppTestHostFxrPath>$([MSBuild]::NormalizeDirectory('$(TestHostRootPath)', 'host', 'fxr', '$(ProductVersion)'))</NETCoreAppTestHostFxrPath>
     <NETCoreAppTestSharedFrameworkPath>$([MSBuild]::NormalizeDirectory('$(TestHostRootPath)', 'shared', 'Microsoft.NETCore.App', '$(ProductVersion)'))</NETCoreAppTestSharedFrameworkPath>
     <!-- For UAP, we'll produce the layout and hard-link this into each test's directory -->
-    <UAPTestSharedFrameworkPath>$(TestHostRootPath)UAPLayout</UAPTestSharedFrameworkPath>
+    <UAPTestSharedFrameworkPath>$([MSBuild]::NormalizeDirectory('$(TestHostRootPath)', 'UAPLayout'))</UAPTestSharedFrameworkPath>
+
+    <TestHostRuntimePath Condition="'$(BinPlaceTestSharedFramework)' == 'true'">$(NETCoreAppTestSharedFrameworkPath)</TestHostRuntimePath>
+    <TestHostRuntimePath Condition="'$(BinPlaceUAPFramework)' == 'true'">$(UAPTestSharedFrameworkPath)</TestHostRuntimePath>
+    <TestHostRuntimePath Condition="'$(BinPlaceNETFXRuntime)' == 'true'">$(TestHostRootPath)</TestHostRuntimePath>
+
+    <PlatformManifestFile>$(TestHostRuntimePath)PlatformManifest.txt</PlatformManifestFile>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(PlatformManifestFile)' != '' and '$(IsTestProject)' == 'true'">
+    <PackageConflictPlatformManifests Include="$(PlatformManifestFile)" />
+  </ItemGroup>
 
   <!-- AOT only asset that we currently don't support. -->
   <ItemGroup>
@@ -359,7 +362,7 @@
 
   <PropertyGroup>
     <!-- F5 and debugging support for netcoreapp and netfx inside VS. -->
-    <EnableLaunchSettings Condition="'$(EnableLaunchSettings)' == ''AND '$(DotNetBuildFromSource)' != 'true'">true</EnableLaunchSettings>
+    <EnableLaunchSettings Condition="'$(EnableLaunchSettings)' == '' and '$(DotNetBuildFromSource)' != 'true'">true</EnableLaunchSettings>
   </PropertyGroup>
 
   <!-- Test properties for full build. -->
@@ -380,7 +383,9 @@
   <!-- Additional optimizations -->
   <PropertyGroup>
     <!-- Clear the init locals flag on all src projects, except those in VB, where we can't use spans. -->
-    <ILLinkClearInitLocals Condition="'$(IsSourceProject)' == 'true' AND '$(Language)' != 'VB'">true</ILLinkClearInitLocals>
+    <ILLinkClearInitLocals Condition="'$(IsSourceProject)' == 'true' and '$(Language)' != 'VB'">true</ILLinkClearInitLocals>
+
+    <Features Condition="'$(IsSourceProject)' == 'true' or '$(IsReferenceAssembly)' == 'true'">$(Features);nullablePublicOnly</Features>
   </PropertyGroup>
 
 </Project>
