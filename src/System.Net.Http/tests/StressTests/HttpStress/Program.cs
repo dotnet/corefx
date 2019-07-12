@@ -255,6 +255,20 @@ public class Program
                 }
             }),
 
+            ("POST Multipart Data",
+            async ctx =>
+            {
+                (string expected, MultipartContent formDataContent) formData = GetMultipartContent(contentSource, ctx, numParameters);
+                Version httpVersion = ctx.GetRandomVersion(httpVersions);
+
+                using (var req = new HttpRequestMessage(HttpMethod.Post, serverUri) { Version = httpVersion, Content = formData.formDataContent })
+                using (HttpResponseMessage m = await ctx.HttpClient.SendAsync(req))
+                {
+                    ValidateResponse(m, httpVersion);
+                    ValidateContent($"{formData.expected}", await m.Content.ReadAsStringAsync());;
+                }
+            }),
+
             ("POST Multipart Form Data",
             async ctx =>
             {
@@ -671,6 +685,29 @@ public class Program
 
         sb.Append("--test_boundary--\r\n");
         return (sb.ToString(), multipartFormDataContent);
+    }
+
+    private static (string, MultipartContent) GetMultipartContent(string contentSource, ClientContext clientContext, int numFormFields)
+    {
+        var multipartContent = new MultipartContent("prefix" + clientContext.GetRandomSubstring(contentSource), "test_boundary");
+        StringBuilder sb = new StringBuilder();
+
+        int num = clientContext.GetRandomInt(numFormFields);
+
+        if (num == 0)
+            return ("--test_boundary\r\n\r\n--test_boundary--\r\n", multipartContent);
+
+        for (int i = 0; i < num; i++)
+        {
+            sb.Append("--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n");
+            string content = clientContext.GetRandomSubstring(contentSource);
+            sb.Append(content);
+            sb.Append("\r\n");
+            multipartContent.Add(new StringContent(content));
+        }
+
+        sb.Append("--test_boundary--\r\n");
+        return (sb.ToString(), multipartContent);
     }
 
     /// <summary>Client context containing information pertaining to a single worker.</summary>
