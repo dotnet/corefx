@@ -47,8 +47,8 @@ namespace System.IO.Pipelines.Tests
                     buffer.FlushAsync(cts2.Token);
                 });
 
-            bool completed = Task.WhenAll(cancellationTask, blockingTask).Wait(TimeSpan.FromSeconds(10));
-            Assert.True(completed);
+            bool completed = Task.WhenAll(cancellationTask, blockingTask).Wait(TimeSpan.FromSeconds(30));
+            Assert.True(completed, $"Flush tasks are not completed. CancellationTask: {cancellationTask.Status.ToString()} BlockingTask: {blockingTask.Status.ToString()}");
         }
 
         [Fact]
