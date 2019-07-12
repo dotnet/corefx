@@ -312,10 +312,12 @@ namespace System.Drawing
             if (_gdiVerticalFont)
             {
                 int fullLength = logFont.lfFaceName.Length;
-                Span<char> temp = stackalloc char[fullLength];
-                temp[0] = '@';
-                logFont.lfFaceName.Slice(0, fullLength - 1).CopyTo(temp.Slice(1));
-                temp.CopyTo(logFont.lfFaceName);
+                Span<char> faceName = logFont.lfFaceName;
+                faceName.Slice(0, fullLength - 1).CopyTo(faceName.Slice(1));
+                faceName[0] = '@';
+
+                // Docs require this to be null terminated
+                faceName[fullLength - 1] = '\0';
             }
 
             if (logFont.lfCharSet == 0)

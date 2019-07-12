@@ -7,9 +7,9 @@
     <WarningsNotAsErrors>CS0618</WarningsNotAsErrors>
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
     <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);FEATURE_WINDOWS_SYSTEM_COLORS;FEATURE_SYSTEM_EVENTS</DefineConstants>
-    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true' OR '$(TargetGroup)' == 'netcoreapp' OR '$(TargetsUap)' == 'true'">true</IsPartialFacadeAssembly>
-    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard' OR '$(TargetsUap)' == 'true'">SR.PlatformNotSupported_Drawing</GeneratePlatformNotSupportedAssemblyMessage>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
+    <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetsUap)' == 'true'">SR.PlatformNotSupported_Drawing</GeneratePlatformNotSupportedAssemblyMessage>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <!-- Shared source code, all configurations -->
   <ItemGroup Condition="$(TargetGroup.StartsWith('netcoreapp'))">
@@ -179,16 +179,6 @@
       <LogicalName>System.Drawing.ShieldIcon.ico</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
-  <!-- netcoreapp2.0 only -->
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp2.0'">
-    <Compile Include="misc\InvalidEnumArgumentException.cs" />
-    <Compile Include="$(CommonPath)\System\Drawing\KnownColor.cs">
-      <Link>System\Drawing\KnownColor.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Drawing\SystemColors.cs">
-      <Link>System\Drawing\SystemColors.cs</Link>
-    </Compile>
-  </ItemGroup>
   <!-- Windows-specific -->
   <ItemGroup Condition="$(TargetGroup.StartsWith('netcoreapp')) AND '$(TargetsWindows)' == 'true'">
     <Compile Include="SRDescriptionAttribute.cs" />
@@ -342,14 +332,8 @@
       <LogicalName>placeholder.ico</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
-  <!-- Unix netcoreapp2.0 specific -->
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp2.0' AND '$(TargetsUnix)' == 'true'">
-    <Compile Include="$(CommonPath)\Interop\Unix\libdl\Interop.dlopen.cs">
-      <Link>Common\Interop\Unix\libdl\Interop.dlopen.cs</Link>
-    </Compile>
-  </ItemGroup>
   <!-- References -->
-  <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
+  <ItemGroup>
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Condition="'$(TargetsWindows)' == 'true'" Include="Microsoft.Win32.SystemEvents" />
     <Reference Include="System.Buffers" />
@@ -374,11 +358,5 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Text.Encoding.Extensions" />
-  </ItemGroup>
-  <!-- NetFX references -->
-  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
   </ItemGroup>
 </Project>
