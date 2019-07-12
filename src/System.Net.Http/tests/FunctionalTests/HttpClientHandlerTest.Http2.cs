@@ -34,10 +34,7 @@ namespace System.Net.Http.Functional.Tests
             if (UseSocketsHttpHandler)
             {
                 string text = e.ToString();
-                if (allowConnectionRefused && (
-                    text.Contains("No connection could be made because the target machine actively refused it.") ||
-                    text.Contains("An existing connection was forcibly closed by the remote host.") ||
-                    text.Contains("Connection refused")))
+                if (allowConnectionRefused && IsExceptionConnectionRefused(e))
                 {
                     return;
                 }
@@ -47,6 +44,24 @@ namespace System.Net.Http.Functional.Tests
                     Enum.IsDefined(typeof(ProtocolErrors), errorCode) ? errorCode.ToString() : "(unknown error)",
                     text);
             }
+        }
+
+        private static bool IsExceptionConnectionRefused(Exception e)
+        {
+            while (e != null)
+            {
+                if (e is Sockets.SocketException sockException)
+                {
+                    if (sockException.SocketErrorCode == Sockets.SocketError.ConnectionRefused)
+                    {
+                        return true;
+                    }
+                }
+
+                e = e.InnerException;
+            }
+
+            return false;
         }
 
         private async Task<(bool, T)> IgnoreSpecificException<ExpectedException, T>(Task<T> task, string expectedExceptionContent = null) where ExpectedException : Exception

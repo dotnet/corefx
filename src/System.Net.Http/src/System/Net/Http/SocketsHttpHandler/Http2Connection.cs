@@ -1333,8 +1333,9 @@ namespace System.Net.Http
                     Debug.Assert(streamId == kvp.Value.StreamId);
 
                     kvp.Value.OnAbort(abortException);
-                    _httpStreams.Remove(streamId);
                 }
+
+                _httpStreams.Clear();
 
                 _disposed = true;
                 CheckForShutdown();
