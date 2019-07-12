@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Xunit;
@@ -148,6 +149,81 @@ namespace System.Text.Json.Serialization.Tests
 
             int i = await JsonSerializer.DeserializeAsync<int>(stream, options);
             Assert.Equal(1, i);
+        }
+
+        private class Session
+        {
+            public int Id { get; set; }
+
+            public string Title { get; set; }
+
+            public virtual string Abstract { get; set; }
+
+            public virtual DateTimeOffset? StartTime { get; set; }
+
+            public virtual DateTimeOffset? EndTime { get; set; }
+
+            // Bonus points to those who can figure out why this is written this way
+            public TimeSpan Duration => EndTime?.Subtract(StartTime ?? EndTime ?? DateTimeOffset.MinValue) ?? TimeSpan.Zero;
+
+            public int? TrackId { get; set; }
+        }
+
+        private class SessionResponse : Session
+        {
+            public Track Track { get; set; }
+
+            public List<Speaker> Speakers { get; set; } = new List<Speaker>();
+        }
+
+        private class Track
+        {
+            public int Id { get; set; }
+
+            public string Name { get; set; }
+        }
+
+        private class Speaker
+        {
+            public int Id { get; set; }
+
+            public string Name { get; set; }
+
+            public string Bio { get; set; }
+
+            public virtual string WebSite { get; set; }
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(10)]
+        [InlineData(1000)]
+        [InlineData(4000)]
+        [InlineData(8000)]
+        [InlineData(16000)]
+        public static async Task LargeJsonFile(int bufferSize)
+        {
+            var input = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Resources", "LargeJson.txt"));
+
+            JsonSerializerOptions options = new JsonSerializerOptions();
+            if (bufferSize != 0)
+            {
+                options.DefaultBufferSize = bufferSize;
+            }
+
+            List<SessionResponse> objects = JsonSerializer.Deserialize<List<SessionResponse>>(input, options);
+
+            // Sync case.
+            var json = JsonSerializer.Serialize(objects, options);
+            Assert.Equal(input, json);
+
+            // Async case.
+            var memoryStream = new MemoryStream();
+            await JsonSerializer.SerializeAsync(memoryStream, objects, options);
+            var jsonAsync = Encoding.UTF8.GetString(memoryStream.ToArray());
+
+            Assert.Equal(json, jsonAsync);
+            Assert.Equal(json.Length, jsonAsync.Length);
         }
     }
 
