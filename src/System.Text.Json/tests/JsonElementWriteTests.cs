@@ -38,15 +38,7 @@ namespace System.Text.Json.Tests
         //        [InlineData("1.2E-3")]
         public static void WriteScientificNumber(string value)
         {
-            var buffer = new ArrayBufferWriter<byte>(1024);
-            using (JsonDocument doc = JsonDocument.Parse($" [ {value} ]", s_options))
-            {
-                JsonElement target = doc.RootElement[0];
-
-                var writer = new Utf8JsonWriter(buffer);
-
-                target.WriteValue(writer);
-            }
+            WriteSimpleValue(false, value);
         }
 
         [Theory]
@@ -460,20 +452,21 @@ null,
         [Fact]
         public static void WriteValueUnicodeEscapeSequence()
         {
-            char[] chars = new char[] { (char)0x0421, (char)0x0430, (char)0x0439, (char)0x043D, ' ', (char)0x0443, (char)0x0443, '?', (char)0x04E9, (char)0x04E9 };
-            string json = $"[\"{new string(chars)}\"]";
+            string unicodeString = "\u0421\u0430\u0439\u043D \u0443\u0443? \u04E9\u04E9";
+            string json = $"[\"{unicodeString}\"]";
             var buffer = new ArrayBufferWriter<byte>(1024);
-            byte[] temp = Encoding.UTF8.GetBytes(json);
-            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(temp, 1);
-            string expectedStr = $"{GetEscapedExpectedString(false, new string(chars), StringEscapeHandling.EscapeNonAscii)}";
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(Encoding.UTF8.GetBytes(json), 1);
+            string expectedStr = GetEscapedExpectedString(unicodeString, StringEscapeHandling.EscapeNonAscii);
 
             using (JsonDocument doc = JsonDocument.Parse(sequence, s_options))
             {
                 JsonElement target = doc.RootElement[0];
 
-                var writer = new Utf8JsonWriter(buffer);
-                target.WriteValue(writer);
-                writer.Flush();
+                using (var writer = new Utf8JsonWriter(buffer))
+                {
+                    target.WriteValue(writer);
+                    writer.Flush();
+                }
                 string str = Encoding.UTF8.GetString(buffer.WrittenSpan);
                 AssertContents(expectedStr, buffer);
             }
@@ -482,12 +475,12 @@ null,
         [Fact]
         public static void WriteValueSurrogatesEscapeSequence()
         {
-            char[] chars = new char[] { (char)0xD800, (char)0xDC00, (char)0xD803, (char)0xDE6D, (char)0xD834, (char)0xDD1E, (char)0xDBFF, (char)0xDFFF };
-            string json = $"[\"{new string(chars)}\"]";
+            string unicodeString = "\uD800\uDC00 \uD803\uDE6D\uD834\uDD1E \uDBFF\uDFFF";
+            string json = $"[\"{unicodeString}\"]";
             var buffer = new ArrayBufferWriter<byte>(1024);
             byte[] temp = Encoding.UTF8.GetBytes(json);
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(temp, 1);
-            string expectedStr = $"{GetEscapedExpectedString(false, new string(chars), StringEscapeHandling.EscapeNonAscii)}";
+            string expectedStr = GetEscapedExpectedString(unicodeString, StringEscapeHandling.EscapeNonAscii);
 
             using (JsonDocument doc = JsonDocument.Parse(sequence, s_options))
             {
@@ -503,10 +496,10 @@ null,
         [Fact]
         public static void WriteValueSurrogatesEscapeString()
         {
-            char[] chars = new char[] { (char)0xD800, (char)0xDC00, (char)0xD803, (char)0xDE6D, (char)0xD834, (char)0xDD1E, (char)0xDBFF, (char)0xDFFF };
-            string json = $"[\"{new string(chars)}\"]";
+            string unicodeString = "\uD800\uDC00\uD803\uDE6D \uD834\uDD1E\uDBFF\uDFFF";
+            string json = $"[\"{unicodeString}\"]";
             var buffer = new ArrayBufferWriter<byte>(1024);
-            string expectedStr = $"{GetEscapedExpectedString(false, new string(chars), StringEscapeHandling.EscapeNonAscii)}";
+            string expectedStr = $"{GetEscapedExpectedString(unicodeString, StringEscapeHandling.EscapeNonAscii)}";
 
             using (JsonDocument doc = JsonDocument.Parse(json, s_options))
             {
@@ -555,14 +548,13 @@ null,
             }
         }
 
-        private static string GetEscapedExpectedString(bool prettyPrint, string value, StringEscapeHandling escaping)
+        private static string GetEscapedExpectedString(string value, StringEscapeHandling escaping)
         {
             var ms = new MemoryStream();
             TextWriter streamWriter = new StreamWriter(ms, new UTF8Encoding(false), 1024, true);
 
             var json = new JsonTextWriter(streamWriter)
             {
-                Formatting = prettyPrint ? Formatting.Indented : Formatting.None,
                 StringEscapeHandling = escaping
             };
 
@@ -1118,11 +1110,11 @@ null,
                     Indented = indented,
                 };
 
-                var writer = new Utf8JsonWriter(buffer, options);
-
-                target.WriteValue(writer);
-                writer.Flush();
-
+                using (var writer = new Utf8JsonWriter(buffer, options))
+                {
+                    target.WriteValue(writer);
+                    writer.Flush();
+                }
                 AssertContents(jsonOut ?? jsonIn, buffer);
             }
         }
