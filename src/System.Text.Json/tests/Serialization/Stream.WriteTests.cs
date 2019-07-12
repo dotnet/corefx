@@ -154,43 +154,31 @@ namespace System.Text.Json.Serialization.Tests
         private class Session
         {
             public int Id { get; set; }
-
             public string Title { get; set; }
-
             public virtual string Abstract { get; set; }
-
             public virtual DateTimeOffset? StartTime { get; set; }
-
             public virtual DateTimeOffset? EndTime { get; set; }
-
-            // Bonus points to those who can figure out why this is written this way
             public TimeSpan Duration => EndTime?.Subtract(StartTime ?? EndTime ?? DateTimeOffset.MinValue) ?? TimeSpan.Zero;
-
             public int? TrackId { get; set; }
         }
 
         private class SessionResponse : Session
         {
             public Track Track { get; set; }
-
             public List<Speaker> Speakers { get; set; } = new List<Speaker>();
         }
 
         private class Track
         {
             public int Id { get; set; }
-
             public string Name { get; set; }
         }
 
         private class Speaker
         {
             public int Id { get; set; }
-
             public string Name { get; set; }
-
             public string Bio { get; set; }
-
             public virtual string WebSite { get; set; }
         }
 
@@ -203,27 +191,70 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(16000)]
         public static async Task LargeJsonFile(int bufferSize)
         {
-            var input = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Resources", "LargeJson.txt"));
+            // Build up a large list to serialize.
+            var list = new List<SessionResponse>();
+            for (int i = 0; i < 100; i++)
+            {
+                SessionResponse response = new SessionResponse
+                {
+                    Id = i,
+                    Abstract = new string('A', i * 2),
+                    Title = new string('T', i),
+                    StartTime = new DateTime(i),
+                    EndTime = new DateTime(i * 10000),
+                    TrackId = i,
+                    Track = new Track()
+                    {
+                        Id = i,
+                        Name = new string('N', i),
+                    },
+                };
 
+                for (int j = 0; j < 5; j++)
+                {
+                    response.Speakers.Add(new Speaker()
+                    {
+                        Bio = new string('B', 50),
+                        Id = j,
+                        Name = new string('N', i),
+                        WebSite = new string('W', 20),
+                    });
+                }
+
+                list.Add(response);
+            }
+
+            // Adjust buffer length to encourage buffer flusing at several levels.
             JsonSerializerOptions options = new JsonSerializerOptions();
             if (bufferSize != 0)
             {
                 options.DefaultBufferSize = bufferSize;
             }
 
-            List<SessionResponse> objects = JsonSerializer.Deserialize<List<SessionResponse>>(input, options);
+            string json = JsonSerializer.Serialize(list, options);
+            Assert.True(json.Length > 100_000); // Verify data is large and will cause buffer flushing.
+            Assert.True(json.Length < 200_000); // But not too large for memory considerations.
 
             // Sync case.
-            var json = JsonSerializer.Serialize(objects, options);
-            Assert.Equal(input, json);
+            {
+                List<SessionResponse> deserializedList = JsonSerializer.Deserialize<List<SessionResponse>>(json, options);
+                Assert.Equal(100, deserializedList.Count);
+
+                string jsonSerialized = JsonSerializer.Serialize(deserializedList, options);
+                Assert.Equal(json, jsonSerialized);
+            }
 
             // Async case.
-            var memoryStream = new MemoryStream();
-            await JsonSerializer.SerializeAsync(memoryStream, objects, options);
-            var jsonAsync = Encoding.UTF8.GetString(memoryStream.ToArray());
+            using (var memoryStream = new MemoryStream())
+            {
+                await JsonSerializer.SerializeAsync(memoryStream, list, options);
+                string jsonSerialized = Encoding.UTF8.GetString(memoryStream.ToArray());
+                Assert.Equal(json, jsonSerialized);
 
-            Assert.Equal(json, jsonAsync);
-            Assert.Equal(json.Length, jsonAsync.Length);
+                memoryStream.Position = 0;
+                List<SessionResponse> deserializedList = await JsonSerializer.DeserializeAsync<List<SessionResponse>>(memoryStream, options);
+                Assert.Equal(100, deserializedList.Count);
+            }
         }
     }
 

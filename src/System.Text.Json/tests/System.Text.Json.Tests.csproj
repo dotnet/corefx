@@ -108,11 +108,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\LargeJson.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   </ItemGroup>
 </Project>

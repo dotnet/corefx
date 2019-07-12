@@ -80,7 +80,7 @@ namespace System.Text.Json
                 {
                     flushThreshold = (int)(bufferWriter.Capacity * .9); //todo: determine best value here
 
-                    isFinalBlock = Write(writer, 0, flushThreshold, options, ref state);
+                    isFinalBlock = Write(writer, originalWriterDepth: 0, flushThreshold, options, ref state);
                     writer.Flush();
 
                     await bufferWriter.WriteToStreamAsync(utf8Json, cancellationToken).ConfigureAwait(false);
