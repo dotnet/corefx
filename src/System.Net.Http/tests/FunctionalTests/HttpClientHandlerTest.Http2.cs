@@ -1130,12 +1130,12 @@ namespace System.Net.Http.Functional.Tests
 
                 HttpResponseMessage response1 = await sendTask1;
                 Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
-
                 await newConnection.ShutdownIgnoringErrorsAsync(retriedStreamId, ProtocolErrors.ENHANCE_YOUR_CALM);
-                await connection.WaitForConnectionShutdownAsync();
 
                 await AssertProtocolErrorAsync(sendTask2, ProtocolErrors.ENHANCE_YOUR_CALM);
                 await AssertProtocolErrorAsync(sendTask3, ProtocolErrors.ENHANCE_YOUR_CALM);
+
+                await connection.WaitForConnectionShutdownAsync();
             }
         }
 

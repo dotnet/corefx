@@ -457,6 +457,9 @@ namespace System.Net.Http
                         return;
                     }
 
+                    // We should not retry request which have started being processed since the behavior might be unpredictable
+                    // I.e. some action might have been taken based on the received data.
+                    // We will bubble the exception and let user decide what to do.
                     bool isRetriable = _state == StreamState.ExpectingStatus || _state == StreamState.ExpectingHeaders;
                     Interlocked.CompareExchange(ref _abortException, abortException, null);
                     _state = StreamState.Aborted;
