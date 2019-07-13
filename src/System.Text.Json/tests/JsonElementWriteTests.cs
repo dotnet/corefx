@@ -30,11 +30,39 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteNumberScientific(bool indented)
+        [InlineData("1e6", false)]
+        [InlineData("1e6", true)]
+        [InlineData("1e+6", false)]
+        [InlineData("1e+6", true)]
+        [InlineData("1e-6", false)]
+        [InlineData("1e-6", true)]
+        [InlineData("-1e6", false)]
+        [InlineData("-1e6", true)]
+        [InlineData("-1e+6", true)]
+        [InlineData("-1e+6", true)]
+        [InlineData("-1e-6", false)]
+        [InlineData("-1e-6", true)]
+        public static void WriteNumberScientific(string value, bool indented)
         {
-            WriteSimpleValue(indented, "1e6");
+            WriteSimpleValue(indented, value);
+        }
+
+        [Theory]
+        [InlineData("5.012e-20", false)]
+        [InlineData("5.012e-20", true)]
+        [InlineData("5.012e20", false)]
+        [InlineData("5.012e20", true)]
+        [InlineData("5.012e+20", false)]
+        [InlineData("5.012e+20", true)]
+        [InlineData("-5.012e-20", false)]
+        [InlineData("-5.012e-20", true)]
+        [InlineData("-5.012e20", false)]
+        [InlineData("-5.012e20", true)]
+        [InlineData("-5.012e+20", false)]
+        [InlineData("-5.012e+20", true)]
+        public static void WriteNumberDecimalScientific(string value, bool indented)
+        {
+            WriteSimpleValue(indented, value);
         }
 
         [Theory]
@@ -56,19 +84,20 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteNumberTooLargeScientific(bool indented)
+        [InlineData("1e400", false)]
+        [InlineData("1e400", true)]
+        [InlineData("-1e400", false)]
+        [InlineData("-1e400", true)]
+        public static void WriteNumberTooLargeScientific(string value, bool indented)
         {
             // This value is a reference "potential interoperability problem" from
             // https://tools.ietf.org/html/rfc7159#section-6
-            const string OneQuarticGoogol = "1e400";
 
             // This just validates we write the literal number 1e400 even though it is too
             // large to be represented by System.Double and would be converted to
             // PositiveInfinity instead (or throw if using double.Parse on frameworks
             // older than .NET Core 3.0).
-            WriteSimpleValue(indented, OneQuarticGoogol);
+            WriteSimpleValue(indented, value);
         }
 
         [Theory]

@@ -140,6 +140,7 @@ namespace System.Text.Json
             // because it doesn't need to deal with "NeedsMoreData", or remembering the format.
             if (utf8FormattedNumber.IsEmpty)
             {
+                //ThrowHelper.ThrowArgumentException(nameof(utf8FormattedNumber), utf8FormattedNumber);
                 throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
             }
 
@@ -183,12 +184,13 @@ namespace System.Text.Json
                 {
                     i++;
                 }
+
+                if (utf8FormattedNumber.Length < i)
+                {
+                    throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
+                }
             }
 
-            if (utf8FormattedNumber.Length <= i)
-            {
-                throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
-            }
 
             if (i == utf8FormattedNumber.Length)
             {
