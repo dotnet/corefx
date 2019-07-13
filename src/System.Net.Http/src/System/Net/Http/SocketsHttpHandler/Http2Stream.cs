@@ -457,9 +457,10 @@ namespace System.Net.Http
                         return;
                     }
 
+                    bool isRetriable = _state == StreamState.ExpectingStatus || _state == StreamState.ExpectingHeaders;
                     Interlocked.CompareExchange(ref _abortException, abortException, null);
                     _state = StreamState.Aborted;
-                    _canRetry = canRetry;
+                    _canRetry = canRetry && isRetriable;
 
                     signalWaiter = _hasWaiter;
                     _hasWaiter = false;

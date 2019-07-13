@@ -659,7 +659,7 @@ namespace System.Net.Http
 
             if (protocolError == Http2ProtocolErrorCode.RefusedStream)
             {
-                http2Stream.OnAbort(null, canRetry: true);
+                http2Stream.OnAbort(new Http2StreamException(protocolError), canRetry: true);
             }
             else
             {

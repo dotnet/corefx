@@ -28,40 +28,17 @@ namespace System.Net.Http.Functional.Tests
 
         public HttpClientHandlerTest_Http2(ITestOutputHelper output) : base(output) { }
 
-        private async Task AssertProtocolErrorAsync(Task task, ProtocolErrors errorCode, bool allowConnectionRefused = false)
+        private async Task AssertProtocolErrorAsync(Task task, ProtocolErrors errorCode)
         {
             Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => task);
             if (UseSocketsHttpHandler)
             {
                 string text = e.ToString();
-                if (allowConnectionRefused && IsExceptionConnectionRefused(e))
-                {
-                    return;
-                }
-
                 Assert.Contains(((int)errorCode).ToString("x"), text);
                 Assert.Contains(
                     Enum.IsDefined(typeof(ProtocolErrors), errorCode) ? errorCode.ToString() : "(unknown error)",
                     text);
             }
-        }
-
-        private static bool IsExceptionConnectionRefused(Exception e)
-        {
-            while (e != null)
-            {
-                if (e is Sockets.SocketException sockException)
-                {
-                    if (sockException.SocketErrorCode == Sockets.SocketError.ConnectionRefused)
-                    {
-                        return true;
-                    }
-                }
-
-                e = e.InnerException;
-            }
-
-            return false;
         }
 
         private async Task<(bool, T)> IgnoreSpecificException<ExpectedException, T>(Task<T> task, string expectedExceptionContent = null) where ExpectedException : Exception
@@ -1114,11 +1091,9 @@ namespace System.Net.Http.Functional.Tests
 
                 Task<HttpResponseMessage> sendTask2 = client.GetAsync("request2");
                 int streamId2 = await connection.ReadRequestHeaderAsync();
-                bool request2Retried = false;
 
                 Task<HttpResponseMessage> sendTask3 = client.GetAsync("request3");
                 int streamId3 = await connection.ReadRequestHeaderAsync();
-                bool request3Retried = false;
 
                 Assert.InRange(streamId1, 1, streamId2 - 1);
                 Assert.InRange(streamId2, streamId1 + 1, streamId3 - 1);
@@ -1128,17 +1103,10 @@ namespace System.Net.Http.Functional.Tests
 
                 // First response: Don't send anything yet, request should be retried on the new connection
 
-                // Second response: Send headers, no body yet
-                //   In case when headers were parsed we will fail this request
-                //   If headers were not parsed we will retry
-                //   Currently there is no way for server to tell if the server has parsed the headers.
-                //   Regardless of the case we want to make sure that something unexpected doesn't happen (i.e. hang)
-                //   Note: PING can tell that headers got received but does not guarantee them being parsed
-                //         (in most common case it will parse them but when client is experiencing heavy load it might not)
+                // Second response: Send headers, no body yet - request should fail
                 await connection.SendDefaultResponseHeadersAsync(streamId2);
 
-                // Third response: Send headers, partial body
-                //   As above, retry is not guaranteed
+                // Third response: Send headers, partial body - request should fail
                 await connection.SendDefaultResponseHeadersAsync(streamId3);
                 await connection.SendResponseDataAsync(streamId3, new byte[5], endStream: false);
 
@@ -1150,71 +1118,24 @@ namespace System.Net.Http.Functional.Tests
 
                 Http2LoopbackConnection newConnection = await server.EstablishConnectionAsync();
 
-                bool done = false;
-                int lastRetriedStreamId = -1;
-                while (!done)
-                {
-                    HeadersFrame retriedFrame = await newConnection.ReadRequestHeaderFrameAsync();
-                    int retriedStreamId = retriedFrame.StreamId;
-                    Assert.InRange(retriedStreamId, 1, Int32.MaxValue);
-                    string headerData = Encoding.UTF8.GetString(retriedFrame.Data.Span);
+                HeadersFrame retriedFrame = await newConnection.ReadRequestHeaderFrameAsync();
+                int retriedStreamId = retriedFrame.StreamId;
+                Assert.InRange(retriedStreamId, 1, Int32.MaxValue);
+                string headerData = Encoding.UTF8.GetString(retriedFrame.Data.Span);
 
-                    await newConnection.SendDefaultResponseHeadersAsync(retriedStreamId);
-                    await newConnection.SendResponseDataAsync(retriedStreamId, new byte[3], endStream: true);
+                await newConnection.SendDefaultResponseHeadersAsync(retriedStreamId);
+                await newConnection.SendResponseDataAsync(retriedStreamId, new byte[3], endStream: true);
 
-                    if (headerData.Contains("request1"))
-                    {
-                        done = true;
-                        HttpResponseMessage response1 = await sendTask1;
-                        Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
-                    }
-                    else if (headerData.Contains("request2"))
-                    {
-                        Assert.False(request2Retried);
+                Assert.Contains("request1", headerData);
 
-                        (bool succeeded, HttpResponseMessage response2) = await IgnoreSpecificException<HttpRequestException, HttpResponseMessage>(sendTask2, "ENHANCE_YOUR_CALM");
-                        if (succeeded)
-                        {
-                            Assert.Equal(HttpStatusCode.OK, response2.StatusCode);
-                            request2Retried = true;
-                        }
-                    }
-                    else if (headerData.Contains("request3"))
-                    {
-                        Assert.False(request3Retried);
+                HttpResponseMessage response1 = await sendTask1;
+                Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
 
-                        (bool succeeded, HttpResponseMessage response3) = await IgnoreSpecificException<HttpRequestException, HttpResponseMessage>(sendTask3, "ENHANCE_YOUR_CALM");
-                        if (succeeded)
-                        {
-                            Assert.Equal(HttpStatusCode.OK, response3.StatusCode);
-                            request3Retried = true;
-                        }
-                    }
-                    else
-                    {
-                        Assert.True(false, "Unrecognized sender of the request");
-                    }
-
-                    lastRetriedStreamId = retriedStreamId;
-                }
-
-                await newConnection.ShutdownIgnoringErrorsAsync(lastRetriedStreamId, ProtocolErrors.ENHANCE_YOUR_CALM);
+                await newConnection.ShutdownIgnoringErrorsAsync(retriedStreamId, ProtocolErrors.ENHANCE_YOUR_CALM);
                 await connection.WaitForConnectionShutdownAsync();
 
-                // We cannot tell for sure if request 2 or 3 already failed or got retried
-                // Now we make server stop listening to avoid any hangs due to retries and server still listening
-
-                server.Dispose();
-
-                if (!request2Retried)
-                {
-                    await AssertProtocolErrorAsync(sendTask2, ProtocolErrors.ENHANCE_YOUR_CALM, allowConnectionRefused: true);
-                }
-
-                if (!request3Retried)
-                {
-                    await AssertProtocolErrorAsync(sendTask3, ProtocolErrors.ENHANCE_YOUR_CALM, allowConnectionRefused: true);
-                }
+                await AssertProtocolErrorAsync(sendTask2, ProtocolErrors.ENHANCE_YOUR_CALM);
+                await AssertProtocolErrorAsync(sendTask3, ProtocolErrors.ENHANCE_YOUR_CALM);
             }
         }
 
