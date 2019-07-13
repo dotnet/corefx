@@ -97,6 +97,7 @@ namespace System.Text.Json
         /// </summary>
         /// <remarks>
         /// This property can be set to <see cref="JsonNamingPolicy.CamelCase"/> to specify a camel-casing policy.
+        /// It is not used when deserializing.
         /// </remarks>
         public JsonNamingPolicy DictionaryKeyPolicy
         {
@@ -339,7 +340,7 @@ namespace System.Text.Json
 
             if (!_objectJsonProperties.TryGetValue(objectType, out JsonPropertyInfo propertyInfo))
             {
-                propertyInfo = JsonClassInfo.CreateProperty(objectType, objectType, null, typeof(object), options);
+                propertyInfo = JsonClassInfo.CreateProperty(objectType, objectType, objectType, null, typeof(object), options);
                 _objectJsonProperties[objectType] = propertyInfo;
             }
 

@@ -445,7 +445,7 @@ namespace System.Net.Http
                 }
             }
 
-            public void OnAbort(Exception abortException)
+            public void OnAbort(Exception abortException, bool canRetry = false)
             {
                 bool signalWaiter;
                 lock (SyncObject)
@@ -457,33 +457,13 @@ namespace System.Net.Http
                         return;
                     }
 
+                    // We should not retry request which have started being processed since the behavior might be unpredictable
+                    // I.e. some action might have been taken based on the received data.
+                    // We will bubble the exception and let user decide what to do.
+                    bool isRetriable = _state == StreamState.ExpectingStatus || _state == StreamState.ExpectingHeaders;
                     Interlocked.CompareExchange(ref _abortException, abortException, null);
                     _state = StreamState.Aborted;
-
-                    signalWaiter = _hasWaiter;
-                    _hasWaiter = false;
-                }
-
-                if (signalWaiter)
-                {
-                    _waitSource.SetResult(true);
-                }
-            }
-
-            public void OnRefused()
-            {
-                bool signalWaiter;
-                lock (SyncObject)
-                {
-                    if (NetEventSource.IsEnabled) Trace("");
-
-                    if (_disposed || _state == StreamState.Aborted)
-                    {
-                        return;
-                    }
-
-                    _state = StreamState.Aborted;
-                    _canRetry = true;
+                    _canRetry = canRetry && isRetriable;
 
                     signalWaiter = _hasWaiter;
                     _hasWaiter = false;
@@ -508,7 +488,7 @@ namespace System.Net.Http
                 {
                     if (_canRetry)
                     {
-                        throw CreateRetryException();
+                        throw new HttpRequestException(SR.net_http_request_aborted, _abortException, allowRetry: true);
                     }
 
                     throw new IOException(SR.net_http_request_aborted, _abortException);
@@ -747,34 +727,34 @@ namespace System.Net.Http
                 // if it is cancelable, then register for the cancellation callback, allocate a task for the asynchronously
                 // completing case, etc.
                 return cancellationToken.CanBeCanceled ?
-                    new ValueTask(GetWaiterTaskCore()) :
+                    new ValueTask(GetCancelableWaiterTask(cancellationToken)) :
                     new ValueTask(this, _waitSource.Version);
+            }
 
-                async Task GetWaiterTaskCore()
+            private async Task GetCancelableWaiterTask(CancellationToken cancellationToken)
+            {
+                using (cancellationToken.UnsafeRegister(s =>
                 {
-                    using (cancellationToken.UnsafeRegister(s =>
-                    {
-                        var thisRef = (Http2Stream)s;
+                    var thisRef = (Http2Stream)s;
 
-                        bool signalWaiter;
-                        lock (thisRef.SyncObject)
-                        {
-                            signalWaiter = thisRef._hasWaiter;
-                            thisRef._hasWaiter = false;
-                        }
-
-                        if (signalWaiter)
-                        {
-                            // Wake up the wait.  It will then immediately check whether cancellation was requested and throw if it was.
-                            thisRef._waitSource.SetResult(true);
-                        }
-                    }, this))
+                    bool signalWaiter;
+                    lock (thisRef.SyncObject)
                     {
-                        await new ValueTask(this, _waitSource.Version).ConfigureAwait(false);
+                        signalWaiter = thisRef._hasWaiter;
+                        thisRef._hasWaiter = false;
                     }
 
-                    CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
+                    if (signalWaiter)
+                    {
+                        // Wake up the wait.  It will then immediately check whether cancellation was requested and throw if it was.
+                        thisRef._waitSource.SetResult(true);
+                    }
+                }, this))
+                {
+                    await new ValueTask(this, _waitSource.Version).ConfigureAwait(false);
                 }
+
+                CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
             }
 
             public void Trace(string message, [CallerMemberName] string memberName = null) =>
