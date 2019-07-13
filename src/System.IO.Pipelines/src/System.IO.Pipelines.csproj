@@ -11,6 +11,7 @@
     <Compile Include="System\IO\Pipelines\BufferSegment.cs" />
     <Compile Include="System\IO\Pipelines\CompletionData.cs" />
     <Compile Include="System\IO\Pipelines\FlushResult.cs" />
+    <Compile Include="System\IO\Pipelines\Gate.cs" />
     <Compile Include="System\IO\Pipelines\InlineScheduler.cs" />
     <Compile Include="System\IO\Pipelines\IDuplexPipe.cs" />
     <Compile Include="System\IO\Pipelines\BufferSegmentStack.cs" />
