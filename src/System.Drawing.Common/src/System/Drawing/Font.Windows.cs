@@ -226,12 +226,12 @@ namespace System.Drawing
         /// </summary>
         public static Font FromHfont(IntPtr hfont)
         {
-            var lf = new SafeNativeMethods.LOGFONT();
-            SafeNativeMethods.GetObject(new HandleRef(null, hfont), ref lf);
+            var logFont = new SafeNativeMethods.LOGFONT();
+            SafeNativeMethods.GetObject(new HandleRef(null, hfont), ref logFont);
 
             using (ScreenDC dc = ScreenDC.Create())
             {
-                return FromLogFont(lf, dc);
+                return FromLogFontInternal(ref logFont, dc);
             }
         }
 
@@ -248,7 +248,15 @@ namespace System.Drawing
             }
         }
 
-        private static Font FromLogFontInternal(ref SafeNativeMethods.LOGFONT logFont, IntPtr hdc)
+        internal static Font FromLogFont(ref SafeNativeMethods.LOGFONT logFont)
+        {
+            using (ScreenDC dc = ScreenDC.Create())
+            {
+                return FromLogFont(logFont, dc);
+            }
+        }
+
+        internal static Font FromLogFontInternal(ref SafeNativeMethods.LOGFONT logFont, IntPtr hdc)
         {
             int status = Gdip.GdipCreateFontFromLogfontW(new HandleRef(null, hdc), ref logFont, out IntPtr font);
 

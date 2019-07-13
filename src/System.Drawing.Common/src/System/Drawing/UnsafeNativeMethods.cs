@@ -32,11 +32,8 @@ namespace System.Drawing
         [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true)]
         public static extern int GetSystemMetrics(int nIndex);
 
-        [DllImport(ExternDll.User32, SetLastError = true, CharSet = CharSet.Auto, BestFitMapping = false)]
-        public static extern bool SystemParametersInfo(int uiAction, int uiParam, [In, Out] NativeMethods.NONCLIENTMETRICS pvParam, int fWinIni);
-
-        [DllImport(ExternDll.User32, SetLastError = true, CharSet = CharSet.Auto, BestFitMapping = false)]
-        public static extern bool SystemParametersInfo(int uiAction, int uiParam, ref SafeNativeMethods.LOGFONT pvParam, int fWinIni);
+        [DllImport(ExternDll.User32, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static unsafe extern bool SystemParametersInfo(uint uiAction, uint uiParam, void* pvParam, uint fWinIni);
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern int GetDeviceCaps(HandleRef hDC, int nIndex);
