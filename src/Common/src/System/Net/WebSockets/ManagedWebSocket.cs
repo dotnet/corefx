@@ -12,6 +12,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Sources;
 
 namespace System.Net.WebSockets
 {
@@ -153,6 +154,8 @@ namespace System.Net.WebSockets
         /// As such, we need thread-safety in the management of <see cref="_lastReceiveAsync"/>.
         /// </summary>
         private object ReceiveAsyncLock => _utf8TextState; // some object, as we're simply lock'ing on it
+
+        private EnsureBufferValueTaskSource _ensureBuffer;
 
         /// <summary>Initializes the websocket.</summary>
         /// <param name="stream">The connected Stream.</param>
@@ -1191,10 +1194,9 @@ namespace System.Net.WebSockets
             _receiveBufferOffset += count;
         }
 
-        private async Task EnsureBufferContainsAsync(int minimumRequiredBytes, CancellationToken cancellationToken, bool throwOnPrematureClosure = true)
+        private ValueTask EnsureBufferContainsAsync(int minimumRequiredBytes, CancellationToken cancellationToken, bool throwOnPrematureClosure = true)
         {
             Debug.Assert(minimumRequiredBytes <= _receiveBuffer.Length, $"Requested number of bytes {minimumRequiredBytes} must not exceed {_receiveBuffer.Length}");
-
             // If we don't have enough data in the buffer to satisfy the minimum required, read some more.
             if (_receiveBufferCount < minimumRequiredBytes)
             {
@@ -1205,18 +1207,12 @@ namespace System.Net.WebSockets
                 }
                 _receiveBufferOffset = 0;
 
-                // While we don't have enough data, read more.
-                while (_receiveBufferCount < minimumRequiredBytes)
-                {
-                    int numRead = await _stream.ReadAsync(_receiveBuffer.Slice(_receiveBufferCount, _receiveBuffer.Length - _receiveBufferCount), cancellationToken).ConfigureAwait(false);
-                    Debug.Assert(numRead >= 0, $"Expected non-negative bytes read, got {numRead}");
-                    if (numRead <= 0)
-                    {
-                        ThrowIfEOFUnexpected(throwOnPrematureClosure);
-                        break;
-                    }
-                    _receiveBufferCount += numRead;
-                }
+                EnsureBufferValueTaskSource ensureBuffer = (_ensureBuffer ??= new EnsureBufferValueTaskSource(this));
+                return ensureBuffer.EnsureBufferContainsAsync(minimumRequiredBytes, cancellationToken, throwOnPrematureClosure);
+            }
+            else
+            {
+                return default;
             }
         }
 
@@ -1502,6 +1498,113 @@ namespace System.Net.WebSockets
         {
             public WebSocketReceiveResult GetResult(int count, WebSocketMessageType messageType, bool endOfMessage, WebSocketCloseStatus? closeStatus, string closeDescription) =>
                 new WebSocketReceiveResult(count, messageType, endOfMessage, closeStatus, closeDescription);
+        }
+
+        private sealed class EnsureBufferValueTaskSource : IValueTaskSource
+        {
+            private readonly ManagedWebSocket _webSocket;
+            private readonly Action _onComplete;
+            private ManualResetValueTaskSourceCore<bool> _valueTaskSource;
+
+            private int _minimumRequiredBytes;
+            private CancellationToken _cancellationToken;
+            private bool _throwOnPrematureClosure;
+
+            private ConfiguredValueTaskAwaitable<int>.ConfiguredValueTaskAwaiter _awaiter;
+
+            public EnsureBufferValueTaskSource(ManagedWebSocket webSocket)
+            {
+                _webSocket = webSocket;
+                _onComplete = new Action(OnComplete);
+            }
+
+            public ValueTask EnsureBufferContainsAsync(int minimumRequiredBytes, CancellationToken cancellationToken, bool throwOnPrematureClosure)
+            {
+                _minimumRequiredBytes = minimumRequiredBytes;
+                _cancellationToken = cancellationToken;
+                _throwOnPrematureClosure = throwOnPrematureClosure;
+
+                return EnsureBufferContains();
+            }
+
+            private ValueTask EnsureBufferContains()
+            {
+                // While we don't have enough data, read more.
+                while (_webSocket._receiveBufferCount < _minimumRequiredBytes)
+                {
+                    ValueTask<int> vt = ReadAsync();
+                    if (!vt.IsCompletedSuccessfully)
+                    {
+                        _awaiter = vt.ConfigureAwait(false).GetAwaiter();
+                        _awaiter.UnsafeOnCompleted(_onComplete);
+                        return new ValueTask(this, _valueTaskSource.Version);
+                    }
+
+                    int numRead = vt.Result;
+                    Debug.Assert(numRead >= 0, $"Expected non-negative bytes read, got {numRead}");
+                    if (numRead <= 0)
+                    {
+                        _webSocket.ThrowIfEOFUnexpected(_throwOnPrematureClosure);
+                        break;
+                    }
+                    _webSocket._receiveBufferCount += numRead;
+                }
+
+                // Completed sync
+                return default;
+            }
+
+            private void OnComplete()
+            {
+                try
+                {
+                    int numRead = _awaiter.GetResult();
+                    Debug.Assert(numRead >= 0, $"Expected non-negative bytes read, got {numRead}");
+                    if (numRead <= 0)
+                    {
+                        _webSocket.ThrowIfEOFUnexpected(_throwOnPrematureClosure);
+                        _valueTaskSource.SetResult(default);
+                        return;
+                    }
+                    _webSocket._receiveBufferCount += numRead;
+
+                    if (_webSocket._receiveBufferCount < _minimumRequiredBytes)
+                    {
+                        ValueTask vt = EnsureBufferContains();
+                        if (vt.IsCompletedSuccessfully)
+                        {
+                            _valueTaskSource.SetResult(default);
+                        }
+                    }
+                    else
+                    {
+                        _valueTaskSource.SetResult(default);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _valueTaskSource.SetException(ex);
+                }
+            }
+
+            private ValueTask<int> ReadAsync()
+            {
+                return _webSocket._stream.ReadAsync(
+                    _webSocket._receiveBuffer.Slice(_webSocket._receiveBufferCount, _webSocket._receiveBuffer.Length - _webSocket._receiveBufferCount),
+                    _cancellationToken);
+            }
+
+            void IValueTaskSource.GetResult(short token)
+            {
+                _valueTaskSource.GetResult(token);
+                _valueTaskSource.Reset();
+            }
+
+            ValueTaskSourceStatus IValueTaskSource.GetStatus(short token)
+                => _valueTaskSource.GetStatus(token);
+
+            void IValueTaskSource.OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags)
+                => _valueTaskSource.OnCompleted(continuation, state, token, flags);
         }
     }
 }

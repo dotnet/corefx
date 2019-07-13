@@ -5,6 +5,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);CS1573</NoWarn>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <DefineConstants Condition="'$(TargetsNetFx)' == 'true'">$(DefineConstants);netstandard</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Net\WebSockets\ManagedWebSocket.netcoreapp.cs" />
@@ -43,5 +44,8 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Timer" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)'!='netcoreapp'">
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces" />
   </ItemGroup>
 </Project>

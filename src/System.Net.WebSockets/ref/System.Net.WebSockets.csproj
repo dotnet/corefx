@@ -15,4 +15,11 @@
     <ProjectReference Include="..\..\System.Security.Principal\ref\System.Security.Principal.csproj" />
     <ProjectReference Include="..\..\System.Threading.Tasks\ref\System.Threading.Tasks.csproj" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' OR '$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+    <Reference Include="netstandard" />
+    <Reference Include="System.Memory" />
+    <Reference Include="System.Threading.Tasks.Extensions" />
+    <ProjectReference Include="..\..\Microsoft.Bcl.AsyncInterfaces\ref\Microsoft.Bcl.AsyncInterfaces.csproj" />
+  </ItemGroup>
 </Project>
