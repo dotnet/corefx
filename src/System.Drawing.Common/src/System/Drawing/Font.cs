@@ -297,10 +297,9 @@ namespace System.Drawing
 
             SafeNativeMethods.LOGFONT nativeLogFont = ToLogFontInternal(graphics);
 
+            // PtrToStructure requires that the passed in object not be a value type.
             if (!type.IsValueType)
             {
-                // Unfortunately PtrToStructure requires that the passed in object not be a value type.
-                // The underlying runtime code supports it, and perhaps there is another way to do this.
                 Marshal.PtrToStructure(new IntPtr(&nativeLogFont), logFont);
             }
             else
