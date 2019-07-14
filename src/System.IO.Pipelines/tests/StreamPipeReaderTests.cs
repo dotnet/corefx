@@ -120,6 +120,27 @@ namespace System.IO.Pipelines.Tests
             pipe.Reader.Complete();
         }
 
+        [Fact]
+        public void ConcurrentReadsThrow()
+        {
+            var pipe = new Pipe();
+            var options = new StreamPipeReaderOptions(bufferSize: 4096);
+            PipeReader reader = PipeReader.Create(pipe.Reader.AsStream(), options);
+
+            ValueTask<ReadResult> valueTask = reader.ReadAsync();
+
+            Assert.False(valueTask.IsCompleted);
+
+            Assert.Throws<InvalidOperationException>(() => reader.ReadAsync());
+            Assert.Throws<InvalidOperationException>(() => reader.TryRead(out _));
+
+            Assert.False(valueTask.IsCompleted);
+
+            reader.Complete();
+
+            pipe.Reader.Complete();
+        }
+
         [Theory]
         [MemberData(nameof(ReadSettings))]
         public async Task ReadWithDifferentSettings(int bytesInBuffer, int bufferSize, int minimumReadSize, int[] readBufferSizes)

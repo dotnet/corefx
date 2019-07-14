@@ -4,12 +4,14 @@
 
 using System.Buffers;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Sources;
 
 namespace System.IO.Pipelines
 {
-    internal class StreamPipeReader : PipeReader
+    internal class StreamPipeReader : PipeReader, IValueTaskSource<ReadResult>
     {
         internal const int InitialSegmentPoolSize = 4; // 16K
         internal const int MaxSegmentPoolSize = 256; // 1MB
@@ -28,11 +30,19 @@ namespace System.IO.Pipelines
         private BufferSegment _readTail;
         private long _bufferedBytes;
         private bool _examinedEverything;
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
         // Mutable struct! Don't make this readonly
         private BufferSegmentStack _bufferSegmentPool;
-        private bool _leaveOpen;
+        private readonly bool _leaveOpen;
+
+        // State for async reads
+        private volatile bool _readInProgress;
+        private readonly Action _onReadCompleted;
+        private ManualResetValueTaskSourceCore<ReadResult> _readMrvts;
+        private ValueTaskAwaiter<int> _readAwaiter;
+        private CancellationToken _readCancellation;
+        private CancellationTokenRegistration _readRegistration;
 
         /// <summary>
         /// Creates a new StreamPipeReader.
@@ -53,6 +63,7 @@ namespace System.IO.Pipelines
             _pool = options.Pool == MemoryPool<byte>.Shared ? null : options.Pool;
             _bufferSize = _pool == null ? options.BufferSize : Math.Min(options.BufferSize, _pool.MaxBufferSize);
             _leaveOpen = options.LeaveOpen;
+            _onReadCompleted = new Action(OnReadCompleted);
         }
 
         /// <summary>
@@ -72,11 +83,7 @@ namespace System.IO.Pipelines
             {
                 lock (_lock)
                 {
-                    if (_internalTokenSource == null)
-                    {
-                        _internalTokenSource = new CancellationTokenSource();
-                    }
-                    return _internalTokenSource;
+                    return (_internalTokenSource ??= new CancellationTokenSource());
                 }
             }
         }
@@ -188,31 +195,40 @@ namespace System.IO.Pipelines
         }
 
         /// <inheritdoc />
-        public override async ValueTask<ReadResult> ReadAsync(CancellationToken cancellationToken = default)
+        public override ValueTask<ReadResult> ReadAsync(CancellationToken cancellationToken = default)
         {
-            // TODO ReadyAsync needs to throw if there are overlapping reads.
-            ThrowIfCompleted();
-
-            // PERF: store InternalTokenSource locally to avoid querying it twice (which acquires a lock)
-            CancellationTokenSource tokenSource = InternalTokenSource;
-            if (TryReadInternal(tokenSource, out ReadResult readResult))
+            if (_readInProgress)
             {
-                return readResult;
+                // Throw if there are overlapping reads; throwing unwrapped as it suggests last read was not awaited 
+                // so we surface it directly rather than wrapped in a Task (as this one will likely also not be awaited).
+                ThrowConcurrentReadsNotSupported();
             }
+            _readInProgress = true;
 
-            if (_isStreamCompleted)
+            bool isAsync = false;
+            try
             {
-                return new ReadResult(buffer: default, isCanceled: false, isCompleted: true);
-            }
 
-            var reg = new CancellationTokenRegistration();
-            if (cancellationToken.CanBeCanceled)
-            {
-                reg = cancellationToken.UnsafeRegister(state => ((StreamPipeReader)state).Cancel(), this);
-            }
+                ThrowIfCompleted();
 
-            using (reg)
-            {
+                // PERF: store InternalTokenSource locally to avoid querying it twice (which acquires a lock)
+                CancellationTokenSource tokenSource = InternalTokenSource;
+                if (TryReadInternal(tokenSource, out ReadResult readResult))
+                {
+                    return new ValueTask<ReadResult>(readResult);
+                }
+
+                if (_isStreamCompleted)
+                {
+                    return new ValueTask<ReadResult>(new ReadResult(buffer: default, isCanceled: false, isCompleted: true));
+                }
+
+                var reg = new CancellationTokenRegistration();
+                if (cancellationToken.CanBeCanceled)
+                {
+                    reg = cancellationToken.UnsafeRegister(state => ((StreamPipeReader)state).Cancel(), this);
+                }
+
                 var isCanceled = false;
                 try
                 {
@@ -220,7 +236,18 @@ namespace System.IO.Pipelines
 
                     Memory<byte> buffer = _readTail.AvailableMemory.Slice(_readTail.End);
 
-                    int length = await InnerStream.ReadAsync(buffer, tokenSource.Token).ConfigureAwait(false);
+                    ValueTask<int> resultTask = InnerStream.ReadAsync(buffer, tokenSource.Token);
+                    int length;
+                    if (resultTask.IsCompletedSuccessfully)
+                    {
+                        length = resultTask.Result;
+                    }
+                    else
+                    {
+                        isAsync = true;
+                        // Need to go async
+                        return CompleteReadAsync(resultTask, cancellationToken, reg);
+                    }
 
                     Debug.Assert(length + _readTail.End <= _readTail.AvailableMemory.Length);
 
@@ -247,8 +274,27 @@ namespace System.IO.Pipelines
                     }
 
                 }
+                finally
+                {
+                    if (!isAsync)
+                    {
+                        reg.Dispose();
+                    }
+                }
 
-                return new ReadResult(GetCurrentReadOnlySequence(), isCanceled, _isStreamCompleted);
+                return new ValueTask<ReadResult>(new ReadResult(GetCurrentReadOnlySequence(), isCanceled, _isStreamCompleted));
+            }
+            catch (Exception ex)
+            {
+                return new ValueTask<ReadResult>(Task.FromException<ReadResult>(ex));
+            }
+            finally
+            {
+                if (!isAsync)
+                {
+                    Debug.Assert(_readInProgress);
+                    _readInProgress = false;
+                }
             }
         }
 
@@ -270,6 +316,11 @@ namespace System.IO.Pipelines
 
         public override bool TryRead(out ReadResult result)
         {
+            if (_readInProgress)
+            {
+                ThrowConcurrentReadsNotSupported();
+            }
+
             ThrowIfCompleted();
 
             return TryReadInternal(InternalTokenSource, out result);
@@ -356,6 +407,114 @@ namespace System.IO.Pipelines
         private void Cancel()
         {
             InternalTokenSource.Cancel();
+        }
+
+        static void ThrowConcurrentReadsNotSupported()
+        {
+            throw new InvalidOperationException($"Concurrent reads are not supported; await the {nameof(ValueTask<ReadResult>)} before starting next read.");
+        }
+
+        private ValueTask<ReadResult> CompleteReadAsync(ValueTask<int> task, CancellationToken cancellationToken, CancellationTokenRegistration reg)
+        {
+            Debug.Assert(_readInProgress, "Read not in progress");
+
+            _readCancellation = cancellationToken;
+            _readRegistration = reg;
+
+            _readAwaiter = task.GetAwaiter();
+
+            return new ValueTask<ReadResult>(this, _readMrvts.Version);
+        }
+
+        private void OnReadCompleted()
+        {
+            try
+            {
+                int length = _readAwaiter.GetResult();
+
+                Debug.Assert(length + _readTail.End <= _readTail.AvailableMemory.Length);
+
+                _readTail.End += length;
+                _bufferedBytes += length;
+
+                if (length == 0)
+                {
+                    _isStreamCompleted = true;
+                }
+
+                _readMrvts.SetResult(new ReadResult(GetCurrentReadOnlySequence(), isCanceled: false, _isStreamCompleted));
+            }
+            catch (OperationCanceledException oce)
+            {
+                // Get the source before clearing (and replacing)
+                CancellationTokenSource tokenSource = InternalTokenSource;
+                ClearCancellationToken();
+                if (tokenSource.IsCancellationRequested && !_readCancellation.IsCancellationRequested)
+                {
+                    // Catch cancellation and translate it into setting isCanceled = true
+                    _readMrvts.SetResult(new ReadResult(GetCurrentReadOnlySequence(), isCanceled: true, _isStreamCompleted));
+                }
+                else
+                {
+                    _readMrvts.SetException(oce);
+                }
+            }
+            catch (Exception ex)
+            {
+                _readMrvts.SetException(ex);
+            }
+            finally
+            {
+                _readRegistration.Dispose();
+                _readRegistration = default;
+            }
+        }
+
+        ReadResult IValueTaskSource<ReadResult>.GetResult(short token)
+        {
+            ValidateReading();
+            ReadResult result = _readMrvts.GetResult(token);
+
+            _readCancellation = default;
+            _readAwaiter = default;
+            _readMrvts.Reset();
+
+            Debug.Assert(_readInProgress);
+            _readInProgress = false;
+
+            return result;
+        }
+
+        ValueTaskSourceStatus IValueTaskSource<ReadResult>.GetStatus(short token)
+            => _readMrvts.GetStatus(token);
+
+        void IValueTaskSource<ReadResult>.OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags)
+        {
+            ValidateReading();
+            _readMrvts.OnCompleted(continuation, state, token, flags);
+
+            if ((flags & ValueTaskSourceOnCompletedFlags.FlowExecutionContext) != 0)
+            {
+                _readAwaiter.OnCompleted(_onReadCompleted);
+            }
+            else
+            {
+                _readAwaiter.UnsafeOnCompleted(_onReadCompleted);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ValidateReading()
+        {
+            if (!_readInProgress)
+            {
+                ThrowReadNotInProgress();
+            }
+
+            static void ThrowReadNotInProgress()
+            {
+                throw new InvalidOperationException("Read not in progress");
+            }
         }
     }
 }
