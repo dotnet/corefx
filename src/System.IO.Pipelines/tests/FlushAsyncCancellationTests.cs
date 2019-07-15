@@ -48,7 +48,7 @@ namespace System.IO.Pipelines.Tests
                 });
 
             bool completed = Task.WhenAll(cancellationTask, blockingTask).Wait(TimeSpan.FromSeconds(30));
-            Assert.True(completed, $"Flush tasks are not completed. CancellationTask: {cancellationTask.Status.ToString()} BlockingTask: {blockingTask.Status.ToString()}");
+            Assert.True(completed, $"Flush tasks are not completed. CancellationTask: {cancellationTask.Status} BlockingTask: {blockingTask.Status.ToString()}");
         }
 
         [Fact]
