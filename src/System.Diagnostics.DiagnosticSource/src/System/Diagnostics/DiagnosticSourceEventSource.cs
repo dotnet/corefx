@@ -206,7 +206,7 @@ namespace System.Diagnostics
         /// Events from DiagnosticSource can be forwarded to EventSource using this event.  
         /// </summary>
         [Event(2, Keywords = Keywords.Events)]
-        private void Event(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
+        private void Event(string SourceName, string EventName, List<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(2, SourceName, EventName, Arguments);
         }
@@ -226,7 +226,7 @@ namespace System.Diagnostics
         /// Used to mark the beginning of an activity 
         /// </summary>
         [Event(4, Keywords = Keywords.Events)]
-        private void Activity1Start(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
+        private void Activity1Start(string SourceName, string EventName, List<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(4, SourceName, EventName, Arguments);
         }
@@ -235,7 +235,7 @@ namespace System.Diagnostics
         /// Used to mark the end of an activity 
         /// </summary>
         [Event(5, Keywords = Keywords.Events)]
-        private void Activity1Stop(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
+        private void Activity1Stop(string SourceName, string EventName, List<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(5, SourceName, EventName, Arguments);
         }
@@ -244,7 +244,7 @@ namespace System.Diagnostics
         /// Used to mark the beginning of an activity 
         /// </summary>
         [Event(6, Keywords = Keywords.Events)]
-        private void Activity2Start(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
+        private void Activity2Start(string SourceName, string EventName, List<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(6, SourceName, EventName, Arguments);
         }
@@ -253,7 +253,7 @@ namespace System.Diagnostics
         /// Used to mark the end of an activity that can be recursive.  
         /// </summary>
         [Event(7, Keywords = Keywords.Events)]
-        private void Activity2Stop(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
+        private void Activity2Stop(string SourceName, string EventName, List<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(7, SourceName, EventName, Arguments);
         }
@@ -262,7 +262,7 @@ namespace System.Diagnostics
         /// Used to mark the beginning of an activity 
         /// </summary>
         [Event(8, Keywords = Keywords.Events, ActivityOptions = EventActivityOptions.Recursive)]
-        private void RecursiveActivity1Start(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
+        private void RecursiveActivity1Start(string SourceName, string EventName, List<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(8, SourceName, EventName, Arguments);
         }
@@ -271,7 +271,7 @@ namespace System.Diagnostics
         /// Used to mark the end of an activity that can be recursive.  
         /// </summary>
         [Event(9, Keywords = Keywords.Events, ActivityOptions = EventActivityOptions.Recursive)]
-        private void RecursiveActivity1Stop(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
+        private void RecursiveActivity1Stop(string SourceName, string EventName, List<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(9, SourceName, EventName, Arguments);
         }
@@ -293,7 +293,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Converts a keyvalue bag to JSON.  Only used on V4.5 EventSources.  
         /// </summary>
-        private static string ToJson(IEnumerable<KeyValuePair<string, string>> keyValues)
+        private static string ToJson(List<KeyValuePair<string, string>> keyValues)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("{");
@@ -559,7 +559,7 @@ namespace System.Diagnostics
                     }
                 }
 
-                Action<string, string, IEnumerable<KeyValuePair<string, string>>> writeEvent = null;
+                Action<string, string, List<KeyValuePair<string, string>>> writeEvent = null;
                 if (activityName != null && activityName.Contains("Activity"))
                 {
                     MethodInfo writeEventMethodInfo = typeof(DiagnosticSourceEventSource).GetTypeInfo().GetDeclaredMethod(activityName);
@@ -570,8 +570,8 @@ namespace System.Diagnostics
                         // just works.  
                         try
                         {
-                            writeEvent = (Action<string, string, IEnumerable<KeyValuePair<string, string>>>)
-                                writeEventMethodInfo.CreateDelegate(typeof(Action<string, string, IEnumerable<KeyValuePair<string, string>>>), _eventSource);
+                            writeEvent = (Action<string, string, List<KeyValuePair<string, string>>>)
+                                writeEventMethodInfo.CreateDelegate(typeof(Action<string, string, List<KeyValuePair<string, string>>>), _eventSource);
                         }
                         catch (Exception) { }
                     }
@@ -584,7 +584,7 @@ namespace System.Diagnostics
 #if !NO_EVENTSOURCE_COMPLEX_TYPE_SUPPORT
                     writeEvent = _eventSource.Event;
 #else
-                    writeEvent = delegate (string sourceName, string eventName, IEnumerable<KeyValuePair<string, string>> arguments)
+                    writeEvent = delegate (string sourceName, string eventName, List<KeyValuePair<string, string>> arguments)
                     {
                         _eventSource.EventJson(sourceName, eventName, ToJson(arguments));
                     };
