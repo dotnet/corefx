@@ -17,7 +17,7 @@ namespace System.Linq
     /// Returning an instance of this type is useful to quickly handle scenarios where it is known
     /// that an operation will result in zero elements.
     /// </remarks>
-    internal sealed class EmptyPartition<TElement> : IPartition<TElement>, IEnumerator<TElement>
+    internal sealed class EmptyPartition<TElement> : IPartition<TElement>, IEnumerator<TElement>, IReverseProvider<TElement>
     {
         /// <summary>
         /// A cached, immutable instance of an empty enumerable.
@@ -49,6 +49,8 @@ namespace System.Linq
         {
             // Do nothing.
         }
+
+        public IEnumerable<TElement> Reverse() => this;
 
         public IPartition<TElement> Skip(int count) => this;
 
@@ -142,7 +144,7 @@ namespace System.Linq
         /// An iterator that yields the items of part of an <see cref="IList{TSource}"/>.
         /// </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
-        private sealed class ListPartition<TSource> : Iterator<TSource>, IPartition<TSource>
+        private sealed class ListPartition<TSource> : Iterator<TSource>, IPartition<TSource>, IReverseProvider<TSource>
         {
             private readonly IList<TSource> _source;
             private readonly int _minIndexInclusive;
@@ -180,6 +182,9 @@ namespace System.Linq
 
             public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
                 new SelectListPartitionIterator<TSource, TResult>(_source, selector, _minIndexInclusive, _maxIndexInclusive);
+
+            public IEnumerable<TSource> Reverse() =>
+                new ReverseListPartition<TSource>(_source, _minIndexInclusive, _maxIndexInclusive);
 
             public IPartition<TSource> Skip(int count)
             {

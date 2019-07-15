@@ -154,7 +154,7 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source array.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
-        private sealed partial class SelectArrayIterator<TSource, TResult> : Iterator<TResult>
+        private sealed partial class SelectArrayIterator<TSource, TResult> : Iterator<TResult>, IReverseProvider<TResult>
         {
             private readonly TSource[] _source;
             private readonly Func<TSource, TResult> _selector;
@@ -185,6 +185,9 @@ namespace System.Linq
 
             public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
                 new SelectArrayIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
+
+            public IEnumerable<TResult> Reverse() =>
+                new ReverseSelectArrayIterator<TSource, TResult>(_source, _selector);
         }
 
         /// <summary>
@@ -192,7 +195,7 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
-        private sealed partial class SelectListIterator<TSource, TResult> : Iterator<TResult>
+        private sealed partial class SelectListIterator<TSource, TResult> : Iterator<TResult>, IReverseProvider<TResult>
         {
             private readonly List<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
@@ -232,6 +235,9 @@ namespace System.Linq
 
             public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
                 new SelectListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
+
+            public IEnumerable<TResult> Reverse() =>
+                new ReverseSelectListIterator<TSource, TResult>(_source, _selector);
         }
 
         /// <summary>
@@ -239,7 +245,7 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
-        private sealed partial class SelectIListIterator<TSource, TResult> : Iterator<TResult>
+        private sealed partial class SelectIListIterator<TSource, TResult> : Iterator<TResult>, IReverseProvider<TResult>
         {
             private readonly IList<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
@@ -290,6 +296,9 @@ namespace System.Linq
 
             public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
                 new SelectIListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
+
+            public IEnumerable<TResult> Reverse() =>
+                new ReverseSelectIListIterator<TSource, TResult>(_source, _selector);
         }
     }
 }

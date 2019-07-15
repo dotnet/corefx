@@ -79,6 +79,7 @@
     <Compile Include="System\Linq\Iterator.cs" />
     <Compile Include="System\Linq\IIListProvider.cs" />
     <Compile Include="System\Linq\IPartition.cs" />
+    <Compile Include="System\Linq\IReverseProvider.cs" />
     <Compile Include="System\Linq\Join.cs" />
     <Compile Include="System\Linq\Last.cs" />
     <Compile Include="System\Linq\Lookup.cs" />
