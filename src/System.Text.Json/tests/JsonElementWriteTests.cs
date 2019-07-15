@@ -40,11 +40,39 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteNumberScientific(bool indented)
+        [InlineData("1e6", false)]
+        [InlineData("1e6", true)]
+        [InlineData("1e+6", false)]
+        [InlineData("1e+6", true)]
+        [InlineData("1e-6", false)]
+        [InlineData("1e-6", true)]
+        [InlineData("-1e6", false)]
+        [InlineData("-1e6", true)]
+        [InlineData("-1e+6", true)]
+        [InlineData("-1e+6", true)]
+        [InlineData("-1e-6", false)]
+        [InlineData("-1e-6", true)]
+        public static void WriteNumberScientific(string value, bool indented)
         {
-            WriteSimpleValue(indented, "1e6");
+            WriteSimpleValue(indented, value);
+        }
+
+        [Theory]
+        [InlineData("5.012e-20", false)]
+        [InlineData("5.012e-20", true)]
+        [InlineData("5.012e20", false)]
+        [InlineData("5.012e20", true)]
+        [InlineData("5.012e+20", false)]
+        [InlineData("5.012e+20", true)]
+        [InlineData("-5.012e-20", false)]
+        [InlineData("-5.012e-20", true)]
+        [InlineData("-5.012e20", false)]
+        [InlineData("-5.012e20", true)]
+        [InlineData("-5.012e+20", false)]
+        [InlineData("-5.012e+20", true)]
+        public static void WriteNumberDecimalScientific(string value, bool indented)
+        {
+            WriteSimpleValue(indented, value);
         }
 
         [Theory]
@@ -385,21 +413,6 @@ null,
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNullStringAsProperty(bool indented)
-        {
-            WritePropertyValueBothForms(
-                indented,
-                null,
-                "\"\"",
-                @"{
-  """": """"
-}",
-                "{\"\":\"\"}");
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
         public static void WriteNumberAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
@@ -427,9 +440,9 @@ null,
                 propertyName,
                 "42",
                 @"{
-  ""\u00ea" + propertyName.Substring(1) + @""": 42
+  ""\u00EA" + propertyName.Substring(1) + @""": 42
 }",
-                $"{{\"\\u00ea{propertyName.Substring(1)}\":42}}");
+                $"{{\"\\u00EA{propertyName.Substring(1)}\":42}}");
         }
 
         [Theory]
@@ -470,12 +483,12 @@ null,
             WritePropertyValueBothForms(
                 indented,
                 // Arabic "kabir" => "big"
-                "\u0643\u0628\u064a\u0631",
+                "\u0643\u0628\u064A\u0631",
                 "1e400",
                 @"{
-  ""\u0643\u0628\u064a\u0631"": 1e400
+  ""\u0643\u0628\u064A\u0631"": 1e400
 }",
-                "{\"\\u0643\\u0628\\u064a\\u0631\":1e400}");
+                "{\"\\u0643\\u0628\\u064A\\u0631\":1e400}");
         }
 
         [Theory]
@@ -1208,14 +1221,15 @@ null,
 
         private static void AssertContents(string expectedValue, ArrayBufferWriter<byte> buffer)
         {
-            Assert.Equal(
-                expectedValue,
-                Encoding.UTF8.GetString(
+            string value = Encoding.UTF8.GetString(
                     buffer.WrittenSpan
 #if netfx
                         .ToArray()
 #endif
-                    ));
+                    );
+
+            // Temporary hack until we can use the same escape algorithm throughout.
+            Assert.Equal(expectedValue.NormalizeToJsonNetFormat(), value.NormalizeToJsonNetFormat());
         }
     }
 }
