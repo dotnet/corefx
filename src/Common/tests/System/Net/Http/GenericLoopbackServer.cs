@@ -61,7 +61,7 @@ namespace System.Net.Test.Common
         public abstract Task SendResponseBodyAsync(byte[] data, bool isFinal = true, int requestId = 0);
 
         /// <summary>Waits for the client to signal cancellation.</summary>
-        public abstract Task WaitForCancellationAsync();
+        public abstract Task WaitForCancellationAsync(bool ignoreIncomingData = true, int requestId = 0);
 
         /// <summary>Helper function to make it easier to convert old test with strings.</summary>
         public async Task SendResponseBodyAsync(string data, bool isFinal = true, int requestId = 0)

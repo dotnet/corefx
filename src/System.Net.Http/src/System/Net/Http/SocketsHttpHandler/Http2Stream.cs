@@ -320,7 +320,7 @@ namespace System.Net.Http
                         // if the header can't be added, we silently drop it.
                         if (_state == StreamState.ExpectingTrailingHeaders)
                         {
-                            _trailers ??= new List<KeyValuePair<HeaderDescriptor, string>>();
+                            Debug.Assert(_trailers != null);
                             _trailers.Add(KeyValuePair.Create(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue));
                         }
                         else if (descriptor.HeaderType == HttpHeaderType.Content)
@@ -354,6 +354,7 @@ namespace System.Net.Http
                     if (_state == StreamState.ExpectingData)
                     {
                         _state = StreamState.ExpectingTrailingHeaders;
+                        _trailers ??= new List<KeyValuePair<HeaderDescriptor, string>>();
                     }
                 }
             }

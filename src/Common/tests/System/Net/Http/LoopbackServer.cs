@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Functional.Tests;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
@@ -816,14 +815,23 @@ namespace System.Net.Test.Common
                 await SendResponseAsync(Encoding.UTF8.GetString(body)).ConfigureAwait(false);
             }
 
-            public override async Task WaitForCancellationAsync()
+            public override async Task WaitForCancellationAsync(bool ignoreIncomingData = true, int requestId = 0)
             {
                 var buffer = new byte[1024];
-                try
+                while (true)
                 {
-                    while (await ReadAsync(buffer, 0, buffer.Length).TimeoutAfter(TestHelper.PassingTestTimeoutMilliseconds).ConfigureAwait(false) > 0);
+                    int bytesRead = await ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+
+                    if (!ignoreIncomingData)
+                    {
+                        Assert.Equal(0, bytesRead);
+                    }
+
+                    if (bytesRead == 0)
+                    {
+                        break;
+                    }
                 }
-                catch (IOException) { }
             }
         }
 

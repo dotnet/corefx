@@ -728,15 +728,27 @@ namespace System.Net.Test.Common
             return SendResponseBodyAsync(streamId, body, isFinal);
         }
 
-        public override async Task WaitForCancellationAsync()
+        public override async Task WaitForCancellationAsync(bool ignoreIncomingData = true, int requestId = 0)
         {
+            int streamId = requestId == 0 ? _lastStreamId : requestId;
+
             Frame frame;
             do
             {
                 frame = await ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds));
                 Assert.NotNull(frame); // We should get Rst before closing connection.
                 Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
+                if (ignoreIncomingData)
+                {
+                    Assert.True(frame.Type == FrameType.Data || frame.Type == FrameType.RstStream, $"Expected Data or RstStream, got {frame.Type}");
+                }
+                else
+                {
+                    Assert.Equal(FrameType.RstStream, frame.Type);
+                }
             } while (frame.Type != FrameType.RstStream);
+
+            Assert.Equal(streamId, frame.StreamId);
         }
     }
 }

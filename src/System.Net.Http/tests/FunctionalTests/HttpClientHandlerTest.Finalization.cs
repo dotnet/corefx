@@ -26,7 +26,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.SupportsAlpn))]
-        public async Task PendingReceive_ResponseDropped_SendsReset()
+        public async Task IncompleteResponseStream_ResponseDropped_CancelsRequestToServer()
         {
             using (HttpClient client = CreateHttpClient())
             {
