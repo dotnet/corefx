@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 #if BUILDING_INBOX_LIBRARY
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;

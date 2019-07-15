@@ -331,9 +331,6 @@ namespace System.Text.Json
             };
         }
 
-        internal delegate object ImmutableCreateRangeDelegate<T>(IEnumerable<T> items);
-        internal delegate object ImmutableDictCreateRangeDelegate<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> items);
-
         internal JsonPropertyInfo GetJsonPropertyInfoFromClassInfo(JsonClassInfo classInfo, JsonSerializerOptions options)
         {
             Type objectType = classInfo.Type;
