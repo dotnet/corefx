@@ -482,7 +482,7 @@ null,
                     target.WriteTo(writer);
                     writer.Flush();
                 }
-                string str = Encoding.UTF8.GetString(buffer.WrittenSpan);
+
                 AssertContents(expectedStr, buffer);
             }
         }
@@ -504,6 +504,7 @@ null,
                 var writer = new Utf8JsonWriter(buffer);
                 target.WriteTo(writer);
                 writer.Flush();
+
                 AssertContents(expectedStr, buffer);
             }
         }
@@ -514,7 +515,7 @@ null,
             string unicodeString = "\uD800\uDC00\uD803\uDE6D \uD834\uDD1E\uDBFF\uDFFF";
             string json = $"[\"{unicodeString}\"]";
             var buffer = new ArrayBufferWriter<byte>(1024);
-            string expectedStr = $"{GetEscapedExpectedString(unicodeString, StringEscapeHandling.EscapeNonAscii)}";
+            string expectedStr = GetEscapedExpectedString(unicodeString, StringEscapeHandling.EscapeNonAscii);
 
             using (JsonDocument doc = JsonDocument.Parse(json, s_options))
             {
@@ -523,6 +524,7 @@ null,
                 var writer = new Utf8JsonWriter(buffer);
                 target.WriteTo(writer);
                 writer.Flush();
+
                 AssertContents(expectedStr, buffer);
             }
         }
