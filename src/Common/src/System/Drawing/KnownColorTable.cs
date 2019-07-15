@@ -183,7 +183,7 @@ namespace System.Drawing
 
 #if FEATURE_WINDOWS_SYSTEM_COLORS
 
-        private static readonly byte[] s_systemColorIdTable = new byte[]
+        private static ReadOnlySpan<byte> SystemColorIdTable => new byte[]
         {
             // In order of definition in KnownColor enum
 
@@ -233,8 +233,8 @@ namespace System.Drawing
             Debug.Assert(Color.IsKnownColorSystem(color));
 
             return color < KnownColor.Transparent
-                ? s_systemColorIdTable[(int)color - (int)KnownColor.ActiveBorder]
-                : s_systemColorIdTable[(int)color - (int)KnownColor.ButtonFace + (int)KnownColor.WindowText];
+                ? SystemColorIdTable[(int)color - (int)KnownColor.ActiveBorder]
+                : SystemColorIdTable[(int)color - (int)KnownColor.ButtonFace + (int)KnownColor.WindowText];
         }
 #else
         private static readonly uint[] s_staticSystemColors = new uint[]

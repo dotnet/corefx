@@ -99,7 +99,6 @@ namespace System.Drawing.Tests
                 yield return new object[] { color, oleColor };
             }
 
-
             // These system colors are equivilent to Control, ControlLight and ControlDark.
             yield return new object[] { SystemColors.ButtonFace, unchecked((int)0x8000000F) };
             yield return new object[] { SystemColors.ButtonHighlight, unchecked((int)0x80000014) };
