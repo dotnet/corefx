@@ -283,6 +283,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<char>("1"));
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<char?>("1"));
 
+            // This throws because Enum is an abstract type.
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Enum>(unexpectedString));
         }
 
@@ -290,11 +291,15 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadPrimitiveUri()
         {
             Uri uri = JsonSerializer.Deserialize<Uri>(@"""https://domain/path""");
-            Assert.Equal("https:\u002f\u002fdomain\u002fpath", uri.ToString());
+            Assert.Equal(@"https://domain/path", uri.ToString());
+            Assert.Equal("https://domain/path", uri.OriginalString);
+
+            uri = JsonSerializer.Deserialize<Uri>(@"""https:\/\/domain\/path""");
+            Assert.Equal(@"https://domain/path", uri.ToString());
             Assert.Equal("https://domain/path", uri.OriginalString);
 
             uri = JsonSerializer.Deserialize<Uri>(@"""https:\u002f\u002fdomain\u002fpath""");
-            Assert.Equal("https:\u002f\u002fdomain\u002fpath", uri.ToString());
+            Assert.Equal(@"https://domain/path", uri.ToString());
             Assert.Equal("https://domain/path", uri.OriginalString);
 
             uri = JsonSerializer.Deserialize<Uri>(@"""~/path""");
