@@ -581,9 +581,14 @@ namespace System.Net.Http
                 throw new Http2ConnectionException(Http2ProtocolErrorCode.FrameSizeError);
             }
 
-            // Send PING ACK
-            // Don't wait for completion, which could happen asynchronously.
-            LogExceptions(SendPingAckAsync(_incomingBuffer.ActiveMemory.Slice(0, FrameHeader.PingLength)));
+            // We don't wait for SendPingAckAsync to complete before discarding
+            // the incoming buffer, so we need to take a copy of the data. Read
+            // it as a big-endian integer here to avoid allocating an array.
+            Debug.Assert(sizeof(long) == FrameHeader.PingLength);
+            ReadOnlySpan<byte> pingContent = _incomingBuffer.ActiveSpan.Slice(0, FrameHeader.PingLength);
+            long pingContentLong = BinaryPrimitives.ReadInt64BigEndian(pingContent);
+
+            LogExceptions(SendPingAckAsync(pingContentLong));
 
             _incomingBuffer.Discard(frameHeader.Length);
         }
@@ -654,7 +659,7 @@ namespace System.Net.Http
 
             if (protocolError == Http2ProtocolErrorCode.RefusedStream)
             {
-                http2Stream.OnRefused();
+                http2Stream.OnAbort(new Http2StreamException(protocolError), canRetry: true);
             }
             else
             {
@@ -684,7 +689,7 @@ namespace System.Net.Http
             var errorCode = (Http2ProtocolErrorCode)BinaryPrimitives.ReadInt32BigEndian(_incomingBuffer.ActiveSpan.Slice(sizeof(int)));
             if (NetEventSource.IsEnabled) Trace(frameHeader.StreamId, $"{nameof(lastValidStream)}={lastValidStream}, {nameof(errorCode)}={errorCode}");
 
-            AbortStreams(lastValidStream, new Http2ConnectionException(errorCode));
+            StartTerminatingConnection(lastValidStream, new Http2ConnectionException(errorCode));
 
             _incomingBuffer.Discard(frameHeader.Length);
         }
@@ -818,10 +823,9 @@ namespace System.Net.Http
             FinishWrite(FlushTiming.AfterPendingWrites);
         }
 
-        private async Task SendPingAckAsync(ReadOnlyMemory<byte> pingContent)
+        /// <param name="pingContent">The 8-byte ping content to send, read as a big-endian integer.</param>
+        private async Task SendPingAckAsync(long pingContent)
         {
-            Debug.Assert(pingContent.Length == FrameHeader.PingLength);
-
             Memory<byte> writeBuffer = await StartWriteAsync(FrameHeader.Size + FrameHeader.PingLength).ConfigureAwait(false);
             if (NetEventSource.IsEnabled) Trace("Started writing.");
 
@@ -829,7 +833,8 @@ namespace System.Net.Http
             frameHeader.WriteTo(writeBuffer);
             writeBuffer = writeBuffer.Slice(FrameHeader.Size);
 
-            pingContent.CopyTo(writeBuffer);
+            Debug.Assert(sizeof(long) == FrameHeader.PingLength);
+            BinaryPrimitives.WriteInt64BigEndian(writeBuffer.Span, pingContent);
 
             FinishWrite(FlushTiming.AfterPendingWrites);
         }
@@ -1273,7 +1278,7 @@ namespace System.Net.Http
         {
             // The connection has failed, e.g. failed IO or a connection-level frame error.
             Interlocked.CompareExchange(ref _abortException, abortException, null);
-            AbortStreams(0, abortException);
+            AbortStreams(abortException);
         }
 
         /// <summary>Gets whether the connection exceeded any of the connection limits.</summary>
@@ -1311,10 +1316,40 @@ namespace System.Net.Http
             return LifetimeExpired(nowTicks, connectionLifetime);
         }
 
-        private void AbortStreams(int lastValidStream, Exception abortException)
+        private void AbortStreams(Exception abortException)
+        {
+            // Invalidate outside of lock to avoid race with HttpPool Dispose()
+            // We should not try to grab pool lock while holding connection lock as on disposing pool,
+            // we could hold pool lock while trying to grab connection lock in Dispose().
+            _pool.InvalidateHttp2Connection(this);
+
+            lock (SyncObject)
+            {
+                if (NetEventSource.IsEnabled) Trace($"{nameof(abortException)}={abortException}");
+
+                foreach (KeyValuePair<int, Http2Stream> kvp in _httpStreams)
+                {
+                    int streamId = kvp.Key;
+                    Debug.Assert(streamId == kvp.Value.StreamId);
+
+                    kvp.Value.OnAbort(abortException);
+                }
+
+                _httpStreams.Clear();
+
+                _disposed = true;
+                CheckForShutdown();
+            }
+        }
+
+        private void StartTerminatingConnection(int lastValidStream, Exception abortException)
         {
             Debug.Assert(lastValidStream >= 0);
-            bool isAlreadyInvalidated = _disposed;
+
+            // Invalidate outside of lock to avoid race with HttpPool Dispose()
+            // We should not try to grab pool lock while holding connection lock as on disposing pool,
+            // we could hold pool lock while trying to grab connection lock in Dispose().
+            _pool.InvalidateHttp2Connection(this);
 
             lock (SyncObject)
             {
@@ -1327,27 +1362,25 @@ namespace System.Net.Http
                     // We have already received GOAWAY before
                     // In this case the smaller valid stream is used
                     _lastValidStreamId = Math.Min(_lastValidStreamId, lastValidStream);
-                    isAlreadyInvalidated = true;
                 }
 
-                if (NetEventSource.IsEnabled) Trace($"{nameof(lastValidStream)}={lastValidStream}, {nameof(abortException)}={lastValidStream}={abortException}, {nameof(_lastValidStreamId)}={_lastValidStreamId}");
+                if (NetEventSource.IsEnabled) Trace($"{nameof(lastValidStream)}={lastValidStream}, {nameof(_lastValidStreamId)}={_lastValidStreamId}");
 
                 bool hasAnyActiveStream = false;
+
                 foreach (KeyValuePair<int, Http2Stream> kvp in _httpStreams)
                 {
                     int streamId = kvp.Key;
                     Debug.Assert(streamId == kvp.Value.StreamId);
 
-                    if (streamId > lastValidStream)
+                    if (streamId > _lastValidStreamId)
                     {
-                        kvp.Value.OnAbort(abortException);
-
-                        _httpStreams.Remove(kvp.Value.StreamId);
+                        kvp.Value.OnAbort(abortException, canRetry: true);
+                        _httpStreams.Remove(streamId);
                     }
                     else
                     {
-                        if (NetEventSource.IsEnabled) Trace($"Found {nameof(streamId)} {streamId} <= {lastValidStream}.");
-
+                        if (NetEventSource.IsEnabled) Trace($"Found {nameof(streamId)} {streamId} <= {_lastValidStreamId}.");
                         hasAnyActiveStream = true;
                     }
                 }
@@ -1358,14 +1391,6 @@ namespace System.Net.Http
                 }
 
                 CheckForShutdown();
-            }
-
-            if (!isAlreadyInvalidated)
-            {
-                // Invalidate outside of lock to avoid race with HttpPool Dispose()
-                // We should not try to grab pool lock while holding connection lock as on disposing pool,
-                // we could hold pool lock while trying to grab connection lock in Dispose().
-                _pool.InvalidateHttp2Connection(this);
             }
         }
 
@@ -1595,7 +1620,8 @@ namespace System.Net.Http
 
                 if (e is IOException ||
                     e is ObjectDisposedException ||
-                    e is Http2ProtocolException)
+                    e is Http2ProtocolException ||
+                    e is InvalidOperationException)
                 {
                     replacementException = new HttpRequestException(SR.net_http_client_execution_error, _abortException ?? e);
                 }
