@@ -781,43 +781,46 @@ namespace System.Net.Http.Functional.Tests
         [ConditionalFact(nameof(SupportsAlpn))]
         public async Task GoAwayFrame_RequestInFlight_Finished()
         {
-            using (await Watchdog.CreateAsync())
-            using (var server = Http2LoopbackServer.CreateServer())
-            using (HttpClient client = CreateHttpClient())
-            {
-                Task<HttpResponseMessage> sendTask = client.GetAsync(server.Address);
-                Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
-                int streamId = await connection.ReadRequestHeaderAsync();
-
-                await connection.SendDefaultResponseHeadersAsync(streamId);
-
-                await connection.SendResponseBodyAsync(streamId, new byte[5] { 5, 4, 3, 2, 1 }, isFinal: false);
-                await connection.SendResponseBodyAsync(streamId, new byte[6] { 11, 10, 9, 8, 7, 6 }, isFinal: false);
-                // Signal that our request is the last thing which will be processed
-                await connection.SendGoAway(streamId);
-
-                // Make sure client received GOAWAY
-                await connection.PingPong();
-
-                await connection.SendResponseBodyAsync(streamId, new byte[4] { 15, 14, 13, 12 }, isFinal: false);
-                await connection.SendResponseBodyAsync(streamId, new byte[5] { 20, 19, 18, 17, 16 }, isFinal: true);
-
-                HttpResponseMessage response = await sendTask;
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                byte[] responseBody = await response.Content.ReadAsByteArrayAsync();
-
-                Assert.Equal(
-                    new byte[20]
+            await Http2LoopbackServer.CreateClientAndServerAsync(async uri =>
+                {
+                    using (HttpClient client = CreateHttpClient())
                     {
-                        5, 4, 3, 2, 1,
-                        11, 10, 9, 8, 7, 6,
-                        15, 14, 13, 12,
-                        20, 19, 18, 17, 16,
-                    },
-                    responseBody);
+                        HttpResponseMessage response = await client.GetAsync(uri);
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        byte[] responseBody = await response.Content.ReadAsByteArrayAsync();
 
-                await connection.WaitForConnectionShutdownAsync();
-            }
+                        Assert.Equal(
+                            new byte[20]
+                            {
+                                5, 4, 3, 2, 1,
+                                11, 10, 9, 8, 7, 6,
+                                15, 14, 13, 12,
+                                20, 19, 18, 17, 16,
+                            },
+                            responseBody);
+                    }
+                },
+                async server =>
+                {
+                    Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
+                    int streamId = await connection.ReadRequestHeaderAsync();
+
+                    await connection.SendDefaultResponseHeadersAsync(streamId);
+
+                    await connection.SendResponseBodyAsync(streamId, new byte[5] { 5, 4, 3, 2, 1 }, isFinal: false);
+                    await connection.SendResponseBodyAsync(streamId, new byte[6] { 11, 10, 9, 8, 7, 6 }, isFinal: false);
+
+                    // Signal that our request is the last thing which will be processed
+                    await connection.SendGoAway(streamId);
+
+                    // Make sure client received GOAWAY
+                    await connection.PingPong();
+
+                    await connection.SendResponseBodyAsync(streamId, new byte[4] { 15, 14, 13, 12 }, isFinal: false);
+                    await connection.SendResponseBodyAsync(streamId, new byte[5] { 20, 19, 18, 17, 16 }, isFinal: true);
+
+                    await connection.WaitForConnectionShutdownAsync();
+                });
         }
 
         [ConditionalFact(nameof(SupportsAlpn))]
