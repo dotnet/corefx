@@ -473,6 +473,12 @@ namespace System.Net.Http.Functional.Tests
         [MemberData(nameof(PostAsync_Cancel_CancellationTokenPassedToContent_MemberData))]
         public async Task PostAsync_Cancel_CancellationTokenPassedToContent(HttpContent content, CancellationToken expectedToken, StrongBox<CancellationToken> actualToken)
         {
+            if (IsUapHandler)
+            {
+                // HttpHandlerToFilter doesn't flow the token into the request body.
+                return;
+            }
+
             await LoopbackServerFactory.CreateClientAndServerAsync(
                 async uri =>
                 {
