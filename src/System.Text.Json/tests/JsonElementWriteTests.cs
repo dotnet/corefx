@@ -1200,7 +1200,7 @@ null,
 #endif
                     );
 
-            // Temporary hack until we can use the same escape algorithm throughout.
+            // Temporary hack until we can use the same escape algorithm on both sides and make sure we want uppercase hex.
             Assert.Equal(expectedValue.NormalizeToJsonNetFormat(), value.NormalizeToJsonNetFormat());
         }
     }
