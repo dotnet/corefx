@@ -22,7 +22,7 @@ namespace System.Text.Encodings.Web
     public abstract class TextEncoder
     {
         // Fast cache for Ascii
-        private static byte[] s_noEscape = new byte[] { };
+        private static readonly byte[] s_noEscape = new byte[] { }; // Should not be Array.Empty<byte> since used as a singleton for comparison.
         private byte[][] _asciiEscape = new byte[0x80][];
         
         // The following pragma disables a warning complaining about non-CLS compliant members being abstract, 
@@ -353,7 +353,7 @@ namespace System.Text.Encodings.Web
 
             uint nextScalarValue;
             int utf8BytesConsumedForScalar = 0;
-            int nonEscapedBytes = 0;
+            int nonEscapedByteCount = 0;
             OperationStatus opStatus = OperationStatus.Done;
 
             while (!utf8Source.IsEmpty)
@@ -361,26 +361,26 @@ namespace System.Text.Encodings.Web
                 // For performance, read until we require escaping.
                 do
                 {
-                    nextScalarValue = utf8Source[nonEscapedBytes];
+                    nextScalarValue = utf8Source[nonEscapedByteCount];
                     if (UnicodeUtility.IsAsciiCodePoint(nextScalarValue))
                     {
                         // Check Ascii cache.
-                        byte[] encoding = GetAsciiEncoding((byte)nextScalarValue);
+                        byte[] encodedBytes = GetAsciiEncoding((byte)nextScalarValue);
 
-                        if (ReferenceEquals(encoding, s_noEscape))
+                        if (ReferenceEquals(encodedBytes, s_noEscape))
                         {
-                            if (++nonEscapedBytes <= utf8Destination.Length)
+                            if (++nonEscapedByteCount <= utf8Destination.Length)
                             {
                                 // Source data can be copied as-is.
                                 continue;
                             }
 
-                            --nonEscapedBytes;
+                            --nonEscapedByteCount;
                             opStatus = OperationStatus.DestinationTooSmall;
                             break;
                         }
 
-                        if (encoding == null)
+                        if (encodedBytes == null)
                         {
                             // We need to escape and update the cache, so break out of this loop.
                             opStatus = OperationStatus.Done;
@@ -389,59 +389,59 @@ namespace System.Text.Encodings.Web
                         }
 
                         // For performance, handle the non-escaped bytes and encoding here instead of breaking out of the loop.
-                        if (nonEscapedBytes > 0)
+                        if (nonEscapedByteCount > 0)
                         {
                             // We previously verified the destination size.
-                            Debug.Assert(nonEscapedBytes <= utf8Destination.Length);
+                            Debug.Assert(nonEscapedByteCount <= utf8Destination.Length);
 
-                            utf8Source.Slice(0, nonEscapedBytes).CopyTo(utf8Destination);
-                            utf8Source = utf8Source.Slice(nonEscapedBytes);
-                            utf8Destination = utf8Destination.Slice(nonEscapedBytes);
-                            nonEscapedBytes = 0;
+                            utf8Source.Slice(0, nonEscapedByteCount).CopyTo(utf8Destination);
+                            utf8Source = utf8Source.Slice(nonEscapedByteCount);
+                            utf8Destination = utf8Destination.Slice(nonEscapedByteCount);
+                            nonEscapedByteCount = 0;
                         }
 
-                        if (!((ReadOnlySpan<byte>)encoding).TryCopyTo(utf8Destination))
+                        if (!((ReadOnlySpan<byte>)encodedBytes).TryCopyTo(utf8Destination))
                         {
                             opStatus = OperationStatus.DestinationTooSmall;
                             break;
                         }
 
-                        utf8Destination = utf8Destination.Slice(encoding.Length);
+                        utf8Destination = utf8Destination.Slice(encodedBytes.Length);
                         utf8Source = utf8Source.Slice(1);
                         continue;
                     }
 
                     // Code path for non-Ascii.
-                    opStatus = UnicodeHelpers.DecodeScalarValueFromUtf8(utf8Source.Slice(nonEscapedBytes), out nextScalarValue, out utf8BytesConsumedForScalar);
+                    opStatus = UnicodeHelpers.DecodeScalarValueFromUtf8(utf8Source.Slice(nonEscapedByteCount), out nextScalarValue, out utf8BytesConsumedForScalar);
                     if (opStatus == OperationStatus.Done)
                     {
                         if (!WillEncode((int)nextScalarValue))
                         {
-                            nonEscapedBytes += utf8BytesConsumedForScalar;
-                            if (nonEscapedBytes <= utf8Destination.Length)
+                            nonEscapedByteCount += utf8BytesConsumedForScalar;
+                            if (nonEscapedByteCount <= utf8Destination.Length)
                             {
                                 // Source data can be copied as-is.
                                 continue;
                             }
 
-                            nonEscapedBytes -= utf8BytesConsumedForScalar;
+                            nonEscapedByteCount -= utf8BytesConsumedForScalar;
                             opStatus = OperationStatus.DestinationTooSmall;
                         }
                     }
 
                     // We need to escape.
                     break;
-                } while (nonEscapedBytes < utf8Source.Length);
+                } while (nonEscapedByteCount < utf8Source.Length);
 
-                if (nonEscapedBytes > 0)
+                if (nonEscapedByteCount > 0)
                 {
                     // We previously verified the destination size.
-                    Debug.Assert(nonEscapedBytes <= utf8Destination.Length);
+                    Debug.Assert(nonEscapedByteCount <= utf8Destination.Length);
 
-                    utf8Source.Slice(0, nonEscapedBytes).CopyTo(utf8Destination);
-                    utf8Source = utf8Source.Slice(nonEscapedBytes);
-                    utf8Destination = utf8Destination.Slice(nonEscapedBytes);
-                    nonEscapedBytes = 0;
+                    utf8Source.Slice(0, nonEscapedByteCount).CopyTo(utf8Destination);
+                    utf8Source = utf8Source.Slice(nonEscapedByteCount);
+                    utf8Destination = utf8Destination.Slice(nonEscapedByteCount);
+                    nonEscapedByteCount = 0;
                 }
 
                 if (utf8Source.IsEmpty)

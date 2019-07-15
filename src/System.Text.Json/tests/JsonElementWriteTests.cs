@@ -1211,10 +1211,7 @@ null,
                     );
 
             // Temporary hack until we can use the same escape algorithm throughout.
-            if (expectedValue.NormalizeToJsonNetFormat() != value.NormalizeToJsonNetFormat())
-            {
-                Assert.Equal(expectedValue.NormalizeToJsonNetFormat(), value.NormalizeToJsonNetFormat());
-            }
+            Assert.Equal(expectedValue.NormalizeToJsonNetFormat(), value.NormalizeToJsonNetFormat());
         }
     }
 }

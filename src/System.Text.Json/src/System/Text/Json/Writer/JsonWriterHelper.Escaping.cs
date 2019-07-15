@@ -15,7 +15,7 @@ namespace System.Text.Json
     {
         // Only allow ASCII characters between ' ' (0x20) and '~' (0x7E), inclusively,
         // but exclude characters that need to be escaped as hex: '"', '\'', '&', '+', '<', '>', '`'
-        // and exclude characters that need to be escaped by adding a backslash: '\n', '\r', '\t', '\\', '/', '\b', '\f' 
+        // and exclude characters that need to be escaped by adding a backslash: '\n', '\r', '\t', '\\', '/', '\b', '\f'
         //
         // non-zero = allowed, 0 = disallowed
         public const int LastAsciiCharacter = 0x7F;
@@ -118,6 +118,8 @@ namespace System.Text.Json
             }
             else
             {
+                // For performance when no encoder is specified, perform escaping here for Ascii and on the
+                // first occurrence of a non-Ascii character, then call into the default encoder.
                 while (consumed < value.Length)
                 {
                     byte val = value[consumed];

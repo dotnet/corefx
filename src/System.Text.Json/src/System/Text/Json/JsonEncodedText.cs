@@ -36,14 +36,13 @@ namespace System.Text.Json
         /// Encodes the string text value as a JSON string.
         /// </summary>
         /// <param name="value">The value to be transformed as JSON encoded text.</param>
-        /// <param name="encoder">The encoder used to escape the input string.</param>
+        /// <param name="encoder">The encoder to use when escaping the string, or <see langword="null" /> to use the default encoder.</param>
         /// <exception cref="ArgumentNullException">
         /// Thrown if value is null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large or if it contains invalid UTF-16 characters.
         /// </exception>
-        /// <remarks>By default, if no encoder is passed in, <see cref="JavaScriptEncoder.Default"/> is used</remarks>
         public static JsonEncodedText Encode(string value, JavaScriptEncoder encoder = null)
         {
             if (value == null)
@@ -51,16 +50,15 @@ namespace System.Text.Json
 
             return Encode(value.AsSpan(), encoder);
         }
-        
+
         /// <summary>
         /// Encodes the text value as a JSON string.
         /// </summary>
         /// <param name="value">The value to be transformed as JSON encoded text.</param>
-        /// <param name="encoder">The encoder used to escape the input string.</param>
+        /// <param name="encoder">The encoder to use when escaping the string, or <see langword="null" /> to use the default encoder.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large or if it contains invalid UTF-16 characters.
         /// </exception>
-        /// <remarks>By default, if no encoder is passed in, <see cref="JavaScriptEncoder.Default"/> is used</remarks>
         public static JsonEncodedText Encode(ReadOnlySpan<char> value, JavaScriptEncoder encoder = null)
         {
             if (value.Length == 0)
@@ -98,11 +96,10 @@ namespace System.Text.Json
         /// Encodes the UTF-8 text value as a JSON string.
         /// </summary>
         /// <param name="utf8Value">The UTF-8 encoded value to be transformed as JSON encoded text.</param>
-        /// <param name="encoder">The encoder used to escape the input string.</param>
+        /// <param name="encoder">The encoder to use when escaping the string, or <see langword="null" /> to use the default encoder.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large or if it contains invalid UTF-8 bytes.
         /// </exception>
-        /// <remarks>By default, if no encoder is passed in, <see cref="JavaScriptEncoder.Default"/> is used</remarks>
         public static JsonEncodedText Encode(ReadOnlySpan<byte> utf8Value, JavaScriptEncoder encoder = null)
         {
             if (utf8Value.Length == 0)
