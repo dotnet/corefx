@@ -165,9 +165,6 @@
     <Compile Condition="'$(TargetGroup)' == 'netcoreapp2.0'" Include="$(CommonPath)\System\Drawing\ColorUtil.netcoreapp20.cs">
       <Link>System\Drawing\ColorUtil.netcoreapp20.cs</Link>
     </Compile>
-    <Compile Condition="'$(TargetGroup)' != 'netcoreapp2.0'" Include="$(CommonPath)\System\Drawing\ColorUtil.netcoreapp21.cs">
-      <Link>System\Drawing\ColorUtil.netcoreapp21.cs</Link>
-    </Compile>
     <Compile Condition="'$(TargetGroup)' == 'netcoreapp2.0'" Include="$(CommonPath)\System\Drawing\KnownColorTable.cs">
       <Link>System\Drawing\KnownColorTable.cs</Link>
     </Compile>
@@ -252,12 +249,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetProcAddress.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.GetProcAddress.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\User32\Interop.GetSysColor.cs">
-      <Link>Common\Interop\Windows\User32\Interop.GetSysColor.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\User32\Interop.Win32SystemColors.cs">
-      <Link>Common\Interop\Windows\User32\Interop.Win32SystemColors.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
       <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
