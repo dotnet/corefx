@@ -3,10 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 #if BUILDING_INBOX_LIBRARY
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -51,7 +51,7 @@ namespace System.Text.Json
         }
 
 
-        public override object ImmutableCollectionCreateRange(Type constructingType, Type elementType)
+        public override ImmutableCollectionCreator ImmutableCollectionCreateRange(Type constructingType, Type collectionType, Type elementType)
         {
             MethodInfo createRange = ImmutableCollectionCreateRangeMethod(constructingType, elementType);
 
@@ -60,32 +60,40 @@ namespace System.Text.Json
                 return null;
             }
 
-            if (constructingType.FullName == DefaultImmutableEnumerableConverter.ImmutableArrayTypeName)
-            {
-                Type immutableArrayType = constructingType.Assembly.GetType(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName);
-                immutableArrayType = immutableArrayType.MakeGenericType(elementType);
+            Type creatorType = typeof(ImmutableEnumerableCreator<,>).MakeGenericType(elementType, collectionType);
 
-                Type creatorType = typeof(ImmutableCollectionCreatorHelper<,>).MakeGenericType(elementType, immutableArrayType);
+            ConstructorInfo realMethod = creatorType.GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                Type.EmptyTypes,
+                modifiers: null);
 
-                ConstructorInfo constructor = typeof(ImmutableCollectionCreatorHelper<string, string>).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, binder: null, Type.EmptyTypes, modifiers: null);
+            Debug.Assert(realMethod != null);
 
-                ImmutableCollectionCreator creator = (ImmutableCollectionCreator)Activator.CreateInstance(
-                    creatorType,
-                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-                    binder: null,
-                    args: null,
-                    culture: null);
+            var dynamicMethod = new DynamicMethod(
+                ConstructorInfo.ConstructorName,
+                typeof(object),
+                Type.EmptyTypes,
+                typeof(ReflectionEmitMemberAccessor).Module,
+                skipVisibility: true);
 
-                creator.RegisterCreatorDelegateFromMethod(createRange);
-                return creator;
-            }
+            ILGenerator generator = dynamicMethod.GetILGenerator();
 
-            return createRange.CreateDelegate(
-                typeof(JsonSerializerOptions.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
+            generator.Emit(OpCodes.Newobj, realMethod);
+            generator.Emit(OpCodes.Ret);
+
+
+            JsonClassInfo.ConstructorDelegate constructor = (JsonClassInfo.ConstructorDelegate)dynamicMethod.CreateDelegate(
+                typeof(JsonClassInfo.ConstructorDelegate));
+
+            ImmutableCollectionCreator creator = (ImmutableCollectionCreator)constructor();
+
+            creator.RegisterCreatorDelegateFromMethod(createRange);
+            return creator;
         }
 
 
-        public override object ImmutableDictionaryCreateRange(Type constructingType, Type elementType)
+        public override ImmutableCollectionCreator ImmutableDictionaryCreateRange(Type constructingType, Type collectionType, Type elementType)
         {
             MethodInfo createRange = ImmutableDictionaryCreateRangeMethod(constructingType, elementType);
 
@@ -94,8 +102,36 @@ namespace System.Text.Json
                 return null;
             }
 
-            return createRange.CreateDelegate(
-                typeof(JsonSerializerOptions.ImmutableDictCreateRangeDelegate<,>).MakeGenericType(typeof(string), elementType), null);
+            Type creatorType = typeof(ImmutableDictionaryCreator<,>).MakeGenericType(elementType, collectionType);
+
+            ConstructorInfo realMethod = creatorType.GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                Type.EmptyTypes,
+                modifiers: null);
+
+            Debug.Assert(realMethod != null);
+
+            var dynamicMethod = new DynamicMethod(
+                ConstructorInfo.ConstructorName,
+                typeof(object),
+                Type.EmptyTypes,
+                typeof(ReflectionEmitMemberAccessor).Module,
+                skipVisibility: true);
+
+            ILGenerator generator = dynamicMethod.GetILGenerator();
+
+            generator.Emit(OpCodes.Newobj, realMethod);
+            generator.Emit(OpCodes.Ret);
+
+
+            JsonClassInfo.ConstructorDelegate constructor = (JsonClassInfo.ConstructorDelegate)dynamicMethod.CreateDelegate(
+                typeof(JsonClassInfo.ConstructorDelegate));
+
+            ImmutableCollectionCreator creator = (ImmutableCollectionCreator)constructor();
+
+            creator.RegisterCreatorDelegateFromMethod(createRange);
+            return creator;
         }
 
         public override Func<object, TProperty> CreatePropertyGetter<TClass, TProperty>(PropertyInfo propertyInfo) =>

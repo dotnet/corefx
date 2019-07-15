@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -37,7 +38,7 @@ namespace System.Text.Json
             return () => Activator.CreateInstance(type);
         }
 
-        public override object ImmutableCollectionCreateRange(Type constructingType, Type elementType)
+        public override ImmutableCollectionCreator ImmutableCollectionCreateRange(Type constructingType, Type collectionType, Type elementType)
         {
             MethodInfo createRange = ImmutableCollectionCreateRangeMethod(constructingType, elementType);
 
@@ -46,12 +47,21 @@ namespace System.Text.Json
                 return null;
             }
 
-            return createRange.CreateDelegate(
-                typeof(JsonSerializerOptions.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
+            Type creatorType = typeof(ImmutableEnumerableCreator<,>).MakeGenericType(elementType, collectionType);
+            ConstructorInfo constructor = creatorType.GetConstructor(
+                BindingFlags.Public |
+                BindingFlags.NonPublic |
+                BindingFlags.Instance, binder: null,
+                Type.EmptyTypes,
+                modifiers: null);
+
+            ImmutableCollectionCreator creator = (ImmutableCollectionCreator)constructor.Invoke(new object[] { });
+            creator.RegisterCreatorDelegateFromMethod(createRange);
+            return creator;
         }
 
 
-        public override object ImmutableDictionaryCreateRange(Type constructingType, Type elementType)
+        public override ImmutableCollectionCreator ImmutableDictionaryCreateRange(Type constructingType, Type collectionType, Type elementType)
         {
             MethodInfo createRange = ImmutableDictionaryCreateRangeMethod(constructingType, elementType);
 
@@ -60,8 +70,17 @@ namespace System.Text.Json
                 return null;
             }
 
-            return createRange.CreateDelegate(
-                typeof(JsonSerializerOptions.ImmutableDictCreateRangeDelegate<,>).MakeGenericType(typeof(string), elementType), null);
+            Type creatorType = typeof(ImmutableDictionaryCreator<,>).MakeGenericType(elementType, collectionType);
+            ConstructorInfo constructor = creatorType.GetConstructor(
+                BindingFlags.Public |
+                BindingFlags.NonPublic |
+                BindingFlags.Instance, binder: null,
+                Type.EmptyTypes,
+                modifiers: null);
+
+            ImmutableCollectionCreator creator = (ImmutableCollectionCreator)constructor.Invoke(new object[] { });
+            creator.RegisterCreatorDelegateFromMethod(createRange);
+            return creator;
         }
 
         public override Func<object, TProperty> CreatePropertyGetter<TClass, TProperty>(PropertyInfo propertyInfo)

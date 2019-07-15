@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.Json.Tests;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -69,6 +70,13 @@ namespace System.Text.Json.Serialization.Tests
 
             result = JsonSerializer.Deserialize<ImmutableArray<int>>(Encoding.UTF8.GetBytes(@"[]"));
             Assert.Equal(0, result.Count());
+        }
+
+        [Fact]
+        public static void ReadSimpleClassWithImmutableArray()
+        {
+            SimpleTestClassWithImmutableArray obj = JsonSerializer.Deserialize<SimpleTestClassWithImmutableArray>(SimpleTestClassWithImmutableArray.s_json);
+            obj.Verify();
         }
 
         [Fact]

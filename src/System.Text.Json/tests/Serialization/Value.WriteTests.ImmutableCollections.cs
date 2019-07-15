@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Text.Json.Tests;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -78,6 +79,24 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.Serialize(input);
             Assert.Equal("[[1,2],[3,4]]", json);
+        }
+
+        [Fact]
+        public static void WriteSimpleClassWithImmutableArray()
+        {
+            SimpleTestClassWithImmutableArray obj = new SimpleTestClassWithImmutableArray();
+            obj.Initialize();
+
+            Assert.Equal(SimpleTestClassWithImmutableArray.s_json, JsonSerializer.Serialize(obj));
+        }
+
+        [Fact]
+        public static void WriteSimpleClassWithObjectImmutableArray()
+        {
+            SimpleTestClassWithObjectImmutableArray obj = new SimpleTestClassWithObjectImmutableArray();
+            obj.Initialize();
+
+            Assert.Equal(SimpleTestClassWithObjectImmutableArray.s_json, JsonSerializer.Serialize(obj));
         }
 
         [Fact]

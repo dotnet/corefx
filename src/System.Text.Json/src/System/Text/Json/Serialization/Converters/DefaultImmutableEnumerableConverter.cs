@@ -94,8 +94,8 @@ namespace System.Text.Json.Serialization.Converters
             Type constructingType = underlyingType.Assembly.GetType(constructingTypeName);
 
             // Create a delegate which will point to the CreateRange method.
-            object createRangeDelegate;
-            createRangeDelegate = options.MemberAccessorStrategy.ImmutableCollectionCreateRange(constructingType, elementType);
+            ImmutableCollectionCreator createRangeDelegate;
+            createRangeDelegate = options.MemberAccessorStrategy.ImmutableCollectionCreateRange(constructingType, immutableCollectionType, elementType);
 
             // Cache the delegate
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);

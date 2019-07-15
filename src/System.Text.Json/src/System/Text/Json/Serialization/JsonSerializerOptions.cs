@@ -20,7 +20,7 @@ namespace System.Text.Json
 
         private readonly ConcurrentDictionary<Type, JsonClassInfo> _classes = new ConcurrentDictionary<Type, JsonClassInfo>();
         private readonly ConcurrentDictionary<Type, JsonPropertyInfo> _objectJsonProperties = new ConcurrentDictionary<Type, JsonPropertyInfo>();
-        private static ConcurrentDictionary<string, object> s_createRangeDelegates = new ConcurrentDictionary<string, object>();
+        private static ConcurrentDictionary<string, ImmutableCollectionCreator> s_createRangeDelegates = new ConcurrentDictionary<string, ImmutableCollectionCreator>();
         private MemberAccessor _memberAccessorStrategy;
         private JsonNamingPolicy _dictionayKeyPolicy;
         private JsonNamingPolicy _jsonPropertyNamingPolicy;
@@ -352,12 +352,12 @@ namespace System.Text.Json
             return s_createRangeDelegates.ContainsKey(key);
         }
 
-        internal bool TryGetCreateRangeDelegate(string delegateKey, out object createRangeDelegate)
+        internal bool TryGetCreateRangeDelegate(string delegateKey, out ImmutableCollectionCreator createRangeDelegate)
         {
             return s_createRangeDelegates.TryGetValue(delegateKey, out createRangeDelegate) && createRangeDelegate != null;
         }
 
-        internal bool TryAddCreateRangeDelegate(string key, object createRangeDelegate)
+        internal bool TryAddCreateRangeDelegate(string key, ImmutableCollectionCreator createRangeDelegate)
         {
             return s_createRangeDelegates.TryAdd(key, createRangeDelegate);
         }
