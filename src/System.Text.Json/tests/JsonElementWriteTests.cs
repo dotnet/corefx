@@ -136,9 +136,19 @@ namespace System.Text.Json.Tests
             using (MemoryStream stream = new MemoryStream(Array.Empty<byte>()))
             using (Utf8JsonWriter writer = new Utf8JsonWriter(stream))
             {
-                // Overwrite the number in the memory buffer still referenced by the document.
-                // If it doesn't hit a 100% overlap then we're not testing what we thought we were.
-                Assert.Equal(utf8Data.Length, Encoding.UTF8.GetBytes(overwriteJson, utf8Data));
+                // Use fixed and the older version of GetBytes-in-place because of the NetFX build.
+                unsafe
+                {
+                    fixed (byte* dataPtr = utf8Data)
+                    fixed (char* inputPtr = overwriteJson)
+                    {
+                        // Overwrite the number in the memory buffer still referenced by the document.
+                        // If it doesn't hit a 100% overlap then we're not testing what we thought we were.
+                        Assert.Equal(
+                            utf8Data.Length,
+                            Encoding.UTF8.GetBytes(inputPtr, overwriteJson.Length, dataPtr, utf8Data.Length));
+                    }
+                }
 
                 JsonElement rootElement = document.RootElement;
 
