@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -283,6 +282,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<char>("1"));
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<char?>("1"));
 
+            // This throws because Enum is an abstract type.
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Enum>(unexpectedString));
         }
 

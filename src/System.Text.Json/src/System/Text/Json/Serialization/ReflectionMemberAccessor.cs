@@ -34,6 +34,11 @@ namespace System.Text.Json
                 return null;
             }
 
+            if (type.IsAbstract)
+            {
+                return null;
+            }
+
             return () => Activator.CreateInstance(type);
         }
 

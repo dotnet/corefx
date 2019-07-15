@@ -21,6 +21,11 @@ namespace System.Text.Json
                 return null;
             }
 
+            if (type.IsAbstract)
+            {
+                return null;
+            }
+
             var dynamicMethod = new DynamicMethod(
                 ConstructorInfo.ConstructorName,
                 typeof(object),
