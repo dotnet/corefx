@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http.Headers;
@@ -32,6 +33,8 @@ namespace System.Net.Http
             private readonly CreditManager _streamWindow;
             private readonly HttpRequestMessage _request;
             private HttpResponseMessage _response;
+            /// <summary>Stores any trailers received after returning the response content to the caller.</summary>
+            private List<KeyValuePair<HeaderDescriptor, string>> _trailers;
 
             private ArrayBuffer _responseBuffer; // mutable struct, do not make this readonly
             private int _pendingWindowUpdate;
@@ -100,8 +103,17 @@ namespace System.Net.Http
             private object SyncObject => _streamWindow;
 
             public int StreamId => _streamId;
-            public HttpRequestMessage Request => _request;
-            public HttpResponseMessage Response => _response;
+
+            public HttpResponseMessage GetAndClearResponse()
+            {
+                // Once SendAsync completes, the Http2Stream should no longer hold onto the response message.
+                // Since the Http2Stream is rooted by the Http2Connection dictionary, doing so would prevent
+                // the response stream from being collected and finalized if it were to be dropped without
+                // being disposed first.
+                HttpResponseMessage r = _response;
+                _response = null;
+                return r;
+            }
 
             public async Task SendRequestBodyAsync(CancellationToken cancellationToken)
             {
@@ -272,7 +284,7 @@ namespace System.Net.Http
                             {
                                 _state = StreamState.ExpectingHeaders;
                                 // If we tried 100-Continue and got rejected signal that we should not send request body.
-                                _shouldSendRequestBody = (int)Response.StatusCode < 300;
+                                _shouldSendRequestBody = (int)_response.StatusCode < 300;
                                 shouldSendRequestBodyWaiter?.TrySetResult(_shouldSendRequestBody);
                             }
                         }
@@ -308,14 +320,17 @@ namespace System.Net.Http
                         // if the header can't be added, we silently drop it.
                         if (_state == StreamState.ExpectingTrailingHeaders)
                         {
-                            _response.TrailingHeaders.TryAddWithoutValidation(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
+                            Debug.Assert(_trailers != null);
+                            _trailers.Add(KeyValuePair.Create(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue));
                         }
                         else if (descriptor.HeaderType == HttpHeaderType.Content)
                         {
+                            Debug.Assert(_response != null);
                             _response.Content.Headers.TryAddWithoutValidation(descriptor, headerValue);
                         }
                         else
                         {
+                            Debug.Assert(_response != null);
                             _response.Headers.TryAddWithoutValidation(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
                         }
                     }
@@ -339,6 +354,7 @@ namespace System.Net.Http
                     if (_state == StreamState.ExpectingData)
                     {
                         _state = StreamState.ExpectingTrailingHeaders;
+                        _trailers ??= new List<KeyValuePair<HeaderDescriptor, string>>();
                     }
                 }
             }
@@ -445,7 +461,7 @@ namespace System.Net.Http
                 }
             }
 
-            public void OnAbort(Exception abortException)
+            public void OnAbort(Exception abortException, bool canRetry = false)
             {
                 bool signalWaiter;
                 lock (SyncObject)
@@ -457,33 +473,13 @@ namespace System.Net.Http
                         return;
                     }
 
+                    // We should not retry request which have started being processed since the behavior might be unpredictable
+                    // I.e. some action might have been taken based on the received data.
+                    // We will bubble the exception and let user decide what to do.
+                    bool isRetriable = _state == StreamState.ExpectingStatus || _state == StreamState.ExpectingHeaders;
                     Interlocked.CompareExchange(ref _abortException, abortException, null);
                     _state = StreamState.Aborted;
-
-                    signalWaiter = _hasWaiter;
-                    _hasWaiter = false;
-                }
-
-                if (signalWaiter)
-                {
-                    _waitSource.SetResult(true);
-                }
-            }
-
-            public void OnRefused()
-            {
-                bool signalWaiter;
-                lock (SyncObject)
-                {
-                    if (NetEventSource.IsEnabled) Trace("");
-
-                    if (_disposed || _state == StreamState.Aborted)
-                    {
-                        return;
-                    }
-
-                    _state = StreamState.Aborted;
-                    _canRetry = true;
+                    _canRetry = canRetry && isRetriable;
 
                     signalWaiter = _hasWaiter;
                     _hasWaiter = false;
@@ -508,7 +504,7 @@ namespace System.Net.Http
                 {
                     if (_canRetry)
                     {
-                        throw CreateRetryException();
+                        throw new HttpRequestException(SR.net_http_request_aborted, _abortException, allowRetry: true);
                     }
 
                     throw new IOException(SR.net_http_request_aborted, _abortException);
@@ -558,9 +554,18 @@ namespace System.Net.Http
                 }
 
                 // Start to process the response body.
-                ((HttpConnectionResponseContent)_response.Content).SetStream(emptyResponse ?
-                    EmptyReadStream.Instance :
-                    (Stream)new Http2ReadStream(this));
+                var responseContent = (HttpConnectionResponseContent)_response.Content;
+                if (emptyResponse)
+                {
+                    // If there are any trailers, copy them over to the response.  Normally this would be handled by
+                    // the response stream hitting EOF, but if there is no response body, we do it here.
+                    CopyTrailersToResponseMessage(_response);
+                    responseContent.SetStream(EmptyReadStream.Instance);
+                }
+                else
+                {
+                    responseContent.SetStream(new Http2ReadStream(this));
+                }
 
                 // Process Set-Cookie headers.
                 if (_connection._pool.Settings._useCookies)
@@ -623,7 +628,7 @@ namespace System.Net.Http
                 }
             }
 
-            public int ReadData(Span<byte> buffer, CancellationToken cancellationToken)
+            public int ReadData(Span<byte> buffer, HttpResponseMessage responseMessage)
             {
                 if (buffer.Length == 0)
                 {
@@ -635,8 +640,7 @@ namespace System.Net.Http
                 {
                     // Synchronously block waiting for data to be produced.
                     Debug.Assert(bytesRead == 0);
-                    GetWaiterTask(cancellationToken).AsTask().GetAwaiter().GetResult();
-                    CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
+                    GetWaiterTask(default).AsTask().GetAwaiter().GetResult();
                     (wait, bytesRead) = TryReadFromBuffer(buffer);
                     Debug.Assert(!wait);
                 }
@@ -644,13 +648,17 @@ namespace System.Net.Http
                 if (bytesRead != 0)
                 {
                     ExtendWindow(bytesRead);
-                    _connection.ExtendWindow(bytesRead);
+                }
+                else
+                {
+                    // We've hit EOF.  Pull in from the Http2Stream any trailers that were temporarily stored there.
+                    CopyTrailersToResponseMessage(responseMessage);
                 }
 
                 return bytesRead;
             }
 
-            public async ValueTask<int> ReadDataAsync(Memory<byte> buffer, CancellationToken cancellationToken)
+            public async ValueTask<int> ReadDataAsync(Memory<byte> buffer, HttpResponseMessage responseMessage, CancellationToken cancellationToken)
             {
                 if (buffer.Length == 0)
                 {
@@ -670,8 +678,25 @@ namespace System.Net.Http
                 {
                     ExtendWindow(bytesRead);
                 }
+                else
+                {
+                    // We've hit EOF.  Pull in from the Http2Stream any trailers that were temporarily stored there.
+                    CopyTrailersToResponseMessage(responseMessage);
+                }
 
                 return bytesRead;
+            }
+
+            private void CopyTrailersToResponseMessage(HttpResponseMessage responseMessage)
+            {
+                if (_trailers != null && _trailers.Count > 0)
+                {
+                    foreach (KeyValuePair<HeaderDescriptor, string> trailer in _trailers)
+                    {
+                        responseMessage.TrailingHeaders.TryAddWithoutValidation(trailer.Key, trailer.Value);
+                    }
+                    _trailers.Clear();
+                }
             }
 
             private async Task SendDataAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
@@ -747,34 +772,34 @@ namespace System.Net.Http
                 // if it is cancelable, then register for the cancellation callback, allocate a task for the asynchronously
                 // completing case, etc.
                 return cancellationToken.CanBeCanceled ?
-                    new ValueTask(GetWaiterTaskCore()) :
+                    new ValueTask(GetCancelableWaiterTask(cancellationToken)) :
                     new ValueTask(this, _waitSource.Version);
+            }
 
-                async Task GetWaiterTaskCore()
+            private async Task GetCancelableWaiterTask(CancellationToken cancellationToken)
+            {
+                using (cancellationToken.UnsafeRegister(s =>
                 {
-                    using (cancellationToken.UnsafeRegister(s =>
-                    {
-                        var thisRef = (Http2Stream)s;
+                    var thisRef = (Http2Stream)s;
 
-                        bool signalWaiter;
-                        lock (thisRef.SyncObject)
-                        {
-                            signalWaiter = thisRef._hasWaiter;
-                            thisRef._hasWaiter = false;
-                        }
-
-                        if (signalWaiter)
-                        {
-                            // Wake up the wait.  It will then immediately check whether cancellation was requested and throw if it was.
-                            thisRef._waitSource.SetResult(true);
-                        }
-                    }, this))
+                    bool signalWaiter;
+                    lock (thisRef.SyncObject)
                     {
-                        await new ValueTask(this, _waitSource.Version).ConfigureAwait(false);
+                        signalWaiter = thisRef._hasWaiter;
+                        thisRef._hasWaiter = false;
                     }
 
-                    CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
+                    if (signalWaiter)
+                    {
+                        // Wake up the wait.  It will then immediately check whether cancellation was requested and throw if it was.
+                        thisRef._waitSource.SetResult(true);
+                    }
+                }, this))
+                {
+                    await new ValueTask(this, _waitSource.Version).ConfigureAwait(false);
                 }
+
+                CancellationHelper.ThrowIfCancellationRequested(cancellationToken);
             }
 
             public void Trace(string message, [CallerMemberName] string memberName = null) =>
@@ -794,11 +819,27 @@ namespace System.Net.Http
             private sealed class Http2ReadStream : HttpBaseStream
             {
                 private Http2Stream _http2Stream;
+                private readonly HttpResponseMessage _responseMessage;
 
                 public Http2ReadStream(Http2Stream http2Stream)
                 {
                     Debug.Assert(http2Stream != null);
+                    Debug.Assert(http2Stream._response != null);
                     _http2Stream = http2Stream;
+                    _responseMessage = _http2Stream._response;
+                }
+
+                ~Http2ReadStream()
+                {
+                    if (NetEventSource.IsEnabled) _http2Stream?.Trace("");
+                    try
+                    {
+                        Dispose(disposing: false);
+                    }
+                    catch (Exception e)
+                    {
+                        if (NetEventSource.IsEnabled) _http2Stream?.Trace($"Error: {e}");
+                    }
                 }
 
                 protected override void Dispose(bool disposing)
@@ -809,16 +850,19 @@ namespace System.Net.Http
                         return;
                     }
 
-                    if (disposing)
-                    {
-                        if (http2Stream._state != StreamState.Aborted && http2Stream._state != StreamState.Complete)
-                        {
-                            // If we abort response stream before endOfStream, let server know.
-                            IgnoreExceptions(http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel));
-                        }
+                    // Technically we shouldn't be doing the following work when disposing == false,
+                    // as the following work relies on other finalizable objects.  But given the HTTP/2
+                    // protocol, we have little choice: if someone drops the Http2ReadStream without
+                    // disposing of it, we need to a) signal to the server that the stream is being
+                    // canceled, and b) clean up the associated state in the Http2Connection.
 
-                        http2Stream.Dispose();
+                    if (http2Stream._state != StreamState.Aborted && http2Stream._state != StreamState.Complete)
+                    {
+                        // If we abort response stream before endOfStream, let server know.
+                        IgnoreExceptions(http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel));
                     }
+
+                    http2Stream.Dispose();
 
                     base.Dispose(disposing);
                 }
@@ -834,7 +878,7 @@ namespace System.Net.Http
                         throw new IOException(SR.net_http_client_execution_error, http2Stream._abortException);
                     }
 
-                    return http2Stream.ReadData(destination, CancellationToken.None);
+                    return http2Stream.ReadData(destination, _responseMessage);
                 }
 
                 public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
@@ -855,7 +899,7 @@ namespace System.Net.Http
                         return new ValueTask<int>(Task.FromCanceled<int>(cancellationToken));
                     }
 
-                    return http2Stream.ReadDataAsync(destination, cancellationToken);
+                    return http2Stream.ReadDataAsync(destination, _responseMessage, cancellationToken);
                 }
 
                 public override void Write(ReadOnlySpan<byte> buffer) => throw new NotSupportedException(SR.net_http_content_readonly_stream);

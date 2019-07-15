@@ -135,7 +135,7 @@ namespace System.Text.Json
             KeyName = null;
         }
 
-        public static object CreateEnumerableValue(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options)
+        public static object CreateEnumerableValue(ref Utf8JsonReader reader, ref ReadStack state)
         {
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
@@ -154,16 +154,39 @@ namespace System.Text.Json
 
                 state.Current.TempEnumerableValues = converterList;
 
+                // Clear the value if present to ensure we don't confuse tempEnumerableValues with the collection. 
+                if (!jsonPropertyInfo.IsPropertyPolicy)
+                {
+                    jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, null);
+                }
+
                 return null;
             }
 
-            Type propertyType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            Type propertyType = jsonPropertyInfo.RuntimePropertyType;
             if (typeof(IList).IsAssignableFrom(propertyType))
             {
                 // If IList, add the members as we create them.
-                JsonClassInfo collectionClassInfo = state.Current.JsonPropertyInfo.RuntimeClassInfo;
-                IList collection = (IList)collectionClassInfo.CreateObject();
-                return collection;
+                JsonClassInfo collectionClassInfo;
+                
+                if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
+                {
+                    collectionClassInfo = jsonPropertyInfo.RuntimeClassInfo;
+                }
+                else
+                {
+                    collectionClassInfo = jsonPropertyInfo.DeclaredTypeClassInfo;
+                }
+
+                if (collectionClassInfo.CreateObject() is IList collection)
+                {
+                    return collection;
+                }
+                else
+                {
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(jsonPropertyInfo.DeclaredPropertyType, reader, state.JsonPath);
+                    return null;
+                }
             }
             else
             {

@@ -47,11 +47,14 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="propertyName"/> parameter is <see langword="null"/>.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         public void WriteBase64String(string propertyName, ReadOnlySpan<byte> bytes)
-            => WriteBase64String(propertyName.AsSpan(), bytes);
+            => WriteBase64String((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan(), bytes);
 
         /// <summary>
         /// Writes the property name and raw bytes value (as a base 64 encoded JSON string) as part of a name/value pair of a JSON object.
@@ -169,7 +172,7 @@ namespace System.Text.Json
                 stackalloc byte[length] :
                 (propertyArray = ArrayPool<byte>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+            JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, encoder: null, out int written);
 
             WriteBase64ByOptions(escapedPropertyName.Slice(0, written), bytes);
 

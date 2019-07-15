@@ -5,7 +5,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -128,6 +127,116 @@ namespace System.Text.Json.Serialization.Tests
 
             {
                 SortedList obj = JsonSerializer.Deserialize<SortedList>(JsonString);
+                Assert.Equal("World", ((JsonElement)obj["Hello"]).GetString());
+                Assert.Equal("World2", ((JsonElement)obj["Hello2"]).GetString());
+
+                string json = JsonSerializer.Serialize(obj);
+                Assert.Equal(JsonString, json);
+
+                json = JsonSerializer.Serialize<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
+        }
+
+        [Fact]
+        public static void ImplementsDictionary_DictionaryOfString()
+        {
+            const string JsonString = @"{""Hello"":""World"",""Hello2"":""World2""}";
+            const string ReorderedJsonString = @"{""Hello2"":""World2"",""Hello"":""World""}";
+
+            {
+                WrapperForIDictionary obj = JsonSerializer.Deserialize<WrapperForIDictionary>(JsonString);
+                Assert.Equal("World", ((JsonElement)obj["Hello"]).GetString());
+                Assert.Equal("World2", ((JsonElement)obj["Hello2"]).GetString());
+
+                string json = JsonSerializer.Serialize(obj);
+                Assert.Equal(JsonString, json);
+
+                json = JsonSerializer.Serialize<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
+
+            {
+                StringToStringDictionaryWrapper obj = JsonSerializer.Deserialize<StringToStringDictionaryWrapper>(JsonString);
+                Assert.Equal("World", obj["Hello"]);
+                Assert.Equal("World2", obj["Hello2"]);
+
+                string json = JsonSerializer.Serialize(obj);
+                Assert.Equal(JsonString, json);
+
+                json = JsonSerializer.Serialize<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
+
+            {
+                StringToStringSortedDictionaryWrapper obj = JsonSerializer.Deserialize<StringToStringSortedDictionaryWrapper>(JsonString);
+                Assert.Equal("World", obj["Hello"]);
+                Assert.Equal("World2", obj["Hello2"]);
+
+                string json = JsonSerializer.Serialize(obj);
+                Assert.Equal(JsonString, json);
+
+                json = JsonSerializer.Serialize<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
+
+            {
+                StringToStringIDictionaryWrapper obj = JsonSerializer.Deserialize<StringToStringIDictionaryWrapper>(JsonString);
+                Assert.Equal("World", obj["Hello"]);
+                Assert.Equal("World2", obj["Hello2"]);
+
+                string json = JsonSerializer.Serialize(obj);
+                Assert.Equal(JsonString, json);
+
+                json = JsonSerializer.Serialize<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
+
+            {
+                Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringToStringIReadOnlyDictionaryWrapper>(JsonString));
+
+                StringToStringIReadOnlyDictionaryWrapper obj = new StringToStringIReadOnlyDictionaryWrapper(new Dictionary<string, string>()
+                {
+                    { "Hello", "World" },
+                    { "Hello2", "World2" },
+                });
+                string json = JsonSerializer.Serialize(obj);
+                Assert.Equal(JsonString, json);
+
+                json = JsonSerializer.Serialize<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
+
+            {
+                Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringToStringIImmutableDictionaryWrapper>(JsonString));
+
+                StringToStringIImmutableDictionaryWrapper obj = new StringToStringIImmutableDictionaryWrapper(new Dictionary<string, string>()
+                {
+                    { "Hello", "World" },
+                    { "Hello2", "World2" },
+                });
+
+                string json = JsonSerializer.Serialize(obj);
+                Assert.True(JsonString == json || ReorderedJsonString == json);
+
+                json = JsonSerializer.Serialize<object>(obj);
+                Assert.True(JsonString == json || ReorderedJsonString == json);
+            }
+
+            {
+                HashtableWrapper obj = JsonSerializer.Deserialize<HashtableWrapper>(JsonString);
+                Assert.Equal("World", ((JsonElement)obj["Hello"]).GetString());
+                Assert.Equal("World2", ((JsonElement)obj["Hello2"]).GetString());
+
+                string json = JsonSerializer.Serialize(obj);
+                Assert.True(JsonString == json || ReorderedJsonString == json);
+
+                json = JsonSerializer.Serialize<object>(obj);
+                Assert.True(JsonString == json || ReorderedJsonString == json);
+            }
+
+            {
+                SortedListWrapper obj = JsonSerializer.Deserialize<SortedListWrapper>(JsonString);
                 Assert.Equal("World", ((JsonElement)obj["Hello"]).GetString());
                 Assert.Equal("World2", ((JsonElement)obj["Hello2"]).GetString());
 
@@ -787,7 +896,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, foo.IntProperty);
 
             foo = JsonSerializer.Deserialize<PocoDuplicate>(@"{""DictProperty"" : {""a"" : ""b"", ""c"" : ""d""},""DictProperty"" : {""b"" : ""b"", ""c"" : ""e""}}");
-            Assert.Equal(3, foo.DictProperty.Count);
+            Assert.Equal(2, foo.DictProperty.Count); // We don't concat.
             Assert.Equal("e", foo.DictProperty["c"]);
         }
 
@@ -798,12 +907,62 @@ namespace System.Text.Json.Serialization.Tests
             public Dictionary<string, string> DictProperty { get; set; }
         }
 
-        [Fact]
-        public static void ClassWithNoSetter()
+        public class ClassWithPopulatedDictionaryAndNoSetter
         {
-            string json = @"{""MyDictionary"":{""Key"":""Value""}}";
-            ClassWithDictionaryButNoSetter obj = JsonSerializer.Deserialize<ClassWithDictionaryButNoSetter>(json);
-            Assert.Equal("Value", obj.MyDictionary["Key"]);
+            public ClassWithPopulatedDictionaryAndNoSetter()
+            {
+                MyImmutableDictionary = MyImmutableDictionary.Add("Key", "Value");
+            }
+
+            public Dictionary<string, string> MyDictionary { get; } = new Dictionary<string, string>() { { "Key", "Value" } };
+            public ImmutableDictionary<string, string> MyImmutableDictionary { get; } = ImmutableDictionary.Create<string, string>();
+        }
+
+        [Fact]
+        public static void ClassWithNoSetterAndDictionary()
+        {
+            // We don't attempt to deserialize into dictionaries without a setter.
+            string json = @"{""MyDictionary"":{""Key1"":""Value1"", ""Key2"":""Value2""}}";
+            ClassWithPopulatedDictionaryAndNoSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedDictionaryAndNoSetter>(json);
+            Assert.Equal(1, obj.MyDictionary.Count);
+        }
+
+        [Fact]
+        public static void ClassWithNoSetterAndImmutableDictionary()
+        {
+            // We don't attempt to deserialize into dictionaries without a setter.
+            string json = @"{""MyImmutableDictionary"":{""Key1"":""Value1"", ""Key2"":""Value2""}}";
+            ClassWithPopulatedDictionaryAndNoSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedDictionaryAndNoSetter>(json);
+            Assert.Equal(1, obj.MyImmutableDictionary.Count);
+        }
+
+        public class ClassWithPopulatedDictionaryAndSetter
+        {
+            public ClassWithPopulatedDictionaryAndSetter()
+            {
+                MyImmutableDictionary = MyImmutableDictionary.Add("Key", "Value");
+            }
+
+            public Dictionary<string, string> MyDictionary { get; set; } = new Dictionary<string, string>() { { "Key", "Value" } };
+            public ImmutableDictionary<string, string> MyImmutableDictionary { get; set; } = ImmutableDictionary.Create<string, string>();
+        }
+
+        [Fact]
+        public static void ClassWithPopulatedDictionary()
+        {
+            // We replace the contents.
+            string json = @"{""MyDictionary"":{""Key1"":""Value1"", ""Key2"":""Value2""}}";
+            ClassWithPopulatedDictionaryAndSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedDictionaryAndSetter>(json);
+            Assert.Equal(2, obj.MyDictionary.Count);
+        }
+
+        [Fact]
+        public static void ClassWithPopulatedImmutableDictionary()
+        {
+            // We replace the contents.
+            string json = @"{""MyImmutableDictionary"":{""Key1"":""Value1"", ""Key2"":""Value2""}}";
+            ClassWithPopulatedDictionaryAndSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedDictionaryAndSetter>(json);
+            Assert.Equal(2, obj.MyImmutableDictionary.Count);
         }
 
         [Fact]
@@ -830,13 +989,6 @@ namespace System.Text.Json.Serialization.Tests
             string json = @"{""MyDictionary"":{""Key"":1}}";
             ClassWithNotSupportedDictionaryButIgnored obj = JsonSerializer.Deserialize<ClassWithNotSupportedDictionaryButIgnored>(json);
             Assert.Null(obj.MyDictionary);
-        }
-
-        [Fact]
-        public static void DeserializeUserDefinedDictionaryThrows()
-        {
-            string json = @"{""Hello"":1,""Hello2"":2}";
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<IImmutableDictionaryWrapper>(json));
         }
 
         [Fact]
@@ -1004,11 +1156,6 @@ namespace System.Text.Json.Serialization.Tests
 
             Assert.Equal("value1", dictionaryLast.Test);
             Assert.Null(dictionaryLast.Dict);
-        }
-
-        public class ClassWithDictionaryButNoSetter
-        {
-            public Dictionary<string, string> MyDictionary { get; } = new Dictionary<string, string>();
         }
 
         public class ClassWithNotSupportedDictionary
