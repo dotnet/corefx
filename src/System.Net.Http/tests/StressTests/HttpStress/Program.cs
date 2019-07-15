@@ -269,20 +269,6 @@ public class Program
                 }
             }),
 
-            ("POST Multipart Form Data",
-            async ctx =>
-            {
-                (string expected, MultipartFormDataContent formDataContent) formData = GetMultipartFormDataContent(contentSource, ctx, numParameters);
-                Version httpVersion = ctx.GetRandomVersion(httpVersions);
-
-                using (var req = new HttpRequestMessage(HttpMethod.Post, serverUri) { Version = httpVersion, Content = formData.formDataContent })
-                using (HttpResponseMessage m = await ctx.HttpClient.SendAsync(req))
-                {
-                    ValidateResponse(m, httpVersion);
-                    ValidateContent($"{formData.expected}", await m.Content.ReadAsStringAsync());;
-                }
-            }),
-
             ("POST Duplex",
             async ctx =>
             {
@@ -662,29 +648,6 @@ public class Program
         }
 
         return (queryString.ToString(), expectedString.ToString());
-    }
-
-    private static (string, MultipartFormDataContent) GetMultipartFormDataContent(string contentSource, ClientContext clientContext, int numFormFields)
-    {
-        var multipartFormDataContent = new MultipartFormDataContent("test_boundary");
-        StringBuilder sb = new StringBuilder();
-
-        int num = clientContext.GetRandomInt(numFormFields);
-
-        if (num == 0)
-            return ("--test_boundary\r\n\r\n--test_boundary--\r\n", multipartFormDataContent);
-
-        for (int i = 0; i < num; i++)
-        {
-            sb.Append("--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Disposition: form-data\r\n\r\n");
-            string content = clientContext.GetRandomSubstring(contentSource);
-            sb.Append(content);
-            sb.Append("\r\n");
-            multipartFormDataContent.Add(new StringContent(content));
-        }
-
-        sb.Append("--test_boundary--\r\n");
-        return (sb.ToString(), multipartFormDataContent);
     }
 
     private static (string, MultipartContent) GetMultipartContent(string contentSource, ClientContext clientContext, int numFormFields)
