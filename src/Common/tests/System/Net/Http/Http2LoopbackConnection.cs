@@ -694,7 +694,7 @@ namespace System.Net.Test.Common
             // TODO: Header continuation support.
             Assert.NotNull(statusCode);
 
-            if (headers != null && statusCode != null)
+            if (headers != null)
             {
                 bool hasDate = false;
                 bool stripContentLength = false;
