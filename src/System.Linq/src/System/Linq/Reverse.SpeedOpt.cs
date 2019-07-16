@@ -880,5 +880,249 @@ namespace System.Linq
                 }
             }
         }
+
+        internal sealed partial class ReverseWhereArrayIterator<TSource> : IIListProvider<TSource>
+        {
+            public TSource[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TSource>(_source.Length);
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(item);
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TSource> ToList()
+            {
+                var list = new List<TSource>();
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(item);
+                    }
+                }
+
+                return list;
+            }
+
+            public int GetCount(bool onlyIfCheap)
+            {
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
+        }
+
+        private sealed partial class ReverseWhereListIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
+        {
+            public TSource[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TSource>(_source.Count);
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(item);
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TSource> ToList()
+            {
+                var list = new List<TSource>();
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(item);
+                    }
+                }
+
+                return list;
+            }
+
+            public int GetCount(bool onlyIfCheap)
+            {
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
+        }
+
+        private sealed partial class ReverseWhereSelectArrayIterator<TSource, TResult> : IIListProvider<TResult>
+        {
+            public TResult[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TResult>(_source.Length);
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(_selector(item));
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TResult> ToList()
+            {
+                var list = new List<TResult>();
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(_selector(item));
+                    }
+                }
+
+                return list;
+            }
+
+            public int GetCount(bool onlyIfCheap)
+            {
+                // In case someone uses Count() to force evaluation of
+                // the selector, run it provided `onlyIfCheap` is false.
+
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        _selector(item);
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
+        }
+
+        private sealed partial class ReverseWhereSelectListIterator<TSource, TResult> : IIListProvider<TResult>
+        {
+            public TResult[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TResult>(_source.Count);
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(_selector(item));
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TResult> ToList()
+            {
+                var list = new List<TResult>();
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(_selector(item));
+                    }
+                }
+
+                return list;
+            }
+
+            public int GetCount(bool onlyIfCheap)
+            {
+                // In case someone uses Count() to force evaluation of
+                // the selector, run it provided `onlyIfCheap` is false.
+
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        _selector(item);
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
+        }
     }
 }

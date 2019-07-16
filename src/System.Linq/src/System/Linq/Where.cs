@@ -142,7 +142,7 @@ namespace System.Linq
         /// An iterator that filters each item of a <see cref="T:TSource[]"/>.
         /// </summary>
         /// <typeparam name="TSource">The type of the source array.</typeparam>
-        internal sealed partial class WhereArrayIterator<TSource> : Iterator<TSource>
+        internal sealed partial class WhereArrayIterator<TSource> : Iterator<TSource>, IReverseProvider<TSource>
         {
             private readonly TSource[] _source;
             private readonly Func<TSource, bool> _predicate;
@@ -183,13 +183,16 @@ namespace System.Linq
 
             public override IEnumerable<TSource> Where(Func<TSource, bool> predicate) =>
                 new WhereArrayIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
+
+            public IEnumerable<TSource> Reverse() =>
+                new ReverseWhereArrayIterator<TSource>(_source, _predicate);
         }
 
         /// <summary>
         /// An iterator that filters each item of a <see cref="List{TSource}"/>.
         /// </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
-        private sealed partial class WhereListIterator<TSource> : Iterator<TSource>
+        private sealed partial class WhereListIterator<TSource> : Iterator<TSource>, IReverseProvider<TSource>
         {
             private readonly List<TSource> _source;
             private readonly Func<TSource, bool> _predicate;
@@ -237,6 +240,9 @@ namespace System.Linq
 
             public override IEnumerable<TSource> Where(Func<TSource, bool> predicate) =>
                 new WhereListIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
+
+            public IEnumerable<TSource> Reverse() =>
+                new ReverseWhereListIterator<TSource>(_source, _predicate);
         }
 
         /// <summary>
@@ -244,7 +250,7 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source array.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
-        private sealed partial class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>
+        private sealed partial class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>, IReverseProvider<TResult>
         {
             private readonly TSource[] _source;
             private readonly Func<TSource, bool> _predicate;
@@ -285,6 +291,9 @@ namespace System.Linq
 
             public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
                 new WhereSelectArrayIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
+
+            public IEnumerable<TResult> Reverse() =>
+                new ReverseWhereSelectArrayIterator<TSource, TResult>(_source, _predicate, _selector);
         }
 
         /// <summary>
@@ -292,7 +301,7 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
-        private sealed partial class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>
+        private sealed partial class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>, IReverseProvider<TResult>
         {
             private readonly List<TSource> _source;
             private readonly Func<TSource, bool> _predicate;
@@ -340,6 +349,9 @@ namespace System.Linq
 
             public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
                 new WhereSelectListIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
+
+            public IEnumerable<TResult> Reverse() =>
+                new ReverseWhereSelectListIterator<TSource, TResult>(_source, _predicate, _selector);
         }
 
         /// <summary>

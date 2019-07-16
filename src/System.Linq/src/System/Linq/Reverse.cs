@@ -71,6 +71,9 @@ namespace System.Linq
             public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
                 new ReverseSelectArrayIterator<TSource, TResult>(_source, selector);
 
+            public override IEnumerable<TSource> Where(Func<TSource, bool> predicate) =>
+                new ReverseWhereArrayIterator<TSource>(_source, predicate);
+
             public IEnumerable<TSource> Reverse() => _source;
         }
 
@@ -138,6 +141,9 @@ namespace System.Linq
 
             public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
                 new ReverseSelectListIterator<TSource, TResult>(_source, selector);
+
+            public override IEnumerable<TSource> Where(Func<TSource, bool> predicate) =>
+                new ReverseWhereListIterator<TSource>(_source, predicate);
 
             public IEnumerable<TSource> Reverse() => _source;
         }
@@ -382,6 +388,196 @@ namespace System.Linq
             }
 
             public IEnumerable<TSource> Reverse() => _source;
+        }
+
+        internal sealed partial class ReverseWhereArrayIterator<TSource> : Iterator<TSource>, IReverseProvider<TSource>
+        {
+            private readonly TSource[] _source;
+            private readonly Func<TSource, bool> _predicate;
+
+            public ReverseWhereArrayIterator(TSource[] source, Func<TSource, bool> predicate)
+            {
+                Debug.Assert(source != null && source.Length > 0);
+                Debug.Assert(predicate != null);
+                _source = source;
+                _predicate = predicate;
+            }
+
+            public override Iterator<TSource> Clone() =>
+                new ReverseWhereArrayIterator<TSource>(_source, _predicate);
+
+            public override bool MoveNext()
+            {
+                TSource[] source = _source;
+                int index = source.Length - _state;
+
+                while (unchecked((uint)index < (uint)source.Length))
+                {
+                    TSource item = source[index];
+                    _state++;
+                    index--;
+                    if (_predicate(item))
+                    {
+                        _current = item;
+                        return true;
+                    }
+                }
+
+                Dispose();
+                return false;
+            }
+
+            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
+                new ReverseWhereSelectArrayIterator<TSource, TResult>(_source, _predicate, selector);
+
+            public override IEnumerable<TSource> Where(Func<TSource, bool> predicate) =>
+                new ReverseWhereArrayIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
+
+            public IEnumerable<TSource> Reverse() =>
+                new WhereArrayIterator<TSource>(_source, _predicate);
+        }
+
+        private sealed partial class ReverseWhereListIterator<TSource> : Iterator<TSource>, IReverseProvider<TSource>
+        {
+            private readonly List<TSource> _source;
+            private readonly Func<TSource, bool> _predicate;
+
+            public ReverseWhereListIterator(List<TSource> source, Func<TSource, bool> predicate)
+            {
+                Debug.Assert(source != null);
+                Debug.Assert(predicate != null);
+                _source = source;
+                _predicate = predicate;
+            }
+
+            public override Iterator<TSource> Clone() =>
+                new ReverseWhereListIterator<TSource>(_source, _predicate);
+
+            public override bool MoveNext()
+            {
+                List<TSource> source = _source;
+                int count = source.Count;
+                int index = count - _state;
+
+                while (unchecked((uint)index < (uint)count))
+                {
+                    TSource item = source[index];
+                    _state++;
+                    index--;
+                    if (_predicate(item))
+                    {
+                        _current = item;
+                        return true;
+                    }
+                }
+
+                Dispose();
+                return false;
+            }
+
+            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
+                new ReverseWhereSelectListIterator<TSource, TResult>(_source, _predicate, selector);
+
+            public override IEnumerable<TSource> Where(Func<TSource, bool> predicate) =>
+                new ReverseWhereListIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
+
+            public IEnumerable<TSource> Reverse() =>
+                new WhereListIterator<TSource>(_source, _predicate);
+        }
+
+        private sealed partial class ReverseWhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>, IReverseProvider<TResult>
+        {
+            private readonly TSource[] _source;
+            private readonly Func<TSource, bool> _predicate;
+            private readonly Func<TSource, TResult> _selector;
+
+            public ReverseWhereSelectArrayIterator(TSource[] source, Func<TSource, bool> predicate, Func<TSource, TResult> selector)
+            {
+                Debug.Assert(source != null && source.Length > 0);
+                Debug.Assert(predicate != null);
+                Debug.Assert(selector != null);
+                _source = source;
+                _predicate = predicate;
+                _selector = selector;
+            }
+
+            public override Iterator<TResult> Clone() =>
+                new ReverseWhereSelectArrayIterator<TSource, TResult>(_source, _predicate, _selector);
+
+            public override bool MoveNext()
+            {
+                TSource[] source = _source;
+                int index = source.Length - _state;
+
+                while (unchecked((uint)index < (uint)source.Length))
+                {
+                    TSource item = source[index];
+                    _state++;
+                    index--;
+                    if (_predicate(item))
+                    {
+                        _current = _selector(item);
+                        return true;
+                    }
+                }
+
+                Dispose();
+                return false;
+            }
+
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new ReverseWhereSelectArrayIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
+
+            public IEnumerable<TResult> Reverse() =>
+                new WhereSelectArrayIterator<TSource, TResult>(_source, _predicate, _selector);
+        }
+
+        private sealed partial class ReverseWhereSelectListIterator<TSource, TResult> : Iterator<TResult>, IReverseProvider<TResult>
+        {
+            private readonly List<TSource> _source;
+            private readonly Func<TSource, bool> _predicate;
+            private readonly Func<TSource, TResult> _selector;
+
+            public ReverseWhereSelectListIterator(List<TSource> source, Func<TSource, bool> predicate, Func<TSource, TResult> selector)
+            {
+                Debug.Assert(source != null);
+                Debug.Assert(predicate != null);
+                Debug.Assert(selector != null);
+                _source = source;
+                _predicate = predicate;
+                _selector = selector;
+            }
+
+            public override Iterator<TResult> Clone() =>
+                new ReverseWhereSelectListIterator<TSource, TResult>(_source, _predicate, _selector);
+
+            public override bool MoveNext()
+            {
+                List<TSource> source = _source;
+                int count = source.Count;
+                int index = count - _state;
+
+                while (unchecked((uint)index < (uint)count))
+                {
+                    TSource item = source[index];
+                    _state++;
+                    index--;
+                    if (_predicate(item))
+                    {
+                        _current = _selector(item);
+                        return true;
+                    }
+                }
+
+                Dispose();
+                return false;
+            }
+
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new ReverseWhereSelectListIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
+
+            public IEnumerable<TResult> Reverse() =>
+                new WhereSelectListIterator<TSource, TResult>(_source, _predicate, _selector);
         }
     }
 }
