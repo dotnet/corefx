@@ -58,9 +58,6 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <param name="bytes">The Base64-encoded data to write.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
