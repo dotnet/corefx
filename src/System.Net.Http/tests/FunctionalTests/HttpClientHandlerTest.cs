@@ -57,9 +57,9 @@ namespace System.Net.Http.Functional.Tests
         {
             foreach (string method in methods)
             {
-                foreach (bool secure in new[] { true, false })
+                foreach (Uri serverUri in Configuration.Http.EchoServerList)
                 {
-                    yield return new object[] { method, secure };
+                    yield return new object[] { method, serverUri };
                 }
             }
         }
@@ -743,6 +743,34 @@ namespace System.Net.Http.Functional.Tests
                     await Assert.ThrowsAsync<HttpRequestException>(() => client.GetStringAsync(uri));
                 }
             }, server => server.AcceptConnectionSendCustomResponseAndCloseAsync($"HTTP/1.1 200 OK\r\n{invalidHeader}\r\nContent-Length: 11\r\n\r\nhello world"));
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(true, true)]
+        public async Task GetAsync_IncompleteData_ThrowsHttpRequestException(bool failDuringHeaders, bool getString)
+        {
+            if (IsWinHttpHandler || IsUapHandler)
+            {
+                // [ActiveIssue(39136)]
+                return;
+            }
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    Task t = getString ? (Task)
+                        client.GetStringAsync(uri) :
+                        client.GetByteArrayAsync(uri);
+                    await Assert.ThrowsAsync<HttpRequestException>(() => t);
+                }
+            }, server =>
+                failDuringHeaders ?
+                   server.AcceptConnectionSendCustomResponseAndCloseAsync("HTTP/1.1 200 OK\r\nContent-Length: 5\r\n") :
+                   server.AcceptConnectionSendCustomResponseAndCloseAsync("HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nhe"));
         }
 
         [Fact]
@@ -2318,13 +2346,13 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(HttpMethods))]
         public async Task SendAsync_SendRequestUsingMethodToEchoServerWithNoContent_MethodCorrectlySent(
             string method,
-            bool secureServer)
+            Uri serverUri)
         {
             using (HttpClient client = CreateHttpClient())
             {
                 var request = new HttpRequestMessage(
                     new HttpMethod(method),
-                    secureServer ? Configuration.Http.SecureRemoteEchoServer : Configuration.Http.RemoteEchoServer) { Version = VersionFromUseHttp2 };
+                    serverUri) { Version = VersionFromUseHttp2 };
 
                 if (PlatformDetection.IsUap && method == "TRACE")
                 {
@@ -2346,13 +2374,13 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(HttpMethodsThatAllowContent))]
         public async Task SendAsync_SendRequestUsingMethodToEchoServerWithContent_Success(
             string method,
-            bool secureServer)
+            Uri serverUri)
         {
             using (HttpClient client = CreateHttpClient())
             {
                 var request = new HttpRequestMessage(
                     new HttpMethod(method),
-                    secureServer ? Configuration.Http.SecureRemoteEchoServer : Configuration.Http.RemoteEchoServer) { Version = VersionFromUseHttp2 };
+                    serverUri) { Version = VersionFromUseHttp2 };
                 request.Content = new StringContent(ExpectedContent);
                 using (HttpResponseMessage response = await client.SendAsync(request))
                 {
@@ -2410,7 +2438,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(HttpMethodsThatDontAllowContent))]
         public async Task SendAsync_SendRequestUsingNoBodyMethodToEchoServerWithContent_NoBodySent(
             string method,
-            bool secureServer)
+            Uri serverUri)
         {
             if (PlatformDetection.IsUap && method == "TRACE")
             {
@@ -2424,7 +2452,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 var request = new HttpRequestMessage(
                     new HttpMethod(method),
-                    secureServer ? Configuration.Http.SecureRemoteEchoServer : Configuration.Http.RemoteEchoServer)
+                    serverUri)
                 {
                     Content = new StringContent(ExpectedContent),
                     Version = VersionFromUseHttp2

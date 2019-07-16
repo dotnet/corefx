@@ -16,8 +16,6 @@ namespace System.Text.Json
             ref Utf8JsonReader reader,
             ref ReadStack state)
         {
-            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
-
             if (state.Current.SkipProperty)
             {
                 // The array is not being applied to the object.
@@ -26,6 +24,7 @@ namespace System.Text.Json
                 return;
             }
 
+            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
             if (jsonPropertyInfo == null)
             {
                 jsonPropertyInfo = state.Current.JsonClassInfo.CreateRootObject(options);
@@ -35,9 +34,9 @@ namespace System.Text.Json
                 jsonPropertyInfo = state.Current.JsonClassInfo.CreatePolymorphicProperty(jsonPropertyInfo, typeof(object), options);
             }
 
-            // Verify that we don't have a multidimensional array.
+            // Verify that we have a valid enumerable.
             Type arrayType = jsonPropertyInfo.RuntimePropertyType;
-            if (!typeof(IEnumerable).IsAssignableFrom(arrayType) || (arrayType.IsArray && arrayType.GetArrayRank() > 1))
+            if (!typeof(IEnumerable).IsAssignableFrom(arrayType))
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(arrayType, reader, state.JsonPath);
             }
@@ -51,39 +50,31 @@ namespace System.Text.Json
 
                 state.Push();
                 state.Current.Initialize(elementType, options);
-                state.Current.CollectionPropertyInitialized = true;
-            }
-            else
-            {
-                state.Current.CollectionPropertyInitialized = true;
             }
 
-            jsonPropertyInfo = state.Current.JsonPropertyInfo;
+            state.Current.CollectionPropertyInitialized = true;
 
             if (state.Current.JsonClassInfo.ClassType == ClassType.Value)
             {
+                // Custom converter code path.
                 state.Current.JsonPropertyInfo.Read(JsonTokenType.StartObject, ref state, ref reader);
             }
             else
             {
-                // If current property is already set (from a constructor, for example) leave as-is.
-                if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) == null)
-                {
-                    // Create the enumerable.
-                    object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state, options);
+                // Set or replace the existing enumerable value.
+                object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state);
 
-                    // If value is not null, then we don't have a converter so apply the value.
-                    if (value != null)
+                // If value is not null, then we don't have a converter so apply the value.
+                if (value != null)
+                {
+                    if (state.Current.ReturnValue != null)
                     {
-                        if (state.Current.ReturnValue != null)
-                        {
-                            state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
-                        }
-                        else
-                        {
-                            // Primitive arrays being returned without object
-                            state.Current.SetReturnValue(value);
-                        }
+                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                    }
+                    else
+                    {
+                        // Primitive arrays being returned without object
+                        state.Current.SetReturnValue(value);
                     }
                 }
             }
@@ -122,7 +113,7 @@ namespace System.Text.Json
             else if (state.Current.IsEnumerableProperty)
             {
                 // We added the items to the list already.
-                state.Current.ResetProperty();
+                state.Current.EndProperty();
                 return false;
             }
 
@@ -188,7 +179,9 @@ namespace System.Text.Json
                 else
                 {
                     IList list = (IList)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
-                    if (list == null)
+                    if (list == null ||
+                        // ImmutableArray<T> is a struct, so default value won't be null.
+                        state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName)) 
                     {
                         state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
                     }
@@ -211,7 +204,7 @@ namespace System.Text.Json
                 (state.Current.IsIDictionaryConstructibleProperty && !setPropertyDirectly))
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
-                IDictionary dictionary = (IDictionary)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.TempDictionaryValues);
+                IDictionary dictionary = (IDictionary)state.Current.TempDictionaryValues;
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));

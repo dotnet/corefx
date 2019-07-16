@@ -52,13 +52,25 @@ namespace System.Net.Http
             if (NetEventSource.IsEnabled) NetEventSource.Associate(this, content);
         }
 
-        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context) =>
+            SerializeToStreamAsyncCore(stream, default);
+
+        internal override Task SerializeToStreamAsync(Stream stream, TransportContext context, CancellationToken cancellationToken) =>
+            // Only skip the original protected virtual SerializeToStreamAsync if this
+            // isn't a derived type that may have overridden the behavior.
+            GetType() == typeof(StreamContent) ? SerializeToStreamAsyncCore(stream, cancellationToken) :
+            base.SerializeToStreamAsync(stream, context, cancellationToken);
+
+        private Task SerializeToStreamAsyncCore(Stream stream, CancellationToken cancellationToken)
         {
             Debug.Assert(stream != null);
-
             PrepareContent();
-            // If the stream can't be re-read, make sure that it gets disposed once it is consumed.
-            return StreamToStreamCopy.CopyAsync(_content, stream, _bufferSize, !_content.CanSeek);
+            return StreamToStreamCopy.CopyAsync(
+                _content,
+                stream,
+                _bufferSize,
+                !_content.CanSeek, // If the stream can't be re-read, make sure that it gets disposed once it is consumed.
+                cancellationToken);
         }
 
         protected internal override bool TryComputeLength(out long length)
@@ -93,6 +105,8 @@ namespace System.Net.Http
         internal override Stream TryCreateContentReadStream() =>
             GetType() == typeof(StreamContent) ? new ReadOnlyStream(_content) : // type check ensures we use possible derived type's CreateContentReadStreamAsync override
             null;
+
+        internal override bool AllowDuplex => false;
 
         private void PrepareContent()
         {

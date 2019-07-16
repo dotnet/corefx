@@ -3872,7 +3872,6 @@ namespace System.Collections
     {
         bool IsFixedSize { get; }
         bool IsReadOnly { get; }
-        [System.Diagnostics.CodeAnalysis.DisallowNullAttribute]
         object? this[object key] { get; set; }
         System.Collections.ICollection Keys { get; }
         System.Collections.ICollection Values { get; }
@@ -4984,9 +4983,7 @@ namespace System.Globalization
     public partial class TextElementEnumerator : System.Collections.IEnumerator
     {
         internal TextElementEnumerator() { }
-#pragma warning disable CS8612 // TODO-NULLABLE: Covariance in interfaces (https://github.com/dotnet/roslyn/issues/35227)
         public object Current { get { throw null; } }
-#pragma warning restore CS8612
         public int ElementIndex { get { throw null; } }
         public string GetTextElement() { throw null; }
         public bool MoveNext() { throw null; }

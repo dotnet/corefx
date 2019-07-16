@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -39,6 +40,7 @@ namespace System.Text.Json.Serialization.Tests
             options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 
             SimpleTestClass obj = JsonSerializer.Deserialize<SimpleTestClass>(@"{}", options);
+
             string json = JsonSerializer.Serialize(obj, options);
             Assert.Contains(@"""myInt16"":0", json);
             Assert.Contains(@"""myInt32"":0", json);
@@ -64,6 +66,7 @@ namespace System.Text.Json.Serialization.Tests
 
             // A policy that returns null is not allowed.
             Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<SimpleTestClass>(@"{}", options));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new SimpleTestClass(), options));
         }
 
         [Fact]
@@ -257,6 +260,21 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(1, obj.Aѧ34567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890);
             }
         }
+
+        [Fact]
+        public static void ExtensionDataDictionarySerialize_DoesNotHonor()
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            EmptyClassWithExtensionProperty obj = JsonSerializer.Deserialize<EmptyClassWithExtensionProperty>(@"{""Key1"": 1}", options);
+
+            // Ignore naming policy for extension data properties by default.
+            Assert.False(obj.MyOverflow.ContainsKey("key1"));
+            Assert.Equal(1, obj.MyOverflow["Key1"].GetInt32());
+        }
     }
 
     public class OverridePropertyNameDesignTime_TestClass
@@ -315,5 +333,11 @@ namespace System.Text.Json.Serialization.Tests
         {
             return null;
         }
+    }
+
+    public class EmptyClassWithExtensionProperty
+    {
+        [JsonExtensionData]
+        public IDictionary<string, JsonElement> MyOverflow { get; set; }
     }
 }

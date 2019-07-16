@@ -14,17 +14,20 @@ namespace System.Text.Json
     internal abstract class JsonPropertyInfo
     {
         // Cache the converters so they don't get created for every enumerable property.
+        private static readonly JsonEnumerableConverter s_jsonDerivedEnumerableConverter = new DefaultDerivedEnumerableConverter();
         private static readonly JsonEnumerableConverter s_jsonArrayConverter = new DefaultArrayConverter();
         private static readonly JsonEnumerableConverter s_jsonICollectionConverter = new DefaultICollectionConverter();
-        private static readonly JsonDictionaryConverter s_jsonIDictionaryConverter = new DefaultIDictionaryConverter();
         private static readonly JsonEnumerableConverter s_jsonImmutableEnumerableConverter = new DefaultImmutableEnumerableConverter();
+        private static readonly JsonDictionaryConverter s_jsonDerivedDictionaryConverter = new DefaultDerivedDictionaryConverter();
+        private static readonly JsonDictionaryConverter s_jsonIDictionaryConverter = new DefaultIDictionaryConverter();
         private static readonly JsonDictionaryConverter s_jsonImmutableDictionaryConverter = new DefaultImmutableDictionaryConverter();
-
+        
         public static readonly JsonPropertyInfo s_missingProperty = new JsonPropertyInfoNotNullable<object, object, object, object>();
 
         private Type _elementType;
         private JsonClassInfo _elementClassInfo;
         private JsonClassInfo _runtimeClassInfo;
+        private JsonClassInfo _declaredTypeClassInfo;
 
         public bool CanBeNull { get; private set; }
 
@@ -37,14 +40,23 @@ namespace System.Text.Json
         {
             other.EscapedName = EscapedName;
             other.Name = Name;
+            other.NameAsString = NameAsString;
             other.PropertyNameKey = PropertyNameKey;
         }
 
         public abstract IList CreateConverterList();
 
+        public abstract IEnumerable CreateDerivedEnumerableInstance(JsonPropertyInfo collectionPropertyInfo, IList sourceList, string jsonPath, JsonSerializerOptions options);
+
+        public abstract object CreateDerivedDictionaryInstance(JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options);
+
         public abstract IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options);
 
         public abstract IDictionary CreateIDictionaryInstance(Type parentType, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options);
+
+        public abstract IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string propertyPath, JsonSerializerOptions options);
+
+        public abstract IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string propertyPath, JsonSerializerOptions options);
 
         // Create a property that is ignored at run-time. It uses the same type (typeof(sbyte)) to help
         // prevent issues with unsupported types and helps ensure we don't accidently (de)serialize it.
@@ -61,11 +73,9 @@ namespace System.Text.Json
             return jsonPropertyInfo;
         }
 
-        public abstract IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string propertyPath, JsonSerializerOptions options);
-
-        public abstract IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string propertyPath, JsonSerializerOptions options);
-
         public Type DeclaredPropertyType { get; private set; }
+
+        public Type ImplementedPropertyType { get; private set; }
 
         private void DeterminePropertyName()
         {
@@ -128,69 +138,75 @@ namespace System.Text.Json
             {
                 if (HasGetter)
                 {
+                    ShouldSerialize = true;
+
                     if (HasSetter)
                     {
                         ShouldDeserialize = true;
-                    }
-                    else if (!RuntimePropertyType.IsArray &&
-                        (typeof(IList).IsAssignableFrom(RuntimePropertyType) || typeof(IDictionary).IsAssignableFrom(RuntimePropertyType)))
-                    {
-                        ShouldDeserialize = true;
-                    }
-                }
-                //else if (HasSetter)
-                //{
-                //    // todo: Special case where there is no getter but a setter (and an EnumerableConverter)
-                //}
 
-                if (ShouldDeserialize)
-                {
-                    ShouldSerialize = HasGetter;
+                        if (RuntimePropertyType.IsArray)
+                        {
+                            // Verify that we don't have a multidimensional array.
+                            if (RuntimePropertyType.GetArrayRank() > 1)
+                            {
+                                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(RuntimePropertyType, ParentClassType, PropertyInfo);
+                            }
 
-                    if (RuntimePropertyType.IsArray)
-                    {
-                        EnumerableConverter = s_jsonArrayConverter;
-                    }
-                    else if (ClassType == ClassType.IDictionaryConstructible)
-                    {
-                        if (RuntimePropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName))
+                            EnumerableConverter = s_jsonArrayConverter;
+                        }
+                        else if (ClassType == ClassType.IDictionaryConstructible)
                         {
-                            DefaultImmutableDictionaryConverter.RegisterImmutableDictionary(
-                                RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo, Options), Options);
+                            // Natively supported type.
+                            if (DeclaredPropertyType == ImplementedPropertyType)
+                            {
+                                if (RuntimePropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName))
+                                {
+                                    DefaultImmutableDictionaryConverter.RegisterImmutableDictionary(
+                                        RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo, Options), Options);
 
-                            DictionaryConverter = s_jsonImmutableDictionaryConverter;
+                                    DictionaryConverter = s_jsonImmutableDictionaryConverter;
+                                }
+                                else if (JsonClassInfo.IsDeserializedByConstructingWithIDictionary(RuntimePropertyType))
+                                {
+                                    DictionaryConverter = s_jsonIDictionaryConverter;
+                                }
+                            }
+                            // Type that implements a type with ClassType IDictionaryConstructible.
+                            else
+                            {
+                                DictionaryConverter = s_jsonDerivedDictionaryConverter;
+                            }
                         }
-                        else if (JsonClassInfo.IsDeserializedByConstructingWithIDictionary(RuntimePropertyType))
+                        else if (ClassType == ClassType.Enumerable)
                         {
-                            DictionaryConverter = s_jsonIDictionaryConverter;
+                            // Else if it's an implementing type that is not assignable from IList.
+                            if (DeclaredPropertyType != ImplementedPropertyType &&
+                                (!typeof(IList).IsAssignableFrom(DeclaredPropertyType) ||
+                                ImplementedPropertyType == typeof(ArrayList) ||
+                                ImplementedPropertyType == typeof(IList)))
+                            {
+                                EnumerableConverter = s_jsonDerivedEnumerableConverter;
+                            }
+                            else if (JsonClassInfo.IsDeserializedByConstructingWithIList(RuntimePropertyType) ||
+                                (!typeof(IList).IsAssignableFrom(RuntimePropertyType) &&
+                                JsonClassInfo.HasConstructorThatTakesGenericIEnumerable(RuntimePropertyType, Options)))
+                            {
+                                EnumerableConverter = s_jsonICollectionConverter;
+                            }
+                            else if (RuntimePropertyType.IsGenericType &&
+                                RuntimePropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName) &&
+                                RuntimePropertyType.GetGenericArguments().Length == 1)
+                            {
+                                DefaultImmutableEnumerableConverter.RegisterImmutableCollection(RuntimePropertyType,
+                                    JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo, Options), Options);
+                                EnumerableConverter = s_jsonImmutableEnumerableConverter;
+                            }
+
                         }
                     }
-                    else if (typeof(IEnumerable).IsAssignableFrom(RuntimePropertyType))
-                    {
-                        if (JsonClassInfo.IsDeserializedByConstructingWithIList(RuntimePropertyType) ||
-                            (!typeof(IList).IsAssignableFrom(RuntimePropertyType) && 
-                            JsonClassInfo.HasConstructorThatTakesGenericIEnumerable(RuntimePropertyType, Options)))
-                        {
-                            EnumerableConverter = s_jsonICollectionConverter;
-                        }
-                        else if (RuntimePropertyType.IsGenericType &&
-                            RuntimePropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName) &&
-                            RuntimePropertyType.GetGenericArguments().Length == 1)
-                        {
-                            DefaultImmutableEnumerableConverter.RegisterImmutableCollection(RuntimePropertyType,
-                                JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo, Options), Options);
-                            EnumerableConverter = s_jsonImmutableEnumerableConverter;
-                        }
-                    }
-                }
-                else
-                {
-                    ShouldSerialize = HasGetter && !Options.IgnoreReadOnlyProperties;
                 }
             }
         }
-
-        public JsonDictionaryConverter DictionaryConverter { get; private set; }
 
         /// <summary>
         /// Return the JsonClassInfo for the element type, or null if the the property is not an enumerable or dictionary.
@@ -212,6 +228,7 @@ namespace System.Text.Json
         }
 
         public JsonEnumerableConverter EnumerableConverter { get; private set; }
+        public JsonDictionaryConverter DictionaryConverter { get; private set; }
 
         // The escaped name passed to the writer.
         public JsonEncodedText? EscapedName { get; private set; }
@@ -224,13 +241,6 @@ namespace System.Text.Json
         public abstract Type GetDictionaryConcreteType();
 
         public abstract Type GetConcreteType(Type type);
-
-        private static void GetOriginalValues(ref Utf8JsonReader reader, out JsonTokenType tokenType, out int depth, out long bytesConsumed)
-        {
-            tokenType = reader.TokenType;
-            depth = reader.CurrentDepth;
-            bytesConsumed = reader.BytesConsumed;
-        }
 
         public virtual void GetPolicies()
         {
@@ -248,6 +258,7 @@ namespace System.Text.Json
             Type parentClassType,
             Type declaredPropertyType,
             Type runtimePropertyType,
+            Type implementedPropertyType,
             PropertyInfo propertyInfo,
             Type elementType,
             JsonConverter converter,
@@ -256,6 +267,7 @@ namespace System.Text.Json
             ParentClassType = parentClassType;
             DeclaredPropertyType = declaredPropertyType;
             RuntimePropertyType = runtimePropertyType;
+            ImplementedPropertyType = implementedPropertyType;
             PropertyInfo = propertyInfo;
             _elementType = elementType;
             Options = options;
@@ -275,6 +287,11 @@ namespace System.Text.Json
                 {
                     ClassType = ClassType.Value;
                 }
+            }
+            // Special case for immutable collections.
+            else if (declaredPropertyType != implementedPropertyType && !JsonClassInfo.IsNativelySupportedCollection(declaredPropertyType))
+            {
+                ClassType = JsonClassInfo.GetClassType(declaredPropertyType, options);
             }
             else
             {
@@ -323,9 +340,13 @@ namespace System.Text.Json
             }
             else
             {
-                GetOriginalValues(ref reader, out JsonTokenType originalTokenType, out int originalDepth, out long bytesConsumed);
+                JsonTokenType originalTokenType = reader.TokenType;
+                int originalDepth = reader.CurrentDepth;
+                long originalBytesConsumed = reader.BytesConsumed;
+
                 OnRead(tokenType, ref state, ref reader);
-                VerifyRead(originalTokenType, originalDepth, bytesConsumed, ref state, ref reader);
+
+                VerifyRead(originalTokenType, originalDepth, originalBytesConsumed, ref state, ref reader);
             }
         }
 
@@ -333,9 +354,13 @@ namespace System.Text.Json
         {
             Debug.Assert(ShouldDeserialize);
 
-            GetOriginalValues(ref reader, out JsonTokenType originalTokenType, out int originalDepth, out long bytesConsumed);
+            JsonTokenType originalTokenType = reader.TokenType;
+            int originalDepth = reader.CurrentDepth;
+            long originalBytesConsumed = reader.BytesConsumed;
+
             OnReadEnumerable(tokenType, ref state, ref reader);
-            VerifyRead(originalTokenType, originalDepth, bytesConsumed, ref state, ref reader);
+
+            VerifyRead(originalTokenType, originalDepth, originalBytesConsumed, ref state, ref reader);
         }
 
         public JsonClassInfo RuntimeClassInfo
@@ -351,6 +376,19 @@ namespace System.Text.Json
             }
         }
 
+        public JsonClassInfo DeclaredTypeClassInfo
+        {
+            get
+            {
+                if (_declaredTypeClassInfo == null)
+                {
+                    _declaredTypeClassInfo = Options.GetOrAddClass(DeclaredPropertyType);
+                }
+
+                return _declaredTypeClassInfo;
+            }
+        }
+
         public Type RuntimePropertyType { get; private set; }
 
         public abstract void SetValueAsObject(object obj, object value);
@@ -358,43 +396,49 @@ namespace System.Text.Json
         public bool ShouldSerialize { get; private set; }
         public bool ShouldDeserialize { get; private set; }
 
-        private void VerifyRead(JsonTokenType originalTokenType, int originalDepth, long bytesConsumed, ref ReadStack state, ref Utf8JsonReader reader)
+        private void VerifyRead(JsonTokenType tokenType, int depth, long bytesConsumed, ref ReadStack state, ref Utf8JsonReader reader)
         {
-            switch (originalTokenType)
+            switch (tokenType)
             {
                 case JsonTokenType.StartArray:
                     if (reader.TokenType != JsonTokenType.EndArray)
                     {
-                        // todo issue #38550 blocking this: originalDepth != reader.CurrentDepth + 1
                         ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
                     }
+                    else if (depth != reader.CurrentDepth)
+                    {
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                    }
+
+                    // Should not be possible to have not read anything.
+                    Debug.Assert(bytesConsumed < reader.BytesConsumed);
                     break;
 
                 case JsonTokenType.StartObject:
                     if (reader.TokenType != JsonTokenType.EndObject)
                     {
-                        // todo issue #38550 blocking this: originalDepth != reader.CurrentDepth + 1
                         ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
                     }
-                    break;
-
-                default:
-                    // Reading a single property value.
-                    if (reader.TokenType != originalTokenType || reader.BytesConsumed != bytesConsumed)
+                    else if (depth != reader.CurrentDepth)
                     {
                         ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
                     }
 
+                    // Should not be possible to have not read anything.
+                    Debug.Assert(bytesConsumed < reader.BytesConsumed);
                     break;
-            }
-        }
 
-        private void VerifyWrite(int originalDepth, ref WriteStack state, ref Utf8JsonWriter writer)
-        {
-            // todo issue #38550 blocking this: originalDepth != reader.CurrentDepth
-            if (originalDepth != writer.CurrentDepth)
-            {
-                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+                default:
+                    // Reading a single property value.
+                    if (reader.BytesConsumed != bytesConsumed)
+                    {
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                    }
+
+                    // Should not be possible to change token type.
+                    Debug.Assert(reader.TokenType == tokenType);
+
+                    break;
             }
         }
 
@@ -411,27 +455,40 @@ namespace System.Text.Json
             else
             {
                 int originalDepth = writer.CurrentDepth;
+
                 OnWrite(ref state.Current, writer);
-                VerifyWrite(originalDepth, ref state, ref writer);
+
+                if (originalDepth != writer.CurrentDepth)
+                {
+                    ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+                }
             }
         }
 
         public void WriteDictionary(ref WriteStack state, Utf8JsonWriter writer)
         {
             Debug.Assert(ShouldSerialize);
-
             int originalDepth = writer.CurrentDepth;
+
             OnWriteDictionary(ref state.Current, writer);
-            VerifyWrite(originalDepth, ref state, ref writer);
+
+            if (originalDepth != writer.CurrentDepth)
+            {
+                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+            }
         }
 
         public void WriteEnumerable(ref WriteStack state, Utf8JsonWriter writer)
         {
             Debug.Assert(ShouldSerialize);
-
             int originalDepth = writer.CurrentDepth;
+
             OnWriteEnumerable(ref state.Current, writer);
-            VerifyWrite(originalDepth, ref state, ref writer);
+
+            if (originalDepth != writer.CurrentDepth)
+            {
+                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+            }
         }
     }
 }

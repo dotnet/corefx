@@ -314,7 +314,7 @@ namespace System.Text.Json.Tests
             using (JsonDocument doc = JsonDocument.Parse(new MemoryStream(data)))
             {
                 JsonElement root = doc.RootElement;
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
                 Assert.Equal(11, root.GetInt32());
             }
         }
@@ -328,7 +328,7 @@ namespace System.Text.Json.Tests
                 JsonDocument.Parse(new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, data: data)))
             {
                 JsonElement root = doc.RootElement;
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
                 Assert.Equal(11, root.GetInt32());
             }
         }
@@ -341,7 +341,7 @@ namespace System.Text.Json.Tests
             using (JsonDocument doc = await JsonDocument.ParseAsync(new MemoryStream(data)))
             {
                 JsonElement root = doc.RootElement;
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
                 Assert.Equal(11, root.GetInt32());
             }
         }
@@ -355,7 +355,7 @@ namespace System.Text.Json.Tests
                 new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, data: data)))
             {
                 JsonElement root = doc.RootElement;
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
                 Assert.Equal(11, root.GetInt32());
             }
         }
@@ -409,6 +409,42 @@ namespace System.Text.Json.Tests
                 bytes => JsonDocument.ParseAsync(
                         new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, Utf8Bom.Concat(bytes).ToArray())).
                     GetAwaiter().GetResult());
+        }
+
+        [Fact]
+        public static void ParseJson_Stream_ClearRentedBuffer_WhenThrow_CodeCoverage()
+        {
+            using (Stream stream = new ThrowOnReadStream(new byte[] { 1 }))
+            {
+                Assert.Throws<EndOfStreamException>(() => JsonDocument.Parse(stream));
+            }
+        }
+
+        [Fact]
+        public static void ParseJson_Stream_Async_ClearRentedBuffer_WhenThrow_CodeCoverage()
+        {
+            using (Stream stream = new ThrowOnReadStream(new byte[] { 1 }))
+            {
+                Assert.ThrowsAsync<EndOfStreamException>(async () => await JsonDocument.ParseAsync(stream));
+            }
+        }
+
+        [Fact]
+        public static void ParseJson_Stream_ThrowsOn_ArrayPoolRent_CodeCoverage()
+        {
+            using (Stream stream = new ThrowOnCanSeekStream(new byte[] { 1 }))
+            {
+                Assert.Throws<InsufficientMemoryException>(() => JsonDocument.Parse(stream));
+            }
+        }
+
+        [Fact]
+        public static void ParseJson_Stream_Async_ThrowsOn_ArrayPoolRent_CodeCoverage()
+        {
+            using (Stream stream = new ThrowOnCanSeekStream(new byte[] { 1 }))
+            {
+                Assert.ThrowsAsync<InsufficientMemoryException>(async () => await JsonDocument.ParseAsync(stream));
+            }
         }
 
         [Theory]
@@ -554,20 +590,20 @@ namespace System.Text.Json.Tests
 
         private static void DepthFirstAppend(StringBuilder buf, JsonElement element)
         {
-            JsonValueType type = element.Type;
+            JsonValueKind kind = element.ValueKind;
 
-            switch (type)
+            switch (kind)
             {
-                case JsonValueType.False:
-                case JsonValueType.True:
-                case JsonValueType.String:
-                case JsonValueType.Number:
+                case JsonValueKind.False:
+                case JsonValueKind.True:
+                case JsonValueKind.String:
+                case JsonValueKind.Number:
                     {
                         buf.Append(element.ToString());
                         buf.Append(", ");
                         break;
                     }
-                case JsonValueType.Object:
+                case JsonValueKind.Object:
                     {
                         foreach (JsonProperty prop in element.EnumerateObject())
                         {
@@ -578,7 +614,7 @@ namespace System.Text.Json.Tests
 
                         break;
                     }
-                case JsonValueType.Array:
+                case JsonValueKind.Array:
                     {
                         foreach (JsonElement child in element.EnumerateArray())
                         {
@@ -727,7 +763,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.Array, root.Type);
+                Assert.Equal(JsonValueKind.Array, root.ValueKind);
                 Assert.Equal(SR.ParseJson, root.ToString());
             }
         }
@@ -739,7 +775,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.Object, root.Type);
+                Assert.Equal(JsonValueKind.Object, root.ValueKind);
                 Assert.Equal(SR.BasicJson, root.ToString());
             }
         }
@@ -768,7 +804,7 @@ namespace System.Text.Json.Tests
 
                 Assert.Equal("425-214-3151", phoneNumber);
                 Assert.Equal(25, age);
-                Assert.Equal(JsonValueType.Null, root[3].Type);
+                Assert.Equal(JsonValueKind.Null, root[3].ValueKind);
 
                 Assert.Throws<IndexOutOfRangeException>(() => root[4]);
             }
@@ -788,7 +824,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
 
                 Assert.True(root.TryGetSingle(out float floatVal));
                 Assert.Equal(expectedFloat, floatVal);
@@ -888,7 +924,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
 
                 Assert.True(root.TryGetSingle(out float floatVal));
                 Assert.Equal(expectedFloat, floatVal);
@@ -985,7 +1021,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
 
                 Assert.True(root.TryGetSingle(out float floatVal));
                 Assert.Equal(expectedFloat, floatVal);
@@ -1079,7 +1115,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
 
                 Assert.True(root.TryGetSingle(out float floatVal));
                 Assert.Equal(expectedFloat, floatVal);
@@ -1179,7 +1215,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
 
                 Assert.True(root.TryGetSingle(out float floatVal));
                 Assert.Equal(expectedFloat, floatVal);
@@ -1253,7 +1289,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
 
                 Assert.True(root.TryGetSingle(out float floatVal));
                 Assert.Equal(expectedFloat, floatVal);
@@ -1325,7 +1361,7 @@ namespace System.Text.Json.Tests
                 DateTime expectedDateTime = DateTime.Parse(expectedString);
                 DateTimeOffset expectedDateTimeOffset = DateTimeOffset.Parse(expectedString);
 
-                Assert.Equal(JsonValueType.String, root.Type);
+                Assert.Equal(JsonValueKind.String, root.ValueKind);
 
                 Assert.True(root.TryGetDateTime(out DateTime DateTimeVal));
                 Assert.Equal(expectedDateTime, DateTimeVal);
@@ -1364,7 +1400,7 @@ namespace System.Text.Json.Tests
                 DateTime expectedDateTime = DateTime.ParseExact(expectedString, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
                 DateTimeOffset expectedDateTimeOffset = DateTimeOffset.ParseExact(expectedString, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 
-                Assert.Equal(JsonValueType.String, root.Type);
+                Assert.Equal(JsonValueKind.String, root.ValueKind);
 
                 Assert.True(root.TryGetDateTime(out DateTime DateTimeVal));
                 Assert.Equal(expectedDateTime, DateTimeVal);
@@ -1387,7 +1423,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.String, root.Type);
+                Assert.Equal(JsonValueKind.String, root.ValueKind);
 
                 Assert.False(root.TryGetDateTime(out DateTime DateTimeVal));
                 Assert.Equal(default, DateTimeVal);
@@ -1412,7 +1448,7 @@ namespace System.Text.Json.Tests
 
                 Guid expected = new Guid(expectedStr);
 
-                Assert.Equal(JsonValueType.String, root.Type);
+                Assert.Equal(JsonValueKind.String, root.ValueKind);
 
                 Assert.True(root.TryGetGuid(out Guid GuidVal));
                 Assert.Equal(expected, GuidVal);
@@ -1444,7 +1480,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.String, root.Type);
+                Assert.Equal(JsonValueKind.String, root.ValueKind);
 
                 Assert.False(root.TryGetGuid(out Guid GuidVal));
                 Assert.Equal(default, GuidVal);
@@ -1473,7 +1509,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
 
                 Assert.True(root.TryGetSingle(out float floatVal));
                 Assert.Equal(expectedFloat, floatVal);
@@ -1539,13 +1575,11 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void ReadTooPreciseDouble()
         {
-            // If https://github.com/dotnet/corefx/issues/33997 gets resolved as the reader throwing,
-            // this test would need to expect FormatException from GetDouble, and false from TryGet.
             using (JsonDocument doc = JsonDocument.Parse("    1e+100000002"))
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(JsonValueKind.Number, root.ValueKind);
 
                 if (PlatformDetection.IsFullFramework)
                 {
@@ -1631,8 +1665,6 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void ReadArrayWithComments()
         {
-            // If https://github.com/dotnet/corefx/issues/33997 gets resolved as the reader throwing,
-            // this test would need to expect FormatException from GetDouble, and false from TryGet.
             var options = new JsonDocumentOptions
             {
                 CommentHandling = JsonCommentHandling.Skip,
@@ -1644,7 +1676,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.Array, root.Type);
+                Assert.Equal(JsonValueKind.Array, root.ValueKind);
                 Assert.Equal(5, root.GetArrayLength());
 
                 for (int i = root.GetArrayLength() - 1; i >= 0; i--)
@@ -1696,12 +1728,14 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void CheckUseAfterDispose()
         {
-            using (JsonDocument doc = JsonDocument.Parse("true", default))
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            using (JsonDocument doc = JsonDocument.Parse("{\"First\":1}", default))
             {
                 JsonElement root = doc.RootElement;
+                JsonProperty property = root.EnumerateObject().First();
                 doc.Dispose();
 
-                Assert.Throws<ObjectDisposedException>(() => root.Type);
+                Assert.Throws<ObjectDisposedException>(() => root.ValueKind);
                 Assert.Throws<ObjectDisposedException>(() => root.GetArrayLength());
                 Assert.Throws<ObjectDisposedException>(() => root.EnumerateArray());
                 Assert.Throws<ObjectDisposedException>(() => root.EnumerateObject());
@@ -1735,26 +1769,20 @@ namespace System.Text.Json.Tests
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = default;
-                    root.WriteValue(writer);
+                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
+                    root.WriteTo(writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = default;
-                    root.WriteProperty(ReadOnlySpan<char>.Empty, writer);
+                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
+                    doc.WriteTo(writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = default;
-                    root.WriteProperty(ReadOnlySpan<byte>.Empty, writer);
-                });
-
-                Assert.Throws<ObjectDisposedException>(() =>
-                {
-                    Utf8JsonWriter writer = default;
-                    root.WriteProperty(JsonEncodedText.Encode(ReadOnlySpan<byte>.Empty), writer);
+                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
+                    property.WriteTo(writer);
                 });
             }
         }
@@ -1764,7 +1792,7 @@ namespace System.Text.Json.Tests
         {
             JsonElement root = default;
 
-            Assert.Equal(JsonValueType.Undefined, root.Type);
+            Assert.Equal(JsonValueKind.Undefined, root.ValueKind);
 
             Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
             Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
@@ -1802,21 +1830,19 @@ namespace System.Text.Json.Tests
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                Utf8JsonWriter writer = default;
-                root.WriteValue(writer);
+                var buffer = new ArrayBufferWriter<byte>(1024);
+                Utf8JsonWriter writer = new Utf8JsonWriter(buffer);                
+                root.WriteTo(writer);
             });
+        }
 
-            Assert.Throws<InvalidOperationException>(() =>
+        [Fact]
+        public static void CheckByPassingNullWriter()
+        {
+            using (JsonDocument doc = JsonDocument.Parse("true", default))
             {
-                Utf8JsonWriter writer = default;
-                root.WriteProperty(ReadOnlySpan<char>.Empty, writer);
-            });
-
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                Utf8JsonWriter writer = default;
-                root.WriteProperty(ReadOnlySpan<byte>.Empty, writer);
-            });
+                AssertExtensions.Throws<ArgumentNullException>("writer", () => doc.WriteTo(null));
+            }
         }
 
         [Fact]
@@ -1848,7 +1874,7 @@ namespace System.Text.Json.Tests
                 JsonElement root = doc.RootElement;
 
                 const string ErrorMessage = "Cannot transcode invalid UTF-8 JSON text to UTF-16 string.";
-                Assert.Equal(JsonValueType.String, root.Type);
+                Assert.Equal(JsonValueKind.String, root.ValueKind);
                 AssertExtensions.Throws<InvalidOperationException>(() => root.GetString(), ErrorMessage);
                 Assert.Throws<InvalidOperationException>(() => root.GetRawText());
                 const string DummyString = "dummy-string";
@@ -1868,7 +1894,7 @@ namespace System.Text.Json.Tests
             {
                 JsonElement root = doc.RootElement;
 
-                Assert.Equal(JsonValueType.String, root.Type);
+                Assert.Equal(JsonValueKind.String, root.ValueKind);
                 Assert.Throws<FormatException>(() => root.GetBytesFromBase64());
                 Assert.False(root.TryGetBytesFromBase64(out byte[] value));
                 Assert.Null(value);
@@ -2011,19 +2037,19 @@ namespace System.Text.Json.Tests
 
                 void assertPascal(JsonElement elem)
                 {
-                    Assert.Equal(JsonValueType.String, elem.Type);
+                    Assert.Equal(JsonValueKind.String, elem.ValueKind);
                     Assert.Equal("no", elem.GetString());
                 }
 
                 void assertCamel(JsonElement elem)
                 {
-                    Assert.Equal(JsonValueType.Number, elem.Type);
+                    Assert.Equal(JsonValueKind.Number, elem.ValueKind);
                     Assert.Equal(42, elem.GetInt32());
                 }
 
                 void assertOdd(JsonElement elem)
                 {
-                    Assert.Equal(JsonValueType.False, elem.Type);
+                    Assert.Equal(JsonValueKind.False, elem.ValueKind);
                     Assert.Equal(false, elem.GetBoolean());
                 }
 
@@ -2105,18 +2131,18 @@ namespace System.Text.Json.Tests
             using (JsonDocument doc = JsonDocument.Parse(okayJson))
             {
                 JsonElement root = doc.RootElement;
-                Assert.Equal(JsonValueType.Array, root.Type);
+                Assert.Equal(JsonValueKind.Array, root.ValueKind);
 
                 JsonElement cur = root;
 
-                while (cur.Type == JsonValueType.Array)
+                while (cur.ValueKind == JsonValueKind.Array)
                 {
                     Assert.Equal(1, cur.GetArrayLength());
                     cur = cur[0];
                     depth++;
                 }
 
-                Assert.Equal(JsonValueType.Number, cur.Type);
+                Assert.Equal(JsonValueKind.Number, cur.ValueKind);
                 Assert.Equal(2, cur.GetInt32());
                 Assert.Equal(OkayCount, depth);
             }
@@ -2136,18 +2162,18 @@ namespace System.Text.Json.Tests
             using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonDocumentOptions { MaxDepth = OkayCount }))
             {
                 JsonElement root = doc.RootElement;
-                Assert.Equal(JsonValueType.Array, root.Type);
+                Assert.Equal(JsonValueKind.Array, root.ValueKind);
 
                 JsonElement cur = root;
 
-                while (cur.Type == JsonValueType.Array)
+                while (cur.ValueKind == JsonValueKind.Array)
                 {
                     Assert.Equal(1, cur.GetArrayLength());
                     cur = cur[0];
                     depth++;
                 }
 
-                Assert.Equal(JsonValueType.Number, cur.Type);
+                Assert.Equal(JsonValueKind.Number, cur.ValueKind);
                 Assert.Equal(2, cur.GetInt32());
                 Assert.Equal(OkayCount, depth);
             }
@@ -2169,13 +2195,13 @@ namespace System.Text.Json.Tests
             using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonDocumentOptions { MaxDepth = MaxDepthOverflow }))
             {
                 JsonElement root = doc.RootElement;
-                Assert.Equal(JsonValueType.Array, root.Type);
+                Assert.Equal(JsonValueKind.Array, root.ValueKind);
             }
 
             using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonDocumentOptions { MaxDepth = int.MaxValue }))
             {
                 JsonElement root = doc.RootElement;
-                Assert.Equal(JsonValueType.Array, root.Type);
+                Assert.Equal(JsonValueKind.Array, root.ValueKind);
             }
         }
 
@@ -2235,7 +2261,7 @@ namespace System.Text.Json.Tests
 
             using (JsonDocument doc = JsonDocument.Parse("/* some comment */{ }", options))
             {
-                Assert.Equal(JsonValueType.Object, doc.RootElement.Type);
+                Assert.Equal(JsonValueKind.Object, doc.RootElement.ValueKind);
             }
         }
 
@@ -2575,6 +2601,14 @@ namespace System.Text.Json.Tests
                     test++;
                 }
 
+                structEnumerator.Reset();
+
+                Assert.True(structEnumerator.MoveNext());
+                Assert.Equal(0, structEnumerator.Current.GetInt32());
+
+                Assert.True(structEnumerator.MoveNext());
+                Assert.Equal(1, structEnumerator.Current.GetInt32());
+
                 Assert.True(structEnumerator.MoveNext());
                 Assert.Equal(2, structEnumerator.Current.GetInt32());
 
@@ -2630,8 +2664,8 @@ namespace System.Text.Json.Tests
             JsonElement.ArrayEnumerator enumerator = enumerable.GetEnumerator();
             JsonElement.ArrayEnumerator defaultEnumerator = default;
 
-            Assert.Equal(JsonValueType.Undefined, enumerable.Current.Type);
-            Assert.Equal(JsonValueType.Undefined, enumerator.Current.Type);
+            Assert.Equal(JsonValueKind.Undefined, enumerable.Current.ValueKind);
+            Assert.Equal(JsonValueKind.Undefined, enumerator.Current.ValueKind);
 
             Assert.False(enumerable.MoveNext());
             Assert.False(enumerable.MoveNext());
@@ -2741,6 +2775,16 @@ namespace System.Text.Json.Tests
                     test++;
                 }
 
+                structEnumerator.Reset();
+
+                Assert.True(structEnumerator.MoveNext());
+                Assert.Equal("name0", structEnumerator.Current.Name);
+                Assert.Equal(0, structEnumerator.Current.Value.GetInt32());
+
+                Assert.True(structEnumerator.MoveNext());
+                Assert.Equal("name1", structEnumerator.Current.Name);
+                Assert.Equal(1, structEnumerator.Current.Value.GetInt32());
+
                 Assert.True(structEnumerator.MoveNext());
                 Assert.Equal("name2", structEnumerator.Current.Name);
                 Assert.Equal(2, structEnumerator.Current.Value.GetInt32());
@@ -2808,8 +2852,8 @@ namespace System.Text.Json.Tests
             JsonElement.ObjectEnumerator enumerator = enumerable.GetEnumerator();
             JsonElement.ObjectEnumerator defaultEnumerator = default;
 
-            Assert.Equal(JsonValueType.Undefined, enumerable.Current.Value.Type);
-            Assert.Equal(JsonValueType.Undefined, enumerator.Current.Value.Type);
+            Assert.Equal(JsonValueKind.Undefined, enumerable.Current.Value.ValueKind);
+            Assert.Equal(JsonValueKind.Undefined, enumerator.Current.Value.ValueKind);
 
             Assert.Throws<InvalidOperationException>(() => enumerable.Current.Name);
             Assert.Throws<InvalidOperationException>(() => enumerator.Current.Name);
@@ -2842,11 +2886,11 @@ namespace System.Text.Json.Tests
             using (JsonDocument doc = JsonDocument.Parse(json))
             {
                 JsonElement root = doc.RootElement;
-                Assert.Equal(JsonValueType.Object, root.Type);
+                Assert.Equal(JsonValueKind.Object, root.ValueKind);
 
                 Assert.True(root.GetProperty("first").GetProperty("true").GetBoolean());
                 Assert.False(root.GetProperty("first").GetProperty("false").GetBoolean());
-                Assert.Equal(JsonValueType.Null, root.GetProperty("first").GetProperty("null").Type);
+                Assert.Equal(JsonValueKind.Null, root.GetProperty("first").GetProperty("null").ValueKind);
                 Assert.Equal(3, root.GetProperty("first").GetProperty("int").GetInt32());
                 Assert.Equal(3.14159f, root.GetProperty("first").GetProperty("nearlyPi").GetSingle());
                 Assert.Equal("This is some text that does not end... <EOT>", root.GetProperty("first").GetProperty("text").GetString());
@@ -3441,7 +3485,7 @@ namespace System.Text.Json.Tests
                 Assert.True(jElement.ValueEquals(default(ReadOnlySpan<char>)));
                 Assert.True(jElement.ValueEquals((ReadOnlySpan<byte>)null));
                 Assert.True(jElement.ValueEquals(default(ReadOnlySpan<byte>)));
-                
+
                 Assert.False(jElement.ValueEquals(Array.Empty<byte>()));
                 Assert.False(jElement.ValueEquals(""));
                 Assert.False(jElement.ValueEquals("".AsSpan()));
@@ -3555,49 +3599,6 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void NameEquals_GivenPropertyAndValue_TrueForPropertyName()
-        {
-            string jsonString = $"{{ \"aPropertyName\" : \"itsValue\" }}";
-            using (JsonDocument doc = JsonDocument.Parse(jsonString))
-            {
-                JsonElement jElement = doc.RootElement;
-                JsonProperty property = jElement.EnumerateObject().First();
-
-                string text = "aPropertyName";
-                byte[] expectedGetBytes = Encoding.UTF8.GetBytes(text);
-                Assert.True(property.NameEquals(text));
-                Assert.True(property.NameEquals(text.AsSpan()));
-                Assert.True(property.NameEquals(expectedGetBytes));
-
-                text = "itsValue";
-                expectedGetBytes = Encoding.UTF8.GetBytes(text);
-                Assert.False(property.NameEquals(text));
-                Assert.False(property.NameEquals(text.AsSpan()));
-                Assert.False(property.NameEquals(expectedGetBytes));
-            }
-        }
-
-        [Theory]
-        [InlineData("conne\\u0063tionId", "connectionId")]
-        [InlineData("connectionId", "connectionId")]
-        [InlineData("123", "123")]
-        [InlineData("My name is \\\"Ahson\\\"", "My name is \"Ahson\"")]
-        public static void NameEquals_UseGoodMatches_True(string propertyName, string otherText)
-        {
-            string jsonString = $"{{ \"{propertyName}\" : \"itsValue\" }}";
-            using (JsonDocument doc = JsonDocument.Parse(jsonString))
-            {
-                JsonElement jElement = doc.RootElement;
-                JsonProperty property = jElement.EnumerateObject().First();
-
-                byte[] expectedGetBytes = Encoding.UTF8.GetBytes(otherText);
-                Assert.True(property.NameEquals(otherText));
-                Assert.True(property.NameEquals(otherText.AsSpan()));
-                Assert.True(property.NameEquals(expectedGetBytes));
-            }
-        }
-
-        [Fact]
         public static void NameEquals_Empty_Throws()
         {
             const string jsonString = "{\"\" : \"some-value\"}";
@@ -3610,20 +3611,6 @@ namespace System.Text.Json.Tests
                 AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(ThrowsAnyway.AsSpan()), ErrorMessage);
                 AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)), ErrorMessage);
             }
-        }
-
-        [Theory]
-        [InlineData("hello")]
-        [InlineData("")]
-        [InlineData(null)]
-        public static void NameEquals_InvalidInstance_Throws(string text)
-        {
-            const string ErrorMessage = "Operation is not valid due to the current state of the object.";
-            JsonProperty prop = default;
-            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(text), ErrorMessage);
-            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(text.AsSpan()), ErrorMessage);
-            byte[] expectedGetBytes = text == null ? null : Encoding.UTF8.GetBytes(text);
-            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(expectedGetBytes), ErrorMessage);
         }
 
         private static void BuildSegmentedReader(
@@ -3690,5 +3677,61 @@ namespace System.Text.Json.Tests
 
             return s_compactJson[testCaseType] = existing;
         }
+
+        [Fact]
+        public static void WriteNumberTooLargeScientific()
+        {
+            // This value is a reference "potential interoperability problem" from
+            // https://tools.ietf.org/html/rfc7159#section-6
+            const string OneQuarticGoogol = "1e400";
+
+            // This just validates we write the literal number 1e400 even though it is too
+            // large to be represented by System.Double and would be converted to
+            // PositiveInfinity instead (or throw if using double.Parse on frameworks
+            // older than .NET Core 3.0).
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            var expectedNonIndentedJson = $"[{OneQuarticGoogol}]";
+            using (JsonDocument doc = JsonDocument.Parse($"[ {OneQuarticGoogol} ]"))
+            {
+                var writer = new Utf8JsonWriter(buffer, default);
+                doc.WriteTo(writer);
+                writer.Flush();
+
+                AssertContents(expectedNonIndentedJson, buffer);
+            }
+        }
+
+        private static void AssertContents(string expectedValue, ArrayBufferWriter<byte> buffer)
+        {
+            Assert.Equal(
+                expectedValue,
+                Encoding.UTF8.GetString(
+                    buffer.WrittenSpan
+#if netfx
+                        .ToArray()
+#endif
+                    ));
+        }
+    }
+
+    public class ThrowOnReadStream : MemoryStream
+    {
+        public ThrowOnReadStream(byte[] bytes) : base(bytes)
+        {
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            throw new EndOfStreamException();
+        }
+    }
+
+    public class ThrowOnCanSeekStream : MemoryStream
+    {
+        public ThrowOnCanSeekStream(byte[] bytes) : base(bytes)
+        {
+        }
+
+        public override bool CanSeek => throw new InsufficientMemoryException();
     }
 }

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
 using System.Numerics;
@@ -28,25 +27,27 @@ namespace System.Text.Json
             return (newLines, lastLineFeedIndex);
         }
 
-        internal static JsonValueType ToValueType(this JsonTokenType tokenType)
+        internal static JsonValueKind ToValueKind(this JsonTokenType tokenType)
         {
             switch (tokenType)
             {
                 case JsonTokenType.None:
-                    return JsonValueType.Undefined;
+                    return JsonValueKind.Undefined;
                 case JsonTokenType.StartArray:
-                    return JsonValueType.Array;
+                    return JsonValueKind.Array;
                 case JsonTokenType.StartObject:
-                    return JsonValueType.Object;
+                    return JsonValueKind.Object;
                 case JsonTokenType.String:
                 case JsonTokenType.Number:
                 case JsonTokenType.True:
                 case JsonTokenType.False:
                 case JsonTokenType.Null:
-                    return (JsonValueType)((byte)tokenType - 3);
+                    // This is the offset between the set of literals within JsonValueType and JsonTokenType
+                    // Essentially: JsonTokenType.Null - JsonValueType.Null
+                    return (JsonValueKind)((byte)tokenType - 4);
                 default:
                     Debug.Fail($"No mapping for token type {tokenType}");
-                    return JsonValueType.Undefined;
+                    return JsonValueKind.Undefined;
             }
         }
 
@@ -276,8 +277,7 @@ namespace System.Text.Json
             Debug.Assert(!sourceUnescaped.IsEmpty);
 
             if (sourceUnescaped.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
-                && JsonHelpers.TryParseAsISO(sourceUnescaped, out DateTime tmp, out int bytesConsumed)
-                && sourceUnescaped.Length == bytesConsumed)
+                && JsonHelpers.TryParseAsISO(sourceUnescaped, out DateTime tmp))
             {
                 value = tmp;
                 return true;
@@ -302,8 +302,7 @@ namespace System.Text.Json
             Debug.Assert(!sourceUnescaped.IsEmpty);
 
             if (sourceUnescaped.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
-                && JsonHelpers.TryParseAsISO(sourceUnescaped, out DateTimeOffset tmp, out int bytesConsumed)
-                && sourceUnescaped.Length == bytesConsumed)
+                && JsonHelpers.TryParseAsISO(sourceUnescaped, out DateTimeOffset tmp))
             {
                 value = tmp;
                 return true;

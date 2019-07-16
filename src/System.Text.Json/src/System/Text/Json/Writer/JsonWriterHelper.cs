@@ -138,10 +138,10 @@ namespace System.Text.Json
         {
             // This is a simplified version of the number reader from Utf8JsonReader.TryGetNumber,
             // because it doesn't need to deal with "NeedsMoreData", or remembering the format.
-            if (utf8FormattedNumber.IsEmpty)
-            {
-                throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
-            }
+            //
+            // The Debug.Asserts in this method should change to validated ArgumentExceptions if/when
+            // writing a formatted number becomes public API.
+            Debug.Assert(!utf8FormattedNumber.IsEmpty);
 
             int i = 0;
 
@@ -172,21 +172,39 @@ namespace System.Text.Json
                 return;
             }
 
+            // The non digit character inside the number
             byte val = utf8FormattedNumber[i];
 
             if (val == '.')
             {
                 i++;
+
+                if (utf8FormattedNumber.Length <= i)
+                {
+                    throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
+                }
+
+                while (i < utf8FormattedNumber.Length && JsonHelpers.IsDigit(utf8FormattedNumber[i]))
+                {
+                    i++;
+                }
+
+                if (i == utf8FormattedNumber.Length)
+                {
+                    return;
+                }
+
+                Debug.Assert(i < utf8FormattedNumber.Length);
+                val = utf8FormattedNumber[i];
             }
-            else if (val == 'e' || val == 'E')
+
+            if (val == 'e' || val == 'E')
             {
                 i++;
 
-                if (i >= utf8FormattedNumber.Length)
+                if (utf8FormattedNumber.Length <= i)
                 {
-                    throw new ArgumentException(
-                        SR.RequiredDigitNotFoundEndOfData,
-                        nameof(utf8FormattedNumber));
+                    throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
                 }
 
                 val = utf8FormattedNumber[i];
@@ -203,11 +221,9 @@ namespace System.Text.Json
                     nameof(utf8FormattedNumber));
             }
 
-            if (i >= utf8FormattedNumber.Length)
+            if (utf8FormattedNumber.Length <= i)
             {
-                throw new ArgumentException(
-                    SR.RequiredDigitNotFoundEndOfData,
-                    nameof(utf8FormattedNumber));
+                throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
             }
 
             while (i < utf8FormattedNumber.Length && JsonHelpers.IsDigit(utf8FormattedNumber[i]))

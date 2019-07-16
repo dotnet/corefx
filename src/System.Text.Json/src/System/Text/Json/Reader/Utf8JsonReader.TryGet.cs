@@ -13,14 +13,23 @@ namespace System.Text.Json
         /// <summary>
         /// Parses the current JSON token value from the source, unescaped, and transcoded as a <see cref="string"/>.
         /// </summary>
+        /// <remarks>
+        /// Returns <see langword="null" /> when <see cref="TokenType"/> is <see cref="JsonTokenType.Null"/>.
+        /// </remarks>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of the JSON token that is not a string
-        /// (i.e. other than <see cref="JsonTokenType.String"/> or <see cref="JsonTokenType.PropertyName"/>).
+        /// (i.e. other than <see cref="JsonTokenType.String"/>, <see cref="JsonTokenType.PropertyName"/> or
+        /// <see cref="JsonTokenType.Null"/>).
         /// <seealso cref="TokenType" />
         /// It will also throw when the JSON string contains invalid UTF-8 bytes, or invalid UTF-16 surrogates.
         /// </exception>
         public string GetString()
         {
+            if (TokenType == JsonTokenType.Null)
+            {
+                return null;
+            }
+
             if (TokenType != JsonTokenType.String && TokenType != JsonTokenType.PropertyName)
             {
                 throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
@@ -311,7 +320,7 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value represents a number less than <see cref="float.MinValue"/> or greater 
+        /// On any framework that is not .NET Core 3.0 or higher, thrown if the JSON token value represents a number less than <see cref="float.MinValue"/> or greater 
         /// than <see cref="float.MaxValue"/>.
         /// </exception>
         public float GetSingle()
@@ -334,7 +343,7 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value represents a number less than <see cref="double.MinValue"/> or greater 
+        /// On any framework that is not .NET Core 3.0 or higher, thrown if the JSON token value represents a number less than <see cref="double.MinValue"/> or greater 
         /// than <see cref="double.MaxValue"/>.
         /// </exception>
         public double GetDouble()
@@ -845,8 +854,7 @@ namespace System.Text.Json
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
             if (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
-                && JsonHelpers.TryParseAsISO(span, out DateTime tmp, out int bytesConsumed)
-                && span.Length == bytesConsumed)
+                && JsonHelpers.TryParseAsISO(span, out DateTime tmp))
             {
                 value = tmp;
                 return true;
@@ -910,8 +918,7 @@ namespace System.Text.Json
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
             if (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
-                && JsonHelpers.TryParseAsISO(span, out DateTimeOffset tmp, out int bytesConsumed)
-                && span.Length == bytesConsumed)
+                && JsonHelpers.TryParseAsISO(span, out DateTimeOffset tmp))
             {
                 value = tmp;
                 return true;

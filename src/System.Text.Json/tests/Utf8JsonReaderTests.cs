@@ -133,6 +133,29 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void InitialStateSimpleCtor()
+        {
+            var json = new Utf8JsonReader(Encoding.UTF8.GetBytes("1"));
+
+            Assert.Equal(0, json.BytesConsumed);
+            Assert.Equal(0, json.TokenStartIndex);
+            Assert.Equal(0, json.CurrentDepth);
+            Assert.Equal(JsonTokenType.None, json.TokenType);
+            Assert.Equal(default, json.Position);
+            Assert.False(json.HasValueSequence);
+            Assert.True(json.IsFinalBlock);
+            Assert.True(json.ValueSpan.SequenceEqual(default));
+            Assert.True(json.ValueSequence.IsEmpty);
+
+            Assert.Equal(64, json.CurrentState.Options.MaxDepth);
+            Assert.False(json.CurrentState.Options.AllowTrailingCommas);
+            Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
+
+            Assert.True(json.Read());
+            Assert.False(json.Read());
+        }
+
+        [Fact]
         public static void StateRecovery()
         {
             byte[] utf8 = Encoding.UTF8.GetBytes("[1]");
@@ -426,26 +449,51 @@ namespace System.Text.Json.Tests
     ]
 ]";
 
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            {
+                byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
 
-            Assert.Equal(0, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(0, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(1, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(2, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(2, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(2, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(1, json.CurrentDepth);
-            Assert.True(json.Read());
-            Assert.Equal(0, json.CurrentDepth);
-            Assert.False(json.Read());
-            Assert.Equal(0, json.CurrentDepth);
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(1, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(1, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.False(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+            }
+
+            {
+                byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+                var json = new Utf8JsonReader(dataUtf8);
+
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(1, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(2, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(1, json.CurrentDepth);
+                Assert.True(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.False(json.Read());
+                Assert.Equal(0, json.CurrentDepth);
+            }
         }
 
         [Fact]
@@ -646,6 +694,27 @@ namespace System.Text.Json.Tests
             }
             {
                 var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString), isFinalBlock: false, state: default);
+                for (int i = 0; i < readCount; i++)
+                {
+                    reader.Read();
+                }
+
+                Assert.True(reader.TrySkip());
+                Assert.Equal(expectedConsumed, reader.BytesConsumed);
+            }
+
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString));
+                for (int i = 0; i < readCount; i++)
+                {
+                    reader.Read();
+                }
+
+                reader.Skip();
+                Assert.Equal(expectedConsumed, reader.BytesConsumed);
+            }
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString));
                 for (int i = 0; i < readCount; i++)
                 {
                     reader.Read();
@@ -1568,7 +1637,45 @@ namespace System.Text.Json.Tests
                     while (json.Read())
                     {
                         if (json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null)
+                        {
                             actualDepth = json.CurrentDepth;
+                        }
+                    }
+
+                    int expectedDepth = 0;
+                    var newtonJson = new JsonTextReader(new StringReader(jsonStr))
+                    {
+                        MaxDepth = depth
+                    };
+                    while (newtonJson.Read())
+                    {
+                        if (newtonJson.TokenType == JsonToken.String)
+                        {
+                            expectedDepth = newtonJson.Depth;
+                        }
+                    }
+
+                    Assert.Equal(expectedDepth, actualDepth);
+                    Assert.Equal(i + 1, actualDepth);
+                }
+            }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                for (int i = 0; i < depth; i++)
+                {
+                    string jsonStr = JsonTestHelper.WriteDepthObject(i, commentHandling == JsonCommentHandling.Allow);
+                    Span<byte> data = Encoding.UTF8.GetBytes(jsonStr);
+
+                    var json = new Utf8JsonReader(data, new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = depth });
+
+                    int actualDepth = 0;
+                    while (json.Read())
+                    {
+                        if (json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null)
+                        {
+                            actualDepth = json.CurrentDepth;
+                        }
                     }
 
                     int expectedDepth = 0;
@@ -1859,6 +1966,24 @@ namespace System.Text.Json.Tests
                 Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
                 Assert.Equal(default, json.Position);
             }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (jsonString == "12345")
+                {
+                    continue;
+                }
+
+                var json = new Utf8JsonReader(dataUtf8.AsSpan(0, splitLocation), options: new JsonReaderOptions { CommentHandling = commentHandling });
+
+                try
+                {
+                    while (json.Read())
+                        ;
+                    Assert.True(false, "Expected JsonException was not thrown.");
+                }
+                catch (JsonException) {}
+            }
         }
 
         [Theory]
@@ -1944,6 +2069,23 @@ namespace System.Text.Json.Tests
                     Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
                 }
             }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var json = new Utf8JsonReader(dataUtf8, new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = maxDepth });
+
+                try
+                {
+                    while (json.Read())
+                        ;
+                    Assert.True(false, "Expected JsonException was not thrown.");
+                }
+                catch (JsonException ex)
+                {
+                    Assert.Equal(expectedlineNumber, ex.LineNumber);
+                    Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
+                }
+            }
         }
 
         [Theory]
@@ -1982,6 +2124,24 @@ namespace System.Text.Json.Tests
             {
                 var state = new JsonReaderState(new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = maxDepth });
                 var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+                try
+                {
+                    while (json.Read())
+                        ;
+                    Assert.True(false, "Expected JsonException was not thrown with single-segment data.");
+                }
+                catch (JsonException ex)
+                {
+                    Assert.Equal(expectedlineNumber, ex.LineNumber);
+                    Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
+                    Assert.Equal(default, json.Position);
+                }
+            }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var json = new Utf8JsonReader(dataUtf8, new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = maxDepth });
 
                 try
                 {
@@ -2701,6 +2861,88 @@ namespace System.Text.Json.Tests
             }
         }
 
+        [Theory]
+        [InlineData("//asd\r", "asd", 6)]
+        [InlineData("//asd\r\n", "asd", 7)]
+        [InlineData("//asd\n", "asd", 6)]
+        public static void JsonWithASingleCommentEndingWithLineEndingSingleSegment(string jsonString, string expectedComment, int expectedBytesConsumed)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+            Assert.True(json.Read());
+            Assert.Equal(expectedComment, json.GetComment());
+            Assert.False(json.Read());
+            Assert.Equal(expectedBytesConsumed, json.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("//\u2028")]
+        [InlineData("//\u2029")]
+        [InlineData("// \u2028")]
+        [InlineData("//   \u2028")]
+        [InlineData("//  \u2029 ")]
+        [InlineData("//  \u2029  ")]
+        [InlineData("//\u2028\n")]
+        [InlineData("//\u2028 \n")]
+        [InlineData("// \u2028\n")]
+        [InlineData("// \u2028 \n")]
+        [InlineData("//\u2028\r\n")]
+        [InlineData("//\u2028 \r\n")]
+        [InlineData("// \u2028\r\n")]
+        [InlineData("// \u2028 \r\n")]
+        [InlineData("//\u2028\r")]
+        [InlineData("//\u2028 \r")]
+        [InlineData("// \u2028\r")]
+        [InlineData("// \u2028 \r")]
+        public static void JsonWithSingleLineCommentEndingWithNonStandardLineEnding(string jsonString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+                try
+                {
+                    json.Read();
+                    Assert.True(false, $"Expected JsonException was not thrown. CommentHandling = {commentHandling}");
+                }
+                catch (JsonException) { }
+            }
+        }
+
+        [Theory]
+        // Non-standard line-endings are: \u2028 \u2029 (E2, 80, A8/A9)
+        // last byte does not match (E2, 80, AA)
+        [InlineData("//\u2030\n", "\u2030")]
+        [InlineData("//\u2030 \r\n", "\u2030 ")]
+        [InlineData("// \u2030\r", " \u2030")]
+        [InlineData("//\u2030\u2031\n", "\u2030\u2031")]
+        [InlineData("//\u2030 \u2031\r\n", "\u2030 \u2031")]
+        [InlineData("// \u2030 \u2031\n", " \u2030 \u2031")]
+        [InlineData("// \u2030 \u2031 \r", " \u2030 \u2031 ")]
+        // second byte does not match (E2, 81, A8/A9)
+        [InlineData("//\u2069\r\n", "\u2069")]
+        [InlineData("// \u2069\r", " \u2069")]
+        [InlineData("//\u2069 \n", "\u2069 ")]
+        [InlineData("//\u2069\u2068\n", "\u2069\u2068")]
+        [InlineData("//\u2069 \u2068\n", "\u2069 \u2068")]
+        [InlineData("//\u2069 \u2068 \u2068\n", "\u2069 \u2068 \u2068")]
+        [InlineData("// \u2069 \u2068 \u2068 \n", " \u2069 \u2068 \u2068 ")]
+        public static void JsonWithSingleCorrectLineCommentWithPartialNonStandardLineEnding(string jsonString, string expectedComment)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+            Assert.True(json.Read());
+            Assert.Equal(expectedComment, json.GetComment());
+            Assert.False(json.Read());
+        }
+
         [Fact]
         public static void EmptyJsonIsInvalid()
         {
@@ -2886,6 +3128,7 @@ namespace System.Text.Json.Tests
                 {
                     case JsonTokenType.Null:
                         Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
+                        Assert.Null(json.GetString());
                         foundPrimitiveValue = true;
                         break;
                     case JsonTokenType.Number:

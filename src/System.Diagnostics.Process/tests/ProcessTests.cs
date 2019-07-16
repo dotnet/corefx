@@ -1088,22 +1088,27 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void GetProcesses_RemoteMachinePath_ReturnsExpected()
         {
+            string computerDomain = null;
             try
             {
-                Process[] processes = Process.GetProcesses(Environment.MachineName + "." + Domain.GetComputerDomain());
+                computerDomain = Domain.GetComputerDomain().Name;
+            }
+            catch
+            {
+                // Ignore all exceptions - this test is not testing GetComputerDomain.
+                // This path is taken when the executing machine is not domain-joined or DirectoryServices are unavailable.
+                return;
+            }
+
+            try
+            {
+                Process[] processes = Process.GetProcesses(Environment.MachineName + "." + computerDomain);
                 Assert.NotEmpty(processes);
             }
-            catch (ActiveDirectoryObjectNotFoundException)
+            catch (InvalidOperationException)
             {
-                //This will be thrown when the executing machine is not domain-joined, i.e. in CI
-            }
-            catch (TypeInitializationException tie) when (tie.InnerException is ActiveDirectoryOperationException)
-            {
-                //Thrown if the ActiveDirectory module is unavailable
-            }
-            catch (PlatformNotSupportedException)
-            {
-                //System.DirectoryServices is not supported on all platforms
+                // As we can't detect reliably if performance counters are enabled
+                // we let possible InvalidOperationExceptions pass silently.
             }
         }
 
@@ -1340,16 +1345,6 @@ namespace System.Diagnostics.Tests
         {
             var process = new Process();
             Assert.Throws<InvalidOperationException>(() => process.StandardInput);
-        }
-
-        // [Fact] // uncomment for diagnostic purposes to list processes to console
-        public void TestDiagnosticsWithConsoleWriteLine()
-        {
-            foreach (var p in Process.GetProcesses().OrderBy(p => p.Id))
-            {
-                Console.WriteLine("{0} : \"{1}\" (Threads: {2})", p.Id, p.ProcessName, p.Threads.Count);
-                p.Dispose();
-            }
         }
 
         [Fact]

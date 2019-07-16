@@ -10,6 +10,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DefineConstants>$(DefineConstants);FEATURE_SERIALIZATION</DefineConstants>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <!-- Too much private reflection. Do not bother with trimming -->
+    <ILLinkTrimAssembly>false</ILLinkTrimAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <RuntimeSerializationSources>System\Runtime\Serialization</RuntimeSerializationSources>
@@ -18,9 +20,6 @@
     <TextSources>System\Text</TextSources>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(CommonPath)\System\HResults.cs">
-      <Link>Common\System\HResults.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
     </Compile>

@@ -350,7 +350,6 @@ namespace System.Threading.Tasks
 
         /// <summary>Throws the exception that caused the <see cref="ValueTask"/> to fail.  If it completed successfully, nothing is thrown.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [StackTraceHidden]
         internal void ThrowIfCompletedUnsuccessfully()
         {
             object? obj = _obj;
@@ -450,7 +449,7 @@ namespace System.Threading.Tasks
 
             _obj = task;
 
-            _result = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+            _result = default;
             _continueOnCapturedContext = true;
             _token = 0;
         }
@@ -469,7 +468,7 @@ namespace System.Threading.Tasks
             _obj = source;
             _token = token;
 
-            _result = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+            _result = default;
             _continueOnCapturedContext = true;
         }
 

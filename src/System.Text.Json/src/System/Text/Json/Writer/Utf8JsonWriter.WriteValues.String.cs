@@ -40,10 +40,24 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// The value is escaped before writing.
+        /// <para>
+        /// The value is escaped before writing.</para>
+        /// <para>
+        /// If <paramref name="value"/> is <see langword="null"/> the JSON null value is written,
+        /// as if <see cref="WriteNullValue"/> was called.
+        /// </para>
         /// </remarks>
         public void WriteStringValue(string value)
-           => WriteStringValue(value.AsSpan());
+        {
+            if (value == null)
+            {
+                WriteNullValue();
+            }
+            else
+            {
+                WriteStringValue(value.AsSpan());
+            }
+        }
 
         /// <summary>
         /// Writes the text value (as a JSON string) as an element of a JSON array.
@@ -70,7 +84,7 @@ namespace System.Text.Json
 
         private void WriteStringEscape(ReadOnlySpan<char> value)
         {
-            int valueIdx = JsonWriterHelper.NeedsEscaping(value);
+            int valueIdx = JsonWriterHelper.NeedsEscaping(value, _options.Encoder);
 
             Debug.Assert(valueIdx >= -1 && valueIdx < value.Length);
 
@@ -87,7 +101,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<char> value)
         {
             ValidateWritingValue();
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteStringIndented(value);
             }
@@ -178,7 +192,7 @@ namespace System.Text.Json
                 stackalloc char[length] :
                 (valueArray = ArrayPool<char>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, out int written);
+            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, _options.Encoder, out int written);
 
             WriteStringByOptions(escapedValue.Slice(0, written));
 
@@ -213,7 +227,7 @@ namespace System.Text.Json
 
         private void WriteStringEscape(ReadOnlySpan<byte> utf8Value)
         {
-            int valueIdx = JsonWriterHelper.NeedsEscaping(utf8Value);
+            int valueIdx = JsonWriterHelper.NeedsEscaping(utf8Value, _options.Encoder);
 
             Debug.Assert(valueIdx >= -1 && valueIdx < utf8Value.Length);
 
@@ -230,7 +244,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<byte> utf8Value)
         {
             ValidateWritingValue();
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteStringIndented(utf8Value);
             }
@@ -321,7 +335,7 @@ namespace System.Text.Json
                 stackalloc byte[length] :
                 (valueArray = ArrayPool<byte>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, out int written);
+            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, _options.Encoder, out int written);
 
             WriteStringByOptions(escapedValue.Slice(0, written));
 

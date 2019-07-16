@@ -20,11 +20,14 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large OR if the given string text value contains a comment delimiter (i.e. */).
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="value"/> parameter is <see langword="null"/>.
+        /// </exception>
         /// <remarks>
         /// The comment value is not escaped before writing.
         /// </remarks>
         public void WriteCommentValue(string value)
-            => WriteCommentValue(value.AsSpan());
+            => WriteCommentValue((value ?? throw new ArgumentNullException(nameof(value))).AsSpan());
 
         /// <summary>
         /// Writes the text value (as a JSON comment).
@@ -50,7 +53,7 @@ namespace System.Text.Json
 
         private void WriteCommentByOptions(ReadOnlySpan<char> value)
         {
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteCommentIndented(value);
             }
@@ -149,7 +152,7 @@ namespace System.Text.Json
 
         private void WriteCommentByOptions(ReadOnlySpan<byte> utf8Value)
         {
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteCommentIndented(utf8Value);
             }

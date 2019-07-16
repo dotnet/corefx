@@ -34,7 +34,7 @@ namespace System.Text.Json.Serialization.Tests
             public JsonElement String { get; set; }
             public JsonElement Array { get; set; }
             public JsonElement Object { get; set; }
-            // public JsonElement Null { get; set; }
+            public JsonElement Null { get; set; }
 
             public static readonly string s_json =
                 @"{" +
@@ -43,9 +43,8 @@ namespace System.Text.Json.Serialization.Tests
                     @"""False"" : false," +
                     @"""String"" : ""Hello""," +
                     @"""Array"" : [2, false, true, ""Goodbye""]," +
-                    @"""Object"" : {}" +
-                    // TODO: Null doesn't work yet (but probably should? object gets null in this case)
-                    //@"""Null"" : null" +
+                    @"""Object"" : {}," +
+                    @"""Null"" : null" +
                 @"}";
 
             public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
@@ -58,33 +57,33 @@ namespace System.Text.Json.Serialization.Tests
                 String = JsonDocument.Parse(@"""Hello""").RootElement.Clone();
                 Array = JsonDocument.Parse(@"[2, false, true, ""Goodbye""]").RootElement.Clone();
                 Object = JsonDocument.Parse(@"{}").RootElement.Clone();
-                // Null = JsonDocument.Parse(@"null").RootElement.Clone();
+                Null = JsonDocument.Parse(@"null").RootElement.Clone();
             }
 
             public void Verify()
             {
-                Assert.Equal(JsonValueType.Number, Number.Type);
+                Assert.Equal(JsonValueKind.Number, Number.ValueKind);
                 Assert.Equal("1", Number.ToString());
-                Assert.Equal(JsonValueType.True, True.Type);
+                Assert.Equal(JsonValueKind.True, True.ValueKind);
                 Assert.Equal("True", True.ToString());
-                Assert.Equal(JsonValueType.False, False.Type);
+                Assert.Equal(JsonValueKind.False, False.ValueKind);
                 Assert.Equal("False", False.ToString());
-                Assert.Equal(JsonValueType.String, String.Type);
+                Assert.Equal(JsonValueKind.String, String.ValueKind);
                 Assert.Equal("Hello", String.ToString());
-                Assert.Equal(JsonValueType.Array, Array.Type);
+                Assert.Equal(JsonValueKind.Array, Array.ValueKind);
                 JsonElement[] elements = Array.EnumerateArray().ToArray();
-                Assert.Equal(JsonValueType.Number, elements[0].Type);
+                Assert.Equal(JsonValueKind.Number, elements[0].ValueKind);
                 Assert.Equal("2", elements[0].ToString());
-                Assert.Equal(JsonValueType.False, elements[1].Type);
+                Assert.Equal(JsonValueKind.False, elements[1].ValueKind);
                 Assert.Equal("False", elements[1].ToString());
-                Assert.Equal(JsonValueType.True, elements[2].Type);
+                Assert.Equal(JsonValueKind.True, elements[2].ValueKind);
                 Assert.Equal("True", elements[2].ToString());
-                Assert.Equal(JsonValueType.String, elements[3].Type);
+                Assert.Equal(JsonValueKind.String, elements[3].ValueKind);
                 Assert.Equal("Goodbye", elements[3].ToString());
-                Assert.Equal(JsonValueType.Object, Object.Type);
+                Assert.Equal(JsonValueKind.Object, Object.ValueKind);
                 Assert.Equal("{}", Object.ToString());
-                //Assert.Equal(JsonValueType.Null, Null.Type);
-                //Assert.Equal("Null", Null.ToString());
+                Assert.Equal(JsonValueKind.Null, Null.ValueKind);
+                Assert.Equal("", Null.ToString()); // JsonElement returns empty string for null.
             }
         }
 
@@ -114,10 +113,9 @@ namespace System.Text.Json.Serialization.Tests
                         @"1, " +
                         @"true, " +
                         @"false, " +
-                        @"""Hello""" +
-                        // TODO: Nested complex objects aren't handled by the collection code yet.
-                        // @"[2, false, true, ""Goodbye""], " +
-                        // @"{}" +
+                        @"""Hello""," +
+                        @"[2, false, true, ""Goodbye""]," +
+                        @"{}" +
                     @"]" +
                 @"}";
 
@@ -136,13 +134,13 @@ namespace System.Text.Json.Serialization.Tests
 
             public void Verify()
             {
-                Assert.Equal(JsonValueType.Number, Array[0].Type);
+                Assert.Equal(JsonValueKind.Number, Array[0].ValueKind);
                 Assert.Equal("1", Array[0].ToString());
-                Assert.Equal(JsonValueType.True, Array[1].Type);
+                Assert.Equal(JsonValueKind.True, Array[1].ValueKind);
                 Assert.Equal("True", Array[1].ToString());
-                Assert.Equal(JsonValueType.False, Array[2].Type);
+                Assert.Equal(JsonValueKind.False, Array[2].ValueKind);
                 Assert.Equal("False", Array[2].ToString());
-                Assert.Equal(JsonValueType.String, Array[3].Type);
+                Assert.Equal(JsonValueKind.String, Array[3].ValueKind);
                 Assert.Equal("Hello", Array[3].ToString());
             }
         }

@@ -66,7 +66,7 @@ namespace System.Drawing
             SetNativePen(pen);
 
 #if FEATURE_SYSTEM_EVENTS
-            if (ColorUtil.IsSystemColor(_color))
+            if (_color.IsSystemColor)
             {
                 SystemColorTracker.Add(this);
             }
@@ -156,7 +156,7 @@ namespace System.Drawing
                 try
                 {
 #if DEBUG
-                    int status =
+                    int status = !Gdip.Initialized ? Gdip.Ok :
 #endif
                     Gdip.GdipDeletePen(new HandleRef(this, NativePen));
 #if DEBUG
@@ -590,7 +590,7 @@ namespace System.Drawing
 #if FEATURE_SYSTEM_EVENTS
                     // NOTE: We never remove pens from the active list, so if someone is
                     // changing their pen colors a lot, this could be a problem.
-                    if (ColorUtil.IsSystemColor(value) && !ColorUtil.IsSystemColor(oldColor))
+                    if (value.IsSystemColor && !oldColor.IsSystemColor)
                     {
                         SystemColorTracker.Add(this);
                     }

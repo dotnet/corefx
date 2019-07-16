@@ -124,7 +124,6 @@ namespace System.Diagnostics.Tests
             Assert.Throws<ArgumentException>(() => EventLog.GetEventLogs(""));
             EventLog[] eventLogCollection = EventLog.GetEventLogs();
             Assert.Contains(eventLogCollection, eventlog => eventlog.Log.Equals("Application"));
-            Assert.Contains(eventLogCollection, eventlog => eventlog.Log.Equals("Security"));
             Assert.Contains(eventLogCollection, eventlog => eventlog.Log.Equals("System"));
         }
 
@@ -357,7 +356,7 @@ namespace System.Diagnostics.Tests
             foreach (var eventLog in EventLog.GetEventLogs())
             {
                 // Accessing eventlog properties should not throw.
-                Assert.True(eventLog.Entries.Count >= 0);
+                Assert.True(Helpers.RetryOnWin7(() => eventLog.Entries.Count) >= 0);
             }
         }
     }

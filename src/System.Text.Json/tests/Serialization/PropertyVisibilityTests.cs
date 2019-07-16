@@ -32,7 +32,9 @@ namespace System.Text.Json.Serialization.Tests
             var obj = new ClassWithNoSetter();
 
             string json = JsonSerializer.Serialize(obj, options);
-            Assert.Equal(@"{}", json);
+
+            // Collections are always serialized unless they have [JsonIgnore].
+            Assert.Equal(@"{""MyInts"":[1,2]}", json);
         }
 
         [Fact]
@@ -215,6 +217,95 @@ namespace System.Text.Json.Serialization.Tests
 
             [JsonIgnore]
             public string[] MyStringsWithIgnore { get; set; }
+        }
+
+        private enum MyEnum
+        {
+            Case1 = 0,
+            Case2 = 1,
+        }
+
+        private struct StructWithOverride
+        {
+            [JsonIgnore]
+            public MyEnum EnumValue { get; set; }
+
+            [JsonPropertyName("EnumValue")]
+            public string EnumString
+            {
+                get => EnumValue.ToString();
+                set
+                {
+                    if (value == "Case1")
+                    {
+                        EnumValue = MyEnum.Case1;
+                    }
+                    else if (value == "Case2")
+                    {
+                        EnumValue = MyEnum.Case2;
+                    }
+                    else
+                    {
+                        throw new Exception("Unknown value!");
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public static void OverrideJsonIgnorePropertyUsingJsonPropertyName()
+        {
+            const string json = @"{""EnumValue"":""Case2""}";
+
+            StructWithOverride obj = JsonSerializer.Deserialize<StructWithOverride>(json);
+
+            Assert.Equal(MyEnum.Case2, obj.EnumValue);
+            Assert.Equal("Case2", obj.EnumString);
+
+            string jsonSerialized = JsonSerializer.Serialize(obj);
+            Assert.Equal(json, jsonSerialized);
+        }
+
+        private struct ClassWithOverrideReversed
+        {
+            // Same as ClassWithOverride except the order of the properties is different, which should cause different reflection order.
+            [JsonPropertyName("EnumValue")]
+            public string EnumString
+            {
+                get => EnumValue.ToString();
+                set
+                {
+                    if (value == "Case1")
+                    {
+                        EnumValue = MyEnum.Case1;
+                    }
+                    if (value == "Case2")
+                    {
+                        EnumValue = MyEnum.Case2;
+                    }
+                    else
+                    {
+                        throw new Exception("Unknown value!");
+                    }
+                }
+            }
+
+            [JsonIgnore]
+            public MyEnum EnumValue { get; set; }
+        }
+
+        [Fact]
+        public static void OverrideJsonIgnorePropertyUsingJsonPropertyNameReversed()
+        {
+            const string json = @"{""EnumValue"":""Case2""}";
+
+            ClassWithOverrideReversed obj = JsonSerializer.Deserialize<ClassWithOverrideReversed>(json);
+
+            Assert.Equal(MyEnum.Case2, obj.EnumValue);
+            Assert.Equal("Case2", obj.EnumString);
+
+            string jsonSerialized = JsonSerializer.Serialize(obj);
+            Assert.Equal(json, jsonSerialized);
         }
     }
 }
