@@ -1384,7 +1384,15 @@ namespace System.Net.Security
                     break;
                 case TaskCompletionSource<int> taskCompletionSource when taskCompletionSource.Task.AsyncState != null:
                     Memory<byte> array = (Memory<byte>)taskCompletionSource.Task.AsyncState;
-                    taskCompletionSource.SetResult(CheckOldKeyDecryptedData(array));
+                    try
+                    {
+                        int oldKeyResult = CheckOldKeyDecryptedData(array);
+                        taskCompletionSource.SetResult(oldKeyResult);
+                    }
+                    catch (Exception exc)
+                    {
+                        taskCompletionSource.SetException(exc);
+                    }
                     break;
                 case TaskCompletionSource<int> taskCompletionSource:
                     taskCompletionSource.SetResult(0);
