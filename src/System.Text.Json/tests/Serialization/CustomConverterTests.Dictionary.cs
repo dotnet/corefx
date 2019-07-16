@@ -96,14 +96,12 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.Converters.Add(new IDictionaryConverter(10));
 
-            {
-                Dictionary<string, long> dictionary = JsonSerializer.Deserialize<Dictionary<string, long>>(json, options);
-                Assert.Equal(11, dictionary["Key1"]);
-                Assert.Equal(12, dictionary["Key2"]);
+            Dictionary<string, long> dictionary = JsonSerializer.Deserialize<Dictionary<string, long>>(json, options);
+            Assert.Equal(11, dictionary["Key1"]);
+            Assert.Equal(12, dictionary["Key2"]);
 
-                string jsonSerialized = JsonSerializer.Serialize(dictionary, options);
-                Assert.Equal(json, jsonSerialized);
-            }
+            string jsonSerialized = JsonSerializer.Serialize(dictionary, options);
+            Assert.Equal(json, jsonSerialized);
         }
 
         [Fact]
@@ -114,16 +112,14 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.Converters.Add(new IDictionaryConverter(10));
 
-            {
-                ClassWithCustomDictionaryConverter dictionary = JsonSerializer.Deserialize<ClassWithCustomDictionaryConverter>(json, options);
-                Assert.Equal(11, dictionary.MyDictionary["Key1"]);
-                Assert.Equal(12, dictionary.MyDictionary["Key2"]);
-                Assert.Equal(32, dictionary.MyInt);
-                Assert.Equal("Hello", dictionary.MyString);
+            ClassWithCustomDictionaryConverter dictionary = JsonSerializer.Deserialize<ClassWithCustomDictionaryConverter>(json, options);
+            Assert.Equal(11, dictionary.MyDictionary["Key1"]);
+            Assert.Equal(12, dictionary.MyDictionary["Key2"]);
+            Assert.Equal(32, dictionary.MyInt);
+            Assert.Equal("Hello", dictionary.MyString);
 
-                string jsonSerialized = JsonSerializer.Serialize(dictionary, options);
-                Assert.Equal(json, jsonSerialized);
-            }
+            string jsonSerialized = JsonSerializer.Serialize(dictionary, options);
+            Assert.Equal(json, jsonSerialized);
         }
 
         private class ClassWithCustomDictionaryConverter

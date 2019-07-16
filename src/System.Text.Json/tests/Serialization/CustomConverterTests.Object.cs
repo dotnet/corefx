@@ -16,7 +16,7 @@ namespace System.Text.Json.Serialization.Tests
             public override bool CanConvert(Type typeToConvert)
             {
                 return (typeToConvert == typeof(Customer) ||
-                    typeToConvert == typeof(int) || typeToConvert == typeof(SimpleTestClass));
+                    typeToConvert == typeof(int));
             }
 
             public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -32,11 +32,6 @@ namespace System.Text.Json.Serialization.Tests
                 if (typeToConvert == typeof(int))
                 {
                     return 42;
-                }
-
-                if (typeToConvert == typeof(SimpleTestClass))
-                {
-                    return new SimpleTestClass();
                 }
 
                 throw new NotSupportedException();
@@ -165,7 +160,7 @@ namespace System.Text.Json.Serialization.Tests
                     customer = new DerivedCustomer();
                 }
 
-                if(customer != null)
+                if (customer != null)
                 { 
                     while (reader.Read())
                     {
@@ -214,8 +209,9 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ClassWithFieldHavingCustomConverterTest()
         {
-            TestClassWithFieldHavingCustomConverter testObject = new TestClassWithFieldHavingCustomConverter { IntValue = 32, Name = "John Doe",
-                Customer = new Customer { Name = "Customer Doe", CreditLimit = 1000 }, DerivedCustomer = new DerivedCustomer { Name = "Derived Doe", CreditLimit = 2000 } };
+            TestClassWithFieldHavingCustomConverter testObject = new TestClassWithFieldHavingCustomConverter { IntValue = 32,
+                Name = "John Doe", Customer = new Customer { Name = "Customer Doe", CreditLimit = 1000 },
+                DerivedCustomer = new DerivedCustomer { Name = "Derived Doe", CreditLimit = 2000 } };
 
             var options = new JsonSerializerOptions();
             options.Converters.Add(new ObjectToCustomerConverter());
