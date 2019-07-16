@@ -527,51 +527,6 @@ null,
         }
 
         [Fact]
-        public static void WriteValueUnicodeEscapeSequence()
-        {
-            string unicodeString = "\u0421\u0430\u0439\u043D \u0443\u0443? \u04E9\u04E9";
-            string json = $"[\"{unicodeString}\"]";
-            var buffer = new ArrayBufferWriter<byte>(1024);
-            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(Encoding.UTF8.GetBytes(json), 1);
-            string expectedStr = GetEscapedExpectedString(unicodeString, StringEscapeHandling.EscapeNonAscii);
-
-            using (JsonDocument doc = JsonDocument.Parse(sequence, s_options))
-            {
-                JsonElement target = doc.RootElement[0];
-
-                using (var writer = new Utf8JsonWriter(buffer))
-                {
-                    target.WriteTo(writer);
-                    writer.Flush();
-                }
-
-                AssertContents(expectedStr, buffer);
-            }
-        }
-
-        [Fact]
-        public static void WriteValueSurrogatesEscapeSequence()
-        {
-            string unicodeString = "\uD800\uDC00 \uD803\uDE6D\uD834\uDD1E \uDBFF\uDFFF";
-            string json = $"[\"{unicodeString}\"]";
-            var buffer = new ArrayBufferWriter<byte>(1024);
-            byte[] temp = Encoding.UTF8.GetBytes(json);
-            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(temp, 1);
-            string expectedStr = GetEscapedExpectedString(unicodeString, StringEscapeHandling.EscapeNonAscii);
-
-            using (JsonDocument doc = JsonDocument.Parse(sequence, s_options))
-            {
-                JsonElement target = doc.RootElement[0];
-
-                var writer = new Utf8JsonWriter(buffer);
-                target.WriteTo(writer);
-                writer.Flush();
-
-                AssertContents(expectedStr, buffer);
-            }
-        }
-
-        [Fact]
         public static void WriteValueSurrogatesEscapeString()
         {
             string unicodeString = "\uD800\uDC00\uD803\uDE6D \uD834\uDD1E\uDBFF\uDFFF";
@@ -583,46 +538,12 @@ null,
             {
                 JsonElement target = doc.RootElement[0];
 
-                var writer = new Utf8JsonWriter(buffer);
-                target.WriteTo(writer);
-                writer.Flush();
-
+                using (var writer = new Utf8JsonWriter(buffer))
+                {
+                    target.WriteTo(writer);
+                    writer.Flush();
+                }
                 AssertContents(expectedStr, buffer);
-            }
-        }
-
-        [ActiveIssue(39397)]
-        [Fact]
-        public static void WriteValueSequenceWithInvalidSurrogatesShouldThrow()
-        {
-            char[] chars = new char[] { '[', '"', (char)0xDC00, (char)0xD800, (char)0xD803, '"', ']' };
-            var buffer = new ArrayBufferWriter<byte>(128);
-            byte[] temp = Encoding.UTF8.GetBytes(chars);
-            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(temp, 1);
-
-            using (JsonDocument doc = JsonDocument.Parse(sequence, s_options))
-            {
-                JsonElement target = doc.RootElement[0];
-                var writer = new Utf8JsonWriter(buffer);
-
-                Assert.Throws<ArgumentException>(() => target.WriteTo(writer));
-            }
-        }
-
-        [ActiveIssue(39397)]
-        [Fact]
-        public static void WriteValueBytesWithInvalidSurrogatesShouldThrow()
-        {
-            char[] chars = new char[] { '[', '"', (char)0xDC00, (char)0xD800, (char)0xD803, '"', ']' };
-            var buffer = new ArrayBufferWriter<byte>(128);
-            byte[] temp = Encoding.UTF8.GetBytes(chars);
-
-            using (JsonDocument doc = JsonDocument.Parse(temp, s_options))
-            {
-                JsonElement target = doc.RootElement[0];
-                var writer = new Utf8JsonWriter(buffer);
-
-                Assert.Throws<ArgumentException>(() => target.WriteTo(writer));
             }
         }
 
