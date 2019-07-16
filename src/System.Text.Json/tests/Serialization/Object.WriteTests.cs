@@ -12,7 +12,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void VerifyTypeFail()
         {
-            Assert.Throws<ArgumentException>(() => JsonSerializer.ToString(1, typeof(string)));
+            Assert.Throws<ArgumentException>(() => JsonSerializer.Serialize(1, typeof(string)));
         }
 
         [Theory]
@@ -24,11 +24,11 @@ namespace System.Text.Json.Serialization.Tests
             {
                 testObj.Initialize();
                 testObj.Verify();
-                json = JsonSerializer.ToString(testObj, testObj.GetType());
+                json = JsonSerializer.Serialize(testObj, testObj.GetType());
             }
 
             {
-                ITestClass obj = (ITestClass)JsonSerializer.Parse(json, testObj.GetType());
+                ITestClass obj = (ITestClass)JsonSerializer.Deserialize(json, testObj.GetType());
                 obj.Verify();
             }
         }
@@ -39,6 +39,41 @@ namespace System.Text.Json.Serialization.Tests
             {
                 return TestData.WriteSuccessCases;
             }
+        }
+
+        [Fact]
+        public static void WriteObjectAsObject()
+        {
+            var obj = new ObjectObject { Object = new object() };
+            string json = JsonSerializer.Serialize(obj);
+            Assert.Equal(@"{""Object"":{}}", json);
+        }
+
+        public class ObjectObject
+        {
+            public object Object { get; set; }
+        }
+
+        [Fact]
+        public static void WriteObject_PublicIndexer()
+        {
+            var indexer = new Indexer();
+            indexer[42] = 42;
+            indexer.NonIndexerProp = "Value";
+            Assert.Equal(@"{""NonIndexerProp"":""Value""}", JsonSerializer.Serialize(indexer));
+        }
+
+        private class Indexer
+        {
+            private int _index = -1;
+
+            public int this[int index]
+            {
+                get => _index;
+                set => _index = value;
+            }
+
+            public string NonIndexerProp { get; set; }
         }
     }
 }

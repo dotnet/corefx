@@ -7,7 +7,7 @@ namespace System.Diagnostics
     [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class DebuggerTypeProxyAttribute : Attribute
     {
-        private Type _target;
+        private Type? _target;
 
         public DebuggerTypeProxyAttribute(Type type)
         {
@@ -16,7 +16,7 @@ namespace System.Diagnostics
                 throw new ArgumentNullException(nameof(type));
             }
 
-            ProxyTypeName = type.AssemblyQualifiedName;
+            ProxyTypeName = type.AssemblyQualifiedName!;
         }
 
         public DebuggerTypeProxyAttribute(string typeName)
@@ -26,7 +26,7 @@ namespace System.Diagnostics
 
         public string ProxyTypeName { get; }
 
-        public Type Target
+        public Type? Target
         {
             get => _target;
             set
@@ -41,6 +41,6 @@ namespace System.Diagnostics
             }        
         }
 
-        public string TargetTypeName { get; set; }
+        public string? TargetTypeName { get; set; }
     }
 }

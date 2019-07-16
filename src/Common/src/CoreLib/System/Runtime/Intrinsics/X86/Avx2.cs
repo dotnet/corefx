@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
@@ -681,7 +680,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_cvtepu8_epi16 (__m128i a)
         ///   VPMOVZXBW ymm, xmm
         /// </summary>
-        public static Vector256<ushort> ConvertToVector256UInt16(Vector128<byte> value) => ConvertToVector256UInt16(value);
         public static Vector256<short> ConvertToVector256Int16(Vector128<byte> value) => ConvertToVector256Int16(value);
         /// <summary>
         /// __m256i _mm256_cvtepi8_epi32 (__m128i a)
@@ -692,7 +690,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_cvtepu8_epi32 (__m128i a)
         ///   VPMOVZXBD ymm, xmm
         /// </summary>
-        public static Vector256<uint> ConvertToVector256UInt32(Vector128<byte> value) => ConvertToVector256UInt32(value);
         public static Vector256<int> ConvertToVector256Int32(Vector128<byte> value) => ConvertToVector256Int32(value);
         /// <summary>
         /// __m256i _mm256_cvtepi16_epi32 (__m128i a)
@@ -703,7 +700,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_cvtepu16_epi32 (__m128i a)
         ///   VPMOVZXWD ymm, xmm
         /// </summary>
-        public static Vector256<uint> ConvertToVector256UInt32(Vector128<ushort> value) => ConvertToVector256UInt32(value);
         public static Vector256<int> ConvertToVector256Int32(Vector128<ushort> value) => ConvertToVector256Int32(value);
         /// <summary>
         /// __m256i _mm256_cvtepi8_epi64 (__m128i a)
@@ -714,7 +710,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_cvtepu8_epi64 (__m128i a)
         ///   VPMOVZXBQ ymm, xmm
         /// </summary>
-        public static Vector256<ulong> ConvertToVector256UInt64(Vector128<byte> value) => ConvertToVector256UInt64(value);
         public static Vector256<long> ConvertToVector256Int64(Vector128<byte> value) => ConvertToVector256Int64(value);
         /// <summary>
         /// __m256i _mm256_cvtepi16_epi64 (__m128i a)
@@ -725,7 +720,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_cvtepu16_epi64 (__m128i a)
         ///   VPMOVZXWQ ymm, xmm
         /// </summary>
-        public static Vector256<ulong> ConvertToVector256UInt64(Vector128<ushort> value) => ConvertToVector256UInt64(value);
         public static Vector256<long> ConvertToVector256Int64(Vector128<ushort> value) => ConvertToVector256Int64(value);
         /// <summary>
         /// __m256i _mm256_cvtepi32_epi64 (__m128i a)
@@ -736,7 +730,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m256i _mm256_cvtepu32_epi64 (__m128i a)
         ///   VPMOVZXDQ ymm, xmm
         /// </summary>
-        public static Vector256<ulong> ConvertToVector256UInt64(Vector128<uint> value) => ConvertToVector256UInt64(value);
         public static Vector256<long> ConvertToVector256Int64(Vector128<uint> value) => ConvertToVector256Int64(value);
 
         /// <summary>

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -360,7 +359,7 @@ namespace System.Globalization
             if (retVal == null || (retVal.IsNeutralCulture == true))
             {
                 // Not a valid mapping, try the hard coded table
-                string name;
+                string? name;
                 if (RegionNames.TryGetValue(cultureName, out name))
                 {
                     // Make sure we can get culture data for it
@@ -591,7 +590,7 @@ namespace System.Globalization
             {
                 // Check the hash table
                 bool ret;
-                CultureData retVal;
+                CultureData? retVal;
                 lock (s_lock)
                 {
                     ret = tempHashTable.TryGetValue(hashName, out retVal);
@@ -698,6 +697,14 @@ namespace System.Globalization
                 return cd;
             }
 
+            if (cultureName.Length == 1 && (cultureName[0] == 'C' || cultureName[0] == 'c'))
+            {
+                // Always map the "C" locale to Invariant to avoid mapping it to en_US_POSIX on Linux because POSIX
+                // locale collation doesn't support case insensitive comparisons.
+                // We do the same mapping on Windows for the sake of consistency. 
+                return CultureData.Invariant;
+            }
+
             CultureData culture = new CultureData();
             culture._bUseOverrides = useUserOverride;
             culture._sRealName = cultureName;
@@ -797,9 +804,9 @@ namespace System.Globalization
                 {
                     case "zh-CHS":
                     case "zh-CHT":
-                        return _sName!; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34273
+                        return _sName;
                 }
-                return _sRealName!;
+                return _sRealName;
             }
         }
 

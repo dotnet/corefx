@@ -21,7 +21,6 @@ namespace System.IO.Pipelines.Tests
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new InvalidOperationException();
         }
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
@@ -34,7 +33,7 @@ namespace System.IO.Pipelines.Tests
             return Task.CompletedTask;
         }
 
-#if !netstandard
+#if netcoreapp
         public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
         {
             if (_writes >= _maxWrites)

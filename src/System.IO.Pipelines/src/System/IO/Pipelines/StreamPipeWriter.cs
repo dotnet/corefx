@@ -28,6 +28,7 @@ namespace System.IO.Pipelines
         private object _lockObject = new object();
 
         private BufferSegmentStack _bufferSegmentPool;
+        private bool _leaveOpen;
 
         private CancellationTokenSource InternalTokenSource
         {
@@ -56,6 +57,7 @@ namespace System.IO.Pipelines
             _minimumBufferSize = options.MinimumBufferSize;
             _pool = options.Pool == MemoryPool<byte>.Shared ? null : options.Pool;
             _bufferSegmentPool = new BufferSegmentStack(InitialSegmentPoolSize);
+            _leaveOpen = options.LeaveOpen;
         }
 
         /// <summary>
@@ -214,25 +216,40 @@ namespace System.IO.Pipelines
 
             _internalTokenSource?.Dispose();
 
-            BufferSegment segment = _head;
-            while (segment != null)
+            FlushInternal();
+
+            if (!_leaveOpen)
             {
-                BufferSegment returnSegment = segment;
-                segment = segment.NextSegment;
-                returnSegment.ResetMemory();
+                InnerStream.Dispose();
+            }
+        }
+
+        public override async ValueTask CompleteAsync(Exception exception = null)
+        {
+            if (_isCompleted)
+            {
+                return;
             }
 
-            _head = null;
-            _tail = null;
+            _isCompleted = true;
 
-            // REVIEW: Do we need a leaveOpen to avoid this?
-            InnerStream.Dispose();
+            _internalTokenSource?.Dispose();
+
+            await FlushAsyncInternal().ConfigureAwait(false);
+
+            if (!_leaveOpen)
+            {
+#if netcoreapp
+                await InnerStream.DisposeAsync().ConfigureAwait(false);
+#else
+                InnerStream.Dispose();
+#endif
+            }
         }
 
         /// <inheritdoc />
         public override void OnReaderCompleted(Action<Exception, object> callback, object state)
         {
-            throw new NotSupportedException("OnReaderCompleted is not supported.");
         }
 
         /// <inheritdoc />
@@ -261,9 +278,12 @@ namespace System.IO.Pipelines
                 reg = cancellationToken.UnsafeRegister(state => ((StreamPipeWriter)state).Cancel(), this);
             }
 
-            // Update any buffered data
-            _tail.End += _tailBytesBuffered;
-            _tailBytesBuffered = 0;
+            if (_tailBytesBuffered > 0)
+            {
+                // Update any buffered data
+                _tail.End += _tailBytesBuffered;
+                _tailBytesBuffered = 0;
+            }
 
             using (reg)
             {
@@ -276,7 +296,10 @@ namespace System.IO.Pipelines
                         BufferSegment returnSegment = segment;
                         segment = segment.NextSegment;
 
-                        await InnerStream.WriteAsync(returnSegment.Memory, localToken).ConfigureAwait(false);
+                        if (returnSegment.Length > 0)
+                        {
+                            await InnerStream.WriteAsync(returnSegment.Memory, localToken).ConfigureAwait(false);
+                        }
 
                         returnSegment.ResetMemory();
                         ReturnSegmentUnsynchronized(returnSegment);
@@ -285,7 +308,10 @@ namespace System.IO.Pipelines
                         _head = segment;
                     }
 
-                    await InnerStream.FlushAsync(localToken).ConfigureAwait(false);
+                    if (_bytesBuffered > 0)
+                    {
+                        await InnerStream.FlushAsync(localToken).ConfigureAwait(false);
+                    }
 
                     // Mark bytes as written *after* flushing
                     _head = null;
@@ -303,15 +329,59 @@ namespace System.IO.Pipelines
                         _internalTokenSource = null;
                     }
 
-                    if (cancellationToken.IsCancellationRequested)
+                    if (localToken.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
                     {
-                        throw;
+                        // Catch cancellation and translate it into setting isCanceled = true
+                        return new FlushResult(isCanceled: true, isCompleted: false);
                     }
 
-                    // Catch any cancellation and translate it into setting isCanceled = true
-                    return new FlushResult(isCanceled: true, isCompleted: false);
+                    throw;
                 }
             }
+        }
+
+        private void FlushInternal()
+        {
+            // Write all completed segments and whatever remains in the current segment
+            // and flush the result.
+            if (_tailBytesBuffered > 0)
+            {
+                // Update any buffered data
+                _tail.End += _tailBytesBuffered;
+                _tailBytesBuffered = 0;
+            }
+
+            BufferSegment segment = _head;
+            while (segment != null)
+            {
+                BufferSegment returnSegment = segment;
+                segment = segment.NextSegment;
+
+                if (returnSegment.Length > 0)
+                {
+#if netcoreapp
+                    InnerStream.Write(returnSegment.Memory.Span);
+#else
+                    InnerStream.Write(returnSegment.Memory);
+#endif
+                }
+
+                returnSegment.ResetMemory();
+                ReturnSegmentUnsynchronized(returnSegment);
+
+                // Update the head segment after we return the current segment
+                _head = segment;
+            }
+
+            if (_bytesBuffered > 0)
+            {
+                InnerStream.Flush();
+            }
+
+            // Mark bytes as written *after* flushing
+            _head = null;
+            _tail = null;
+            _bytesBuffered = 0;
         }
     }
 }

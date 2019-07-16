@@ -53,8 +53,8 @@ namespace Windows.UI.Xaml
     public enum DurationType
     {
         Automatic = 0,
-        Forever = 2,
         TimeSpan = 1,
+        Forever = 2,
     }
     public partial struct GridLength
     {
@@ -83,6 +83,7 @@ namespace Windows.UI.Xaml
     public partial class LayoutCycleException : System.Exception
     {
         public LayoutCycleException() { }
+        protected LayoutCycleException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public LayoutCycleException(string message) { }
         public LayoutCycleException(string message, System.Exception innerException) { }
     }
@@ -108,6 +109,7 @@ namespace Windows.UI.Xaml.Automation
     public partial class ElementNotAvailableException : System.Exception
     {
         public ElementNotAvailableException() { }
+        protected ElementNotAvailableException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public ElementNotAvailableException(string message) { }
         public ElementNotAvailableException(string message, System.Exception innerException) { }
     }

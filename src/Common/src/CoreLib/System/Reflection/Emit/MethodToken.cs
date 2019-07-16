@@ -17,7 +17,7 @@ namespace System.Reflection.Emit
 
         public override int GetHashCode() => Token;
 
-        public override bool Equals(object obj) => obj is MethodToken mt && Equals(mt);
+        public override bool Equals(object? obj) => obj is MethodToken mt && Equals(mt);
 
         public bool Equals(MethodToken obj) => obj.Token == Token;
 

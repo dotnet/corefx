@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Reflection;
 using System.Runtime.Serialization;
 
@@ -55,12 +54,12 @@ namespace System.Security
         protected SecurityException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            Demanded = (string)info.GetValueNoThrow(DemandedName, typeof(string));
-            GrantedSet = (string)info.GetValueNoThrow(GrantedSetName, typeof(string));
-            RefusedSet = (string)info.GetValueNoThrow(RefusedSetName, typeof(string));
-            DenySetInstance = (string)info.GetValueNoThrow(DeniedName, typeof(string));
-            PermitOnlySetInstance = (string)info.GetValueNoThrow(PermitOnlyName, typeof(string));
-            Url = (string)info.GetValueNoThrow(UrlName, typeof(string));
+            Demanded = (string?)info.GetValueNoThrow(DemandedName, typeof(string));
+            GrantedSet = (string?)info.GetValueNoThrow(GrantedSetName, typeof(string));
+            RefusedSet = (string?)info.GetValueNoThrow(RefusedSetName, typeof(string));
+            DenySetInstance = (string?)info.GetValueNoThrow(DeniedName, typeof(string));
+            PermitOnlySetInstance = (string?)info.GetValueNoThrow(PermitOnlyName, typeof(string));
+            Url = (string?)info.GetValueNoThrow(UrlName, typeof(string));
         }
 
         public override string ToString() => base.ToString();

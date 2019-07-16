@@ -34,6 +34,9 @@ namespace System.Diagnostics.Tracing
         /// <param name="eventSource">The event source.</param>
         public PollingCounter(string name, EventSource eventSource, Func<double> metricProvider) : base(name, eventSource)
         {
+            if (metricProvider == null)
+                throw new ArgumentNullException(nameof(metricProvider));
+
             _metricProvider = metricProvider;
         }
 
@@ -42,9 +45,9 @@ namespace System.Diagnostics.Tracing
         private Func<double> _metricProvider;
         private double _lastVal;
 
-        internal override void WritePayload(float intervalSec)
+        internal override void WritePayload(float intervalSec, int pollingIntervalMillisec)
         {
-            lock (MyLock)
+            lock (this)
             {
                 double value = 0;
                 try 
@@ -61,11 +64,14 @@ namespace System.Diagnostics.Tracing
                 payload.DisplayName = DisplayName ?? "";
                 payload.Count = 1; // NOTE: These dumb-looking statistics is intentional
                 payload.IntervalSec = intervalSec;
+                payload.Series = $"Interval={pollingIntervalMillisec}";  // TODO: This may need to change when we support multi-session
+                payload.CounterType = "Mean";
                 payload.Mean = value;
                 payload.Max = value;
                 payload.Min = value;
                 payload.Metadata = GetMetadataString();
                 payload.StandardDeviation = 0;
+                payload.DisplayUnits = DisplayUnits ?? "";
                 _lastVal = value;
                 EventSource.Write("EventCounters", new EventSourceOptions() { Level = EventLevel.LogAlways }, new PollingPayloadType(payload));
             }

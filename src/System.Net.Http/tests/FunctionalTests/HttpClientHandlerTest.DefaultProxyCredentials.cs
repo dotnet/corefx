@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -17,6 +18,8 @@ namespace System.Net.Http.Functional.Tests
 
     public abstract class HttpClientHandler_DefaultProxyCredentials_Test : HttpClientHandlerTestBase
     {
+        public HttpClientHandler_DefaultProxyCredentials_Test(ITestOutputHelper output) : base(output) { }
+
         [Fact]
         public void Default_Get_Null()
         {
@@ -44,7 +47,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Fact]
         public async Task ProxyExplicitlyProvided_DefaultCredentials_Ignored()
@@ -56,7 +58,7 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateClientAndServerAsync(async proxyUrl =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     handler.Proxy = new UseSpecifiedUriWebProxy(proxyUrl, explicitProxyCreds);
                     handler.DefaultProxyCredentials = defaultSystemProxyCreds;
@@ -103,10 +105,10 @@ namespace System.Net.Http.Functional.Tests
                     psi.Environment.Add("http_proxy", $"http://{proxyUri.Host}:{proxyUri.Port}");
                 }
 
-                RemoteExecutor.Invoke(async (useProxyString, useSocketsHttpHandlerString) =>
+                RemoteExecutor.Invoke(async (useProxyString, useSocketsHttpHandlerString, useHttp2String) =>
                 {
-                    using (HttpClientHandler handler = CreateHttpClientHandler(useSocketsHttpHandlerString))
-                    using (var client = new HttpClient(handler))
+                    using (HttpClientHandler handler = CreateHttpClientHandler(useSocketsHttpHandlerString, useHttp2String))
+                    using (HttpClient client = CreateHttpClient(handler, useHttp2String))
                     {
                         var creds = new NetworkCredential(ExpectedUsername, ExpectedPassword);
                         handler.DefaultProxyCredentials = creds;
@@ -114,10 +116,10 @@ namespace System.Net.Http.Functional.Tests
 
                         HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer);
                         // Correctness of user and password is done in server part.
-                        Assert.True(response.StatusCode ==  HttpStatusCode.OK);
+                        Assert.True(response.StatusCode == HttpStatusCode.OK);
                     }
                     return RemoteExecutor.SuccessExitCode;
-                }, useProxy.ToString(), UseSocketsHttpHandler.ToString(), new RemoteInvokeOptions { StartInfo = psi }).Dispose();
+                }, useProxy.ToString(), UseSocketsHttpHandler.ToString(), UseHttp2.ToString(), new RemoteInvokeOptions { StartInfo = psi }).Dispose();
                 if (useProxy)
                 {
                     await proxyTask;
@@ -135,7 +137,7 @@ namespace System.Net.Http.Functional.Tests
             WebRequest.DefaultWebProxy = null;
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.DefaultProxyCredentials = new NetworkCredential("UsernameNotUsed", "PasswordNotUsed");
                 HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer);

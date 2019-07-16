@@ -10,11 +10,12 @@ namespace System.Threading
     public sealed partial class Timer : System.MarshalByRefObject, System.IAsyncDisposable, System.IDisposable
     {
         public Timer(System.Threading.TimerCallback callback) { }
-        public Timer(System.Threading.TimerCallback callback, object state, int dueTime, int period) { }
-        public Timer(System.Threading.TimerCallback callback, object state, long dueTime, long period) { }
-        public Timer(System.Threading.TimerCallback callback, object state, System.TimeSpan dueTime, System.TimeSpan period) { }
+        public Timer(System.Threading.TimerCallback callback, object? state, int dueTime, int period) { }
+        public Timer(System.Threading.TimerCallback callback, object? state, long dueTime, long period) { }
+        public Timer(System.Threading.TimerCallback callback, object? state, System.TimeSpan dueTime, System.TimeSpan period) { }
         [System.CLSCompliantAttribute(false)]
-        public Timer(System.Threading.TimerCallback callback, object state, uint dueTime, uint period) { }
+        public Timer(System.Threading.TimerCallback callback, object? state, uint dueTime, uint period) { }
+        public static long ActiveCount { get { throw null; } }
         public bool Change(int dueTime, int period) { throw null; }
         public bool Change(long dueTime, long period) { throw null; }
         public bool Change(System.TimeSpan dueTime, System.TimeSpan period) { throw null; }
@@ -24,5 +25,5 @@ namespace System.Threading
         public bool Dispose(System.Threading.WaitHandle notifyObject) { throw null; }
         public System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
     }
-    public delegate void TimerCallback(object state);
+    public delegate void TimerCallback(object? state);
 }

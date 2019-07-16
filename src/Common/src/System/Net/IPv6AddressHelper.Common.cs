@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
+using System.Diagnostics;
+
 namespace System
 {
     internal static partial class IPv6AddressHelper
@@ -107,6 +110,17 @@ namespace System
             {
                 start++;
                 needsClosingBracket = true;
+
+                // IsValidStrict() is only called if there is a ':' in the name string, i.e. 
+                // it is a possible IPv6 address. So, if the string starts with a '[' and
+                // the pointer is advanced here there are still more characters to parse.
+                Debug.Assert(start < end);
+            }
+
+            // Starting with a colon character is only valid if another colon follows.
+            if (name[start] == ':' && (start + 1 >= end || name[start + 1] != ':'))
+            {
+                return false;
             }
 
             int i;
@@ -142,11 +156,6 @@ namespace System
                                 else if (name[i] == '/')
                                 {
                                     goto case '/';
-                                }
-                                else if (name[i] < '0' || name[i] > '9')
-                                {
-                                    // scope ID must only contain digits
-                                    return false;
                                 }
                             }
                             break;
@@ -278,7 +287,7 @@ namespace System
         //  Nothing
         //
 
-        internal static unsafe void Parse(ReadOnlySpan<char> address, ushort* numbers, int start, ref string scopeId)
+        internal static void Parse(ReadOnlySpan<char> address, Span<ushort> numbers, int start, ref string? scopeId)
         {
             int number = 0;
             int index = 0;
@@ -402,10 +411,15 @@ namespace System
                 int toIndex = NumberOfLabels - 1;
                 int fromIndex = index - 1;
 
-                for (int i = index - compressorIndex; i > 0; --i)
+                // if fromIndex and toIndex are the same, it means that "zero bits" are already in the correct place
+                // it happens for leading and trailing compression
+                if (fromIndex != toIndex)
                 {
-                    numbers[toIndex--] = numbers[fromIndex];
-                    numbers[fromIndex--] = 0;
+                    for (int i = index - compressorIndex; i > 0; --i)
+                    {
+                        numbers[toIndex--] = numbers[fromIndex];
+                        numbers[fromIndex--] = 0;
+                    }
                 }
             }
         }

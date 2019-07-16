@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -13,131 +12,77 @@ namespace System.Text.Json.Serialization.Tests
         public static void WritePrimitives()
         {
             {
-                string json = JsonSerializer.ToString(1);
+                string json = JsonSerializer.Serialize(1);
                 Assert.Equal("1", json);
             }
 
             {
-                Span<byte> json = JsonSerializer.ToBytes(1);
+                int? value = 1;
+                string json = JsonSerializer.Serialize(value);
+                Assert.Equal("1", json);
+            }
+
+            {
+                int? value = null;
+                string json = JsonSerializer.Serialize(value);
+                Assert.Equal("null", json);
+            }
+
+            {
+                string json = JsonSerializer.Serialize((string)null);
+                Assert.Equal("null", json);
+            }
+
+            {
+                Span<byte> json = JsonSerializer.SerializeToUtf8Bytes(1);
                 Assert.Equal(Encoding.UTF8.GetBytes("1"), json.ToArray());
             }
 
             {
-                string json = JsonSerializer.ToString(long.MaxValue);
+                string json = JsonSerializer.Serialize(long.MaxValue);
                 Assert.Equal(long.MaxValue.ToString(), json);
             }
 
             {
-                Span<byte> json = JsonSerializer.ToBytes(long.MaxValue);
+                Span<byte> json = JsonSerializer.SerializeToUtf8Bytes(long.MaxValue);
                 Assert.Equal(Encoding.UTF8.GetBytes(long.MaxValue.ToString()), json.ToArray());
             }
 
             {
-                string json = JsonSerializer.ToString("Hello");
+                string json = JsonSerializer.Serialize("Hello");
                 Assert.Equal(@"""Hello""", json);
             }
 
             {
-                Span<byte> json = JsonSerializer.ToBytes("Hello");
+                Span<byte> json = JsonSerializer.SerializeToUtf8Bytes("Hello");
                 Assert.Equal(Encoding.UTF8.GetBytes(@"""Hello"""), json.ToArray());
             }
-        }
-
-        [Fact]
-        public static void WritePrimitiveArray()
-        {
-            var input = new int[] { 0, 1 };
-            string json = JsonSerializer.ToString(input);
-            Assert.Equal("[0,1]", json);
-        }
-
-        [Fact]
-        public static void WriteArrayWithEnums()
-        {
-            var input = new SampleEnum[] { SampleEnum.One, SampleEnum.Two };
-            string json = JsonSerializer.ToString(input);
-            Assert.Equal("[1,2]", json);
-        }
-
-        [Fact]
-        public static void WriteObjectArray()
-        {
-            string json;
 
             {
-                SimpleTestClass[] input = new SimpleTestClass[] { new SimpleTestClass(), new SimpleTestClass() };
-                input[0].Initialize();
-                input[0].Verify();
-
-                input[1].Initialize();
-                input[1].Verify();
-
-                json = JsonSerializer.ToString(input);
+                Uri uri = new Uri("https://domain/path");
+                Assert.Equal(@"""https:\/\/domain\/path""", JsonSerializer.Serialize(uri));
             }
 
             {
-                SimpleTestClass[] output = JsonSerializer.Parse<SimpleTestClass[]>(json);
-                Assert.Equal(2, output.Length);
-                output[0].Verify();
-                output[1].Verify();
+                Uri.TryCreate("~/path", UriKind.RelativeOrAbsolute, out Uri uri);
+                Assert.Equal(@"""~\/path""", JsonSerializer.Serialize(uri));
             }
-        }
 
-        [Fact]
-        public static void WritePrimitiveJaggedArray()
-        {
-            var input = new int[2][];
-            input[0] = new int[] { 1, 2 };
-            input[1] = new int[] { 3, 4 };
+            // The next two scenarios validate that we're NOT using Uri.ToString() for serializing Uri. The serializer
+            // will escape backslashes and ampersands, but otherwise should be the same as the output of Uri.OriginalString.
 
-            string json = JsonSerializer.ToString(input);
-            Assert.Equal("[[1,2],[3,4]]", json);
-        }
-
-        [Fact]
-        public static void WriteListOfList()
-        {
-            var input = new List<List<int>>
             {
-                new List<int>() { 1, 2 },
-                new List<int>() { 3, 4 }
-            };
+                // ToString would collapse the relative segment
+                Uri uri = new Uri("http://a/b/../c");
+                Assert.Equal(@"""http:\/\/a\/b\/..\/c""", JsonSerializer.Serialize(uri));
+            }
 
-            string json = JsonSerializer.ToString(input);
-            Assert.Equal("[[1,2],[3,4]]", json);
-        }
-
-        [Fact]
-        public static void WriteListOfArray()
-        {
-            var input = new List<int[]>
             {
-                new int[] { 1, 2 },
-                new int[] { 3, 4 }
-            };
-
-            string json = JsonSerializer.ToString(input);
-            Assert.Equal("[[1,2],[3,4]]", json);
-        }
-
-        [Fact]
-        public static void WriteArrayOfList()
-        {
-            var input = new List<int>[2];
-            input[0] = new List<int>() { 1, 2 };
-            input[1] = new List<int>() { 3, 4 };
-
-            string json = JsonSerializer.ToString(input);
-            Assert.Equal("[[1,2],[3,4]]", json);
-        }
-
-        [Fact]
-        public static void WritePrimitiveList()
-        {
-            var input = new List<int> { 1, 2 };
-
-            string json = JsonSerializer.ToString(input);
-            Assert.Equal("[1,2]", json);
+                // "%20" gets turned into a space by Uri.ToString()
+                // https://coding.abel.nu/2014/10/beware-of-uri-tostring/
+                Uri uri = new Uri("http://localhost?p1=Value&p2=A%20B%26p3%3DFooled!");
+                Assert.Equal(@"""http:\/\/localhost?p1=Value\u0026p2=A%20B%26p3%3DFooled!""", JsonSerializer.Serialize(uri));
+            }
         }
     }
 }

@@ -22,7 +22,7 @@ namespace System.Threading
         private static readonly AutoResetEvent s_timerEvent = new AutoResetEvent(false);
 
         private bool _isScheduled;
-        private int _scheduledDueTimeMs;
+        private long _scheduledDueTimeMs;
 
         private TimerQueue(int id)
         {
@@ -50,13 +50,13 @@ namespace System.Threading
         private bool SetTimer(uint actualDuration)
         {
             Debug.Assert((int)actualDuration >= 0);
-            int dueTimeMs = TickCount + (int)actualDuration;
+            long dueTimeMs = TickCount64 + (int)actualDuration;
             AutoResetEvent timerEvent = s_timerEvent;
             lock (timerEvent)
             {
                 if (!_isScheduled)
                 {
-                    List<TimerQueue> timers = s_scheduledTimers;
+                    List<TimerQueue>? timers = s_scheduledTimers;
                     if (timers == null)
                     {
                         timers = InitializeScheduledTimerManager_Locked();
@@ -80,11 +80,11 @@ namespace System.Threading
         private static void TimerThread()
         {
             AutoResetEvent timerEvent = s_timerEvent;
-            List<TimerQueue> timersToFire = s_scheduledTimersToFire;
+            List<TimerQueue> timersToFire = s_scheduledTimersToFire!;
             List<TimerQueue> timers;
             lock (timerEvent)
             {
-                timers = s_scheduledTimers;
+                timers = s_scheduledTimers!;
             }
 
             int shortestWaitDurationMs = Timeout.Infinite;
@@ -92,14 +92,14 @@ namespace System.Threading
             {
                 timerEvent.WaitOne(shortestWaitDurationMs);
 
-                int currentTimeMs = TickCount;
+                long currentTimeMs = TickCount64;
                 shortestWaitDurationMs = int.MaxValue;
                 lock (timerEvent)
                 {
                     for (int i = timers.Count - 1; i >= 0; --i)
                     {
                         TimerQueue timer = timers[i];
-                        int waitDurationMs = timer._scheduledDueTimeMs - currentTimeMs;
+                        long waitDurationMs = timer._scheduledDueTimeMs - currentTimeMs;
                         if (waitDurationMs <= 0)
                         {
                             timer._isScheduled = false;
@@ -116,7 +116,7 @@ namespace System.Threading
 
                         if (waitDurationMs < shortestWaitDurationMs)
                         {
-                            shortestWaitDurationMs = waitDurationMs;
+                            shortestWaitDurationMs = (int)waitDurationMs;
                         }
                     }
                 }

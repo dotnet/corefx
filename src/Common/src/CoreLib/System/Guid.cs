@@ -196,7 +196,7 @@ namespace System
             return result._parsedGuid;
         }
 
-        public static bool TryParse(string input, out Guid result)
+        public static bool TryParse(string? input, out Guid result)
         {
             if (input == null)
             {
@@ -269,7 +269,7 @@ namespace System
             return result._parsedGuid;
         }
 
-        public static bool TryParseExact(string input, string format, out Guid result)
+        public static bool TryParseExact(string? input, string? format, out Guid result)
         {
             if (input == null)
             {
@@ -806,7 +806,7 @@ namespace System
 
         // Returns true if and only if the guid represented
         //  by o is the same as this instance.
-        public override bool Equals(object o)
+        public override bool Equals(object? o)
         {
             Guid g;
             // Check that o is a Guid first
@@ -832,7 +832,7 @@ namespace System
 
         private int GetResult(uint me, uint them) => me < them ? -1 : 1;
 
-        public int CompareTo(object value)
+        public int CompareTo(object? value)
         {
             if (value == null)
             {
@@ -980,7 +980,7 @@ namespace System
                 Unsafe.Add(ref a._a, 3) != Unsafe.Add(ref b._a, 3);
         }
 
-        public string ToString(string format)
+        public string ToString(string? format)
         {
             return ToString(format, null);
         }
@@ -1023,7 +1023,7 @@ namespace System
 
         // IFormattable interface
         // We currently ignore provider
-        public string ToString(string format, IFormatProvider provider)
+        public string ToString(string? format, IFormatProvider? provider)
         {
             if (string.IsNullOrEmpty(format))
             {
@@ -1194,7 +1194,7 @@ namespace System
             return true;
         }
 
-        bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider provider)
+        bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
         {
             // Like with the IFormattable implementation, provider is ignored.
             return TryFormat(destination, out charsWritten, format);

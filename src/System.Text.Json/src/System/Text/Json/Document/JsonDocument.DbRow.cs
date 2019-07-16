@@ -9,9 +9,6 @@ namespace System.Text.Json
 {
     public sealed partial class JsonDocument
     {
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be used by source-package consumers.
-        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal struct DbRow
         {
@@ -65,7 +62,7 @@ namespace System.Text.Json
 
             internal DbRow(JsonTokenType jsonTokenType, int location, int sizeOrLength)
             {
-                Debug.Assert(jsonTokenType > JsonTokenType.None && jsonTokenType <= JsonTokenType.Comment);
+                Debug.Assert(jsonTokenType > JsonTokenType.None && jsonTokenType <= JsonTokenType.Null);
                 Debug.Assert((byte)jsonTokenType < 1 << 4);
                 Debug.Assert(location >= 0);
                 Debug.Assert(sizeOrLength >= UnknownSize);

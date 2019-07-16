@@ -20,23 +20,23 @@ namespace System.Reflection.Emit
         Return = 7,
         Throw = 8,
     }
-    public partial struct OpCode
+    public readonly partial struct OpCode : System.IEquatable<System.Reflection.Emit.OpCode>
     {
-        private object _dummy;
+        private readonly int _dummyPrimitive;
         public System.Reflection.Emit.FlowControl FlowControl { get { throw null; } }
-        public string Name { get { throw null; } }
+        public string? Name { get { throw null; } }
         public System.Reflection.Emit.OpCodeType OpCodeType { get { throw null; } }
         public System.Reflection.Emit.OperandType OperandType { get { throw null; } }
         public int Size { get { throw null; } }
         public System.Reflection.Emit.StackBehaviour StackBehaviourPop { get { throw null; } }
         public System.Reflection.Emit.StackBehaviour StackBehaviourPush { get { throw null; } }
         public short Value { get { throw null; } }
-        public override bool Equals(object obj) { throw null; }
+        public override bool Equals(object? obj) { throw null; }
         public bool Equals(System.Reflection.Emit.OpCode obj) { throw null; }
         public override int GetHashCode() { throw null; }
         public static bool operator ==(System.Reflection.Emit.OpCode a, System.Reflection.Emit.OpCode b) { throw null; }
         public static bool operator !=(System.Reflection.Emit.OpCode a, System.Reflection.Emit.OpCode b) { throw null; }
-        public override string ToString() { throw null; }
+        public override string? ToString() { throw null; }
     }
     public partial class OpCodes
     {
@@ -303,15 +303,15 @@ namespace System.Reflection.Emit
     }
     public enum PackingSize
     {
-        Size1 = 1,
-        Size128 = 128,
-        Size16 = 16,
-        Size2 = 2,
-        Size32 = 32,
-        Size4 = 4,
-        Size64 = 64,
-        Size8 = 8,
         Unspecified = 0,
+        Size1 = 1,
+        Size2 = 2,
+        Size4 = 4,
+        Size8 = 8,
+        Size16 = 16,
+        Size32 = 32,
+        Size64 = 64,
+        Size128 = 128,
     }
     public enum StackBehaviour
     {
@@ -328,7 +328,6 @@ namespace System.Reflection.Emit
         Popref = 10,
         Popref_pop1 = 11,
         Popref_popi = 12,
-        Popref_popi_pop1 = 28,
         Popref_popi_popi = 13,
         Popref_popi_popi8 = 14,
         Popref_popi_popr4 = 15,
@@ -344,5 +343,6 @@ namespace System.Reflection.Emit
         Pushref = 25,
         Varpop = 26,
         Varpush = 27,
+        Popref_popi_pop1 = 28,
     }
 }

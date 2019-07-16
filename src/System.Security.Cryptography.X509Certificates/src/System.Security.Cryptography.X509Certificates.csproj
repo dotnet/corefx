@@ -18,6 +18,9 @@
     <Compile Include="$(CommonPath)\System\Memory\PointerMemoryManager.cs">
       <Link>Common\System\Memory\PointerMemoryManager.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\CryptoPool.cs">
+      <Link>Common\System\Security\Cryptography\CryptoPool.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Oids.cs">
       <Link>Common\System\Security\Cryptography\Oids.cs</Link>
     </Compile>
@@ -309,11 +312,12 @@
       <DependentUpon>System\Security\Cryptography\X509Certificates\Asn1\DistributionPointNameAsn.xml</DependentUpon>
     </Compile>
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\ReasonFlagsAsn.cs" />
+    <Compile Include="Internal\Cryptography\Pal.Unix\CachedDirectoryStoreProvider.cs" />
+    <Compile Include="Internal\Cryptography\Pal.Unix\CachedSystemStoreProvider.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\CertCollectionLoader.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\CertificateAssetDownloader.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\CertificatePal.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\ChainPal.cs" />
-    <Compile Include="Internal\Cryptography\Pal.Unix\CollectionBackedStoreProvider.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\CrlCache.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\DirectoryBasedStoreProvider.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\ExportProvider.cs" />
@@ -405,6 +409,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.PooledCrypto.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.PooledCrypto.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\Asn1SafeHandles.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\Asn1SafeHandles.Unix.cs</Link>

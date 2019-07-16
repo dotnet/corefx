@@ -16,7 +16,7 @@ namespace System
     {
         internal static bool IsWindows8OrAbove => WindowsVersion.IsWindows8OrAbove;
 
-        private static string GetEnvironmentVariableFromRegistry(string variable, bool fromMachine)
+        private static string? GetEnvironmentVariableFromRegistry(string variable, bool fromMachine)
         {
             Debug.Assert(variable != null);
 
@@ -25,13 +25,13 @@ namespace System
                 return null; // Systems without the Windows registry pretend that it's always empty.
 #endif
 
-            using (RegistryKey environmentKey = OpenEnvironmentKeyIfExists(fromMachine, writable: false))
+            using (RegistryKey? environmentKey = OpenEnvironmentKeyIfExists(fromMachine, writable: false))
             {
                 return environmentKey?.GetValue(variable) as string;
             }
         }
 
-        private static void SetEnvironmentVariableFromRegistry(string variable, string value, bool fromMachine)
+        private static void SetEnvironmentVariableFromRegistry(string variable, string? value, bool fromMachine)
         {
             Debug.Assert(variable != null);
 
@@ -46,7 +46,7 @@ namespace System
                 throw new ArgumentException(SR.Argument_LongEnvVarValue, nameof(variable));
             }
 
-            using (RegistryKey environmentKey = OpenEnvironmentKeyIfExists(fromMachine, writable: true))
+            using (RegistryKey? environmentKey = OpenEnvironmentKeyIfExists(fromMachine, writable: true))
             {
                 if (environmentKey != null)
                 {
@@ -74,13 +74,13 @@ namespace System
                 return results;
 #endif
 
-            using (RegistryKey environmentKey = OpenEnvironmentKeyIfExists(fromMachine, writable: false))
+            using (RegistryKey? environmentKey = OpenEnvironmentKeyIfExists(fromMachine, writable: false))
             {
                 if (environmentKey != null)
                 {
                     foreach (string name in environmentKey.GetValueNames())
                     {
-                        string value = environmentKey.GetValue(name, "").ToString();
+                        string? value = environmentKey.GetValue(name, "")!.ToString(); // TODO-NULLABLE: Remove ! when [NotNullIfNotNull] respected
                         try
                         {
                             results.Add(name, value);
@@ -96,7 +96,7 @@ namespace System
             return results;
         }
 
-        private static RegistryKey OpenEnvironmentKeyIfExists(bool fromMachine, bool writable)
+        private static RegistryKey? OpenEnvironmentKeyIfExists(bool fromMachine, bool writable)
         {
             RegistryKey baseKey;
             string keyName;
@@ -410,10 +410,10 @@ namespace System
             {
                 if (s_winRTFolderPathsGetFolderPath == null)
                 {
-                    Type winRtFolderPathsType = Type.GetType("System.WinRTFolderPaths, System.Runtime.WindowsRuntime, Version=4.0.14.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", throwOnError: false);
-                    MethodInfo getFolderPathsMethod = winRtFolderPathsType?.GetMethod("GetFolderPath", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { typeof(SpecialFolder), typeof(SpecialFolderOption) }, null);
-                    var d = (Func<SpecialFolder, SpecialFolderOption, string>)getFolderPathsMethod?.CreateDelegate(typeof(Func<SpecialFolder, SpecialFolderOption, string>));
-                    s_winRTFolderPathsGetFolderPath = d ?? delegate { return null; };
+                    Type? winRtFolderPathsType = Type.GetType("System.WinRTFolderPaths, System.Runtime.WindowsRuntime, Version=4.0.14.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", throwOnError: false);
+                    MethodInfo? getFolderPathsMethod = winRtFolderPathsType?.GetMethod("GetFolderPath", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { typeof(SpecialFolder), typeof(SpecialFolderOption) }, null);
+                    var d = (Func<SpecialFolder, SpecialFolderOption, string>?)getFolderPathsMethod?.CreateDelegate(typeof(Func<SpecialFolder, SpecialFolderOption, string>));
+                    s_winRTFolderPathsGetFolderPath = d ?? delegate { return string.Empty; };
                 }
 
                 return s_winRTFolderPathsGetFolderPath(folder, option);

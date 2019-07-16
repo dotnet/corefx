@@ -741,14 +741,7 @@ namespace System.Linq.Tests
 
             // The.NET full framework throws a NotImplementedException.
             // See https://github.com/dotnet/corefx/pull/2959.
-            if (PlatformDetection.IsFullFramework)
-            {
-                Assert.Throws<NotImplementedException>(() => enumerator.Reset());
-            }
-            else
-            {
-                Assert.Throws<NotSupportedException>(() => enumerator.Reset());
-            }
+            Assert.Throws<NotSupportedException>(() => enumerator.Reset());
         }
 
         [Fact]
@@ -1187,24 +1180,6 @@ namespace System.Linq.Tests
             selected.Count();
 
             Assert.Equal(source.Count(), timesRun);
-        }
-
-        // [Theory]
-        [MemberData(nameof(RunSelectorDuringCountData))]
-        public void RunSelectorDuringPartitionCount(IEnumerable<int> source)
-        {
-            int timesRun = 0;
-
-            var selected = source.Select(i => timesRun++);
-
-            if (source.Any())
-            {
-                selected.Skip(1).Count();
-                Assert.Equal(source.Count() - 1, timesRun);
-
-                selected.Take(source.Count() - 1).Count();
-                Assert.Equal(source.Count() * 2 - 2, timesRun);
-            }
         }
 
         public static IEnumerable<object[]> RunSelectorDuringCountData()

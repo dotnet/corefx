@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -627,21 +626,21 @@ namespace System
             }
         }
 
-        public static string Join(string? separator, IEnumerable<string> values)
+        public static string Join(string? separator, IEnumerable<string?> values)
         {
             if (values == null)
             {
                 throw new ArgumentNullException(nameof(values));
             }
 
-            using (IEnumerator<string> en = values.GetEnumerator())
+            using (IEnumerator<string?> en = values.GetEnumerator())
             {
                 if (!en.MoveNext())
                 {
                     return string.Empty;
                 }
 
-                string firstValue = en.Current;
+                string? firstValue = en.Current;
 
                 if (!en.MoveNext())
                 {
@@ -1680,20 +1679,6 @@ namespace System
             return InternalSubString(startIndex, length);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string Substring(Index startIndex)
-        {
-            int actualIndex = startIndex.GetOffset(Length);
-            return Substring(actualIndex);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string Substring(Range range)
-        {
-            (int start, int length) = range.GetOffsetAndLength(Length);
-            return Substring(start, length);
-        }
-
         private unsafe string InternalSubString(int startIndex, int length)
         {
             Debug.Assert(startIndex >= 0 && startIndex <= this.Length, "StartIndex is out of range!");
@@ -1711,19 +1696,13 @@ namespace System
         }
 
         // Creates a copy of this string in lower case.  The culture is set by culture.
-        public string ToLower()
-        {
-            return CultureInfo.CurrentCulture.TextInfo.ToLower(this);
-        }
+        public string ToLower() => ToLower(null);
 
         // Creates a copy of this string in lower case.  The culture is set by culture.
-        public string ToLower(CultureInfo culture)
+        public string ToLower(CultureInfo? culture)
         {
-            if (culture == null)
-            {
-                throw new ArgumentNullException(nameof(culture));
-            }
-            return culture.TextInfo.ToLower(this);
+            CultureInfo cult = culture ?? CultureInfo.CurrentCulture;
+            return cult.TextInfo.ToLower(this);
         }
 
         // Creates a copy of this string in lower case based on invariant culture.
@@ -1732,19 +1711,13 @@ namespace System
             return CultureInfo.InvariantCulture.TextInfo.ToLower(this);
         }
 
-        public string ToUpper()
-        {
-            return CultureInfo.CurrentCulture.TextInfo.ToUpper(this);
-        }
+        public string ToUpper() => ToUpper(null);
 
         // Creates a copy of this string in upper case.  The culture is set by culture.
-        public string ToUpper(CultureInfo culture)
+        public string ToUpper(CultureInfo? culture)
         {
-            if (culture == null)
-            {
-                throw new ArgumentNullException(nameof(culture));
-            }
-            return culture.TextInfo.ToUpper(this);
+            CultureInfo cult = culture ?? CultureInfo.CurrentCulture;
+            return cult.TextInfo.ToUpper(this);
         }
 
         //Creates a copy of this string in upper case based on invariant culture.

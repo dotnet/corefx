@@ -19,7 +19,7 @@ namespace Internal.IO
         // given by the specified path exists; otherwise, the result is
         // false.  Note that if path describes a directory,
         // Exists will return true.
-        public static bool Exists(string path)
+        public static bool Exists(string? path)
         {
             try
             {

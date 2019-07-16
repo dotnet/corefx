@@ -10,7 +10,7 @@ namespace System.Diagnostics
     {
         private static readonly bool s_shouldWriteToStdErr = Environment.GetEnvironmentVariable("COMPlus_DebugWriteToStdErr") == "1";
 
-        public static void FailCore(string stackTrace, string message, string detailMessage, string errorSource)
+        public static void FailCore(string stackTrace, string? message, string? detailMessage, string errorSource)
         {
             if (s_FailCore != null)
             {
@@ -27,19 +27,7 @@ namespace System.Diagnostics
                 // In Core, we do not show a dialog.
                 // Fail in order to avoid anyone catching an exception and masking
                 // an assert failure.
-                DebugAssertException ex;
-                if (message == string.Empty) 
-                {
-                    ex = new DebugAssertException(stackTrace);
-                }
-                else if (detailMessage == string.Empty) 
-                {
-                    ex = new DebugAssertException(message, stackTrace);
-                }
-                else
-                {
-                    ex = new DebugAssertException(message, detailMessage, stackTrace);
-                }
+                DebugAssertException ex = new DebugAssertException(message, detailMessage, stackTrace);
                 Environment.FailFast(ex.Message, ex, errorSource);
             }
         }
@@ -77,7 +65,7 @@ namespace System.Diagnostics
             // We don't want to write UTF-16 to a file like standard error.  Ideally we would transcode this
             // to UTF8, but the downside of that is it pulls in a bunch of stuff into what is ideally
             // a path with minimal dependencies (as to prevent re-entrency), so we'll take the strategy
-            // of just throwing away any non ASCII characters from the message and writing the rest
+            // of just throwing away any non ASCII characters from the message and writing the rest            
 
             const int BufferLength = 256;
 

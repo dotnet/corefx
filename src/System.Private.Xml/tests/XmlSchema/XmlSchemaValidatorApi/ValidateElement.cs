@@ -457,7 +457,6 @@ namespace System.Xml.Tests
             return;
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "This checks a quirked behavior and Full Framework always gets old behavior as Xunit runner always targets 4.5.2 TFM ")]
         [Fact]
         public void StringPassedToValidateEndElementDoesNotSatisfyIdentityConstraints()
         {
@@ -613,23 +612,6 @@ namespace System.Xml.Tests
                 catch (XmlSchemaValidationException e) { _output.WriteLine(e.Message); return; }
             }
             Assert.True(false);
-        }
-
-        public void RunTest(ArrayList schemaList, string xml)
-        {
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.ValidationType = ValidationType.Schema;
-            settings.ValidationFlags = XmlSchemaValidationFlags.ReportValidationWarnings;
-            settings.Schemas.XmlResolver = new XmlUrlResolver();
-
-            for (int i = 0; i < schemaList.Count; ++i)
-            {
-                XmlSchema schema = XmlSchema.Read(new StringReader((string)schemaList[i]), new ValidationEventHandler(ValidationCallback));
-                settings.Schemas.Add(schema);
-            }
-            settings.ValidationEventHandler += new ValidationEventHandler(ValidationCallback);
-            using (XmlReader reader = XmlReader.Create(new StringReader(xml), settings))
-                while (reader.Read()) ;
         }
     }
 }

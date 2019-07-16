@@ -38,7 +38,6 @@
     <Compile Include="System\Net\Sockets\TCPClient.cs" />
     <Compile Include="System\Net\Sockets\TCPListener.cs" />
     <Compile Include="System\Net\Sockets\TransmitFileOptions.cs" />
-    <Compile Include="System\Net\Sockets\TransportType.cs" />
     <Compile Include="System\Net\Sockets\UDPClient.cs" />
     <Compile Include="System\Net\Sockets\UdpReceiveResult.cs" />
     <Compile Include="System\Net\Sockets\AcceptOverlappedAsyncResult.cs" />
@@ -115,7 +114,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
-    <!-- Windows: CoreCLR and .NET Native -->
+    <!-- Windows: CoreCLR -->
     <Compile Include="System\Net\Sockets\AcceptOverlappedAsyncResult.Windows.cs" />
     <Compile Include="System\Net\Sockets\BaseOverlappedAsyncResult.Windows.cs" />
     <Compile Include="System\Net\Sockets\ConnectOverlappedAsyncResult.Windows.cs" />

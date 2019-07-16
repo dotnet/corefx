@@ -223,10 +223,12 @@ namespace System.Net.WebSockets
                 Abort();
                 response?.Dispose();
 
-                if (exc is WebSocketException)
+                if (exc is WebSocketException ||
+                    (exc is OperationCanceledException && cancellationToken.IsCancellationRequested))
                 {
                     throw;
                 }
+
                 throw new WebSocketException(WebSocketError.Faulted, SR.net_webstatus_ConnectFailure, exc);
             }
             finally
@@ -273,7 +275,7 @@ namespace System.Net.WebSockets
         {
             if (!headers.TryGetValues(name, out IEnumerable<string> values))
             {
-                ThrowConnectFailure();
+                throw new WebSocketException(WebSocketError.Faulted, SR.Format(SR.net_WebSockets_MissingResponseHeader, name));
             }
 
             Debug.Assert(values is string[]);
@@ -283,7 +285,5 @@ namespace System.Net.WebSockets
                 throw new WebSocketException(WebSocketError.HeaderError, SR.Format(SR.net_WebSockets_InvalidResponseHeader, name, string.Join(", ", array)));
             }
         }
-
-        private static void ThrowConnectFailure() => throw new WebSocketException(WebSocketError.Faulted, SR.net_webstatus_ConnectFailure);
     }
 }

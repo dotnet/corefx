@@ -15,7 +15,7 @@ namespace System.ComponentModel.Tests
         public void Ctor_Default()
         {
             var resourceManager = new ComponentResourceManager();
-            Assert.Null(resourceManager.BaseName);
+            Assert.Empty(resourceManager.BaseName);
             Assert.False(resourceManager.IgnoreCase);
             Assert.NotNull(resourceManager.ResourceSetType);
         }
@@ -162,7 +162,6 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
-        [ActiveIssue(22145, TargetFrameworkMonikers.NetFramework)]
         public void ApplyResources_IComponentWithDesignModeSite_Success()
         {
             var resourceManager = new ComponentResourceManager(typeof(global::Resources.TestResx))

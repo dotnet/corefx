@@ -21,19 +21,20 @@ namespace System.Text
 {
     internal static partial class ASCIIUtility
     {
-        /// <summary>
-        /// Returns <see langword="true"/> iff all bytes in <paramref name="value"/> are ASCII.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool AllBytesInUInt32AreAscii(uint value)
+#if DEBUG
+        static ASCIIUtility()
         {
-            return ((value & 0x80808080u) == 0);
+            Debug.Assert(sizeof(nint) == IntPtr.Size && nint.MinValue < 0, "nint is defined incorrectly.");
+            Debug.Assert(sizeof(nuint) == IntPtr.Size && nuint.MinValue == 0, "nuint is defined incorrectly.");
         }
+#endif // DEBUG
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool AllBytesInUInt64AreAscii(ulong value)
         {
-            return ((value & 0x80808080_80808080ul) == 0);
+            // If the high bit of any byte is set, that byte is non-ASCII.
+
+            return ((value & UInt64HighBitsOnlyMask) == 0);
         }
 
         /// <summary>
@@ -52,56 +53,6 @@ namespace System.Text
         private static bool AllCharsInUInt64AreAscii(ulong value)
         {
             return ((value & ~0x007F007F_007F007Ful) == 0);
-        }
-
-        /// <summary>
-        /// Given a 24-bit integer which represents a three-byte buffer read in machine endianness,
-        /// counts the number of consecutive ASCII bytes starting from the beginning of the buffer.
-        /// Returns a value 0 - 3, inclusive.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static uint CountNumberOfLeadingAsciiBytesFrom24BitInteger(uint value)
-        {
-            // This implementation seems to have better performance than tzcnt.
-
-            // The 'allBytesUpToNowAreAscii' DWORD uses bit twiddling to hold a 1 or a 0 depending
-            // on whether all processed bytes were ASCII. Then we accumulate all of the
-            // results to calculate how many consecutive ASCII bytes are present.
-
-            value = ~value;
-
-            if (BitConverter.IsLittleEndian)
-            {
-                // Read first byte
-                uint allBytesUpToNowAreAscii = (value >>= 7) & 1;
-                uint numAsciiBytes = allBytesUpToNowAreAscii;
-
-                // Read second byte
-                allBytesUpToNowAreAscii &= (value >>= 8);
-                numAsciiBytes += allBytesUpToNowAreAscii;
-
-                // Read third byte
-                allBytesUpToNowAreAscii &= (value >>= 8);
-                numAsciiBytes += allBytesUpToNowAreAscii;
-
-                return numAsciiBytes;
-            }
-            else
-            {
-                // Read first byte
-                uint allBytesUpToNowAreAscii = (value = ROL32(value, 1)) & 1;
-                uint numAsciiBytes = allBytesUpToNowAreAscii;
-
-                // Read second byte
-                allBytesUpToNowAreAscii &= (value = ROL32(value, 8));
-                numAsciiBytes += allBytesUpToNowAreAscii;
-
-                // Read third byte
-                allBytesUpToNowAreAscii &= (value = ROL32(value, 8));
-                numAsciiBytes += allBytesUpToNowAreAscii;
-
-                return numAsciiBytes;
-            }
         }
 
         /// <summary>
@@ -273,11 +224,10 @@ namespace System.Text
             // we get to the high byte; or (b) all of the earlier bytes are ASCII, so the high byte must be
             // non-ASCII. In both cases we only care about the low 24 bits.
 
-            pBuffer += CountNumberOfLeadingAsciiBytesFrom24BitInteger(currentUInt32);
+            pBuffer += CountNumberOfLeadingAsciiBytesFromUInt32WithSomeNonAsciiData(currentUInt32);
             goto Finish;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static unsafe nuint GetIndexOfFirstNonAsciiByte_Sse2(byte* pBuffer, nuint bufferLength)
         {
             // JIT turns the below into constants
@@ -435,7 +385,7 @@ namespace System.Text
 
             uint currentDWord;
             Debug.Assert(!AllBytesInUInt32AreAscii(currentDWord), "Shouldn't be here unless we see non-ASCII data.");
-            pBuffer += CountNumberOfLeadingAsciiBytesFrom24BitInteger(currentDWord);
+            pBuffer += CountNumberOfLeadingAsciiBytesFromUInt32WithSomeNonAsciiData(currentDWord);
 
             goto Finish;
 
@@ -461,7 +411,7 @@ namespace System.Text
                         // Clear everything but the high bit of each byte, then tzcnt.
                         // Remember the / 8 at the end to convert bit count to byte count.
 
-                        candidateUInt64 &= 0x80808080_80808080ul;
+                        candidateUInt64 &= UInt64HighBitsOnlyMask;
                         pBuffer += (nuint)(Bmi1.X64.TrailingZeroCount(candidateUInt64) / 8);
                         goto Finish;
                     }
@@ -691,7 +641,6 @@ namespace System.Text
             goto Finish;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static unsafe nuint GetIndexOfFirstNonAsciiChar_Sse2(char* pBuffer, nuint bufferLength /* in chars */)
         {
             // This method contains logic optimized for both SSE2 and SSE41. Much of the logic in this method
@@ -1055,7 +1004,7 @@ namespace System.Text
         /// narrows each WORD to a BYTE, then writes the 4-byte result to the output buffer
         /// also in machine-endian order.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void NarrowFourUtf16CharsToAsciiAndWriteToBuffer(ref byte outputBuffer, ulong value)
         {
             Debug.Assert(AllCharsInUInt64AreAscii(value));
@@ -1095,7 +1044,7 @@ namespace System.Text
         /// narrows each WORD to a BYTE, then writes the 2-byte result to the output buffer also in
         /// machine-endian order.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void NarrowTwoUtf16CharsToAsciiAndWriteToBuffer(ref byte outputBuffer, uint value)
         {
             Debug.Assert(AllCharsInUInt32AreAscii(value));
@@ -1118,7 +1067,6 @@ namespace System.Text
         /// or once <paramref name="elementCount"/> elements have been converted. Returns the total number
         /// of elements that were able to be converted.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static unsafe nuint NarrowUtf16ToAscii(char* pUtf16Buffer, byte* pAsciiBuffer, nuint elementCount)
         {
             nuint currentOffset = 0;
@@ -1347,7 +1295,6 @@ namespace System.Text
             goto Finish;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static unsafe nuint NarrowUtf16ToAscii_Sse2(char* pUtf16Buffer, byte* pAsciiBuffer, nuint elementCount)
         {
             // This method contains logic optimized for both SSE2 and SSE41. Much of the logic in this method
@@ -1395,17 +1342,7 @@ namespace System.Text
             // Turn the 8 ASCII chars we just read into 8 ASCII bytes, then copy it to the destination.
 
             Vector128<byte> asciiVector = Sse2.PackUnsignedSaturate(utf16VectorFirst, utf16VectorFirst);
-
-            if (Sse41.X64.IsSupported)
-            {
-                // Use PEXTRQ instruction if available, since it can extract from the vector directly to the destination address.
-                Unsafe.WriteUnaligned<ulong>(pAsciiBuffer, Sse41.X64.Extract(asciiVector.AsUInt64(), 0));
-            }
-            else
-            {
-                // Bounce this through a temporary register (with potential stack spillage) before writing to memory.
-                Unsafe.WriteUnaligned<ulong>(pAsciiBuffer, asciiVector.AsUInt64().GetElement(0));
-            }
+            Sse2.StoreScalar((ulong*)pAsciiBuffer, asciiVector.AsUInt64()); // ulong* calculated here is UNALIGNED
 
             nuint currentOffsetInElements = SizeOfVector128 / 2; // we processed 8 elements so far
 
@@ -1444,16 +1381,7 @@ namespace System.Text
 
                 // Turn the 8 ASCII chars we just read into 8 ASCII bytes, then copy it to the destination.
                 asciiVector = Sse2.PackUnsignedSaturate(utf16VectorFirst, utf16VectorFirst);
-
-                // See comments earlier in this method for information about how this works.
-                if (Sse41.X64.IsSupported)
-                {
-                    Unsafe.WriteUnaligned<ulong>(pAsciiBuffer + currentOffsetInElements, Sse41.X64.Extract(asciiVector.AsUInt64(), 0));
-                }
-                else
-                {
-                    Unsafe.WriteUnaligned<ulong>(pAsciiBuffer + currentOffsetInElements, asciiVector.AsUInt64().GetElement(0));
-                }
+                Sse2.StoreScalar((ulong*)(pAsciiBuffer + currentOffsetInElements), asciiVector.AsUInt64()); // ulong* calculated here is UNALIGNED
             }
 
             // Calculate how many elements we wrote in order to get pAsciiBuffer to its next alignment
@@ -1529,25 +1457,11 @@ namespace System.Text
 
             Debug.Assert(((nuint)pAsciiBuffer + currentOffsetInElements) % sizeof(ulong) == 0, "Destination should be ulong-aligned.");
 
-            // See comments earlier in this method for information about how this works.
-            if (Sse41.X64.IsSupported)
-            {
-                *(ulong*)(pAsciiBuffer + currentOffsetInElements) = Sse41.X64.Extract(asciiVector.AsUInt64(), 0);
-            }
-            else
-            {
-                *(ulong*)(pAsciiBuffer + currentOffsetInElements) = asciiVector.AsUInt64().GetElement(0);
-            }
+            Sse2.StoreScalar((ulong*)(pAsciiBuffer + currentOffsetInElements), asciiVector.AsUInt64()); // ulong* calculated here is aligned
             currentOffsetInElements += SizeOfVector128 / 2;
 
             goto Finish;
         }
-
-        /// <summary>
-        /// Rotates a <see cref="uint"/> left. The JIT is smart enough to turn this into a ROL / ROR instruction.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static uint ROL32(uint value, int shift) => (value << shift) | (value >> (32 - shift));
 
         /// <summary>
         /// Copies as many ASCII bytes (00..7F) as possible from <paramref name="pAsciiBuffer"/>
@@ -1683,7 +1597,6 @@ namespace System.Text
             goto Finish;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static unsafe nuint WidenAsciiToUtf16_Sse2(byte* pAsciiBuffer, char* pUtf16Buffer, nuint elementCount)
         {
             // JIT turns the below into constants
@@ -1780,7 +1693,7 @@ namespace System.Text
         /// Given a DWORD which represents a buffer of 4 bytes, widens the buffer into 4 WORDs and
         /// writes them to the output buffer with machine endianness.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void WidenFourAsciiBytesToUtf16AndWriteToBuffer(ref char outputBuffer, uint value)
         {
             Debug.Assert(AllBytesInUInt32AreAscii(value));

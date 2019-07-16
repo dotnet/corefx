@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Runtime.Serialization;
 
 namespace System.Globalization
@@ -62,7 +61,7 @@ namespace System.Globalization
             : base(info, context)
         {
             _invalidCultureId = (int?)info.GetValue("InvalidCultureId", typeof(int?));
-            _invalidCultureName = (string)info.GetValue("InvalidCultureName", typeof(string));
+            _invalidCultureName = (string?)info.GetValue("InvalidCultureName", typeof(string));
         }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)

@@ -5,7 +5,7 @@
 using System.Buffers.Text;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,6 +34,65 @@ namespace System.Net.Http
             {
                 Debug.Assert(response != null, "The HttpResponseMessage cannot be null.");
                 _response = response;
+            }
+
+            public override int Read(Span<byte> buffer)
+            {
+                if (_connection == null || buffer.Length == 0)
+                {
+                    // Response body fully consumed or the caller didn't ask for any data.
+                    return 0;
+                }
+
+                // Try to consume from data we already have in the buffer.
+                int bytesRead = ReadChunksFromConnectionBuffer(buffer, cancellationRegistration: default);
+                if (bytesRead > 0)
+                {
+                    return bytesRead;
+                }
+
+                // Nothing available to consume.  Fall back to I/O.
+                while (true)
+                {
+                    if (_connection == null)
+                    {
+                        // Fully consumed the response in ReadChunksFromConnectionBuffer.
+                        return 0;
+                    }
+
+                    if (_state == ParsingState.ExpectChunkData &&
+                        buffer.Length >= _connection.ReadBufferSize &&
+                        _chunkBytesRemaining >= (ulong)_connection.ReadBufferSize)
+                    {
+                        // As an optimization, we skip going through the connection's read buffer if both
+                        // the remaining chunk data and the buffer are both at least as large
+                        // as the connection buffer.  That avoids an unnecessary copy while still reading
+                        // the maximum amount we'd otherwise read at a time.
+                        Debug.Assert(_connection.RemainingBuffer.Length == 0);
+                        bytesRead = _connection.Read(buffer.Slice(0, (int)Math.Min((ulong)buffer.Length, _chunkBytesRemaining)));
+                        if (bytesRead == 0)
+                        {
+                            throw new IOException(SR.Format(SR.net_http_invalid_response_premature_eof_bytecount, _chunkBytesRemaining));
+                        }
+                        _chunkBytesRemaining -= (ulong)bytesRead;
+                        if (_chunkBytesRemaining == 0)
+                        {
+                            _state = ParsingState.ExpectChunkTerminator;
+                        }
+                        return bytesRead;
+                    }
+
+                    // We're only here if we need more data to make forward progress.
+                    _connection.Fill();
+
+                    // Now that we have more, see if we can get any response data, and if
+                    // we can we're done.
+                    int bytesCopied = ReadChunksFromConnectionBuffer(buffer, cancellationRegistration: default);
+                    if (bytesCopied > 0)
+                    {
+                        return bytesCopied;
+                    }
+                }
             }
 
             public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
@@ -99,7 +158,7 @@ namespace System.Net.Http
                             int bytesRead = await _connection.ReadAsync(buffer.Slice(0, (int)Math.Min((ulong)buffer.Length, _chunkBytesRemaining))).ConfigureAwait(false);
                             if (bytesRead == 0)
                             {
-                                throw new IOException(SR.net_http_invalid_response);
+                                throw new IOException(SR.Format(SR.net_http_invalid_response_premature_eof_bytecount, _chunkBytesRemaining));
                             }
                             _chunkBytesRemaining -= (ulong)bytesRead;
                             if (_chunkBytesRemaining == 0)
@@ -219,7 +278,7 @@ namespace System.Net.Http
                             // Parse the hex value from it.
                             if (!Utf8Parser.TryParse(currentLine, out ulong chunkSize, out int bytesConsumed, 'X'))
                             {
-                                throw new IOException(SR.net_http_invalid_response);
+                                throw new IOException(SR.Format(SR.net_http_invalid_response_chunk_header_invalid, BitConverter.ToString(currentLine.ToArray())));
                             }
                             _chunkBytesRemaining = chunkSize;
 
@@ -274,7 +333,7 @@ namespace System.Net.Http
 
                             if (currentLine.Length != 0)
                             {
-                                ThrowInvalidHttpResponse();
+                                throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_chunk_terminator_invalid, Encoding.ASCII.GetString(currentLine)));
                             }
 
                             _state = ParsingState.ExpectChunkHeader;
@@ -354,7 +413,7 @@ namespace System.Net.Http
                     }
                     else if (c != ' ' && c != '\t') // not called out in the RFC, but WinHTTP allows it
                     {
-                        throw new IOException(SR.net_http_invalid_response);
+                        throw new IOException(SR.Format(SR.net_http_invalid_response_chunk_extension_invalid, BitConverter.ToString(lineAfterChunkSize.ToArray())));
                     }
                 }
             }

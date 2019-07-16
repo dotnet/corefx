@@ -1846,14 +1846,9 @@ namespace System.Xml
         }
 
         // !!!!!!
-        // NOTE: This method is called via reflection from System.Data.dll and from Analysis Services in Yukon. 
-        // Do not change its signature without notifying the appropriate teams!
+        // NOTE: This method is called via reflection from System.Data.Common.dll.
         // !!!!!!
-#if UAPAOT
-        public static XmlReader CreateSqlReader(Stream input, XmlReaderSettings settings, XmlParserContext inputContext)
-#else
         internal static XmlReader CreateSqlReader(Stream input, XmlReaderSettings settings, XmlParserContext inputContext)
-#endif
         {
             if (input == null)
             {

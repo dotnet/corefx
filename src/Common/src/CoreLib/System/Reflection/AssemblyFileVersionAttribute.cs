@@ -9,9 +9,7 @@ namespace System.Reflection
     {
         public AssemblyFileVersionAttribute(string version)
         {
-            if (version == null)
-                throw new ArgumentNullException(nameof(version));
-            Version = version;
+            Version = version ?? throw new ArgumentNullException(nameof(version));
         }
 
         public string Version { get; }

@@ -18,7 +18,7 @@ internal partial class Interop
                                         string source,
                                         int sourceLength,
                                         [System.Runtime.InteropServices.OutAttribute()]
-                                        char[] destination,
+                                        char[]? destination,
                                         int destinationLength);
     }
 }

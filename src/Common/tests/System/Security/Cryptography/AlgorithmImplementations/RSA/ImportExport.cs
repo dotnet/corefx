@@ -10,6 +10,8 @@ namespace System.Security.Cryptography.Rsa.Tests
 {
     public partial class ImportExport
     {
+        public static bool Supports16384 { get; } = TestRsa16384();
+
         [Fact]
         public static void ExportAutoKey()
         {
@@ -287,6 +289,28 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public static void ExportAfterDispose(bool importKey)
+        {
+            RSA rsa = importKey ? RSAFactory.Create(TestData.RSA2048Params) : RSAFactory.Create(1024);
+            
+            // Ensure that the key got created, and then Dispose it.
+            using (rsa)
+            {
+                rsa.Encrypt(TestData.HelloBytes, RSAEncryptionPadding.Pkcs1);
+            }
+
+            Assert.Throws<ObjectDisposedException>(() => rsa.ExportParameters(false));
+            Assert.Throws<ObjectDisposedException>(() => rsa.ExportParameters(true));
+
+            if (!(PlatformDetection.IsFullFramework && rsa.GetType().Name.EndsWith("Cng")))
+            {
+                Assert.Throws<ObjectDisposedException>(() => rsa.ImportParameters(TestData.RSA1024Params));
+            }
+        }
+
         internal static void AssertKeyEquals(in RSAParameters expected, in RSAParameters actual)
         {
             Assert.Equal(expected.Modulus, actual.Modulus);
@@ -344,6 +368,15 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
+        internal static RSAParameters MakePublic(in RSAParameters rsaParams)
+        {
+            return new RSAParameters
+            {
+                Modulus = rsaParams.Modulus,
+                Exponent = rsaParams.Exponent,
+            };
+        }
+
         private static void VerifyDValue(in RSAParameters rsaParams)
         {
             if (rsaParams.P == null)
@@ -392,6 +425,24 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             Array.Reverse(littleEndianBytes);
             return new BigInteger(littleEndianBytes);
+        }
+
+        private static bool TestRsa16384()
+        {
+            try
+            {
+                using (RSA rsa = RSAFactory.Create())
+                {
+                    rsa.ImportParameters(TestData.RSA16384Params);
+                }
+
+                return true;
+            }
+            catch (CryptographicException)
+            {
+                // The key is too big for this platform.
+                return false;
+            }
         }
     }
 }

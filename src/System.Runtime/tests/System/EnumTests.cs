@@ -87,13 +87,16 @@ namespace System.Tests
             yield return new object[] { "Value1", false, Enum.ToObject(s_boolEnumType, true) };
             yield return new object[] { "vaLue2", true, Enum.ToObject(s_boolEnumType, false) };
 
-            // Single - parses successfully, but doesn't properly represent the underlying value
-            yield return new object[] { "Value1", false, Enum.GetValues(s_floatEnumType).GetValue(0) };
-            yield return new object[] { "vaLue2", true, Enum.GetValues(s_floatEnumType).GetValue(0) };
+            if (!PlatformDetection.IsMonoRuntime) // tracked in issue #36887
+            {
+                // Single - parses successfully, but doesn't properly represent the underlying value
+                yield return new object[] { "Value1", false, Enum.GetValues(s_floatEnumType).GetValue(0) };
+                yield return new object[] { "vaLue2", true, Enum.GetValues(s_floatEnumType).GetValue(0) };
 
-            // Double - parses successfully, but doesn't properly represent the underlying value
-            yield return new object[] { "Value1", false, Enum.GetValues(s_doubleEnumType).GetValue(0) };
-            yield return new object[] { "vaLue2", true, Enum.GetValues(s_doubleEnumType).GetValue(0) };
+                // Double - parses successfully, but doesn't properly represent the underlying value
+                yield return new object[] { "Value1", false, Enum.GetValues(s_doubleEnumType).GetValue(0) };
+                yield return new object[] { "vaLue2", true, Enum.GetValues(s_doubleEnumType).GetValue(0) };
+            }
 #endif // netcoreapp
 
             // SimpleEnum
@@ -217,11 +220,11 @@ namespace System.Tests
         public static void Parse_Invalid(Type enumType, string value, bool ignoreCase, Type exceptionType)
         {
             Type typeArgument = enumType == null || !enumType.GetTypeInfo().IsEnum ? typeof(SimpleEnum) : enumType;
-            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid)).MakeGenericMethod(typeArgument);
+            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeArgument);
             parseMethod.Invoke(null, new object[] { enumType, value, ignoreCase, exceptionType });
         }
 
-        public static void Parse_Generic_Invalid<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
+        private static void Parse_Generic_Invalid<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
         {
             T result;
             if (!ignoreCase)

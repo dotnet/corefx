@@ -11,7 +11,6 @@
 **
 =============================================================================*/
 
-#nullable enable
 using System.Globalization;
 using System.Runtime.Serialization;
 
@@ -79,17 +78,26 @@ namespace System
         {
             get
             {
+                SetMessageField();
+                
                 string s = base.Message;
                 if (!string.IsNullOrEmpty(_paramName))
                 {
-                    string resourceString = SR.Format(SR.Arg_ParamName_Name, _paramName);
-                    return s + Environment.NewLine + resourceString;
+                    s += " " + SR.Format(SR.Arg_ParamName_Name, _paramName);
                 }
-                else
-                    return s;
+
+                return s;
             }
         }
 
+        private void SetMessageField()
+        {
+            if (_message == null && HResult == System.HResults.COR_E_ARGUMENT) 
+            {
+                _message = SR.Arg_ArgumentException;
+            }
+        }
+        
         public virtual string? ParamName
         {
             get { return _paramName; }

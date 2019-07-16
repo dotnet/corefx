@@ -14,7 +14,9 @@ namespace System
     internal static partial class SpanHelpers // .T
     {
         public static int IndexOf<T>(ref T searchSpace, int searchSpaceLength, ref T value, int valueLength)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(searchSpaceLength >= 0);
             Debug.Assert(valueLength >= 0);
@@ -51,13 +53,15 @@ namespace System
 
         // Adapted from IndexOf(...)
         public unsafe static bool Contains<T>(ref T searchSpace, T value, int length)
-               where T : IEquatable<T>
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
+            where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(length >= 0);
 
             IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
 
-            if (default(T) != null || (object)value != null)
+            if (default(T)! != null || (object)value != null) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while (length >= 8)
                 {
@@ -122,12 +126,14 @@ namespace System
         }
 
         public static unsafe int IndexOf<T>(ref T searchSpace, T value, int length)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(length >= 0);
 
             IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
-            if (default(T) != null || (object)value != null)
+            if (default(T)! != null || (object)value != null) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while (length >= 8)
                 {
@@ -210,13 +216,15 @@ namespace System
         }
 
         public static int IndexOfAny<T>(ref T searchSpace, T value0, T value1, int length)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(length >= 0);
 
             T lookUp;
             int index = 0;
-            if (default(T) != null || ((object)value0 != null && (object)value1 != null))
+            if (default(T)! != null || ((object)value0 != null && (object)value1 != null)) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while ((length - index) >= 8)
                 {
@@ -280,9 +288,9 @@ namespace System
                 for (index = 0; index < length; index++)
                 {
                     lookUp = Unsafe.Add(ref searchSpace, index);
-                    if ((object)lookUp is null)
+                    if ((object?)lookUp is null)
                     {
-                        if ((object)value0 is null || (object)value1 is null)
+                        if ((object?)value0 is null || (object?)value1 is null)
                         {
                             goto Found;
                         }
@@ -315,13 +323,15 @@ namespace System
         }
 
         public static int IndexOfAny<T>(ref T searchSpace, T value0, T value1, T value2, int length)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(length >= 0);
 
             T lookUp;
             int index = 0;
-            if (default(T) != null || ((object)value0 != null && (object)value1 != null && (object)value2 != null))
+            if (default(T)! != null || ((object)value0 != null && (object)value1 != null && (object)value2 != null)) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while ((length - index) >= 8)
                 {
@@ -385,9 +395,9 @@ namespace System
                 for (index = 0; index < length; index++)
                 {
                     lookUp = Unsafe.Add(ref searchSpace, index);
-                    if ((object)lookUp is null)
+                    if ((object?)lookUp is null)
                     {
-                        if ((object)value0 is null || (object)value1 is null || (object)value2 is null)
+                        if ((object?)value0 is null || (object?)value1 is null || (object?)value2 is null)
                         {
                             goto Found;
                         }
@@ -419,13 +429,15 @@ namespace System
         }
 
         public static int IndexOfAny<T>(ref T searchSpace, int searchSpaceLength, ref T value, int valueLength)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(searchSpaceLength >= 0);
             Debug.Assert(valueLength >= 0);
 
             if (valueLength == 0)
-                return 0;  // A zero-length sequence is always treated as "found" at the start of the search space.
+                return -1;  // A zero-length set of values is always treated as "not found".
 
             int index = -1;
             for (int i = 0; i < valueLength; i++)
@@ -445,7 +457,9 @@ namespace System
         }
 
         public static int LastIndexOf<T>(ref T searchSpace, int searchSpaceLength, ref T value, int valueLength)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(searchSpaceLength >= 0);
             Debug.Assert(valueLength >= 0);
@@ -480,11 +494,13 @@ namespace System
         }
 
         public static int LastIndexOf<T>(ref T searchSpace, T value, int length)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(length >= 0);
 
-            if (default(T) != null || (object)value != null)
+            if (default(T)! != null || (object)value != null) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while (length >= 8)
                 {
@@ -562,12 +578,14 @@ namespace System
         }
 
         public static int LastIndexOfAny<T>(ref T searchSpace, T value0, T value1, int length)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(length >= 0);
 
             T lookUp;
-            if (default(T) != null || ((object)value0 != null && (object)value1 != null))
+            if (default(T)! != null || ((object)value0 != null && (object)value1 != null)) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while (length >= 8)
                 {
@@ -631,9 +649,9 @@ namespace System
                 for (length--; length >= 0; length--)
                 {
                     lookUp = Unsafe.Add(ref searchSpace, length);
-                    if ((object)lookUp is null)
+                    if ((object?)lookUp is null)
                     {
-                        if ((object)value0 is null || (object)value1 is null)
+                        if ((object?)value0 is null || (object?)value1 is null)
                         {
                             goto Found;
                         }
@@ -666,12 +684,14 @@ namespace System
         }
 
         public static int LastIndexOfAny<T>(ref T searchSpace, T value0, T value1, T value2, int length)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(length >= 0);
 
             T lookUp;
-            if (default(T) != null || ((object)value0 != null && (object)value1 != null))
+            if (default(T)! != null || ((object)value0 != null && (object)value1 != null)) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while (length >= 8)
                 {
@@ -735,9 +755,9 @@ namespace System
                 for (length--; length >= 0; length--)
                 {
                     lookUp = Unsafe.Add(ref searchSpace, length);
-                    if ((object)lookUp is null)
+                    if ((object?)lookUp is null)
                     {
-                        if ((object)value0 is null || (object)value1 is null || (object)value2 is null)
+                        if ((object?)value0 is null || (object?)value1 is null || (object?)value2 is null)
                         {
                             goto Found;
                         }
@@ -770,13 +790,15 @@ namespace System
         }
 
         public static int LastIndexOfAny<T>(ref T searchSpace, int searchSpaceLength, ref T value, int valueLength)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(searchSpaceLength >= 0);
             Debug.Assert(valueLength >= 0);
 
             if (valueLength == 0)
-                return 0;  // A zero-length sequence is always treated as "found" at the start of the search space.
+                return -1;  // A zero-length set of values is always treated as "not found".
 
             int index = -1;
             for (int i = 0; i < valueLength; i++)
@@ -789,7 +811,9 @@ namespace System
         }
 
         public static bool SequenceEqual<T>(ref T first, ref T second, int length)
+#nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
             where T : IEquatable<T>
+#nullable restore
         {
             Debug.Assert(length >= 0);
 
@@ -805,35 +829,35 @@ namespace System
 
                 lookUp0 = Unsafe.Add(ref first, index);
                 lookUp1 = Unsafe.Add(ref second, index);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 1);
                 lookUp1 = Unsafe.Add(ref second, index + 1);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 2);
                 lookUp1 = Unsafe.Add(ref second, index + 2);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 3);
                 lookUp1 = Unsafe.Add(ref second, index + 3);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 4);
                 lookUp1 = Unsafe.Add(ref second, index + 4);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 5);
                 lookUp1 = Unsafe.Add(ref second, index + 5);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 6);
                 lookUp1 = Unsafe.Add(ref second, index + 6);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 7);
                 lookUp1 = Unsafe.Add(ref second, index + 7);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
 
                 index += 8;
@@ -845,19 +869,19 @@ namespace System
 
                 lookUp0 = Unsafe.Add(ref first, index);
                 lookUp1 = Unsafe.Add(ref second, index);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 1);
                 lookUp1 = Unsafe.Add(ref second, index + 1);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 2);
                 lookUp1 = Unsafe.Add(ref second, index + 2);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 3);
                 lookUp1 = Unsafe.Add(ref second, index + 3);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
 
                 index += 4;
@@ -867,7 +891,7 @@ namespace System
             {
                 lookUp0 = Unsafe.Add(ref first, index);
                 lookUp1 = Unsafe.Add(ref second, index);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 index += 1;
                 length--;
@@ -892,7 +916,7 @@ namespace System
             for (int i = 0; i < minLength; i++)
             {
                 T lookUp = Unsafe.Add(ref second, i);
-                int result = (Unsafe.Add(ref first, i)?.CompareTo(lookUp) ?? (((object)lookUp is null) ? 0 : -1));
+                int result = (Unsafe.Add(ref first, i)?.CompareTo(lookUp) ?? (((object?)lookUp is null) ? 0 : -1));
                 if (result != 0)
                     return result;
             }

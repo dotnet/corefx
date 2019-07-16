@@ -73,7 +73,7 @@ namespace System.Net.Http
             int idx = value.IndexOf(':');
             if (idx != -1)
             {
-                password = value.Substring(idx+1);
+                password = value.Substring(idx + 1);
                 value = value.Substring(0, idx);
             }
 
@@ -81,64 +81,29 @@ namespace System.Net.Http
             if (idx != -1)
             {
                 domain = value.Substring(0, idx);
-                value = value.Substring(idx+1);
+                value = value.Substring(idx + 1);
             }
 
             return new NetworkCredential(value, password, domain);
         }
     }
 
-    internal sealed class HttpEnvironmentProxy : IWebProxy
+    internal sealed partial class HttpEnvironmentProxy : IWebProxy
     {
         private const string EnvAllProxyUC = "ALL_PROXY";
         private const string EnvAllProxyLC = "all_proxy";
         private const string EnvHttpProxyLC = "http_proxy";
+        private const string EnvHttpProxyUC = "HTTP_PROXY";
         private const string EnvHttpsProxyLC = "https_proxy";
         private const string EnvHttpsProxyUC = "HTTPS_PROXY";
         private const string EnvNoProxyLC = "no_proxy";
+        private const string EnvNoProxyUC = "NO_PROXY";
+        private const string EnvCGI = "GATEWAY_INTERFACE"; // Running in a CGI environment.
 
         private Uri _httpProxyUri;      // String URI for HTTP requests
         private Uri _httpsProxyUri;     // String URI for HTTPS requests
         private string[] _bypass = null;// list of domains not to proxy
         private ICredentials _credentials;
-
-        public static bool TryCreate(out IWebProxy proxy)
-        {
-            // Get environmental variables. Protocol specific take precedence over
-            // general all_*, lower case variable has precedence over upper case.
-            // Note that curl uses HTTPS_PROXY but not HTTP_PROXY.
-            // For http, only http_proxy and generic variables are used.
-
-            Uri httpProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpProxyLC));
-            Uri httpsProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyLC)) ??
-                             GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyUC));
-
-            if (httpProxy == null || httpsProxy == null)
-            {
-                Uri allProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvAllProxyLC)) ??
-                                GetUriFromString(Environment.GetEnvironmentVariable(EnvAllProxyUC));
-
-                if (httpProxy == null)
-                {
-                    httpProxy = allProxy;
-                }
-                if (httpsProxy == null)
-                {
-                    httpsProxy = allProxy;
-                }
-            }
-
-            // Do not instantiate if nothing is set.
-            // Caller may pick some other proxy type.
-            if (httpProxy == null && httpsProxy == null)
-            {
-                proxy = null;
-                return false;
-            }
-
-            proxy = new HttpEnvironmentProxy(httpProxy, httpsProxy, Environment.GetEnvironmentVariable(EnvNoProxyLC));
-            return true;
-        }
 
         private HttpEnvironmentProxy(Uri httpProxy, Uri httpsProxy, string bypassList)
         {

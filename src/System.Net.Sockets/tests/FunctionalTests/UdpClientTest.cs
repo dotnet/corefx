@@ -194,7 +194,7 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ObjectDisposedException>(() => udpClient.Send(null, 0, "localhost", 0));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public void Finalize_NoExceptionsThrown()
         {
             WeakReference<UdpClient> udpClientWeakRef = CreateAndDiscardUdpClient();
@@ -382,6 +382,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // localhost on Windows resolves to both IPV4/6, but doesn't on all Unix
         public void Send_InvalidArguments_StringInt_Throws()
         {
@@ -517,6 +518,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // "localhost" resolves to IPv4 & IPV6 on Windows, but may resolve to only one of those on Unix 
         [OuterLoop] // TODO: Issue #11345
         public void Send_Receive_Connected_Success()
@@ -579,6 +581,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // "localhost" resolves to IPv4 & IPV6 on Windows, but may resolve to only one of those on Unix 
         [OuterLoop] // TODO: Issue #11345
         public void BeginEndSend_BeginEndReceive_Connected_Success()
@@ -622,6 +625,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // "localhost" resolves to IPv4 & IPV6 on Windows, but may resolve to only one of those on Unix 
         [OuterLoop] // TODO: Issue #11345
         public async Task SendAsync_ReceiveAsync_Connected_Success()
@@ -691,7 +695,6 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void BeginSend_IPv6Socket_IPv4Dns_Success()
         {
             using (var receiver = new UdpClient("127.0.0.1", DiscardPort))

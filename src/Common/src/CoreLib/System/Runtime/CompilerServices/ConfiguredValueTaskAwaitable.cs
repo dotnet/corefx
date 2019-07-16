@@ -51,13 +51,12 @@ namespace System.Runtime.CompilerServices
 
             /// <summary>Gets the result of the ValueTask.</summary>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            [StackTraceHidden]
             public void GetResult() => _value.ThrowIfCompletedUnsuccessfully();
 
             /// <summary>Schedules the continuation action for the <see cref="ConfiguredValueTaskAwaitable"/>.</summary>
             public void OnCompleted(Action continuation)
             {
-                object obj = _value._obj;
+                object? obj = _value._obj;
                 Debug.Assert(obj == null || obj is Task || obj is IValueTaskSource);
 
                 if (obj is Task t)
@@ -79,7 +78,7 @@ namespace System.Runtime.CompilerServices
             /// <summary>Schedules the continuation action for the <see cref="ConfiguredValueTaskAwaitable"/>.</summary>
             public void UnsafeOnCompleted(Action continuation)
             {
-                object obj = _value._obj;
+                object? obj = _value._obj;
                 Debug.Assert(obj == null || obj is Task || obj is IValueTaskSource);
 
                 if (obj is Task t)
@@ -99,7 +98,7 @@ namespace System.Runtime.CompilerServices
 
             void IStateMachineBoxAwareAwaiter.AwaitUnsafeOnCompleted(IAsyncStateMachineBox box)
             {
-                object obj = _value._obj;
+                object? obj = _value._obj;
                 Debug.Assert(obj == null || obj is Task || obj is IValueTaskSource);
 
                 if (obj is Task t)
@@ -157,13 +156,12 @@ namespace System.Runtime.CompilerServices
 
             /// <summary>Gets the result of the ValueTask.</summary>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            [StackTraceHidden]
             public TResult GetResult() => _value.Result;
 
             /// <summary>Schedules the continuation action for the <see cref="ConfiguredValueTaskAwaitable{TResult}"/>.</summary>
             public void OnCompleted(Action continuation)
             {
-                object obj = _value._obj;
+                object? obj = _value._obj;
                 Debug.Assert(obj == null || obj is Task<TResult> || obj is IValueTaskSource<TResult>);
 
                 if (obj is Task<TResult> t)
@@ -185,7 +183,7 @@ namespace System.Runtime.CompilerServices
             /// <summary>Schedules the continuation action for the <see cref="ConfiguredValueTaskAwaitable{TResult}"/>.</summary>
             public void UnsafeOnCompleted(Action continuation)
             {
-                object obj = _value._obj;
+                object? obj = _value._obj;
                 Debug.Assert(obj == null || obj is Task<TResult> || obj is IValueTaskSource<TResult>);
 
                 if (obj is Task<TResult> t)
@@ -205,7 +203,7 @@ namespace System.Runtime.CompilerServices
 
             void IStateMachineBoxAwareAwaiter.AwaitUnsafeOnCompleted(IAsyncStateMachineBox box)
             {
-                object obj = _value._obj;
+                object? obj = _value._obj;
                 Debug.Assert(obj == null || obj is Task<TResult> || obj is IValueTaskSource<TResult>);
 
                 if (obj is Task<TResult> t)

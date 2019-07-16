@@ -899,7 +899,7 @@ namespace System.Net.Sockets
             }
             else
             {
-                IPAddress[] addresses = Dns.GetHostAddressesAsync(host).GetAwaiter().GetResult();
+                IPAddress[] addresses = Dns.GetHostAddresses(host);
                 Connect(addresses, port);
             }
 
@@ -4335,19 +4335,6 @@ namespace System.Net.Sockets
                 return (_intCleanedUp == 1);
             }
         }
-
-        internal TransportType Transport
-        {
-            get
-            {
-                return
-                    _protocolType == Sockets.ProtocolType.Tcp ?
-                        TransportType.Tcp :
-                        _protocolType == Sockets.ProtocolType.Udp ?
-                            TransportType.Udp :
-                            TransportType.All;
-            }
-        }
         #endregion
 
         #region Internal and private methods
@@ -4461,16 +4448,11 @@ namespace System.Net.Sockets
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposing)
-            {
-                return;
-            }
-
             if (NetEventSource.IsEnabled)
             {
                 try
                 {
-                    NetEventSource.Info(this, $"disposing:true CleanedUp:{CleanedUp}");
+                    NetEventSource.Info(this, $"disposing:{disposing} CleanedUp:{CleanedUp}");
                     NetEventSource.Enter(this);
                 }
                 catch (Exception exception) when (!ExceptionCheck.IsFatal(exception)) { }
@@ -4490,11 +4472,11 @@ namespace System.Net.Sockets
             try
             {
                 int timeout = _closeTimeout;
-                if (timeout == 0)
+                if (timeout == 0 || !disposing)
                 {
                     // Abortive.
                     if (NetEventSource.IsEnabled) NetEventSource.Info(this, "Calling _handle.Dispose()");
-                    _handle.Dispose();
+                    _handle?.Dispose();
                 }
                 else
                 {

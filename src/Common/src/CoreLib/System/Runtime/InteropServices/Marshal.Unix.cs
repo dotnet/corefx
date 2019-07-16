@@ -9,22 +9,22 @@ namespace System.Runtime.InteropServices
 {
     public static partial class Marshal
     {
-        public static string PtrToStringAuto(IntPtr ptr, int len)
+        public static string? PtrToStringAuto(IntPtr ptr, int len)
         {
             return PtrToStringUTF8(ptr, len);
         }
 
-        public static string PtrToStringAuto(IntPtr ptr)
+        public static string? PtrToStringAuto(IntPtr ptr)
         {
             return PtrToStringUTF8(ptr);
         }
 
-        public static IntPtr StringToHGlobalAuto(string s)
+        public static IntPtr StringToHGlobalAuto(string? s)
         {
             return StringToHGlobalUTF8(s);
         }
 
-        public static IntPtr StringToCoTaskMemAuto(string s)
+        public static IntPtr StringToCoTaskMemAuto(string? s)
         {
             return StringToCoTaskMemUTF8(s);
         }

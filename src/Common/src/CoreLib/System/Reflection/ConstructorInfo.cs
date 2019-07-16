@@ -16,14 +16,14 @@ namespace System.Reflection
 
         [DebuggerHidden]
         [DebuggerStepThrough]
-        public object Invoke(object[] parameters) => Invoke(BindingFlags.Default, binder: null, parameters: parameters, culture: null);
-        public abstract object Invoke(BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture);
+        public object Invoke(object?[]? parameters) => Invoke(BindingFlags.Default, binder: null, parameters: parameters, culture: null);
+        public abstract object Invoke(BindingFlags invokeAttr, Binder? binder, object?[]? parameters, CultureInfo? culture);
 
-        public override bool Equals(object obj) => base.Equals(obj);
+        public override bool Equals(object? obj) => base.Equals(obj);
         public override int GetHashCode() => base.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(ConstructorInfo left, ConstructorInfo right)
+        public static bool operator ==(ConstructorInfo? left, ConstructorInfo? right)
         {
             // Test "right" first to allow branch elimination when inlined for null checks (== null)
             // so it can become a simple test
@@ -34,7 +34,7 @@ namespace System.Reflection
             }
 
             // Try fast reference equality and opposite null check prior to calling the slower virtual Equals
-            if ((object)left == (object)right)
+            if ((object?)left == (object)right)
             {
                 return true;
             }
@@ -42,7 +42,7 @@ namespace System.Reflection
             return (left is null) ? false : left.Equals(right);
         }
 
-        public static bool operator !=(ConstructorInfo left, ConstructorInfo right) => !(left == right);
+        public static bool operator !=(ConstructorInfo? left, ConstructorInfo? right) => !(left == right);
 
         public static readonly string ConstructorName = ".ctor";
         public static readonly string TypeConstructorName = ".cctor";

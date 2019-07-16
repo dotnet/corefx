@@ -233,7 +233,7 @@ namespace System.Collections.Generic
             T removed = array[head];
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                array[head] = default;
+                array[head] = default!;
             }
             MoveNext(ref _head);
             _size--;
@@ -241,21 +241,21 @@ namespace System.Collections.Generic
             return removed;
         }
 
-        public bool TryDequeue(out T result)
+        public bool TryDequeue([MaybeNullWhen(false)] out T result)
         {
             int head = _head;
             T[] array = _array;
 
             if (_size == 0)
             {
-            	result = default;
-            	return false;
+            	result = default!;
+                return false;
             }
 
             result = array[head];
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                array[head] = default;
+                array[head] = default!;
             }
             MoveNext(ref _head);
             _size--;
@@ -276,12 +276,12 @@ namespace System.Collections.Generic
             return _array[_head];
         }
 
-        public bool TryPeek(out T result)
+        public bool TryPeek([MaybeNullWhen(false)] out T result)
         {
             if (_size == 0)
             {
-            	result = default(T);
-            	return false;
+            	result = default!;
+                return false;
             }
 
             result = _array[_head];
@@ -397,20 +397,20 @@ namespace System.Collections.Generic
             private readonly Queue<T> _q;
             private readonly int _version;
             private int _index;   // -1 = not started, -2 = ended/disposed
-            private T _currentElement;
+            [AllowNull] private T _currentElement;
 
             internal Enumerator(Queue<T> q)
             {
                 _q = q;
                 _version = q._version;
                 _index = -1;
-                _currentElement = default(T);
+                _currentElement = default;
             }
 
             public void Dispose()
             {
                 _index = -2;
-                _currentElement = default(T);
+                _currentElement = default;
             }
 
             public bool MoveNext()
@@ -426,7 +426,7 @@ namespace System.Collections.Generic
                 {
                     // We've run past the last element
                     _index = -2;
-                    _currentElement = default(T);
+                    _currentElement = default;
                     return false;
                 }
 
@@ -469,7 +469,7 @@ namespace System.Collections.Generic
                 throw new InvalidOperationException(_index == -1 ? SR.InvalidOperation_EnumNotStarted : SR.InvalidOperation_EnumEnded);
             }
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get { return Current; }
             }
@@ -478,7 +478,7 @@ namespace System.Collections.Generic
             {
                 if (_version != _q._version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 _index = -1;
-                _currentElement = default(T);
+                _currentElement = default;
             }
         }
     }

@@ -35,11 +35,11 @@ namespace System.Tests
         public static void Parse_Invalid_NetCoreApp11(Type enumType, string value, bool ignoreCase, Type exceptionType)
         {
             Type typeArgument = enumType == null || !enumType.IsValueType ? typeof(SimpleEnum) : enumType;
-            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid_NetCoreApp11)).MakeGenericMethod(typeArgument);
+            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid_NetCoreApp11), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeArgument);
             parseMethod.Invoke(null, new object[] { enumType, value, ignoreCase, exceptionType });
         }
 
-        public static void Parse_Generic_Invalid_NetCoreApp11<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
+        private static void Parse_Generic_Invalid_NetCoreApp11<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
         {
             object result = null;
             if (!ignoreCase)
@@ -138,7 +138,6 @@ namespace System.Tests
             Assert.True(formatFExceptionName == nameof(InvalidOperationException) || formatFExceptionName == "ContractException");
         }
 
-#if netcoreapp // .NetNative does not support RefEmit nor any other way to create Enum types with unusual backing types.
         private static EnumBuilder GetNonRuntimeEnumTypeBuilder(Type underlyingType)
         {
             AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.Run);
@@ -226,6 +225,5 @@ namespace System.Tests
 
             return enumBuilder.CreateTypeInfo().AsType();
         }
-#endif //netcoreapp        
     }
 }

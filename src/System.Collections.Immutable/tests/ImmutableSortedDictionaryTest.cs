@@ -313,10 +313,7 @@ namespace System.Collections.Immutable.Tests
             var map = ImmutableSortedDictionary.Create<string, string>()
                 .Add("firstKey", "1").Add("secondKey", "2");
             var exception = AssertExtensions.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
-            if (!PlatformDetection.IsNetNative) //.NET Native toolchain removes exception messages.
-            {
-                Assert.Contains("firstKey", exception.Message);
-            }
+            Assert.Contains("firstKey", exception.Message);
         }
 
         [Fact]
@@ -407,7 +404,6 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableSortedDictionary.Create<string, int>());
@@ -422,7 +418,6 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public static void TestDebuggerAttributes_Null()
         {
             Type proxyType = DebuggerAttributes.GetProxyType(ImmutableSortedDictionary.Create<int, int>());
@@ -430,7 +425,7 @@ namespace System.Collections.Immutable.Tests
             Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
-        ////[Fact] // not really a functional test -- but very useful to enable when collecting perf traces.
+        [Fact(Skip = "Useful to enable when collecting perf traces")]
         public void EnumerationPerformance()
         {
             var dictionary = Enumerable.Range(1, 1000).ToImmutableSortedDictionary(k => k, k => k);
@@ -455,7 +450,7 @@ namespace System.Collections.Immutable.Tests
             Debug.WriteLine("Timing:{0}{1}", Environment.NewLine, timingText);
         }
 
-        ////[Fact] // not really a functional test -- but very useful to enable when collecting perf traces.
+        [Fact(Skip = "Useful to enable when collecting perf traces")]
         public void EnumerationPerformance_Empty()
         {
             var dictionary = ImmutableSortedDictionary<int, int>.Empty;

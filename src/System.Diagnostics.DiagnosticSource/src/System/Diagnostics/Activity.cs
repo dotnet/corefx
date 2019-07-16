@@ -6,6 +6,7 @@ using System.Buffers.Binary;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
@@ -30,6 +31,46 @@ namespace System.Diagnostics
     /// </summary>
     public partial class Activity
     {
+        private static readonly IEnumerable<KeyValuePair<string, string>> s_emptyBaggageTags = new KeyValuePair<string, string>[0]; // Array.Empty<T>() doesn't exist in all configurations
+
+        private const byte ActivityTraceFlagsIsSet = 0b_1_0000000; // Internal flag to indicate if flags have been set
+        private const int RequestIdMaxLength = 1024;
+
+        // Used to generate an ID it represents the machine and process we are in.  
+        private static readonly string s_uniqSuffix = "-" + GetRandomNumber().ToString("x") + ".";
+
+        // A unique number inside the appdomain, randomized between appdomains. 
+        // Int gives enough randomization and keeps hex-encoded s_currentRootId 8 chars long for most applications
+        private static long s_currentRootId = (uint)GetRandomNumber();
+        private static ActivityIdFormat s_defaultIdFormat;
+        /// <summary>
+        /// Normally if the ParentID is defined, the format of that is used to determine the
+        /// format used by the Activity.   However if ForceDefaultFormat is set to true, the
+        /// ID format will always be the DefaultIdFormat even if the ParentID is define and is
+        /// a different format. 
+        /// </summary>
+        public static bool ForceDefaultIdFormat { get; set; }
+
+        private string _traceState;
+        private State _state;
+        private int _currentChildId;  // A unique number for all children of this activity.
+
+        // State associated with ID. 
+        private string _id;
+        private string _rootId;
+        // State associated with ParentId.
+        private string _parentId;
+
+        // W3C formats
+        private string _parentSpanId;
+        private string _traceId;
+        private string _spanId;
+
+        private byte _w3CIdFlags;
+
+        private KeyValueListNode _tags;
+        private KeyValueListNode _baggage;
+
         /// <summary>
         /// An operation name is a COARSEST name that is useful grouping/filtering. 
         /// The name is typically a compile-time constant.   Names of Rest APIs are
@@ -37,6 +78,27 @@ namespace System.Diagnostics
         /// the name but rather in the tags.  
         /// </summary>
         public string OperationName { get; }
+
+        /// <summary>
+        /// If the Activity that created this activity is from the same process you can get 
+        /// that Activity with Parent.  However, this can be null if the Activity has no
+        /// parent (a root activity) or if the Parent is from outside the process.
+        /// </summary>
+        /// <seealso cref="ParentId"/>
+        public Activity Parent { get; private set; }
+
+        /// <summary>
+        /// If the Activity has ended (<see cref="Stop"/> or <see cref="SetEndTime"/> was called) then this is the delta
+        /// between <see cref="StartTimeUtc"/> and end.   If Activity is not ended and <see cref="SetEndTime"/> was not called then this is 
+        /// <see cref="TimeSpan.Zero"/>.
+        /// </summary>
+        public TimeSpan Duration { get; private set; }
+
+        /// <summary>
+        /// The time that operation started.  It will typically be initialized when <see cref="Start"/>
+        /// is called, but you can set at any time via <see cref="SetStartTime(DateTime)"/>.
+        /// </summary>
+        public DateTime StartTimeUtc { get; private set; }
 
         /// <summary>
         /// This is an ID that is specific to a particular request.   Filtering
@@ -63,31 +125,19 @@ namespace System.Diagnostics
             {
                 // if we represented it as a traceId-spanId, convert it to a string.  
                 // We can do this concatenation with a stackalloced Span<char> if we actually used Id a lot.  
-                if (_id == null && _spanIdSet)
+                if (_id == null && _spanId != null)
                 {
                     // Convert flags to binary.  
                     Span<char> flagsChars = stackalloc char[2];
-                    ActivityTraceId.ByteToHexDigits(flagsChars, _w3CIdFlags);
-                    _id = "00-" + _traceId.ToHexString() + "-" + _spanId.ToHexString() + "-" + flagsChars.ToString();
+                    ActivityTraceId.ByteToHexDigits(flagsChars, (byte)((~ActivityTraceFlagsIsSet) & _w3CIdFlags));
+                    string id = "00-" + _traceId + "-" + _spanId + "-" + flagsChars.ToString();
+
+                    Interlocked.CompareExchange(ref _id, id, null);
 
                 }
                 return _id;
             }
         }
-
-        /// <summary>
-        /// The time that operation started.  It will typically be initialized when <see cref="Start"/>
-        /// is called, but you can set at any time via <see cref="SetStartTime(DateTime)"/>.
-        /// </summary>
-        public DateTime StartTimeUtc { get; private set; }
-
-        /// <summary>
-        /// If the Activity that created this activity is from the same process you can get 
-        /// that Activity with Parent.  However, this can be null if the Activity has no
-        /// parent (a root activity) or if the Parent is from outside the process.
-        /// </summary>
-        /// <seealso cref="ParentId"/>
-        public Activity Parent { get; private set; }
 
         /// <summary>
         /// If the parent for this activity comes from outside the process, the activity
@@ -104,11 +154,17 @@ namespace System.Diagnostics
                 // if we represented it as a traceId-spanId, convert it to a string.  
                 if (_parentId == null)
                 {
-                    if (_parentSpanIdSet)
-                        _parentId = "00-" + _traceId.ToHexString() + "-" + _parentSpanId.ToHexString() + "-00";
+                    if (_parentSpanId != null)
+                    {
+                        string parentId = "00-" + _traceId + "-" + _parentSpanId + "-00";
+                        Interlocked.CompareExchange(ref _parentId, parentId, null);
+                    }
                     else if (Parent != null)
-                        _parentId = Parent.Id;
+                    {
+                        Interlocked.CompareExchange(ref _parentId, Parent.Id, null);
+                    }
                 }
+
                 return _parentId;
             }
         }
@@ -128,15 +184,22 @@ namespace System.Diagnostics
                 //Presumably, it will be called by logging systems for every log record, so we cache it.
                 if (_rootId == null)
                 {
+                    string rootId = null;
                     if (Id != null)
                     {
-                        _rootId = GetRootId(Id);
+                        rootId = GetRootId(Id);
                     }
                     else if (ParentId != null)
                     {
-                        _rootId = GetRootId(ParentId);
+                        rootId = GetRootId(ParentId);
+                    }
+
+                    if (rootId != null)
+                    {
+                        Interlocked.CompareExchange(ref _rootId, rootId, null);
                     }
                 }
+
                 return _rootId;
             }
         }
@@ -151,8 +214,20 @@ namespace System.Diagnostics
         {
             get
             {
-                for (var tags = _tags; tags != null; tags = tags.Next)
-                    yield return tags.keyValue;
+                KeyValueListNode tags = _tags;
+                return tags != null ?
+                    Iterate(tags) :
+                    s_emptyBaggageTags;
+
+                static IEnumerable<KeyValuePair<string, string>> Iterate(KeyValueListNode tags)
+                {
+                    do
+                    {
+                        yield return tags.keyValue;
+                        tags = tags.Next;
+                    }
+                    while (tags != null);
+                }
             }
         }
 
@@ -169,8 +244,28 @@ namespace System.Diagnostics
             get
             {
                 for (Activity activity = this; activity != null; activity = activity.Parent)
-                    for (var baggage = activity._baggage; baggage != null; baggage = baggage.Next)
-                        yield return baggage.keyValue;
+                {
+                    if (activity._baggage != null)
+                    {
+                        return Iterate(activity);
+                    }
+                }
+
+                return s_emptyBaggageTags;
+
+                static IEnumerable<KeyValuePair<string, string>> Iterate(Activity activity)
+                {
+                    do
+                    {
+                        for (KeyValueListNode baggage = activity._baggage; baggage != null; baggage = baggage.Next)
+                        {
+                            yield return baggage.keyValue;
+                        }
+
+                        activity = activity.Parent;
+                    }
+                    while (activity != null);
+                }
             }
         }
 
@@ -180,7 +275,7 @@ namespace System.Diagnostics
         /// </summary>
         public string GetBaggageItem(string key)
         {
-            foreach (var keyValue in Baggage)
+            foreach (KeyValuePair<string, string> keyValue in Baggage)
                 if (key == keyValue.Key)
                     return keyValue.Value;
             return null;
@@ -197,7 +292,7 @@ namespace System.Diagnostics
         {
             if (string.IsNullOrEmpty(operationName))
             {
-                NotifyError(new ArgumentException($"{nameof(operationName)} must not be null or empty"));
+                NotifyError(new ArgumentException(SR.OperationNameInvalid));
                 return;
             }
 
@@ -212,7 +307,14 @@ namespace System.Diagnostics
         /// <returns>'this' for convenient chaining</returns>
         public Activity AddTag(string key, string value)
         {
-            _tags = new KeyValueListNode() { keyValue = new KeyValuePair<string, string>(key, value), Next = _tags };
+            KeyValueListNode currentTags = _tags;
+            KeyValueListNode newTags = new KeyValueListNode() { keyValue = new KeyValuePair<string, string>(key, value) };
+            do
+            {
+                newTags.Next = currentTags;
+                currentTags = Interlocked.CompareExchange(ref _tags, newTags, currentTags);
+            } while (!ReferenceEquals(newTags.Next, currentTags));
+
             return this;
         }
 
@@ -227,7 +329,15 @@ namespace System.Diagnostics
         /// <returns>'this' for convenient chaining</returns>
         public Activity AddBaggage(string key, string value)
         {
-            _baggage = new KeyValueListNode() { keyValue = new KeyValuePair<string, string>(key, value), Next = _baggage };
+            KeyValueListNode currentBaggage = _baggage;
+            KeyValueListNode newBaggage = new KeyValueListNode() { keyValue = new KeyValuePair<string, string>(key, value) };
+
+            do
+            {
+                newBaggage.Next = currentBaggage;
+                currentBaggage = Interlocked.CompareExchange(ref _baggage, newBaggage, currentBaggage);
+            } while (!ReferenceEquals(newBaggage.Next, currentBaggage));
+
             return this;
         }
 
@@ -244,15 +354,15 @@ namespace System.Diagnostics
         {
             if (Parent != null)
             {
-                NotifyError(new InvalidOperationException($"Trying to set {nameof(ParentId)} on activity which has {nameof(Parent)}"));
+                NotifyError(new InvalidOperationException(SR.SetParentIdOnActivityWithParent));
             }
-            else if (ParentId != null || _parentSpanIdSet)
+            else if (ParentId != null || _parentSpanId != null)
             {
-                NotifyError(new InvalidOperationException($"{nameof(ParentId)} is already set"));
+                NotifyError(new InvalidOperationException(SR.ParentIdAlreadySet));
             }
             else if (string.IsNullOrEmpty(parentId))
             {
-                NotifyError(new ArgumentException($"{nameof(parentId)} must not be null or empty"));
+                NotifyError(new ArgumentException(SR.ParentIdInvalid));
             }
             else
             {
@@ -265,24 +375,21 @@ namespace System.Diagnostics
         /// Set the parent ID using the W3C convention using a TraceId and a SpanId.   This
         /// constructor has the advantage that no string manipulation is needed to set the ID.  
         /// </summary>
-        public Activity SetParentId(in ActivityTraceId traceId, in ActivitySpanId spanId, ActivityTraceFlags activityTraceFlags = ActivityTraceFlags.None)
+        public Activity SetParentId(ActivityTraceId traceId, ActivitySpanId spanId, ActivityTraceFlags activityTraceFlags = ActivityTraceFlags.None)
         {
             if (Parent != null)
             {
-                NotifyError(new InvalidOperationException($"Trying to set {nameof(ParentId)} on activity which has {nameof(Parent)}"));
+                NotifyError(new InvalidOperationException(SR.SetParentIdOnActivityWithParent));
             }
-            else if (ParentId != null || _parentSpanIdSet)
+            else if (ParentId != null || _parentSpanId != null)
             {
-                NotifyError(new InvalidOperationException($"{nameof(ParentId)} is already set"));
+                NotifyError(new InvalidOperationException(SR.ParentIdAlreadySet));
             }
             else
             {
-                _traceId = traceId;     // The child will share the parent's traceId.  
-                _traceIdSet = true;
-                _parentSpanId = spanId;
-                _parentSpanIdSet = true;
-                _w3CIdFlags = (byte) activityTraceFlags;
-                _w3CIdFlagsSet = true;
+                _traceId = traceId.ToHexString();     // The child will share the parent's traceId.
+                _parentSpanId = spanId.ToHexString();
+                ActivityTraceFlags = activityTraceFlags;
             }
             return this;
         }
@@ -296,7 +403,7 @@ namespace System.Diagnostics
         {
             if (startTimeUtc.Kind != DateTimeKind.Utc)
             {
-                NotifyError(new InvalidOperationException($"{nameof(startTimeUtc)} is not UTC"));
+                NotifyError(new InvalidOperationException(SR.StartTimeNotUtc));
             }
             else
             {
@@ -316,7 +423,7 @@ namespace System.Diagnostics
         {
             if (endTimeUtc.Kind != DateTimeKind.Utc)
             {
-                NotifyError(new InvalidOperationException($"{nameof(endTimeUtc)} is not UTC"));
+                NotifyError(new InvalidOperationException(SR.EndTimeNotUtc));
             }
             else
             {
@@ -326,13 +433,6 @@ namespace System.Diagnostics
             }
             return this;
         }
-
-        /// <summary>
-        /// If the Activity has ended (<see cref="Stop"/> or <see cref="SetEndTime"/> was called) then this is the delta
-        /// between <see cref="StartTimeUtc"/> and end.   If Activity is not ended and <see cref="SetEndTime"/> was not called then this is 
-        /// <see cref="TimeSpan.Zero"/>.
-        /// </summary>
-        public TimeSpan Duration { get; private set; }
 
         /// <summary>
         /// Starts activity
@@ -349,15 +449,15 @@ namespace System.Diagnostics
         public Activity Start()
         {
             // Has the ID already been set (have we called Start()).  
-            if (_id != null || _spanIdSet)
+            if (_id != null || _spanId != null)
             {
-                NotifyError(new InvalidOperationException("Trying to start an Activity that was already started"));
+                NotifyError(new InvalidOperationException(SR.ActivityStartAlreadyStarted));
             }
             else
             {
-                if (_parentId == null && !_parentSpanIdSet)
+                if (_parentId == null && _parentSpanId is null)
                 {
-                    var parent = Current;
+                    Activity parent = Current;
                     if (parent != null)
                     {
                         // The parent change should not form a loop.   We are actually guaranteed this because
@@ -367,21 +467,21 @@ namespace System.Diagnostics
                     }
                 }
 
-                if (StartTimeUtc == default(DateTime))
+                if (StartTimeUtc == default)
                     StartTimeUtc = GetUtcNow();
 
-                // Figure out what format to use.  
-                if (ForceDefaultIdFormat)
-                    IdFormat = DefaultIdFormat;
-                else if (Parent != null)
-                    IdFormat = Parent.IdFormat;
-                else if (_parentSpanIdSet)
-                    IdFormat = ActivityIdFormat.W3C;
-                else if (_parentId != null)
-                    IdFormat = IsW3CId(_parentId) ? ActivityIdFormat.W3C : ActivityIdFormat.Hierarchical;
-                else
-                    IdFormat = DefaultIdFormat;
-
+                if (IdFormat == ActivityIdFormat.Unknown)
+                {
+                    // Figure out what format to use.  
+                    IdFormat =
+                        ForceDefaultIdFormat ? DefaultIdFormat :
+                        Parent != null ? Parent.IdFormat :
+                        _parentSpanId != null ? ActivityIdFormat.W3C :
+                        _parentId == null ? DefaultIdFormat :
+                        IsW3CId(_parentId) ? ActivityIdFormat.W3C :
+                        ActivityIdFormat.Hierarchical;
+                }
+               
                 // Generate the ID in the appropriate format.  
                 if (IdFormat == ActivityIdFormat.W3C)
                     GenerateW3CId();
@@ -404,13 +504,13 @@ namespace System.Diagnostics
         {
             if (Id == null)
             {
-                NotifyError(new InvalidOperationException("Trying to stop an Activity that was not started"));
+                NotifyError(new InvalidOperationException(SR.ActivityNotStarted));
                 return;
             }
 
-            if (!isFinished)
+            if (!IsFinished)
             {
-                isFinished = true;
+                IsFinished = true;
 
                 if (Duration == TimeSpan.Zero)
                 {
@@ -442,7 +542,7 @@ namespace System.Diagnostics
             {
                 for (Activity activity = this; activity != null; activity = activity.Parent)
                 {
-                    var val = activity._traceState;
+                    string val = activity._traceState;
                     if (val != null)
                         return val;
                 }
@@ -456,55 +556,43 @@ namespace System.Diagnostics
 
         /// <summary>
         /// If the Activity has the W3C format, this returns the ID for the SPAN part of the Id.  
-        /// Otherwise it returns a zero SpanId. 
-        /// 
-        /// Note that this returns a readonly ref.   This is because SpanId has a cache of the
-        /// Hex string.   However for that cache to be available for subsequent conversions to
-        /// Hex, you have to be operating on the same instance.   Thus if you need the Hex string
-        /// you should store the SpanId in a ref local variable and call the AsHexString property
-        /// which will have the effect of updating Activity's instance so all subsequent uses
-        /// share the same converted string.  
+        /// Otherwise it returns a zero SpanId.
         /// </summary>
-        public ref readonly ActivitySpanId SpanId
+        public ActivitySpanId SpanId
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
             [System.Security.SecuritySafeCriticalAttribute]
 #endif
             get
             {
-                if (!_spanIdSet)
+                if (_spanId is null)
                 {
                     if (_id != null && IdFormat == ActivityIdFormat.W3C)
                     {
-                        _spanId = ActivitySpanId.CreateFromString(_id.AsSpan(36, 16));
-                        _spanIdSet = true;
+                        ActivitySpanId activitySpanId = ActivitySpanId.CreateFromString(_id.AsSpan(36, 16));
+                        string spanId = activitySpanId.ToHexString();
+
+                        Interlocked.CompareExchange(ref _spanId, spanId, null);
                     }
                 }
-                return ref _spanId;
+                return new ActivitySpanId(_spanId);
             }
         }
 
         /// <summary>
         /// If the Activity has the W3C format, this returns the ID for the TraceId part of the Id.  
         /// Otherwise it returns a zero TraceId. 
-        /// 
-        /// Note that this returns a readonly ref.   This is because TraceId has a cache of the
-        /// Hex string.   However for that cache to be available for subsequent conversions to
-        /// Hex, you have to be operating on the same instance.   Thus if you need the Hex string
-        /// you should store the TraceId in a ref local variable and call the AsHexString property
-        /// which will have the effect of updating Activity's instance so all subsequent uses
-        /// share the same converted string.  
         /// </summary>
-        public ref readonly ActivityTraceId TraceId
+        public ActivityTraceId TraceId
         {
             get
             {
-                if (!_traceIdSet)
+                if (_traceId is null)
                 {
                     TrySetTraceIdFromParent();
                 }
 
-                return ref _traceId;
+                return new ActivityTraceId(_traceId);
             }
         }
 
@@ -513,9 +601,6 @@ namespace System.Diagnostics
         /// </summary>
         public bool Recorded { get => (ActivityTraceFlags & ActivityTraceFlags.Recorded) != 0; }
 
-        byte _w3CIdFlags;
-        bool _w3CIdFlagsSet;
-
         /// <summary>
         /// Return the flags (defined by the W3C ID specification) associated with the activity.  
         /// </summary>
@@ -523,24 +608,15 @@ namespace System.Diagnostics
         {
             get
             {
-                if (!_w3CIdFlagsSet)
+                if (!W3CIdFlagsSet)
                 {
-                    if (Parent != null)
-                    {
-                        ActivityTraceFlags = Parent.ActivityTraceFlags;
-                    }
-                    else if (_parentId != null && IsW3CId(_parentId))
-                    {
-                        _w3CIdFlags = ActivityTraceId.HexByteFromChars(_parentId[53], _parentId[54]);
-                        _w3CIdFlagsSet = true;
-                    }
+                    TrySetTraceFlagsFromParent();
                 }
-                return (ActivityTraceFlags) _w3CIdFlags;
+                return (ActivityTraceFlags)((~ActivityTraceFlagsIsSet) & _w3CIdFlags);
             }
             set
             {
-                _w3CIdFlagsSet = true;
-                _w3CIdFlags = (byte)value;
+                _w3CIdFlags = (byte)(ActivityTraceFlagsIsSet | (byte)value);
             }
         }
 
@@ -548,38 +624,37 @@ namespace System.Diagnostics
         /// If the parent Activity ID has the W3C format, this returns the ID for the SpanId part of the ParentId.  
         /// Otherwise it returns a zero SpanId. 
         /// </summary>
-        public ref readonly ActivitySpanId ParentSpanId
+        public ActivitySpanId ParentSpanId
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
             [System.Security.SecuritySafeCriticalAttribute]
 #endif
             get
             {
-                if (!_parentSpanIdSet)
+                if (_parentSpanId is null)
                 {
+                    string parentSpanId = null;
                     if (_parentId != null && IsW3CId(_parentId))
                     {
                         try
                         {
-                            _parentSpanId = ActivitySpanId.CreateFromString(_parentId.AsSpan(36, 16));
+                            parentSpanId = ActivitySpanId.CreateFromString(_parentId.AsSpan(36, 16)).ToHexString();
                         }
                         catch { }
-                        _parentSpanIdSet = true;
                     }
                     else if (Parent != null && Parent.IdFormat == ActivityIdFormat.W3C)
                     {
-                        _parentSpanId = Parent.SpanId;
-                        _parentSpanIdSet = true;
+                        parentSpanId = Parent.SpanId.ToHexString();
+                    }
+
+                    if (parentSpanId != null)
+                    {
+                        Interlocked.CompareExchange(ref _parentSpanId, parentSpanId, null);
                     }
                 }
-                return ref _parentSpanId;
+                return new ActivitySpanId(_parentSpanId);
             }
         }
-
-        /// <summary>
-        /// Returns the format for the ID.   
-        /// </summary>
-        public ActivityIdFormat IdFormat { get; private set; }
 
         /* static state (configuration) */
         /// <summary>
@@ -591,27 +666,35 @@ namespace System.Diagnostics
         {
             get
             {
-                if (s_DefaultIdFormat == ActivityIdFormat.Unknown)
-                    s_DefaultIdFormat = ActivityIdFormat.Hierarchical;
-                return s_DefaultIdFormat;
+                if (s_defaultIdFormat == ActivityIdFormat.Unknown)
+                    s_defaultIdFormat = ActivityIdFormat.Hierarchical;
+                return s_defaultIdFormat;
             }
             set
             {
                 if (!(ActivityIdFormat.Hierarchical <= value && value <= ActivityIdFormat.W3C))
-                    throw new ArgumentException($"value must be a valid ActivityIDFormat value");
-                s_DefaultIdFormat = value;
+                    throw new ArgumentException(SR.ActivityIdFormatInvalid);
+                s_defaultIdFormat = value;
             }
         }
 
         /// <summary>
-        /// Normally if the ParentID is defined, the format of that is used to determine the
-        /// format used by the Activity.   However if ForceDefaultFormat is set to true, the
-        /// ID format will always be the DefaultIdFormat even if the ParentID is define and is
-        /// a different format. 
+        /// Sets IdFormat on the Activity before it is started.  It takes precedence over
+        /// Parent.IdFormat, ParentId format, DefaultIdFormat and ForceDefaultIdFormat.
         /// </summary>
-        public static bool ForceDefaultIdFormat { get; set; }
+        public Activity SetIdFormat(ActivityIdFormat format)
+        {
+            if (_id != null || _spanId != null)
+            {
+                NotifyError(new InvalidOperationException(SR.SetFormatOnStartedActivity));
+            }
+            else
+            {
+                IdFormat = format;
+            }
+            return this;
+        }
 
-        #region private 
         /// <summary>
         /// Returns true if 'id' has the format of a WC3 id see https://w3c.github.io/trace-context
         /// </summary>
@@ -637,18 +720,25 @@ namespace System.Diagnostics
         /// </summary>
         private void GenerateW3CId()
         {
+            // Called from .Start()
+
             // Get the TraceId from the parent or make a new one.  
-            if (!_traceIdSet)
+            if (_traceId is null)
             {
                 if (!TrySetTraceIdFromParent())
                 {
-                    _traceId = ActivityTraceId.CreateRandom();
-                    _traceIdSet = true;
+                    _traceId = ActivityTraceId.CreateRandom().ToHexString();
                 }
             }
+
+            if (!W3CIdFlagsSet)
+            {
+                TrySetTraceFlagsFromParent();
+            }
+
             // Create a new SpanID. 
-            _spanId = ActivitySpanId.CreateRandom();
-            _spanIdSet = true;
+
+            _spanId = ActivitySpanId.CreateRandom().ToHexString();
         }
 
         private static void NotifyError(Exception exception)
@@ -669,6 +759,7 @@ namespace System.Diagnostics
         /// </summary>
         private string GenerateHierarchicalId()
         {
+            // Called from .Start()
             string ret;
             if (Parent != null)
             {
@@ -745,14 +836,6 @@ namespace System.Diagnostics
             string overflowSuffix = ((int)GetRandomNumber()).ToString("x8");
             return parentId.Substring(0, trimPosition) + overflowSuffix + '#';
         }
-
-        private string GenerateRootId()
-        {
-            // It is important that the part that changes frequently be first, because
-            // many hash functions don't 'randomize' the tail of a string.   This makes
-            // sampling based on the hash produce poor samples.
-            return '|' + Interlocked.Increment(ref s_currentRootId).ToString("x") + s_uniqSuffix;
-        }
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
         [System.Security.SecuritySafeCriticalAttribute]
 #endif
@@ -765,7 +848,7 @@ namespace System.Diagnostics
 
         private static bool ValidateSetCurrent(Activity activity)
         {
-            bool canSet = activity == null || (activity.Id != null && !activity.isFinished);
+            bool canSet = activity == null || (activity.Id != null && !activity.IsFinished);
             if (!canSet)
             {
                 NotifyError(new InvalidOperationException("Trying to set an Activity that is not running"));
@@ -779,39 +862,75 @@ namespace System.Diagnostics
 #endif
         private bool TrySetTraceIdFromParent()
         {
-            Debug.Assert(!_traceIdSet);
+            Debug.Assert(_traceId is null);
 
             if (Parent != null && Parent.IdFormat == ActivityIdFormat.W3C)
             {
-                _traceId = Parent.TraceId;
-                _traceIdSet = true;
+                _traceId = Parent.TraceId.ToHexString();
             }
             else if (_parentId != null && IsW3CId(_parentId))
             {
                 try
                 {
-                    _traceId = ActivityTraceId.CreateFromString(_parentId.AsSpan(3, 32));
-                    _traceIdSet = true;
+                    _traceId = ActivityTraceId.CreateFromString(_parentId.AsSpan(3, 32)).ToHexString();
                 }
                 catch
                 {
                 }
             }
 
-            return _traceIdSet;
+            return _traceId != null;
         }
 
-        private string _rootId;
-        private int _currentChildId;  // A unique number for all children of this activity.  
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [System.Security.SecuritySafeCriticalAttribute]
+#endif
+        private void TrySetTraceFlagsFromParent()
+        {
+            Debug.Assert(!W3CIdFlagsSet);
 
-        // Used to generate an ID it represents the machine and process we are in.  
-        private static readonly string s_uniqSuffix = "-" + GetRandomNumber().ToString("x") + ".";
+            if (!W3CIdFlagsSet)
+            {
+                if (Parent != null)
+                {
+                    ActivityTraceFlags = Parent.ActivityTraceFlags;
+                }
+                else if (_parentId != null && IsW3CId(_parentId))
+                {
+                    _w3CIdFlags = (byte)(ActivityTraceId.HexByteFromChars(_parentId[53], _parentId[54]) | ActivityTraceFlagsIsSet);
+                }
+            }
+        }
 
-        //A unique number inside the appdomain, randomized between appdomains. 
-        //Int gives enough randomization and keeps hex-encoded s_currentRootId 8 chars long for most applications
-        private static long s_currentRootId = (uint)GetRandomNumber();
+        private bool W3CIdFlagsSet
+        {
+            get => (_w3CIdFlags & ActivityTraceFlagsIsSet) != 0;
+        }
 
-        private const int RequestIdMaxLength = 1024;
+        private bool IsFinished
+        {
+            get => (_state & State.IsFinished) != 0;
+            set
+            {
+                if (value)
+                {
+                    _state |= State.IsFinished;
+                }
+                else
+                {
+                    _state &= ~State.IsFinished;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the format for the ID.   
+        /// </summary>
+        public ActivityIdFormat IdFormat
+        {
+            get => (ActivityIdFormat)(_state & State.FormatFlags);
+            private set => _state = (_state & ~State.FormatFlags) | (State)((byte)value & (byte)State.FormatFlags);
+        }
 
         /// <summary>
         /// Having our own key-value linked list allows us to be more efficient  
@@ -822,26 +941,18 @@ namespace System.Diagnostics
             public KeyValueListNode Next;
         }
 
-        private static ActivityIdFormat s_DefaultIdFormat;
+        [Flags]
+        private enum State : byte
+        {
+            None = 0,
 
-        private KeyValueListNode _tags;
-        private KeyValueListNode _baggage;
-        private string _traceState;
+            FormatUnknown = 0b_0_00000_00,
+            FormatHierarchical = 0b_0_00000_01,
+            FormatW3C = 0b_0_00000_10,
+            FormatFlags = 0b_0_00000_11,
 
-        // State associated with ID.  It can be represented by a string or by TraceId, SpanId.  
-        private string _id;
-        private ActivityTraceId _traceId;
-        private bool _traceIdSet;
-        private ActivitySpanId _spanId;
-        private bool _spanIdSet;
-
-        // State associated with ParentId.  It can be represented by a string or by TraceId, SpanId.  
-        private string _parentId;
-        private ActivitySpanId _parentSpanId;
-        private bool _parentSpanIdSet;
-
-        private bool isFinished;
-        #endregion // private
+            IsFinished = 0b_1_00000_00,
+        }
     }
 
     /// <summary>
@@ -850,8 +961,8 @@ namespace System.Diagnostics
     [Flags]
     public enum ActivityTraceFlags
     {
-        None = 0,
-        Recorded = 1        // The Activity (or more likley its parents) has been marked as useful to record 
+        None = 0b_0_0000000,
+        Recorded = 0b_0_0000001, // The Activity (or more likley its parents) has been marked as useful to record
     }
 
     /// <summary>
@@ -859,9 +970,9 @@ namespace System.Diagnostics
     /// </summary>
     public enum ActivityIdFormat
     {
-        Unknown,      // ID format is not known.     
-        Hierarchical, //|XXXX.XX.X_X ... see https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format
-        W3C,          // 00-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX see https://w3c.github.io/trace-context/
+        Unknown = 0,      // ID format is not known.     
+        Hierarchical = 1, //|XXXX.XX.X_X ... see https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format
+        W3C = 2,          // 00-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX see https://w3c.github.io/trace-context/
     };
 
     /// <summary>
@@ -876,45 +987,36 @@ namespace System.Diagnostics
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
         [System.Security.SecuritySafeCriticalAttribute]
 #endif
-    public unsafe readonly struct ActivityTraceId : IEquatable<ActivityTraceId>
+    public readonly struct ActivityTraceId : IEquatable<ActivityTraceId>
     {
+        private readonly string _hexString;
+
+        internal ActivityTraceId(string hexString) => _hexString = hexString;
+
         /// <summary>
         /// Create a new TraceId with at random number in it (very likely to be unique)
         /// </summary>
         public static ActivityTraceId CreateRandom()
         {
-            ActivityTraceId ret = new ActivityTraceId();
-            SetToRandomBytes(new Span<byte>(&ret._id1, sizeof(ulong) * 2));
-            return ret;
+            Span<byte> span = stackalloc byte[sizeof(ulong) * 2];
+            SetToRandomBytes(span);
+            return CreateFromBytes(span);
         }
         public static ActivityTraceId CreateFromBytes(ReadOnlySpan<byte> idData)
         {
             if (idData.Length != 16)
                 throw new ArgumentOutOfRangeException(nameof(idData));
 
-            ActivityTraceId ret = new ActivityTraceId();
-            idData.CopyTo(new Span<byte>(&ret._id1, sizeof(ulong) * 2));
-            return ret;
+            return new ActivityTraceId(SpanToHexString(idData));
         }
         public static ActivityTraceId CreateFromUtf8String(ReadOnlySpan<byte> idData) => new ActivityTraceId(idData);
 
         public static ActivityTraceId CreateFromString(ReadOnlySpan<char> idData)
         {
-            if (idData.Length != 32)
+            if (idData.Length != 32 || !ActivityTraceId.IsLowerCaseHexAndNotAllZeros(idData))
                 throw new ArgumentOutOfRangeException(nameof(idData));
 
-            ActivityTraceId ret = new ActivityTraceId();
-            ActivityTraceId.SetSpanFromHexChars(new Span<byte>(&ret._id1, sizeof(ulong) * 2), idData);
-            return ret;
-        }
-
-        /// <summary>
-        /// Copy the bytes of the TraceId (16 total) into the 'destination' span.
-        /// </summary>
-        public void CopyTo(Span<byte> destination)
-        {
-            fixed (ulong* idPtr = &_id1)
-                new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2).CopyTo(destination);
+            return new ActivityTraceId(idData.ToString());
         }
 
         /// <summary>
@@ -922,17 +1024,7 @@ namespace System.Diagnostics
         /// </summary>
         public string ToHexString()
         {
-            if (_asHexString == null)
-            {
-                fixed (ulong* idPtr = &_id1)
-                {
-                    // Cast away the read-only-ness of _asHexString, and assign the converted value to it.  
-                    // We are OK with this because conceptually the class is still read-only.  
-                    ref string strRef = ref Unsafe.AsRef(in _asHexString);
-                    Interlocked.CompareExchange(ref strRef, SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2)), null);
-                }
-            }
-            return _asHexString;
+            return _hexString ?? "00000000000000000000000000000000";
         }
 
         /// <summary>
@@ -940,57 +1032,76 @@ namespace System.Diagnostics
         /// </summary>
         public override string ToString() => ToHexString();
 
-        #region equality operators
-        public static bool operator ==(in ActivityTraceId traceId1, in ActivityTraceId traceId2)
+        public static bool operator ==(ActivityTraceId traceId1, ActivityTraceId traceId2)
         {
-            return traceId1._id1 == traceId2._id1 && traceId1._id2 == traceId2._id2;
+            return traceId1._hexString == traceId2._hexString;
         }
-        public static bool operator !=(in ActivityTraceId traceId1, in ActivityTraceId traceId2)
+        public static bool operator !=(ActivityTraceId traceId1, ActivityTraceId traceId2)
         {
-            return traceId1._id1 != traceId2._id1 || traceId1._id2 != traceId2._id2;
+            return traceId1._hexString != traceId2._hexString;
         }
         public bool Equals(ActivityTraceId traceId)
         {
-            return _id1 == traceId._id1 && _id2 == traceId._id2;
+            return _hexString == traceId._hexString;
         }
         public override bool Equals(object obj)
         {
             if (obj is ActivityTraceId traceId)
-                return _id1 == traceId._id1 && _id2 == traceId._id2;
+                return _hexString == traceId._hexString;
             return false;
         }
         public override int GetHashCode()
         {
-            return _id1.GetHashCode() + _id2.GetHashCode();
+            return ToHexString().GetHashCode();
         }
-        #endregion
 
-        #region private
         /// <summary>
         /// This is exposed as CreateFromUtf8String, but we are modifying fields, so the code needs to be in a constructor.  
         /// </summary>
         /// <param name="idData"></param>
         private ActivityTraceId(ReadOnlySpan<byte> idData)
         {
-            _id1 = 0;
-            _id2 = 0;
-            _asHexString = null;
             if (idData.Length != 32)
                 throw new ArgumentOutOfRangeException(nameof(idData));
-            Utf8Parser.TryParse(idData.Slice(0, 16), out _id1, out _, 'x');
-            Utf8Parser.TryParse(idData.Slice(16, 16), out _id2, out _, 'x');
+
+            Span<ulong> span = stackalloc ulong[2];
+
+            if (!Utf8Parser.TryParse(idData.Slice(0, 16), out span[0], out _, 'x'))
+            {
+                // Invalid Id, use random https://github.com/dotnet/corefx/issues/38486
+                _hexString = CreateRandom()._hexString;
+                return;
+            }
+
+            if (!Utf8Parser.TryParse(idData.Slice(16, 16), out span[1], out _, 'x'))
+            {
+                // Invalid Id, use random https://github.com/dotnet/corefx/issues/38486
+                _hexString = CreateRandom()._hexString;
+                return;
+            }
+
             if (BitConverter.IsLittleEndian)
             {
-                _id1 = BinaryPrimitives.ReverseEndianness(_id1);
-                _id2 = BinaryPrimitives.ReverseEndianness(_id2);
+                span[0] = BinaryPrimitives.ReverseEndianness(span[0]);
+                span[1] = BinaryPrimitives.ReverseEndianness(span[1]);
             }
+
+            _hexString = ActivityTraceId.SpanToHexString(MemoryMarshal.AsBytes(span));
+        }
+
+        /// <summary>
+        /// Copy the bytes of the TraceId (16 total) into the 'destination' span.
+        /// </summary>
+        public void CopyTo(Span<byte> destination)
+        {
+            ActivityTraceId.SetSpanFromHexChars(ToHexString().AsSpan(), destination);
         }
 
         /// <summary>
         /// Sets the bytes in 'outBytes' to be random values.   outBytes.Length must be less than or equal to 16
         /// </summary>
         /// <param name="outBytes"></param>
-        internal static void SetToRandomBytes(Span<byte> outBytes)
+        internal unsafe static void SetToRandomBytes(Span<byte> outBytes)
         {
             Debug.Assert(outBytes.Length <= sizeof(Guid));     // Guid is 16 bytes, and so is TraceId 
             Guid guid = Guid.NewGuid();
@@ -998,7 +1109,7 @@ namespace System.Diagnostics
             guidBytes.Slice(0, outBytes.Length).CopyTo(outBytes);
         }
 
-        #region CONVERSION binary spans to hex spans, and hex spans to binary spans  
+        // CONVERSION binary spans to hex spans, and hex spans to binary spans  
         /* It would be nice to use generic Hex number conversion routines, but there 
          * is nothing that is exposed publicly and efficient */
         /// <summary>
@@ -1022,7 +1133,7 @@ namespace System.Diagnostics
         /// Converts 'idData' which is assumed to be HEX Unicode characters to binary
         /// puts it in 'outBytes'
         /// </summary>
-        internal static void SetSpanFromHexChars(Span<byte> outBytes, ReadOnlySpan<char> charData)
+        internal static void SetSpanFromHexChars(ReadOnlySpan<char> charData, Span<byte> outBytes)
         {
             Debug.Assert(outBytes.Length * 2 == charData.Length);
             for (int i = 0; i < outBytes.Length; i++)
@@ -1055,12 +1166,34 @@ namespace System.Diagnostics
             outChars[1] = BinaryToHexDigit(val & 0xF);
         }
 
-        #endregion
+        internal static bool IsLowerCaseHexAndNotAllZeros(ReadOnlySpan<char> idData)
+        {
+            // Verify lower-case hex and not all zeros https://w3c.github.io/trace-context/#field-value
+            bool isNonZero = false;
+            int i = 0;
+            for (; i < idData.Length; i++)
+            {
+                char c = idData[i];
+                if (!IsHexadecimalLowercaseChar(c))
+                {
+                    return false;
+                }
 
-        readonly ulong _id1;
-        readonly ulong _id2;
-        readonly string _asHexString;  // Caches the Hex string    
-        #endregion
+                if (c != '0')
+                {
+                    isNonZero = true;
+                }
+            }
+
+            return isNonZero;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsHexadecimalLowercaseChar(char c)
+        {
+            // Between 0 - 9 or lowercased between a - f
+            return (uint)(c - '0') <= 9 || (uint)(c - 'a') <= ('f' - 'a');
+        }
     }
 
     /// <summary>
@@ -1075,44 +1208,36 @@ namespace System.Diagnostics
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
         [System.Security.SecuritySafeCriticalAttribute]
 #endif
-    public unsafe readonly struct ActivitySpanId : IEquatable<ActivitySpanId>
+    public readonly struct ActivitySpanId : IEquatable<ActivitySpanId>
     {
+        private readonly string _hexString;
+
+        internal ActivitySpanId(string hexString) => _hexString = hexString;
+
         /// <summary>
         /// Create a new SpanId with at random number in it (very likely to be unique)
         /// </summary>
-        public static ActivitySpanId CreateRandom()
+        public unsafe static ActivitySpanId CreateRandom()
         {
-            ActivitySpanId ret = new ActivitySpanId();
-            ActivityTraceId.SetToRandomBytes(new Span<byte>(&ret._id1, sizeof(ulong)));
-            return ret;
+            ulong id;
+            ActivityTraceId.SetToRandomBytes(new Span<byte>(&id, sizeof(ulong)));
+            return new ActivitySpanId(ActivityTraceId.SpanToHexString(new ReadOnlySpan<byte>(&id, sizeof(ulong))));
         }
         public static ActivitySpanId CreateFromBytes(ReadOnlySpan<byte> idData)
         {
             if (idData.Length != 8)
                 throw new ArgumentOutOfRangeException(nameof(idData));
 
-            ActivitySpanId ret = new ActivitySpanId();
-            idData.CopyTo(new Span<byte>(&ret._id1, sizeof(ulong)));
-            return ret;
+            return new ActivitySpanId(ActivityTraceId.SpanToHexString(idData));
         }
         public static ActivitySpanId CreateFromUtf8String(ReadOnlySpan<byte> idData) => new ActivitySpanId(idData);
+
         public static ActivitySpanId CreateFromString(ReadOnlySpan<char> idData)
         {
-            if (idData.Length != 16)
+            if (idData.Length != 16 || !ActivityTraceId.IsLowerCaseHexAndNotAllZeros(idData))
                 throw new ArgumentOutOfRangeException(nameof(idData));
 
-            ActivitySpanId ret = new ActivitySpanId();
-            ActivityTraceId.SetSpanFromHexChars(new Span<byte>(&ret._id1, sizeof(ulong)), idData);
-            return ret;
-        }
-
-        /// <summary>
-        /// Copy the bytes of the TraceId (8 bytes total) into the 'destination' span.
-        /// </summary>
-        public void CopyTo(Span<byte> destination)
-        {
-            fixed (ulong* idPtr = &_id1)
-                new ReadOnlySpan<byte>(idPtr, sizeof(ulong)).CopyTo(destination);
+            return new ActivitySpanId(idData.ToString());
         }
 
         /// <summary>
@@ -1121,17 +1246,7 @@ namespace System.Diagnostics
         /// <returns></returns>
         public string ToHexString()
         {
-            if (_asHexString == null)
-            {
-                fixed (ulong* idPtr = &_id1)
-                {
-                    // Cast away the read-only-ness of _asHexString, and assign the converted value to it.  
-                    // We are OK with this because conceptually the class is still read-only.  
-                    ref string strRef = ref Unsafe.AsRef(in _asHexString);
-                    Interlocked.CompareExchange(ref strRef, ActivityTraceId.SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong))), null);
-                }
-            }
-            return _asHexString;
+            return _hexString ?? "0000000000000000";
         }
 
         /// <summary>
@@ -1139,47 +1254,61 @@ namespace System.Diagnostics
         /// </summary>
         public override string ToString() => ToHexString();
 
-        #region equality operators
-        public static bool operator ==(in ActivitySpanId spanId1, in ActivitySpanId spandId2)
+        public static bool operator ==(ActivitySpanId spanId1, ActivitySpanId spandId2)
         {
-            return spanId1._id1 == spandId2._id1;
+            return spanId1._hexString == spandId2._hexString;
         }
-        public static bool operator !=(in ActivitySpanId spanId1, in ActivitySpanId spandId2)
+        public static bool operator !=(ActivitySpanId spanId1, ActivitySpanId spandId2)
         {
-            return spanId1._id1 != spandId2._id1;
+            return spanId1._hexString != spandId2._hexString;
         }
         public bool Equals(ActivitySpanId spanId)
         {
-            return _id1 == spanId._id1;
+            return _hexString == spanId._hexString;
         }
         public override bool Equals(object obj)
         {
             if (!(obj is ActivitySpanId))
+            {
                 return false;
+            }
+
             ActivitySpanId spanId = (ActivitySpanId)obj;
-            return _id1 == spanId._id1;
+            return _hexString == spanId._hexString;
         }
         public override int GetHashCode()
         {
-            return _id1.GetHashCode();
+            return ToHexString().GetHashCode();
         }
-        #endregion
 
-        #region private
-
-        private ActivitySpanId(ReadOnlySpan<byte> idData)
+        private unsafe ActivitySpanId(ReadOnlySpan<byte> idData)
         {
-            _id1 = 0;
-            _asHexString = null;
             if (idData.Length != 16)
+            {
                 throw new ArgumentOutOfRangeException(nameof(idData));
-            Utf8Parser.TryParse(idData, out _id1, out _, 'x');
+            }
+
+            if (!Utf8Parser.TryParse(idData, out ulong id, out _, 'x'))
+            {
+                // Invalid Id, use random https://github.com/dotnet/corefx/issues/38486
+                _hexString = CreateRandom()._hexString;
+                return;
+            }
+
             if (BitConverter.IsLittleEndian)
-                _id1 = BinaryPrimitives.ReverseEndianness(_id1);
+            {
+                id = BinaryPrimitives.ReverseEndianness(id);
+            }
+
+            _hexString = ActivityTraceId.SpanToHexString(new ReadOnlySpan<byte>(&id, sizeof(ulong)));
         }
 
-        readonly ulong _id1;
-        readonly string _asHexString;   // Caches the Hex string  
-        #endregion
+        /// <summary>
+        /// Copy the bytes of the TraceId (8 bytes total) into the 'destination' span.
+        /// </summary>
+        public void CopyTo(Span<byte> destination)
+        {
+            ActivityTraceId.SetSpanFromHexChars(ToHexString().AsSpan(), destination);
+        }
     }
 }

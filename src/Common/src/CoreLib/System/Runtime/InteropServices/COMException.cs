@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Runtime.Serialization;
 using System.Globalization;
 using System.Text;
@@ -49,7 +48,7 @@ namespace System.Runtime.InteropServices
         public override string ToString()
         {
             StringBuilder s = new StringBuilder();
-            
+
             string className = GetType().ToString();
             s.Append(className).Append(" (0x").Append(HResult.ToString("X8", CultureInfo.InvariantCulture)).Append(')');
 
@@ -62,7 +61,7 @@ namespace System.Runtime.InteropServices
             Exception? innerException = InnerException;
             if (innerException != null)
             {
-                s.Append(" ---> ").Append(innerException.ToString());
+                s.Append(Environment.NewLine).Append(InnerExceptionPrefix).Append(innerException.ToString());
             }
 
             string? stackTrace = StackTrace;

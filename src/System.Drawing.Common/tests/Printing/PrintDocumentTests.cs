@@ -63,6 +63,7 @@ namespace System.Drawing.Printing.Tests
             }
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         public void DefaultPageSettings_Null_ReturnsExpected()
         {
@@ -169,6 +170,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [ActiveIssue(30223)]
         [ConditionalFact(Helpers.AnyInstalledPrinters, Helpers.IsDrawingSupported)]
         public void EndPrint_SetValue_ReturnsExpected()
         {
@@ -255,7 +257,7 @@ namespace System.Drawing.Printing.Tests
                     break;
             }
 
-            Assert.Equal(PrinterResolutionKind.Custom, pageSettings.PrinterResolution.Kind);
+            Assert.True(Enum.IsDefined(typeof(PrinterResolutionKind), pageSettings.PrinterResolution.Kind));
             Assert.True(pageSettings.PrinterSettings.IsDefaultPrinter);
         }
 

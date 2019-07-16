@@ -20,7 +20,7 @@ namespace System
             WinRTInteropCallbacks callbacks = WinRTInterop.UnsafeCallbacks;
             return callbacks != null && callbacks.IsAppxModel() ?
                 callbacks.GetFolderPath(folder, option) :
-                null;
+                string.Empty;
         }
     }
 }

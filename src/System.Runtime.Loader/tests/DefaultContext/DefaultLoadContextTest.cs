@@ -44,7 +44,6 @@ namespace System.Runtime.Loader.Tests
         }
     }
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "AssemblyLoadContext not supported on .NET Native")]
     public class DefaultLoadContextTests
     {
         private const string TestAssemblyName = "System.Runtime.Loader.Noop.Assembly";
@@ -184,7 +183,7 @@ namespace System.Runtime.Loader.Tests
                 () => AssemblyLoadContext.Default.LoadFromAssemblyName(new AssemblyName("System.Runtime.Loader.NonExistent.Assembly")));
         }
 
-        public void DefaultContextFallback()
+        private void DefaultContextFallback()
         {
             var lcDefault = AssemblyLoadContext.Default;
             
@@ -239,7 +238,7 @@ namespace System.Runtime.Loader.Tests
             Assert.Equal(typeof(FileNotFoundException), ex.GetType());
         }
 
-        public void DefaultContextOverrideTPA()
+        private void DefaultContextOverrideTPA()
         {
             var lcDefault = AssemblyLoadContext.Default;
             
@@ -247,6 +246,8 @@ namespace System.Runtime.Loader.Tests
             OverrideDefaultLoadContext olc = new OverrideDefaultLoadContext();
             var asmTargetAsm = olc.LoadFromAssemblyPath(_assemblyPath);
             var loadedContext = AssemblyLoadContext.GetLoadContext(asmTargetAsm);
+
+            olc.LoadedFromContext = false;
 
             // LoadContext of the assembly should be the custom context and not DefaultContext
             Assert.NotEqual(lcDefault, olc);
@@ -260,7 +261,6 @@ namespace System.Runtime.Loader.Tests
             // Load System.Runtime - since this is on TPA, it should get resolved from our custom load context
             // since the Load method has been implemented to override TPA assemblies.
             var assemblyName = "System.Runtime, Version=4.0.0.0";
-            olc.LoadedFromContext = false;
             Assembly asmLoaded = (Assembly)method.Invoke(null, new object[] {assemblyName});
             loadedContext = AssemblyLoadContext.GetLoadContext(asmLoaded);
 

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
+using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -197,6 +198,75 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 CheckChain();
                 CheckChain();
+            }
+        }
+
+        [Fact]
+        public static void TestInvalidAia()
+        {
+            using (RSA key = RSA.Create())
+            {
+                CertificateRequest rootReq = new CertificateRequest(
+                    "CN=Root",
+                    key,
+                    HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+
+                rootReq.CertificateExtensions.Add(
+                    new X509BasicConstraintsExtension(true, false, 0, true));
+
+                CertificateRequest certReq = new CertificateRequest(
+                    "CN=test",
+                    key,
+                    HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+
+                certReq.CertificateExtensions.Add(
+                    new X509BasicConstraintsExtension(false, false, 0, false));
+
+                certReq.CertificateExtensions.Add(
+                    new X509Extension(
+                        "1.3.6.1.5.5.7.1.1",
+                        new byte[] { 5 },
+                        critical: false));
+
+                DateTimeOffset notBefore = DateTimeOffset.UtcNow.AddDays(-1);
+                DateTimeOffset notAfter = notBefore.AddDays(30);
+
+                using (X509Certificate2 root = rootReq.CreateSelfSigned(notBefore, notAfter))
+                using (X509Certificate2 ee = certReq.Create(root, notBefore, notAfter, root.GetSerialNumber()))
+                {
+                    X509Chain chain = new X509Chain();
+                    Assert.False(chain.Build(ee));
+                    Assert.Equal(1, chain.ChainElements.Count);
+                }
+            }
+        }
+
+        [Fact]
+        // macOS (10.14) will not load certificates with NumericString in their subject
+        // if the 0x12 (NumericString) is changed to 0x13 (PrintableString) then the cert
+        // import doesn't fail.
+        [PlatformSpecific(~TestPlatforms.OSX)]
+        public static void VerifyNumericStringSubject()
+        {
+            X500DistinguishedName dn = new X500DistinguishedName(
+                "30283117301506052901020203120C313233203635342037383930310D300B0603550403130454657374".HexToByteArray());
+
+            using (RSA key = RSA.Create())
+            {
+                CertificateRequest req = new CertificateRequest(
+                    dn,
+                    key,
+                    HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1);
+
+                DateTimeOffset now = DateTimeOffset.UtcNow;
+
+                using (X509Certificate2 cert = req.CreateSelfSigned(now.AddDays(-1), now.AddDays(1)))
+                {
+                    Assert.Equal("CN=Test, OID.1.1.1.2.2.3=123 654 7890", cert.Subject);
+                }
             }
         }
 

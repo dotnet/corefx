@@ -7,7 +7,7 @@ namespace System.Runtime.InteropServices
     // Wrapper that is converted to a variant with VT_DISPATCH
     public sealed class DispatchWrapper
     {
-        public DispatchWrapper(Object obj)
+        public DispatchWrapper(object? obj)
         {
             if (obj != null)
             {
@@ -21,6 +21,6 @@ namespace System.Runtime.InteropServices
             }
         }
 
-        public object WrappedObject { get; }
+        public object? WrappedObject { get; }
     }
 }

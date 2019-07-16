@@ -16,7 +16,7 @@ namespace System.Reflection
         public abstract MethodAttributes Attributes { get; }
         public virtual MethodImplAttributes MethodImplementationFlags => GetMethodImplementationFlags();
         public abstract MethodImplAttributes GetMethodImplementationFlags();
-        public virtual MethodBody GetMethodBody() { throw new InvalidOperationException(); }
+        public virtual MethodBody? GetMethodBody() { throw new InvalidOperationException(); }
         public virtual CallingConventions CallingConvention => CallingConventions.Standard;
 
         public bool IsAbstract => (Attributes & MethodAttributes.Abstract) != 0;
@@ -51,8 +51,8 @@ namespace System.Reflection
 
         [DebuggerHidden]
         [DebuggerStepThrough]
-        public object Invoke(object obj, object[] parameters) => Invoke(obj, BindingFlags.Default, binder: null, parameters: parameters, culture: null);
-        public abstract object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture);
+        public object? Invoke(object? obj, object?[]? parameters) => Invoke(obj, BindingFlags.Default, binder: null, parameters: parameters, culture: null);
+        public abstract object? Invoke(object? obj, BindingFlags invokeAttr, Binder? binder, object?[]? parameters, CultureInfo? culture);
 
         public abstract RuntimeMethodHandle MethodHandle { get; }
 
@@ -60,11 +60,11 @@ namespace System.Reflection
         public virtual bool IsSecuritySafeCritical { get { throw NotImplemented.ByDesign; } }
         public virtual bool IsSecurityTransparent { get { throw NotImplemented.ByDesign; } }
 
-        public override bool Equals(object obj) => base.Equals(obj);
+        public override bool Equals(object? obj) => base.Equals(obj);
         public override int GetHashCode() => base.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(MethodBase left, MethodBase right)
+        public static bool operator ==(MethodBase? left, MethodBase? right)
         {
             // Test "right" first to allow branch elimination when inlined for null checks (== null)
             // so it can become a simple test
@@ -75,7 +75,7 @@ namespace System.Reflection
             }
 
             // Try fast reference equality and opposite null check prior to calling the slower virtual Equals
-            if ((object)left == (object)right)
+            if ((object?)left == (object)right)
             {
                 return true;
             }
@@ -83,6 +83,6 @@ namespace System.Reflection
             return (left is null) ? false : left.Equals(right);
         }
 
-        public static bool operator !=(MethodBase left, MethodBase right) => !(left == right);
+        public static bool operator !=(MethodBase? left, MethodBase? right) => !(left == right);
     }
 }

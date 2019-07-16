@@ -61,6 +61,15 @@ namespace System.Net.Tests
             {
                 new CookieCollection()
                 {
+                    new Cookie("foo bar", "value")
+                },
+                147, "Set-Cookie: foo bar=value", null
+            };
+
+            yield return new object[]
+            {
+                new CookieCollection()
+                {
                     new Cookie("name1", "value1"),
                     new Cookie("name2", "value2")
                 },

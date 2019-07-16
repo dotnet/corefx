@@ -117,7 +117,7 @@ namespace System
 
         /// <summary>Indicates whether the current Index object is equal to another object of the same type.</summary>
         /// <param name="value">An object to compare with this object</param>
-        public override bool Equals(object value) => value is Index && _value == ((Index)value)._value;
+        public override bool Equals(object? value) => value is Index && _value == ((Index)value)._value;
 
         /// <summary>Indicates whether the current Index object is equal to another Index object.</summary>
         /// <param name="other">An object to compare with this object</param>

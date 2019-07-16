@@ -2,23 +2,30 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
+using System.Buffers.Text;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
-    public ref partial struct Utf8JsonWriter
+    public sealed partial class Utf8JsonWriter
     {
         private void ValidateWritingValue()
         {
-            if (!_writerOptions.SkipValidation)
+            if (!Options.SkipValidation)
             {
                 if (_inObject)
                 {
-                    Debug.Assert(_tokenType != JsonTokenType.None && _tokenType != JsonTokenType.StartArray);
-                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueWithinObject, currentDepth: default, token: default, _tokenType);
+                    if (_tokenType != JsonTokenType.PropertyName)
+                    {
+                        Debug.Assert(_tokenType != JsonTokenType.None && _tokenType != JsonTokenType.StartArray);
+                        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueWithinObject, currentDepth: default, token: default, _tokenType);
+                    }
                 }
                 else
                 {
+                    Debug.Assert(_tokenType != JsonTokenType.PropertyName);
                     if (!_isNotPrimitive && _tokenType != JsonTokenType.None)
                     {
                         ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueAfterPrimitive, currentDepth: default, token: default, _tokenType);
@@ -27,42 +34,39 @@ namespace System.Text.Json
             }
         }
 
-        private int WriteCommaAndFormattingPreamble()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Base64EncodeAndWrite(ReadOnlySpan<byte> bytes, Span<byte> output, int encodingLength)
         {
-            int idx = 0;
-            WriteListSeparator(ref idx);
-            WriteFormattingPreamble(ref idx);
-            return idx;
-        }
+            byte[] outputText = null;
 
-        private void WriteFormattingPreamble(ref int idx)
-        {
-            if (_tokenType != JsonTokenType.None)
-                WriteNewLine(ref idx);
+            Span<byte> encodedBytes = encodingLength <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[encodingLength] :
+                (outputText = ArrayPool<byte>.Shared.Rent(encodingLength));
 
-            int indent = Indentation;
-            while (true)
+            OperationStatus status = Base64.EncodeToUtf8(bytes, encodedBytes, out int consumed, out int written);
+            Debug.Assert(status == OperationStatus.Done);
+            Debug.Assert(consumed == bytes.Length);
+
+            encodedBytes = encodedBytes.Slice(0, written);
+            Span<byte> destination = output.Slice(BytesPending);
+
+            int firstEscapeIndexVal = encodedBytes.IndexOfAny(JsonConstants.Plus, JsonConstants.Slash);
+            if (firstEscapeIndexVal == -1)
             {
-                bool result = JsonWriterHelper.TryWriteIndentation(_buffer.Slice(idx), indent, out int bytesWritten);
-                idx += bytesWritten;
-                if (result)
-                {
-                    break;
-                }
-                indent -= bytesWritten;
-                AdvanceAndGrow(ref idx);
+                Debug.Assert(destination.Length >= written);
+                encodedBytes.Slice(0, written).CopyTo(destination);
+                BytesPending += written;
             }
-        }
-
-        private void WriteListSeparator(ref int idx)
-        {
-            if (_currentDepth < 0)
+            else
             {
-                if (_buffer.Length <= idx)
-                {
-                    GrowAndEnsure();
-                }
-                _buffer[idx++] = JsonConstants.ListSeparator;
+                Debug.Assert(destination.Length >= written * JsonConstants.MaxExpansionFactorWhileEscaping);
+                JsonWriterHelper.EscapeString(encodedBytes, destination, firstEscapeIndexVal, encoder: null, out written);
+                BytesPending += written;
+            }
+
+            if (outputText != null)
+            {
+                ArrayPool<byte>.Shared.Return(outputText);
             }
         }
     }

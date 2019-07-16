@@ -90,7 +90,7 @@ namespace System.Text
                 ThrowHelper.ThrowArgumentOutOfRangeException((index < 0) ? ExceptionArgument.index : ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
             }
 
-            if (chars.Length - index < count)
+            if (chars!.Length - index < count)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.chars, ExceptionResource.ArgumentOutOfRange_IndexCountBuffer);
             }
@@ -117,7 +117,7 @@ namespace System.Text
 
             fixed (char* pChars = chars)
             {
-                return GetByteCountCommon(pChars, chars.Length);
+                return GetByteCountCommon(pChars, chars!.Length);
             }
         }
 
@@ -159,7 +159,7 @@ namespace System.Text
             // Common helper method for all non-EncoderNLS entry points to GetByteCount.
             // A modification of this method should be copied in to each of the supported encodings: ASCII, UTF8, UTF16, UTF32.
 
-            Debug.Assert(charCount >= 0, "Caller should't specify negative length buffer.");
+            Debug.Assert(charCount >= 0, "Caller shouldn't specify negative length buffer.");
             Debug.Assert(pChars != null || charCount == 0, "Input pointer shouldn't be null if non-zero length specified.");
 
             // First call into the fast path.
@@ -183,7 +183,7 @@ namespace System.Text
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // called directly by GetByteCountCommon
-        private protected sealed override unsafe int GetByteCountFast(char* pChars, int charsLength, EncoderFallback fallback, out int charsConsumed)
+        private protected sealed override unsafe int GetByteCountFast(char* pChars, int charsLength, EncoderFallback? fallback, out int charsConsumed)
         {
             // First: Can we short-circuit the entire calculation?
             // If an EncoderReplacementFallback is in use, all non-ASCII chars
@@ -230,12 +230,12 @@ namespace System.Text
                     resource: ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
             }
 
-            if (chars.Length - charIndex < charCount)
+            if (chars!.Length - charIndex < charCount)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.chars, ExceptionResource.ArgumentOutOfRange_IndexCount);
             }
 
-            if ((uint)byteIndex > bytes.Length)
+            if ((uint)byteIndex > bytes!.Length)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.byteIndex, ExceptionResource.ArgumentOutOfRange_Index);
             }
@@ -280,12 +280,12 @@ namespace System.Text
                     resource: ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
             }
 
-            if (chars.Length - charIndex < charCount)
+            if (chars!.Length - charIndex < charCount)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.chars, ExceptionResource.ArgumentOutOfRange_IndexCount);
             }
 
-            if ((uint)byteIndex > bytes.Length)
+            if ((uint)byteIndex > bytes!.Length)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.byteIndex, ExceptionResource.ArgumentOutOfRange_Index);
             }
@@ -340,9 +340,9 @@ namespace System.Text
             // Common helper method for all non-EncoderNLS entry points to GetBytes.
             // A modification of this method should be copied in to each of the supported encodings: ASCII, UTF8, UTF16, UTF32.
 
-            Debug.Assert(charCount >= 0, "Caller should't specify negative length buffer.");
+            Debug.Assert(charCount >= 0, "Caller shouldn't specify negative length buffer.");
             Debug.Assert(pChars != null || charCount == 0, "Input pointer shouldn't be null if non-zero length specified.");
-            Debug.Assert(byteCount >= 0, "Caller should't specify negative length buffer.");
+            Debug.Assert(byteCount >= 0, "Caller shouldn't specify negative length buffer.");
             Debug.Assert(pBytes != null || byteCount == 0, "Input pointer shouldn't be null if non-zero length specified.");
 
             // First call into the fast path.
@@ -372,7 +372,7 @@ namespace System.Text
             return bytesWritten;
         }
 
-        private protected sealed override unsafe int GetBytesWithFallback(ReadOnlySpan<char> chars, int originalCharsLength, Span<byte> bytes, int originalBytesLength, EncoderNLS encoder)
+        private protected sealed override unsafe int GetBytesWithFallback(ReadOnlySpan<char> chars, int originalCharsLength, Span<byte> bytes, int originalBytesLength, EncoderNLS? encoder)
         {
             // We special-case EncoderReplacementFallback if it's telling us to write a single ASCII char,
             // since we believe this to be relatively common and we can handle it more efficiently than
@@ -447,7 +447,7 @@ namespace System.Text
                 ThrowHelper.ThrowArgumentOutOfRangeException((index < 0) ? ExceptionArgument.index : ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
             }
 
-            if (bytes.Length - index < count)
+            if (bytes!.Length - index < count)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.bytes, ExceptionResource.ArgumentOutOfRange_IndexCountBuffer);
             }
@@ -496,7 +496,7 @@ namespace System.Text
             // Common helper method for all non-DecoderNLS entry points to GetCharCount.
             // A modification of this method should be copied in to each of the supported encodings: ASCII, UTF8, UTF16, UTF32.
 
-            Debug.Assert(byteCount >= 0, "Caller should't specify negative length buffer.");
+            Debug.Assert(byteCount >= 0, "Caller shouldn't specify negative length buffer.");
             Debug.Assert(pBytes != null || byteCount == 0, "Input pointer shouldn't be null if non-zero length specified.");
 
             // First call into the fast path.
@@ -520,7 +520,7 @@ namespace System.Text
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // called directly by GetCharCountCommon
-        private protected sealed override unsafe int GetCharCountFast(byte* pBytes, int bytesLength, DecoderFallback fallback, out int bytesConsumed)
+        private protected sealed override unsafe int GetCharCountFast(byte* pBytes, int bytesLength, DecoderFallback? fallback, out int bytesConsumed)
         {
             // First: Can we short-circuit the entire calculation?
             // If a DecoderReplacementFallback is in use, all non-ASCII bytes are replaced with
@@ -564,12 +564,12 @@ namespace System.Text
                     resource: ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
             }
 
-            if (bytes.Length - byteIndex < byteCount)
+            if (bytes!.Length - byteIndex < byteCount)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.bytes, ExceptionResource.ArgumentOutOfRange_IndexCountBuffer);
             }
 
-            if ((uint)charIndex > (uint)chars.Length)
+            if ((uint)charIndex > (uint)chars!.Length)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.charIndex, ExceptionResource.ArgumentOutOfRange_Index);
             }
@@ -624,9 +624,9 @@ namespace System.Text
             // Common helper method for all non-DecoderNLS entry points to GetChars.
             // A modification of this method should be copied in to each of the supported encodings: ASCII, UTF8, UTF16, UTF32.
 
-            Debug.Assert(byteCount >= 0, "Caller should't specify negative length buffer.");
+            Debug.Assert(byteCount >= 0, "Caller shouldn't specify negative length buffer.");
             Debug.Assert(pBytes != null || byteCount == 0, "Input pointer shouldn't be null if non-zero length specified.");
-            Debug.Assert(charCount >= 0, "Caller should't specify negative length buffer.");
+            Debug.Assert(charCount >= 0, "Caller shouldn't specify negative length buffer.");
             Debug.Assert(pChars != null || charCount == 0, "Input pointer shouldn't be null if non-zero length specified.");
 
             // First call into the fast path.
@@ -656,7 +656,7 @@ namespace System.Text
             return charsWritten;
         }
 
-        private protected sealed override unsafe int GetCharsWithFallback(ReadOnlySpan<byte> bytes, int originalBytesLength, Span<char> chars, int originalCharsLength, DecoderNLS decoder)
+        private protected sealed override unsafe int GetCharsWithFallback(ReadOnlySpan<byte> bytes, int originalBytesLength, Span<char> chars, int originalCharsLength, DecoderNLS? decoder)
         {
             // We special-case DecoderReplacementFallback if it's telling us to write a single BMP char,
             // since we believe this to be relatively common and we can handle it more efficiently than
@@ -732,7 +732,7 @@ namespace System.Text
                     resource: ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
             }
 
-            if (bytes.Length - byteIndex < byteCount)
+            if (bytes!.Length - byteIndex < byteCount)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.bytes, ExceptionResource.ArgumentOutOfRange_IndexCountBuffer);
             }

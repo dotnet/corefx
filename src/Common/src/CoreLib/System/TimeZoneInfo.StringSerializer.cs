@@ -104,7 +104,7 @@ namespace System
                 string displayName = s.GetNextStringValue();
                 string standardName = s.GetNextStringValue();
                 string daylightName = s.GetNextStringValue();
-                AdjustmentRule[] rules = s.GetNextAdjustmentRuleArrayValue();
+                AdjustmentRule[]? rules = s.GetNextAdjustmentRuleArrayValue();
 
                 try
                 {
@@ -373,13 +373,13 @@ namespace System
             /// <summary>
             /// Helper function to read an AdjustmentRule[] token.
             /// </summary>
-            private AdjustmentRule[] GetNextAdjustmentRuleArrayValue()
+            private AdjustmentRule[]? GetNextAdjustmentRuleArrayValue()
             {
                 List<AdjustmentRule> rules = new List<AdjustmentRule>(1);
                 int count = 0;
 
                 // individual AdjustmentRule array elements do not require semicolons
-                AdjustmentRule rule = GetNextAdjustmentRuleValue();
+                AdjustmentRule? rule = GetNextAdjustmentRuleValue();
                 while (rule != null)
                 {
                     rules.Add(rule);
@@ -404,7 +404,7 @@ namespace System
             /// <summary>
             /// Helper function to read an AdjustmentRule token.
             /// </summary>
-            private AdjustmentRule GetNextAdjustmentRuleValue()
+            private AdjustmentRule? GetNextAdjustmentRuleValue()
             {
                 // first verify the internal state of the object
                 if (_state == State.EndOfLine)

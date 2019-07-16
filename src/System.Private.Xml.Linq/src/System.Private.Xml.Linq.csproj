@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{BAC347A3-9841-44FC-B1E3-2344D1152C23}</ProjectGuid>
     <AssemblyName>System.Private.Xml.Linq</AssemblyName>
@@ -7,14 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.Private.Xml\src\System.Private.Xml.csproj" />
-    <Compile Include="$(CommonPath)\System\Collections\Generic\ArrayBuilder.cs">
-      <Link>System\Collections\Generic\ArrayBuilder.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Collections\Generic\EnumerableHelpers.cs">
       <Link>System\Collections\Generic\EnumerableHelpers.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.cs">
-      <Link>System\Collections\Generic\LargeArrayBuilder.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\Text\StringBuilderCache.cs">
       <Link>System\Text\StringBuilderCache.cs</Link>
@@ -63,5 +57,6 @@
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Thread" />
+    <Reference Include="System.Memory" />
   </ItemGroup>
 </Project>

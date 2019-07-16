@@ -45,7 +45,14 @@ namespace System.Text.Tests
         public static unsafe void GetByteCount_Invalid(Encoding encoding)
         {
             // Chars is null
-            AssertExtensions.Throws<ArgumentNullException>(encoding is ASCIIEncoding ? "chars" : "s", () => encoding.GetByteCount((string)null));
+            if (PlatformDetection.IsNetCore)
+            {
+                AssertExtensions.Throws<ArgumentNullException>((encoding is ASCIIEncoding || encoding is UTF8Encoding) ? "chars" : "s", () => encoding.GetByteCount((string)null));
+            }
+            else
+            {
+                AssertExtensions.Throws<ArgumentNullException>((encoding is ASCIIEncoding) ? "chars" : "s", () => encoding.GetByteCount((string)null));
+            }
             AssertExtensions.Throws<ArgumentNullException>("chars", () => encoding.GetByteCount((char[])null));
             AssertExtensions.Throws<ArgumentNullException>("chars", () => encoding.GetByteCount((char[])null, 0, 0));
 
@@ -302,7 +309,7 @@ namespace System.Text.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("bytes", () => encoding.GetString(new byte[1], 0, 2));
         }
 
-        public static unsafe void Encode_Invalid(Encoding encoding, string chars, int index, int count)
+        internal static unsafe void Encode_Invalid(Encoding encoding, string chars, int index, int count)
         {
             Assert.Equal(EncoderFallback.ExceptionFallback, encoding.EncoderFallback);
 
@@ -336,7 +343,7 @@ namespace System.Text.Tests
             }
         }
 
-        public static unsafe void Decode_Invalid(Encoding encoding, byte[] bytes, int index, int count)
+        internal static unsafe void Decode_Invalid(Encoding encoding, byte[] bytes, int index, int count)
         {
             Assert.Equal(DecoderFallback.ExceptionFallback, encoding.DecoderFallback);
 

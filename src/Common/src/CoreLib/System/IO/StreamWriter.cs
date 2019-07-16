@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -26,21 +27,20 @@ namespace System.IO
         private const int DefaultFileStreamBufferSize = 4096;
         private const int MinBufferSize = 128;
 
-        private const int DontCopyOnWriteLineThreshold = 512;
-
         // Bit bucket - Null has no backing store. Non closable.
-        public new static readonly StreamWriter Null = new StreamWriter(Stream.Null, UTF8NoBOM, MinBufferSize, true);
+        public new static readonly StreamWriter Null = new StreamWriter(Stream.Null, UTF8NoBOM, MinBufferSize, leaveOpen: true);
 
-        private Stream _stream;
-        private Encoding _encoding;
-        private Encoder _encoder;
-        private byte[] _byteBuffer;
-        private char[] _charBuffer;
+        private readonly Stream _stream;
+        private readonly Encoding _encoding;
+        private readonly Encoder _encoder;
+        private readonly byte[] _byteBuffer;
+        private readonly char[] _charBuffer;
         private int _charPos;
         private int _charLen;
         private bool _autoFlush;
         private bool _haveWrittenPreamble;
-        private bool _closable;
+        private readonly bool _closable;
+        private bool _disposed;
 
         // We don't guarantee thread safety on StreamWriter, but we should at 
         // least prevent users from trying to write anything while an Async
@@ -57,6 +57,7 @@ namespace System.IO
             }
         }
 
+        [DoesNotReturn]
         private static void ThrowAsyncIOInProgress() =>
             throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
 
@@ -70,11 +71,6 @@ namespace System.IO
         // Maybe we can add a DiscardBufferedData() method to get out of such situation (like 
         // StreamReader though for different reason). Either way, the buffered data will be lost!
         private static Encoding UTF8NoBOM => EncodingCache.UTF8NoBOM;
-
-
-        internal StreamWriter() : base(null)
-        { // Ask for CurrentCulture all the time 
-        }
 
         public StreamWriter(Stream stream)
             : this(stream, UTF8NoBOM, DefaultBufferSize, false)
@@ -95,23 +91,49 @@ namespace System.IO
         {
         }
 
-        public StreamWriter(Stream stream, Encoding encoding, int bufferSize, bool leaveOpen)
+        public StreamWriter(Stream stream, Encoding? encoding = null, int bufferSize = -1, bool leaveOpen = false)
             : base(null) // Ask for CurrentCulture all the time
         {
-            if (stream == null || encoding == null)
+            if (stream == null)
             {
-                throw new ArgumentNullException(stream == null ? nameof(stream) : nameof(encoding));
+                throw new ArgumentNullException(nameof(stream));
+            }
+            if (encoding == null)
+            {
+                encoding = UTF8NoBOM;
             }
             if (!stream.CanWrite)
             {
                 throw new ArgumentException(SR.Argument_StreamNotWritable);
             }
-            if (bufferSize <= 0)
+            if (bufferSize == -1)
+            {
+                bufferSize = DefaultBufferSize;
+            }
+            else if (bufferSize <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
             }
 
-            Init(stream, encoding, bufferSize, leaveOpen);
+            _stream = stream;
+            _encoding = encoding;
+            _encoder = _encoding.GetEncoder();
+            if (bufferSize < MinBufferSize)
+            {
+                bufferSize = MinBufferSize;
+            }
+
+            _charBuffer = new char[bufferSize];
+            _byteBuffer = new byte[_encoding.GetMaxByteCount(bufferSize)];
+            _charLen = bufferSize;
+            // If we're appending to a Stream that already has data, don't write
+            // the preamble.
+            if (_stream.CanSeek && _stream.Position > 0)
+            {
+                _haveWrittenPreamble = true;
+            }
+
+            _closable = !leaveOpen;
         }
 
         public StreamWriter(string path)
@@ -129,8 +151,13 @@ namespace System.IO
         {
         }
 
-        public StreamWriter(string path, bool append, Encoding encoding, int bufferSize)
+        public StreamWriter(string path, bool append, Encoding encoding, int bufferSize) :
+            this(ValidateArgsAndOpenPath(path, append, encoding, bufferSize), encoding, bufferSize, leaveOpen: false)
         { 
+        }
+
+        private static Stream ValidateArgsAndOpenPath(string path, bool append, Encoding encoding, int bufferSize)
+        {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
             if (encoding == null)
@@ -140,32 +167,7 @@ namespace System.IO
             if (bufferSize <= 0)
                 throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
 
-            Stream stream = new FileStream(path, append ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.Read,
-                DefaultFileStreamBufferSize, FileOptions.SequentialScan);
-            Init(stream, encoding, bufferSize, shouldLeaveOpen: false);
-        }
-
-        private void Init(Stream streamArg, Encoding encodingArg, int bufferSize, bool shouldLeaveOpen)
-        {
-            _stream = streamArg;
-            _encoding = encodingArg;
-            _encoder = _encoding.GetEncoder();
-            if (bufferSize < MinBufferSize)
-            {
-                bufferSize = MinBufferSize;
-            }
-
-            _charBuffer = new char[bufferSize];
-            _byteBuffer = new byte[_encoding.GetMaxByteCount(bufferSize)];
-            _charLen = bufferSize;
-            // If we're appending to a Stream that already has data, don't write
-            // the preamble.
-            if (_stream.CanSeek && _stream.Position > 0)
-            {
-                _haveWrittenPreamble = true;
-            }
-
-            _closable = !shouldLeaveOpen;
+            return new FileStream(path, append ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan);
         }
 
         public override void Close()
@@ -182,15 +184,11 @@ namespace System.IO
                 // Also, we never close the handles for stdout & friends.  So we can safely 
                 // write any buffered data to those streams even during finalization, which 
                 // is generally the right thing to do.
-                if (_stream != null)
+                if (!_disposed && disposing)
                 {
                     // Note: flush on the underlying stream can throw (ex., low disk space)
-                    if (disposing /* || (LeaveOpen && stream is __ConsoleStream) */)
-                    {
-                        CheckAsyncTaskInProgress();
-
-                        Flush(true, true);
-                    }
+                    CheckAsyncTaskInProgress();
+                    Flush(flushStream: true, flushEncoder: true);
                 }
             }
             finally
@@ -202,7 +200,7 @@ namespace System.IO
         private void CloseStreamFromDispose(bool disposing)
         {
             // Dispose of our resources if this StreamWriter is closable. 
-            if (!LeaveOpen && _stream != null)
+            if (_closable && !_disposed)
             {
                 try
                 {
@@ -217,11 +215,7 @@ namespace System.IO
                 }
                 finally
                 {
-                    _stream = null;
-                    _byteBuffer = null;
-                    _charBuffer = null;
-                    _encoding = null;
-                    _encoder = null;
+                    _disposed = true;
                     _charLen = 0;
                     base.Dispose(disposing);
                 }
@@ -239,7 +233,7 @@ namespace System.IO
             Debug.Assert(GetType() == typeof(StreamWriter));
             try
             {
-                if (_stream != null)
+                if (!_disposed)
                 {
                     await FlushAsync().ConfigureAwait(false);
                 }
@@ -263,11 +257,8 @@ namespace System.IO
             // flushEncoder should be true at the end of the file and if
             // the user explicitly calls Flush (though not if AutoFlush is true).
             // This is required to flush any dangling characters from our UTF-7 
-            // and UTF-8 encoders.  
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-            }
+            // and UTF-8 encoders.
+            ThrowIfDisposed();
 
             // Perf boost for Flush on non-dirty writers.
             if (_charPos == 0 && !flushStream && !flushEncoder)
@@ -321,16 +312,6 @@ namespace System.IO
             get { return _stream; }
         }
 
-        internal bool LeaveOpen
-        {
-            get { return !_closable; }
-        }
-
-        internal bool HaveWrittenPreamble
-        {
-            set { _haveWrittenPreamble = value; }
-        }
-
         public override Encoding Encoding
         {
             get { return _encoding; }
@@ -354,7 +335,7 @@ namespace System.IO
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)] // prevent WriteSpan from bloating call sites
-        public override void Write(char[] buffer)
+        public override void Write(char[]? buffer)
         {
             WriteSpan(buffer, appendNewLine: false);
         }
@@ -420,11 +401,8 @@ namespace System.IO
                 // else) due to temporaries that need to be cleared.  Given the use of unsafe code, we also
                 // make local copies of instance state to protect against potential concurrent misuse.
 
+                ThrowIfDisposed();
                 char[] charBuffer = _charBuffer;
-                if (charBuffer == null)
-                {
-                    throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-                }
 
                 fixed (char* bufferPtr = &MemoryMarshal.GetReference(buffer))
                 fixed (char* dstPtr = &charBuffer[0])
@@ -475,13 +453,13 @@ namespace System.IO
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)] // prevent WriteSpan from bloating call sites
-        public override void Write(string value)
+        public override void Write(string? value)
         {
             WriteSpan(value, appendNewLine: false);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)] // prevent WriteSpan from bloating call sites
-        public override void WriteLine(string value)
+        public override void WriteLine(string? value)
         {
             CheckAsyncTaskInProgress();
             WriteSpan(value, appendNewLine: true);
@@ -506,8 +484,8 @@ namespace System.IO
         private void WriteFormatHelper(string format, ParamsArray args, bool appendNewLine)
         {
             StringBuilder sb =
-                StringBuilderCache.Acquire(format.Length + args.Length * 8)
-                .AppendFormatHelper(null, format, args);
+                StringBuilderCache.Acquire((format?.Length ?? 0) + args.Length * 8)
+                .AppendFormatHelper(null, format!, args); // AppendFormatHelper will appropriately throw ArgumentNullException for a null format
 
             StringBuilder.ChunkEnumerator chunks = sb.GetChunks();
 
@@ -524,7 +502,7 @@ namespace System.IO
             StringBuilderCache.Release(sb);
         }
 
-        public override void Write(string format, object arg0)
+        public override void Write(string format, object? arg0)
         {
             if (GetType() == typeof(StreamWriter))
             {
@@ -536,7 +514,7 @@ namespace System.IO
             }
         }
 
-        public override void Write(string format, object arg0, object arg1)
+        public override void Write(string format, object? arg0, object? arg1)
         {
             if (GetType() == typeof(StreamWriter))
             {
@@ -548,7 +526,7 @@ namespace System.IO
             }
         }
 
-        public override void Write(string format, object arg0, object arg1, object arg2)
+        public override void Write(string format, object? arg0, object? arg1, object? arg2)
         {
             if (GetType() == typeof(StreamWriter))
             {
@@ -560,10 +538,14 @@ namespace System.IO
             }
         }
 
-        public override void Write(string format, params object[] arg)
+        public override void Write(string format, params object?[] arg)
         {
             if (GetType() == typeof(StreamWriter))
             {
+                if (arg == null)
+                {
+                    throw new ArgumentNullException((format == null) ? nameof(format) : nameof(arg)); // same as base logic
+                }
                 WriteFormatHelper(format, new ParamsArray(arg), appendNewLine: false);
             }
             else
@@ -572,7 +554,7 @@ namespace System.IO
             }
         }
 
-        public override void WriteLine(string format, object arg0)
+        public override void WriteLine(string format, object? arg0)
         {
             if (GetType() == typeof(StreamWriter))
             {
@@ -584,7 +566,7 @@ namespace System.IO
             }
         }
 
-        public override void WriteLine(string format, object arg0, object arg1)
+        public override void WriteLine(string format, object? arg0, object? arg1)
         {
             if (GetType() == typeof(StreamWriter))
             {
@@ -596,7 +578,7 @@ namespace System.IO
             }
         }
 
-        public override void WriteLine(string format, object arg0, object arg1, object arg2)
+        public override void WriteLine(string format, object? arg0, object? arg1, object? arg2)
         {
             if (GetType() == typeof(StreamWriter))
             {
@@ -608,10 +590,14 @@ namespace System.IO
             }
         }
 
-        public override void WriteLine(string format, params object[] arg)
+        public override void WriteLine(string format, params object?[] arg)
         {
             if (GetType() == typeof(StreamWriter))
             {
+                if (arg == null)
+                {
+                    throw new ArgumentNullException(nameof(arg));
+                }
                 WriteFormatHelper(format, new ParamsArray(arg), appendNewLine: true);
             }
             else
@@ -620,7 +606,6 @@ namespace System.IO
             }
         }
 
-        #region Task based Async APIs
         public override Task WriteAsync(char value)
         {
             // If we have been inherited into a subclass, the following implementation could be incorrect
@@ -632,11 +617,7 @@ namespace System.IO
                 return base.WriteAsync(value);
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             Task task = WriteAsyncInternal(this, value, _charBuffer, _charPos, _charLen, CoreNewLine, _autoFlush, appendNewLine: false);
@@ -685,10 +666,10 @@ namespace System.IO
                 charPos = 0;
             }
 
-            _this.CharPos_Prop = charPos;
+            _this._charPos = charPos;
         }
 
-        public override Task WriteAsync(string value)
+        public override Task WriteAsync(string? value)
         {
             // If we have been inherited into a subclass, the following implementation could be incorrect
             // since it does not call through to Write() which a subclass might have overridden.  
@@ -701,11 +682,7 @@ namespace System.IO
 
             if (value != null)
             {
-                if (_stream == null)
-                {
-                    throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-                }
-
+                ThrowIfDisposed();
                 CheckAsyncTaskInProgress();
 
                 Task task = WriteAsyncInternal(this, value, _charBuffer, _charPos, _charLen, CoreNewLine, _autoFlush, appendNewLine: false);
@@ -778,7 +755,7 @@ namespace System.IO
                 charPos = 0;
             }
 
-            _this.CharPos_Prop = charPos;
+            _this._charPos = charPos;
         }
 
         public override Task WriteAsync(char[] buffer, int index, int count)
@@ -809,11 +786,7 @@ namespace System.IO
                 return base.WriteAsync(buffer, index, count);
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             Task task = WriteAsyncInternal(this, new ReadOnlyMemory<char>(buffer, index, count), _charBuffer, _charPos, _charLen, CoreNewLine, _autoFlush, appendNewLine: false, cancellationToken: default);
@@ -830,11 +803,7 @@ namespace System.IO
                 return base.WriteAsync(buffer, cancellationToken);
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             if (cancellationToken.IsCancellationRequested)
@@ -895,7 +864,7 @@ namespace System.IO
                 charPos = 0;
             }
 
-            _this.CharPos_Prop = charPos;
+            _this._charPos = charPos;
         }
 
         public override Task WriteLineAsync()
@@ -909,11 +878,7 @@ namespace System.IO
                 return base.WriteLineAsync();
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             Task task = WriteAsyncInternal(this, ReadOnlyMemory<char>.Empty, _charBuffer, _charPos, _charLen, CoreNewLine, _autoFlush, appendNewLine: true, cancellationToken: default);
@@ -934,11 +899,7 @@ namespace System.IO
                 return base.WriteLineAsync(value);
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             Task task = WriteAsyncInternal(this, value, _charBuffer, _charPos, _charLen, CoreNewLine, _autoFlush, appendNewLine: true);
@@ -948,7 +909,7 @@ namespace System.IO
         }
 
 
-        public override Task WriteLineAsync(string value)
+        public override Task WriteLineAsync(string? value)
         {
             if (value == null)
             {
@@ -964,11 +925,7 @@ namespace System.IO
                 return base.WriteLineAsync(value);
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             Task task = WriteAsyncInternal(this, value, _charBuffer, _charPos, _charLen, CoreNewLine, _autoFlush, appendNewLine: true);
@@ -1006,11 +963,7 @@ namespace System.IO
                 return base.WriteLineAsync(buffer, index, count);
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             Task task = WriteAsyncInternal(this, new ReadOnlyMemory<char>(buffer, index, count), _charBuffer, _charPos, _charLen, CoreNewLine, _autoFlush, appendNewLine: true, cancellationToken: default);
@@ -1026,11 +979,7 @@ namespace System.IO
                 return base.WriteLineAsync(buffer, cancellationToken);
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             if (cancellationToken.IsCancellationRequested)
@@ -1060,27 +1009,13 @@ namespace System.IO
             // the user explicitly calls Flush (though not if AutoFlush is true).
             // This is required to flush any dangling characters from our UTF-7 
             // and UTF-8 encoders.  
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             Task task = FlushAsyncInternal(true, true, _charBuffer, _charPos);
             _asyncWriteTask = task;
 
             return task;
-        }
-
-        private int CharPos_Prop
-        {
-            set { _charPos = value; }
-        }
-
-        private bool HaveWrittenPreamble_Prop
-        {
-            set { _haveWrittenPreamble = value; }
         }
 
         private Task FlushAsyncInternal(bool flushStream, bool flushEncoder,
@@ -1113,7 +1048,7 @@ namespace System.IO
         {
             if (!haveWrittenPreamble)
             {
-                _this.HaveWrittenPreamble_Prop = true;
+                _this._haveWrittenPreamble = true;
                 byte[] preamble = encoding.GetPreamble();
                 if (preamble.Length > 0)
                 {
@@ -1135,6 +1070,15 @@ namespace System.IO
                 await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         }
-        #endregion
+
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+            {
+                ThrowObjectDisposedException();
+            }
+
+            void ThrowObjectDisposedException() => throw new ObjectDisposedException(GetType().Name, SR.ObjectDisposed_WriterClosed);
+        }
     }  // class StreamWriter
 }  // namespace

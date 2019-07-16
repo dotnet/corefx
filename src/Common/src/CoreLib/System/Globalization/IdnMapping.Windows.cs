@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace System.Globalization
@@ -115,6 +115,7 @@ namespace System.Globalization
             }
         }
 
+        [DoesNotReturn]
         private static void ThrowForZeroLength(bool unicode)
         {
             int lastError = Marshal.GetLastWin32Error();

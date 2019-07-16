@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -1374,7 +1373,7 @@ namespace System.IO
                             // Allocate a native overlapped for our reusable overlapped, and set position to read based on the next
                             // desired address stored in the awaitable.  (This position may be 0, if either we're at the beginning or
                             // if the stream isn't seekable.)
-                            readAwaitable._nativeOverlapped = _fileHandle.ThreadPoolBinding.AllocateNativeOverlapped(awaitableOverlapped);
+                            readAwaitable._nativeOverlapped = _fileHandle.ThreadPoolBinding!.AllocateNativeOverlapped(awaitableOverlapped);
                             if (canSeek)
                             {
                                 readAwaitable._nativeOverlapped->OffsetLow = unchecked((int)readAwaitable._position);
@@ -1449,7 +1448,7 @@ namespace System.IO
                             }
                             if (overlapped != null)
                             {
-                                _fileHandle.ThreadPoolBinding.FreeNativeOverlapped(overlapped);
+                                _fileHandle.ThreadPoolBinding!.FreeNativeOverlapped(overlapped);
                             }
                         }
                     }
@@ -1556,10 +1555,6 @@ namespace System.IO
             }
         }
 
-        // Unlike Flush(), FlushAsync() always flushes to disk. This is intentional.
-        // Legend is that we chose not to flush the OS file buffers in Flush() in fear of 
-        // perf problems with frequent, long running FlushFileBuffers() calls. But we don't 
-        // have that problem with FlushAsync() because we will call FlushFileBuffers() in the background.
         private Task FlushAsyncInternal(CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1568,7 +1563,7 @@ namespace System.IO
             if (_fileHandle.IsClosed)
                 throw Error.GetFileNotOpen();
 
-            // TODO: https://github.com/dotnet/corefx/issues/32837 (stop doing this synchronous work).
+            // TODO: https://github.com/dotnet/corefx/issues/32837 (stop doing this synchronous work!!).
             // The always synchronous data transfer between the OS and the internal buffer is intentional 
             // because this is needed to allow concurrent async IO requests. Concurrent data transfer
             // between the OS and the internal buffer will result in race conditions. Since FlushWrite and
@@ -1585,19 +1580,7 @@ namespace System.IO
                 return Task.FromException(e);
             }
 
-            if (CanWrite)
-            {
-                return Task.Factory.StartNew(
-                    state => ((FileStream)state!).FlushOSBuffer(), // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
-                    this,
-                    cancellationToken,
-                    TaskCreationOptions.DenyChildAttach,
-                    TaskScheduler.Default);
-            }
-            else
-            {
-                return Task.CompletedTask;
-            }
+            return Task.CompletedTask;
         }
 
         private void LockInternal(long position, long length)

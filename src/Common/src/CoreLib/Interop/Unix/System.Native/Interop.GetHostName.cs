@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -35,7 +34,7 @@ internal static partial class Interop
             // If the hostname is truncated, it is unspecified whether the returned buffer includes a terminating null byte.
             name[ArrLength - 1] = 0;
 
-            return Marshal.PtrToStringAnsi((IntPtr)name);
+            return Marshal.PtrToStringAnsi((IntPtr)name)!;
         }
     }
 }

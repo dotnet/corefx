@@ -12,8 +12,6 @@
 ** See $(RepoRoot)\src\inc\OpCodeGen.pl for more information.**
 ==============================================================*/
 
-using System;
-
 namespace System.Reflection.Emit
 {
     public enum StackBehaviour

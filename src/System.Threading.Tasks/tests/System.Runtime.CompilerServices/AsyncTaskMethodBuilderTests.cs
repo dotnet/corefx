@@ -345,7 +345,6 @@ namespace System.Threading.Tasks.Tests
         }
 
         [Fact]
-        [ActiveIssue("TFS 450361 - Codegen optimization issue", TargetFrameworkMonikers.UapAot)]
         public static void TaskMethodBuilder_UsesCompletedCache()
         {
             var atmb1 = new AsyncTaskMethodBuilder();
@@ -358,7 +357,6 @@ namespace System.Threading.Tasks.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        [ActiveIssue("TFS 450361 - Codegen optimization issue", TargetFrameworkMonikers.UapAot)]
         public static void TaskMethodBuilderBoolean_UsesCompletedCache(bool result)
         {
             TaskMethodBuilderT_UsesCompletedCache(result, true);
@@ -369,15 +367,12 @@ namespace System.Threading.Tasks.Tests
         [InlineData(5, true)]
         [InlineData(-5, false)]
         [InlineData(42, false)]
-        [ActiveIssue("TFS 450361 - Codegen optimization issue", TargetFrameworkMonikers.UapAot)]
         public static void TaskMethodBuilderInt32_UsesCompletedCache(int result, bool shouldBeCached)
         {
             TaskMethodBuilderT_UsesCompletedCache(result, shouldBeCached);
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/coreclr/pull/16588")]
         [Fact]
-        [ActiveIssue("TFS 450361 - Codegen optimization issue", TargetFrameworkMonikers.UapAot)]
         public static void TaskMethodBuilderDecimal_DoesntUseCompletedCache()
         {
             TaskMethodBuilderT_UsesCompletedCache(0m, shouldBeCached: false);
@@ -388,7 +383,6 @@ namespace System.Threading.Tasks.Tests
         [Theory]
         [InlineData((string)null, true)]
         [InlineData("test", false)]
-        [ActiveIssue("TFS 450361 - Codegen optimization issue", TargetFrameworkMonikers.UapAot)]
         public static void TaskMethodBuilderRef_UsesCompletedCache(string result, bool shouldBeCached)
         {
             TaskMethodBuilderT_UsesCompletedCache(result, shouldBeCached);
@@ -509,10 +503,10 @@ namespace System.Threading.Tasks.Tests
             cts.Cancel();
             b.SignalAndWait(); // release task to complete
 
-            // This test may be run concurrently with other tests in the suite, 
+            // This test may be run concurrently with other tests in the suite,
             // which can be problematic as TaskScheduler.UnobservedTaskException
             // is global state.  The handler is carefully written to be non-problematic
-            // if it happens to be set during the execution of another test that has 
+            // if it happens to be set during the execution of another test that has
             // an unobserved exception.
             EventHandler<UnobservedTaskExceptionEventArgs> handler =
                 (s, e) => Assert.DoesNotContain(oce, e.Exception.InnerExceptions);
@@ -527,6 +521,7 @@ namespace System.Threading.Tasks.Tests
             TaskScheduler.UnobservedTaskException -= handler;
         }
 
+        [ActiveIssue(39155)]
         [Fact]
         public static async Task AsyncMethodsDropsStateMachineAndExecutionContextUponCompletion()
         {
@@ -539,7 +534,8 @@ namespace System.Threading.Tasks.Tests
             var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             Task t = null;
-            await Task.Run(delegate // avoid any issues with the stack keeping the object alive, and escape xunit sync ctx
+
+            Thread runner = new Thread(() =>
             {
                 async Task YieldOnceAsync(object s)
                 {
@@ -548,10 +544,13 @@ namespace System.Threading.Tasks.Tests
                 }
 
                 var state = new InvokeActionOnFinalization { Action = () => tcs.SetResult(true) };
-                var al = new AsyncLocal<object> { Value = state }; // ensure the object is stored in ExecutionContext
+                var al = new AsyncLocal<object>() { Value = state }; // ensure the object is stored in ExecutionContext
                 t = YieldOnceAsync(state); // ensure the object is stored in the state machine
                 al.Value = null;
-            });
+            }) { IsBackground = true };
+
+            runner.Start();
+            runner.Join();
 
             await t; // wait for the async method to complete and clear out its state
             await Task.Yield(); // ensure associated state is not still on the stack as part of the antecedent's execution
@@ -561,7 +560,15 @@ namespace System.Threading.Tasks.Tests
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
             }
-            await tcs.Task.TimeoutAfter(60_000);
+
+            try
+            {
+                await tcs.Task.TimeoutAfter(60_000);
+            }
+            catch (Exception e)
+            {
+                Environment.FailFast("Look at the created dump", e);
+            }
 
             GC.KeepAlive(t); // ensure the object is stored in the state machine
         }

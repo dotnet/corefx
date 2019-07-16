@@ -81,7 +81,7 @@ namespace System
             return !_complete;
         }
 
-        public object Current
+        public object? Current
         {
             get
             {
@@ -136,7 +136,7 @@ namespace System
             return false;
         }
 
-        public object Current
+        public object? Current
         {
             get
             {
@@ -199,7 +199,7 @@ namespace System
             }
         }
 
-        object IEnumerator.Current => Current;
+        object? IEnumerator.Current => Current;
 
         void IEnumerator.Reset() => _index = -1;
 

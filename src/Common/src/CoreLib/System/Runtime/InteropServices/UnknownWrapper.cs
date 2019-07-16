@@ -7,11 +7,11 @@ namespace System.Runtime.InteropServices
     // Wrapper that is converted to a variant with VT_UNKNOWN.
     public sealed class UnknownWrapper
     {
-        public UnknownWrapper(Object obj)
+        public UnknownWrapper(object? obj)
         {
             WrappedObject = obj;
         }
 
-        public Object WrappedObject { get; }
+        public object? WrappedObject { get; }
     }
 }

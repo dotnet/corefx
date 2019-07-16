@@ -14,6 +14,7 @@
 ===========================================================*/
 
 using System.Collections;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
@@ -27,16 +28,16 @@ namespace System.Resources
     //
     public class ResourceSet : IDisposable, IEnumerable
     {
-        protected IResourceReader Reader;
-        internal Hashtable Table;
+        protected IResourceReader Reader = null!;
+        internal Hashtable? Table; // TODO-NULLABLE: Avoid nulling out in Dispose
 
-        private Hashtable _caseInsensitiveTable;  // For case-insensitive lookups.
+        private Hashtable? _caseInsensitiveTable;  // For case-insensitive lookups.
 
         protected ResourceSet()
         {
             // To not inconvenience people subclassing us, we should allocate a new
             // hashtable here just so that Table is set to something.
-            CommonInit();
+            Table = new Hashtable();
         }
 
         // For RuntimeResourceSet, ignore the Table parameter - it's a wasted 
@@ -50,9 +51,9 @@ namespace System.Resources
         // on disk.
         // 
         public ResourceSet(string fileName)
+            : this()
         {
             Reader = new ResourceReader(fileName);
-            CommonInit();
             ReadResources();
         }
 
@@ -61,24 +62,19 @@ namespace System.Resources
         // of data.
         // 
         public ResourceSet(Stream stream)
+            : this()
         {
             Reader = new ResourceReader(stream);
-            CommonInit();
             ReadResources();
         }
 
         public ResourceSet(IResourceReader reader)
+            : this()
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
             Reader = reader;
-            CommonInit();
             ReadResources();
-        }
-
-        private void CommonInit()
-        {
-            Table = new Hashtable();
         }
 
         // Closes and releases any resources used by this ResourceSet, if any.
@@ -95,12 +91,12 @@ namespace System.Resources
             if (disposing)
             {
                 // Close the Reader in a thread-safe way.
-                IResourceReader copyOfReader = Reader;
-                Reader = null;
+                IResourceReader? copyOfReader = Reader;
+                Reader = null!; // TODO-NULLABLE: Avoid nulling out in Dispose
                 if (copyOfReader != null)
                     copyOfReader.Close();
             }
-            Reader = null;
+            Reader = null!; // TODO-NULLABLE: Avoid nulling out in Dispose
             _caseInsensitiveTable = null;
             Table = null;
         }
@@ -124,7 +120,7 @@ namespace System.Resources
         public virtual Type GetDefaultWriter()
         {
             Assembly resourceWriterAssembly = Assembly.Load("System.Resources.Writer, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
-            return resourceWriterAssembly.GetType("System.Resources.ResourceWriter", true);
+            return resourceWriterAssembly.GetType("System.Resources.ResourceWriter", throwOnError: true)!;
         }
 
         public virtual IDictionaryEnumerator GetEnumerator()
@@ -139,7 +135,7 @@ namespace System.Resources
 
         private IDictionaryEnumerator GetEnumeratorHelper()
         {
-            Hashtable copyOfTable = Table;  // Avoid a race with Dispose
+            Hashtable? copyOfTable = Table;  // Avoid a race with Dispose
             if (copyOfTable == null)
                 throw new ObjectDisposedException(null, SR.ObjectDisposed_ResourceSet);
             return copyOfTable.GetEnumerator();
@@ -147,12 +143,12 @@ namespace System.Resources
 
         // Look up a string value for a resource given its name.
         // 
-        public virtual string GetString(string name)
+        public virtual string? GetString(string name)
         {
-            object obj = GetObjectInternal(name);
+            object? obj = GetObjectInternal(name);
             try
             {
-                return (string)obj;
+                return (string?)obj;
             }
             catch (InvalidCastException)
             {
@@ -160,16 +156,16 @@ namespace System.Resources
             }
         }
 
-        public virtual string GetString(string name, bool ignoreCase)
+        public virtual string? GetString(string name, bool ignoreCase)
         {
-            object obj;
-            string s;
+            object? obj;
+            string? s;
 
             // Case-sensitive lookup
             obj = GetObjectInternal(name);
             try
             {
-                s = (string)obj;
+                s = (string?)obj;
             }
             catch (InvalidCastException)
             {
@@ -186,7 +182,7 @@ namespace System.Resources
             obj = GetCaseInsensitiveObjectInternal(name);
             try
             {
-                return (string)obj;
+                return (string?)obj;
             }
             catch (InvalidCastException)
             {
@@ -196,14 +192,14 @@ namespace System.Resources
 
         // Look up an object value for a resource given its name.
         // 
-        public virtual object GetObject(string name)
+        public virtual object? GetObject(string name)
         {
             return GetObjectInternal(name);
         }
 
-        public virtual object GetObject(string name, bool ignoreCase)
+        public virtual object? GetObject(string name, bool ignoreCase)
         {
-            object obj = GetObjectInternal(name);
+            object? obj = GetObjectInternal(name);
 
             if (obj != null || !ignoreCase)
                 return obj;
@@ -213,22 +209,24 @@ namespace System.Resources
 
         protected virtual void ReadResources()
         {
+            Debug.Assert(Table != null);
+            Debug.Assert(Reader != null);
             IDictionaryEnumerator en = Reader.GetEnumerator();
             while (en.MoveNext())
             {
-                object value = en.Value;
+                object? value = en.Value;
                 Table.Add(en.Key, value);
             }
             // While technically possible to close the Reader here, don't close it
             // to help with some WinRes lifetime issues.
         }
 
-        private object GetObjectInternal(string name)
+        private object? GetObjectInternal(string name)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            Hashtable copyOfTable = Table;  // Avoid a race with Dispose
+            Hashtable? copyOfTable = Table;  // Avoid a race with Dispose
 
             if (copyOfTable == null)
                 throw new ObjectDisposedException(null, SR.ObjectDisposed_ResourceSet);
@@ -236,14 +234,14 @@ namespace System.Resources
             return copyOfTable[name];
         }
 
-        private object GetCaseInsensitiveObjectInternal(string name)
+        private object? GetCaseInsensitiveObjectInternal(string name)
         {
-            Hashtable copyOfTable = Table;  // Avoid a race with Dispose
+            Hashtable? copyOfTable = Table;  // Avoid a race with Dispose
 
             if (copyOfTable == null)
                 throw new ObjectDisposedException(null, SR.ObjectDisposed_ResourceSet);
 
-            Hashtable caseTable = _caseInsensitiveTable;  // Avoid a race condition with Close
+            Hashtable? caseTable = _caseInsensitiveTable;  // Avoid a race condition with Close
             if (caseTable == null)
             {
                 caseTable = new Hashtable(StringComparer.OrdinalIgnoreCase);

@@ -23,7 +23,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public static bool operator !=(EventRegistrationToken left, EventRegistrationToken right) =>
             !left.Equals(right);
 
-        public override bool Equals(object obj) =>
+        public override bool Equals(object? obj) =>
             obj is EventRegistrationToken &&
             ((EventRegistrationToken)obj)._value == _value;
 

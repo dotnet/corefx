@@ -10,8 +10,8 @@
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 
@@ -88,6 +88,7 @@ namespace System
             _exceptionDispatch = ExceptionDispatchInfo.Capture(exception);
         }
 
+        [DoesNotReturn]
         internal void ThrowException()
         {
             Debug.Assert(_exceptionDispatch != null, "execution path is invalid");
@@ -150,11 +151,11 @@ namespace System
             }
         }
 
-        internal static object CreateViaDefaultConstructor(Type type)
+        internal static T CreateViaDefaultConstructor<T>()
         {
             try
             {
-                return Activator.CreateInstance(type);
+                return Activator.CreateInstance<T>();
             }
             catch (MissingMethodException)
             {
@@ -183,10 +184,7 @@ namespace System
     [DebuggerDisplay("ThreadSafetyMode={Mode}, IsValueCreated={IsValueCreated}, IsValueFaulted={IsValueFaulted}, Value={ValueForDebugDisplay}")]
     public class Lazy<T>
     {
-        private static T CreateViaDefaultConstructor()
-        {
-            return (T)LazyHelper.CreateViaDefaultConstructor(typeof(T));
-        }
+        private static T CreateViaDefaultConstructor() => LazyHelper.CreateViaDefaultConstructor<T>();
 
         // _state, a volatile reference, is set to null after _value has been set
         private volatile LazyHelper? _state;
@@ -196,7 +194,7 @@ namespace System
         private Func<T>? _factory;
 
         // _value eventually stores the lazily created value. It is valid when _state = null.
-        private T _value = default!; // TODO-NULLABLE-GENERIC
+        private T _value = default!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:System.Threading.Lazy{T}"/> class that 
@@ -448,13 +446,14 @@ namespace System
         }
 
         /// <summary>Gets the value of the Lazy&lt;T&gt; for debugging display purposes.</summary>
+        [MaybeNull]
         internal T ValueForDebugDisplay
         {
             get
             {
                 if (!IsValueCreated)
                 {
-                    return default!; // TODO-NULLABLE-GENERIC
+                    return default!;
                 }
                 return _value;
             }

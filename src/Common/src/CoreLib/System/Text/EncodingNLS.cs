@@ -66,7 +66,7 @@ namespace System.Text
         public override unsafe int GetByteCount(string s)
         {
             // Validate input
-            if (s==null)
+            if (s == null)
                 throw new ArgumentNullException(nameof(s));
 
             fixed (char* pChars = s)

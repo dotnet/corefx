@@ -129,7 +129,20 @@ namespace System.Security.Cryptography.X509Certificates
     }
     public enum X509SelectionFlag
     {
-        MultiSelection = 1,
         SingleSelection = 0,
+        MultiSelection = 1,
+    }
+}
+namespace System.Xaml.Permissions
+{
+    public partial class XamlAccessLevel
+    {
+        internal XamlAccessLevel() { }
+        public System.Reflection.AssemblyName AssemblyAccessToAssemblyName { get { throw null; } }
+        public string PrivateAccessToTypeName { get { throw null; } }
+        public static System.Xaml.Permissions.XamlAccessLevel AssemblyAccessTo(System.Reflection.Assembly assembly) { throw null; }
+        public static System.Xaml.Permissions.XamlAccessLevel AssemblyAccessTo(System.Reflection.AssemblyName assemblyName) { throw null; }
+        public static System.Xaml.Permissions.XamlAccessLevel PrivateAccessTo(string assemblyQualifiedTypeName) { throw null; }
+        public static System.Xaml.Permissions.XamlAccessLevel PrivateAccessTo(System.Type type) { throw null; }
     }
 }

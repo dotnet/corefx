@@ -11,7 +11,6 @@
 **
 ===========================================================*/
 
-#nullable enable
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -215,6 +214,7 @@ namespace System
             return IsNaN(obj) && IsNaN(m_value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
             var bits = Unsafe.As<float, int>(ref Unsafe.AsRef(in m_value));

@@ -30,7 +30,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, reason: "netfx doesn't have https://github.com/dotnet/coreclr/pull/20294")]
+        [ActiveIssue(39155)]
         [Fact]
         public static async Task TaskDropsExecutionContextUponCompletion()
         {
@@ -42,13 +42,17 @@ namespace System.Threading.Tasks.Tests
             var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             Task t = null;
-            await Task.Run(delegate // avoid any issues with the stack keeping the object alive
+
+            Thread runner = new Thread(() =>
             {
                 var state = new InvokeActionOnFinalization { Action = () => tcs.SetResult(true) };
-                var al = new AsyncLocal<object> { Value = state }; // ensure the object is stored in ExecutionContext
+                var al = new AsyncLocal<object>(){ Value = state }; // ensure the object is stored in ExecutionContext
                 t = Task.Run(() => { }); // run a task that'll capture EC
                 al.Value = null;
-            });
+            }) { IsBackground = true };
+
+            runner.Start();
+            runner.Join();
 
             await t; // wait for the task method to complete and clear out its state
 
@@ -58,7 +62,15 @@ namespace System.Threading.Tasks.Tests
                 GC.WaitForPendingFinalizers();
             }
 
-            await tcs.Task.TimeoutAfter(60_000); // finalizable object should have been collected and finalized
+            try
+            {
+                await tcs.Task.TimeoutAfter(60_000); // finalizable object should have been collected and finalized
+            }
+            catch (Exception e)
+            {
+                Environment.FailFast("Look at the created dump", e);
+            }
+
             GC.KeepAlive(t); // ensure the object is stored in the state machine
         }
 

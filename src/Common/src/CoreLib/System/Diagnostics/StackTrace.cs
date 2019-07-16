@@ -25,7 +25,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Stack frames comprising this stack trace.
         /// </summary>
-        private StackFrame[] _stackFrames;
+        private StackFrame?[]? _stackFrames;
 
         /// <summary>
         /// Constructs a stack trace from the current location.
@@ -145,7 +145,7 @@ namespace System.Diagnostics
         /// Returns a given stack frame.  Stack frames are numbered starting at
         /// zero, which is the last stack frame pushed.
         /// </summary>
-        public virtual StackFrame GetFrame(int index)
+        public virtual StackFrame? GetFrame(int index)
         {
             if (_stackFrames != null && index < _numOfFrames && index >= 0)
                 return _stackFrames[index + _methodsToSkip];
@@ -159,10 +159,10 @@ namespace System.Diagnostics
         /// The nth element of this array is the same as GetFrame(n).
         /// The length of the array is the same as FrameCount.
         /// </summary>
-        public virtual StackFrame[] GetFrames()
+        public virtual StackFrame?[] GetFrames()
         {
             if (_stackFrames == null || _numOfFrames <= 0)
-                return null;
+                return Array.Empty<StackFrame>();
 
             // We have to return a subset of the array. Unfortunately this
             // means we have to allocate a new array and copy over.
@@ -204,8 +204,8 @@ namespace System.Diagnostics
             StringBuilder sb = new StringBuilder(255);
             for (int iFrameIndex = 0; iFrameIndex < _numOfFrames; iFrameIndex++)
             {
-                StackFrame sf = GetFrame(iFrameIndex);
-                MethodBase mb = sf.GetMethod();
+                StackFrame? sf = GetFrame(iFrameIndex);
+                MethodBase? mb = sf?.GetMethod();
                 if (mb != null && (ShowInStackTrace(mb) || 
                                    (iFrameIndex == _numOfFrames - 1))) // Don't filter last frame
                 {
@@ -218,7 +218,7 @@ namespace System.Diagnostics
                     sb.AppendFormat(CultureInfo.InvariantCulture, "   {0} ", word_At);
 
                     bool isAsync = false;
-                    Type declaringType = mb.DeclaringType;
+                    Type? declaringType = mb.DeclaringType;
                     string methodName = mb.Name;
                     bool methodChanged = false;
                     if (declaringType != null && declaringType.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false))
@@ -235,7 +235,7 @@ namespace System.Diagnostics
                     if (declaringType != null)
                     {
                         // Append t.FullName, replacing '+' with '.'
-                        string fullName = declaringType.FullName;
+                        string fullName = declaringType.FullName!;
                         for (int i = 0; i < fullName.Length; i++)
                         {
                             char ch = fullName[i];
@@ -265,7 +265,7 @@ namespace System.Diagnostics
                         sb.Append(']');
                     }
 
-                    ParameterInfo[] pi = null;
+                    ParameterInfo[]? pi = null;
                     try
                     {
                         pi = mb.GetParameters();
@@ -306,11 +306,11 @@ namespace System.Diagnostics
                     }
 
                     // source location printing
-                    if (sf.GetILOffset() != -1)
+                    if (sf!.GetILOffset() != -1)
                     {
                         // If we don't have a PDB or PDB-reading is disabled for the module,
                         // then the file name will be null.
-                        string fileName = sf.GetFileName();
+                        string? fileName = sf.GetFileName();
 
                         if (fileName != null)
                         {
@@ -339,7 +339,32 @@ namespace System.Diagnostics
         private static bool ShowInStackTrace(MethodBase mb)
         {
             Debug.Assert(mb != null);
-            return !(mb.IsDefined(typeof(StackTraceHiddenAttribute)) || (mb.DeclaringType?.IsDefined(typeof(StackTraceHiddenAttribute)) ?? false));
+
+            if ((mb.MethodImplementationFlags & MethodImplAttributes.AggressiveInlining) != 0)
+            {
+                // Aggressive Inlines won't normally show in the StackTrace; however for Tier0 Jit and
+                // cross-assembly AoT/R2R these inlines will be blocked until Tier1 Jit re-Jits 
+                // them when they will inline. We don't show them in the StackTrace to bring consistency
+                // between this first-pass asm and fully optimized asm.
+                return false;
+            }
+
+            if (mb.IsDefined(typeof(StackTraceHiddenAttribute), inherit: false))
+            {
+                // Don't show where StackTraceHidden is applied to the method.
+                return false;
+            }
+
+            Type? declaringType = mb.DeclaringType;
+            // Methods don't always have containing types, for example dynamic RefEmit generated methods.
+            if (declaringType != null && 
+                declaringType.IsDefined(typeof(StackTraceHiddenAttribute), inherit: false))
+            {
+                // Don't show where StackTraceHidden is applied to the containing Type of the method.
+                return false;
+            }
+
+            return true;
         }
 
         private static bool TryResolveStateMachineMethod(ref MethodBase method, out Type declaringType)
@@ -349,13 +374,13 @@ namespace System.Diagnostics
 
             declaringType = method.DeclaringType;
 
-            Type parentType = declaringType.DeclaringType;
+            Type? parentType = declaringType.DeclaringType;
             if (parentType == null)
             {
                 return false;
             }
 
-            MethodInfo[] methods = parentType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            MethodInfo[]? methods = parentType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
             if (methods == null)
             {
                 return false;
@@ -363,7 +388,7 @@ namespace System.Diagnostics
 
             foreach (MethodInfo candidateMethod in methods)
             {
-                IEnumerable<StateMachineAttribute> attributes = candidateMethod.GetCustomAttributes<StateMachineAttribute>(inherit: false);
+                IEnumerable<StateMachineAttribute>? attributes = candidateMethod.GetCustomAttributes<StateMachineAttribute>(inherit: false);
                 if (attributes == null)
                 {
                     continue;
@@ -385,7 +410,7 @@ namespace System.Diagnostics
                     // of the original method. Non-iterator async state machines resolve directly to their builder methods
                     // so aren't marked as changed.
                     method = candidateMethod;
-                    declaringType = candidateMethod.DeclaringType;
+                    declaringType = candidateMethod.DeclaringType!;
                     return foundIteratorAttribute;
                 }
             }

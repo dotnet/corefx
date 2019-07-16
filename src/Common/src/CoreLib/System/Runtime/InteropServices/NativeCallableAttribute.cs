@@ -24,6 +24,6 @@ namespace System.Runtime.InteropServices
         /// <summary>
         /// Optional. If omitted, then the method is native callable, but no EAT is emitted.
         /// </summary>
-        public string EntryPoint;
+        public string? EntryPoint;
     }
 }

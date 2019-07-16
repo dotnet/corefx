@@ -59,7 +59,7 @@ namespace System
             return hasValue ? value : defaultValue;
         }
 
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
             if (!hasValue) return other == null;
             if (other == null) return false;
@@ -71,7 +71,7 @@ namespace System
             return hasValue ? value.GetHashCode() : 0;
         }
 
-        public override string ToString()
+        public override string? ToString()
         {
             return hasValue ? value.ToString() : "";
         }
@@ -85,7 +85,7 @@ namespace System
         [NonVersionable]
         public static explicit operator T(Nullable<T> value)
         {
-            return value.Value;
+            return value!.Value;
         }
     }
 
@@ -115,7 +115,7 @@ namespace System
 
         // If the type provided is not a Nullable Type, return null.
         // Otherwise, returns the underlying type of the Nullable type
-        public static Type GetUnderlyingType(Type nullableType)
+        public static Type? GetUnderlyingType(Type nullableType)
         {
             if ((object)nullableType == null)
             {

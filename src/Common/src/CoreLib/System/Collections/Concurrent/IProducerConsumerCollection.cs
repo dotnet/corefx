@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Collections.Concurrent
 {
@@ -59,7 +59,7 @@ namespace System.Collections.Concurrent
         /// unspecified.
         /// </param>
         /// <returns>true if an object was removed and returned successfully; otherwise, false.</returns>
-        bool TryTake(out T item);
+        bool TryTake([MaybeNullWhen(false)] out T item);
 
         /// <summary>
         /// Copies the elements contained in the <see cref="IProducerConsumerCollection{T}"/> to a new array.

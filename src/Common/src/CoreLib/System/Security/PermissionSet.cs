@@ -25,7 +25,7 @@ namespace System.Security
         public void Assert() { }
         public bool ContainsNonCodeAccessPermissions() { return false; }
         [Obsolete]
-        public static byte[] ConvertPermissionSet(string inFormat, byte[] inData, string outFormat) { throw new NotImplementedException(); }
+        public static byte[] ConvertPermissionSet(string inFormat, byte[] inData, string outFormat) { throw new PlatformNotSupportedException(SR.PlatformNotSupported_CAS); }
         public virtual PermissionSet Copy() { return new PermissionSet(this); }
         public virtual void CopyTo(Array array, int index) { }
         public void Demand() { }
@@ -48,7 +48,7 @@ namespace System.Security
         public static void RevertAssert() { }
         public IPermission? SetPermission(IPermission? perm) { return SetPermissionImpl(perm); }
         protected virtual IPermission? SetPermissionImpl(IPermission? perm) { return default(IPermission); }
-        void IDeserializationCallback.OnDeserialization(object sender) { }
+        void IDeserializationCallback.OnDeserialization(object? sender) { }
         public override string ToString() => base.ToString()!;
         public virtual SecurityElement? ToXml() { return default(SecurityElement); }
         public PermissionSet? Union(PermissionSet? other) { return default(PermissionSet); }

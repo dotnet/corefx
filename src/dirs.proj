@@ -8,16 +8,21 @@
 
   <ItemGroup Condition="'$(DirectoryToBuild)' == ''">
     <Project Include="ref.builds" />
-    <Project Include="shims\shims.proj" />
+    <Project Include="shims\generated\*.csproj" />
     <Project Include="Native\native-binplace.proj" />
     <Project Include="src.builds" />
     <Project Include="shims\manual\*.csproj" />
-    <Project Include="shims\ApiCompat.proj" />
-    <Project Include="pretest.builds" />
+    <Project Include="shims\ApiCompat.proj" Condition="'$(DotNetBuildFromSource)' != 'true'" />
+    <Project Include="pretest.proj" Condition="'$(DotNetBuildFromSource)' != 'true' and '$(BuildAllConfigurations)' != 'true'" />
+  </ItemGroup>
+
+  <!-- Don't build System.Text.Encodings.Web tools as part of build; they're intended to be run manually. -->
+  <ItemGroup>
+    <ProjectExclusions Include="$(SourceDir)System.Text.Encodings.Web/tools/**/*.csproj" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(DirectoryToBuild)' != ''">
-    <Project Include="$(DirectoryToBuild)/**/*.csproj" />
+    <Project Include="$(DirectoryToBuild)/**/*.csproj" Exclude="@(ProjectExclusions)" />
   </ItemGroup>
 
   <Import Project="$(RepositoryEngineeringDir)dir.traversal.targets" />

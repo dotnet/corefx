@@ -7,6 +7,9 @@ using System.Net.Test.Common;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.DotNet.XUnitExtensions;
+using Microsoft.DotNet.RemoteExecutor;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,11 +20,31 @@ namespace System.Net.Http.Functional.Tests
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
     public abstract class HttpClientHandler_Proxy_Test : HttpClientHandlerTestBase
     {
-        private readonly ITestOutputHelper _output;
-        
-        public HttpClientHandler_Proxy_Test(ITestOutputHelper output)
+        public HttpClientHandler_Proxy_Test(ITestOutputHelper output) : base(output) { }
+
+        [Fact]
+        public async Task Dispose_HandlerWithProxy_ProxyNotDisposed()
         {
-            _output = output;
+            var proxy = new TrackDisposalProxy();
+
+            await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                {
+                    handler.UseProxy = true;
+                    handler.Proxy = proxy;
+                    using (HttpClient client = CreateHttpClient(handler))
+                    {
+                        Assert.Equal("hello", await client.GetStringAsync(uri));
+                    }
+                }
+            }, async server =>
+            {
+                await server.HandleRequestAsync(content: "hello");
+            });
+
+            Assert.True(proxy.ProxyUsed);
+            Assert.False(proxy.Disposed);
         }
 
         [ActiveIssue(32809)]
@@ -57,13 +80,6 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            if (PlatformDetection.IsFullFramework &&
-                (proxyAuthScheme == AuthenticationSchemes.Negotiate || proxyAuthScheme == AuthenticationSchemes.Ntlm))
-            {
-                // Skip due to bug in .NET Framework with Windows auth and proxy tunneling.
-                return;
-            }
-
             if (!PlatformDetection.IsWindows &&
                 (proxyAuthScheme == AuthenticationSchemes.Negotiate || proxyAuthScheme == AuthenticationSchemes.Ntlm))
             {
@@ -89,7 +105,7 @@ namespace System.Net.Http.Functional.Tests
             using (LoopbackProxyServer proxyServer = LoopbackProxyServer.Create(options))
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     handler.Proxy = new WebProxy(proxyServer.Uri);
                     handler.Proxy.Credentials = new NetworkCredential("username", "password");
@@ -104,6 +120,35 @@ namespace System.Net.Http.Functional.Tests
                     }
                 }
             }
+        }
+
+        [OuterLoop("Uses external server")]
+        [ConditionalFact]
+        public void Proxy_UseEnvironmentVariableToSetSystemProxy_RequestGoesThruProxy()
+        {
+            if (!UseSocketsHttpHandler)
+            {
+                throw new SkipTestException("Test needs SocketsHttpHandler");
+            }
+
+            RemoteExecutor.Invoke(async (useSocketsHttpHandlerString, useHttp2String) =>
+            {
+                var options = new LoopbackProxyServer.Options { AddViaRequestHeader = true };
+                using (LoopbackProxyServer proxyServer = LoopbackProxyServer.Create(options))
+                {
+                    Environment.SetEnvironmentVariable("http_proxy", proxyServer.Uri.AbsoluteUri.ToString());
+
+                    using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString, useHttp2String))
+                    using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer))
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        string body = await response.Content.ReadAsStringAsync();
+                        Assert.Contains(proxyServer.ViaHeader, body);
+                    }
+
+                    return RemoteExecutor.SuccessExitCode;
+                }
+            }, UseSocketsHttpHandler.ToString(), UseHttp2.ToString()).Dispose();
         }
 
         [ActiveIssue(32809)]
@@ -127,7 +172,7 @@ namespace System.Net.Http.Functional.Tests
                 }
 
                 using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     handler.Proxy = new WebProxy(proxyServer.Uri) { Credentials = creds };
 
@@ -170,7 +215,7 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.Proxy = proxy;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer))
             {
                 TestHelper.VerifyResponseBody(
@@ -190,7 +235,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.Proxy = new WebProxy(proxyServer.Uri);
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer))
                 {
                     Assert.Equal(HttpStatusCode.ProxyAuthenticationRequired, response.StatusCode);
@@ -202,7 +247,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task Proxy_SslProxyUnsupported_Throws()
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.Proxy = new WebProxy("https://" + Guid.NewGuid().ToString("N"));
 
@@ -229,7 +274,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.Proxy = new WebProxy(proxyServer.Uri);
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.SecureRemoteEchoServer))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -239,7 +284,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public async Task ProxyAuth_Digest_Succeeds()
         {
@@ -258,7 +302,7 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateServerAsync(async (proxyServer, proxyUrl) =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     handler.Proxy = new WebProxy(proxyUrl) { Credentials = proxyCreds };
 
@@ -298,6 +342,25 @@ namespace System.Net.Http.Functional.Tests
                 yield return new object[] { new NetworkCredential("username", "password"), wrapCredsInCache };
                 yield return new object[] { new NetworkCredential("username", "password", "domain"), wrapCredsInCache };
             }
+        }
+
+        private sealed class TrackDisposalProxy : IWebProxy, IDisposable
+        {
+            public bool Disposed;
+            public bool ProxyUsed;
+
+            public void Dispose() => Disposed = true;
+            public Uri GetProxy(Uri destination)
+            {
+                ProxyUsed = true;
+                return null;
+            }
+            public bool IsBypassed(Uri host)
+            {
+                ProxyUsed = true;
+                return true;
+            }
+            public ICredentials Credentials { get => null; set { } }
         }
     }
 }

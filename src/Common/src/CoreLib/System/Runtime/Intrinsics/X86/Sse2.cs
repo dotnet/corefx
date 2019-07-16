@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
@@ -305,21 +304,18 @@ namespace System.Runtime.Intrinsics.X86
         /// int _mm_comieq_sd (__m128d a, __m128d b)
         ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareEqualOrderedScalar(Vector128<double> left, Vector128<double> right) => CompareEqualOrderedScalar(left, right);
         public static bool CompareScalarOrderedEqual(Vector128<double> left, Vector128<double> right) => CompareScalarOrderedEqual(left, right);
 
         /// <summary>
         /// int _mm_ucomieq_sd (__m128d a, __m128d b)
         ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareEqualUnorderedScalar(Vector128<double> left, Vector128<double> right) => CompareEqualUnorderedScalar(left, right);
         public static bool CompareScalarUnorderedEqual(Vector128<double> left, Vector128<double> right) => CompareScalarUnorderedEqual(left, right);
 
         /// <summary>
         /// __m128d _mm_cmpeq_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(0)
         /// </summary>
-        public static Vector128<double> CompareEqualScalar(Vector128<double> left, Vector128<double> right) => CompareEqualScalar(left, right);
         public static Vector128<double> CompareScalarEqual(Vector128<double> left, Vector128<double> right) => CompareScalarEqual(left, right);
 
         /// <summary>
@@ -347,21 +343,18 @@ namespace System.Runtime.Intrinsics.X86
         /// int _mm_comigt_sd (__m128d a, __m128d b)
         ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareGreaterThanOrderedScalar(Vector128<double> left, Vector128<double> right) => CompareGreaterThanOrderedScalar(left, right);
         public static bool CompareScalarOrderedGreaterThan(Vector128<double> left, Vector128<double> right) => CompareScalarOrderedGreaterThan(left, right);
 
         /// <summary>
         /// int _mm_ucomigt_sd (__m128d a, __m128d b)
         ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareGreaterThanUnorderedScalar(Vector128<double> left, Vector128<double> right) => CompareGreaterThanUnorderedScalar(left, right);
         public static bool CompareScalarUnorderedGreaterThan(Vector128<double> left, Vector128<double> right) => CompareScalarUnorderedGreaterThan(left, right);
 
         /// <summary>
         /// __m128d _mm_cmpgt_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(6)
         /// </summary>
-        public static Vector128<double> CompareGreaterThanScalar(Vector128<double> left, Vector128<double> right) => CompareGreaterThanScalar(left, right);
         public static Vector128<double> CompareScalarGreaterThan(Vector128<double> left, Vector128<double> right) => CompareScalarGreaterThan(left, right);
 
         /// <summary>
@@ -374,21 +367,18 @@ namespace System.Runtime.Intrinsics.X86
         /// int _mm_comige_sd (__m128d a, __m128d b)
         ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareGreaterThanOrEqualOrderedScalar(Vector128<double> left, Vector128<double> right) => CompareGreaterThanOrEqualOrderedScalar(left, right);
         public static bool CompareScalarOrderedGreaterThanOrEqual(Vector128<double> left, Vector128<double> right) => CompareScalarOrderedGreaterThanOrEqual(left, right);
 
         /// <summary>
         /// int _mm_ucomige_sd (__m128d a, __m128d b)
         ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareGreaterThanOrEqualUnorderedScalar(Vector128<double> left, Vector128<double> right) => CompareGreaterThanOrEqualUnorderedScalar(left, right);
         public static bool CompareScalarUnorderedGreaterThanOrEqual(Vector128<double> left, Vector128<double> right) => CompareScalarUnorderedGreaterThanOrEqual(left, right);
 
         /// <summary>
         /// __m128d _mm_cmpge_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(5)
         /// </summary>
-        public static Vector128<double> CompareGreaterThanOrEqualScalar(Vector128<double> left, Vector128<double> right) => CompareGreaterThanOrEqualScalar(left, right);
         public static Vector128<double> CompareScalarGreaterThanOrEqual(Vector128<double> left, Vector128<double> right) => CompareScalarGreaterThanOrEqual(left, right);
 
         /// <summary>
@@ -416,21 +406,18 @@ namespace System.Runtime.Intrinsics.X86
         /// int _mm_comilt_sd (__m128d a, __m128d b)
         ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareLessThanOrderedScalar(Vector128<double> left, Vector128<double> right) => CompareLessThanOrderedScalar(left, right);
         public static bool CompareScalarOrderedLessThan(Vector128<double> left, Vector128<double> right) => CompareScalarOrderedLessThan(left, right);
 
         /// <summary>
         /// int _mm_ucomilt_sd (__m128d a, __m128d b)
         ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareLessThanUnorderedScalar(Vector128<double> left, Vector128<double> right) => CompareLessThanUnorderedScalar(left, right);
         public static bool CompareScalarUnorderedLessThan(Vector128<double> left, Vector128<double> right) => CompareScalarUnorderedLessThan(left, right);
 
         /// <summary>
         /// __m128d _mm_cmplt_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(1)
         /// </summary>
-        public static Vector128<double> CompareLessThanScalar(Vector128<double> left, Vector128<double> right) => CompareLessThanScalar(left, right);
         public static Vector128<double> CompareScalarLessThan(Vector128<double> left, Vector128<double> right) => CompareScalarLessThan(left, right);
 
         /// <summary>
@@ -443,21 +430,18 @@ namespace System.Runtime.Intrinsics.X86
         /// int _mm_comile_sd (__m128d a, __m128d b)
         ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareLessThanOrEqualOrderedScalar(Vector128<double> left, Vector128<double> right) => CompareLessThanOrEqualOrderedScalar(left, right);
         public static bool CompareScalarOrderedLessThanOrEqual(Vector128<double> left, Vector128<double> right) => CompareScalarOrderedLessThanOrEqual(left, right);
 
         /// <summary>
         /// int _mm_ucomile_sd (__m128d a, __m128d b)
         ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareLessThanOrEqualUnorderedScalar(Vector128<double> left, Vector128<double> right) => CompareLessThanOrEqualUnorderedScalar(left, right);
         public static bool CompareScalarUnorderedLessThanOrEqual(Vector128<double> left, Vector128<double> right) => CompareScalarUnorderedLessThanOrEqual(left, right);
 
         /// <summary>
         /// __m128d _mm_cmple_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(2)
         /// </summary>
-        public static Vector128<double> CompareLessThanOrEqualScalar(Vector128<double> left, Vector128<double> right) => CompareLessThanOrEqualScalar(left, right);
         public static Vector128<double> CompareScalarLessThanOrEqual(Vector128<double> left, Vector128<double> right) => CompareScalarLessThanOrEqual(left, right);
 
         /// <summary>
@@ -470,21 +454,18 @@ namespace System.Runtime.Intrinsics.X86
         /// int _mm_comineq_sd (__m128d a, __m128d b)
         ///   COMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareNotEqualOrderedScalar(Vector128<double> left, Vector128<double> right) => CompareNotEqualOrderedScalar(left, right);
         public static bool CompareScalarOrderedNotEqual(Vector128<double> left, Vector128<double> right) => CompareScalarOrderedNotEqual(left, right);
 
         /// <summary>
         /// int _mm_ucomineq_sd (__m128d a, __m128d b)
         ///   UCOMISD xmm, xmm/m64
         /// </summary>
-        public static bool CompareNotEqualUnorderedScalar(Vector128<double> left, Vector128<double> right) => CompareNotEqualUnorderedScalar(left, right);
         public static bool CompareScalarUnorderedNotEqual(Vector128<double> left, Vector128<double> right) => CompareScalarUnorderedNotEqual(left, right);
 
         /// <summary>
         /// __m128d _mm_cmpneq_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(4)
         /// </summary>
-        public static Vector128<double> CompareNotEqualScalar(Vector128<double> left, Vector128<double> right) => CompareNotEqualScalar(left, right);
         public static Vector128<double> CompareScalarNotEqual(Vector128<double> left, Vector128<double> right) => CompareScalarNotEqual(left, right);
 
         /// <summary>
@@ -497,7 +478,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpngt_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(2)
         /// </summary>
-        public static Vector128<double> CompareNotGreaterThanScalar(Vector128<double> left, Vector128<double> right) => CompareNotGreaterThanScalar(left, right);
         public static Vector128<double> CompareScalarNotGreaterThan(Vector128<double> left, Vector128<double> right) => CompareScalarNotGreaterThan(left, right);
 
         /// <summary>
@@ -510,7 +490,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpnge_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(1)
         /// </summary>
-        public static Vector128<double> CompareNotGreaterThanOrEqualScalar(Vector128<double> left, Vector128<double> right) => CompareNotGreaterThanOrEqualScalar(left, right);
         public static Vector128<double> CompareScalarNotGreaterThanOrEqual(Vector128<double> left, Vector128<double> right) => CompareScalarNotGreaterThanOrEqual(left, right);
 
         /// <summary>
@@ -523,7 +502,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpnlt_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(5)
         /// </summary>
-        public static Vector128<double> CompareNotLessThanScalar(Vector128<double> left, Vector128<double> right) => CompareNotLessThanScalar(left, right);
         public static Vector128<double> CompareScalarNotLessThan(Vector128<double> left, Vector128<double> right) => CompareScalarNotLessThan(left, right);
 
         /// <summary>
@@ -536,7 +514,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpnle_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(6)
         /// </summary>
-        public static Vector128<double> CompareNotLessThanOrEqualScalar(Vector128<double> left, Vector128<double> right) => CompareNotLessThanOrEqualScalar(left, right);
         public static Vector128<double> CompareScalarNotLessThanOrEqual(Vector128<double> left, Vector128<double> right) => CompareScalarNotLessThanOrEqual(left, right);
 
         /// <summary>
@@ -549,7 +526,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpord_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(7)
         /// </summary>
-        public static Vector128<double> CompareOrderedScalar(Vector128<double> left, Vector128<double> right) => CompareOrderedScalar(left, right);
         public static Vector128<double> CompareScalarOrdered(Vector128<double> left, Vector128<double> right) => CompareScalarOrdered(left, right);
 
         /// <summary>
@@ -562,7 +538,6 @@ namespace System.Runtime.Intrinsics.X86
         /// __m128d _mm_cmpunord_sd (__m128d a,  __m128d b)
         ///   CMPSD xmm, xmm/m64, imm8(3)
         /// </summary>
-        public static Vector128<double> CompareUnorderedScalar(Vector128<double> left, Vector128<double> right) => CompareUnorderedScalar(left, right);
         public static Vector128<double> CompareScalarUnordered(Vector128<double> left, Vector128<double> right) => CompareScalarUnordered(left, right);
 
         /// <summary>
@@ -1325,6 +1300,16 @@ namespace System.Runtime.Intrinsics.X86
         ///   MOVSD m64, xmm
         /// </summary>
         public static unsafe void StoreScalar(double* address, Vector128<double> source) => StoreScalar(address, source);
+        /// <summary>
+        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
+        ///   MOVQ m64, xmm
+        /// </summary>
+        public static unsafe void StoreScalar(long* address, Vector128<long> source) => StoreScalar(address, source);
+        /// <summary>
+        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
+        ///   MOVQ m64, xmm
+        /// </summary>
+        public static unsafe void StoreScalar(ulong* address, Vector128<ulong> source) => StoreScalar(address, source);
 
         /// <summary>
         /// void _mm_store_si128 (__m128i* mem_addr, __m128i a)
@@ -1470,16 +1455,6 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static unsafe void StoreHigh(double* address, Vector128<double> source) => StoreHigh(address, source);
 
-        /// <summary>
-        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
-        ///   MOVQ m64, xmm
-        /// </summary>
-        public static unsafe void StoreLow(long* address, Vector128<long> source) => StoreLow(address, source);
-        /// <summary>
-        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
-        ///   MOVQ m64, xmm
-        /// </summary>
-        public static unsafe void StoreLow(ulong* address, Vector128<ulong> source) => StoreLow(address, source);
         /// <summary>
         /// void _mm_storel_pd (double* mem_addr, __m128d a)
         ///   MOVLPD m64, xmm

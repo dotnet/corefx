@@ -599,10 +599,8 @@ namespace System.ComponentModel
                     }
                 }
 
-#if FEATURE_IDESIGNERHOST
                 // Not in our table. We have a default association with a designer 
                 // if that designer is a component.
-                //
                 if (associatedObject == primary)
                 {
                     IComponent component = primary as IComponent;
@@ -621,7 +619,6 @@ namespace System.ComponentModel
                                 // got here, we're probably hosed because the user just passed in
                                 // an object that this PropertyDescriptor can't munch on, but it's
                                 // clearer to use that object instance instead of it's designer.
-                                //
                                 if (designer != null && type.IsInstanceOfType(designer))
                                 {
                                     associatedObject = designer;
@@ -630,7 +627,6 @@ namespace System.ComponentModel
                         }
                     }
                 }
-#endif
             }
 
             return associatedObject;
@@ -908,12 +904,6 @@ namespace System.ComponentModel
             {
                 throw new ArgumentException(nameof(component));
             }
-
-            if (component is IUnimplemented)
-            {
-                throw new NotSupportedException(SR.Format(SR.TypeDescriptorUnsupportedRemoteObject, component.GetType().FullName));
-            }
-
 
             ICustomTypeDescriptor desc = NodeFor(component).GetTypeDescriptor(component);
             ICustomTypeDescriptor d = component as ICustomTypeDescriptor;
@@ -2862,24 +2852,6 @@ namespace System.ComponentModel
                 return true;
             }
         }
-
-        /// <summary>
-        /// An unimplemented interface. What is this?  It is an interface that nobody ever
-        /// implements, of course? Where and why would it be used?  Why, to find cross-process
-        /// remoted objects, of course!  If a well-known object comes in from a cross process
-        /// connection, the remoting layer does contain enough type information to determine
-        /// if an object implements an interface. It assumes that if you are going to cast
-        /// an object to an interface that you know what you're doing, and allows the cast,
-        /// even for objects that DON'T actually implement the interface. The error here
-        /// is raised later when you make your first call on that interface pointer:  you
-        /// get a remoting exception.
-        ///
-        /// This is a big problem for code that does "is" and "as" checks to detect the
-        /// presence of an interface. We do that all over the place here, so we do a check
-        /// during parameter validation to see if an object implements IUnimplemented. If it
-        /// does, we know that what we really have is a lying remoting proxy, and we bail.
-        /// </summary>
-        private interface IUnimplemented { }
 
         /// <summary>
         /// This comparer compares member descriptors for sorting.

@@ -44,14 +44,47 @@ namespace System.Security.Cryptography
                 if (parameters.D == null)
                 {
                     includePrivate = false;
-                    if (parameters.P != null || parameters.DP != null || parameters.Q != null || parameters.DQ != null || parameters.InverseQ != null)
+
+                    if (parameters.P != null ||
+                        parameters.DP != null ||
+                        parameters.Q != null ||
+                        parameters.DQ != null ||
+                        parameters.InverseQ != null)
+                    {
                         throw new CryptographicException(SR.Cryptography_InvalidRsaParameters);
+                    }
                 }
                 else
                 {
                     includePrivate = true;
-                    if (parameters.P == null || parameters.DP == null || parameters.Q == null || parameters.DQ == null || parameters.InverseQ == null)
+
+                    if (parameters.P == null ||
+                        parameters.DP == null ||
+                        parameters.Q == null ||
+                        parameters.DQ == null ||
+                        parameters.InverseQ == null)
+                    {
                         throw new CryptographicException(SR.Cryptography_InvalidRsaParameters);
+                    }
+
+                    // Half, rounded up.
+                    int halfModulusLength = (parameters.Modulus.Length + 1) / 2;
+
+                    // The same checks are done by RSACryptoServiceProvider on import (when building the key blob)
+                    // Historically RSACng let CNG handle this (reporting NTE_NOT_SUPPORTED), but on RS1 CNG let the
+                    // import succeed, then on private key use (e.g. signing) it would report NTE_INVALID_PARAMETER.
+                    //
+                    // Doing the check here prevents the state in RS1 where the Import succeeds, but corrupts the key,
+                    // and makes for a friendlier exception message.
+                    if (parameters.D.Length != parameters.Modulus.Length ||
+                        parameters.P.Length != halfModulusLength ||
+                        parameters.Q.Length != halfModulusLength ||
+                        parameters.DP.Length != halfModulusLength ||
+                        parameters.DQ.Length != halfModulusLength ||
+                        parameters.InverseQ.Length != halfModulusLength)
+                    {
+                        throw new CryptographicException(SR.Cryptography_InvalidRsaParameters);
+                    }
                 }
 
                 //
@@ -112,6 +145,8 @@ namespace System.Security.Cryptography
 
             public override void ImportPkcs8PrivateKey(ReadOnlySpan<byte> source, out int bytesRead)
             {
+                ThrowIfDisposed();
+
                 CngPkcs8.Pkcs8Response response = CngPkcs8.ImportPkcs8PrivateKey(source, out int localRead);
 
                 ProcessPkcs8Response(response);
@@ -123,6 +158,8 @@ namespace System.Security.Cryptography
                 ReadOnlySpan<byte> source,
                 out int bytesRead)
             {
+                ThrowIfDisposed();
+
                 CngPkcs8.Pkcs8Response response = CngPkcs8.ImportEncryptedPkcs8PrivateKey(
                     passwordBytes,
                     source,
@@ -137,6 +174,8 @@ namespace System.Security.Cryptography
                 ReadOnlySpan<byte> source,
                 out int bytesRead)
             {
+                ThrowIfDisposed();
+
                 CngPkcs8.Pkcs8Response response = CngPkcs8.ImportEncryptedPkcs8PrivateKey(
                     password,
                     source,

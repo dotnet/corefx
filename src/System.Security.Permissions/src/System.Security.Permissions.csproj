@@ -1,10 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{07390899-C8F6-4E83-A3A9-6867B8CB46A0}</ProjectGuid>
     <RootNamespace>System.Security.Permissions</RootNamespace>
     <AssemblyName>System.Security.Permissions</AssemblyName>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <Configurations>net461-Debug;net461-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <Configurations>net461-Debug;net461-Release;netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <Compile Include="System\ApplicationIdentity.cs" />
@@ -89,6 +89,7 @@
     <Compile Include="System\Security\Permissions\KeyContainerPermissionAccessEntryEnumerator.cs" />
     <Compile Include="System\Security\Permissions\KeyContainerPermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\KeyContainerPermissionFlags.cs" />
+    <Compile Include="System\Security\Permissions\MediaPermission.cs" />
     <Compile Include="System\Security\Permissions\PermissionSetAttribute.cs" />
     <Compile Include="System\Security\Permissions\PrincipalPermission.cs" />
     <Compile Include="System\Security\Permissions\PrincipalPermissionAttribute.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="System\Security\Permissions\UIPermissionWindow.cs" />
     <Compile Include="System\Security\Permissions\UrlIdentityPermission.cs" />
     <Compile Include="System\Security\Permissions\UrlIdentityPermissionAttribute.cs" />
+    <Compile Include="System\Security\Permissions\WebBrowserPermission.cs" />
     <Compile Include="System\Security\Permissions\ZoneIdentityPermission.cs" />
     <Compile Include="System\Security\Permissions\ZoneIdentityPermissionAttribute.cs" />
     <Compile Include="System\Security\Policy\AllMembershipCondition.cs" />
@@ -177,6 +179,9 @@
     <Compile Include="System\Web\AspNetHostingPermissionAttribute.cs" />
     <Compile Include="System\Web\AspNetHostingPermissionLevel.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System\Xaml\Permissions\XamlLoadPermission.cs" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
     <Compile Include="$(CommonPath)\CoreLib\System\Security\IStackWalk.cs">
       <Link>Common\CoreLib\System\Security\IStackWalk.cs</Link>
@@ -201,6 +206,8 @@
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Security.AccessControl" />
@@ -221,5 +228,8 @@
     <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Reference Include="System.Windows.Extensions" />
   </ItemGroup>
 </Project>

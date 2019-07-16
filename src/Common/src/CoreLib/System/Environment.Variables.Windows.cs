@@ -4,16 +4,14 @@
 
 using System.Buffers;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace System
 {
     public static partial class Environment
     {
-        private static string GetEnvironmentVariableCore(string variable)
+        private static string? GetEnvironmentVariableCore(string variable)
         {
             Span<char> buffer = stackalloc char[128]; // a somewhat reasonable default size
             int requiredSize = Interop.Kernel32.GetEnvironmentVariable(variable, buffer);
@@ -47,7 +45,7 @@ namespace System
             }
         }
 
-        private static void SetEnvironmentVariableCore(string variable, string value)
+        private static void SetEnvironmentVariableCore(string variable, string? value)
         {
             if (!Interop.Kernel32.SetEnvironmentVariable(variable, value))
             {

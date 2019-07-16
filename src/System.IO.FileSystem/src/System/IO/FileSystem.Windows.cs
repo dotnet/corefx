@@ -82,7 +82,7 @@ namespace System.IO
             int length = fullPath.Length;
 
             // We need to trim the trailing slash or the code will try to create 2 directories of the same name.
-            if (length >= 2 && PathInternal.EndsInDirectorySeparator(fullPath.AsSpan()))
+            if (length >= 2 && Path.EndsInDirectorySeparator(fullPath.AsSpan()))
                 length--;
 
             int lengthRoot = PathInternal.GetRootLength(fullPath.AsSpan());
@@ -200,7 +200,7 @@ namespace System.IO
             int errorCode = Interop.Errors.ERROR_SUCCESS;
 
             // Neither GetFileAttributes or FindFirstFile like trailing separators
-            path = PathInternal.TrimEndingDirectorySeparator(path);
+            path = Path.TrimEndingDirectorySeparator(path);
 
             using (DisableMediaInsertionPrompt.Create())
             {
@@ -217,12 +217,13 @@ namespace System.IO
                         && errorCode != Interop.Errors.ERROR_INVALID_PARAMETER
                         && errorCode != Interop.Errors.ERROR_NETWORK_UNREACHABLE
                         && errorCode != Interop.Errors.ERROR_NETWORK_ACCESS_DENIED
-                        && errorCode != Interop.Errors.ERROR_INVALID_HANDLE  // eg from \\.\CON
+                        && errorCode != Interop.Errors.ERROR_INVALID_HANDLE         // eg from \\.\CON
+                        && errorCode != Interop.Errors.ERROR_FILENAME_EXCED_RANGE   // Path is too long
                         )
                     {
                         // Assert so we can track down other cases (if any) to add to our test suite
                         Debug.Assert(errorCode == Interop.Errors.ERROR_ACCESS_DENIED || errorCode == Interop.Errors.ERROR_SHARING_VIOLATION,
-                            $"Unexpected error code getting attributes {errorCode}");
+                            $"Unexpected error code getting attributes {errorCode} from path {path}");
 
                         // Files that are marked for deletion will not let you GetFileAttributes,
                         // ERROR_ACCESS_DENIED is given back without filling out the data struct.
@@ -408,7 +409,7 @@ namespace System.IO
 
         private static void GetFindData(string fullPath, ref Interop.Kernel32.WIN32_FIND_DATA findData)
         {
-            using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(PathInternal.TrimEndingDirectorySeparator(fullPath), ref findData))
+            using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(Path.TrimEndingDirectorySeparator(fullPath), ref findData))
             {
                 if (handle.IsInvalid)
                 {

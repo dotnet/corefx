@@ -90,7 +90,7 @@ namespace System.Xml.Xsl.Xslt
                     newSize = position + 1;
                 }
                 Record[] tmp = new Record[newSize];
-                Array.Copy(_records, tmp, _records.Length);
+                Array.Copy(_records, 0, tmp, 0, _records.Length);
                 _records = tmp;
             }
         }
@@ -262,8 +262,6 @@ namespace System.Xml.Xsl.Xslt
             Debug.Assert(_reader.NodeType == XmlNodeType.EndEntity);
             if (_readerLineInfo != null)
             {
-                int line = _readerLineInfo.LineNumber;
-                int pos = _readerLineInfo.LinePosition;
                 rec.end = new Location(_readerLineInfo.LineNumber, _readerLineInfo.LinePosition + 1);
             }
         }

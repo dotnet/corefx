@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -14,9 +13,9 @@ internal static partial class Interop
         [StructLayout(LayoutKind.Sequential)]
         internal struct ProcessCpuInformation
         {
-            ulong lastRecordedCurrentTime;
-            ulong lastRecordedKernelTime;
-            ulong lastRecordedUserTime;
+            internal ulong lastRecordedCurrentTime;
+            internal ulong lastRecordedKernelTime;
+            internal ulong lastRecordedUserTime;
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetCpuUtilization")]

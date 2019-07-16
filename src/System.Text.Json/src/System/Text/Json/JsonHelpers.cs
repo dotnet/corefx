@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
@@ -9,7 +10,7 @@ namespace System.Text.Json
     internal static partial class JsonHelpers
     {
         /// <summary>
-        /// Returns <see langword="true"/> iff <paramref name="value"/> is a valid Unicode scalar
+        /// Returns <see langword="true"/> if <paramref name="value"/> is a valid Unicode scalar
         /// value, i.e., is in [ U+0000..U+D7FF ], inclusive; or [ U+E000..U+10FFFF ], inclusive.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -24,7 +25,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Returns <see langword="true"/> iff <paramref name="value"/> is between
+        /// Returns <see langword="true"/> if <paramref name="value"/> is between
         /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -32,7 +33,7 @@ namespace System.Text.Json
             => (value - lowerBound) <= (upperBound - lowerBound);
 
         /// <summary>
-        /// Returns <see langword="true"/> iff <paramref name="value"/> is between
+        /// Returns <see langword="true"/> if <paramref name="value"/> is between
         /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -40,7 +41,7 @@ namespace System.Text.Json
             => ((byte)(value - lowerBound) <= (byte)(upperBound - lowerBound));
 
         /// <summary>
-        /// Returns <see langword="true"/> iff <paramref name="value"/> is between
+        /// Returns <see langword="true"/> if <paramref name="value"/> is between
         /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -48,7 +49,7 @@ namespace System.Text.Json
             => (uint)(value - lowerBound) <= (uint)(upperBound - lowerBound);
 
         /// <summary>
-        /// Returns <see langword="true"/> iff <paramref name="value"/> is between
+        /// Returns <see langword="true"/> if <paramref name="value"/> is between
         /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -56,16 +57,7 @@ namespace System.Text.Json
             => (ulong)(value - lowerBound) <= (ulong)(upperBound - lowerBound);
 
         /// <summary>
-        /// Returns <see langword="true"/> iff <paramref name="value"/> is between
-        /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInRangeInclusive(double value, double lowerBound, double upperBound)
-            // For floating-point, do a direct comparison as it is more accurate than subtracting.
-            => (value >= lowerBound) && (value <= upperBound);
-
-        /// <summary>
-        /// Returns <see langword="true"/> iff <paramref name="value"/> is between
+        /// Returns <see langword="true"/> if <paramref name="value"/> is between
         /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,9 +65,41 @@ namespace System.Text.Json
             => (value - lowerBound) <= (upperBound - lowerBound);
 
         /// <summary>
-        /// Returns <see langword="true"/> iff <paramref name="value"/> is in the range [0..9].
+        /// Returns <see langword="true"/> if <paramref name="value"/> is in the range [0..9].
         /// Otherwise, returns <see langword="false"/>.
         /// </summary>
         public static bool IsDigit(byte value) => (uint)(value - '0') <= '9' - '0';
+
+        /// <summary>
+        /// Calls Encoding.UTF8.GetString that supports netstandard.
+        /// </summary>
+        /// <param name="bytes">The utf8 bytes to convert.</param>
+        /// <returns></returns>
+        internal static string Utf8GetString(ReadOnlySpan<byte> bytes)
+        {
+            return Encoding.UTF8.GetString(bytes
+#if netstandard
+                        .ToArray()
+#endif
+                );
+        }
+
+        /// <summary>
+        /// Emulates Dictionary.TryAdd on netstandard.
+        /// </summary>
+        internal static bool TryAdd<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key, TValue value)
+        {
+#if netstandard
+            if (!dictionary.ContainsKey(key))
+            {
+                dictionary[key] = value;
+                return true;
+            }
+
+            return false;
+#else
+            return dictionary.TryAdd(key, value);
+#endif
+        }
     }
 }

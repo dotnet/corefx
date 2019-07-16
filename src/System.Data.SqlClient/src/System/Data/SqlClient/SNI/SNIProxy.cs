@@ -22,7 +22,7 @@ namespace System.Data.SqlClient.SNI
     {
         private const int DefaultSqlServerPort = 1433;
         private const int DefaultSqlServerDacPort = 1434;
-        private const string SqlServerSpnHeader = "MSSQLSvc";
+        private const string SqlServerSpnHeader = "MSSQLSvc/";
 
         public static readonly SNIProxy Singleton = new SNIProxy();
 
@@ -220,16 +220,15 @@ namespace System.Data.SqlClient.SNI
         /// <returns>SNI error status</returns>
         public uint WritePacket(SNIHandle handle, SNIPacket packet, bool sync)
         {
-            SNIPacket clonedPacket = packet.Clone();
             uint result;
             if (sync)
             {
-                result = handle.Send(clonedPacket);
-                clonedPacket.Dispose();
+                result = handle.Send(packet);
+                packet.Release();
             }
             else
             {
-                result = handle.SendAsync(clonedPacket, true);
+                result = handle.SendAsync(packet, true);
             }
 
             return result;
@@ -342,7 +341,7 @@ namespace System.Data.SqlClient.SNI
                 // If the DNS lookup failed, then resort to using the user provided hostname to construct the SPN.
                 fullyQualifiedDomainName = hostEntry?.HostName ?? hostNameOrAddress;
             }
-            string serverSpn = SqlServerSpnHeader + SpnServiceHostSeparator + fullyQualifiedDomainName;
+            string serverSpn = SqlServerSpnHeader + fullyQualifiedDomainName;
             if (!string.IsNullOrWhiteSpace(portOrInstanceName))
             {
                 serverSpn += ":" + portOrInstanceName;
@@ -399,8 +398,6 @@ namespace System.Data.SqlClient.SNI
             return new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel);
         }
 
-
-
         /// <summary>
         /// Creates an SNINpHandle object
         /// </summary>
@@ -439,7 +436,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="length">Length</param>
         public void PacketSetData(SNIPacket packet, byte[] data, int length)
         {
-            packet.SetData(data, length);
+            packet.AppendData(data, length);
         }
 
         /// <summary>

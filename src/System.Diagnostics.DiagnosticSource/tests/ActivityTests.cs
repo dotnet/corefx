@@ -8,11 +8,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Diagnostics.Tests
 {
-    public class ActivityTests
+    public class ActivityTests : IDisposable
     {
         /// <summary>
         /// Tests Activity constructor
@@ -39,13 +40,63 @@ namespace System.Diagnostics.Tests
         public void Baggage()
         {
             var activity = new Activity("activity");
+
+            // Baggage starts off empty
             Assert.Null(activity.GetBaggageItem("some baggage"));
+            Assert.Empty(activity.Baggage);
 
-            Assert.Equal(activity, activity.AddBaggage("some baggage", "value"));
-            Assert.Equal("value", activity.GetBaggageItem("some baggage"));
+            const string Key = "some baggage";
+            const string Value = "value";
 
-            var baggage = activity.Baggage.ToList();
-            Assert.Equal(1, baggage.Count);
+            // Add items, get them individually and via an enumerable
+            for (int i = 0; i < 3; i++)
+            {
+                Assert.Equal(activity, activity.AddBaggage(Key + i, Value + i));
+                Assert.Equal(Value + i, activity.GetBaggageItem(Key + i));
+                Assert.Equal(i + 1, activity.Baggage.Count());
+                for (int j = 0; j < i; j++)
+                {
+                    Assert.Contains(new KeyValuePair<string, string>(Key + j, Value + j), activity.Baggage);
+                }
+            }
+
+            // Now test baggage via child activities
+            activity.Start();
+            try
+            {
+                // Start a child
+                var anotherActivity = new Activity("another activity");
+                anotherActivity.Start();
+                try
+                {
+                    // Its parent should match.
+                    Assert.Same(activity, anotherActivity.Parent);
+
+                    // All of the parent's baggage should be available via the child.
+                    for (int i = 0; i < 3; i++)
+                    {
+                        Assert.Equal(Value + i, anotherActivity.GetBaggageItem(Key + i));
+                        Assert.Contains(new KeyValuePair<string, string>(Key + i, Value + i), anotherActivity.Baggage);
+                    }
+
+                    // And we should be able to add additional baggage to the child, see that baggage, and still see the parent's.
+                    Assert.Same(anotherActivity, anotherActivity.AddBaggage("hello", "world"));
+                    Assert.Equal("world", anotherActivity.GetBaggageItem("hello"));
+                    Assert.Equal(4, anotherActivity.Baggage.Count());
+                    Assert.Equal(new KeyValuePair<string, string>("hello", "world"), anotherActivity.Baggage.First());
+                    Assert.Equal(new KeyValuePair<string, string>(Key + 2, Value + 2), anotherActivity.Baggage.Skip(1).First());
+                    Assert.Equal(new KeyValuePair<string, string>(Key + 1, Value + 1), anotherActivity.Baggage.Skip(2).First());
+                    Assert.Equal(new KeyValuePair<string, string>(Key + 0, Value + 0), anotherActivity.Baggage.Skip(3).First());
+                }
+                finally
+                {
+                    anotherActivity.Stop();
+                }
+            }
+            finally
+            {
+                activity.Stop();
+            }
         }
 
         /// <summary>
@@ -55,13 +106,18 @@ namespace System.Diagnostics.Tests
         public void Tags()
         {
             var activity = new Activity("activity");
+            Assert.Empty(activity.Tags);
 
-            Assert.Equal(activity, activity.AddTag("some tag", "value"));
-
-            var tags = activity.Tags.ToList();
-            Assert.Equal(1, tags.Count);
-            Assert.Equal(tags[0].Key, "some tag");
-            Assert.Equal(tags[0].Value, "value");
+            const string Key = "some tag";
+            const string Value = "value";
+            for (int i = 0; i < 3; i++)
+            {
+                Assert.Equal(activity, activity.AddTag(Key + i, Value + i));
+                List<KeyValuePair<string, string>> tags = activity.Tags.ToList();
+                Assert.Equal(i + 1, tags.Count);
+                Assert.Equal(tags[tags.Count - i - 1].Key, Key + i);
+                Assert.Equal(tags[tags.Count - i - 1].Value, Value + i);
+            }
         }
 
         /// <summary>
@@ -468,201 +524,347 @@ namespace System.Diagnostics.Tests
         }
 
         /****** WC3 Format tests *****/
+
         [Fact]
-        public void IdFormatTests()
+        public void IdFormat_HierarchicalIsDefault()
         {
-            try
+            Activity activity = new Activity("activity1");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+        }
+
+        [Fact]
+        public void IdFormat_W3CWhenParentIdIsW3C()
+        {
+            Activity activity = new Activity("activity2");
+            activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-00");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+            Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
+            Assert.Equal(ActivityTraceFlags.None, activity.ActivityTraceFlags);
+            Assert.False(activity.Recorded);
+            Assert.True(IdIsW3CFormat(activity.Id));
+        }
+
+        [Fact]
+        public void IdFormat_W3CWhenTraceIdAndSpanIdProvided()
+        {
+            Activity activity = new Activity("activity3");
+            ActivityTraceId activityTraceId = ActivityTraceId.CreateRandom();
+            activity.SetParentId(activityTraceId, ActivitySpanId.CreateRandom());
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.Equal(activityTraceId.ToHexString(), activity.TraceId.ToHexString());
+            Assert.Equal(ActivityTraceFlags.None, activity.ActivityTraceFlags);
+            Assert.False(activity.Recorded);
+            Assert.True(IdIsW3CFormat(activity.Id));
+        }
+
+        [Fact]
+        public void IdFormat_W3CWhenDefaultIsW3C()
+        {
+            RemoteExecutor.Invoke(() =>
             {
-                Activity activity;
-
-                // Default format is the default (Hierarchical)
-                activity = new Activity("activity1");
-                activity.Start();
-                Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
-                activity.Stop();
-
-                // Set the parent to something that is W3C by string
-                activity = new Activity("activity2");
-                activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-00");
-                activity.Start();
-                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
-                Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
-                Assert.Equal(ActivityTraceFlags.None, activity.ActivityTraceFlags);
-                Assert.False(activity.Recorded);
-                Assert.True(IdIsW3CFormat(activity.Id));
-                activity.Stop();
-
-                // Set the parent to something that is W3C but using ActivityTraceId,ActivitySpanId version of SetParentId.  
-                activity = new Activity("activity3");
-                ActivityTraceId activityTraceId = ActivityTraceId.CreateRandom();
-                activity.SetParentId(activityTraceId, ActivitySpanId.CreateRandom());
-                activity.Start();
-                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-                Assert.Equal(activityTraceId.ToHexString(), activity.TraceId.ToHexString());
-                Assert.Equal(ActivityTraceFlags.None, activity.ActivityTraceFlags);
-                Assert.False(activity.Recorded);
-                Assert.True(IdIsW3CFormat(activity.Id));
-                activity.Stop();
-
-                // Change DefaultIdFormat to W3C, confirm I get the new format.  
                 Activity.DefaultIdFormat = ActivityIdFormat.W3C;
-                activity = new Activity("activity4");
+                Activity activity = new Activity("activity4");
                 activity.Start();
                 Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
                 Assert.True(IdIsW3CFormat(activity.Id));
-                activity.Stop();
+            }).Dispose();
+        }
 
-                // But I don't get the default format if parent is hierarchical 
-                activity = new Activity("activity5");
-                string parentId = "|a000b421-5d183ab6.1";
+        [Fact]
+        public void IdFormat_HierarchicalWhenDefaultIsW3CButHierarchicalParentId()
+        {
+            RemoteExecutor.Invoke(() =>
+            {
+                Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+                Activity activity = new Activity("activity5");
+                string parentId = "|a000b421-5d183ab6.1.";
                 activity.SetParentId(parentId);
                 activity.Start();
                 Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
                 Assert.True(activity.Id.StartsWith(parentId));
+            }).Dispose();
+        }
 
-                // Heirarchical Ids return null ActivityTraceId and ActivitySpanIds
-                Assert.Equal("00000000000000000000000000000000", activity.TraceId.ToHexString());
-                Assert.Equal("0000000000000000", activity.SpanId.ToHexString());
-                activity.Stop();
+        [Fact]
+        public void IdFormat_ZeroTraceIdAndSpanIdWithHierarchicalFormat()
+        {
+            Activity activity = new Activity("activity");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+            Assert.Equal("00000000000000000000000000000000", activity.TraceId.ToHexString());
+            Assert.Equal("0000000000000000", activity.SpanId.ToHexString());
+        }
 
-                // But if I set ForceDefaultFormat I get what I asked for (W3C format)
+        [Fact]
+        public void IdFormat_W3CWhenForcedAndHierarchicalParentId()
+        {
+            RemoteExecutor.Invoke(() =>
+            {
+                Activity.DefaultIdFormat = ActivityIdFormat.W3C;
                 Activity.ForceDefaultIdFormat = true;
-                activity = new Activity("activity6");
-                activity.SetParentId(parentId);
+                Activity activity = new Activity("activity6");
+                activity.SetParentId("|a000b421-5d183ab6.1.");
                 activity.Start();
                 Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
                 Assert.True(IdIsW3CFormat(activity.Id));
                 Assert.NotEqual("00000000000000000000000000000000", activity.TraceId.ToHexString());
                 Assert.NotEqual("0000000000000000", activity.SpanId.ToHexString());
-
-                /* TraceStateString testing */
-                // Test TraceStateString (that it inherits from parent)
-                Activity parent = new Activity("parent");
-                string testString = "MyTestString";
-                parent.TraceStateString = testString;
-                parent.Start();
-                Assert.Equal(testString, parent.TraceStateString);
-
-                activity = new Activity("activity7");
-                activity.Start();
-                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-                Assert.True(IdIsW3CFormat(activity.Id));
-                Assert.Equal(testString, activity.TraceStateString);
-
-                // Update child 
-                string childTestString = "ChildTestString";
-                activity.TraceStateString = childTestString;
-
-                // Confirm that child sees update, but parent does not
-                Assert.Equal(childTestString, activity.TraceStateString);
-                Assert.Equal(testString, parent.TraceStateString);
-
-                // Update parent
-                string parentTestString = "newTestString";
-                parent.TraceStateString = parentTestString;
-
-                // Confirm that parent sees update but child does not.  
-                Assert.Equal(childTestString, activity.TraceStateString);
-                Assert.Equal(parentTestString, parent.TraceStateString);
-
-                activity.Stop();
-                parent.Stop();
-
-                // Upper-case ids are not supported
-                activity = new Activity("activity8");
-                activity.SetParentId("00-0123456789ABCDEF0123456789ABCDEF-0123456789ABCDEF-01");
-                activity.Start();
-                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-                Assert.True(IdIsW3CFormat(activity.Id));
-                activity.Stop();
-
-                // non hex chars are not supported in traceId
-                activity = new Activity("activity9");
-                activity.SetParentId("00-xyz3456789abcdef0123456789abcdef-0123456789abcdef-01");
-                activity.Start();
-                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-                Assert.True(IdIsW3CFormat(activity.Id));
-                activity.Stop();
-
-                // non hex chars are not supported in parentSpanId
-                activity = new Activity("activity10");
-                activity.SetParentId("00-0123456789abcdef0123456789abcdef-x123456789abcdef-01");
-                activity.Start();
-                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-                Assert.True(IdIsW3CFormat(activity.Id));
-                Assert.Equal("0000000000000000", activity.ParentSpanId.ToHexString());
-                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
-                activity.Stop();
-
-                // ParentSpanId from parent Activity
-                Activity.DefaultIdFormat = ActivityIdFormat.W3C;
-                Activity.ForceDefaultIdFormat = true;
-
-                parent = new Activity("parent").Start();
-                activity = new Activity("parent").Start();
-                Assert.Equal(parent.SpanId.ToHexString(), activity.ParentSpanId.ToHexString());
-
-                activity.Stop();
-                parent.Stop();
-            }
-            finally
-            {
-                // Set global settings back to the default, just to put the state back. 
-                Activity.ForceDefaultIdFormat = false;
-                Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
-                Activity.Current = null;
-            }
+            }).Dispose();
         }
 
         [Fact]
-        public void TraceIdBeforeStartTests()
+        public void TraceStateString_InheritsFromParent()
         {
-            try
+            Activity parent = new Activity("parent");
+            parent.SetIdFormat(ActivityIdFormat.W3C);
+            const string testString = "MyTestString";
+            parent.TraceStateString = testString;
+            parent.Start();
+            Assert.Equal(testString, parent.TraceStateString);
+
+            Activity activity = new Activity("activity7");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.True(IdIsW3CFormat(activity.Id));
+            Assert.Equal(testString, activity.TraceStateString);
+
+            // Update child 
+            string childTestString = "ChildTestString";
+            activity.TraceStateString = childTestString;
+
+            // Confirm that child sees update, but parent does not
+            Assert.Equal(childTestString, activity.TraceStateString);
+            Assert.Equal(testString, parent.TraceStateString);
+
+            // Update parent
+            string parentTestString = "newTestString";
+            parent.TraceStateString = parentTestString;
+
+            // Confirm that parent sees update but child does not.  
+            Assert.Equal(childTestString, activity.TraceStateString);
+            Assert.Equal(parentTestString, parent.TraceStateString);
+        }
+
+        [Fact]
+        public void TraceId_W3CUppercaseCharsNotSupportedAndDoesNotThrow()
+        {
+            Activity activity = new Activity("activity8");
+            activity.SetParentId("00-0123456789ABCDEF0123456789ABCDEF-0123456789ABCDEF-01");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.True(IdIsW3CFormat(activity.Id));
+        }
+
+        [Fact]
+        public void TraceId_W3CNonHexCharsNotSupportedAndDoesNotThrow()
+        {
+            Activity activity = new Activity("activity9");
+            activity.SetParentId("00-xyz3456789abcdef0123456789abcdef-0123456789abcdef-01");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.True(IdIsW3CFormat(activity.Id));
+        }
+
+        [Fact]
+        public void ParentSpanId_W3CNonHexCharsNotSupportedAndDoesNotThrow()
+        {
+            Activity activity = new Activity("activity10");
+            activity.SetParentId("00-0123456789abcdef0123456789abcdef-x123456789abcdef-01");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.True(IdIsW3CFormat(activity.Id));
+            Assert.Equal("0000000000000000", activity.ParentSpanId.ToHexString());
+            Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+        }
+
+        [Fact]
+        public void IdFormat_W3CForcedOveeridesParentActivityIdFormat()
+        {
+            RemoteExecutor.Invoke(() =>
             {
-                Activity activity;
-
-                // from traceparent header
-                activity = new Activity("activity1");
-                activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
-                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
-
-                // from explicit TraceId and SpanId
-                activity = new Activity("activity2");
-                activity.SetParentId(
-                    ActivityTraceId.CreateFromString("0123456789abcdef0123456789abcdef".AsSpan()),
-                    ActivitySpanId.CreateFromString("0123456789abcdef".AsSpan()));
-
-                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
-
-                // from in-proc parent
-                Activity parent = new Activity("parent");
-                parent.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
-                parent.Start();
-
-                activity = new Activity("child");
-                activity.Start();
-                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
-                parent.Stop();
-                activity.Stop();
-
-                // no parent
                 Activity.DefaultIdFormat = ActivityIdFormat.W3C;
                 Activity.ForceDefaultIdFormat = true;
 
-                activity = new Activity("activity3");
-                Assert.Equal("00000000000000000000000000000000", activity.TraceId.ToHexString());
+                Activity parent = new Activity("parent").Start();
+                Activity activity = new Activity("child").Start();
+                Assert.Equal(parent.SpanId.ToHexString(), activity.ParentSpanId.ToHexString()); ;
+            }).Dispose();
+        }
 
-                // from invalid traceparent header
-                activity.SetParentId("123");
-                Assert.Equal("00000000000000000000000000000000", activity.TraceId.ToHexString());
-            }
-            finally
+        [Fact]
+        public void SetIdFormat_CanSetHierarchicalBeforeStart()
+        {
+            Activity activity = new Activity("activity1");
+            Assert.Equal(ActivityIdFormat.Unknown, activity.IdFormat);
+            activity.SetIdFormat(ActivityIdFormat.Hierarchical);
+            Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+
+            // cannot change after activity starts
+            activity.SetIdFormat(ActivityIdFormat.W3C);
+            Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+        }
+
+        [Fact]
+        public void SetIdFormat_CanSetW3CBeforeStart()
+        {
+            Activity activity = new Activity("activity2");
+            Assert.Equal(ActivityIdFormat.Unknown, activity.IdFormat);
+            activity.SetIdFormat(ActivityIdFormat.W3C);
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.True(IdIsW3CFormat(activity.Id));
+        }
+
+        [Fact]
+        public void SetIdFormat_CanSetW3CAfterHierarchicalParentIsSet()
+        {
+            Activity activity = new Activity("activity3");
+            activity.SetParentId("|foo.bar.");
+            activity.SetIdFormat(ActivityIdFormat.W3C);
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.Equal("|foo.bar.", activity.ParentId);
+            Assert.True(IdIsW3CFormat(activity.Id));
+        }
+
+        [Fact]
+        public void SetIdFormat_CanSetHierarchicalAfterW3CParentIsSet()
+        {
+            Activity activity = new Activity("activity4");
+            activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-00");
+            activity.SetIdFormat(ActivityIdFormat.Hierarchical);
+            Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+            Assert.Equal("00-0123456789abcdef0123456789abcdef-0123456789abcdef-00", activity.ParentId);
+            Assert.True(activity.Id[0] == '|');
+        }
+
+        [Fact]
+        public void SetIdFormat_CanSetAndOverrideBeforeStart()
+        {
+            Activity activity = new Activity("activity5");
+            Assert.Equal(ActivityIdFormat.Unknown, activity.IdFormat);
+            activity.SetIdFormat(ActivityIdFormat.Hierarchical);
+            Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+            activity.SetIdFormat(ActivityIdFormat.W3C);
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+        }
+
+        [Fact]
+        public void SetIdFormat_OverridesForcedW3C()
+        {
+            RemoteExecutor.Invoke(() =>
             {
-                Activity.ForceDefaultIdFormat = false;
+                Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+                Activity.ForceDefaultIdFormat = true;
+                Activity activity = new Activity("activity7");
+                activity.SetIdFormat(ActivityIdFormat.Hierarchical);
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+            }).Dispose();
+        }
+
+        [Fact]
+        public void SetIdFormat_OverridesForcedHierarchical()
+        {
+            RemoteExecutor.Invoke(() =>
+            {
                 Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
-                Activity.Current = null;
-            }
+                Activity.ForceDefaultIdFormat = true;
+                Activity activity = new Activity("activity8");
+                activity.SetIdFormat(ActivityIdFormat.W3C);
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            }).Dispose();
+        }
+
+        [Fact]
+        public void SetIdFormat_OverridesParentHierarchicalFormat()
+        {
+            Activity parent = new Activity("parent")
+                .SetIdFormat(ActivityIdFormat.Hierarchical)
+                .Start();
+
+            Activity child = new Activity("child")
+                .SetIdFormat(ActivityIdFormat.W3C)
+                .Start();
+
+            Assert.Equal(ActivityIdFormat.W3C, child.IdFormat);
+        }
+
+        [Fact]
+        public void SetIdFormat_OverridesParentW3CFormat()
+        {
+            Activity parent = new Activity("parent")
+                .SetIdFormat(ActivityIdFormat.W3C)
+                .Start();
+
+            Activity child = new Activity("child")
+                .SetIdFormat(ActivityIdFormat.Hierarchical)
+                .Start();
+
+            Assert.Equal(ActivityIdFormat.Hierarchical, child.IdFormat);
+        }
+
+        [Fact]
+        public void TraceIdBeforeStart_FromTraceparentHeader()
+        {
+            Activity activity = new Activity("activity1");
+            activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
+            Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+        }
+
+        [Fact]
+        public void TraceIdBeforeStart_FromExplicitTraceId()
+        {
+            Activity activity = new Activity("activity2");
+            activity.SetParentId(
+                ActivityTraceId.CreateFromString("0123456789abcdef0123456789abcdef".AsSpan()),
+                ActivitySpanId.CreateFromString("0123456789abcdef".AsSpan()));
+
+            Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+        }
+
+        [Fact]
+        public void TraceIdBeforeStart_FromInProcParent()
+        {
+            Activity parent = new Activity("parent");
+            parent.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
+            parent.Start();
+
+            Activity activity = new Activity("child");
+            activity.Start();
+            Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+        }
+
+        [Fact]
+        public void TraceIdBeforeStart_FromInvalidTraceparentHeader()
+        {
+            Activity activity = new Activity("activity");
+            activity.SetParentId("123");
+            Assert.Equal("00000000000000000000000000000000", activity.TraceId.ToHexString());
+        }
+
+        [Fact]
+        public void TraceIdBeforeStart_NoParent()
+        {
+            RemoteExecutor.Invoke(() =>
+            {
+                Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+                Activity.ForceDefaultIdFormat = true;
+
+                Activity activity = new Activity("activity3");
+                Assert.Equal("00000000000000000000000000000000", activity.TraceId.ToHexString());
+            }).Dispose();
         }
 
         [Fact]
@@ -687,6 +889,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
             Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
             Assert.True(IdIsW3CFormat(activity.Id));
+            Assert.Equal($"00-0123456789abcdef0123456789abcdef-{activity.SpanId.ToHexString()}-01", activity.Id);
             Assert.Equal(ActivityTraceFlags.Recorded, activity.ActivityTraceFlags);
             Assert.True(activity.Recorded);
             activity.Stop();
@@ -699,6 +902,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
             Assert.Equal(activityTraceId.ToHexString(), activity.TraceId.ToHexString());
             Assert.True(IdIsW3CFormat(activity.Id));
+            Assert.Equal($"00-{activity.TraceId.ToHexString()}-{activity.SpanId.ToHexString()}-01", activity.Id);
             Assert.Equal(ActivityTraceFlags.Recorded, activity.ActivityTraceFlags);
             Assert.True(activity.Recorded);
             activity.Stop();
@@ -712,6 +916,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
             Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
             Assert.True(IdIsW3CFormat(activity.Id));
+            Assert.Equal($"00-{activity.TraceId.ToHexString()}-{activity.SpanId.ToHexString()}-00", activity.Id);
             Assert.Equal(ActivityTraceFlags.None, activity.ActivityTraceFlags);
             Assert.False(activity.Recorded);
 
@@ -730,6 +935,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
             Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
             Assert.True(IdIsW3CFormat(activity.Id));
+            Assert.Equal($"00-{activity.TraceId.ToHexString()}-{activity.SpanId.ToHexString()}-01", activity.Id);
             Assert.Equal(ActivityTraceFlags.Recorded, activity.ActivityTraceFlags);
             Assert.True(activity.Recorded);
 
@@ -741,6 +947,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal("0123456789abcdef0123456789abcdef", childActivity.TraceId.ToHexString());
             Assert.NotEqual(activity.SpanId.ToHexString(), childActivity.SpanId.ToHexString());
             Assert.True(IdIsW3CFormat(childActivity.Id));
+            Assert.Equal($"00-{childActivity.TraceId.ToHexString()}-{childActivity.SpanId.ToHexString()}-01", childActivity.Id);
             Assert.Equal(ActivityTraceFlags.Recorded, childActivity.ActivityTraceFlags);
             Assert.True(childActivity.Recorded);
 
@@ -1057,6 +1264,11 @@ namespace System.Diagnostics.Tests
 
             Activity.Current = stopped;
             Assert.Same(started, Activity.Current);
+        }
+
+        public void Dispose()
+        {
+            Activity.Current = null;
         }
 
         private class TestObserver : IObserver<KeyValuePair<string, object>>

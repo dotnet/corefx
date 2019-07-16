@@ -4,19 +4,23 @@
     <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
     <!-- use the most recent MS.NETCore.App we have from upstack -->
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
+    <DisableImplicitNETCorePlatformsReference>true</DisableImplicitNETCorePlatformsReference>
   </PropertyGroup>
-  <!-- Unix CoreLib contains EventRegistrationToken but no other
-       types from System.Runtime.InteropServices.WindowsRuntime.
-       https://github.com/dotnet/corefx/issues/35792 -->
-  <ItemGroup Condition="'$(RuntimeIdentifier)' != '' AND !$(RuntimeIdentifier.StartsWith('win'))">
-    <IgnoredTypes Include="System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken" />
+
+  <ItemGroup>
+    <!-- SDK doesn't honor RuntimeFrameworkVersion for targeting pack-->
+    <KnownFrameworkReference Update="Microsoft.NETCore.App" TargetingPackVersion="$(RuntimeFrameworkVersion)" />
+
+    <!-- Temporary till SDK supports transitive framework references. -->
+    <KnownFrameworkReference Remove="Microsoft.AspNetCore.App" />
+    <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App" />
   </ItemGroup>
   <ItemGroup>
-    <!-- https://github.com/dotnet/corefx/issues/36483 -->
-    <IgnoredTypes Include="System.Runtime.Intrinsics.Arm.Arm64.Aes" />
-    <IgnoredTypes Include="System.Runtime.Intrinsics.Arm.Arm64.Base" />
-    <IgnoredTypes Include="System.Runtime.Intrinsics.Arm.Arm64.Sha1" />
-    <IgnoredTypes Include="System.Runtime.Intrinsics.Arm.Arm64.Sha256" />
-    <IgnoredTypes Include="System.Runtime.Intrinsics.Arm.Arm64.Simd" />
+    <!-- CodePages is part of the framework but we don't yet have a MicrosoftNETCoreAppPackageVersion with that change -->
+    <IgnoredReference Include="System.Text.Encoding.CodePages"/>
   </ItemGroup>
+  <Target Name="CheckForWorkaroundRemoval" AfterTargets="ResolveReferences">
+    <Error Condition="'%(Reference.FileName)' == 'System.Text.Encoding.CodePages' AND '%(Reference.NuGetPackageId)' == 'Microsoft.NETCore.App'"
+           Text="Please remove IgnoredReference workaround from pkg\test\frameworkSettings\netcoreapp3.0\settings.targets" />
+  </Target>
 </Project>

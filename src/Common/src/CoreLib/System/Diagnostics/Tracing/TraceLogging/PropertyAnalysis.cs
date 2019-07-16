@@ -21,13 +21,13 @@ namespace System.Diagnostics.Tracing
         internal readonly PropertyInfo propertyInfo;
         internal readonly Func<PropertyValue, PropertyValue> getter;
         internal readonly TraceLoggingTypeInfo typeInfo;
-        internal readonly EventFieldAttribute fieldAttribute;
+        internal readonly EventFieldAttribute? fieldAttribute;
 
         public PropertyAnalysis(
             string name,
             PropertyInfo propertyInfo,
             TraceLoggingTypeInfo typeInfo,
-            EventFieldAttribute fieldAttribute)
+            EventFieldAttribute? fieldAttribute)
         {
             this.name = name;
             this.propertyInfo = propertyInfo;

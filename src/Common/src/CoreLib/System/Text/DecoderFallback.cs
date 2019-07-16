@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Threading;
 
@@ -10,15 +11,15 @@ namespace System.Text
 {
     public abstract class DecoderFallback
     {
-        private static DecoderFallback s_replacementFallback; // Default fallback, uses no best fit & "?"
-        private static DecoderFallback s_exceptionFallback;
+        private static DecoderFallback? s_replacementFallback; // Default fallback, uses no best fit & "?"
+        private static DecoderFallback? s_exceptionFallback;
 
         public static DecoderFallback ReplacementFallback =>
-            s_replacementFallback ?? Interlocked.CompareExchange(ref s_replacementFallback, new DecoderReplacementFallback(), null) ?? s_replacementFallback;        
+            s_replacementFallback ?? Interlocked.CompareExchange(ref s_replacementFallback, new DecoderReplacementFallback(), null) ?? s_replacementFallback!; // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
 
 
         public static DecoderFallback ExceptionFallback =>
-            s_exceptionFallback ?? Interlocked.CompareExchange<DecoderFallback>(ref s_exceptionFallback, new DecoderExceptionFallback(), null) ?? s_exceptionFallback;
+            s_exceptionFallback ?? Interlocked.CompareExchange<DecoderFallback?>(ref s_exceptionFallback, new DecoderExceptionFallback(), null) ?? s_exceptionFallback!; // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
 
         // Fallback
         //
@@ -67,8 +68,8 @@ namespace System.Text
         internal unsafe byte* byteStart;
         internal unsafe char* charEnd;
 
-        internal Encoding _encoding;
-        internal DecoderNLS _decoder;
+        internal Encoding? _encoding;
+        internal DecoderNLS? _decoder;
         private int _originalByteCount;
 
         // Internal Reset
@@ -86,7 +87,7 @@ namespace System.Text
             this.charEnd = charEnd;
         }
 
-        internal static DecoderFallbackBuffer CreateAndInitialize(Encoding encoding, DecoderNLS decoder, int originalByteCount)
+        internal static DecoderFallbackBuffer CreateAndInitialize(Encoding encoding, DecoderNLS? decoder, int originalByteCount)
         {
             // The original byte count is only used for keeping track of what 'index' value needs
             // to be passed to the abstract Fallback method. The index value is calculated by subtracting
@@ -296,8 +297,11 @@ namespace System.Text
         }
 
         // private helper methods
+        [DoesNotReturn]
         internal void ThrowLastBytesRecursive(byte[] bytesUnknown)
         {
+            bytesUnknown = bytesUnknown ?? Array.Empty<byte>();
+
             // Create a string representation of our bytes.
             StringBuilder strBytes = new StringBuilder(bytesUnknown.Length * 3);
             int i;

@@ -13,9 +13,11 @@ using Xunit;
 
 namespace System.Net.Security.Tests
 {
-    [PlatformSpecific(TestPlatforms.Windows)] // NegotiateStream only supports client-side functionality on Unix
+    [PlatformSpecific(TestPlatforms.Windows)] // NegotiateStream client needs explicit credentials or SPNs on unix.
     public abstract class NegotiateStreamStreamToStreamTest
     {
+        public static bool IsNtlmInstalled => Capability.IsNtlmInstalled();
+
         private const int PartialBytesToRead = 5;
         private static readonly byte[] s_sampleMsg = Encoding.UTF8.GetBytes("Sample Test Message");
 
@@ -26,7 +28,7 @@ namespace System.Net.Security.Tests
         protected abstract Task AuthenticateAsClientAsync(NegotiateStream client, NetworkCredential credential, string targetName);
         protected abstract Task AuthenticateAsServerAsync(NegotiateStream server);
 
-        [Fact]
+        [ConditionalFact(nameof(IsNtlmInstalled))]
         public async Task NegotiateStream_StreamToStream_Authentication_Success()
         {
             VirtualNetwork network = new VirtualNetwork();
@@ -76,7 +78,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsNtlmInstalled))]
         public async Task NegotiateStream_StreamToStream_Authentication_TargetName_Success()
         {
             string targetName = "testTargetName";
@@ -132,8 +134,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core difference in behavior: https://github.com/dotnet/corefx/issues/5241")]
+        [ConditionalFact(nameof(IsNtlmInstalled))]
         public async Task NegotiateStream_StreamToStream_Authentication_EmptyCredentials_Fails()
         {
             string targetName = "testTargetName";
@@ -195,7 +196,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsNtlmInstalled))]
         public async Task NegotiateStream_StreamToStream_Successive_ClientWrite_Sync_Success()
         {
             byte[] recvBuf = new byte[s_sampleMsg.Length];
@@ -234,7 +235,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsNtlmInstalled))]
         public async Task NegotiateStream_StreamToStream_Successive_ClientWrite_Async_Success()
         {
             byte[] recvBuf = new byte[s_sampleMsg.Length];
@@ -273,7 +274,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsNtlmInstalled))]
         public async Task NegotiateStream_ReadWriteLongMsgSync_Success()
         {
             byte[] recvBuf = new byte[s_longMsg.Length];
@@ -300,7 +301,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsNtlmInstalled))]
         public async Task NegotiateStream_ReadWriteLongMsgAsync_Success()
         {
             byte[] recvBuf = new byte[s_longMsg.Length];
@@ -327,7 +328,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsNtlmInstalled))]
         public void NegotiateStream_StreamToStream_Flush_Propagated()
         {
             VirtualNetwork network = new VirtualNetwork();
@@ -341,8 +342,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Relies on FlushAsync override not available in desktop")]
+        [ConditionalFact(nameof(IsNtlmInstalled))]
         public void NegotiateStream_StreamToStream_FlushAsync_Propagated()
         {
             VirtualNetwork network = new VirtualNetwork();

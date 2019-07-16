@@ -13,11 +13,11 @@ namespace System.Collections
     public struct DictionaryEntry
     {
         private object _key; // Do not rename (binary serialization)
-        private object _value; // Do not rename (binary serialization)
+        private object? _value; // Do not rename (binary serialization)
 
         // Constructs a new DictionaryEnumerator by setting the Key
         // and Value fields appropriately.
-        public DictionaryEntry(object key, object value)
+        public DictionaryEntry(object key, object? value)
         {
             _key = key;
             _value = value;
@@ -36,7 +36,7 @@ namespace System.Collections
             }
         }
 
-        public object Value
+        public object? Value
         {
             get
             {
@@ -50,7 +50,7 @@ namespace System.Collections
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void Deconstruct(out object key, out object value)
+        public void Deconstruct(out object key, out object? value)
         {
             key = Key;
             value = Value;

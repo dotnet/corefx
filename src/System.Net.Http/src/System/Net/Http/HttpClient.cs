@@ -14,6 +14,7 @@ namespace System.Net.Http
     {
         #region Fields
 
+        private static IWebProxy s_defaultProxy;
         private static readonly TimeSpan s_defaultTimeout = TimeSpan.FromSeconds(100);
         private static readonly TimeSpan s_maxTimeout = TimeSpan.FromMilliseconds(int.MaxValue);
         private static readonly TimeSpan s_infiniteTimeout = Threading.Timeout.InfiniteTimeSpan;
@@ -24,6 +25,7 @@ namespace System.Net.Http
 
         private CancellationTokenSource _pendingRequestsCts;
         private HttpRequestHeaders _defaultRequestHeaders;
+        private Version _defaultRequestVersion = HttpUtilities.DefaultRequestVersion;
 
         private Uri _baseAddress;
         private TimeSpan _timeout;
@@ -32,6 +34,15 @@ namespace System.Net.Http
         #endregion Fields
 
         #region Properties
+        public static IWebProxy DefaultProxy
+        {
+            get => LazyInitializer.EnsureInitialized(ref s_defaultProxy, () => SystemProxyInfo.Proxy);
+
+            set
+            {
+                s_defaultProxy = value ?? throw new ArgumentNullException(nameof(value));
+            }
+        }
 
         public HttpRequestHeaders DefaultRequestHeaders
         {
@@ -42,6 +53,16 @@ namespace System.Net.Http
                     _defaultRequestHeaders = new HttpRequestHeaders();
                 }
                 return _defaultRequestHeaders;
+            }
+        }
+
+        public Version DefaultRequestVersion
+        {
+            get => _defaultRequestVersion;
+            set
+            {
+                CheckDisposedOrStarted();
+                _defaultRequestVersion = value ?? throw new ArgumentNullException(nameof(value));
             }
         }
 
@@ -151,7 +172,15 @@ namespace System.Net.Http
                     using (Stream responseStream = c.TryReadAsStream() ?? await c.ReadAsStreamAsync().ConfigureAwait(false))
                     using (var buffer = new HttpContent.LimitArrayPoolWriteStream(_maxResponseContentBufferSize, (int)headers.ContentLength.GetValueOrDefault()))
                     {
-                        await responseStream.CopyToAsync(buffer).ConfigureAwait(false);
+                        try
+                        {
+                            await responseStream.CopyToAsync(buffer).ConfigureAwait(false);
+                        }
+                        catch (Exception e) when (HttpContent.StreamCopyExceptionNeedsWrapping(e))
+                        {
+                            throw HttpContent.WrapStreamCopyException(e);
+                        }
+
                         if (buffer.Length > 0)
                         {
                             // Decode and return the data from the buffer.
@@ -199,7 +228,16 @@ namespace System.Net.Http
                             // to which the content will be transferred.  That way, assuming we actually get the exact
                             // amount we were expecting, we can simply return the MemoryStream's underlying buffer.
                             buffer = new HttpContent.LimitMemoryStream(_maxResponseContentBufferSize, (int)contentLength.GetValueOrDefault());
-                            await responseStream.CopyToAsync(buffer).ConfigureAwait(false);
+
+                            try
+                            {
+                                await responseStream.CopyToAsync(buffer).ConfigureAwait(false);
+                            }
+                            catch (Exception e) when (HttpContent.StreamCopyExceptionNeedsWrapping(e))
+                            {
+                                throw HttpContent.WrapStreamCopyException(e);
+                            }
+
                             if (buffer.Length > 0)
                             {
                                 return ((HttpContent.LimitMemoryStream)buffer).GetSizedBuffer();
@@ -214,7 +252,15 @@ namespace System.Net.Http
                             buffer = new HttpContent.LimitArrayPoolWriteStream(_maxResponseContentBufferSize);
                             try
                             {
-                                await responseStream.CopyToAsync(buffer).ConfigureAwait(false);
+                                try
+                                {
+                                    await responseStream.CopyToAsync(buffer).ConfigureAwait(false);
+                                }
+                                catch (Exception e) when (HttpContent.StreamCopyExceptionNeedsWrapping(e))
+                                {
+                                    throw HttpContent.WrapStreamCopyException(e);
+                                }
+
                                 if (buffer.Length > 0)
                                 {
                                     return ((HttpContent.LimitArrayPoolWriteStream)buffer).ToArray();
@@ -296,7 +342,7 @@ namespace System.Net.Http
         public Task<HttpResponseMessage> GetAsync(Uri requestUri, HttpCompletionOption completionOption,
             CancellationToken cancellationToken)
         {
-            return SendAsync(new HttpRequestMessage(HttpMethod.Get, requestUri), completionOption, cancellationToken);
+            return SendAsync(CreateRequestMessage(HttpMethod.Get, requestUri), completionOption, cancellationToken);
         }
 
         public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
@@ -318,7 +364,7 @@ namespace System.Net.Http
         public Task<HttpResponseMessage> PostAsync(Uri requestUri, HttpContent content,
             CancellationToken cancellationToken)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            HttpRequestMessage request = CreateRequestMessage(HttpMethod.Post, requestUri);
             request.Content = content;
             return SendAsync(request, cancellationToken);
         }
@@ -342,7 +388,7 @@ namespace System.Net.Http
         public Task<HttpResponseMessage> PutAsync(Uri requestUri, HttpContent content,
             CancellationToken cancellationToken)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, requestUri);
+            HttpRequestMessage request = CreateRequestMessage(HttpMethod.Put, requestUri);
             request.Content = content;
             return SendAsync(request, cancellationToken);
         }
@@ -366,7 +412,7 @@ namespace System.Net.Http
         public Task<HttpResponseMessage> PatchAsync(Uri requestUri, HttpContent content,
             CancellationToken cancellationToken)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Patch, requestUri);
+            HttpRequestMessage request = CreateRequestMessage(HttpMethod.Patch, requestUri);
             request.Content = content;
             return SendAsync(request, cancellationToken);
         }
@@ -388,7 +434,7 @@ namespace System.Net.Http
 
         public Task<HttpResponseMessage> DeleteAsync(Uri requestUri, CancellationToken cancellationToken)
         {
-            return SendAsync(new HttpRequestMessage(HttpMethod.Delete, requestUri), cancellationToken);
+            return SendAsync(CreateRequestMessage(HttpMethod.Delete, requestUri), cancellationToken);
         }
 
         #endregion REST Send Overloads
@@ -460,7 +506,7 @@ namespace System.Net.Http
                 throw;
             }
 
-            return completionOption == HttpCompletionOption.ResponseContentRead ?
+            return completionOption == HttpCompletionOption.ResponseContentRead && !string.Equals(request.Method.Method, "HEAD", StringComparison.OrdinalIgnoreCase) ?
                 FinishSendAsyncBuffered(sendTask, request, cts, disposeCts) :
                 FinishSendAsyncUnbuffered(sendTask, request, cts, disposeCts);
         }
@@ -532,7 +578,7 @@ namespace System.Net.Http
             // cancellation (e.g. WebException when reading from canceled response stream).
             if (cts.IsCancellationRequested && e is HttpRequestException)
             {
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, $"Canceled");
+                if (NetEventSource.IsEnabled) NetEventSource.Error(this, "Canceled");
                 throw new OperationCanceledException(cts.Token);
             }
         }
@@ -699,14 +745,11 @@ namespace System.Net.Http
             }
         }
 
-        private Uri CreateUri(string uri)
-        {
-            if (string.IsNullOrEmpty(uri))
-            {
-                return null;
-            }
-            return new Uri(uri, UriKind.RelativeOrAbsolute);
-        }
+        private Uri CreateUri(string uri) =>
+            string.IsNullOrEmpty(uri) ? null : new Uri(uri, UriKind.RelativeOrAbsolute);
+
+        private HttpRequestMessage CreateRequestMessage(HttpMethod method, Uri uri) =>
+            new HttpRequestMessage(method, uri) { Version = _defaultRequestVersion };
         #endregion Private Helpers
     }
 }

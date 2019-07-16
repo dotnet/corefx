@@ -17,7 +17,7 @@ internal static partial class Interop
     internal static bool CallStringMethod<TArg1, TArg2, TArg3>(
         SpanFunc<char, TArg1, TArg2, TArg3, Interop.Globalization.ResultCode> interopCall,
         TArg1 arg1, TArg2 arg2, TArg3 arg3,
-        out string result)
+        out string? result)
     {
         const int InitialSize = 256; // arbitrary stack allocation size
         const int MaxHeapSize = 1280; // max from previous version of the code, starting at 80 and doubling four times

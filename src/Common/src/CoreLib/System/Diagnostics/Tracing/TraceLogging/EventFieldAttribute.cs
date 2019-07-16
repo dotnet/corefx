@@ -58,7 +58,7 @@ namespace System.Diagnostics.Tracing
         /// as the event field's name.
         /// TODO REMOVE
         /// </summary>
-        internal string Name
+        internal string? Name
         {
             get;
             set;

@@ -28,7 +28,7 @@ namespace System
         /// Returns an object array that contains zero or more objects to format. Clients should not
         /// mutate the contents of the array.
         /// </summary>
-        public abstract object[] GetArguments();
+        public abstract object?[] GetArguments();
 
         /// <summary>
         /// The number of arguments to be formatted.
@@ -38,14 +38,14 @@ namespace System
         /// <summary>
         /// Returns one argument to be formatted from argument position <paramref name="index"/>.
         /// </summary>
-        public abstract object GetArgument(int index);
+        public abstract object? GetArgument(int index);
 
         /// <summary>
         /// Format to a string using the given culture.
         /// </summary>
-        public abstract string ToString(IFormatProvider formatProvider);
+        public abstract string ToString(IFormatProvider? formatProvider);
 
-        string IFormattable.ToString(string ignored, IFormatProvider formatProvider)
+        string IFormattable.ToString(string? ignored, IFormatProvider? formatProvider)
         {
             return ToString(formatProvider);
         }

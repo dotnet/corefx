@@ -134,10 +134,10 @@ namespace System.Diagnostics
     public enum EventLogEntryType
     {
         Error = 1,
-        FailureAudit = 16,
+        Warning = 2,
         Information = 4,
         SuccessAudit = 8,
-        Warning = 2,
+        FailureAudit = 16,
     }
     public sealed partial class EventLogTraceListener : System.Diagnostics.TraceListener
     {
@@ -229,9 +229,11 @@ namespace System.Diagnostics.Eventing.Reader
     {
         public EventLogException() { }
         protected EventLogException(int errorCode) { }
+        protected EventLogException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public EventLogException(string message) { }
         public EventLogException(string message, System.Exception innerException) { }
         public override string Message { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public sealed partial class EventLogInformation
     {
@@ -248,14 +250,15 @@ namespace System.Diagnostics.Eventing.Reader
     public partial class EventLogInvalidDataException : System.Diagnostics.Eventing.Reader.EventLogException
     {
         public EventLogInvalidDataException() { }
+        protected EventLogInvalidDataException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public EventLogInvalidDataException(string message) { }
         public EventLogInvalidDataException(string message, System.Exception innerException) { }
     }
     public enum EventLogIsolation
     {
         Application = 0,
-        Custom = 2,
         System = 1,
+        Custom = 2,
     }
     public sealed partial class EventLogLink
     {
@@ -266,13 +269,14 @@ namespace System.Diagnostics.Eventing.Reader
     }
     public enum EventLogMode
     {
-        AutoBackup = 1,
         Circular = 0,
+        AutoBackup = 1,
         Retain = 2,
     }
     public partial class EventLogNotFoundException : System.Diagnostics.Eventing.Reader.EventLogException
     {
         public EventLogNotFoundException() { }
+        protected EventLogNotFoundException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public EventLogNotFoundException(string message) { }
         public EventLogNotFoundException(string message, System.Exception innerException) { }
     }
@@ -285,6 +289,7 @@ namespace System.Diagnostics.Eventing.Reader
     public partial class EventLogProviderDisabledException : System.Diagnostics.Eventing.Reader.EventLogException
     {
         public EventLogProviderDisabledException() { }
+        protected EventLogProviderDisabledException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public EventLogProviderDisabledException(string message) { }
         public EventLogProviderDisabledException(string message, System.Exception innerException) { }
     }
@@ -316,6 +321,7 @@ namespace System.Diagnostics.Eventing.Reader
     public partial class EventLogReadingException : System.Diagnostics.Eventing.Reader.EventLogException
     {
         public EventLogReadingException() { }
+        protected EventLogReadingException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public EventLogReadingException(string message) { }
         public EventLogReadingException(string message, System.Exception innerException) { }
     }
@@ -382,9 +388,9 @@ namespace System.Diagnostics.Eventing.Reader
     public enum EventLogType
     {
         Administrative = 0,
+        Operational = 1,
         Analytical = 2,
         Debug = 3,
-        Operational = 1,
     }
     public partial class EventLogWatcher : System.IDisposable
     {
@@ -471,8 +477,8 @@ namespace System.Diagnostics.Eventing.Reader
     }
     public enum PathType
     {
-        FilePath = 2,
         LogName = 1,
+        FilePath = 2,
     }
     public partial class ProviderMetadata : System.IDisposable
     {
@@ -497,47 +503,47 @@ namespace System.Diagnostics.Eventing.Reader
     public enum SessionAuthentication
     {
         Default = 0,
-        Kerberos = 2,
         Negotiate = 1,
+        Kerberos = 2,
         Ntlm = 3,
     }
     [System.FlagsAttribute]
     public enum StandardEventKeywords : long
     {
-        AuditFailure = (long)4503599627370496,
-        AuditSuccess = (long)9007199254740992,
-        [System.ObsoleteAttribute("Incorrect value: use CorrelationHint2 instead", false)]
-        CorrelationHint = (long)4503599627370496,
-        CorrelationHint2 = (long)18014398509481984,
-        EventLogClassic = (long)36028797018963968,
         None = (long)0,
         ResponseTime = (long)281474976710656,
-        Sqm = (long)2251799813685248,
         WdiContext = (long)562949953421312,
         WdiDiagnostic = (long)1125899906842624,
+        Sqm = (long)2251799813685248,
+        AuditFailure = (long)4503599627370496,
+        [System.ObsoleteAttribute("Incorrect value: use CorrelationHint2 instead", false)]
+        CorrelationHint = (long)4503599627370496,
+        AuditSuccess = (long)9007199254740992,
+        CorrelationHint2 = (long)18014398509481984,
+        EventLogClassic = (long)36028797018963968,
     }
     public enum StandardEventLevel
     {
+        LogAlways = 0,
         Critical = 1,
         Error = 2,
-        Informational = 4,
-        LogAlways = 0,
-        Verbose = 5,
         Warning = 3,
+        Informational = 4,
+        Verbose = 5,
     }
     public enum StandardEventOpcode
     {
+        Info = 0,
+        Start = 1,
+        Stop = 2,
         DataCollectionStart = 3,
         DataCollectionStop = 4,
         Extension = 5,
-        Info = 0,
-        Receive = 240,
         Reply = 6,
         Resume = 7,
-        Send = 9,
-        Start = 1,
-        Stop = 2,
         Suspend = 8,
+        Send = 9,
+        Receive = 240,
     }
     public enum StandardEventTask
     {

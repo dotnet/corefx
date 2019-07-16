@@ -23,10 +23,10 @@ namespace System.Runtime.InteropServices.ComTypes
         void ReleaseBoundObjects();
         void SetBindOptions([In()] ref BIND_OPTS pbindopts);
         void GetBindOptions(ref BIND_OPTS pbindopts);
-        void GetRunningObjectTable(out IRunningObjectTable pprot);
+        void GetRunningObjectTable(out IRunningObjectTable? pprot);
         void RegisterObjectParam([MarshalAs(UnmanagedType.LPWStr)] string pszKey, [MarshalAs(UnmanagedType.Interface)] object punk);
-        void GetObjectParam([MarshalAs(UnmanagedType.LPWStr)] string pszKey, [MarshalAs(UnmanagedType.Interface)] out object ppunk);
-        void EnumObjectParam(out IEnumString ppenum);
+        void GetObjectParam([MarshalAs(UnmanagedType.LPWStr)] string pszKey, [MarshalAs(UnmanagedType.Interface)] out object? ppunk);
+        void EnumObjectParam(out IEnumString? ppenum);
         [PreserveSig]
         int RevokeObjectParam([MarshalAs(UnmanagedType.LPWStr)] string pszKey);
     }

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security;
@@ -36,10 +35,15 @@ namespace System.Globalization
         private bool LoadCalendarDataFromSystem(string localeName, CalendarId calendarId)
         {
             bool result = true;
-            // TODO-NULLABLE: these can return null but are later replaced with String.Empty or other non-nullable value
+            
+            // these can return null but are later replaced with String.Empty or other non-nullable value
             result &= GetCalendarInfo(localeName, calendarId, CalendarDataType.NativeName, out this.sNativeName!);
             result &= GetCalendarInfo(localeName, calendarId, CalendarDataType.MonthDay, out this.sMonthDay!);
-            this.sMonthDay = NormalizeDatePattern(this.sMonthDay);
+
+            if (this.sMonthDay != null)
+            {
+                this.sMonthDay = NormalizeDatePattern(this.sMonthDay);
+            }
 
             result &= EnumDatePatterns(localeName, calendarId, CalendarDataType.ShortDates, out this.saShortDates!);
             result &= EnumDatePatterns(localeName, calendarId, CalendarDataType.LongDates, out this.saLongDates!);
@@ -108,7 +112,7 @@ namespace System.Globalization
 
         // PAL Layer ends here
 
-        private static unsafe bool GetCalendarInfo(string localeName, CalendarId calendarId, CalendarDataType dataType, out string calendarString)
+        private static unsafe bool GetCalendarInfo(string localeName, CalendarId calendarId, CalendarDataType dataType, out string? calendarString)
         {
             Debug.Assert(!GlobalizationMode.Invariant);
 

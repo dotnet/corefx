@@ -63,7 +63,7 @@ namespace System.Net.Test.Common
 
                 using (var server = new LoopbackServer(listenSocket, options))
                 {
-                    await funcAsync(server);
+                    await funcAsync(server).ConfigureAwait(false);
                 }
             }
         }
@@ -80,8 +80,44 @@ namespace System.Net.Test.Common
                 Task clientTask = clientFunc(server.Uri);
                 Task serverTask = serverFunc(server);
 
-                await new Task[] { clientTask, serverTask }.WhenAllOrAnyFailed();
+                await new Task[] { clientTask, serverTask }.WhenAllOrAnyFailed().ConfigureAwait(false);
             }, options);
+        }
+
+        public async Task<Connection> EstablishConnectionAsync()
+        {
+            Socket s = await _listenSocket.AcceptAsync().ConfigureAwait(false);
+            try
+            {
+                s.NoDelay = true;
+
+                Stream stream = new NetworkStream(s, ownsSocket: false);
+                if (_options.UseSsl)
+                {
+                    var sslStream = new SslStream(stream, false, delegate { return true; });
+                    using (var cert = Configuration.Certificates.GetServerCertificate())
+                    {
+                        await sslStream.AuthenticateAsServerAsync(
+                            cert,
+                            clientCertificateRequired: true, // allowed but not required
+                            enabledSslProtocols: _options.SslProtocols,
+                            checkCertificateRevocation: false).ConfigureAwait(false);
+                    }
+                    stream = sslStream;
+                }
+
+                if (_options.StreamWrapper != null)
+                {
+                    stream = _options.StreamWrapper(stream);
+                }
+
+                return new Connection(s, stream);
+            }
+            catch (Exception)
+            {
+                s.Close();
+                throw;
+            }
         }
 
         public async Task AcceptConnectionAsync(Func<Connection, Task> funcAsync)
@@ -93,8 +129,7 @@ namespace System.Net.Test.Common
                 Stream stream = new NetworkStream(s, ownsSocket: false);
                 if (_options.UseSsl)
                 {
-                    var sslStream = new SslStream(stream, false, delegate
-                    { return true; });
+                    var sslStream = new SslStream(stream, false, delegate { return true; });
                     using (var cert = Configuration.Certificates.GetServerCertificate())
                     {
                         await sslStream.AuthenticateAsServerAsync(
@@ -113,7 +148,7 @@ namespace System.Net.Test.Common
 
                 using (var connection = new Connection(s, stream))
                 {
-                    await funcAsync(connection);
+                    await funcAsync(connection).ConfigureAwait(false);
                 }
             }
         }
@@ -122,12 +157,26 @@ namespace System.Net.Test.Common
         {
             List<string> lines = null;
 
+            // Note, we assume there's no request body.
+            // We'll close the connection after reading the request header and sending the response.
+            await AcceptConnectionAsync(async connection =>
+            {
+                lines = await connection.ReadRequestHeaderAndSendCustomResponseAsync(response).ConfigureAwait(false);
+            }).ConfigureAwait(false);
+
+            return lines;
+        }
+
+        public async Task<List<string>> AcceptConnectionSendCustomResponseAndCloseAsync(byte[] response)
+        {
+            List<string> lines = null;
+
             // Note, we assume there's no request body.  
             // We'll close the connection after reading the request header and sending the response.
             await AcceptConnectionAsync(async connection =>
             {
-                lines = await connection.ReadRequestHeaderAndSendCustomResponseAsync(response);
-            });
+                lines = await connection.ReadRequestHeaderAndSendCustomResponseAsync(response).ConfigureAwait(false);
+            }).ConfigureAwait(false);
 
             return lines;
         }
@@ -140,8 +189,8 @@ namespace System.Net.Test.Common
             // We'll close the connection after reading the request header and sending the response.
             await AcceptConnectionAsync(async connection =>
             {
-                lines = await connection.ReadRequestHeaderAndSendResponseAsync(statusCode, additionalHeaders + "Connection: close\r\n", content);
-            });
+                lines = await connection.ReadRequestHeaderAndSendResponseAsync(statusCode, additionalHeaders + "Connection: close\r\n", content).ConfigureAwait(false);
+            }).ConfigureAwait(false);
 
             return lines;
         }
@@ -305,13 +354,19 @@ namespace System.Net.Test.Common
         }
 
         public static string GetHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null, bool connectionClose = false) =>
+            GetHttpResponseHeaders(statusCode, additionalHeaders, content, connectionClose) +
+            content;
+
+        public static string GetHttpResponseHeaders(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null, bool connectionClose = false) =>
+            GetHttpResponseHeaders(statusCode, additionalHeaders, content == null ? 0 : content.Length, connectionClose);
+
+        public static string GetHttpResponseHeaders(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, int contentLength = 0, bool connectionClose = false) =>
             $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
             (connectionClose ? "Connection: close\r\n" : "") +
             $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
-            $"Content-Length: {(content == null ? 0 : content.Length)}\r\n" +
+            $"Content-Length: {contentLength}\r\n" +
             additionalHeaders +
-            "\r\n" +
-            content;
+            "\r\n";
 
         public static string GetSingleChunkHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null, bool connectionClose = false) =>
             $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
@@ -363,7 +418,7 @@ namespace System.Net.Test.Common
             public bool IsProxy { get; set; } = false;
         }
 
-        public sealed class Connection : IDisposable
+        public sealed class Connection : GenericLoopbackConnection
         {
             private const int BufferSize = 4000;
             private Socket _socket;
@@ -372,6 +427,8 @@ namespace System.Net.Test.Common
             private byte[] _readBuffer;
             private int _readStart;
             private int _readEnd;
+            private int _contentLength = 0;
+            private bool _bodyRead = false;
 
             public Connection(Socket socket, Stream stream)
             {
@@ -404,7 +461,7 @@ namespace System.Net.Test.Common
 #if NETSTANDARD
                 // stream does not have Memory<t> overload
                 byte[] tempBuffer = new byte[size];
-                int readLength = await _stream.ReadAsync(tempBuffer, 0, size);
+                int readLength = await _stream.ReadAsync(tempBuffer, 0, size).ConfigureAwait(false);
                 if (readLength > 0)
                 {
                     tempBuffer.AsSpan(readLength).CopyTo(buffer.Span.Slice(offset, size));
@@ -437,16 +494,16 @@ namespace System.Net.Test.Common
                 return totalLength;
             }
 
-            public async Task<int> ReadBlockAsync(char[]  result, int offset, int size)
+            public async Task<int> ReadBlockAsync(char[] result, int offset, int size)
             {
                 byte[] buffer = new byte[size];
-                int readLength = await ReadBlockAsync(buffer, 0, size);
+                int readLength = await ReadBlockAsync(buffer, 0, size).ConfigureAwait(false);
 
                 string asString = System.Text.Encoding.ASCII.GetString(buffer, 0, readLength);
 
                 for (int i = 0; i < readLength; i++)
                 {
-                    result[offset + i ] = asString[i];
+                    result[offset + i] = asString[i];
                 }
 
                 return readLength;
@@ -461,9 +518,9 @@ namespace System.Net.Test.Common
 
                 do
                 {
-                    bytesRead = await ReadAsync(buffer, offset, buffer.Length - offset);
+                    bytesRead = await ReadAsync(buffer, offset, buffer.Length - offset).ConfigureAwait(false);
                     totalLength += bytesRead;
-                    offset+=bytesRead;
+                    offset += bytesRead;
 
                     if (bytesRead == buffer.Length)
                     {
@@ -514,7 +571,7 @@ namespace System.Net.Test.Common
                         }
 
                         _readEnd += bytesRead;
-                   }
+                    }
 
                     index = Array.IndexOf(_readBuffer, (byte)'\n', startSearch, _readEnd - startSearch);
                     if (index == -1)
@@ -537,7 +594,7 @@ namespace System.Net.Test.Common
                 return null;
             }
 
-            public void Dispose()
+            public override void Dispose()
             {
                 try
                 {
@@ -565,53 +622,54 @@ namespace System.Net.Test.Common
 
                 if (line == null)
                 {
-                    throw new Exception("Unexpected EOF trying to read request header");
+                    throw new IOException("Unexpected EOF trying to read request header");
                 }
 
                 return lines;
             }
 
+            public async Task SendResponseAsync(string response)
+            {
+                await _writer.WriteAsync(response).ConfigureAwait(false);
+            }
+
             public async Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null)
             {
-                await _writer.WriteAsync(GetHttpResponse(statusCode, additionalHeaders, content));
+                await SendResponseAsync(GetHttpResponse(statusCode, additionalHeaders, content)).ConfigureAwait(false);
             }
 
             public async Task<List<string>> ReadRequestHeaderAndSendCustomResponseAsync(string response)
             {
                 List<string> lines = await ReadRequestHeaderAsync().ConfigureAwait(false);
-                await _writer.WriteAsync(response);
+                await _writer.WriteAsync(response).ConfigureAwait(false);
+                return lines;
+            }
+
+            public async Task<List<string>> ReadRequestHeaderAndSendCustomResponseAsync(byte[] response)
+            {
+                List<string> lines = await ReadRequestHeaderAsync().ConfigureAwait(false);
+                await _stream.WriteAsync(response, 0, response.Length).ConfigureAwait(false);
                 return lines;
             }
 
             public async Task<List<string>> ReadRequestHeaderAndSendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null)
             {
                 List<string> lines = await ReadRequestHeaderAsync().ConfigureAwait(false);
-                await SendResponseAsync(statusCode, additionalHeaders, content);
+                await SendResponseAsync(statusCode, additionalHeaders, content).ConfigureAwait(false);
                 return lines;
             }
-        }
 
-        //
-        // GenericLoopbackServer implementation
-        //
 
-        public override async Task<HttpRequestData> HandleRequestAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null)
-        {
-            string headerString = null;
-            if (headers != null)
+            //
+            // GenericLoopbackServer implementation
+            //
+
+            public override async Task<HttpRequestData> ReadRequestDataAsync(bool readBody = true)
             {
-                foreach (HttpHeaderData headerData in headers)
-                {
-                    headerString = headerString + $"{headerData.Name}: {headerData.Value}\r\n";
-                }
-            }
+                List<string> headerLines = null;
+                HttpRequestData requestData = new HttpRequestData();
 
-            List<string> headerLines = null;
-            HttpRequestData requestData = new HttpRequestData();
-
-            await AcceptConnectionAsync(async connection =>
-            {
-                headerLines = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
+                headerLines = await ReadRequestHeaderAsync().ConfigureAwait(false);
 
                 // Parse method and path
                 string[] splits = headerLines[0].Split(' ');
@@ -632,52 +690,165 @@ namespace System.Net.Test.Common
                 {
                     if (requestData.GetHeaderValueCount("Content-Length") != 0)
                     {
-                        int contentLength = Int32.Parse(requestData.GetSingleHeaderValue("Content-Length"));
-
-                        if (contentLength > 0)
-                        {
-                            byte[] buffer = new byte[contentLength];
-                            int bytesRead = await connection.ReadBlockAsync(buffer, 0, contentLength);
-                            Assert.Equal(contentLength, bytesRead);
-                            requestData.Body = buffer;
-                        }
+                        _contentLength = Int32.Parse(requestData.GetSingleHeaderValue("Content-Length"));
                     }
                     else if (requestData.GetHeaderValueCount("Transfer-Encoding") != 0 && requestData.GetSingleHeaderValue("Transfer-Encoding") == "chunked")
                     {
-                        while (true)
+                        _contentLength = -1;
+                    }
+                }
+
+                if (readBody)
+                {
+                    requestData.Body = await ReadRequestBodyAsync().ConfigureAwait(false);
+                    _bodyRead = true;
+                }
+
+                return requestData;
+            }
+
+            public override async Task<Byte[]> ReadRequestBodyAsync()
+            {
+                byte[] buffer = null;
+
+                if (_bodyRead)
+                {
+                    throw new InvalidOperationException("Body already done");
+                }
+
+                if (_contentLength == 0)
+                {
+                    buffer = new byte[0];
+                }
+                if (_contentLength > 0)
+                {
+                    buffer = new byte[_contentLength];
+                    int bytesRead = await ReadBlockAsync(buffer, 0, _contentLength).ConfigureAwait(false);
+                    Assert.Equal(_contentLength, bytesRead);
+                }
+                else if (_contentLength < 0)
+                {
+                    // Chunked Encoding
+                    while (true)
+                    {
+                        string chunkHeader = await ReadLineAsync().ConfigureAwait(false);
+                        int chunkLength = int.Parse(chunkHeader, System.Globalization.NumberStyles.HexNumber);
+                        if (chunkLength == 0)
                         {
-                            string chunkHeader = await connection.ReadLineAsync();
-                            int chunkLength = int.Parse(chunkHeader, System.Globalization.NumberStyles.HexNumber);
-                            if (chunkLength == 0)
-                            {
-                                // Last chunk. Read CRLF and exit.
-                                await connection.ReadLineAsync();
-                                break;
-                            }
+                            // Last chunk. Read CRLF and exit.
+                            await ReadLineAsync().ConfigureAwait(false);
+                            break;
+                        }
 
-                            byte[] buffer = new byte[chunkLength];
-                            await connection.ReadBlockAsync(buffer, 0, chunkLength);
-                            await connection.ReadLineAsync();
-                            if (requestData.Body == null)
-                            {
-                                requestData.Body = buffer;
-                            }
-                            else
-                            {
-                                byte[] newBuffer = new byte[requestData.Body.Length + chunkLength];
+                        byte[] chunk = new byte[chunkLength];
+                        await ReadBlockAsync(chunk, 0, chunkLength).ConfigureAwait(false);
+                        await ReadLineAsync().ConfigureAwait(false);
+                        if (buffer == null)
+                        {
+                            buffer = chunk;
+                        }
+                        else
+                        {
+                            byte[] newBuffer = new byte[buffer.Length + chunkLength];
 
-                                requestData.Body.CopyTo(newBuffer, 0);
-                                buffer.CopyTo(newBuffer, requestData.Body.Length);
-                                requestData.Body = newBuffer;
-                            }
+                            buffer.CopyTo(newBuffer, 0);
+                            chunk.CopyTo(newBuffer, buffer.Length);
+                            buffer = newBuffer;
                         }
                     }
                 }
 
-                await connection.SendResponseAsync(statusCode, headerString + "Connection: close\r\n" , content).ConfigureAwait(false);
-            });
+                return buffer;
+            }
 
-            return requestData;
+            public override async Task SendResponseAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null, bool isFinal = true, int requestId = 0)
+            {
+                string headerString = null;
+                int contentLength = -1;
+
+                if (headers != null)
+                {
+                    foreach (HttpHeaderData headerData in headers)
+                    {
+                        headerString = headerString + $"{headerData.Name}: {headerData.Value}\r\n";
+                        if (headerData.Name.Equals("Content-Length", StringComparison.OrdinalIgnoreCase))
+                        {
+                            contentLength = int.Parse(headerData.Value);
+                        }
+                    }
+                }
+
+                if (contentLength < 0)
+                {
+                    // We did not find Content header in headers.
+                    contentLength = String.IsNullOrEmpty(content) ? 0 : content.Length;
+                }
+
+                if (content != null || isFinal)
+                {
+                    headerString = GetHttpResponseHeaders(statusCode, headerString, contentLength, connectionClose: true);
+                }
+
+                await SendResponseAsync(headerString).ConfigureAwait(false);
+                await SendResponseAsync(content).ConfigureAwait(false);
+            }
+
+            public override async Task SendResponseHeadersAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, int requestId = 0)
+            {
+                string headerString = null;
+
+                if (headers != null)
+                {
+                    foreach (HttpHeaderData headerData in headers)
+                    {
+                        headerString = headerString + $"{headerData.Name}: {headerData.Value}\r\n";
+                    }
+                }
+
+                headerString = GetHttpResponseHeaders(statusCode, headerString, 0, connectionClose: true);
+
+                await SendResponseAsync(headerString).ConfigureAwait(false);
+            }
+
+            public override async Task SendResponseBodyAsync(byte[] body, bool isFinal = true, int requestId = 0)
+            {
+                await SendResponseAsync(Encoding.UTF8.GetString(body)).ConfigureAwait(false);
+            }
+
+            public override async Task WaitForCancellationAsync(bool ignoreIncomingData = true, int requestId = 0)
+            {
+                var buffer = new byte[1024];
+                while (true)
+                {
+                    int bytesRead = await ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+
+                    if (!ignoreIncomingData)
+                    {
+                        Assert.Equal(0, bytesRead);
+                    }
+
+                    if (bytesRead == 0)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        public override async Task<HttpRequestData> HandleRequestAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null)
+        {
+            using (Connection connection = await EstablishConnectionAsync().ConfigureAwait(false))
+            {
+                HttpRequestData requestData = await connection.ReadRequestDataAsync().ConfigureAwait(false);
+                await connection.SendResponseAsync(statusCode, headers, content: content).ConfigureAwait(false);
+
+                return requestData;
+            }
+        }
+
+        public override Task AcceptConnectionAsync(Func<GenericLoopbackConnection, Task> funcAsync)
+        {
+            return AcceptConnectionAsync((Func<Connection, Task>)funcAsync);
         }
     }
 
@@ -685,7 +856,7 @@ namespace System.Net.Test.Common
     {
         public static readonly Http11LoopbackServerFactory Singleton = new Http11LoopbackServerFactory();
 
-        public override Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync)
+        public override Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync, int millisecondsTimeout = 60_000)
         {
             return LoopbackServer.CreateServerAsync((server, uri) => funcAsync(server, uri));
         }

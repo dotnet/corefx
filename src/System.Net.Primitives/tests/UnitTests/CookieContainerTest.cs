@@ -331,6 +331,19 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("_m_ask_fm_session", "session1")
                 }
             }; // Empty header followed by another empty header at the end
+
+            if (!PlatformDetection.IsFullFramework)
+            {
+                yield return new object[]
+                {
+                    uSecure,
+                    "hello world=value",
+                    new Cookie[]
+                    {
+                        new Cookie("hello world", "value"),
+                    }
+                }; // Name with space in it
+            }
         }
 
         [Theory]
@@ -343,7 +356,6 @@ namespace System.Net.Primitives.Unit.Tests
 
         [Theory]
         [MemberData(nameof(SetCookiesData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
         public void SetCookies_Success(Uri uri, string cookieHeader, Cookie[] expected)
         {
             CookieContainer cc = CreateCount11Container();

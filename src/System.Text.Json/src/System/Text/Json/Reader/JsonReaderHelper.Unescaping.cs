@@ -10,6 +10,31 @@ namespace System.Text.Json
 {
     internal static partial class JsonReaderHelper
     {
+        public static bool TryGetUnescapedBase64Bytes(ReadOnlySpan<byte> utf8Source, int idx, out byte[] bytes)
+        {
+            byte[] unescapedArray = null;
+
+            Span<byte> utf8Unescaped = utf8Source.Length <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[utf8Source.Length] :
+                (unescapedArray = ArrayPool<byte>.Shared.Rent(utf8Source.Length));
+
+            Unescape(utf8Source, utf8Unescaped, idx, out int written);
+            Debug.Assert(written > 0);
+
+            utf8Unescaped = utf8Unescaped.Slice(0, written);
+            Debug.Assert(!utf8Unescaped.IsEmpty);
+
+            bool result = TryDecodeBase64InPlace(utf8Unescaped, out bytes);
+
+            if (unescapedArray != null)
+            {
+                utf8Unescaped.Clear();
+                ArrayPool<byte>.Shared.Return(unescapedArray);
+            }
+
+            return result;
+        }
+
         // Reject any invalid UTF-8 data rather than silently replacing.
         public static readonly UTF8Encoding s_utf8Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
@@ -107,6 +132,53 @@ namespace System.Text.Json
             return result;
         }
 
+        public static bool TryDecodeBase64InPlace(Span<byte> utf8Unescaped, out byte[] bytes)
+        {
+            OperationStatus status = Base64.DecodeFromUtf8InPlace(utf8Unescaped, out int bytesWritten);
+            if (status != OperationStatus.Done)
+            {
+                bytes = null;
+                return false;
+            }
+            bytes = utf8Unescaped.Slice(0, bytesWritten).ToArray();
+            return true;
+        }
+
+        public static bool TryDecodeBase64(ReadOnlySpan<byte> utf8Unescaped, out byte[] bytes)
+        {
+            byte[] pooledArray = null;
+
+            Span<byte> byteSpan = utf8Unescaped.Length <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[utf8Unescaped.Length] :
+                (pooledArray = ArrayPool<byte>.Shared.Rent(utf8Unescaped.Length));
+
+            OperationStatus status = Base64.DecodeFromUtf8(utf8Unescaped, byteSpan, out int bytesConsumed, out int bytesWritten);
+
+            if (status != OperationStatus.Done)
+            {
+                bytes = null;
+
+                if (pooledArray != null)
+                {
+                    byteSpan.Clear();
+                    ArrayPool<byte>.Shared.Return(pooledArray);
+                }
+
+                return false;
+            }
+            Debug.Assert(bytesConsumed == utf8Unescaped.Length);
+
+            bytes = byteSpan.Slice(0, bytesWritten).ToArray();
+
+            if (pooledArray != null)
+            {
+                byteSpan.Clear();
+                ArrayPool<byte>.Shared.Return(pooledArray);
+            }
+
+            return true;
+        }
+
         public static string TranscodeHelper(ReadOnlySpan<byte> utf8Unescaped)
         {
             try
@@ -140,39 +212,83 @@ namespace System.Text.Json
 
         internal static int GetUtf8ByteCount(ReadOnlySpan<char> text)
         {
+            try
+            {
 #if BUILDING_INBOX_LIBRARY
-            return s_utf8Encoding.GetByteCount(text);
+                return s_utf8Encoding.GetByteCount(text);
 #else
-            if (text.IsEmpty)
-            {
-                return 0;
-            }
-            unsafe
-            {
-                fixed (char* charPtr = text)
+                if (text.IsEmpty)
                 {
-                    return s_utf8Encoding.GetByteCount(charPtr, text.Length);
+                    return 0;
                 }
-            }
+                unsafe
+                {
+                    fixed (char* charPtr = text)
+                    {
+                        return s_utf8Encoding.GetByteCount(charPtr, text.Length);
+                    }
+                }
 #endif
+            }
+            catch (EncoderFallbackException ex)
+            {
+                // We want to be consistent with the exception being thrown
+                // so the user only has to catch a single exception.
+                // Since we already throw ArgumentException when validating other arguments,
+                // using that exception for failure to encode invalid UTF-16 chars as well.
+                // Therefore, wrapping the EncoderFallbackException around an ArgumentException.
+                throw ThrowHelper.GetArgumentException_ReadInvalidUTF16(ex);
+            }
         }
 
         internal static int GetUtf8FromText(ReadOnlySpan<char> text, Span<byte> dest)
         {
-#if BUILDING_INBOX_LIBRARY
-            return s_utf8Encoding.GetBytes(text, dest);
-#else
-            if (text.IsEmpty)
+            try
             {
-                return 0;
+#if BUILDING_INBOX_LIBRARY
+                return s_utf8Encoding.GetBytes(text, dest);
+#else
+                if (text.IsEmpty)
+                {
+                    return 0;
+                }
+
+                unsafe
+                {
+                    fixed (char* charPtr = text)
+                    fixed (byte* destPtr = dest)
+                    {
+                        return s_utf8Encoding.GetBytes(charPtr, text.Length, destPtr, dest.Length);
+                    }
+                }
+#endif
+            }
+            catch (EncoderFallbackException ex)
+            {
+                // We want to be consistent with the exception being thrown
+                // so the user only has to catch a single exception.
+                // Since we already throw ArgumentException when validating other arguments,
+                // using that exception for failure to encode invalid UTF-16 chars as well.
+                // Therefore, wrapping the EncoderFallbackException around an ArgumentException.
+                throw ThrowHelper.GetArgumentException_ReadInvalidUTF16(ex);
+            }
+        }
+
+        internal static string GetTextFromUtf8(ReadOnlySpan<byte> utf8Text)
+        {
+#if BUILDING_INBOX_LIBRARY
+            return s_utf8Encoding.GetString(utf8Text);
+#else
+            if (utf8Text.IsEmpty)
+            {
+                return string.Empty;
             }
 
             unsafe
             {
-                fixed (char* charPtr = text)
-                fixed (byte* destPtr = dest)
+                fixed (byte* bytePtr = utf8Text)
                 {
-                    return s_utf8Encoding.GetBytes(charPtr, text.Length, destPtr, dest.Length);
+                    return s_utf8Encoding.GetString(bytePtr, utf8Text.Length);
                 }
             }
 #endif

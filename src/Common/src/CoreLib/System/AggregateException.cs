@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -452,8 +451,10 @@ namespace System
 
             for (int i = 0; i < m_innerExceptions.Count; i++)
             {
-                text.AppendLine();
-                text.Append("---> ");
+                if (m_innerExceptions[i] == InnerException)
+                    continue; // Already logged in base.ToString()
+
+                text.Append(Environment.NewLine).Append(InnerExceptionPrefix);
                 text.AppendFormat(CultureInfo.InvariantCulture, SR.AggregateException_InnerException, i);
                 text.Append(m_innerExceptions[i].ToString());
                 text.Append("<---");

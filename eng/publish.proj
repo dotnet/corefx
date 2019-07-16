@@ -1,6 +1,5 @@
 <Project>
   <Import Project="..\Directory.Build.props" />
-  <Import Project="$(PackagesDir)/$(PublishSymbolsPackage.ToLower())/$(PublishSymbolsPackageVersion)/build/PublishSymbols.targets" />
 
   <!-- We need to import Directory.Build.targets at the beginning because there is where we import the restored tools targets, in 
   this case we need Microsoft.DotNet.Build.Tasks.Feed targets to be imported. -->
@@ -135,7 +134,8 @@
                     ManifestCommit="$(ManifestCommit)"
                     ManifestBuildData="$(ManifestBuildData)"
                     ManifestRepoUri="$(ManifestRepoUri)"
-                    AssetManifestPath="$(AssetManifestFilePath)" />
+                    AssetManifestPath="$(AssetManifestFilePath)"
+                    Overwrite="true" />
 
     <ItemGroup>
       <_ManifestToPush Remove="@(_ManifestToPush)" />
@@ -155,6 +155,7 @@
                     ManifestCommit="$(ManifestCommit)"
                     ManifestBuildData="$(ManifestBuildData)"
                     ManifestRepoUri="$(ManifestRepoUri)"
-                    AssetManifestPath="$(AssetManifestDir)ManifestUpload.xml" />
+                    AssetManifestPath="$(AssetManifestDir)ManifestUpload.xml"
+                    Overwrite="true" />
   </Target>
 </Project>

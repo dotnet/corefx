@@ -168,7 +168,7 @@ namespace System.Globalization.Tests
             GetAscii_Invalid(new IdnMapping() { UseStd3AsciiRules = true }, unicode, index, count, exceptionType);
         }
 
-        public static void GetAscii_Invalid(IdnMapping idnMapping, string unicode, int index, int count, Type exceptionType)
+        private static void GetAscii_Invalid(IdnMapping idnMapping, string unicode, int index, int count, Type exceptionType)
         {
             if (unicode == null || index + count == unicode.Length)
             {
@@ -179,6 +179,15 @@ namespace System.Globalization.Tests
                 Assert.Throws(exceptionType, () => idnMapping.GetAscii(unicode, index));
             }
             Assert.Throws(exceptionType, () => idnMapping.GetAscii(unicode, index, count));
+        }
+
+        [Fact]
+        public void TestStringWithHyphenIn3rdAnd4thPlace()
+        {
+            string unicode = "r6---sn-uxanug5-hxay.gvt1.com";
+
+            // Ensure we are not throwing on Linux because of the 3rd and 4th hyphens in the string.
+            Assert.Equal(unicode, new IdnMapping().GetAscii(unicode));
         }
     }
 }

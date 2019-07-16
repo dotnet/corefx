@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 using System.Text;
 
@@ -83,7 +84,7 @@ namespace System.IO
                 return basePath;
 
             int length = path.Length;
-            string combinedPath = null;
+            string? combinedPath = null;
 
             if ((length >= 1 && PathInternal.IsDirectorySeparator(path[0])))
             {
@@ -189,7 +190,7 @@ namespace System.IO
 
         // Tests if the given path contains a root. A path is considered rooted
         // if it starts with a backslash ("\") or a valid drive letter and a colon (":").
-        public static bool IsPathRooted(string path)
+        public static bool IsPathRooted(string? path)
         {
             return path != null && IsPathRooted(path.AsSpan());
         }
@@ -210,13 +211,13 @@ namespace System.IO
         // and "\\server\share" (a UNC path for a given server and share name).
         // The resulting string is null if path is null. If the path is empty or
         // only contains whitespace characters an ArgumentException gets thrown.
-        public static string GetPathRoot(string path)
+        public static string? GetPathRoot(string? path)
         {
             if (PathInternal.IsEffectivelyEmpty(path.AsSpan()))
                 return null;
 
             ReadOnlySpan<char> result = GetPathRoot(path.AsSpan());
-            if (path.Length == result.Length)
+            if (path!.Length == result.Length)
                 return PathInternal.NormalizeDirectorySeparators(path);
 
             return PathInternal.NormalizeDirectorySeparators(result.ToString());
@@ -247,29 +248,24 @@ namespace System.IO
             if (root.Length == 0)
                 return root;
 
-            int offset = GetUncRootLength(path);
-            if (offset >= 0)
+            // Cut from "\\?\UNC\Server\Share" to "Server\Share"
+            // Cut from  "\\Server\Share" to "Server\Share"
+            int startOffset = GetUncRootLength(path);
+            if (startOffset == -1)
             {
-                // Cut from "\\?\UNC\Server\Share" to "Server\Share"
-                // Cut from  "\\Server\Share" to "Server\Share"
-                return TrimEndingDirectorySeparator(root.Slice(offset));
-            }
-            else if (PathInternal.IsDevice(path))
-            {
-                return TrimEndingDirectorySeparator(root.Slice(4)); // Cut from "\\?\C:\" to "C:"
+                if (PathInternal.IsDevice(path))
+                {
+                    startOffset = 4; // Cut from "\\?\C:\" to "C:"
+                }
+                else
+                {
+                    startOffset = 0; // e.g. "C:"
+                }
             }
 
-            return TrimEndingDirectorySeparator(root); // e.g. "C:"
+            ReadOnlySpan<char> pathToTrim = root.Slice(startOffset);
+            return Path.EndsInDirectorySeparator(pathToTrim) ? pathToTrim.Slice(0, pathToTrim.Length - 1) : pathToTrim;
         }
-
-        /// <summary>
-        /// Trims the ending directory separator if present.
-        /// </summary>
-        /// <param name="path"></param>
-        internal static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) =>
-            PathInternal.EndsInDirectorySeparator(path) ?
-                path.Slice(0, path.Length - 1) :
-                path;
 
         /// <summary>
         /// Returns offset as -1 if the path is not in Unc format, otherwise returns the root length.

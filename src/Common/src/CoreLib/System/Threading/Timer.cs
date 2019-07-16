@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Threading.Tasks;
@@ -56,14 +55,13 @@ namespace System.Threading
         #region interface to native timer
 
         private bool _isTimerScheduled;
-        private int _currentTimerStartTicks;
+        private long _currentTimerStartTicks;
         private uint _currentTimerDuration;
 
         private bool EnsureTimerFiresBy(uint requestedDuration)
         {
             // The VM's timer implementation does not work well for very long-duration timers.
-            // See kb 950807.
-            // So we'll limit our native timer duration to a "small" value.
+            // So we limit our native timer duration to a "small" value.
             // This may cause us to attempt to fire timers early, but that's ok - 
             // we'll just see that none of our timers has actually reached its due time,
             // and schedule the native timer again.
@@ -72,11 +70,11 @@ namespace System.Threading
 
             if (_isTimerScheduled)
             {
-                uint elapsed = (uint)(TickCount - _currentTimerStartTicks);
+                long elapsed = TickCount64 - _currentTimerStartTicks;
                 if (elapsed >= _currentTimerDuration)
                     return true; //the timer's about to fire
 
-                uint remainingDuration = _currentTimerDuration - elapsed;
+                uint remainingDuration = _currentTimerDuration - (uint)elapsed;
                 if (actualDuration >= remainingDuration)
                     return true; //the timer will fire earlier than this request
             }
@@ -92,7 +90,7 @@ namespace System.Threading
             if (SetTimer(actualDuration))
             {
                 _isTimerScheduled = true;
-                _currentTimerStartTicks = TickCount;
+                _currentTimerStartTicks = TickCount64;
                 _currentTimerDuration = actualDuration;
                 return true;
             }
@@ -115,7 +113,7 @@ namespace System.Threading
 
         // The current threshold, an absolute time where any timers scheduled to go off at or
         // before this time must be queued to the short list.
-        private int _currentAbsoluteThreshold = ShortTimersThresholdMilliseconds;
+        private long _currentAbsoluteThreshold = TickCount64 + ShortTimersThresholdMilliseconds;
 
         // Default threshold that separates which timers target _shortTimers vs _longTimers. The threshold
         // is chosen to balance the number of timers in the small list against the frequency with which
@@ -145,7 +143,7 @@ namespace System.Threading
                 bool haveTimerToSchedule = false;
                 uint nextTimerDuration = uint.MaxValue;
 
-                int nowTicks = TickCount;
+                long nowTicks = TickCount64;
 
                 // Sweep through the "short" timers.  If the current tick count is greater than
                 // the current threshold, also sweep through the "long" timers.  Finally, as part
@@ -163,8 +161,8 @@ namespace System.Threading
                         // in our deleting or moving it; we'll continue after with this saved next timer.
                         TimerQueueTimer? next = timer._next;
 
-                        uint elapsed = (uint)(nowTicks - timer._startTicks);
-                        int remaining = (int)timer._dueTime - (int)elapsed;
+                        long elapsed = nowTicks - timer._startTicks;
+                        long remaining = timer._dueTime - elapsed;
                         if (remaining <= 0)
                         {
                             // Timer is ready to fire.
@@ -178,9 +176,9 @@ namespace System.Threading
                                 // again, meaning the timer can't keep up with the short period, have it fire 1 ms from now to
                                 // avoid spinning without a delay.
                                 timer._startTicks = nowTicks;
-                                uint elapsedForNextDueTime = elapsed - timer._dueTime;
+                                long elapsedForNextDueTime = elapsed - timer._dueTime;
                                 timer._dueTime = (elapsedForNextDueTime < timer._period) ?
-                                    timer._period - elapsedForNextDueTime :
+                                    timer._period - (uint)elapsedForNextDueTime :
                                     1;
 
                                 // Update the timer if this becomes the next timer to fire.
@@ -252,7 +250,7 @@ namespace System.Threading
                         // long list now; otherwise, most timers created in the interim would end up in the long
                         // list and we'd likely end up paying for another invocation of FireNextTimers that could
                         // have been delayed longer (to whatever is the current minimum in the long list).
-                        int remaining = _currentAbsoluteThreshold - nowTicks;
+                        long remaining = _currentAbsoluteThreshold - nowTicks;
                         if (remaining > 0)
                         {
                             if (_shortTimers == null && _longTimers != null)
@@ -291,13 +289,15 @@ namespace System.Threading
 
         #region Queue implementation
 
+        public long ActiveCount { get; private set; }
+
         public bool UpdateTimer(TimerQueueTimer timer, uint dueTime, uint period)
         {
-            int nowTicks = TickCount;
+            long nowTicks = TickCount64;
 
             // The timer can be put onto the short list if it's next absolute firing time
             // is <= the current absolute threshold.
-            int absoluteDueTime = (int)(nowTicks + dueTime);
+            long absoluteDueTime = nowTicks + dueTime;
             bool shouldBeShort = _currentAbsoluteThreshold - absoluteDueTime >= 0;
 
             if (timer._dueTime == Timeout.UnsignedInfinite)
@@ -305,6 +305,7 @@ namespace System.Threading
                 // If the timer wasn't previously scheduled, now add it to the right list.
                 timer._short = shouldBeShort;
                 LinkTimer(timer);
+                ++ActiveCount;
             }
             else if (timer._short != shouldBeShort)
             {
@@ -380,6 +381,8 @@ namespace System.Threading
         {
             if (timer._dueTime != Timeout.UnsignedInfinite)
             {
+                --ActiveCount;
+                Debug.Assert(ActiveCount >= 0);
                 UnlinkTimer(timer);
                 timer._prev = null;
                 timer._next = null;
@@ -410,7 +413,7 @@ namespace System.Threading
         internal bool _short;
 
         // The time, according to TimerQueue.TickCount, when this timer's current interval started.
-        internal int _startTicks;
+        internal long _startTicks;
 
         // Timeout.UnsignedInfinite if we are not going to fire.  Otherwise, the offset from _startTime when we will fire.
         internal uint _dueTime;
@@ -470,14 +473,8 @@ namespace System.Threading
                 }
                 else
                 {
-                    if (
-#if CORECLR
-                        // Don't emit this event during EventPipeController.  This avoids initializing FrameworkEventSource during start-up which is expensive relative to the rest of start-up.
-                        !EventPipeController.Initializing &&
-#endif
-                        FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
+                    if (FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
                         FrameworkEventSource.Log.ThreadTransferSendObj(this, 1, string.Empty, true, (int)dueTime, (int)period);
-
                     success = _associatedTimerQueue.UpdateTimer(this, dueTime, period);
                 }
             }
@@ -619,7 +616,7 @@ namespace System.Threading
 
             if (toSignal is WaitHandle wh)
             {
-                EventWaitHandle.Set(wh.SafeWaitHandle!); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/2384
+                EventWaitHandle.Set(wh.SafeWaitHandle);
             }
             else
             {
@@ -678,17 +675,6 @@ namespace System.Threading
 
         ~TimerHolder()
         {
-            // If shutdown has started, another thread may be suspended while holding the timer lock.
-            // So we can't safely close the timer.  
-            //
-            // Similarly, we should not close the timer during AD-unload's live-object finalization phase.
-            // A rude abort may have prevented us from releasing the lock.
-            //
-            // Note that in either case, the Timer still won't fire, because ThreadPool threads won't be
-            // allowed to run anymore.
-            if (Environment.HasShutdownStarted)
-                return;
-
             _timer.Close();
         }
 
@@ -749,15 +735,15 @@ namespace System.Threading
         {
             long dueTm = (long)dueTime.TotalMilliseconds;
             if (dueTm < -1)
-                throw new ArgumentOutOfRangeException(nameof(dueTm), SR.ArgumentOutOfRange_NeedNonNegOrNegative1);
+                throw new ArgumentOutOfRangeException(nameof(dueTime), SR.ArgumentOutOfRange_NeedNonNegOrNegative1);
             if (dueTm > MAX_SUPPORTED_TIMEOUT)
-                throw new ArgumentOutOfRangeException(nameof(dueTm), SR.ArgumentOutOfRange_TimeoutTooLarge);
+                throw new ArgumentOutOfRangeException(nameof(dueTime), SR.ArgumentOutOfRange_TimeoutTooLarge);
 
             long periodTm = (long)period.TotalMilliseconds;
             if (periodTm < -1)
-                throw new ArgumentOutOfRangeException(nameof(periodTm), SR.ArgumentOutOfRange_NeedNonNegOrNegative1);
+                throw new ArgumentOutOfRangeException(nameof(period), SR.ArgumentOutOfRange_NeedNonNegOrNegative1);
             if (periodTm > MAX_SUPPORTED_TIMEOUT)
-                throw new ArgumentOutOfRangeException(nameof(periodTm), SR.ArgumentOutOfRange_PeriodTooLarge);
+                throw new ArgumentOutOfRangeException(nameof(period), SR.ArgumentOutOfRange_PeriodTooLarge);
 
             TimerSetup(callback, state, (uint)dueTm, (uint)periodTm);
         }
@@ -804,7 +790,7 @@ namespace System.Threading
                                 bool flowExecutionContext = true)
         {
             if (callback == null)
-                throw new ArgumentNullException(nameof(TimerCallback));
+                throw new ArgumentNullException(nameof(callback));
 
             _timer = new TimerHolder(new TimerQueueTimer(callback, state, dueTime, period, flowExecutionContext));
         }
@@ -842,6 +828,26 @@ namespace System.Threading
                 throw new ArgumentOutOfRangeException(nameof(period), SR.ArgumentOutOfRange_PeriodTooLarge);
 
             return _timer._timer.Change((uint)dueTime, (uint)period);
+        }
+
+        /// <summary>
+        /// Gets the number of timers that are currently active. An active timer is registered to tick at some point in the
+        /// future, and has not yet been canceled.
+        /// </summary>
+        public static long ActiveCount
+        {
+            get
+            {
+                long count = 0;
+                foreach (TimerQueue queue in TimerQueue.Instances)
+                {
+                    lock (queue)
+                    {
+                        count += queue.ActiveCount;
+                    }
+                }
+                return count;
+            }
         }
 
         public bool Dispose(WaitHandle notifyObject)

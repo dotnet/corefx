@@ -7,45 +7,78 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    public ref partial struct Utf8JsonWriter
+    public sealed partial class Utf8JsonWriter
     {
+        /// <summary>
+        /// Writes the pre-encoded text value (as a JSON string) as an element of a JSON array.
+        /// </summary>
+        /// <param name="value">The JSON encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
+        /// <remarks>
+        /// The value should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
+        public void WriteStringValue(JsonEncodedText value)
+            => WriteStringValueHelper(value.EncodedUtf8Bytes);
+
+        private void WriteStringValueHelper(ReadOnlySpan<byte> utf8Value)
+        {
+            Debug.Assert(utf8Value.Length <= JsonConstants.MaxTokenSize);
+
+            WriteStringByOptions(utf8Value);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.String;
+        }
+
         /// <summary>
         /// Writes the string text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
-        /// <param name="escape">If this is set to false, the writer assumes the value is properly escaped and skips the escaping step.</param>
+        /// <param name="value">The value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
+        /// <remarks>
+        /// <para>The value is escaped before writing.</para>
+        /// <para>
+        /// If <paramref name="value"/> is <see langword="null"/> the JSON null value is written,
+        /// as if <see cref="WriteNullValue"/> was called.
+        /// </para>
+        /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStringValue(string value, bool escape = true)
-           => WriteStringValue(value.AsSpan(), escape);
-
-        /// <summary>
-        /// Writes the UTF-16 text value (as a JSON string) as an element of a JSON array.
-        /// </summary>
-        /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
-        /// <param name="escape">If this is set to false, the writer assumes the value is properly escaped and skips the escaping step.</param>
-        /// <exception cref="ArgumentException">
-        /// Thrown when the specified value is too large.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
-        /// </exception>
-        public void WriteStringValue(ReadOnlySpan<char> value, bool escape = true)
+        public void WriteStringValue(string value)
         {
-            JsonWriterHelper.ValidateValue(value);
-
-            if (escape)
+            if (value == null)
             {
-                WriteStringEscape(value);
+                WriteNullValue();
             }
             else
             {
-                WriteStringByOptions(value);
+                WriteStringValue(value.AsSpan());
             }
+        }
+
+        /// <summary>
+        /// Writes the text value (as a JSON string) as an element of a JSON array.
+        /// </summary>
+        /// <param name="value">The value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
+        /// <remarks>
+        /// The value is escaped before writing.
+        /// </remarks>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified value is too large.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
+        public void WriteStringValue(ReadOnlySpan<char> value)
+        {
+            JsonWriterHelper.ValidateValue(value);
+
+            WriteStringEscape(value);
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
@@ -55,7 +88,7 @@ namespace System.Text.Json
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
 
-            Debug.Assert(valueIdx >= -1 && valueIdx < int.MaxValue / 2);
+            Debug.Assert(valueIdx >= -1 && valueIdx < value.Length);
 
             if (valueIdx != -1)
             {
@@ -70,7 +103,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<char> value)
         {
             ValidateWritingValue();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteStringIndented(value);
             }
@@ -80,23 +113,72 @@ namespace System.Text.Json
             }
         }
 
+        // TODO: https://github.com/dotnet/corefx/issues/36958
         private void WriteStringMinimized(ReadOnlySpan<char> escapedValue)
         {
-            int idx = 0;
-            WriteListSeparator(ref idx);
+            Debug.Assert(escapedValue.Length < (int.MaxValue / JsonConstants.MaxExpansionFactorWhileTranscoding) - 3);
 
-            WriteStringValue(escapedValue, ref idx);
+            // All ASCII, 2 quotes => escapedValue.Length + 2
+            // Optionally, 1 list separator, and up to 3x growth when transcoding
+            int maxRequired = (escapedValue.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + 3;
 
-            Advance(idx);
+            if (_memory.Length - BytesPending < maxRequired)
+            {
+                Grow(maxRequired);
+            }
+
+            Span<byte> output = _memory.Span;
+
+            if (_currentDepth < 0)
+            {
+                output[BytesPending++] = JsonConstants.ListSeparator;
+            }
+            output[BytesPending++] = JsonConstants.Quote;
+
+            TranscodeAndWrite(escapedValue, output);
+
+            output[BytesPending++] = JsonConstants.Quote;
         }
 
+        // TODO: https://github.com/dotnet/corefx/issues/36958
         private void WriteStringIndented(ReadOnlySpan<char> escapedValue)
         {
-            int idx = WriteCommaAndFormattingPreamble();
+            int indent = Indentation;
+            Debug.Assert(indent <= 2 * JsonConstants.MaxWriterDepth);
 
-            WriteStringValue(escapedValue, ref idx);
+            Debug.Assert(escapedValue.Length < (int.MaxValue / JsonConstants.MaxExpansionFactorWhileTranscoding) - indent - 3 - s_newLineLength);
 
-            Advance(idx);
+            // All ASCII, 2 quotes => indent + escapedValue.Length + 2
+            // Optionally, 1 list separator, 1-2 bytes for new line, and up to 3x growth when transcoding
+            int maxRequired = indent + (escapedValue.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + 3 + s_newLineLength;
+
+            if (_memory.Length - BytesPending < maxRequired)
+            {
+                Grow(maxRequired);
+            }
+
+            Span<byte> output = _memory.Span;
+
+            if (_currentDepth < 0)
+            {
+                output[BytesPending++] = JsonConstants.ListSeparator;
+            }
+
+            if (_tokenType != JsonTokenType.PropertyName)
+            {
+                if (_tokenType != JsonTokenType.None)
+                {
+                    WriteNewLine(output);
+                }
+                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
+                BytesPending += indent;
+            }
+
+            output[BytesPending++] = JsonConstants.Quote;
+
+            TranscodeAndWrite(escapedValue, output);
+
+            output[BytesPending++] = JsonConstants.Quote;
         }
 
         private void WriteStringEscapeValue(ReadOnlySpan<char> value, int firstEscapeIndexVal)
@@ -108,21 +190,10 @@ namespace System.Text.Json
 
             int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
 
-            Span<char> escapedValue;
-            if (length > StackallocThreshold)
-            {
-                valueArray = ArrayPool<char>.Shared.Rent(length);
-                escapedValue = valueArray;
-            }
-            else
-            {
-                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
-                unsafe
-                {
-                    char* ptr = stackalloc char[length];
-                    escapedValue = new Span<char>(ptr, length);
-                }
-            }
+            Span<char> escapedValue = length <= JsonConstants.StackallocThreshold ?
+                stackalloc char[length] :
+                (valueArray = ArrayPool<char>.Shared.Rent(length));
+
             JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, out int written);
 
             WriteStringByOptions(escapedValue.Slice(0, written));
@@ -137,25 +208,20 @@ namespace System.Text.Json
         /// Writes the UTF-8 text value (as a JSON string) as an element of a JSON array.
         /// </summary>
         /// <param name="utf8Value">The UTF-8 encoded value to be written as a JSON string element of a JSON array.</param>
-        /// <param name="escape">If this is set to false, the writer assumes the value is properly escaped and skips the escaping step.</param>
+        /// <remarks>
+        /// The value is escaped before writing.
+        /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStringValue(ReadOnlySpan<byte> utf8Value, bool escape = true)
+        public void WriteStringValue(ReadOnlySpan<byte> utf8Value)
         {
             JsonWriterHelper.ValidateValue(utf8Value);
 
-            if (escape)
-            {
-                WriteStringEscape(utf8Value);
-            }
-            else
-            {
-                WriteStringByOptions(utf8Value);
-            }
+            WriteStringEscape(utf8Value);
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
@@ -165,7 +231,7 @@ namespace System.Text.Json
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(utf8Value);
 
-            Debug.Assert(valueIdx >= -1 && valueIdx < int.MaxValue / 2);
+            Debug.Assert(valueIdx >= -1 && valueIdx < utf8Value.Length);
 
             if (valueIdx != -1)
             {
@@ -180,7 +246,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<byte> utf8Value)
         {
             ValidateWritingValue();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteStringIndented(utf8Value);
             }
@@ -190,23 +256,72 @@ namespace System.Text.Json
             }
         }
 
+        // TODO: https://github.com/dotnet/corefx/issues/36958
         private void WriteStringMinimized(ReadOnlySpan<byte> escapedValue)
         {
-            int idx = 0;
-            WriteListSeparator(ref idx);
+            Debug.Assert(escapedValue.Length < int.MaxValue - 3);
 
-            WriteStringValue(escapedValue, ref idx);
+            int minRequired = escapedValue.Length + 2; // 2 quotes
+            int maxRequired = minRequired + 1; // Optionally, 1 list separator
 
-            Advance(idx);
+            if (_memory.Length - BytesPending < maxRequired)
+            {
+                Grow(maxRequired);
+            }
+
+            Span<byte> output = _memory.Span;
+
+            if (_currentDepth < 0)
+            {
+                output[BytesPending++] = JsonConstants.ListSeparator;
+            }
+            output[BytesPending++] = JsonConstants.Quote;
+
+            escapedValue.CopyTo(output.Slice(BytesPending));
+            BytesPending += escapedValue.Length;
+
+            output[BytesPending++] = JsonConstants.Quote;
         }
 
+        // TODO: https://github.com/dotnet/corefx/issues/36958
         private void WriteStringIndented(ReadOnlySpan<byte> escapedValue)
         {
-            int idx = WriteCommaAndFormattingPreamble();
+            int indent = Indentation;
+            Debug.Assert(indent <= 2 * JsonConstants.MaxWriterDepth);
 
-            WriteStringValue(escapedValue, ref idx);
+            Debug.Assert(escapedValue.Length < int.MaxValue - indent - 3 - s_newLineLength);
 
-            Advance(idx);
+            int minRequired = indent + escapedValue.Length + 2; // 2 quotes
+            int maxRequired = minRequired + 1 + s_newLineLength; // Optionally, 1 list separator and 1-2 bytes for new line
+
+            if (_memory.Length - BytesPending < maxRequired)
+            {
+                Grow(maxRequired);
+            }
+
+            Span<byte> output = _memory.Span;
+
+            if (_currentDepth < 0)
+            {
+                output[BytesPending++] = JsonConstants.ListSeparator;
+            }
+
+            if (_tokenType != JsonTokenType.PropertyName)
+            {
+                if (_tokenType != JsonTokenType.None)
+                {
+                    WriteNewLine(output);
+                }
+                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
+                BytesPending += indent;
+            }
+
+            output[BytesPending++] = JsonConstants.Quote;
+
+            escapedValue.CopyTo(output.Slice(BytesPending));
+            BytesPending += escapedValue.Length;
+
+            output[BytesPending++] = JsonConstants.Quote;
         }
 
         private void WriteStringEscapeValue(ReadOnlySpan<byte> utf8Value, int firstEscapeIndexVal)
@@ -218,22 +333,11 @@ namespace System.Text.Json
 
             int length = JsonWriterHelper.GetMaxEscapedLength(utf8Value.Length, firstEscapeIndexVal);
 
-            Span<byte> escapedValue;
-            if (length > StackallocThreshold)
-            {
-                valueArray = ArrayPool<byte>.Shared.Rent(length);
-                escapedValue = valueArray;
-            }
-            else
-            {
-                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
-                unsafe
-                {
-                    byte* ptr = stackalloc byte[length];
-                    escapedValue = new Span<byte>(ptr, length);
-                }
-            }
-            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, out int written);
+            Span<byte> escapedValue = length <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[length] :
+                (valueArray = ArrayPool<byte>.Shared.Rent(length));
+
+            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, encoder: null, out int written);
 
             WriteStringByOptions(escapedValue.Slice(0, written));
 

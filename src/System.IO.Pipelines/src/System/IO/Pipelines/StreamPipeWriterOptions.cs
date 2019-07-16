@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Buffers;
-using System.Collections.Generic;
-using System.Text;
 
 namespace System.IO.Pipelines
 {
@@ -21,16 +18,16 @@ namespace System.IO.Pipelines
         /// <summary>
         /// Creates a new instance of <see cref="StreamPipeWriterOptions"/>.
         /// </summary>
-        public StreamPipeWriterOptions(MemoryPool<byte> pool = null, int minimumBufferSize = DefaultMinimumBufferSize)
+        public StreamPipeWriterOptions(MemoryPool<byte> pool = null, int minimumBufferSize = -1, bool leaveOpen = false)
         {
             Pool = pool ?? MemoryPool<byte>.Shared;
 
-            if (minimumBufferSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(minimumBufferSize));
-            }
+            MinimumBufferSize =
+                minimumBufferSize == -1 ? DefaultMinimumBufferSize :
+                minimumBufferSize <= 0 ? throw new ArgumentOutOfRangeException(nameof(minimumBufferSize)) :
+                minimumBufferSize;
 
-            MinimumBufferSize = minimumBufferSize;
+            LeaveOpen = leaveOpen;
         }
 
         /// <summary>
@@ -42,5 +39,10 @@ namespace System.IO.Pipelines
         /// The <see cref="MemoryPool{T}"/> to use when allocating memory.
         /// </summary>
         public MemoryPool<byte> Pool { get; }
+
+        /// <summary>
+        /// Leave underlying stream open after pipe writer completes.
+        /// </summary>
+        public bool LeaveOpen { get; }
     }
 }

@@ -11,14 +11,14 @@ namespace System.Diagnostics
     [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class DebuggerVisualizerAttribute : Attribute
     {
-        private Type _target;
+        private Type? _target;
 
         public DebuggerVisualizerAttribute(string visualizerTypeName)
         {
             VisualizerTypeName = visualizerTypeName;
         }
 
-        public DebuggerVisualizerAttribute(string visualizerTypeName, string visualizerObjectSourceTypeName)
+        public DebuggerVisualizerAttribute(string visualizerTypeName, string? visualizerObjectSourceTypeName)
         {
             VisualizerTypeName = visualizerTypeName;
             VisualizerObjectSourceTypeName = visualizerObjectSourceTypeName;
@@ -42,7 +42,7 @@ namespace System.Diagnostics
                 throw new ArgumentNullException(nameof(visualizer));
             }
 
-            VisualizerTypeName = visualizer.AssemblyQualifiedName;
+            VisualizerTypeName = visualizer.AssemblyQualifiedName!;
         }
 
         public DebuggerVisualizerAttribute(Type visualizer, Type visualizerObjectSource)
@@ -56,28 +56,28 @@ namespace System.Diagnostics
                 throw new ArgumentNullException(nameof(visualizerObjectSource));
             }
 
-            VisualizerTypeName = visualizer.AssemblyQualifiedName;
+            VisualizerTypeName = visualizer.AssemblyQualifiedName!;
             VisualizerObjectSourceTypeName = visualizerObjectSource.AssemblyQualifiedName;
         }
 
-        public DebuggerVisualizerAttribute(Type visualizer, string visualizerObjectSourceTypeName)
+        public DebuggerVisualizerAttribute(Type visualizer, string? visualizerObjectSourceTypeName)
         {
             if (visualizer == null)
             {
                 throw new ArgumentNullException(nameof(visualizer));
             }
 
-            VisualizerTypeName = visualizer.AssemblyQualifiedName;
+            VisualizerTypeName = visualizer.AssemblyQualifiedName!;
             VisualizerObjectSourceTypeName = visualizerObjectSourceTypeName;
         }
 
-        public string VisualizerObjectSourceTypeName { get; }
+        public string? VisualizerObjectSourceTypeName { get; }
 
         public string VisualizerTypeName { get; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
         
-        public Type Target
+        public Type? Target
         {
             get => _target;
             set
@@ -92,6 +92,6 @@ namespace System.Diagnostics
             }
         }
 
-        public string TargetTypeName { get; set; }
+        public string? TargetTypeName { get; set; }
     }
 }

@@ -26,7 +26,7 @@ namespace System.Collections.ObjectModel
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.list);
             }
-            items = list;
+            items = list!;  // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
         }
 
         public int Count
@@ -68,8 +68,6 @@ namespace System.Collections.ObjectModel
             int index = items.Count;
             InsertItem(index, item);
         }
-
-        public void AddRange(IEnumerable<T> collection) => InsertItemsRange(items.Count, collection);
 
         public void Clear()
         {
@@ -116,26 +114,6 @@ namespace System.Collections.ObjectModel
             InsertItem(index, item);
         }
 
-        public void InsertRange(int index, IEnumerable<T> collection)
-        {
-            if (items.IsReadOnly)
-            {
-                ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
-            }
-
-            if (collection == null)
-            {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
-            }
-
-            if ((uint)index > (uint)items.Count)
-            {
-                ThrowHelper.ThrowArgumentOutOfRange_IndexException();
-            }
-
-            InsertItemsRange(index, collection);
-        }
-
         public bool Remove(T item)
         {
             if (items.IsReadOnly)
@@ -147,61 +125,6 @@ namespace System.Collections.ObjectModel
             if (index < 0) return false;
             RemoveItem(index);
             return true;
-        }
-
-        public void RemoveRange(int index, int count)
-        {
-            if (items.IsReadOnly)
-            {
-                ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
-            }
-
-            if ((uint)index > (uint)items.Count)
-            {
-                ThrowHelper.ThrowArgumentOutOfRange_IndexException();
-            }
-
-            if (count < 0)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
-            }
-
-            if (index > items.Count - count)
-            {
-                ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
-            }
-
-            RemoveItemsRange(index, count);
-        }
-
-        public void ReplaceRange(int index, int count, IEnumerable<T> collection)
-        {
-            if (items.IsReadOnly)
-            {
-                ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
-            }
-
-            if ((uint)index > (uint)items.Count)
-            {
-                ThrowHelper.ThrowArgumentOutOfRange_IndexException();
-            }
-
-            if (count < 0)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
-            }
-
-            if (index > items.Count - count)
-            {
-                ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
-            }
-
-            if (collection == null)
-            {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
-            }
-
-            ReplaceItemsRange(index, count, collection);
         }
 
         public void RemoveAt(int index)
@@ -239,42 +162,6 @@ namespace System.Collections.ObjectModel
             items[index] = item;
         }
 
-        protected virtual void InsertItemsRange(int index, IEnumerable<T> collection)
-        {
-            if (GetType() == typeof(Collection<T>) && items is List<T> list)
-            {
-                list.InsertRange(index, collection);
-            }
-            else
-            {
-                foreach (T item in collection)
-                {
-                    InsertItem(index++, item);
-                }
-            }
-        }
-
-        protected virtual void RemoveItemsRange(int index, int count)
-        {
-            if (GetType() == typeof(Collection<T>) && items is List<T> list)
-            {
-                list.RemoveRange(index, count);
-            }
-            else
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    RemoveItem(index);
-                }
-            }
-        }
-
-        protected virtual void ReplaceItemsRange(int index, int count, IEnumerable<T> collection)
-        {
-            RemoveItemsRange(index, count);
-            InsertItemsRange(index, collection);
-        }
-
         bool ICollection<T>.IsReadOnly
         {
             get
@@ -308,7 +195,7 @@ namespace System.Collections.ObjectModel
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            if (array.Rank != 1)
+            if (array!.Rank != 1) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             {
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_RankMultiDimNotSupported);
             }
@@ -340,7 +227,7 @@ namespace System.Collections.ObjectModel
                 // For example, if the element type of the Array is derived from T,
                 // we can't figure out if we can successfully copy the element beforehand.
                 //
-                Type targetType = array.GetType().GetElementType();
+                Type targetType = array.GetType().GetElementType()!;
                 Type sourceType = typeof(T);
                 if (!(targetType.IsAssignableFrom(sourceType) || sourceType.IsAssignableFrom(targetType)))
                 {
@@ -351,7 +238,7 @@ namespace System.Collections.ObjectModel
                 // We can't cast array of value type to object[], so we don't support 
                 // widening of primitive types here.
                 //
-                object[] objects = array as object[];
+                object?[]? objects = array as object[];
                 if (objects == null)
                 {
                     ThrowHelper.ThrowArgumentException_Argument_InvalidArrayType();
@@ -362,7 +249,7 @@ namespace System.Collections.ObjectModel
                 {
                     for (int i = 0; i < count; i++)
                     {
-                        objects[index++] = items[i];
+                        objects![index++] = items[i];  // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                     }
                 }
                 catch (ArrayTypeMismatchException)
@@ -372,7 +259,7 @@ namespace System.Collections.ObjectModel
             }
         }
 
-        object IList.this[int index]
+        object? IList.this[int index]
         {
             get { return items[index]; }
             set
@@ -381,7 +268,7 @@ namespace System.Collections.ObjectModel
 
                 try
                 {
-                    this[index] = (T)value;
+                    this[index] = (T)value!;
                 }
                 catch (InvalidCastException)
                 {
@@ -414,7 +301,7 @@ namespace System.Collections.ObjectModel
             }
         }
 
-        int IList.Add(object value)
+        int IList.Add(object? value)
         {
             if (items.IsReadOnly)
             {
@@ -424,7 +311,7 @@ namespace System.Collections.ObjectModel
 
             try
             {
-                Add((T)value);
+                Add((T)value!);
             }
             catch (InvalidCastException)
             {
@@ -434,25 +321,25 @@ namespace System.Collections.ObjectModel
             return this.Count - 1;
         }
 
-        bool IList.Contains(object value)
+        bool IList.Contains(object? value)
         {
             if (IsCompatibleObject(value))
             {
-                return Contains((T)value);
+                return Contains((T)value!);
             }
             return false;
         }
 
-        int IList.IndexOf(object value)
+        int IList.IndexOf(object? value)
         {
             if (IsCompatibleObject(value))
             {
-                return IndexOf((T)value);
+                return IndexOf((T)value!);
             }
             return -1;
         }
 
-        void IList.Insert(int index, object value)
+        void IList.Insert(int index, object? value)
         {
             if (items.IsReadOnly)
             {
@@ -462,7 +349,7 @@ namespace System.Collections.ObjectModel
 
             try
             {
-                Insert(index, (T)value);
+                Insert(index, (T)value!);
             }
             catch (InvalidCastException)
             {
@@ -470,7 +357,7 @@ namespace System.Collections.ObjectModel
             }
         }
 
-        void IList.Remove(object value)
+        void IList.Remove(object? value)
         {
             if (items.IsReadOnly)
             {
@@ -479,15 +366,15 @@ namespace System.Collections.ObjectModel
 
             if (IsCompatibleObject(value))
             {
-                Remove((T)value);
+                Remove((T)value!);
             }
         }
 
-        private static bool IsCompatibleObject(object value)
+        private static bool IsCompatibleObject(object? value)
         {
             // Non-null values are fine.  Only accept nulls if T is a class or Nullable<U>.
             // Note that default(T) is not equal to null for value types except when T is Nullable<U>. 
-            return ((value is T) || (value == null && default(T) == null));
+            return ((value is T) || (value == null && default(T)! == null));
         }
     }
 }

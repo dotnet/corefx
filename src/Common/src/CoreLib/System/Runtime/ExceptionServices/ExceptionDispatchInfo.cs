@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Runtime.ExceptionServices
 {
@@ -54,6 +54,7 @@ namespace System.Runtime.ExceptionServices
         // This method will restore the original stack trace and bucketing details before throwing
         // the exception so that it is easy, from debugging standpoint, to understand what really went wrong on
         // the original thread.
+        [DoesNotReturn]
         [StackTraceHidden]
         public void Throw()
         {
@@ -64,6 +65,7 @@ namespace System.Runtime.ExceptionServices
 
         // Throws the source exception, maintaining the original bucketing details and augmenting
         // rather than replacing the original stack trace.
+        [DoesNotReturn]
         public static void Throw(Exception source) => Capture(source).Throw();
     }
 }

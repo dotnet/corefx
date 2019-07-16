@@ -20,7 +20,9 @@ namespace Internal.Cryptography
 {
     internal static partial class PkcsHelpers
     {
-#if !netcoreapp
+        private static readonly byte[] s_pSpecifiedDefaultParameters = { 0x04, 0x00 };
+
+#if !netcoreapp && !netstandard21
         // Compatibility API.
         internal static void AppendData(this IncrementalHash hasher, ReadOnlySpan<byte> data)
         {
@@ -34,19 +36,24 @@ namespace Internal.Cryptography
             return GetDigestAlgorithm(oid.Value);
         }
 
-        internal static HashAlgorithmName GetDigestAlgorithm(string oidValue)
+        internal static HashAlgorithmName GetDigestAlgorithm(string oidValue, bool forVerification = false)
         {
             switch (oidValue)
             {
                 case Oids.Md5:
+                case Oids.RsaPkcs1Md5 when forVerification:
                     return HashAlgorithmName.MD5;
                 case Oids.Sha1:
+                case Oids.RsaPkcs1Sha1 when forVerification:
                     return HashAlgorithmName.SHA1;
                 case Oids.Sha256:
+                case Oids.RsaPkcs1Sha256 when forVerification:
                     return HashAlgorithmName.SHA256;
                 case Oids.Sha384:
+                case Oids.RsaPkcs1Sha384 when forVerification:
                     return HashAlgorithmName.SHA384;
                 case Oids.Sha512:
+                case Oids.RsaPkcs1Sha512 when forVerification:
                     return HashAlgorithmName.SHA512;
                 default:
                     throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, oidValue);
@@ -170,7 +177,17 @@ namespace Internal.Cryptography
             {
                 X509Certificate2 originalCert = recipient.Certificate;
                 X509Certificate2 certCopy = new X509Certificate2(originalCert.Handle);
-                CmsRecipient recipientCopy = new CmsRecipient(recipient.RecipientIdentifierType, certCopy);
+                CmsRecipient recipientCopy;
+
+                if (recipient.RSAEncryptionPadding is null)
+                {
+                    recipientCopy = new CmsRecipient(recipient.RecipientIdentifierType, certCopy);
+                }
+                else
+                {
+                    recipientCopy = new CmsRecipient(recipient.RecipientIdentifierType, certCopy, recipient.RSAEncryptionPadding);
+                }
+
                 recipientsCopy.Add(recipientCopy);
                 GC.KeepAlive(originalCert);
             }
@@ -307,7 +324,7 @@ namespace Internal.Cryptography
             return ToUpperHexString(serialBytes);
         }
 
-#if netcoreapp
+#if netcoreapp || netstandard21
         private static unsafe string ToUpperHexString(ReadOnlySpan<byte> ba)
         {
             fixed (byte* baPtr = ba)
@@ -399,7 +416,7 @@ namespace Internal.Cryptography
                     attributeObject = Upgrade<Pkcs9MessageDigest>(attributeObject);
                     break;
 
-#if netcoreapp
+#if netcoreapp || netstandard21
                 case Oids.LocalKeyId:
                     attributeObject = Upgrade<Pkcs9LocalKeyId>(attributeObject);
                     break;
@@ -464,6 +481,76 @@ namespace Internal.Cryptography
 
             Debug.Fail("TryCopyOctetStringBytes failed with an over-allocated array");
             throw new CryptographicException();
+        }
+
+        public static bool TryGetRsaOaepEncryptionPadding(
+            ReadOnlyMemory<byte>? parameters,
+            out RSAEncryptionPadding rsaEncryptionPadding,
+            out Exception exception)
+        {
+            exception = null;
+            rsaEncryptionPadding = null;
+
+            if (parameters == null || parameters.Value.IsEmpty)
+            {
+                exception = new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                return false;
+            }
+
+            try
+            {
+                OaepParamsAsn oaepParameters = OaepParamsAsn.Decode(parameters.Value, AsnEncodingRules.DER);
+
+                if (oaepParameters.MaskGenFunc.Algorithm.Value != Oids.Mgf1 ||
+                    oaepParameters.MaskGenFunc.Parameters == null ||
+                    oaepParameters.PSourceFunc.Algorithm.Value != Oids.PSpecified
+                    )
+                {
+                    exception = new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    return false;
+                }
+
+                AlgorithmIdentifierAsn mgf1AlgorithmIdentifier = AlgorithmIdentifierAsn.Decode(oaepParameters.MaskGenFunc.Parameters.Value, AsnEncodingRules.DER);
+
+                if (mgf1AlgorithmIdentifier.Algorithm.Value != oaepParameters.HashFunc.Algorithm.Value)
+                {
+                    exception = new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    return false;
+                }
+
+                if (oaepParameters.PSourceFunc.Parameters != null &&
+                    !oaepParameters.PSourceFunc.Parameters.Value.Span.SequenceEqual(s_pSpecifiedDefaultParameters))
+                {
+                    exception = new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    return false;
+                }
+
+                switch (oaepParameters.HashFunc.Algorithm.Value)
+                {
+                    case Oids.Sha1:
+                        rsaEncryptionPadding = RSAEncryptionPadding.OaepSHA1;
+                        return true;
+                    case Oids.Sha256:
+                        rsaEncryptionPadding = RSAEncryptionPadding.OaepSHA256;
+                        return true;
+                    case Oids.Sha384:
+                        rsaEncryptionPadding = RSAEncryptionPadding.OaepSHA384;
+                        return true;
+                    case Oids.Sha512:
+                        rsaEncryptionPadding = RSAEncryptionPadding.OaepSHA512;
+                        return true;
+                    default:
+                        exception = new CryptographicException(
+                            SR.Cryptography_Cms_UnknownAlgorithm,
+                            oaepParameters.HashFunc.Algorithm.Value);
+                        return false;
+                }
+            }
+            catch (CryptographicException e)
+            {
+                exception = e;
+                return false;
+            }
         }
     }
 }

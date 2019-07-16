@@ -36,8 +36,8 @@ internal static partial class Interop
             int inputNameByteCount,
             out SafeGssNameHandle outputName);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_ImportTargetName")]
-        internal static extern Status ImportTargetName(
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_ImportPrincipalName")]
+        internal static extern Status ImportPrincipalName(
             out Status minorStatus,
             string inputName,
             int inputNameByteCount,
@@ -74,6 +74,20 @@ internal static partial class Interop
             SafeGssCredHandle initiatorCredHandle,
             ref SafeGssContextHandle contextHandle,
             bool isNtlmOnly,
+            SafeGssNameHandle targetName,
+            uint reqFlags,
+            byte[] inputBytes,
+            int inputLength,
+            ref GssBuffer token,
+            out uint retFlags,
+            out bool isNtlmUsed);
+
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_InitSecContextEx")]
+        internal static extern Status InitSecContext(
+            out Status minorStatus,
+            SafeGssCredHandle initiatorCredHandle,
+            ref SafeGssContextHandle contextHandle,
+            bool isNtlmOnly,
             IntPtr cbt,
             int cbtSize,
             SafeGssNameHandle targetName,
@@ -90,12 +104,19 @@ internal static partial class Interop
             ref SafeGssContextHandle acceptContextHandle,
             byte[] inputBytes,
             int inputLength,
-            ref GssBuffer token);
+            ref GssBuffer token,
+            out uint retFlags);
 
         [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_DeleteSecContext")]
         internal static extern Status DeleteSecContext(
             out Status minorStatus,
             ref IntPtr contextHandle);
+
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_GetUser")]
+        internal static extern Status GetUser(
+            out Status minorStatus,
+            SafeGssContextHandle acceptContextHandle,
+            ref GssBuffer token);
 
         [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_Wrap")]
         private static extern Status Wrap(

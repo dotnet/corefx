@@ -6,7 +6,7 @@ namespace System.Diagnostics
 {
     public partial class DebugProvider
     {
-        public static void FailCore(string stackTrace, string message, string detailMessage, string errorSource)
+        public static void FailCore(string stackTrace, string? message, string? detailMessage, string errorSource)
         {
             if (s_FailCore != null)
             {
@@ -23,19 +23,7 @@ namespace System.Diagnostics
                 // In Core, we do not show a dialog.
                 // Fail in order to avoid anyone catching an exception and masking
                 // an assert failure.
-                DebugAssertException ex;
-                if (message == string.Empty) 
-                {
-                    ex = new DebugAssertException(stackTrace);
-                }
-                else if (detailMessage == string.Empty) 
-                {
-                    ex = new DebugAssertException(message, stackTrace);
-                }
-                else
-                {
-                    ex = new DebugAssertException(message, detailMessage, stackTrace);
-                }
+                DebugAssertException ex = new DebugAssertException(message, detailMessage, stackTrace);
                 Environment.FailFast(ex.Message, ex, errorSource);
             }
         }
@@ -58,7 +46,7 @@ namespace System.Diagnostics
             // We don't want output from multiple threads to be interleaved.
             lock (s_ForLock)
             {
-                if (message == null || message.Length <= WriteChunkLength)
+                if (message.Length <= WriteChunkLength)
                 {
                     WriteToDebugger(message);
                 }

@@ -2,136 +2,107 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     /// <summary>
     /// Represents a strongly-typed property that is a <see cref="Nullable{T}"/>.
     /// </summary>
-    internal sealed class JsonPropertyInfoNullable<TClass, TProperty> 
-        : JsonPropertyInfoCommon<TClass, TProperty?, TProperty>
+    internal sealed class JsonPropertyInfoNullable<TClass, TProperty>
+        : JsonPropertyInfoCommon<TClass, TProperty?, TProperty, TProperty>
         where TProperty : struct
     {
-        // should this be cached somewhere else so that it's not populated per TClass as well as TProperty?
         private static readonly Type s_underlyingType = typeof(TProperty);
 
-        internal JsonPropertyInfoNullable(
-            Type parentClassType,
-            Type declaredPropertyType,
-            Type runtimePropertyType,
-            PropertyInfo propertyInfo,
-            Type elementType,
-            JsonSerializerOptions options) :
-            base(parentClassType, declaredPropertyType, runtimePropertyType, propertyInfo, elementType, options)
+        protected override void OnRead(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader)
         {
+            if (Converter == null)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+            }
+
+            TProperty value = Converter.Read(ref reader, s_underlyingType, Options);
+
+            if (state.Current.ReturnValue == null)
+            {
+                state.Current.ReturnValue = value;
+            }
+            else
+            {
+                Set(state.Current.ReturnValue, value);
+            }
         }
 
-        internal override void Read(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader)
+        protected override void OnReadEnumerable(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader)
         {
-            if (ElementClassInfo != null)
+            if (Converter == null)
             {
-                // Forward the setter to the value-based JsonPropertyInfo.
-                JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
-                propertyInfo.ReadEnumerable(tokenType, options, ref state, ref reader);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
             }
-            else if (HasSetter)
-            {
-                if (ValueConverter != null)
-                {
-                    if (ValueConverter.TryRead(s_underlyingType, ref reader, out TProperty value))
-                    {
-                        if (state.Current.ReturnValue == null)
-                        {
-                            state.Current.ReturnValue = value;
-                        }
-                        else
-                        {
-                            Set((TClass)state.Current.ReturnValue, value);
-                        }
 
-                        return;
-                    }
+            TProperty value = Converter.Read(ref reader, s_underlyingType, Options);
+            TProperty? nullableValue = new TProperty?(value);
+            JsonSerializer.ApplyValueToEnumerable(ref nullableValue, ref state, ref reader);
+        }
+
+        protected override void OnWrite(ref WriteStackFrame current, Utf8JsonWriter writer)
+        {
+            TProperty? value;
+            if (IsPropertyPolicy)
+            {
+                value = (TProperty?)current.CurrentValue;
+            }
+            else
+            {
+                value = Get(current.CurrentValue);
+            }
+
+            if (value == null)
+            {
+                Debug.Assert(EscapedName.HasValue);
+
+                if (!IgnoreNullValues)
+                {
+                    writer.WriteNull(EscapedName.Value);
+                }
+            }
+            else if (Converter != null)
+            {
+                if (EscapedName.HasValue)
+                {
+                    writer.WritePropertyName(EscapedName.Value);
                 }
 
-                ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state);
+                Converter.Write(writer, value.GetValueOrDefault(), Options);
             }
         }
 
-        internal override void ReadEnumerable(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader)
+        protected override void OnWriteEnumerable(ref WriteStackFrame current, Utf8JsonWriter writer)
         {
-            if (ValueConverter != null)
+            if (Converter != null)
             {
-                if (ValueConverter.TryRead(s_underlyingType, ref reader, out TProperty value))
-                {
-                    ReadStackFrame.SetReturnValue(value, options, ref state.Current);
-                    return;
-                }
-            }
+                Debug.Assert(current.CollectionEnumerator != null);
 
-            ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state);
-        }
-
-        // todo: have the caller check if current.Enumerator != null and call WriteEnumerable of the underlying property directly to avoid an extra virtual call.
-        internal override void Write(JsonSerializerOptions options, ref WriteStackFrame current, ref Utf8JsonWriter writer)
-        {
-            if (current.Enumerator != null)
-            {
-                // Forward the setter to the value-based JsonPropertyInfo.
-                JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
-                propertyInfo.WriteEnumerable(options, ref current, ref writer);
-            }
-            else if (HasGetter)
-            {
                 TProperty? value;
-                if (_isPropertyPolicy)
+                if (current.CollectionEnumerator is IEnumerator<TProperty?> enumerator)
                 {
-                    value = (TProperty?)current.CurrentValue;
+                    // Avoid boxing for strongly-typed enumerators such as returned from IList<T>.
+                    value = enumerator.Current;
                 }
                 else
                 {
-                    value = Get((TClass)current.CurrentValue);
+                    value = (TProperty?)current.CollectionEnumerator.Current;
                 }
 
-                if (value == null)
-                {
-                    if (_escapedName == null)
-                    {
-                        writer.WriteNullValue();
-                    }
-                    else if (!IgnoreNullPropertyValueOnWrite(options))
-                    {
-                        writer.WriteNull(_escapedName);
-                    }
-                }
-                else if (ValueConverter != null)
-                {
-                    if (_escapedName != null)
-                    {
-                        ValueConverter.Write(_escapedName, value.GetValueOrDefault(), ref writer);
-                    }
-                    else
-                    {
-                        ValueConverter.Write(value.GetValueOrDefault(), ref writer);
-                    }
-                }
-            }
-        }
-
-        internal override void WriteEnumerable(JsonSerializerOptions options, ref WriteStackFrame current, ref Utf8JsonWriter writer)
-        {
-            if (ValueConverter != null)
-            {
-                Debug.Assert(current.Enumerator != null);
-                TProperty? value = (TProperty?)current.Enumerator.Current;
                 if (value == null)
                 {
                     writer.WriteNullValue();
                 }
                 else
                 {
-                    ValueConverter.Write(value.GetValueOrDefault(), ref writer);
+                    Converter.Write(writer, value.GetValueOrDefault(), Options);
                 }
             }
         }

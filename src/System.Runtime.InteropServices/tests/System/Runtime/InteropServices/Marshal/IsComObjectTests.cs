@@ -29,13 +29,12 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { new int[][] { new int[] { 10 } } };
             yield return new object[] { new int[,] { { 10 } } };
 
-            MethodInfo method = typeof(IsComObjectTests).GetMethod(nameof(NonGenericMethod));
+            MethodInfo method = typeof(IsComObjectTests).GetMethod(nameof(NonGenericMethod), BindingFlags.NonPublic | BindingFlags.Static);
             Delegate d = method.CreateDelegate(typeof(NonGenericDelegate));
             yield return new object[] { d };
 
             yield return new object[] { new KeyValuePair<string, int>("key", 10) };
 
-#if !netstandard // TODO: Enable for netstandard2.1
             AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Assembly"), AssemblyBuilderAccess.RunAndCollect);
             ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("Module");
             TypeBuilder typeBuilder = moduleBuilder.DefineType("Type");
@@ -53,7 +52,6 @@ namespace System.Runtime.InteropServices.Tests
 
             Type collectibleComImportObject = comImportTypeBuilder.CreateType();
             yield return new object[] { collectibleComImportObject };
-#endif
         }
 
         [Theory]
@@ -69,7 +67,7 @@ namespace System.Runtime.InteropServices.Tests
             AssertExtensions.Throws<ArgumentNullException>("o", () => Marshal.IsComObject(null));
         }
 
-        public static void NonGenericMethod(int i) { }
+        private static void NonGenericMethod(int i) { }
         public delegate void NonGenericDelegate(int i);
 
         public enum Int32Enum : int { Value1, Value2 }

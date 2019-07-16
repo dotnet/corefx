@@ -62,18 +62,19 @@ uint64_t SystemNative_GetTimestampResolution()
         return 0;
     }
 
-    uint64_t nanosecondsPerTick = ((uint64_t)(mtid.denom) / (uint64_t)(mtid.numer));
-    return SecondsToNanoSeconds * nanosecondsPerTick;
+    // (numer / denom) gives you the nanoseconds per tick, so the below code
+    // computes the number of ticks per second. We explicitly do the multiplication
+    // first in order to help minimize the error that is produced by integer division.
+
+    return (SecondsToNanoSeconds * (uint64_t)(mtid.denom)) / (uint64_t)(mtid.numer);
 #else
-    struct timespec ts;
+    // clock_gettime() returns a result in terms of nanoseconds rather than a count. This
+    // means that we need to either always scale the result by the actual resolution (to
+    // get a count) or we need to say the resolution is in terms of nanoseconds. We prefer
+    // the latter since it allows the highest throughput and should minimize error propagated
+    // to the user.
 
-    if (clock_getres(CLOCK_MONOTONIC, &ts) != 0)
-    {
-        return 0;
-    }
-
-    uint64_t nanosecondsPerTick = ((uint64_t)(ts.tv_sec) * SecondsToNanoSeconds) + (uint64_t)(ts.tv_nsec);
-    return SecondsToNanoSeconds * nanosecondsPerTick;
+    return SecondsToNanoSeconds;
 #endif
 }
 
@@ -168,7 +169,7 @@ int32_t SystemNative_GetCpuUtilization(ProcessCpuInformation* previousCpuInfo)
     uint64_t resolution = SystemNative_GetTimestampResolution();
     uint64_t timestamp = SystemNative_GetTimestamp();
 
-    uint64_t currentTime = timestamp * SecondsToNanoSeconds / resolution;
+    uint64_t currentTime = (uint64_t)(timestamp * ((double)SecondsToNanoSeconds / resolution));
 
     uint64_t lastRecordedCurrentTime = previousCpuInfo->lastRecordedCurrentTime;
     uint64_t lastRecordedKernelTime = previousCpuInfo->lastRecordedKernelTime;

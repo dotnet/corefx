@@ -2,103 +2,182 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal partial class JsonClassInfo
     {
-        private void AddProperty(Type propertyType, PropertyInfo propertyInfo, Type classType, JsonSerializerOptions options)
+        private void AddPolicyProperty(Type propertyType, JsonSerializerOptions options)
         {
-            JsonPropertyInfo jsonInfo = CreateProperty(propertyType, propertyType, propertyInfo, classType, options);
+            // A policy property is not a real property on a type; instead it leverages the existing converter
+            // logic and generic support to avoid boxing. It is used with values types and elements from collections and
+            // dictionaries. Typically it would represent a CLR type such as System.String.
+            PolicyProperty = AddProperty(
+                propertyType,
+                propertyInfo : null,        // Not a real property so this is null.
+                classType : typeof(object), // A dummy type (not used).
+                options : options);
+        }
 
-            if (propertyInfo != null)
+        private JsonPropertyInfo AddProperty(Type propertyType, PropertyInfo propertyInfo, Type classType, JsonSerializerOptions options)
+        {
+            JsonPropertyInfo jsonInfo;
+
+            // Get implemented type, if applicable.
+            // Will return the propertyType itself if it's a non-enumerable, string, or natively supported collection.
+            Type implementedType = GetImplementedCollectionType(propertyType);
+
+            if (implementedType != propertyType)
             {
-                string propertyName = propertyInfo.Name;
-
-                // At this point propertyName is valid UTF16, so just call the simple UTF16->UTF8 encoder.
-                byte[] propertyNameBytes = Encoding.UTF8.GetBytes(propertyName);
-                jsonInfo._name = propertyNameBytes;
-
-                // Cache the escaped name.
-                int valueIdx = JsonWriterHelper.NeedsEscaping(propertyNameBytes);
-                if (valueIdx == -1)
-                {
-                    jsonInfo._escapedName = propertyNameBytes;
-                }
-                else
-                {
-                    int length = JsonWriterHelper.GetMaxEscapedLength(propertyNameBytes.Length, valueIdx);
-
-                    byte[] tempArray = ArrayPool<byte>.Shared.Rent(length);
-
-                    JsonWriterHelper.EscapeString(propertyNameBytes, tempArray, valueIdx, out int written);
-                    jsonInfo._escapedName = new byte[written];
-                    tempArray.CopyTo(jsonInfo._escapedName, 0);
-
-                    // We clear the array because it is "user data" (although a property name).
-                    new Span<byte>(tempArray, 0, written).Clear();
-                    ArrayPool<byte>.Shared.Return(tempArray);
-                }
-
-                _propertyRefs.Add(new PropertyRef(GetKey(propertyNameBytes), jsonInfo));
+                jsonInfo = CreateProperty(implementedType, implementedType, implementedType, null, typeof(object), options);
             }
             else
             {
-                // A single property or an IEnumerable
-                _propertyRefs.Add(new PropertyRef(0, jsonInfo));
+                jsonInfo = CreateProperty(propertyType, propertyType, propertyType, propertyInfo, classType, options);
             }
+
+            // Convert non-immutable dictionary interfaces to concrete types.
+            if (IsNativelySupportedCollection(propertyType) && implementedType.IsInterface && jsonInfo.ClassType == ClassType.Dictionary)
+            {
+                JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
+                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+
+                Type newPropertyType = elementPropertyInfo.GetDictionaryConcreteType();
+                if (implementedType != newPropertyType)
+                {
+                    jsonInfo = CreateProperty(propertyType, newPropertyType, implementedType, propertyInfo, classType, options);
+                }
+                else
+                {
+                    jsonInfo = CreateProperty(propertyType, implementedType, implementedType, propertyInfo, classType, options);
+                }
+            }
+            else if (jsonInfo.ClassType == ClassType.Enumerable &&
+                !implementedType.IsArray &&
+                ((IsDeserializedByAssigningFromList(implementedType) && IsNativelySupportedCollection(propertyType)) || IsSetInterface(implementedType)))
+            {
+                JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
+                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+
+                // Get a runtime type for the implemented property. e.g. ISet<T> -> HashSet<T>, ICollection -> List<object>
+                // We use the element's JsonPropertyInfo so we can utilize the generic support.
+                Type newPropertyType = elementPropertyInfo.GetConcreteType(implementedType);
+                if ((implementedType != newPropertyType) && implementedType.IsAssignableFrom(newPropertyType))
+                {
+                    jsonInfo = CreateProperty(propertyType, newPropertyType, implementedType, propertyInfo, classType, options);
+                }
+                else
+                {
+                    jsonInfo = CreateProperty(propertyType, implementedType, implementedType, propertyInfo, classType, options);
+                }
+            }
+            else if (propertyType != implementedType)
+            {
+                jsonInfo = CreateProperty(propertyType, implementedType, implementedType, propertyInfo, classType, options);
+            }
+
+            return jsonInfo;
         }
 
-        internal JsonPropertyInfo CreateProperty(Type declaredPropertyType, Type runtimePropertyType, PropertyInfo propertyInfo, Type parentClassType, JsonSerializerOptions options)
+        internal static JsonPropertyInfo CreateProperty(
+            Type declaredPropertyType,
+            Type runtimePropertyType,
+            Type implementedPropertyType,
+            PropertyInfo propertyInfo,
+            Type parentClassType,
+            JsonSerializerOptions options)
         {
-            Type collectionElementType = null;
-            ClassType propertyClassType = GetClassType(runtimePropertyType);
-            if (propertyClassType == ClassType.Enumerable)
+            bool hasIgnoreAttribute = (JsonPropertyInfo.GetAttribute<JsonIgnoreAttribute>(propertyInfo) != null);
+            if (hasIgnoreAttribute)
             {
-                collectionElementType = GetElementType(runtimePropertyType);
-                // todo: if collectionElementType is object, create loosely-typed collection (JsonArray).
+                return JsonPropertyInfo.CreateIgnoredPropertyPlaceholder(propertyInfo, options);
             }
+
+            Type collectionElementType = null;
+            switch (GetClassType(runtimePropertyType, options))
+            {
+                case ClassType.Enumerable:
+                case ClassType.Dictionary:
+                case ClassType.IDictionaryConstructible:
+                case ClassType.Unknown:
+                    collectionElementType = GetElementType(runtimePropertyType, parentClassType, propertyInfo, options);
+                    break;
+            }
+
+            JsonConverter converter;
 
             // Create the JsonPropertyInfo<TType, TProperty>
             Type propertyInfoClassType;
             if (runtimePropertyType.IsGenericType && runtimePropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
+                // For Nullable, use the underlying type.
                 Type underlyingPropertyType = Nullable.GetUnderlyingType(runtimePropertyType);
                 propertyInfoClassType = typeof(JsonPropertyInfoNullable<,>).MakeGenericType(parentClassType, underlyingPropertyType);
+                converter = options.DetermineConverterForProperty(parentClassType, underlyingPropertyType, propertyInfo);
             }
             else
             {
-                // For now we only support polymorphism with base type == typeof(object).
-                Debug.Assert(declaredPropertyType == runtimePropertyType || declaredPropertyType == typeof(object));
-                propertyInfoClassType = typeof(JsonPropertyInfoNotNullable<,,>).MakeGenericType(parentClassType, declaredPropertyType, runtimePropertyType);
+                converter = options.DetermineConverterForProperty(parentClassType, runtimePropertyType, propertyInfo);
+                Type typeToConvert = converter?.TypeToConvert;
+                if (typeToConvert == null)
+                {
+                    if (IsNativelySupportedCollection(declaredPropertyType))
+                    {
+                        typeToConvert = implementedPropertyType;
+                    }
+                    else
+                    {
+                        typeToConvert = declaredPropertyType;
+                    }
+                }
+
+                // For the covariant case, create JsonPropertyInfoNotNullable. The generic constraints are "where TConverter : TDeclaredProperty".
+                if (runtimePropertyType.IsAssignableFrom(typeToConvert))
+                {
+                    propertyInfoClassType = typeof(JsonPropertyInfoNotNullable<,,,>).MakeGenericType(
+                        parentClassType,
+                        declaredPropertyType,
+                        runtimePropertyType,
+                        typeToConvert);
+                }
+                else
+                {
+                    Debug.Assert(typeToConvert.IsAssignableFrom(runtimePropertyType));
+
+                    // For the contravariant case, create JsonPropertyInfoNotNullableContravariant. The generic constraints are "where TDeclaredProperty : TConverter".
+                    propertyInfoClassType = typeof(JsonPropertyInfoNotNullableContravariant<,,,>).MakeGenericType(
+                        parentClassType,
+                        declaredPropertyType,
+                        runtimePropertyType,
+                        typeToConvert);
+                }
             }
 
             JsonPropertyInfo jsonInfo = (JsonPropertyInfo)Activator.CreateInstance(
                 propertyInfoClassType,
-                BindingFlags.Instance | BindingFlags.NonPublic,
+                BindingFlags.Instance | BindingFlags.Public,
                 binder: null,
-                new object[] { parentClassType, declaredPropertyType, runtimePropertyType, propertyInfo, collectionElementType, options },
+                args: null,
                 culture: null);
+
+            jsonInfo.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, collectionElementType, converter, options);
 
             return jsonInfo;
         }
 
+        internal JsonPropertyInfo CreateRootObject(JsonSerializerOptions options)
+        {
+            return CreateProperty(Type, Type, Type, null, Type, options);
+        }
+
         internal JsonPropertyInfo CreatePolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
         {
-            if (property == null)
-            {
-                // Used with root objects which are not really a property.
-                return CreateProperty(runtimePropertyType, runtimePropertyType, null, runtimePropertyType, options);
-            }
-
-            JsonPropertyInfo runtimeProperty = CreateProperty(property.DeclaredPropertyType, runtimePropertyType, property?.PropertyInfo, Type, options);
-
-            runtimeProperty._name = property._name;
-            runtimeProperty._escapedName = property._escapedName;
-            // Copy other settings here as they are added as features.
+            JsonPropertyInfo runtimeProperty = CreateProperty(property.DeclaredPropertyType, runtimePropertyType, property.ImplementedPropertyType, property?.PropertyInfo, Type, options);
+            property.CopyRuntimeSettingsTo(runtimeProperty);
 
             return runtimeProperty;
         }

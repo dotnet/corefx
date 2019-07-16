@@ -15,12 +15,7 @@ namespace System.Net.Http.Functional.Tests
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "HttpsTestServer not compatible on UAP")]
     public abstract class SchSendAuxRecordHttpTest : HttpClientHandlerTestBase
     {
-        readonly ITestOutputHelper _output;
-        
-        public SchSendAuxRecordHttpTest(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+        public SchSendAuxRecordHttpTest(ITestOutputHelper output) : base(output) { }
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -31,7 +26,7 @@ namespace System.Net.Http.Functional.Tests
 
             using (var server = new HttpsTestServer(options))
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
                 server.Start();

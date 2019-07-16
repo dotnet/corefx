@@ -15,8 +15,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 {
     public static class ChainTests
     {
-        internal static bool CanModifyStores { get; } = TestEnvironmentConfiguration.CanModifyStores;
-
         private static bool TrustsMicrosoftDotComRoot
         {
             get
@@ -125,8 +123,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [ConditionalFact(nameof(CanModifyStores))]
         public static void VerifyChainFromHandle_Unix()
         {
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
@@ -417,7 +415,51 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-        [ConditionalFact(nameof(TrustsMicrosoftDotComRoot), nameof(CanModifyStores))]
+        [ConditionalFact(nameof(TrustsMicrosoftDotComRoot))]
+        public static void BuildChain_FailOnlyApplicationPolicy()
+        {
+            using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
+            using (var microsoftDotComRoot = new X509Certificate2(TestData.MicrosoftDotComRootBytes))
+            using (ChainHolder holder = new ChainHolder())
+            {
+                holder.Chain.ChainPolicy.ApplicationPolicy.Add(new Oid("0.1.2.3.4", null));
+                holder.Chain.ChainPolicy.VerificationTime = microsoftDotCom.NotBefore.AddDays(1);
+                holder.Chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+
+                Assert.False(holder.Chain.Build(microsoftDotCom));
+
+                Assert.Equal(
+                    X509ChainStatusFlags.NotValidForUsage,
+                    holder.Chain.ChainStatus.Aggregate(
+                        X509ChainStatusFlags.NoError,
+                        (a, status) => a | status.Status));
+
+                Assert.Equal(3, holder.Chain.ChainElements.Count);
+
+                Assert.Equal(microsoftDotCom.RawData, holder.Chain.ChainElements[0].Certificate.RawData);
+                Assert.Equal(microsoftDotComRoot.RawData, holder.Chain.ChainElements[2].Certificate.RawData);
+
+                Assert.Equal(
+                    X509ChainStatusFlags.NotValidForUsage,
+                    holder.Chain.ChainElements[0].ChainElementStatus.Aggregate(
+                        X509ChainStatusFlags.NoError,
+                        (a, status) => a | status.Status));
+
+                Assert.Equal(
+                    X509ChainStatusFlags.NotValidForUsage,
+                    holder.Chain.ChainElements[1].ChainElementStatus.Aggregate(
+                        X509ChainStatusFlags.NoError,
+                        (a, status) => a | status.Status));
+
+                Assert.Equal(
+                    X509ChainStatusFlags.NotValidForUsage,
+                    holder.Chain.ChainElements[2].ChainElementStatus.Aggregate(
+                        X509ChainStatusFlags.NoError,
+                        (a, status) => a | status.Status));
+            }
+        }
+
+        [ConditionalFact(nameof(TrustsMicrosoftDotComRoot))]
         [OuterLoop(/* Modifies user certificate store */)]
         public static void BuildChain_MicrosoftDotCom_WithRootCertInUserAndSystemRootCertStores()
         {
@@ -814,7 +856,6 @@ tHP28fj0LUop/QFojSZPsaPAW6JvoQ0t4hd6WoyX6z7FsA==
             }
         }
 
-        [ActiveIssue(36124, TestPlatforms.Windows)]
         [Fact]
         public static void BuildInvalidSignatureTwice()
         {
@@ -854,9 +895,9 @@ tHP28fj0LUop/QFojSZPsaPAW6JvoQ0t4hd6WoyX6z7FsA==
                     }
                     else
                     {
-                        Assert.False(valid, $"Chain is valid on execution {iter}");
-
-                        Assert.Equal(3, chain.ChainElements.Count);
+                        // These asserts are "most informative first".
+                        // (There was an interval where valid was reporting as true in CI, but
+                        // that is the least informative failure)
 
                         // Clear UntrustedRoot, if it happened.
                         allFlags &= ~X509ChainStatusFlags.UntrustedRoot;
@@ -864,6 +905,10 @@ tHP28fj0LUop/QFojSZPsaPAW6JvoQ0t4hd6WoyX6z7FsA==
                         Assert.Equal(
                             X509ChainStatusFlags.NotSignatureValid,
                             allFlags);
+
+                        Assert.Equal(3, chain.ChainElements.Count);
+
+                        Assert.False(valid, $"Chain is valid on execution {iter}");
                     }
 
                     chainHolder.DisposeChainElements();

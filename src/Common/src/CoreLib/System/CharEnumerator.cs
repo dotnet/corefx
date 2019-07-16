@@ -19,7 +19,7 @@ namespace System
 {
     public sealed class CharEnumerator : IEnumerator, IEnumerator<char>, IDisposable, ICloneable
     {
-        private string _str;
+        private string? _str;
         private int _index;
         private char _currentElement;
 
@@ -36,7 +36,7 @@ namespace System
 
         public bool MoveNext()
         {
-            if (_index < (_str.Length - 1))
+            if (_index < (_str!.Length - 1))
             {
                 _index++;
                 _currentElement = _str[_index];
@@ -54,7 +54,7 @@ namespace System
             _str = null;
         }
 
-        object IEnumerator.Current
+        object? IEnumerator.Current
         {
             get { return Current; }
         }
@@ -65,7 +65,7 @@ namespace System
             {
                 if (_index == -1)
                     throw new InvalidOperationException(SR.InvalidOperation_EnumNotStarted);
-                if (_index >= _str.Length)
+                if (_index >= _str!.Length)
                     throw new InvalidOperationException(SR.InvalidOperation_EnumEnded);
                 return _currentElement;
             }

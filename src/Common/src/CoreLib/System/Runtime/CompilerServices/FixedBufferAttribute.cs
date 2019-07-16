@@ -13,8 +13,6 @@
 **
 ===========================================================*/
 
-using System;
-
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]

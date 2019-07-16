@@ -6,6 +6,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
@@ -20,14 +21,14 @@ namespace Internal.Cryptography.Pal
         // 10 is plenty big.
         private const int DefaultChainCapacity = 10;
 
-        private static readonly string s_userRootPath =
-            DirectoryBasedStoreProvider.GetStorePath(X509Store.RootStoreName);
+        private static readonly CachedDirectoryStoreProvider s_userRootStore =
+            new CachedDirectoryStoreProvider(X509Store.RootStoreName);
 
-        private static readonly string s_userIntermediatePath =
-            DirectoryBasedStoreProvider.GetStorePath(X509Store.IntermediateCAStoreName);
+        private static readonly CachedDirectoryStoreProvider s_userIntermediateStore =
+            new CachedDirectoryStoreProvider(X509Store.IntermediateCAStoreName);
 
-        private static readonly string s_userPersonalPath =
-            DirectoryBasedStoreProvider.GetStorePath(X509Store.MyStoreName);
+        private static readonly CachedDirectoryStoreProvider s_userPersonalStore =
+            new CachedDirectoryStoreProvider(X509Store.MyStoreName);
 
         private SafeX509Handle _leafHandle;
         private SafeX509StoreHandle _store;
@@ -82,8 +83,9 @@ namespace Internal.Cryptography.Pal
             DateTime verificationTime,
             TimeSpan remainingDownloadTime)
         {
-            SafeX509StackHandle systemTrust = StorePal.GetMachineRoot().GetNativeCollection();
-            SafeX509StackHandle systemIntermediate = StorePal.GetMachineIntermediate().GetNativeCollection();
+            CachedSystemStoreProvider.GetNativeCollections(
+                out SafeX509StackHandle systemTrust,
+                out SafeX509StackHandle systemIntermediate);
 
             SafeX509StoreHandle store = null;
             SafeX509StackHandle untrusted = null;
@@ -91,11 +93,11 @@ namespace Internal.Cryptography.Pal
 
             try
             {
-                store = Interop.Crypto.X509ChainNew(systemTrust, s_userRootPath);
+                store = Interop.Crypto.X509ChainNew(systemTrust, s_userRootStore.GetNativeCollection());
 
                 untrusted = Interop.Crypto.NewX509Stack();
-                Interop.Crypto.X509StackAddDirectoryStore(untrusted, s_userIntermediatePath);
-                Interop.Crypto.X509StackAddDirectoryStore(untrusted, s_userPersonalPath);
+                Interop.Crypto.X509StackAddMultiple(untrusted, s_userIntermediateStore.GetNativeCollection());
+                Interop.Crypto.X509StackAddMultiple(untrusted, s_userPersonalStore.GetNativeCollection());
                 Interop.Crypto.X509StackAddMultiple(untrusted, systemIntermediate);
                 Interop.Crypto.X509StoreSetVerifyTime(store, verificationTime);
 
@@ -202,7 +204,7 @@ namespace Internal.Cryptography.Pal
                         ref _remainingDownloadTime);
 
                     // The AIA record is contained in a public structure, so no need to clear it.
-                    ArrayPool<byte>.Shared.Return(authorityInformationAccess.Array);
+                    CryptoPool.Return(authorityInformationAccess.Array, clearSize: 0);
 
                     if (downloaded == null)
                     {
@@ -228,7 +230,7 @@ namespace Internal.Cryptography.Pal
                 {
                     int chainSize = Interop.Crypto.GetX509StackFieldCount(chainStack);
                     Span<IntPtr> tempChain = stackalloc IntPtr[DefaultChainCapacity];
-                    IntPtr[] tempChainRent = null;
+                    byte[] tempChainRent = null;
 
                     if (chainSize <= tempChain.Length)
                     {
@@ -236,8 +238,9 @@ namespace Internal.Cryptography.Pal
                     }
                     else
                     {
-                        tempChainRent = ArrayPool<IntPtr>.Shared.Rent(chainSize);
-                        tempChain = tempChainRent.AsSpan(0, chainSize);
+                        int targetSize = checked(chainSize * IntPtr.Size);
+                        tempChainRent = CryptoPool.Rent(targetSize);
+                        tempChain = MemoryMarshal.Cast<byte, IntPtr>(tempChainRent.AsSpan(0, targetSize));
                     }
 
                     for (int i = 0; i < chainSize; i++)
@@ -275,10 +278,7 @@ namespace Internal.Cryptography.Pal
 
                     if (tempChainRent != null)
                     {
-                        // While the IntPtrs aren't secret, clearing them helps prevent
-                        // accidental use-after-free because of pooling.
-                        tempChain.Clear();
-                        ArrayPool<IntPtr>.Shared.Return(tempChainRent);
+                        CryptoPool.Return(tempChainRent);
                     }
                 }
             }
@@ -398,7 +398,7 @@ namespace Internal.Cryptography.Pal
 
             if (applicationPolicy?.Count > 0 || certificatePolicy?.Count > 0)
             {
-                ProcessPolicy(elements, overallStatus, applicationPolicy, certificatePolicy);
+                ProcessPolicy(elements, ref overallStatus, applicationPolicy, certificatePolicy);
             }
 
             ChainStatus = overallStatus?.ToArray() ?? Array.Empty<X509ChainStatus>();
@@ -449,7 +449,7 @@ namespace Internal.Cryptography.Pal
                 string requestUrl = UrlPathAppend(baseUri, urlEncoded);
 
                 // Nothing sensitive is in the encoded request (it was sent via HTTP-non-S)
-                ArrayPool<byte>.Shared.Return(encoded.Array);
+                CryptoPool.Return(encoded.Array, clearSize: 0);
                 ArrayPool<char>.Shared.Return(urlEncoded.Array);
 
                 // https://tools.ietf.org/html/rfc6960#appendix-A describes both a GET and a POST
@@ -618,7 +618,7 @@ namespace Internal.Cryptography.Pal
 
         private static void ProcessPolicy(
             X509ChainElement[] elements,
-            List<X509ChainStatus> overallStatus,
+            ref List<X509ChainStatus> overallStatus,
             OidCollection applicationPolicy,
             OidCollection certificatePolicy)
         {
@@ -651,7 +651,10 @@ namespace Internal.Cryptography.Pal
 
             if (failsPolicyChecks)
             {
-                X509ChainElement leafElement = elements[0];
+                if (overallStatus == null)
+                {
+                    overallStatus = new List<X509ChainStatus>();
+                }
 
                 X509ChainStatus chainStatus = new X509ChainStatus
                 {
@@ -659,16 +662,25 @@ namespace Internal.Cryptography.Pal
                     StatusInformation = SR.Chain_NoPolicyMatch,
                 };
 
-                var elementStatus = new List<X509ChainStatus>(leafElement.ChainElementStatus.Length + 1);
-                elementStatus.AddRange(leafElement.ChainElementStatus);
-
-                AddUniqueStatus(elementStatus, ref chainStatus);
                 AddUniqueStatus(overallStatus, ref chainStatus);
 
-                elements[0] = new X509ChainElement(
-                    leafElement.Certificate,
-                    elementStatus.ToArray(),
-                    leafElement.Information);
+                // No individual element can have seen more errors than the chain overall,
+                // so avoid regrowth of the list.
+                var elementStatus = new List<X509ChainStatus>(overallStatus.Count);
+
+                for (int i = 0; i < elements.Length; i++)
+                {
+                    X509ChainElement element = elements[i];
+                    elementStatus.Clear();
+                    elementStatus.AddRange(element.ChainElementStatus);
+
+                    AddUniqueStatus(elementStatus, ref chainStatus);
+
+                    elements[i] = new X509ChainElement(
+                        element.Certificate,
+                        elementStatus.ToArray(),
+                        element.Information);
+                }
             }
         }
 
@@ -842,29 +854,36 @@ namespace Internal.Cryptography.Pal
             }
 
             string baseUrl = FindHttpAiaRecord(authorityInformationAccess, Oids.OcspEndpoint);
-            ArrayPool<byte>.Shared.Return(authorityInformationAccess.Array);
+            CryptoPool.Return(authorityInformationAccess.Array, clearSize: 0);
             return baseUrl;
         }
 
         private static string FindHttpAiaRecord(ReadOnlyMemory<byte> authorityInformationAccess, string recordTypeOid)
         {
-            AsnReader reader = new AsnReader(authorityInformationAccess, AsnEncodingRules.DER);
-            AsnReader sequenceReader = reader.ReadSequence();
-            reader.ThrowIfNotEmpty();
-
-            while (sequenceReader.HasData)
+            try
             {
-                AccessDescriptionAsn.Decode(sequenceReader, out AccessDescriptionAsn description);
-                if (StringComparer.Ordinal.Equals(description.AccessMethod, recordTypeOid))
+                AsnReader reader = new AsnReader(authorityInformationAccess, AsnEncodingRules.DER);
+                AsnReader sequenceReader = reader.ReadSequence();
+                reader.ThrowIfNotEmpty();
+
+                while (sequenceReader.HasData)
                 {
-                    GeneralNameAsn name = description.AccessLocation;
-                    if (name.Uri != null &&
-                        Uri.TryCreate(name.Uri, UriKind.Absolute, out Uri uri) &&
-                        uri.Scheme == "http")
+                    AccessDescriptionAsn.Decode(sequenceReader, out AccessDescriptionAsn description);
+                    if (StringComparer.Ordinal.Equals(description.AccessMethod, recordTypeOid))
                     {
-                        return name.Uri;
+                        GeneralNameAsn name = description.AccessLocation;
+                        if (name.Uri != null &&
+                            Uri.TryCreate(name.Uri, UriKind.Absolute, out Uri uri) &&
+                            uri.Scheme == "http")
+                        {
+                            return name.Uri;
+                        }
                     }
                 }
+            }
+            catch (CryptographicException)
+            {
+                // Treat any ASN errors as if the extension was missing.
             }
 
             return null;
@@ -956,14 +975,18 @@ namespace Internal.Cryptography.Pal
                             return 0;
                         }
 
-                        // We don't report "OK" as an error.
-                        // For compatibility with Windows / .NET Framework, do not report X509_V_CRL_NOT_YET_VALID.
+                        // * We don't report "OK" as an error.
+                        // * For compatibility with Windows / .NET Framework, do not report X509_V_CRL_NOT_YET_VALID.
+                        // * X509_V_ERR_DIFFERENT_CRL_SCOPE will result in X509_V_ERR_UNABLE_TO_GET_CRL
+                        //   which will trigger OCSP, so is ignorable.
                         if (errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_OK &&
-                            errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CRL_NOT_YET_VALID)
+                            errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CRL_NOT_YET_VALID &&
+                            errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_DIFFERENT_CRL_SCOPE)
                         {
                             if (_errors == null)
                             {
                                 int size = Math.Max(DefaultChainCapacity, errorDepth + 1);
+                                // Since ErrorCollection is a non-public type, this is a private pool.
                                 _errors = ArrayPool<ErrorCollection>.Shared.Rent(size);
 
                                 // We only do spares writes.
@@ -995,7 +1018,7 @@ namespace Internal.Cryptography.Pal
 
         private unsafe struct ErrorCollection
         {
-            // As of OpenSSL 1.1.1 there are 74 defined X509_V_ERR values,
+            // As of OpenSSL 1.1.1 there are 75 defined X509_V_ERR values,
             // therefore it fits in a bitvector backed by 3 ints (96 bits available).
             private const int BucketCount = 3;
             private const int OverflowValue = BucketCount * sizeof(int) * 8 - 1;

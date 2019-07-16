@@ -9,27 +9,27 @@ namespace System.Security.Principal
 {
     public partial interface IIdentity
     {
-        string AuthenticationType { get; }
+        string? AuthenticationType { get; }
         bool IsAuthenticated { get; }
-        string Name { get; }
+        string? Name { get; }
     }
     public partial interface IPrincipal
     {
-        System.Security.Principal.IIdentity Identity { get; }
+        System.Security.Principal.IIdentity? Identity { get; }
         bool IsInRole(string role);
     }
     public enum PrincipalPolicy
     {
-        NoPrincipal = 1,
         UnauthenticatedPrincipal = 0,
+        NoPrincipal = 1,
         WindowsPrincipal = 2,
     }
     public enum TokenImpersonationLevel
     {
+        None = 0,
         Anonymous = 1,
-        Delegation = 4,
         Identification = 2,
         Impersonation = 3,
-        None = 0,
+        Delegation = 4,
     }
 }

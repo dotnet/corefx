@@ -10,7 +10,7 @@ namespace System
     public sealed class AppDomainSetup
     {
         internal AppDomainSetup() { }
-        public string ApplicationBase => AppContext.BaseDirectory;
-        public string TargetFrameworkName => AppContext.TargetFrameworkName;
+        public string? ApplicationBase => AppContext.BaseDirectory;
+        public string? TargetFrameworkName => AppContext.TargetFrameworkName;
     }
 }

@@ -16,9 +16,9 @@ namespace System.Diagnostics
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Delegate | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class DebuggerDisplayAttribute : Attribute
     {
-        private Type _target;
+        private Type? _target;
 
-        public DebuggerDisplayAttribute(string value)
+        public DebuggerDisplayAttribute(string? value)
         {
             Value = value ?? "";
             Name = "";
@@ -27,11 +27,11 @@ namespace System.Diagnostics
 
         public string Value { get; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
-        public string Type { get; set; }
+        public string? Type { get; set; }
 
-        public Type Target
+        public Type? Target
         {
             get => _target;
             set
@@ -46,6 +46,6 @@ namespace System.Diagnostics
             }
         }
 
-        public string TargetTypeName { get; set; }
+        public string? TargetTypeName { get; set; }
     }
 }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 
@@ -71,7 +72,8 @@ namespace Internal.Runtime.CompilerServices
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T As<T>(object value) where T : class
+        [return: NotNullIfNotNull("value")]
+        public static T As<T>(object? value) where T : class?
         {
             throw new PlatformNotSupportedException();
 

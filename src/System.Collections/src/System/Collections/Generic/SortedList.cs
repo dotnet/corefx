@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
@@ -52,15 +53,15 @@ namespace System.Collections.Generic
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class SortedList<TKey, TValue> :
-        IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
+        IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue> where TKey : notnull
     {
         private TKey[] keys; // Do not rename (binary serialization)
         private TValue[] values; // Do not rename (binary serialization)
         private int _size; // Do not rename (binary serialization)
         private int version; // Do not rename (binary serialization)
         private IComparer<TKey> comparer; // Do not rename (binary serialization)
-        private KeyList keyList; // Do not rename (binary serialization)
-        private ValueList valueList; // Do not rename (binary serialization)
+        private KeyList? keyList; // Do not rename (binary serialization)
+        private ValueList? valueList; // Do not rename (binary serialization)
 
         private const int DefaultCapacity = 4;
 
@@ -104,7 +105,7 @@ namespace System.Collections.Generic
         // interface, which in that case must be implemented by the keys of all
         // entries added to the sorted list.
         // 
-        public SortedList(IComparer<TKey> comparer)
+        public SortedList(IComparer<TKey>? comparer)
             : this()
         {
             if (comparer != null)
@@ -122,7 +123,7 @@ namespace System.Collections.Generic
         // the IComparable interface, which in that case must be implemented
         // by the keys of all entries added to the sorted list.
         // 
-        public SortedList(int capacity, IComparer<TKey> comparer)
+        public SortedList(int capacity, IComparer<TKey>? comparer)
             : this(comparer)
         {
             Capacity = capacity;
@@ -147,7 +148,7 @@ namespace System.Collections.Generic
         // by the keys of all entries in the given dictionary as well as keys
         // subsequently added to the sorted list.
         // 
-        public SortedList(IDictionary<TKey, TValue> dictionary, IComparer<TKey> comparer)
+        public SortedList(IDictionary<TKey, TValue> dictionary, IComparer<TKey>? comparer)
             : this((dictionary != null ? dictionary.Count : 0), comparer)
         {
             if (dictionary == null)
@@ -265,12 +266,12 @@ namespace System.Collections.Generic
             }
         }
 
-        void IDictionary.Add(object key, object value)
+        void IDictionary.Add(object key, object? value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if (value == null && !(default(TValue) == null))    // null is an invalid value for Value types
+            if (value == null && !(default(TValue)! == null))    // null is an invalid value for Value types  // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 throw new ArgumentNullException(nameof(value));
 
             if (!(key is TKey))
@@ -279,7 +280,7 @@ namespace System.Collections.Generic
             if (!(value is TValue) && value != null)            // null is a valid value for Reference Types
                 throw new ArgumentException(SR.Format(SR.Arg_WrongType, value, typeof(TValue)), nameof(value));
 
-            Add((TKey)key, (TValue)value);
+            Add((TKey)key, (TValue)value!);
         }
 
         // Returns the number of entries in this sorted list.
@@ -493,7 +494,7 @@ namespace System.Collections.Generic
                 throw new ArgumentException(SR.Arg_ArrayPlusOffTooSmall);
             }
 
-            KeyValuePair<TKey, TValue>[] keyValuePairArray = array as KeyValuePair<TKey, TValue>[];
+            KeyValuePair<TKey, TValue>[]? keyValuePairArray = array as KeyValuePair<TKey, TValue>[];
             if (keyValuePairArray != null)
             {
                 for (int i = 0; i < Count; i++)
@@ -503,7 +504,7 @@ namespace System.Collections.Generic
             }
             else
             {
-                object[] objects = array as object[];
+                object[]? objects = array as object[];
                 if (objects == null)
                 {
                     throw new ArgumentException(SR.Argument_InvalidArrayType, nameof(array));
@@ -601,7 +602,7 @@ namespace System.Collections.Generic
             }
         }
 
-        object IDictionary.this[object key]
+        object? IDictionary.this[object key]
         {
             get
             {
@@ -623,13 +624,13 @@ namespace System.Collections.Generic
                     throw new ArgumentNullException(nameof(key));
                 }
 
-                if (value == null && !(default(TValue) == null))
+                if (value == null && !(default(TValue)! == null)) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                     throw new ArgumentNullException(nameof(value));
 
                 TKey tempKey = (TKey)key;
                 try
                 {
-                    this[tempKey] = (TValue)value;
+                    this[tempKey] = (TValue)value!;
                 }
                 catch (InvalidCastException)
                 {
@@ -677,7 +678,7 @@ namespace System.Collections.Generic
             version++;
         }
 
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
             int i = IndexOfKey(key);
             if (i >= 0)
@@ -686,7 +687,7 @@ namespace System.Collections.Generic
                 return true;
             }
 
-            value = default(TValue);
+            value = default(TValue)!;
             return false;
         }
 
@@ -704,11 +705,11 @@ namespace System.Collections.Generic
             }
             if (RuntimeHelpers.IsReferenceOrContainsReferences<TKey>())
             {
-                keys[_size] = default(TKey);
+                keys[_size] = default(TKey)!;
             }
             if (RuntimeHelpers.IsReferenceOrContainsReferences<TValue>())
             {
-                values[_size] = default(TValue);
+                values[_size] = default(TValue)!;
             }
             version++;
         }
@@ -762,8 +763,8 @@ namespace System.Collections.Generic
         private struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
         {
             private SortedList<TKey, TValue> _sortedList;
-            private TKey _key;
-            private TValue _value;
+            [AllowNull] private TKey _key;
+            [AllowNull] private TValue _value;
             private int _index;
             private int _version;
             private int _getEnumeratorRetType;  // What should Enumerator.Current return?
@@ -777,15 +778,15 @@ namespace System.Collections.Generic
                 _index = 0;
                 _version = _sortedList.version;
                 _getEnumeratorRetType = getEnumeratorRetType;
-                _key = default(TKey);
-                _value = default(TValue);
+                _key = default;
+                _value = default;
             }
 
             public void Dispose()
             {
                 _index = 0;
-                _key = default(TKey);
-                _value = default(TValue);
+                _key = default;
+                _value = default;
             }
 
             object IDictionaryEnumerator.Key
@@ -814,8 +815,8 @@ namespace System.Collections.Generic
                 }
 
                 _index = _sortedList.Count + 1;
-                _key = default(TKey);
-                _value = default(TValue);
+                _key = default;
+                _value = default;
                 return false;
             }
 
@@ -840,7 +841,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get
                 {
@@ -860,7 +861,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            object IDictionaryEnumerator.Value
+            object? IDictionaryEnumerator.Value
             {
                 get
                 {
@@ -881,8 +882,8 @@ namespace System.Collections.Generic
                 }
 
                 _index = 0;
-                _key = default(TKey);
-                _value = default(TValue);
+                _key = default;
+                _value = default;
             }
         }
 
@@ -891,7 +892,7 @@ namespace System.Collections.Generic
             private SortedList<TKey, TValue> _sortedList;
             private int _index;
             private int _version;
-            private TKey _currentKey;
+            [AllowNull] private TKey _currentKey = default!;
 
             internal SortedListKeyEnumerator(SortedList<TKey, TValue> sortedList)
             {
@@ -902,7 +903,7 @@ namespace System.Collections.Generic
             public void Dispose()
             {
                 _index = 0;
-                _currentKey = default(TKey);
+                _currentKey = default;
             }
 
             public bool MoveNext()
@@ -920,7 +921,7 @@ namespace System.Collections.Generic
                 }
 
                 _index = _sortedList.Count + 1;
-                _currentKey = default(TKey);
+                _currentKey = default;
                 return false;
             }
 
@@ -932,7 +933,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get
                 {
@@ -952,7 +953,7 @@ namespace System.Collections.Generic
                     throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 }
                 _index = 0;
-                _currentKey = default(TKey);
+                _currentKey = default;
             }
         }
 
@@ -961,7 +962,7 @@ namespace System.Collections.Generic
             private SortedList<TKey, TValue> _sortedList;
             private int _index;
             private int _version;
-            private TValue _currentValue;
+            [AllowNull] private TValue _currentValue = default!;
 
             internal SortedListValueEnumerator(SortedList<TKey, TValue> sortedList)
             {
@@ -972,7 +973,7 @@ namespace System.Collections.Generic
             public void Dispose()
             {
                 _index = 0;
-                _currentValue = default(TValue);
+                _currentValue = default;
             }
 
             public bool MoveNext()
@@ -990,7 +991,7 @@ namespace System.Collections.Generic
                 }
 
                 _index = _sortedList.Count + 1;
-                _currentValue = default(TValue);
+                _currentValue = default;
                 return false;
             }
 
@@ -1002,7 +1003,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get
                 {
@@ -1022,7 +1023,7 @@ namespace System.Collections.Generic
                     throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 }
                 _index = 0;
-                _currentValue = default(TValue);
+                _currentValue = default;
             }
         }
 
@@ -1087,7 +1088,7 @@ namespace System.Collections.Generic
                 try
                 {
                     // defer error checking to Array.Copy
-                    Array.Copy(_dict.keys, 0, array, arrayIndex, _dict.Count);
+                    Array.Copy(_dict.keys, 0, array!, arrayIndex, _dict.Count);
                 }
                 catch (ArrayTypeMismatchException)
                 {
@@ -1206,7 +1207,7 @@ namespace System.Collections.Generic
                 try
                 {
                     // defer error checking to Array.Copy
-                    Array.Copy(_dict.values, 0, array, index, _dict.Count);
+                    Array.Copy(_dict.values, 0, array!, index, _dict.Count);
                 }
                 catch (ArrayTypeMismatchException)
                 {

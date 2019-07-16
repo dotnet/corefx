@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Runtime.InteropServices
 {
@@ -16,9 +17,9 @@ namespace System.Runtime.InteropServices
         /// If unable to get the <see cref="ReadOnlySequenceSegment{T}"/>, return false.
         /// </summary>
         public static bool TryGetReadOnlySequenceSegment<T>(ReadOnlySequence<T> sequence,
-            out ReadOnlySequenceSegment<T> startSegment,
+            [NotNullWhen(true)] out ReadOnlySequenceSegment<T>? startSegment,
             out int startIndex,
-            out ReadOnlySequenceSegment<T> endSegment,
+            [NotNullWhen(true)] out ReadOnlySequenceSegment<T>? endSegment,
             out int endIndex)
         {
             return sequence.TryGetReadOnlySequenceSegment(out startSegment, out startIndex, out endSegment, out endIndex);
@@ -53,7 +54,7 @@ namespace System.Runtime.InteropServices
         /// Get <see cref="string"/> from the underlying <see cref="ReadOnlySequence{T}"/>.
         /// If unable to get the <see cref="string"/>, return false.
         /// </summary>
-        internal static bool TryGetString(ReadOnlySequence<char> sequence, out string text, out int start, out int length)
+        internal static bool TryGetString(ReadOnlySequence<char> sequence, [NotNullWhen(true)] out string? text, out int start, out int length)
         {
             return sequence.TryGetString(out text, out start, out length);
         }

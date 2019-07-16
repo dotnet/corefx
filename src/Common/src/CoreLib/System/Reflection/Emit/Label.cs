@@ -14,10 +14,6 @@
 ** 
 ===========================================================*/
 
-using System;
-using System.Reflection;
-using System.Runtime.InteropServices;
-
 namespace System.Reflection.Emit
 {
     // The Label class is an opaque representation of a label used by the 
@@ -26,9 +22,9 @@ namespace System.Reflection.Emit
     // is passed to the MethodWriter.
     // Labels are created by using ILGenerator.CreateLabel and their position is set
     // by using ILGenerator.MarkLabel.
-    public struct Label : IEquatable<Label>
+    public readonly struct Label : IEquatable<Label>
     {
-        internal int m_label;
+        internal readonly int m_label;
 
         //public Label() {
         //    m_label=0;
@@ -49,7 +45,7 @@ namespace System.Reflection.Emit
             return m_label;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is Label)
                 return Equals((Label)obj);

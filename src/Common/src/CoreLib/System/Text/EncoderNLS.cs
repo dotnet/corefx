@@ -36,12 +36,6 @@ namespace System.Text
             this.Reset();
         }
 
-        internal EncoderNLS()
-        {
-            _encoding = null;
-            this.Reset();
-        }
-
         public override void Reset()
         {
             _charLeftOver = (char)0;
@@ -86,6 +80,7 @@ namespace System.Text
 
             _mustFlush = flush;
             _throwOnOverflow = true;
+            Debug.Assert(_encoding != null);
             return _encoding.GetByteCount(chars, count, this);
         }
 
@@ -133,6 +128,7 @@ namespace System.Text
 
             _mustFlush = flush;
             _throwOnOverflow = true;
+            Debug.Assert(_encoding != null);
             return _encoding.GetBytes(chars, charCount, bytes, byteCount, this);
         }
 
@@ -194,6 +190,7 @@ namespace System.Text
             _charsUsed = 0;
 
             // Do conversion
+            Debug.Assert(_encoding != null);
             bytesUsed = _encoding.GetBytes(chars, charCount, bytes, byteCount, this);
             charsUsed = _charsUsed;
 
@@ -212,6 +209,7 @@ namespace System.Text
         {
             get
             {
+                Debug.Assert(_encoding != null);
                 return _encoding;
             }
         }
@@ -296,6 +294,7 @@ namespace System.Text
                 {
                     charsConsumed = 1; // consumed the leftover high surrogate + the first char in the input buffer
 
+                    Debug.Assert(_encoding != null);
                     if (_encoding.TryGetByteCount(rune, out int byteCount))
                     {
                         Debug.Assert(byteCount >= 0, "Encoding shouldn't have returned a negative byte count.");
@@ -303,16 +302,22 @@ namespace System.Text
                     }
                     else
                     {
-                        didFallback = FallbackBuffer.Fallback(_charLeftOver, secondChar, index: 0);
+                        // The fallback mechanism relies on a negative index to convey "the start of the invalid
+                        // sequence was some number of chars back before the current buffer." In this block and
+                        // in the block immediately thereafter, we know we have a single leftover high surrogate
+                        // character from a previous operation, so we provide an index of -1 to convey that the
+                        // char immediately before the current buffer was the start of the invalid sequence.
+
+                        didFallback = FallbackBuffer.Fallback(_charLeftOver, secondChar, index: -1);
                     }
                 }
                 else
                 {
-                    didFallback = FallbackBuffer.Fallback(_charLeftOver, index: 0);
+                    didFallback = FallbackBuffer.Fallback(_charLeftOver, index: -1);
                 }
 
                 // Now tally the number of bytes that would've been emitted as part of fallback.
-
+                Debug.Assert(_fallbackBuffer != null);
                 return _fallbackBuffer.DrainRemainingDataForGetByteCount();
             }
         }
@@ -355,6 +360,7 @@ namespace System.Text
                 if (Rune.TryCreate(_charLeftOver, secondChar, out Rune rune))
                 {
                     charsConsumed = 1; // at the very least, we consumed 1 char from the input
+                    Debug.Assert(_encoding != null);
                     switch (_encoding.EncodeRune(rune, bytes, out bytesWritten))
                     {
                         case OperationStatus.Done:
@@ -367,7 +373,7 @@ namespace System.Text
                             break;
 
                         case OperationStatus.InvalidData:
-                            FallbackBuffer.Fallback(_charLeftOver, secondChar, index: 0);
+                            FallbackBuffer.Fallback(_charLeftOver, secondChar, index: -1); // see comment in DrainLeftoverDataForGetByteCount
                             break;
 
                         default:
@@ -377,7 +383,7 @@ namespace System.Text
                 }
                 else
                 {
-                    FallbackBuffer.Fallback(_charLeftOver, index: 0);
+                    FallbackBuffer.Fallback(_charLeftOver, index: -1); // see comment in DrainLeftoverDataForGetByteCount
                 }
             }
 

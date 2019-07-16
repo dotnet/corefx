@@ -30,7 +30,7 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="eventSource">The event source.</param>
-        public DiagnosticCounter(string name, EventSource eventSource)
+        internal DiagnosticCounter(string name, EventSource eventSource)
         {
             if (name == null)
             {
@@ -45,6 +45,7 @@ namespace System.Diagnostics.Tracing
             _group = CounterGroup.GetCounterGroup(eventSource);
             _group.Add(this);
             Name = name;
+            DisplayUnits = string.Empty;
             EventSource = eventSource;
         }
 
@@ -59,23 +60,45 @@ namespace System.Diagnostics.Tracing
             if (_group != null)
             {
                 _group.Remove(this);
-                _group = null;
+                _group = null!; // TODO-NULLABLE: Avoid nulling out in Dispose
             }
         }
 
         /// <summary>
         /// Adds a key-value metadata to the EventCounter that will be included as a part of the payload
         /// </summary>
-        public void AddMetadata(string key, string value)
+        public void AddMetadata(string key, string? value)
         {
-            lock (MyLock)
+            lock (this)
             {
-                _metadata = _metadata ?? new Dictionary<string, string>();
+                _metadata ??= new Dictionary<string, string?>();
                 _metadata.Add(key, value);
             }
         }
 
-        public string DisplayName { get; set; }
+        private string _displayName = "";
+        public string DisplayName
+        {
+            set
+            {
+                if (value == null)
+                    throw new ArgumentException("Cannot set null as DisplayName");
+                _displayName = value;
+            }
+            get { return _displayName; }
+        }
+
+        private string _displayUnits = "";
+        public string DisplayUnits
+        {
+            set
+            {
+                if (value == null)
+                    throw new ArgumentException("Cannot set null as DisplayUnits");
+                _displayUnits = value;
+            }
+            get { return _displayUnits; }
+        }
 
         public string Name { get; }
 
@@ -84,12 +107,9 @@ namespace System.Diagnostics.Tracing
         #region private implementation
 
         private CounterGroup _group;
-        private Dictionary<string, string> _metadata;
+        private Dictionary<string, string?>? _metadata;
 
-        internal abstract void WritePayload(float intervalSec);
-
-        // arbitrarily we use name as the lock object.  
-        internal object MyLock { get { return Name; } }
+        internal abstract void WritePayload(float intervalSec, int pollingIntervalMillisec);
 
         internal void ReportOutOfBandMessage(string message)
         {
@@ -98,17 +118,39 @@ namespace System.Diagnostics.Tracing
 
         internal string GetMetadataString()
         {
+            Debug.Assert(Monitor.IsEntered(this));
+
             if (_metadata == null)
             {
                 return "";
             }
 
-            StringBuilder sb = new StringBuilder("");
-            foreach(KeyValuePair<string, string> kvPair in _metadata)
+            // The dictionary is only initialized to non-null when there's metadata to add, and no items
+            // are ever removed, so if the dictionary is non-null, there must also be at least one element.
+            Dictionary<string, string?>.Enumerator enumerator = _metadata.GetEnumerator();
+            Debug.Assert(_metadata.Count > 0);
+            bool gotOne = enumerator.MoveNext();
+            Debug.Assert(gotOne);
+
+            // If there's only one element, just concat a string for it.
+            KeyValuePair<string, string?> current = enumerator.Current;
+            if (!enumerator.MoveNext())
             {
-                sb.Append($"{kvPair.Key}:{kvPair.Value},");
+                return current.Key + ":" + current.Value;
             }
-            return sb.Length == 0 ? "" : sb.ToString(0, sb.Length - 1); // Get rid of the last ","
+
+            // Otherwise, append it, then append the element we moved to, and then
+            // iterate through the remainder of the elements, appending each.
+            var sb = new StringBuilder().Append(current.Key).Append(':').Append(current.Value);
+            do
+            {
+                current = enumerator.Current;
+                sb.Append(',').Append(current.Key).Append(':').Append(current.Value);
+            }
+            while (enumerator.MoveNext());
+
+            // Return the final string.
+            return sb.ToString();
         }
 
         #endregion // private implementation

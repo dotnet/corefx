@@ -121,7 +121,7 @@ namespace System.Net.Http
             // Figure out proxy stuff.
             if (settings._useProxy)
             {
-                _proxy = settings._proxy ?? SystemProxyInfo.ConstructSystemProxy();
+                _proxy = settings._proxy ?? HttpClient.DefaultProxy;
                 if (_proxy != null)
                 {
                     _proxyCredentials = _proxy.Credentials ?? settings._defaultProxyCredentials;
@@ -307,11 +307,6 @@ namespace System.Net.Http
             foreach (KeyValuePair<HttpConnectionKey, HttpConnectionPool> pool in _pools)
             {
                 pool.Value.Dispose();
-            }
-
-            if (_proxy is IDisposable obj)
-            {
-                obj.Dispose();
             }
         }
 

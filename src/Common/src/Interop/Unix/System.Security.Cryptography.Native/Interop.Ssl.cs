@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
@@ -70,15 +71,6 @@ internal static partial class Interop
             return result;
         }
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_GetSslConnectionInfo")]
-        internal static extern bool GetSslConnectionInfo(
-            SafeSslHandle ssl,
-            out int dataCipherAlg,
-            out int keyExchangeAlg,
-            out int dataHashAlg,
-            out int dataKeySize,
-            out int hashKeySize);
-
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslWrite")]
         internal static extern unsafe int SslWrite(SafeSslHandle ssl, byte* buf, int num);
 
@@ -135,6 +127,21 @@ internal static partial class Interop
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool SslGetCurrentCipherId(SafeSslHandle ssl, out int cipherId);
 
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_GetOpenSslCipherSuiteName")]
+        private static extern IntPtr GetOpenSslCipherSuiteName(SafeSslHandle ssl, int cipherSuite, out int isTls12OrLower);
+
+        internal static string GetOpenSslCipherSuiteName(SafeSslHandle ssl, TlsCipherSuite cipherSuite, out bool isTls12OrLower)
+        {
+            string ret = Marshal.PtrToStringAnsi(GetOpenSslCipherSuiteName(ssl, (int)cipherSuite, out int isTls12OrLowerInt));
+            isTls12OrLower = isTls12OrLowerInt != 0;
+            return ret;
+        }
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_Tls13Supported")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool Tls13SupportedImpl();
+        internal static readonly bool Tls13Supported = Tls13SupportedImpl();
+
         internal static SafeSharedX509NameStackHandle SslGetClientCAList(SafeSslHandle ssl)
         {
             Crypto.CheckValidOpenSslHandle(ssl);
@@ -154,8 +161,16 @@ internal static partial class Interop
             Debug.Assert(chain != null, "X509Chain should not be null");
             Debug.Assert(chain.ChainElements.Count > 0, "chain.Build should have already been called");
 
-            // Don't count the last item (the root)
+            // If the last certificate is a root certificate, don't send it. PartialChain means the last cert wasn't a root.
             int stop = chain.ChainElements.Count - 1;
+            foreach (X509ChainStatus s in chain.ChainStatus)
+            {
+                if ((s.Status & X509ChainStatusFlags.PartialChain) != 0)
+                {
+                    stop++;
+                    break;
+                }
+            }
 
             // Don't include the first item (the cert whose private key we have)
             for (int i = 1; i < stop; i++)

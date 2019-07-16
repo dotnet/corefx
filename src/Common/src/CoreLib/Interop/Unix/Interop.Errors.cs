@@ -179,7 +179,7 @@ internal static partial class Interop
                 message = buffer;
             }
 
-            return Marshal.PtrToStringAnsi((IntPtr)message);
+            return Marshal.PtrToStringAnsi((IntPtr)message)!;
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_ConvertErrorPlatformToPal")]

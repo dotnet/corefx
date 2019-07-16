@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -1886,6 +1886,8 @@ namespace System
             return true;
         }
 
+        private static bool IsSpaceReplacingChar(char c) => c == '\u00a0' || c == '\u202f';
+
         private static unsafe char* MatchChars(char* p, char* pEnd, string value)
         {
             Debug.Assert(p != null && pEnd != null && p <= pEnd && value != null);
@@ -1895,12 +1897,12 @@ namespace System
                 if (*str != '\0')
                 {
                     // We only hurt the failure case
-                    // This fix is for French or Kazakh cultures. Since a user cannot type 0xA0 as a
+                    // This fix is for French or Kazakh cultures. Since a user cannot type 0xA0 or 0x202F as a
                     // space character we use 0x20 space character instead to mean the same.
                     while (true)
                     {
                         char cp = p < pEnd ? *p : '\0';
-                        if (cp != *str && !(*str == '\u00a0' && cp == '\u0020'))
+                        if (cp != *str && !(IsSpaceReplacingChar(*str) && cp == '\u0020'))
                         {
                             break;
                         }
@@ -1927,8 +1929,10 @@ namespace System
             Overflow
         }
 
+        [DoesNotReturn]
         internal static void ThrowOverflowOrFormatException(ParsingStatus status, TypeCode type = 0) => throw GetException(status, type);
 
+        [DoesNotReturn]
         internal static void ThrowOverflowException(TypeCode type) => throw GetException(ParsingStatus.Overflow, type);
 
         private static Exception GetException(ParsingStatus status, TypeCode type)

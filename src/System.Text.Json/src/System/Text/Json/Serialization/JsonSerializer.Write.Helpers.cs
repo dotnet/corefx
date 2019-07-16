@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -55,23 +54,16 @@ namespace System.Text.Json.Serialization
             }
         }
 
-        private static void WriteNull(
-            ref JsonWriterState writerState,
-            IBufferWriter<byte> bufferWriter)
-        {
-            Utf8JsonWriter writer = new Utf8JsonWriter(bufferWriter, writerState);
-            writer.WriteNullValue();
-            writer.Flush(true);
-        }
-
         private static byte[] WriteCoreBytes(object value, Type type, JsonSerializerOptions options)
         {
             if (options == null)
-                options = s_defaultSettings;
+            {
+                options = JsonSerializerOptions.s_defaultOptions;
+            }
 
             byte[] result;
 
-            using (var output = new ArrayBufferWriter<byte>(options.DefaultBufferSize))
+            using (var output = new PooledByteBufferWriter(options.DefaultBufferSize))
             {
                 WriteCore(output, value, type, options);
                 result = output.WrittenMemory.ToArray();
@@ -83,11 +75,13 @@ namespace System.Text.Json.Serialization
         private static string WriteCoreString(object value, Type type, JsonSerializerOptions options)
         {
             if (options == null)
-                options = s_defaultSettings;
+            {
+                options = JsonSerializerOptions.s_defaultOptions;
+            }
 
             string result;
 
-            using (var output = new ArrayBufferWriter<byte>(options.DefaultBufferSize))
+            using (var output = new PooledByteBufferWriter(options.DefaultBufferSize))
             {
                 WriteCore(output, value, type, options);
                 result = JsonReaderHelper.TranscodeHelper(output.WrittenMemory.Span);
@@ -96,12 +90,33 @@ namespace System.Text.Json.Serialization
             return result;
         }
 
-        private static void WriteCore(ArrayBufferWriter<byte> output, object value, Type type, JsonSerializerOptions options)
+        private static string WriteValueCore(Utf8JsonWriter writer, object value, Type type, JsonSerializerOptions options)
+        {
+            if (options == null)
+            {
+                options = JsonSerializerOptions.s_defaultOptions;
+            }
+
+            string result;
+
+            using (var output = new PooledByteBufferWriter(options.DefaultBufferSize))
+            {
+                WriteCore(writer, output, value, type, options);
+                result = JsonReaderHelper.TranscodeHelper(output.WrittenMemory.Span);
+            }
+
+            return result;
+        }
+
+        private static void WriteCore(PooledByteBufferWriter output, object value, Type type, JsonSerializerOptions options)
+        {
+            using var writer = new Utf8JsonWriter(output, options.GetWriterOptions());
+            WriteCore(writer, output, value, type, options);
+        }
+
+        private static void WriteCore(Utf8JsonWriter writer, PooledByteBufferWriter output, object value, Type type, JsonSerializerOptions options)
         {
             Debug.Assert(type != null || value == null);
-
-            var writerState = new JsonWriterState(options.WriterOptions);
-            var writer = new Utf8JsonWriter(output, writerState);
 
             if (value == null)
             {
@@ -119,10 +134,10 @@ namespace System.Text.Json.Serialization
                 state.Current.Initialize(type, options);
                 state.Current.CurrentValue = value;
 
-                Write(ref writer, -1, options, ref state);
+                Write(writer, writer.CurrentDepth, flushThreshold: -1, options, ref state);
             }
 
-            writer.Flush(isFinalBlock: true);
+            writer.Flush();
         }
     }
 }

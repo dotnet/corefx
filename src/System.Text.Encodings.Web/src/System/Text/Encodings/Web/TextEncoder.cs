@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text.Unicode;
 
 namespace System.Text.Encodings.Web
@@ -19,6 +21,10 @@ namespace System.Text.Encodings.Web
     /// </remarks>
     public abstract class TextEncoder
     {
+        // Fast cache for Ascii
+        private static readonly byte[] s_noEscape = new byte[] { }; // Should not be Array.Empty<byte> since used as a singleton for comparison.
+        private byte[][] _asciiEscape = new byte[0x80][];
+        
         // The following pragma disables a warning complaining about non-CLS compliant members being abstract, 
         // and wants me to mark the type as non-CLS compliant. 
         // It is true that this type cannot be extended by all CLS compliant languages. 
@@ -109,10 +115,10 @@ namespace System.Text.Encodings.Web
                     else
                     {
                         char[] wholebuffer = new char[bufferSize];
-                        fixed(char* buffer = &wholebuffer[0])
+                        fixed (char* buffer = &wholebuffer[0])
                         {
                             int totalWritten = EncodeIntoBuffer(buffer, bufferSize, valuePointer, value.Length, firstCharacterToEncode);
-                            result = new string(wholebuffer, 0, totalWritten);                            
+                            result = new string(wholebuffer, 0, totalWritten);
                         }
                     }
 
@@ -130,8 +136,12 @@ namespace System.Text.Encodings.Web
 
             if (firstCharacterToEncode > 0)
             {
-                int bytesToCopy = firstCharacterToEncode + firstCharacterToEncode;
-                BufferInternal.MemoryCopy(value, buffer, bytesToCopy, bytesToCopy);
+                Debug.Assert(firstCharacterToEncode <= valueLength);
+                Buffer.MemoryCopy(source: value,
+                    destination: buffer,
+                    destinationSizeInBytes: sizeof(char) * bufferLength,
+                    sourceBytesToCopy: sizeof(char) * firstCharacterToEncode);
+
                 totalWritten += firstCharacterToEncode;
                 bufferLength -= firstCharacterToEncode;
                 buffer += firstCharacterToEncode;
@@ -318,6 +328,200 @@ namespace System.Text.Encodings.Web
             }
         }
 
+        /// <summary>
+        /// Encodes the supplied UTF-8 text.
+        /// </summary>
+        /// <param name="utf8Source">A source buffer containing the UTF-8 text to encode.</param>
+        /// <param name="utf8Destination">The destination buffer to which the encoded form of <paramref name="utf8Source"/>
+        /// will be written.</param>
+        /// <param name="bytesConsumed">The number of bytes consumed from the <paramref name="utf8Source"/> buffer.</param>
+        /// <param name="bytesWritten">The number of bytes written to the <paramref name="utf8Destination"/> buffer.</param>
+        /// <param name="isFinalBlock"><see langword="true"/> if there is further source data that needs to be encoded;
+        /// <see langword="false"/> if there is no further source data that needs to be encoded.</param>
+        /// <returns>An <see cref="OperationStatus"/> describing the result of the encoding operation.</returns>
+        /// <remarks>The buffers <paramref name="utf8Source"/> and <paramref name="utf8Destination"/> must not overlap.</remarks>
+        public unsafe virtual OperationStatus EncodeUtf8(ReadOnlySpan<byte> utf8Source, Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock = true)
+        {
+            int originalUtf8SourceLength = utf8Source.Length;
+            int originalUtf8DestinationLength = utf8Destination.Length;
+            
+            const int TempUtf16CharBufferLength = 24; // arbitrarily chosen, but sufficient for any reasonable implementation
+            char* pTempCharBuffer = stackalloc char[TempUtf16CharBufferLength];
+
+            const int TempUtf8ByteBufferLength = TempUtf16CharBufferLength * 3 /* max UTF-8 output code units per UTF-16 input code unit */;
+            byte* pTempUtf8Buffer = stackalloc byte[TempUtf8ByteBufferLength];
+
+            uint nextScalarValue;
+            int utf8BytesConsumedForScalar = 0;
+            int nonEscapedByteCount = 0;
+            OperationStatus opStatus = OperationStatus.Done;
+
+            while (!utf8Source.IsEmpty)
+            {
+                // For performance, read until we require escaping.
+                do
+                {
+                    nextScalarValue = utf8Source[nonEscapedByteCount];
+                    if (UnicodeUtility.IsAsciiCodePoint(nextScalarValue))
+                    {
+                        // Check Ascii cache.
+                        byte[] encodedBytes = GetAsciiEncoding((byte)nextScalarValue);
+
+                        if (ReferenceEquals(encodedBytes, s_noEscape))
+                        {
+                            if (++nonEscapedByteCount <= utf8Destination.Length)
+                            {
+                                // Source data can be copied as-is.
+                                continue;
+                            }
+
+                            --nonEscapedByteCount;
+                            opStatus = OperationStatus.DestinationTooSmall;
+                            break;
+                        }
+
+                        if (encodedBytes == null)
+                        {
+                            // We need to escape and update the cache, so break out of this loop.
+                            opStatus = OperationStatus.Done;
+                            utf8BytesConsumedForScalar = 1;
+                            break;
+                        }
+
+                        // For performance, handle the non-escaped bytes and encoding here instead of breaking out of the loop.
+                        if (nonEscapedByteCount > 0)
+                        {
+                            // We previously verified the destination size.
+                            Debug.Assert(nonEscapedByteCount <= utf8Destination.Length);
+
+                            utf8Source.Slice(0, nonEscapedByteCount).CopyTo(utf8Destination);
+                            utf8Source = utf8Source.Slice(nonEscapedByteCount);
+                            utf8Destination = utf8Destination.Slice(nonEscapedByteCount);
+                            nonEscapedByteCount = 0;
+                        }
+
+                        if (!((ReadOnlySpan<byte>)encodedBytes).TryCopyTo(utf8Destination))
+                        {
+                            opStatus = OperationStatus.DestinationTooSmall;
+                            break;
+                        }
+
+                        utf8Destination = utf8Destination.Slice(encodedBytes.Length);
+                        utf8Source = utf8Source.Slice(1);
+                        continue;
+                    }
+
+                    // Code path for non-Ascii.
+                    opStatus = UnicodeHelpers.DecodeScalarValueFromUtf8(utf8Source.Slice(nonEscapedByteCount), out nextScalarValue, out utf8BytesConsumedForScalar);
+                    if (opStatus == OperationStatus.Done)
+                    {
+                        if (!WillEncode((int)nextScalarValue))
+                        {
+                            nonEscapedByteCount += utf8BytesConsumedForScalar;
+                            if (nonEscapedByteCount <= utf8Destination.Length)
+                            {
+                                // Source data can be copied as-is.
+                                continue;
+                            }
+
+                            nonEscapedByteCount -= utf8BytesConsumedForScalar;
+                            opStatus = OperationStatus.DestinationTooSmall;
+                        }
+                    }
+
+                    // We need to escape.
+                    break;
+                } while (nonEscapedByteCount < utf8Source.Length);
+
+                if (nonEscapedByteCount > 0)
+                {
+                    // We previously verified the destination size.
+                    Debug.Assert(nonEscapedByteCount <= utf8Destination.Length);
+
+                    utf8Source.Slice(0, nonEscapedByteCount).CopyTo(utf8Destination);
+                    utf8Source = utf8Source.Slice(nonEscapedByteCount);
+                    utf8Destination = utf8Destination.Slice(nonEscapedByteCount);
+                    nonEscapedByteCount = 0;
+                }
+
+                if (utf8Source.IsEmpty)
+                {
+                    goto Done;
+                }
+
+                // This code path is hit for ill-formed input data (where decoding has replaced it with U+FFFD)
+                // and for well-formed input data that must be escaped.
+
+                if (opStatus != OperationStatus.Done) // Optimize happy path.
+                {
+                    if (opStatus == OperationStatus.NeedMoreData)
+                    {
+                        if (!isFinalBlock)
+                        {
+                            bytesConsumed = originalUtf8SourceLength - utf8Source.Length;
+                            bytesWritten = originalUtf8DestinationLength - utf8Destination.Length;
+                            return OperationStatus.NeedMoreData;
+                        }
+                    }
+                    else if (opStatus == OperationStatus.DestinationTooSmall)
+                    {
+                        goto ReturnDestinationTooSmall;
+                    }
+                }
+
+                if (TryEncodeUnicodeScalar((int)nextScalarValue, pTempCharBuffer, TempUtf16CharBufferLength, out int charsWrittenJustNow))
+                {
+                    // Now that we have it as UTF-16, transcode it to UTF-8.
+                    // Need to copy it to a temporary buffer first, otherwise GetBytes might throw an exception
+                    // due to lack of output space.
+
+                    int transcodedByteCountThisIteration = Encoding.UTF8.GetBytes(pTempCharBuffer, charsWrittenJustNow, pTempUtf8Buffer, TempUtf8ByteBufferLength);
+                    ReadOnlySpan<byte> transcodedUtf8BytesThisIteration = new ReadOnlySpan<byte>(pTempUtf8Buffer, transcodedByteCountThisIteration);
+
+                    // Update cache for Ascii
+                    if (UnicodeUtility.IsAsciiCodePoint(nextScalarValue))
+                    {
+                        _asciiEscape[nextScalarValue] = transcodedUtf8BytesThisIteration.ToArray();
+                    }
+
+                    if (!transcodedUtf8BytesThisIteration.TryCopyTo(utf8Destination))
+                    {
+                        goto ReturnDestinationTooSmall;
+                    }
+
+                    utf8Destination = utf8Destination.Slice(transcodedByteCountThisIteration);
+                }
+                else
+                {
+                    // We really don't expect this to fail. If that happens we'll report an error to our caller.
+                    bytesConsumed = originalUtf8SourceLength - utf8Source.Length;
+                    bytesWritten = originalUtf8DestinationLength - utf8Destination.Length;
+                    return OperationStatus.InvalidData;
+                }
+
+                utf8Source = utf8Source.Slice(utf8BytesConsumedForScalar);
+            }
+
+        Done:
+            // Input buffer has been fully processed!
+            bytesConsumed = originalUtf8SourceLength;
+            bytesWritten = originalUtf8DestinationLength - utf8Destination.Length;
+            return OperationStatus.Done;
+
+        ReturnDestinationTooSmall:
+            bytesConsumed = originalUtf8SourceLength - utf8Source.Length;
+            bytesWritten = originalUtf8DestinationLength - utf8Destination.Length;
+            return OperationStatus.DestinationTooSmall;
+        }
+
+        /// <summary>
+        /// Shim function which can call virtual method <see cref="EncodeUtf8"/> using fast dispatch.
+        /// </summary>
+        internal static OperationStatus EncodeUtf8Shim(TextEncoder encoder, ReadOnlySpan<byte> utf8Source, Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock)
+        {
+            return encoder.EncodeUtf8(utf8Source, utf8Destination, out bytesConsumed, out bytesWritten, isFinalBlock);
+        }
+
         private unsafe void EncodeCore(TextWriter output, char* value, int valueLength)
         {
             Debug.Assert(value != null & output != null);
@@ -333,7 +537,8 @@ namespace System.Text.Encodings.Web
 
             // this loop processes character pairs (in case they are surrogates).
             // there is an if block below to process single last character.
-            for (int secondCharIndex = 1; secondCharIndex < valueLength; secondCharIndex++)
+            int secondCharIndex;
+            for (secondCharIndex = 1; secondCharIndex < valueLength; secondCharIndex++)
             {
                 if (!wasSurrogatePair)
                 {
@@ -366,7 +571,7 @@ namespace System.Text.Encodings.Web
                 }
             }
 
-            if (!wasSurrogatePair)
+            if (!wasSurrogatePair || (secondCharIndex == valueLength))
             {
                 firstChar = value[valueLength - 1];
                 int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, null, out wasSurrogatePair);
@@ -376,6 +581,74 @@ namespace System.Text.Encodings.Web
                 }
                 Write(output, buffer, charsWritten);
             }
+        }
+
+        private unsafe int FindFirstCharacterToEncode(ReadOnlySpan<char> text)
+        {
+            fixed (char* pText = &MemoryMarshal.GetReference(text))
+            {
+                return FindFirstCharacterToEncode(pText, text.Length);
+            }
+        }
+
+        /// <summary>
+        /// Given a UTF-8 text input buffer, finds the first element in the input buffer which would be
+        /// escaped by the current encoder instance.
+        /// </summary>
+        /// <param name="utf8Text">The UTF-8 text input buffer to search.</param>
+        /// <returns>
+        /// The index of the first element in <paramref name="utf8Text"/> which would be escaped by the
+        /// current encoder instance, or -1 if no data in <paramref name="utf8Text"/> requires escaping.
+        /// </returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public virtual int FindFirstCharacterToEncodeUtf8(ReadOnlySpan<byte> utf8Text)
+        {
+            int originalUtf8TextLength = utf8Text.Length;
+
+            // Loop through the input text, terminating when we see ill-formed UTF-8 or when we decode a scalar value
+            // that must be encoded. If we see either of these things then we'll return its index in the original
+            // input sequence. If we consume the entire text without seeing either of these, return -1 to indicate
+            // that the text can be copied as-is without escaping.
+
+            int i = 0;
+            while (i < utf8Text.Length)
+            {
+                byte value = utf8Text[i];
+                if (UnicodeUtility.IsAsciiCodePoint(value))
+                {
+                    if (!ReferenceEquals(GetAsciiEncoding(value), s_noEscape))
+                    {
+                        return originalUtf8TextLength - utf8Text.Length + i;
+                    }
+
+                    i++;
+                }
+                else
+                {
+                    if (i > 0)
+                    {
+                        utf8Text = utf8Text.Slice(i);
+                    }
+
+                    if (UnicodeHelpers.DecodeScalarValueFromUtf8(utf8Text, out uint nextScalarValue, out int bytesConsumedThisIteration) != OperationStatus.Done
+                      || WillEncode((int)nextScalarValue))
+                    {
+                        return originalUtf8TextLength - utf8Text.Length;
+                    }
+
+                    i = bytesConsumedThisIteration;
+                }
+            }
+
+            return -1; // no input data needs to be escaped
+        }
+
+        /// <summary>
+        /// Shim function which can call virtual method <see cref="FindFirstCharacterToEncodeUtf8"/> using fast dispatch.
+        /// </summary>
+        internal static int FindFirstCharacterToEncodeUtf8Shim(TextEncoder encoder, ReadOnlySpan<byte> utf8Text)
+        {
+            return encoder.FindFirstCharacterToEncodeUtf8(utf8Text);
         }
 
         internal static unsafe bool TryCopyCharacters(char[] source, char* destination, int destinationLength, out int numberOfCharactersWritten)
@@ -434,6 +707,22 @@ namespace System.Text.Encodings.Web
                 output.Write(*input);
                 input++;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private byte[] GetAsciiEncoding(byte value)
+        {
+            byte[] encoding = _asciiEscape[value];
+            if (encoding == null)
+            {
+                if (!WillEncode(value))
+                {
+                    _asciiEscape[value] = s_noEscape;
+                    return s_noEscape;
+                }
+            }
+
+            return encoding;
         }
     }
 }

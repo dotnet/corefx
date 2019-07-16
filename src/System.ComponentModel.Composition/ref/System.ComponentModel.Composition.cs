@@ -84,8 +84,8 @@ namespace System.ComponentModel.Composition
     public enum CreationPolicy
     {
         Any = 0,
-        NonShared = 2,
         Shared = 1,
+        NonShared = 2,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Field | System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple=true, Inherited=false)]
     public partial class ExportAttribute : System.Attribute
@@ -359,8 +359,8 @@ namespace System.ComponentModel.Composition.Hosting
     {
         Default = 0,
         DisableSilentRejection = 1,
-        ExportCompositionService = 4,
         IsThreadSafe = 2,
+        ExportCompositionService = 4,
     }
     public partial class CompositionScopeDefinition : System.ComponentModel.Composition.Primitives.ComposablePartCatalog, System.ComponentModel.Composition.Hosting.INotifyComposablePartCatalogChanged
     {
@@ -534,10 +534,12 @@ namespace System.ComponentModel.Composition.Primitives
     public partial class ComposablePartException : System.Exception
     {
         public ComposablePartException() { }
+        protected ComposablePartException(Runtime.Serialization.SerializationInfo info, Runtime.Serialization.StreamingContext context) { }
         public ComposablePartException(string message) { }
         public ComposablePartException(string message, System.ComponentModel.Composition.Primitives.ICompositionElement element) { }
         public ComposablePartException(string message, System.ComponentModel.Composition.Primitives.ICompositionElement element, System.Exception innerException) { }
         public ComposablePartException(string message, System.Exception innerException) { }
+        public override void GetObjectData(Runtime.Serialization.SerializationInfo info, Runtime.Serialization.StreamingContext context) { }
         public System.ComponentModel.Composition.Primitives.ICompositionElement Element { get { throw null; } }
     }
     public partial class ContractBasedImportDefinition : System.ComponentModel.Composition.Primitives.ImportDefinition
@@ -584,9 +586,9 @@ namespace System.ComponentModel.Composition.Primitives
     }
     public enum ImportCardinality
     {
+        ZeroOrOne = 0,
         ExactlyOne = 1,
         ZeroOrMore = 2,
-        ZeroOrOne = 0,
     }
     public partial class ImportDefinition
     {

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Runtime.Serialization;
 
 namespace System
@@ -40,7 +39,7 @@ namespace System
         {
             ClassName = info.GetString("MMClassName");
             MemberName = info.GetString("MMMemberName");
-            Signature = (byte[])info.GetValue("MMSignature", typeof(byte[]));
+            Signature = (byte[]?)info.GetValue("MMSignature", typeof(byte[]));
         }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)

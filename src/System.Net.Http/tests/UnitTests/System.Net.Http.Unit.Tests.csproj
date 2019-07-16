@@ -1,10 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{5F9C3C9F-652E-461E-B2D6-85D264F5A733}</ProjectGuid>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
+    <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <ItemGroup>
@@ -26,6 +26,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\IO\StreamHelpers.CopyValidation.cs">
       <Link>ProductionCode\Common\CoreLib\System\IO\StreamHelpers.CopyValidation.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
+      <Link>Common\System\Net\InternalException.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\HttpDateParser.cs">
       <Link>Common\System\Net\HttpDateParser.cs</Link>
@@ -297,23 +300,60 @@
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.Unix.cs" Condition=" '$(TargetsUnix)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.Unix.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.Windows.cs" Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.Windows.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\HeaderField.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\HeaderField.cs</Link>
     </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\HPackEncoder.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\HPackEncoder.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\HPackDecoder.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\HPackDecoder.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\HPackDecodingException.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\HPackDecodingException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\Huffman.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\Huffman.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\HuffmanDecodingException.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\HuffmanDecodingException.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\IntegerEncoder.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\IntegerEncoder.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\IntegerDecoder.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\IntegerDecoder.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\StaticTable.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\StaticTable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\DynamicTable.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\DynamicTable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.OSX.cs" Condition=" '$(TargetsOSX)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.OSX.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Unix.cs" Condition=" '$(TargetsUnix)' == 'true' And '$(TargetsOSX)' != 'true' And '$(TargetGroup)' == 'netcoreapp'">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Unix.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Windows.cs" Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Windows.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Http\HttpHandlerDefaults.cs">
       <Link>ProductionCode\System\Net\Http\HttpHandlerDefaults.cs</Link>
     </Compile>
     <Compile Include="DigestAuthenticationTests.cs" />
     <Compile Include="Fakes\HttpClientHandler.cs" />
+    <Compile Include="Fakes\MacProxy.cs" Condition=" '$(TargetsOSX)' == 'true' And '$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="Headers\AuthenticationHeaderValueTest.cs" />
     <Compile Include="Headers\ByteArrayHeaderParserTest.cs" />
     <Compile Include="Headers\CacheControlHeaderParserTest.cs" />
@@ -367,14 +407,21 @@
     <Compile Include="Headers\UriHeaderParserTest.cs" />
     <Compile Include="Headers\ViaHeaderValueTest.cs" />
     <Compile Include="Headers\WarningHeaderValueTest.cs" />
+    <Compile Include="HPack\HPackDecoderTest.cs" />
+    <Compile Include="HPack\HPackIntegerTest.cs" />
+    <Compile Include="HPack\HuffmanDecodingTests.cs" />
     <Compile Include="HttpContentTest.cs" />
     <Compile Include="HttpRuleParserTest.cs" />
     <Compile Include="MockContent.cs" />
     <Compile Include="StreamToStreamCopyTest.cs" />
     <Compile Include="HttpEnvironmentProxyTest.cs" />
-    <Compile Include="HttpSystemProxyTest.cs" />
-    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpSystemProxy.cs">
-      <Link>ProductionCode\System\Net\Http\HttpSystemProxy.cs</Link>
+    <Compile Include="HttpWindowsProxyTest.cs" />
+    <Compile Include="SystemProxyInfoTest.cs" />
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpNoProxy.cs">
+      <Link>ProductionCode\System\Net\Http\HttpNoProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpWindowsProxy.cs">
+      <Link>ProductionCode\System\Net\Http\HttpWindowsProxy.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\src\System\Net\Http\WinHttpException.cs">
       <Link>ProductionCode\System\Net\Http\WinHttpException.cs</Link>
@@ -383,7 +430,7 @@
       <Link>ProductionCode\System\Net\Http\WinInetProxyHelper.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\src\System\Net\Http\WinHttpTraceHelper.cs">
-      <Link>ProductionCode\System\Net\Http\WinInetProxyHelper.cs</Link>
+      <Link>ProductionCode\System\Net\Http\WinHttpTraceHelper.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
@@ -407,22 +454,22 @@
       <Link>Common\Interop\Windows\WinHttp\Interop.winhttp_types.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\tests\UnitTests\FakeInterop.cs">
-      <Link>ProductionCode\System\Net\Http\WinInetProxyHelper.cs</Link>
+      <Link>WinHttpHandler\UnitTests\FakeInterop.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\tests\UnitTests\FakeRegistry.cs">
-      <Link>ProductionCode\System\Net\Http\WinInetProxyHelper.cs</Link>
+      <Link>WinHttpHandler\UnitTests\FakeRegistry.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\tests\UnitTests\FakeSafeWinHttpHandle.cs">
-      <Link>ProductionCode\System\Net\Http\WinInetProxyHelper.cs</Link>
+      <Link>WinHttpHandler\UnitTests\FakeSafeWinHttpHandle.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\tests\UnitTests\TestControl.cs">
-      <Link>ProductionCode\System\Net\Http\WinInetProxyHelper.cs</Link>
+      <Link>WinHttpHandler\UnitTests\TestControl.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\tests\UnitTests\APICallHistory.cs">
-      <Link>ProductionCode\System\Net\Http\WinInetProxyHelper.cs</Link>
+      <Link>WinHttpHandler\UnitTests\APICallHistory.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\tests\UnitTests\TestServer.cs">
-      <Link>ProductionCode\System\Net\Http\WinInetProxyHelper.cs</Link>
+      <Link>WinHttpHandler\UnitTests\TestServer.cs</Link>
     </Compile>
   </ItemGroup>
 </Project>

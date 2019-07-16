@@ -3,7 +3,7 @@
     <ProjectGuid>{3ED7BCF1-34B9-49B7-9C25-0BC3304C0858}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
-    <Configurations>netstandard-Debug;netstandard-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Debug;uap-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CancelKeyPress.cs" />
@@ -33,9 +33,9 @@
     <Compile Include="WindowAndCursorProps.cs" />
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(MSBuildThisFileDirectory)TestData\**\*.*">
-      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </SupplementalTestData>
+    <None Include="$(MSBuildThisFileDirectory)TestData\**\*"
+          Link="%(RecursiveDir)%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="ConsoleEncoding.Windows.cs" />
@@ -49,8 +49,5 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.cs">
       <Link>Interop\Unix\System.Native\Interop.Fcntl.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ncursesFormats\" />
   </ItemGroup>
 </Project>

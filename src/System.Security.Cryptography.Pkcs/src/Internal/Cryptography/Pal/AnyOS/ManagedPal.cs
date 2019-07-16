@@ -13,8 +13,6 @@ namespace Internal.Cryptography.Pal.AnyOS
 {
     internal sealed partial class ManagedPkcsPal : PkcsPal
     {
-        internal new static readonly ManagedPkcsPal Instance = new ManagedPkcsPal();
-
         public override void AddCertsFromStoreForDecryption(X509Certificate2Collection certs)
         {
             certs.AddRange(PkcsHelpers.GetStoreCertificates(StoreName.My, StoreLocation.CurrentUser, openExistingOnly: false));
@@ -77,7 +75,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                 return (T)(object)certificate.GetRSAPrivateKey();
             if (typeof(T) == typeof(ECDsa))
                 return (T)(object)certificate.GetECDsaPrivateKey();
-#if netcoreapp
+#if netcoreapp || netstandard21
             if (typeof(T) == typeof(DSA))
                 return (T)(object)certificate.GetDSAPrivateKey();
 #endif

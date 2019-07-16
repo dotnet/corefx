@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -13,471 +15,113 @@ namespace System.Text.Json.Serialization.Tests
         void Verify();
     }
 
+    public enum SampleEnumByte : byte
+    {
+        MinZero = byte.MinValue,
+        One = 1,
+        Two = 2,
+        Max = byte.MaxValue
+    }
+
+    public enum SampleEnumSByte : sbyte
+    {
+        MinNegative = sbyte.MinValue,
+        Zero = 0,
+        One = 1,
+        Two = 2,
+        Max = sbyte.MaxValue
+    }
+
     public enum SampleEnum
     {
+        MinZero = 0,
         One = 1,
         Two = 2
     }
 
-    public class SimpleTestClass : ITestClass
+    public enum SampleEnumInt16 : short
     {
-        public short MyInt16 { get; set; }
-        public int MyInt32 { get; set; }
-        public long MyInt64 { get; set; }
-        public ushort MyUInt16 { get; set; }
-        public uint MyUInt32 { get; set; }
-        public ulong MyUInt64 { get; set; }
-        public byte MyByte { get; set; }
-        public sbyte MySByte { get; set; }
-        public char MyChar { get; set; }
-        public string MyString { get; set; }
-        public decimal MyDecimal { get; set; }
-        public bool MyBooleanTrue { get; set; }
-        public bool MyBooleanFalse { get; set; }
-        public float MySingle { get; set; }
-        public double MyDouble { get; set; }
-        public DateTime MyDateTime { get; set; }
-        public DateTimeOffset MyDateTimeOffset { get; set; }
-        public SampleEnum MyEnum { get; set; }
-        public short[] MyInt16Array { get; set; }
+        MinNegative = short.MinValue,
+        Zero = 0,
+        One = 1,
+        Two = 2,
+        Max = short.MaxValue
+    }
+
+    public enum SampleEnumUInt16 : ushort
+    {
+        MinZero = ushort.MinValue,
+        One = 1,
+        Two = 2,
+        Max = ushort.MaxValue
+    }
+
+    public enum SampleEnumInt32 : Int32
+    {
+        MinNegative = Int32.MinValue,
+        Zero = 0,
+        One = 1,
+        Two = 2,
+        Max = Int32.MaxValue
+    }
+
+    public enum SampleEnumUInt32 : UInt32
+    {
+        MinZero = UInt32.MinValue,
+        One = 1,
+        Two = 2,
+        Max = UInt32.MaxValue
+    }
+
+    public enum SampleEnumInt64 : long
+    {
+        MinNegative = long.MinValue,
+        Zero = 0,
+        One = 1,
+        Two = 2,
+        Max = long.MaxValue
+    }
+
+    public enum SampleEnumUInt64 : ulong
+    {
+        MinZero = ulong.MinValue,
+        One = 1,
+        Two = 2,
+        Max = ulong.MaxValue
+    }
+
+    public struct SimpleStruct
+    {
+        public int One { get; set; }
+        public double Two { get; set; }
+    }
+    
+    public struct SimpleStructWithSimpleClass: ITestClass
+    {
+        public short MyInt32 { get; set; }
+        public SimpleTestClass MySimpleClass { get; set; }
         public int[] MyInt32Array { get; set; }
-        public long[] MyInt64Array { get; set; }
-        public ushort[] MyUInt16Array { get; set; }
-        public uint[] MyUInt32Array { get; set; }
-        public ulong[] MyUInt64Array { get; set; }
-        public byte[] MyByteArray { get; set; }
-        public sbyte[] MySByteArray { get; set; }
-        public char[] MyCharArray { get; set; }
-        public string[] MyStringArray { get; set; }
-        public decimal[] MyDecimalArray { get; set; }
-        public bool[] MyBooleanTrueArray { get; set; }
-        public bool[] MyBooleanFalseArray { get; set; }
-        public float[] MySingleArray { get; set; }
-        public double[] MyDoubleArray { get; set; }
-        public DateTime[] MyDateTimeArray { get; set; }
-        public DateTimeOffset[] MyDateTimeOffsetArray { get; set; }
-        public SampleEnum[] MyEnumArray { get; set; }
-
-        public static readonly string s_json = $"{{{s_partialJsonProperties},{s_partialJsonArrays}}}";
-        public static readonly string s_json_flipped = $"{{{s_partialJsonArrays},{s_partialJsonProperties}}}";
-
-        private const string s_partialJsonProperties =
-                @"""MyInt16"" : 1," +
-                @"""MyInt32"" : 2," +
-                @"""MyInt64"" : 3," +
-                @"""MyUInt16"" : 4," +
-                @"""MyUInt32"" : 5," +
-                @"""MyUInt64"" : 6," +
-                @"""MyByte"" : 7," +
-                @"""MySByte"" : 8," +
-                @"""MyChar"" : ""a""," +
-                @"""MyString"" : ""Hello""," +
-                @"""MyBooleanTrue"" : true," +
-                @"""MyBooleanFalse"" : false," +
-                @"""MySingle"" : 1.1," +
-                @"""MyDouble"" : 2.2," +
-                @"""MyDecimal"" : 3.3," +
-                @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
-                @"""MyDateTimeOffset"" : ""2019-01-30T12:01:02.0000000+01:00""," +
-                @"""MyEnum"" : 2"; // int by default
-
-        private const string s_partialJsonArrays =
-                @"""MyInt16Array"" : [1]," +
-                @"""MyInt32Array"" : [2]," +
-                @"""MyInt64Array"" : [3]," +
-                @"""MyUInt16Array"" : [4]," +
-                @"""MyUInt32Array"" : [5]," +
-                @"""MyUInt64Array"" : [6]," +
-                @"""MyByteArray"" : [7]," +
-                @"""MySByteArray"" : [8]," +
-                @"""MyCharArray"" : [""a""]," +
-                @"""MyStringArray"" : [""Hello""]," +
-                @"""MyBooleanTrueArray"" : [true]," +
-                @"""MyBooleanFalseArray"" : [false]," +
-                @"""MySingleArray"" : [1.1]," +
-                @"""MyDoubleArray"" : [2.2]," +
-                @"""MyDecimalArray"" : [3.3]," +
-                @"""MyDateTimeArray"" : [""2019-01-30T12:01:02.0000000Z""]," +
-                @"""MyDateTimeOffsetArray"" : [""2019-01-30T12:01:02.0000000+01:00""]," +
-                @"""MyEnumArray"" : [2]"; // int by default
-
-        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
-
-        public void Initialize()
-        {
-            MyInt16 = 1;
-            MyInt32 = 2;
-            MyInt64 = 3;
-            MyUInt16 = 4;
-            MyUInt32 = 5;
-            MyUInt64 = 6;
-            MyByte = 7;
-            MySByte = 8;
-            MyChar = 'a';
-            MyString = "Hello";
-            MyBooleanTrue = true;
-            MyBooleanFalse = false;
-            MySingle = 1.1f;
-            MyDouble = 2.2d;
-            MyDecimal = 3.3m;
-            MyDateTime = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
-            MyDateTimeOffset = new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0));
-            MyEnum = SampleEnum.Two;
-
-            MyInt16Array = new short[] { 1 };
-            MyInt32Array = new int[] { 2 };
-            MyInt64Array = new long[] { 3 };
-            MyUInt16Array = new ushort[] { 4 };
-            MyUInt32Array = new uint[] { 5 };
-            MyUInt64Array = new ulong[] { 6 };
-            MyByteArray = new byte[] { 7 };
-            MySByteArray = new sbyte[] { 8 };
-            MyCharArray = new char[] { 'a' };
-            MyStringArray = new string[] { "Hello" };
-            MyBooleanTrueArray = new bool[] { true };
-            MyBooleanFalseArray = new bool[] { false };
-            MySingleArray = new float[] { 1.1f };
-            MyDoubleArray = new double[] { 2.2d };
-            MyDecimalArray = new decimal[] { 3.3m };
-            MyDateTimeArray = new DateTime[] { new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) };
-            MyDateTimeOffsetArray = new DateTimeOffset[] { new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)) };
-            MyEnumArray = new SampleEnum[] { SampleEnum.Two };
-        }
-
-        public void Verify()
-        {
-            Assert.Equal((short)1, MyInt16);
-            Assert.Equal((int)2, MyInt32);
-            Assert.Equal((long)3, MyInt64);
-            Assert.Equal((ushort)4, MyUInt16);
-            Assert.Equal((uint)5, MyUInt32);
-            Assert.Equal((ulong)6, MyUInt64);
-            Assert.Equal((byte)7, MyByte);
-            Assert.Equal((sbyte)8, MySByte);
-            Assert.Equal('a', MyChar);
-            Assert.Equal("Hello", MyString);
-            Assert.Equal(3.3m, MyDecimal);
-            Assert.Equal(false, MyBooleanFalse);
-            Assert.Equal(true, MyBooleanTrue);
-            Assert.Equal(1.1f, MySingle);
-            Assert.Equal(2.2d, MyDouble);
-            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTime);
-            Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), MyDateTimeOffset);
-            Assert.Equal(SampleEnum.Two, MyEnum);
-
-            Assert.Equal((short)1, MyInt16Array[0]);
-            Assert.Equal((int)2, MyInt32Array[0]);
-            Assert.Equal((long)3, MyInt64Array[0]);
-            Assert.Equal((ushort)4, MyUInt16Array[0]);
-            Assert.Equal((uint)5, MyUInt32Array[0]);
-            Assert.Equal((ulong)6, MyUInt64Array[0]);
-            Assert.Equal((byte)7, MyByteArray[0]);
-            Assert.Equal((sbyte)8, MySByteArray[0]);
-            Assert.Equal('a', MyCharArray[0]);
-            Assert.Equal("Hello", MyStringArray[0]);
-            Assert.Equal(3.3m, MyDecimalArray[0]);
-            Assert.Equal(false, MyBooleanFalseArray[0]);
-            Assert.Equal(true, MyBooleanTrueArray[0]);
-            Assert.Equal(1.1f, MySingleArray[0]);
-            Assert.Equal(2.2d, MyDoubleArray[0]);
-            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTimeArray[0]);
-            Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), MyDateTimeOffsetArray[0]);
-            Assert.Equal(SampleEnum.Two, MyEnumArray[0]);
-        }
-    }
-
-    public class SimpleTestClassWithObject : ITestClass
-    {
-        public object MyInt16 { get; set; }
-        public object MyInt32 { get; set; }
-        public object MyInt64 { get; set; }
-        public object MyUInt16 { get; set; }
-        public object MyUInt32 { get; set; }
-        public object MyUInt64 { get; set; }
-        public object MyByte { get; set; }
-        public object MySByte { get; set; }
-        public object MyChar { get; set; }
-        public object MyString { get; set; }
-        public object MyDecimal { get; set; }
-        public object MyBooleanTrue { get; set; }
-        public object MyBooleanFalse { get; set; }
-        public object MySingle { get; set; }
-        public object MyDouble { get; set; }
-        public object MyDateTime { get; set; }
-        public object MyEnum { get; set; }
-        public object MyInt16Array { get; set; }
-        public object MyInt32Array { get; set; }
-        public object MyInt64Array { get; set; }
-        public object MyUInt16Array { get; set; }
-        public object MyUInt32Array { get; set; }
-        public object MyUInt64Array { get; set; }
-        public object MyByteArray { get; set; }
-        public object MySByteArray { get; set; }
-        public object MyCharArray { get; set; }
-        public object MyStringArray { get; set; }
-        public object MyDecimalArray { get; set; }
-        public object MyBooleanTrueArray { get; set; }
-        public object MyBooleanFalseArray { get; set; }
-        public object MySingleArray { get; set; }
-        public object MyDoubleArray { get; set; }
-        public object MyDateTimeArray { get; set; }
-        public object MyEnumArray { get; set; }
 
         public static readonly string s_json =
-                @"{" +
-                @"""MyInt16"" : 1," +
-                @"""MyInt32"" : 2," +
-                @"""MyInt64"" : 3," +
-                @"""MyUInt16"" : 4," +
-                @"""MyUInt32"" : 5," +
-                @"""MyUInt64"" : 6," +
-                @"""MyByte"" : 7," +
-                @"""MySByte"" : 8," +
-                @"""MyChar"" : ""a""," +
-                @"""MyString"" : ""Hello""," +
-                @"""MyBooleanTrue"" : true," +
-                @"""MyBooleanFalse"" : false," +
-                @"""MySingle"" : 1.1," +
-                @"""MyDouble"" : 2.2," +
-                @"""MyDecimal"" : 3.3," +
-                @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
-                @"""MyEnum"" : 2," + // int by default
-                @"""MyInt16Array"" : [1]," +
-                @"""MyInt32Array"" : [2]," +
-                @"""MyInt64Array"" : [3]," +
-                @"""MyUInt16Array"" : [4]," +
-                @"""MyUInt32Array"" : [5]," +
-                @"""MyUInt64Array"" : [6]," +
-                @"""MyByteArray"" : [7]," +
-                @"""MySByteArray"" : [8]," +
-                @"""MyCharArray"" : [""a""]," +
-                @"""MyStringArray"" : [""Hello""]," +
-                @"""MyBooleanTrueArray"" : [true]," +
-                @"""MyBooleanFalseArray"" : [false]," +
-                @"""MySingleArray"" : [1.1]," +
-                @"""MyDoubleArray"" : [2.2]," +
-                @"""MyDecimalArray"" : [3.3]," +
-                @"""MyDateTimeArray"" : [""2019-01-30T12:01:02.0000000Z""]," +
-                @"""MyEnumArray"" : [2]" + // int by default
-                @"}";
-
-        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
+            @"{" +
+                @"""MySimpleClass"" : {""MyString"" : ""Hello"", ""MyDouble"" : 3.14}," +
+                @"""MyInt32"" : 32," +
+                @"""MyInt32Array"" : [32]" +
+            @"}";
 
         public void Initialize()
         {
-            MyInt16 = (short)1;
-            MyInt32 = (int)2;
-            MyInt64 = (long)3;
-            MyUInt16 = (ushort)4;
-            MyUInt32 = (uint)5;
-            MyUInt64 = (ulong)6;
-            MyByte = (byte)7;
-            MySByte =(sbyte) 8;
-            MyChar = 'a';
-            MyString = "Hello";
-            MyBooleanTrue = true;
-            MyBooleanFalse = false;
-            MySingle = 1.1f;
-            MyDouble = 2.2d;
-            MyDecimal = 3.3m;
-            MyDateTime = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
-            MyEnum = SampleEnum.Two;
-
-            MyInt16Array = new short[] { 1 };
-            MyInt32Array = new int[] { 2 };
-            MyInt64Array = new long[] { 3 };
-            MyUInt16Array = new ushort[] { 4 };
-            MyUInt32Array = new uint[] { 5 };
-            MyUInt64Array = new ulong[] { 6 };
-            MyByteArray = new byte[] { 7 };
-            MySByteArray = new sbyte[] { 8 };
-            MyCharArray = new char[] { 'a' };
-            MyStringArray = new string[] { "Hello" };
-            MyBooleanTrueArray = new bool[] { true };
-            MyBooleanFalseArray = new bool[] { false };
-            MySingleArray = new float[] { 1.1f };
-            MyDoubleArray = new double[] { 2.2d };
-            MyDecimalArray = new decimal[] { 3.3m };
-            MyDateTimeArray = new DateTime[] { new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) };
-            MyEnumArray = new SampleEnum[] { SampleEnum.Two };
+            MySimpleClass = new SimpleTestClass { MyString = "Hello", MyDouble = 3.14 };
+            MyInt32 = 32;
+            MyInt32Array = new int[] { 32 };
         }
 
         public void Verify()
         {
-            Assert.Equal((short)1, MyInt16);
-            Assert.Equal((int)2, MyInt32);
-            Assert.Equal((long)3, MyInt64);
-            Assert.Equal((ushort)4, MyUInt16);
-            Assert.Equal((uint)5, MyUInt32);
-            Assert.Equal((ulong)6, MyUInt64);
-            Assert.Equal((byte)7, MyByte);
-            Assert.Equal((sbyte)8, MySByte);
-            Assert.Equal('a', MyChar);
-            Assert.Equal("Hello", MyString);
-            Assert.Equal(3.3m, MyDecimal);
-            Assert.Equal(false, MyBooleanFalse);
-            Assert.Equal(true, MyBooleanTrue);
-            Assert.Equal(1.1f, MySingle);
-            Assert.Equal(2.2d, MyDouble);
-            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTime);
-            Assert.Equal(SampleEnum.Two, MyEnum);
-
-            Assert.Equal((short)1, ((short[])MyInt16Array)[0]);
-            Assert.Equal((int)2, ((int[])MyInt32Array)[0]);
-            Assert.Equal((long)3, ((long[])MyInt64Array)[0]);
-            Assert.Equal((ushort)4, ((ushort[])MyUInt16Array)[0]);
-            Assert.Equal((uint)5, ((uint[])MyUInt32Array)[0]);
-            Assert.Equal((ulong)6, ((ulong[])MyUInt64Array)[0]);
-            Assert.Equal((byte)7, ((byte[])MyByteArray)[0]);
-            Assert.Equal((sbyte)8, ((sbyte[])MySByteArray)[0]);
-            Assert.Equal('a', ((char[])MyCharArray)[0]);
-            Assert.Equal("Hello", ((string[])MyStringArray)[0]);
-            Assert.Equal(3.3m, ((decimal[])MyDecimalArray)[0]);
-            Assert.Equal(false, ((bool[])MyBooleanFalseArray)[0]);
-            Assert.Equal(true, ((bool[])MyBooleanTrueArray)[0]);
-            Assert.Equal(1.1f, ((float[])MySingleArray)[0]);
-            Assert.Equal(2.2d, ((double[])MyDoubleArray)[0]);
-            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), ((DateTime[])MyDateTimeArray)[0]);
-            Assert.Equal(SampleEnum.Two, ((SampleEnum[])MyEnumArray)[0]);
-        }
-    }
-
-    public abstract class SimpleBaseClassWithNullables
-    {
-        public short? MyInt16 { get; set; }
-        public int? MyInt32 { get; set; }
-        public long? MyInt64 { get; set; }
-        public ushort? MyUInt16 { get; set; }
-        public uint? MyUInt32 { get; set; }
-        public ulong? MyUInt64 { get; set; }
-        public byte? MyByte { get; set; }
-        public sbyte? MySByte { get; set; }
-        public char? MyChar { get; set; }
-        public decimal? MyDecimal { get; set; }
-        public bool? MyBooleanTrue { get; set; }
-        public bool? MyBooleanFalse { get; set; }
-        public float? MySingle { get; set; }
-        public double? MyDouble { get; set; }
-        public DateTime? MyDateTime { get; set; }
-        public DateTimeOffset? MyDateTimeOffset { get; set; }
-        public SampleEnum? MyEnum { get; set; }
-    }
-
-    public class SimpleTestClassWithNulls : SimpleBaseClassWithNullables, ITestClass
-    {
-        public void Initialize()
-        {
-        }
-
-        public void Verify()
-        {
-            Assert.Null(MyInt16);
-            Assert.Null(MyInt32);
-            Assert.Null(MyInt64);
-            Assert.Null(MyUInt16);
-            Assert.Null(MyUInt32);
-            Assert.Null(MyUInt64);
-            Assert.Null(MyByte);
-            Assert.Null(MySByte);
-            Assert.Null(MyChar);
-            Assert.Null(MyDecimal);
-            Assert.Null(MyBooleanFalse);
-            Assert.Null(MyBooleanTrue);
-            Assert.Null(MySingle);
-            Assert.Null(MyDouble);
-            Assert.Null(MyDateTime);
-            Assert.Null(MyDateTimeOffset);
-            Assert.Null(MyEnum);
-        }
-        public static readonly string s_json =
-                @"{" +
-                @"""MyInt16"" : null," +
-                @"""MyInt32"" : null," +
-                @"""MyInt64"" : null," +
-                @"""MyUInt16"" : null," +
-                @"""MyUInt32"" : null," +
-                @"""MyUInt64"" : null," +
-                @"""MyByte"" : null," +
-                @"""MySByte"" : null," +
-                @"""MyChar"" : null," +
-                @"""MyBooleanTrue"" : null," +
-                @"""MyBooleanFalse"" : null," +
-                @"""MySingle"" : null," +
-                @"""MyDouble"" : null," +
-                @"""MyDecimal"" : null," +
-                @"""MyDateTime"" : null," +
-                @"""MyDateTimeOffset"" : null," +
-                @"""MyEnum"" : null" +
-                @"}";
-
-        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
-    }
-
-    public class SimpleTestClassWithNullables : SimpleBaseClassWithNullables, ITestClass
-    {
-        public static readonly string s_json =
-                @"{" +
-                @"""MyInt16"" : 1," +
-                @"""MyInt32"" : 2," +
-                @"""MyInt64"" : 3," +
-                @"""MyUInt16"" : 4," +
-                @"""MyUInt32"" : 5," +
-                @"""MyUInt64"" : 6," +
-                @"""MyByte"" : 7," +
-                @"""MySByte"" : 8," +
-                @"""MyChar"" : ""a""," +
-                @"""MyBooleanTrue"" : true," +
-                @"""MyBooleanFalse"" : false," +
-                @"""MySingle"" : 1.1," +
-                @"""MyDouble"" : 2.2," +
-                @"""MyDecimal"" : 3.3," +
-                @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
-                @"""MyDateTimeOffset"" : ""2019-01-30T12:01:02.0000000+01:00""," +
-                @"""MyEnum"" : 2" + // int by default
-                @"}";
-
-        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
-
-        public void Initialize()
-        {
-            MyInt16 = 1;
-            MyInt32 = 2;
-            MyInt64 = 3;
-            MyUInt16 = 4;
-            MyUInt32 = 5;
-            MyUInt64 = 6;
-            MyByte = 7;
-            MySByte = 8;
-            MyChar = 'a';
-            MyBooleanTrue = true;
-            MyBooleanFalse = false;
-            MySingle = 1.1f;
-            MyDouble = 2.2d;
-            MyDecimal = 3.3m;
-            MyDateTime = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
-            MyDateTimeOffset = new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0));
-            MyEnum = SampleEnum.Two;
-        }
-
-        public void Verify()
-        {
-            Assert.Equal(MyInt16, (short)1);
-            Assert.Equal(MyInt32, (int)2);
-            Assert.Equal(MyInt64, (long)3);
-            Assert.Equal(MyUInt16, (ushort)4);
-            Assert.Equal(MyUInt32, (uint)5);
-            Assert.Equal(MyUInt64, (ulong)6);
-            Assert.Equal(MyByte, (byte)7);
-            Assert.Equal(MySByte, (sbyte)8);
-            Assert.Equal(MyChar, 'a');
-            Assert.Equal(MyDecimal, 3.3m);
-            Assert.Equal(MyBooleanFalse, false);
-            Assert.Equal(MyBooleanTrue, true);
-            Assert.Equal(MySingle, 1.1f);
-            Assert.Equal(MyDouble, 2.2d);
-            Assert.Equal(MyDateTime, new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc));
-            Assert.Equal(MyDateTimeOffset, new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)));
-            Assert.Equal(MyEnum, SampleEnum.Two);
+            Assert.Equal(32, MyInt32);
+            Assert.Equal(32, MyInt32Array[0]);
+            Assert.Equal("Hello", MySimpleClass.MyString);
+            Assert.Equal(3.14, MySimpleClass.MyDouble);
         }
     }
 
@@ -491,28 +135,27 @@ namespace System.Text.Json.Serialization.Tests
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
 
-        public void Initialize()
-        {
-            MyString = null;
-        }
-
         public void Verify()
         {
             Assert.Equal(MyString, null);
         }
     }
 
-    public class TestClassWithNullButInitialized
+    public class TestClassWithInitializedProperties
     {
         public string MyString { get; set; } = "Hello";
         public int? MyInt { get; set; } = 1;
-        public static readonly string s_json =
+        public int[] MyIntArray { get; set; } = new int[] { 1 };
+        public List<int> MyIntList { get; set; } = new List<int> { 1 };
+        public static readonly string s_null_json =
                 @"{" +
                 @"""MyString"" : null," +
-                @"""MyInt"" : null" +
+                @"""MyInt"" : null," +
+                @"""MyIntArray"" : null," +
+                @"""MyIntList"" : null" +
                 @"}";
 
-        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_null_json);
     }
 
     public class TestClassWithNestedObjectInner : ITestClass
@@ -569,6 +212,7 @@ namespace System.Text.Json.Serialization.Tests
             @"{" +
                 @"""MyData"":[" +
                     SimpleTestClass.s_json + "," +
+                    "null," +
                     SimpleTestClass.s_json +
                 @"]" +
             @"}");
@@ -583,6 +227,8 @@ namespace System.Text.Json.Serialization.Tests
                 MyData.Add(obj);
             }
 
+            MyData.Add(null);
+
             {
                 SimpleTestClass obj = new SimpleTestClass();
                 obj.Initialize();
@@ -592,9 +238,10 @@ namespace System.Text.Json.Serialization.Tests
 
         public void Verify()
         {
-            Assert.Equal(2, MyData.Count);
+            Assert.Equal(3, MyData.Count);
             MyData[0].Verify();
-            MyData[1].Verify();
+            Assert.Null(MyData[1]);
+            MyData[2].Verify();
         }
     }
 
@@ -629,6 +276,387 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
+    public class TestClassWithObjectIEnumerableT : ITestClass
+    {
+        public IEnumerable<SimpleTestClass> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            SimpleTestClass obj1 = new SimpleTestClass();
+            obj1.Initialize();
+
+            SimpleTestClass obj2 = new SimpleTestClass();
+            obj2.Initialize();
+
+            MyData = new SimpleTestClass[] { obj1, obj2 };
+        }
+
+        public void Verify()
+        {
+            int count = 0;
+
+            foreach (SimpleTestClass data in MyData)
+            {
+                data.Verify();
+                count++;
+            }
+
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithObjectIListT : ITestClass
+    {
+        public IList<SimpleTestClass> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<SimpleTestClass>();
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyData.Add(obj);
+            }
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyData.Add(obj);
+            }
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyData.Count);
+            MyData[0].Verify();
+            MyData[1].Verify();
+        }
+    }
+
+    public class TestClassWithObjectICollectionT : ITestClass
+    {
+        public ICollection<SimpleTestClass> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<SimpleTestClass>();
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyData.Add(obj);
+            }
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyData.Add(obj);
+            }
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyData.Count);
+
+            foreach (SimpleTestClass data in MyData)
+            {
+                data.Verify();
+            }
+        }
+    }
+
+    public class TestClassWithObjectIEnumerable : ITestClass
+    {
+        public IEnumerable MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            SimpleTestClass obj1 = new SimpleTestClass();
+            obj1.Initialize();
+
+            SimpleTestClass obj2 = new SimpleTestClass();
+            obj2.Initialize();
+
+            MyData = new SimpleTestClass[] { obj1, obj2 };
+        }
+
+        public void Verify()
+        {
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    SimpleTestClass obj = JsonSerializer.Deserialize<SimpleTestClass>(element.GetRawText());
+                    obj.Verify();
+                }
+                else
+                {
+                    ((SimpleTestClass)data).Verify();
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithObjectIList : ITestClass
+    {
+        public IList MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<SimpleTestClass>();
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyData.Add(obj);
+            }
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyData.Add(obj);
+            }
+        }
+
+        public void Verify()
+        {
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    SimpleTestClass obj = JsonSerializer.Deserialize<SimpleTestClass>(element.GetRawText());
+                    obj.Verify();
+                }
+                else
+                {
+                    ((SimpleTestClass)data).Verify();
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithObjectICollection : ITestClass
+    {
+        public ICollection MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            List<SimpleTestClass> dataTemp = new List<SimpleTestClass>();
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                dataTemp.Add(obj);
+            }
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                dataTemp.Add(obj);
+            }
+
+            MyData = dataTemp;
+        }
+
+        public void Verify()
+        {
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    SimpleTestClass obj = JsonSerializer.Deserialize<SimpleTestClass>(element.GetRawText());
+                    obj.Verify();
+                }
+                else
+                {
+                    ((SimpleTestClass)data).Verify();
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithObjectIReadOnlyCollectionT : ITestClass
+    {
+        public IReadOnlyCollection<SimpleTestClass> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            SimpleTestClass obj1 = new SimpleTestClass();
+            obj1.Initialize();
+
+            SimpleTestClass obj2 = new SimpleTestClass();
+            obj2.Initialize();
+
+            MyData = new SimpleTestClass[] { obj1, obj2 };
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyData.Count);
+
+            foreach (SimpleTestClass data in MyData)
+            {
+                data.Verify();
+            }
+        }
+    }
+
+    public class TestClassWithObjectIReadOnlyListT : ITestClass
+    {
+        public IReadOnlyList<SimpleTestClass> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            SimpleTestClass obj1 = new SimpleTestClass();
+            obj1.Initialize();
+
+            SimpleTestClass obj2 = new SimpleTestClass();
+            obj2.Initialize();
+
+            MyData = new SimpleTestClass[] { obj1, obj2 };
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyData.Count);
+            MyData[0].Verify();
+            MyData[1].Verify();
+        }
+    }
+
+    public class TestClassWithObjectISetT : ITestClass
+    {
+        public ISet<SimpleTestClass> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            SimpleTestClass obj1 = new SimpleTestClass();
+            obj1.Initialize();
+
+            SimpleTestClass obj2 = new SimpleTestClass();
+            obj2.Initialize();
+
+            MyData = new HashSet<SimpleTestClass> { obj1, obj2 };
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyData.Count);
+
+            foreach (SimpleTestClass obj in MyData)
+            {
+                obj.Verify();
+            }
+        }
+    }
+
+    public class TestClassWithInitializedArray
+    {
+        public int[] Values { get; set; }
+
+        public TestClassWithInitializedArray()
+        {
+            Values = Array.Empty<int>();
+        }
+    }
+
+    public class SimpleClassWithDictionary
+    {
+        public int MyInt { get; set; }
+        public Dictionary<string, string> MyDictionary { get; set; }
+    }
+    public class OuterClassHavingPropertiesDefinedAfterClassWithDictionary
+    {
+        public double MyDouble { get; set; }
+        public SimpleClassWithDictionary MyInnerTestClass { get; set; }
+        public int MyInt { get; set; }
+        public string MyString { get; set; }
+        public List<string> MyList { get; set; }
+        public int[] MyIntArray { get; set; }
+    }
+
     public class TestClassWithStringArray : ITestClass
     {
         public string[] MyData { get; set; }
@@ -651,16 +679,6 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyData[0]);
             Assert.Equal("World", MyData[1]);
             Assert.Equal(2, MyData.Length);
-        }
-    }
-
-    public class TestClassWithCycle
-    {
-        public TestClassWithCycle Parent { get; set; }
-
-        public void Initialize()
-        {
-            Parent = this;
         }
     }
 
@@ -691,6 +709,814 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyData[0]);
             Assert.Equal("World", MyData[1]);
             Assert.Equal(2, MyData.Count);
+        }
+    }
+
+    public class TestClassWithGenericIEnumerable : ITestClass
+    {
+        public IEnumerable MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<string>
+            {
+                "Hello",
+                "World"
+            };
+
+            int count = 0;
+            foreach (string data in MyData)
+            {
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+
+        public void Verify()
+        {
+            string[] expected = { "Hello", "World" };
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    Assert.Equal(expected[count], element.GetString());
+                }
+                else
+                {
+                    Assert.Equal(expected[count], (string)data);
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithGenericIList : ITestClass
+    {
+        public IList MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<string>
+            {
+                "Hello",
+                "World"
+            };
+            Assert.Equal(2, MyData.Count);
+        }
+
+        public void Verify()
+        {
+            string[] expected = { "Hello", "World" };
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    Assert.Equal(expected[count], element.GetString());
+                }
+                else
+                {
+                    Assert.Equal(expected[count], (string)data);
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithGenericICollection : ITestClass
+    {
+        public ICollection MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<string>
+            {
+                "Hello",
+                "World"
+            };
+            Assert.Equal(2, MyData.Count);
+        }
+
+        public void Verify()
+        {
+            string[] expected = { "Hello", "World" };
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    Assert.Equal(expected[count], element.GetString());
+                }
+                else
+                {
+                    Assert.Equal(expected[count], (string)data);
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithGenericIEnumerableT : ITestClass
+    {
+        public IEnumerable<string> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<string>
+            {
+                "Hello",
+                "World"
+            };
+
+            int count = 0;
+            foreach (string data in MyData)
+            {
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+
+        public void Verify()
+        {
+            string[] expected = { "Hello", "World" };
+            int count = 0;
+
+            foreach (string data in MyData)
+            {
+                Assert.Equal(expected[count], data);
+                count++;
+            }
+
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithGenericIListT : ITestClass
+    {
+        public IList<string> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<string>
+            {
+                "Hello",
+                "World"
+            };
+            Assert.Equal(2, MyData.Count);
+        }
+
+        public void Verify()
+        {
+            Assert.Equal("Hello", MyData[0]);
+            Assert.Equal("World", MyData[1]);
+            Assert.Equal(2, MyData.Count);
+        }
+    }
+
+    public class TestClassWithGenericICollectionT : ITestClass
+    {
+        public ICollection<string> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<string>
+            {
+                "Hello",
+                "World"
+            };
+            Assert.Equal(2, MyData.Count);
+        }
+
+        public void Verify()
+        {
+            string[] expected = { "Hello", "World" };
+            int i = 0;
+
+            foreach (string data in MyData)
+            {
+                Assert.Equal(expected[i++], data);
+            }
+
+            Assert.Equal(2, MyData.Count);
+        }
+    }
+
+    public class TestClassWithGenericIReadOnlyCollectionT : ITestClass
+    {
+        public IReadOnlyCollection<string> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<string>
+            {
+                "Hello",
+                "World"
+            };
+            Assert.Equal(2, MyData.Count);
+        }
+
+        public void Verify()
+        {
+            string[] expected = { "Hello", "World" };
+            int i = 0;
+
+            foreach (string data in MyData)
+            {
+                Assert.Equal(expected[i++], data);
+            }
+
+            Assert.Equal(2, MyData.Count);
+        }
+    }
+
+    public class TestClassWithGenericIReadOnlyListT : ITestClass
+    {
+        public IReadOnlyList<string> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<string>
+            {
+                "Hello",
+                "World"
+            };
+            Assert.Equal(2, MyData.Count);
+        }
+
+        public void Verify()
+        {
+            Assert.Equal("Hello", MyData[0]);
+            Assert.Equal("World", MyData[1]);
+            Assert.Equal(2, MyData.Count);
+        }
+    }
+
+    public class TestClassWithGenericISetT : ITestClass
+    {
+        public ISet<string> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new HashSet<string>
+            {
+                "Hello",
+                "World"
+            };
+            Assert.Equal(2, MyData.Count);
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyData.Count);
+
+            bool helloSeen = false;
+            bool worldSeen = false;
+
+            foreach (string data in MyData)
+            {
+                if (data == "Hello")
+                {
+                    helloSeen = true;
+                }
+                else if (data == "World")
+                {
+                    worldSeen = true;
+                }
+            }
+
+            Assert.True(helloSeen && worldSeen);
+        }
+    }
+
+    public class TestClassWithStringToPrimitiveDictionary : ITestClass
+    {
+        public Dictionary<string, int> MyInt32Dict { get; set; }
+        public Dictionary<string, bool> MyBooleanDict { get; set; }
+        public Dictionary<string, float> MySingleDict { get; set; }
+        public Dictionary<string, double> MyDoubleDict { get; set; }
+        public Dictionary<string, DateTime> MyDateTimeDict { get; set; }
+        public IDictionary<string, int> MyInt32IDict { get; set; }
+        public IDictionary<string, bool> MyBooleanIDict { get; set; }
+        public IDictionary<string, float> MySingleIDict { get; set; }
+        public IDictionary<string, double> MyDoubleIDict { get; set; }
+        public IDictionary<string, DateTime> MyDateTimeIDict { get; set; }
+        public IReadOnlyDictionary<string, int> MyInt32IReadOnlyDict { get; set; }
+        public IReadOnlyDictionary<string, bool> MyBooleanIReadOnlyDict { get; set; }
+        public IReadOnlyDictionary<string, float> MySingleIReadOnlyDict { get; set; }
+        public IReadOnlyDictionary<string, double> MyDoubleIReadOnlyDict { get; set; }
+        public IReadOnlyDictionary<string, DateTime> MyDateTimeIReadOnlyDict { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyInt32Dict"":{" +
+                    @"""key1"": 1," +
+                    @"""key2"": 2" +
+                @"}," +
+                @"""MyBooleanDict"":{" +
+                    @"""key1"": true," +
+                    @"""key2"": false" +
+                @"}," +
+                @"""MySingleDict"":{" +
+                    @"""key1"": 1.1," +
+                    @"""key2"": 2.2" +
+                @"}," +
+                @"""MyDoubleDict"":{" +
+                    @"""key1"": 3.3," +
+                    @"""key2"": 4.4" +
+                @"}," +
+                @"""MyDateTimeDict"":{" +
+                    @"""key1"": ""2019-01-30T12:01:02.0000000""," +
+                    @"""key2"": ""2019-01-30T12:01:02.0000000Z""" +
+                @"}," +
+                @"""MyInt32IDict"":{" +
+                    @"""key1"": 1," +
+                    @"""key2"": 2" +
+                @"}," +
+                @"""MyBooleanIDict"":{" +
+                    @"""key1"": true," +
+                    @"""key2"": false" +
+                @"}," +
+                @"""MySingleIDict"":{" +
+                    @"""key1"": 1.1," +
+                    @"""key2"": 2.2" +
+                @"}," +
+                @"""MyDoubleIDict"":{" +
+                    @"""key1"": 3.3," +
+                    @"""key2"": 4.4" +
+                @"}," +
+                @"""MyDateTimeIDict"":{" +
+                    @"""key1"": ""2019-01-30T12:01:02.0000000""," +
+                    @"""key2"": ""2019-01-30T12:01:02.0000000Z""" +
+                @"}," +
+                @"""MyInt32IReadOnlyDict"":{" +
+                    @"""key1"": 1," +
+                    @"""key2"": 2" +
+                @"}," +
+                @"""MyBooleanIReadOnlyDict"":{" +
+                    @"""key1"": true," +
+                    @"""key2"": false" +
+                @"}," +
+                @"""MySingleIReadOnlyDict"":{" +
+                    @"""key1"": 1.1," +
+                    @"""key2"": 2.2" +
+                @"}," +
+                @"""MyDoubleIReadOnlyDict"":{" +
+                    @"""key1"": 3.3," +
+                    @"""key2"": 4.4" +
+                @"}," +
+                @"""MyDateTimeIReadOnlyDict"":{" +
+                    @"""key1"": ""2019-01-30T12:01:02.0000000""," +
+                    @"""key2"": ""2019-01-30T12:01:02.0000000Z""" +
+                @"}" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyInt32Dict = new Dictionary<string, int> { { "key1", 1 }, { "key2", 2 } };
+            MyBooleanDict = new Dictionary<string, bool> { { "key1", true }, { "key2", false } };
+            MySingleDict = new Dictionary<string, float> { { "key1", 1.1f }, { "key2", 2.2f } };
+            MyDoubleDict = new Dictionary<string, double> { { "key1", 3.3d }, { "key2", 4.4d } };
+            MyDateTimeDict = new Dictionary<string, DateTime> { { "key1", new DateTime(2019, 1, 30, 12, 1, 2) }, { "key2", new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) } };
+
+            MyInt32IDict = new Dictionary<string, int> { { "key1", 1 }, { "key2", 2 } };
+            MyBooleanIDict = new Dictionary<string, bool> { { "key1", true }, { "key2", false } };
+            MySingleIDict = new Dictionary<string, float> { { "key1", 1.1f }, { "key2", 2.2f } };
+            MyDoubleIDict = new Dictionary<string, double> { { "key1", 3.3d }, { "key2", 4.4d } };
+            MyDateTimeIDict = new Dictionary<string, DateTime> { { "key1", new DateTime(2019, 1, 30, 12, 1, 2) }, { "key2", new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) } };
+
+            MyInt32IReadOnlyDict = new Dictionary<string, int> { { "key1", 1 }, { "key2", 2 } };
+            MyBooleanIReadOnlyDict = new Dictionary<string, bool> { { "key1", true }, { "key2", false } };
+            MySingleIReadOnlyDict = new Dictionary<string, float> { { "key1", 1.1f }, { "key2", 2.2f } };
+            MyDoubleIReadOnlyDict = new Dictionary<string, double> { { "key1", 3.3d }, { "key2", 4.4d } };
+            MyDateTimeIReadOnlyDict = new Dictionary<string, DateTime> { { "key1", new DateTime(2019, 1, 30, 12, 1, 2) }, { "key2", new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) } };
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(1, MyInt32Dict["key1"]);
+            Assert.Equal(2, MyInt32Dict["key2"]);
+            Assert.Equal(2, MyInt32Dict.Count);
+
+            Assert.Equal(true, MyBooleanDict["key1"]);
+            Assert.Equal(false, MyBooleanDict["key2"]);
+            Assert.Equal(2, MyBooleanDict.Count);
+
+            Assert.Equal(1.1f, MySingleDict["key1"]);
+            Assert.Equal(2.2f, MySingleDict["key2"]);
+            Assert.Equal(2, MySingleDict.Count);
+
+            Assert.Equal(3.3d, MyDoubleDict["key1"]);
+            Assert.Equal(4.4d, MyDoubleDict["key2"]);
+            Assert.Equal(2, MyDoubleDict.Count);
+
+            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2), MyDateTimeDict["key1"]);
+            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTimeDict["key2"]);
+            Assert.Equal(2, MyDateTimeDict.Count);
+
+            Assert.Equal(1, MyInt32IDict["key1"]);
+            Assert.Equal(2, MyInt32IDict["key2"]);
+            Assert.Equal(2, MyInt32IDict.Count);
+
+            Assert.Equal(true, MyBooleanIDict["key1"]);
+            Assert.Equal(false, MyBooleanIDict["key2"]);
+            Assert.Equal(2, MyBooleanIDict.Count);
+
+            Assert.Equal(1.1f, MySingleIDict["key1"]);
+            Assert.Equal(2.2f, MySingleIDict["key2"]);
+            Assert.Equal(2, MySingleIDict.Count);
+
+            Assert.Equal(3.3d, MyDoubleIDict["key1"]);
+            Assert.Equal(4.4d, MyDoubleIDict["key2"]);
+            Assert.Equal(2, MyDoubleIDict.Count);
+
+            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2), MyDateTimeIDict["key1"]);
+            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTimeIDict["key2"]);
+            Assert.Equal(2, MyDateTimeIDict.Count);
+
+            Assert.Equal(1, MyInt32IReadOnlyDict["key1"]);
+            Assert.Equal(2, MyInt32IReadOnlyDict["key2"]);
+            Assert.Equal(2, MyInt32IReadOnlyDict.Count);
+
+            Assert.Equal(true, MyBooleanIReadOnlyDict["key1"]);
+            Assert.Equal(false, MyBooleanIReadOnlyDict["key2"]);
+            Assert.Equal(2, MyBooleanIReadOnlyDict.Count);
+
+            Assert.Equal(1.1f, MySingleIReadOnlyDict["key1"]);
+            Assert.Equal(2.2f, MySingleIReadOnlyDict["key2"]);
+            Assert.Equal(2, MySingleIReadOnlyDict.Count);
+
+            Assert.Equal(3.3d, MyDoubleIReadOnlyDict["key1"]);
+            Assert.Equal(4.4d, MyDoubleIReadOnlyDict["key2"]);
+            Assert.Equal(2, MyDoubleIReadOnlyDict.Count);
+
+            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2), MyDateTimeIReadOnlyDict["key1"]);
+            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTimeIReadOnlyDict["key2"]);
+            Assert.Equal(2, MyDateTimeIReadOnlyDict.Count);
+        }
+    }
+
+    public class TestClassWithObjectIEnumerableConstructibleTypes : ITestClass
+    {
+        public Stack<SimpleTestClass> MyStack { get; set; }
+        public Queue<SimpleTestClass> MyQueue { get; set; }
+        public HashSet<SimpleTestClass> MyHashSet { get; set; }
+        public LinkedList<SimpleTestClass> MyLinkedList { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyStack"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyQueue"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyHashSet"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyLinkedList"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyStack = new Stack<SimpleTestClass>();
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyStack.Push(obj);
+            }
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyStack.Push(obj);
+            }
+
+            MyQueue = new Queue<SimpleTestClass>();
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyQueue.Enqueue(obj);
+            }
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyQueue.Enqueue(obj);
+            }
+
+            MyHashSet = new HashSet<SimpleTestClass>();
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyHashSet.Add(obj);
+            }
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyHashSet.Add(obj);
+            }
+
+            MyLinkedList = new LinkedList<SimpleTestClass>();
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyLinkedList.AddLast(obj);
+            }
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyLinkedList.AddLast(obj);
+            }
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyStack.Count);
+            foreach (SimpleTestClass data in MyStack)
+            {
+                data.Verify();
+            }
+
+            Assert.Equal(2, MyQueue.Count);
+            foreach (SimpleTestClass data in MyQueue)
+            {
+                data.Verify();
+            }
+
+            Assert.Equal(2, MyHashSet.Count);
+            foreach (SimpleTestClass data in MyHashSet)
+            {
+                data.Verify();
+            }
+
+            Assert.Equal(2, MyLinkedList.Count);
+            foreach (SimpleTestClass data in MyLinkedList)
+            {
+                data.Verify();
+            }
+        }
+    }
+
+    public class TestClassWithObjectImmutableTypes : ITestClass
+    {
+        public IImmutableList<SimpleTestClass> MyIImmutableList { get; set; }
+        public IImmutableStack<SimpleTestClass> MyIImmutableStack { get; set; }
+        public IImmutableQueue<SimpleTestClass> MyIImmutableQueue { get; set; }
+        public IImmutableSet<SimpleTestClass> MyIImmutableSet { get; set; }
+        public ImmutableHashSet<SimpleTestClass> MyImmutableHashSet { get; set; }
+        public ImmutableList<SimpleTestClass> MyImmutableList { get; set; }
+        public ImmutableStack<SimpleTestClass> MyImmutableStack { get; set; }
+        public ImmutableQueue<SimpleTestClass> MyImmutableQueue { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyIImmutableList"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyIImmutableStack"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyIImmutableQueue"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyIImmutableSet"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyImmutableHashSet"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyImmutableList"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyImmutableStack"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyImmutableQueue"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyIImmutableList = ImmutableList.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyIImmutableStack = ImmutableStack.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyIImmutableQueue = ImmutableQueue.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyIImmutableSet = ImmutableHashSet.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyImmutableHashSet = ImmutableHashSet.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyImmutableList = ImmutableList.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyImmutableStack = ImmutableStack.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyImmutableQueue = ImmutableQueue.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyIImmutableList.Count);
+            foreach (SimpleTestClass data in MyIImmutableList)
+            {
+                data.Verify();
+            }
+
+            int i = 0;
+            foreach (SimpleTestClass data in MyIImmutableStack)
+            {
+                data.Verify();
+                i++;
+            }
+            Assert.Equal(2, i);
+
+            i = 0;
+            foreach (SimpleTestClass data in MyIImmutableQueue)
+            {
+                data.Verify();
+                i++;
+            }
+            Assert.Equal(2, i);
+
+            Assert.Equal(2, MyIImmutableSet.Count);
+            foreach (SimpleTestClass data in MyIImmutableSet)
+            {
+                data.Verify();
+            }
+
+            Assert.Equal(2, MyImmutableHashSet.Count);
+            foreach (SimpleTestClass data in MyImmutableHashSet)
+            {
+                data.Verify();
+            }
+
+            Assert.Equal(2, MyImmutableList.Count);
+            foreach (SimpleTestClass data in MyImmutableList)
+            {
+                data.Verify();
+            }
+
+            i = 0;
+            foreach (SimpleTestClass data in MyImmutableStack)
+            {
+                data.Verify();
+                i++;
+            }
+            Assert.Equal(2, i);
+
+            i = 0;
+            foreach (SimpleTestClass data in MyImmutableQueue)
+            {
+                data.Verify();
+                i++;
+            }
+            Assert.Equal(2, i);
         }
     }
 
@@ -838,26 +1664,26 @@ namespace System.Text.Json.Serialization.Tests
         public string name { get; set; }
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
-            "{" +
-                @"""name"" : ""Microsoft""," +
-                @"""sites"" : [" +
-                    "{" +
-                        @"""street"" : ""1 Lone Tree Rd S""," +
-                        @"""city"" : ""Fargo""," +
-                        @"""zip"" : 58104" +
-                    "}," +
-                    "{" +
-                        @"""street"" : ""8055 Microsoft Way""," +
-                        @"""city"" : ""Charlotte""," +
-                        @"""zip"" : 28273" +
-                    "}" +
-                @"]," +
-                @"""mainSite"" : " +
-                    "{" +
-                        @"""street"" : ""1 Microsoft Way""," +
-                        @"""city"" : ""Redmond""," +
-                        @"""zip"" : 98052" +
-                    "}" +
+            "{\n" +
+                @"""name"" : ""Microsoft""," + "\n" +
+                @"""sites"" :[" + "\n" +
+                    "{\n" +
+                        @"""street"" : ""1 Lone Tree Rd S""," + "\n" +
+                        @"""city"" : ""Fargo""," + "\n" +
+                        @"""zip"" : 58104" + "\n" +
+                    "},\n" +
+                    "{\n" +
+                        @"""street"" : ""8055 Microsoft Way""," + "\n" +
+                        @"""city"" : ""Charlotte""," + "\n" +
+                        @"""zip"" : 28273" + "\n" +
+                    "}\n" +
+                "],\n" +
+                @"""mainSite"":" + "\n" +
+                    "{\n" +
+                        @"""street"" : ""1 Microsoft Way""," + "\n" +
+                        @"""city"" : ""Redmond""," + "\n" +
+                        @"""zip"" : 98052" + "\n" +
+                    "}\n" +
             "}");
 
         public void Initialize()
@@ -900,6 +1726,72 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("1 Microsoft Way", mainSite.street);
             Assert.Equal("Redmond", mainSite.city);
             Assert.Equal(98052, mainSite.zip);
+        }
+    }
+
+    public class ClassWithUnicodeProperty
+    {
+        public int Aѧ { get; set; }
+
+        // A 400 character property name with a unicode character making it 401 bytes.
+        public int Aѧ34567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890 { get; set; }
+    }
+
+    public class ClassWithExtensionProperty
+    {
+        public SimpleTestClass MyNestedClass { get; set; }
+        public int MyInt { get; set; }
+
+        [JsonExtensionData]
+        public IDictionary<string, JsonElement> MyOverflow { get; set; }
+    }
+
+    public class TestClassWithNestedObjectCommentsInner : ITestClass
+    {
+        public SimpleTestClass MyData { get; set; }
+
+        public static readonly string s_json =
+            @"{" +
+                @"""MyData"":" + SimpleTestClass.s_json + " // Trailing comment\n" +
+                "/* Multi\nLine Comment with } */\n" +
+            @"}";
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
+
+        public void Initialize()
+        {
+            MyData = new SimpleTestClass();
+            MyData.Initialize();
+        }
+
+        public void Verify()
+        {
+            Assert.NotNull(MyData);
+            MyData.Verify();
+        }
+    }
+
+    public class TestClassWithNestedObjectCommentsOuter : ITestClass
+    {
+        public TestClassWithNestedObjectCommentsInner MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                " // This } will be ignored\n" +
+                @"""MyData"":" + TestClassWithNestedObjectCommentsInner.s_json +
+                " /* As will this [ */\n" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new TestClassWithNestedObjectCommentsInner();
+            MyData.Initialize();
+        }
+
+        public void Verify()
+        {
+            Assert.NotNull(MyData);
+            MyData.Verify();
         }
     }
 }

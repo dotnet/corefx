@@ -158,6 +158,7 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new decimal(bits));
         }
 
+        [Theory]
         [InlineData(int.MinValue)]
         [InlineData(0)]
         [InlineData(int.MaxValue)]
@@ -936,7 +937,6 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Remainder_Valid_TestDataV2))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have fixes for https://github.com/dotnet/coreclr/issues/12605")]
         public static void RemainderV2(decimal d1, decimal d2, decimal expected)
         {
             Assert.Equal(expected, d1 % d2);
@@ -1627,7 +1627,6 @@ namespace System.Tests
         public static class BigIntegerMod
         {
             [Fact]
-            [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have fixes for https://github.com/dotnet/coreclr/issues/12605")]
             public static void Test()
             {
                 decimal[] decimalValues = GetRandomData(out BigDecimal[] bigDecimals);
@@ -1807,7 +1806,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have the fix for this bug")]
         public static new void GetHashCode()
         {
             var dict = new Dictionary<string, (int hash, string value)>();

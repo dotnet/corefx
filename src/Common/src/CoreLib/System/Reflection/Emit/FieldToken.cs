@@ -26,7 +26,7 @@ namespace System.Reflection.Emit
         
         public override int GetHashCode() => Token;
         
-        public override bool Equals(object obj) => obj is FieldToken ft && Equals(ft);
+        public override bool Equals(object? obj) => obj is FieldToken ft && Equals(ft);
 
         public bool Equals(FieldToken obj) => obj.Token == Token && obj._class == _class;
 
