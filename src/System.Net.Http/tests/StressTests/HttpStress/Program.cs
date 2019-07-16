@@ -664,9 +664,6 @@ public class Program
 
         int num = clientContext.GetRandomInt32(1, numFormFields + 1);
 
-        if (num == 0)
-            return ("--test_boundary\r\n\r\n--test_boundary--\r\n", multipartContent);
-
         for (int i = 0; i < num; i++)
         {
             sb.Append("--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n");
