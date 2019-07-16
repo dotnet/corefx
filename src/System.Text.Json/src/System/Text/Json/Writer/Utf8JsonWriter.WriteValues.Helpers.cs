@@ -13,7 +13,7 @@ namespace System.Text.Json
     {
         private void ValidateWritingValue()
         {
-            if (!Options.SkipValidation)
+            if (!_options.SkipValidation)
             {
                 if (_inObject)
                 {
