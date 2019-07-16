@@ -18,7 +18,7 @@ namespace System.Text.Json
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (that is, 'G').
         /// </remarks>
         public void WriteNumberValue(decimal value)
         {

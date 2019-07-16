@@ -19,7 +19,7 @@ namespace System.Text.Json
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (that is, 'G').
         /// </remarks>
         public void WriteNumber(JsonEncodedText propertyName, decimal value)
             => WriteNumberHelper(propertyName.EncodedUtf8Bytes, value);
@@ -49,7 +49,7 @@ namespace System.Text.Json
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (that is, 'G').
         /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(string propertyName, decimal value)
@@ -67,7 +67,7 @@ namespace System.Text.Json
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (that is, 'G').
         /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, decimal value)
@@ -92,7 +92,7 @@ namespace System.Text.Json
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (that is, 'G').
         /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, decimal value)

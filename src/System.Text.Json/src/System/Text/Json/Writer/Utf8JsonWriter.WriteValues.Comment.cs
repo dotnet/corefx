@@ -18,7 +18,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="value">The value to write as a JSON comment within /*..*/.</param>
         /// <exception cref="ArgumentException">
-        /// Thrown when the specified value is too large OR if the given string text value contains a comment delimiter (i.e. */).
+        /// Thrown when the specified value is too large OR if the given string text value contains a comment delimiter (that is, */).
         /// </exception>
         /// <exception cref="ArgumentNullException">
         /// The <paramref name="value"/> parameter is <see langword="null"/>.
@@ -34,7 +34,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="value">The value to write as a JSON comment within /*..*/.</param>
         /// <exception cref="ArgumentException">
-        /// Thrown when the specified value is too large OR if the given text value contains a comment delimiter (i.e. */).
+        /// Thrown when the specified value is too large OR if the given text value contains a comment delimiter (that is, */).
         /// </exception>
         /// <remarks>
         /// The comment value is not escaped before writing.
@@ -136,7 +136,7 @@ namespace System.Text.Json
         /// The comment value is not escaped before writing.
         /// </remarks>
         /// <exception cref="ArgumentException">
-        /// Thrown when the specified value is too large OR if the given UTF-8 text value contains a comment delimiter (i.e. */).
+        /// Thrown when the specified value is too large OR if the given UTF-8 text value contains a comment delimiter (that is, */).
         /// </exception>
         public void WriteCommentValue(ReadOnlySpan<byte> utf8Value)
         {

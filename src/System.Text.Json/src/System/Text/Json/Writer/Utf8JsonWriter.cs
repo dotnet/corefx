@@ -100,7 +100,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="bufferWriter">An instance of <see cref="IBufferWriter{Byte}" /> used as a destination for writing JSON text into.</param>
         /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonWriter"/>
-        /// By default, the <see cref="Utf8JsonWriter"/> writes JSON minimized (i.e. with no extra whitespace)
+        /// By default, the <see cref="Utf8JsonWriter"/> writes JSON minimized (that is, with no extra whitespace)
         /// and validates that the JSON being written is structurally valid according to JSON RFC.</param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when the instance of <see cref="IBufferWriter{Byte}" /> that is passed in is null.
@@ -131,7 +131,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="utf8Json">An instance of <see cref="Stream" /> used as a destination for writing JSON text into.</param>
         /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonWriter"/>
-        /// By default, the <see cref="Utf8JsonWriter"/> writes JSON minimized (i.e. with no extra whitespace)
+        /// By default, the <see cref="Utf8JsonWriter"/> writes JSON minimized (that is, with no extra whitespace)
         /// and validates that the JSON being written is structurally valid according to JSON RFC.</param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when the instance of <see cref="Stream" /> that is passed in is null.

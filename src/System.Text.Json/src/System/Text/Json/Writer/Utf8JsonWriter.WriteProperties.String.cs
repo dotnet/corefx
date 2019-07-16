@@ -12,7 +12,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the pre-encoded property name (as a JSON string) as the first part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The name of the property to write.</param>
+        /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
@@ -380,7 +380,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the property name and pre-encoded value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The name of the property to write.</param>
+        /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <param name="value">The JSON-encoded value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
@@ -580,7 +580,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the UTF-8 property name and text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
+        /// <param name="utf8PropertyName">The UTF-8 encoded name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name or value is too large.
@@ -760,7 +760,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the UTF-8 property name and pre-encoded value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
+        /// <param name="utf8PropertyName">The UTF-8 encoded name of the property to write.</param>
         /// <param name="value">The JSON-encoded value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
@@ -800,7 +800,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the UTF-8 property name and string text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
+        /// <param name="utf8PropertyName">The UTF-8 encoded name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name or value is too large.
