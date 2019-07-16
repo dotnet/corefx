@@ -70,7 +70,6 @@ namespace System.Text.Encodings.Web
         private static readonly char[] s_r = new char[] { '\\', 'r' };
         private static readonly char[] s_back = new char[] { '\\', '\\' };
         private static readonly char[] s_doubleQuote = new char[] { '\\', '"' };
-        private static readonly char[] s_singleQuote = new char[] { '\\', '\'' };
 
         // Writes a scalar value as a JavaScript-escaped character (or sequence of characters).
         // See ECMA-262, Sec. 7.8.4, and ECMA-404, Sec. 9
@@ -94,16 +93,15 @@ namespace System.Text.Encodings.Web
             // See UnicodeEncoderBase ctor comments for more info.
 
             if (!WillEncode(unicodeScalar))
-            { return TryWriteScalarAsChar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
+            {
+                return TryWriteScalarAsChar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten);
+            }
 
             char[] toCopy;
             switch (unicodeScalar)
             {
                 case '\"':
                     toCopy = s_doubleQuote;
-                    break;
-                case '\'':
-                    toCopy = s_singleQuote;
                     break;
                 case '\b':
                     toCopy = s_b;
