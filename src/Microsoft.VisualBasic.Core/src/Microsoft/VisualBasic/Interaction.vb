@@ -25,6 +25,22 @@ Namespace Microsoft.VisualBasic
 #End If
         End Sub
 
+        '============================================================================
+        ' String functions.
+        '============================================================================
+        Public Function Choose(ByVal Index As Double, ByVal ParamArray Choice() As Object) As Object
+
+            Dim FixedIndex As Integer = CInt(Fix(Index) - 1) 'ParamArray is 0 based, but Choose assumes 1 based 
+
+            If Choice.Rank <> 1 Then
+                Throw New ArgumentException(GetResourceString(SR.Argument_RankEQOne1, "Choice"))
+            ElseIf FixedIndex < 0 OrElse FixedIndex > Choice.GetUpperBound(0) Then
+                Return Nothing
+            End If
+
+            Return Choice(FixedIndex)
+        End Function
+
         Public Function IIf(ByVal Expression As Boolean, ByVal TruePart As Object, ByVal FalsePart As Object) As Object
             If Expression Then
                 Return TruePart
