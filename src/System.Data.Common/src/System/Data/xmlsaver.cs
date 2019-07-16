@@ -2615,7 +2615,7 @@ namespace System.Data
                                 {
                                     string xsdTypeName = Keywords.XSD_PREFIXCOLON + XmlTreeGen.XmlDataTypeName(valuesType);
                                     _xmlw.WriteAttributeString(Keywords.XSI, Keywords.TYPE, Keywords.XSINS, xsdTypeName);
-                                    _xmlw.WriteAttributeString(Keywords.XMLNS_XSD, Keywords.XSDNS);
+                                    _xmlw.WriteAttributeString(Keywords.XMLNS, Keywords.XSD_PREFIX, null, xsdTypeName);
                                 }
                                 if (!DataStorage.IsSqlType(valuesType))
                                 {
