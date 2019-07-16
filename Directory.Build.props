@@ -83,7 +83,7 @@
 
   <!-- Indicates this is not an officially supported release. Release branches should set this to false. -->
   <PropertyGroup>
-    <IsPrerelease>true</IsPrerelease>
+    <IsPrerelease>false</IsPrerelease>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.DotNet.Build.Tasks.Configuration" Project="Sdk.props" />
