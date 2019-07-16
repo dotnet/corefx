@@ -49,7 +49,7 @@ namespace System.Linq
                 Debug.Assert(count > 0);
                 return count >= _source.Length
                     ? (IPartition<TSource>)this
-                    : new ReverseListPartition<TSource>(_source, _source.Length - count - 1, int.MaxValue);
+                    : new ReverseListPartition<TSource>(_source, _source.Length - count, int.MaxValue);
             }
 
             public TSource TryGetElementAt(int index, out bool found)
@@ -138,7 +138,7 @@ namespace System.Linq
                 Debug.Assert(count > 0);
                 return count >= _source.Length
                     ? (IPartition<TResult>)this
-                    : new ReverseSelectListPartitionIterator<TSource, TResult>(_source, _selector, _source.Length - count - 1, int.MaxValue);
+                    : new ReverseSelectListPartitionIterator<TSource, TResult>(_source, _selector, _source.Length - count, int.MaxValue);
             }
 
             public TResult TryGetElementAt(int index, out bool found)
@@ -200,13 +200,17 @@ namespace System.Linq
             public IPartition<TSource> Skip(int count)
             {
                 Debug.Assert(count > 0);
-                return new ReverseListPartition<TSource>(_source, 0, _source.Count - count - 1);
+                return count >= _source.Count
+                    ? EmptyPartition<TSource>.Instance
+                    : new ReverseListPartition<TSource>(_source, 0, _source.Count - count - 1);
             }
 
             public IPartition<TSource> Take(int count)
             {
                 Debug.Assert(count > 0);
-                return new ReverseListPartition<TSource>(_source, _source.Count - count - 1, int.MaxValue);
+                return count >= _source.Count
+                    ? (IPartition<TSource>)this
+                    : new ReverseListPartition<TSource>(_source, _source.Count - count, int.MaxValue);
             }
 
             public TSource TryGetElementAt(int index, out bool found)
@@ -300,13 +304,17 @@ namespace System.Linq
             public IPartition<TResult> Skip(int count)
             {
                 Debug.Assert(count > 0);
-                return new ReverseSelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, _source.Count - count - 1);
+                return count >= _source.Count
+                    ? EmptyPartition<TResult>.Instance
+                    : new ReverseSelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, _source.Count - count - 1);
             }
 
             public IPartition<TResult> Take(int count)
             {
                 Debug.Assert(count > 0);
-                return new ReverseSelectListPartitionIterator<TSource, TResult>(_source, _selector, _source.Count - count - 1, int.MaxValue);
+                return count >= _source.Count
+                    ? (IPartition<TResult>)this
+                    : new ReverseSelectListPartitionIterator<TSource, TResult>(_source, _selector, _source.Count - count, int.MaxValue);
             }
 
             public TResult TryGetElementAt(int index, out bool found)
@@ -379,13 +387,17 @@ namespace System.Linq
             public IPartition<TSource> Skip(int count)
             {
                 Debug.Assert(count > 0);
-                return new ReverseListPartition<TSource>(_source, 0, _source.Count - count - 1);
+                return count >= _source.Count
+                    ? EmptyPartition<TSource>.Instance
+                    : new ReverseListPartition<TSource>(_source, 0, _source.Count - count - 1);
             }
 
             public IPartition<TSource> Take(int count)
             {
                 Debug.Assert(count > 0);
-                return new ReverseListPartition<TSource>(_source, _source.Count - count - 1, int.MaxValue);
+                return count >= _source.Count
+                    ? (IPartition<TSource>)this
+                    : new ReverseListPartition<TSource>(_source, _source.Count - count, int.MaxValue);
             }
 
             public TSource TryGetElementAt(int index, out bool found)
@@ -479,13 +491,17 @@ namespace System.Linq
             public IPartition<TResult> Skip(int count)
             {
                 Debug.Assert(count > 0);
-                return new ReverseSelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, _source.Count - count - 1);
+                return count >= _source.Count
+                    ? EmptyPartition<TResult>.Instance
+                    : new ReverseSelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, _source.Count - count - 1);
             }
 
             public IPartition<TResult> Take(int count)
             {
                 Debug.Assert(count > 0);
-                return new ReverseSelectListPartitionIterator<TSource, TResult>(_source, _selector, _source.Count - count - 1, int.MaxValue);
+                return count >= _source.Count
+                    ? (IPartition<TResult>)this
+                    : new ReverseSelectListPartitionIterator<TSource, TResult>(_source, _selector, _source.Count - count, int.MaxValue);
             }
 
             public TResult TryGetElementAt(int index, out bool found)
