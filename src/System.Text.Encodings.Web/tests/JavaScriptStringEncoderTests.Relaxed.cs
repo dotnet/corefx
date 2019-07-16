@@ -5,7 +5,6 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
@@ -18,11 +17,11 @@ namespace Microsoft.Framework.WebEncoders
         public void TestSurrogate_Relaxed()
         {
             Assert.Equal("\\uD83D\\uDCA9", JavaScriptEncoder.UnsafeRelaxedJsonEscaping.Encode("\U0001f4a9"));
-            using (var writer = new StringWriter())
-            {
-                JavaScriptEncoder.UnsafeRelaxedJsonEscaping.Encode(writer, "\U0001f4a9");
-                Assert.Equal("\\uD83D\\uDCA9", writer.GetStringBuilder().ToString());
-            }
+
+            using var writer = new StringWriter();
+
+            JavaScriptEncoder.UnsafeRelaxedJsonEscaping.Encode(writer, "\U0001f4a9");
+            Assert.Equal("\\uD83D\\uDCA9", writer.GetStringBuilder().ToString());
         }
 
         [Fact]
@@ -51,7 +50,8 @@ namespace Microsoft.Framework.WebEncoders
         }
 
         [Fact]
-        public void JavaScriptStringEncode_Relaxed_StillEncodesForbiddenChars_Simple_Escaping() {
+        public void JavaScriptStringEncode_Relaxed_StillEncodesForbiddenChars_Simple_Escaping()
+        {
             // The following two calls could be simply InlineData to the Theory below
             // Unfortunately, the xUnit logger fails to escape the inputs when logging the test results,
             // and so the suite fails despite all tests passing. 
@@ -95,13 +95,34 @@ namespace Microsoft.Framework.WebEncoders
                 }
                 else
                 {
-                    if (input == "\b") { expected = @"\b"; }
-                    else if (input == "\t") { expected = @"\t"; }
-                    else if (input == "\n") { expected = @"\n"; }
-                    else if (input == "\f") { expected = @"\f"; }
-                    else if (input == "\r") { expected = @"\r"; }
-                    else if (input == "\\") { expected = @"\\"; }
-                    else if (input == "\"") { expected = "\\\""; }
+                    if (input == "\b")
+                    {
+                        expected = @"\b";
+                    }
+                    else if (input == "\t")
+                    {
+                        expected = @"\t";
+                    }
+                    else if (input == "\n")
+                    {
+                        expected = @"\n";
+                    }
+                    else if (input == "\f")
+                    {
+                        expected = @"\f";
+                    }
+                    else if (input == "\r")
+                    {
+                        expected = @"\r";
+                    }
+                    else if (input == "\\")
+                    {
+                        expected = @"\\";
+                    }
+                    else if (input == "\"")
+                    {
+                        expected = "\\\"";
+                    }
                     else
                     {
                         bool mustEncode = false;
@@ -216,7 +237,8 @@ namespace Microsoft.Framework.WebEncoders
         {
             // Arrange
             JavaScriptStringEncoder encoder = JavaScriptStringEncoder.UnsafeRelaxedJsonEscaping;
-            var output = new StringWriter();
+
+            using var output = new StringWriter();
 
             // Act
             encoder.JavaScriptStringEncode("Hello\\world!".ToCharArray(), 3, 5, output);
@@ -230,7 +252,8 @@ namespace Microsoft.Framework.WebEncoders
         {
             // Arrange
             JavaScriptStringEncoder encoder = JavaScriptStringEncoder.UnsafeRelaxedJsonEscaping;
-            var output = new StringWriter();
+
+            using var output = new StringWriter();
 
             // Act
             encoder.JavaScriptStringEncode("Hello\\world!", 3, 5, output);
