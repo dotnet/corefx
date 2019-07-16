@@ -635,10 +635,6 @@ public class Program
         for (int i = 0; i < num; i++)
         {
             string key = $"{(i == 0 ? "?" : "&")}Var{i}=";
-            if (maxRequestLineSize <= uriSb.Length + key.Length)
-            {
-                break;
-            }
 
             int remainingLength = maxRequestLineSize - uriSb.Length - key.Length;
             if (remainingLength <= 0)
