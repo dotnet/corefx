@@ -19,6 +19,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The bytes are encoded before writing.
+        /// </remarks>
         public void WriteBase64StringValue(ReadOnlySpan<byte> bytes)
         {
             JsonWriterHelper.ValidateBytes(bytes);

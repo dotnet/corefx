@@ -49,6 +49,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(string propertyName, double value)
             => WriteNumber(propertyName.AsSpan(), value);
@@ -66,6 +67,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, double value)
         {
@@ -91,6 +93,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, double value)
         {

@@ -47,6 +47,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(string propertyName, long value)
             => WriteNumber(propertyName.AsSpan(), value);
@@ -64,6 +65,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, long value)
         {
@@ -88,6 +90,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, long value)
         {
@@ -126,6 +129,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(string propertyName, int value)
             => WriteNumber(propertyName.AsSpan(), (long)value);
@@ -160,6 +164,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, int value)
             => WriteNumber(utf8PropertyName, (long)value);

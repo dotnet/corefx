@@ -44,6 +44,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteBase64String(string propertyName, ReadOnlySpan<byte> bytes)
             => WriteBase64String(propertyName.AsSpan(), bytes);
 
@@ -52,12 +55,18 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <param name="bytes">The Base64-encoded data to write.</param>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteBase64String(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> bytes)
         {
             JsonWriterHelper.ValidatePropertyAndBytes(propertyName, bytes);
@@ -79,6 +88,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteBase64String(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> bytes)
         {
             JsonWriterHelper.ValidatePropertyAndBytes(utf8PropertyName, bytes);

@@ -47,6 +47,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(string propertyName, decimal value)
             => WriteNumber(propertyName.AsSpan(), value);
@@ -64,6 +65,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, decimal value)
         {
@@ -88,6 +90,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, decimal value)
         {

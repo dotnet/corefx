@@ -25,6 +25,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         internal void WriteNumber(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> utf8FormattedNumber)
         {
@@ -54,6 +55,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
+        /// The property name is escaped before writing.
         /// </remarks>
         internal void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> utf8FormattedNumber)
         {

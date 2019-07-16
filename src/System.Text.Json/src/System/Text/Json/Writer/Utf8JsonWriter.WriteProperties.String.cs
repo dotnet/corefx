@@ -39,6 +39,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WritePropertyName(string propertyName)
             => WritePropertyName(propertyName.AsSpan());
 
@@ -52,6 +55,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WritePropertyName(ReadOnlySpan<char> propertyName)
         {
             JsonWriterHelper.ValidateProperty(propertyName);
@@ -202,6 +208,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WritePropertyName(ReadOnlySpan<byte> utf8PropertyName)
         {
             JsonWriterHelper.ValidateProperty(utf8PropertyName);
@@ -376,6 +385,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(string propertyName, JsonEncodedText value)
             => WriteString(propertyName.AsSpan(), value);
 
@@ -390,6 +402,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(string propertyName, string value)
             => WriteString(propertyName.AsSpan(), value.AsSpan());
 
@@ -404,6 +419,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value)
         {
             JsonWriterHelper.ValidatePropertyAndValue(propertyName, value);
@@ -425,6 +443,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> utf8Value)
         {
             JsonWriterHelper.ValidatePropertyAndValue(utf8PropertyName, utf8Value);
@@ -497,6 +518,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(string propertyName, ReadOnlySpan<char> value)
             => WriteString(propertyName.AsSpan(), value);
 
@@ -511,6 +535,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<char> value)
         {
             JsonWriterHelper.ValidatePropertyAndValue(utf8PropertyName, value);
@@ -569,6 +596,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(string propertyName, ReadOnlySpan<byte> utf8Value)
             => WriteString(propertyName.AsSpan(), utf8Value);
 
@@ -583,6 +613,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> utf8Value)
         {
             JsonWriterHelper.ValidatePropertyAndValue(propertyName, utf8Value);
@@ -604,6 +637,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(ReadOnlySpan<char> propertyName, JsonEncodedText value)
             => WriteStringHelperEscapeProperty(propertyName, value.EncodedUtf8Bytes);
 
@@ -641,6 +677,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(ReadOnlySpan<char> propertyName, string value)
             => WriteString(propertyName, value.AsSpan());
 
@@ -655,6 +694,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(ReadOnlySpan<byte> utf8PropertyName, JsonEncodedText value)
             => WriteStringHelperEscapeProperty(utf8PropertyName, value.EncodedUtf8Bytes);
 
@@ -692,6 +734,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteString(ReadOnlySpan<byte> utf8PropertyName, string value)
             => WriteString(utf8PropertyName, value.AsSpan());
 

@@ -20,6 +20,9 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large OR if the given string text value contains a comment delimiter (i.e. */).
         /// </exception>
+        /// <remarks>
+        /// The comment value is not escaped before writing.
+        /// </remarks>
         public void WriteCommentValue(string value)
             => WriteCommentValue(value.AsSpan());
 
@@ -30,6 +33,9 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large OR if the given text value contains a comment delimiter (i.e. */).
         /// </exception>
+        /// <remarks>
+        /// The comment value is not escaped before writing.
+        /// </remarks>
         public void WriteCommentValue(ReadOnlySpan<char> value)
         {
             JsonWriterHelper.ValidateValue(value);

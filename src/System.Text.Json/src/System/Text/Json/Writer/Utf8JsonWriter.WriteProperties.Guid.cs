@@ -47,6 +47,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteString(string propertyName, Guid value)
             => WriteString(propertyName.AsSpan(), value);
@@ -64,6 +65,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteString(ReadOnlySpan<char> propertyName, Guid value)
         {
@@ -88,6 +90,7 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
+        /// The property name is escaped before writing.
         /// </remarks>
         public void WriteString(ReadOnlySpan<byte> utf8PropertyName, Guid value)
         {
