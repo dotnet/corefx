@@ -157,7 +157,7 @@ namespace System.Text.Json
 
                 // Clear the value if present to ensure we don't confuse tempEnumerableValues with the collection. 
                 if (!jsonPropertyInfo.IsPropertyPolicy &&
-                    state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
+                    !state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
                 {
                     jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, null);
                 }
