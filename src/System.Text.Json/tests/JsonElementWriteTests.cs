@@ -549,17 +549,15 @@ null,
 
         private static string GetEscapedExpectedString(string value, StringEscapeHandling escaping)
         {
-            using (var ms = new MemoryStream())
-            using (TextWriter streamWriter = new StreamWriter(ms, new UTF8Encoding(false), 1024, true))
-            using (var json = new JsonTextWriter(streamWriter)
+            using (TextWriter stringWriter = new StringWriter())
+            using (var json = new JsonTextWriter(stringWriter)
             {
                 StringEscapeHandling = escaping
             })
             {
                 json.WriteValue(value);
                 json.Flush();
-
-                return Encoding.UTF8.GetString(ms.ToArray());
+                return stringWriter.ToString();
             }
         }
 
