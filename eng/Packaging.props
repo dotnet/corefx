@@ -29,6 +29,7 @@
     <PlatformPackageVersion>$(ProductVersion)</PlatformPackageVersion>
     <SkipValidatePackageTargetFramework>true</SkipValidatePackageTargetFramework>
     <SkipGenerationCheck>true</SkipGenerationCheck>
+    <SkipIndexCheck>true</SkipIndexCheck>
   </PropertyGroup>
 
   <Import Condition="Exists('../pkg/baseline/baseline.props') AND '$(MSBuildProjectExtension)' == '.pkgproj'" Project="../pkg/baseline/baseline.props" />
