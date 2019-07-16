@@ -70,7 +70,7 @@ namespace System.Net.Test.Common
         public abstract Task WaitForCancellationAsync(bool ignoreIncomingData = true, int requestId = 0);
 
         /// <summary>Helper function to make it easier to convert old test with strings.</summary>
-        public async Task SendResponseBodyAsync(string data, bool isFinal = true, int requestId = 0)
+        public async Task SendResponseBodyAsync(string content, bool isFinal = true, int requestId = 0)
         {
             await SendResponseBodyAsync(String.IsNullOrEmpty(content) ? new byte[0] : Encoding.ASCII.GetBytes(content), isFinal, requestId);
         }
