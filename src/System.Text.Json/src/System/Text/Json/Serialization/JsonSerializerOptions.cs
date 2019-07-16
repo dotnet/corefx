@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
+using System.Text.Encodings.Web;
 
 namespace System.Text.Json
 {
@@ -20,11 +21,12 @@ namespace System.Text.Json
 
         private readonly ConcurrentDictionary<Type, JsonClassInfo> _classes = new ConcurrentDictionary<Type, JsonClassInfo>();
         private readonly ConcurrentDictionary<Type, JsonPropertyInfo> _objectJsonProperties = new ConcurrentDictionary<Type, JsonPropertyInfo>();
-        private static ConcurrentDictionary<string, object> s_createRangeDelegates = new ConcurrentDictionary<string, object>();
+        private static ConcurrentDictionary<string, ImmutableCollectionCreator> s_createRangeDelegates = new ConcurrentDictionary<string, ImmutableCollectionCreator>();
         private MemberAccessor _memberAccessorStrategy;
         private JsonNamingPolicy _dictionayKeyPolicy;
         private JsonNamingPolicy _jsonPropertyNamingPolicy;
         private JsonCommentHandling _readCommentHandling;
+        private JavaScriptEncoder _encoder;
         private int _defaultBufferSize = BufferSizeDefault;
         private int _maxDepth;
         private bool _allowTrailingCommas;
@@ -89,6 +91,23 @@ namespace System.Text.Json
                 }
 
                 _defaultBufferSize = value;
+            }
+        }
+
+        /// <summary>
+        /// The encoder to use when escaping strings, or <see langword="null" /> to use the default encoder.
+        /// </summary>
+        public JavaScriptEncoder Encoder
+        {
+            get
+            {
+                return _encoder;
+            }
+            set
+            {
+                VerifyMutable();
+
+                _encoder = value;
             }
         }
 
@@ -324,15 +343,13 @@ namespace System.Text.Json
         {
             return new JsonWriterOptions
             {
+                Encoder = Encoder,
                 Indented = WriteIndented,
 #if !DEBUG
                 SkipValidation = true
 #endif
             };
         }
-
-        internal delegate object ImmutableCreateRangeDelegate<T>(IEnumerable<T> items);
-        internal delegate object ImmutableDictCreateRangeDelegate<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> items);
 
         internal JsonPropertyInfo GetJsonPropertyInfoFromClassInfo(JsonClassInfo classInfo, JsonSerializerOptions options)
         {
@@ -352,12 +369,12 @@ namespace System.Text.Json
             return s_createRangeDelegates.ContainsKey(key);
         }
 
-        internal bool TryGetCreateRangeDelegate(string delegateKey, out object createRangeDelegate)
+        internal bool TryGetCreateRangeDelegate(string delegateKey, out ImmutableCollectionCreator createRangeDelegate)
         {
             return s_createRangeDelegates.TryGetValue(delegateKey, out createRangeDelegate) && createRangeDelegate != null;
         }
 
-        internal bool TryAddCreateRangeDelegate(string key, object createRangeDelegate)
+        internal bool TryAddCreateRangeDelegate(string key, ImmutableCollectionCreator createRangeDelegate)
         {
             return s_createRangeDelegates.TryAdd(key, createRangeDelegate);
         }
