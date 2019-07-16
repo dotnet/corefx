@@ -123,6 +123,18 @@ namespace System.Text.Json.Tests
         [InlineData("12", "02")]
         [InlineData("123", "1e+")]
         [InlineData("123", "1e-")]
+        [InlineData("0.12", "0.1e")]
+        [InlineData("0.123", "0.1e+")]
+        [InlineData("0.123", "0.1e-")]
+        [InlineData("10", "+0")]
+        [InlineData("101", "-01")]
+        [InlineData("12", "1a")]
+        [InlineData("10", "00")]
+        [InlineData("11", "01")]
+        [InlineData("10.5e-012", "10.5e-0.2")]
+        [InlineData("10.5e012", "10.5.012")]
+        [InlineData("0.123", "0.-23")]
+        [InlineData("12345", "hello")]
         public static void WriteCorruptedNumber(string parseJson, string overwriteJson)
         {
             if (overwriteJson.Length != parseJson.Length)
