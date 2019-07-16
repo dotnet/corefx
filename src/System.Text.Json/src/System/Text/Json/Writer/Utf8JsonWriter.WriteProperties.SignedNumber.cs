@@ -16,7 +16,7 @@ namespace System.Text.Json
         /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
@@ -46,7 +46,7 @@ namespace System.Text.Json
         /// The <paramref name="propertyName"/> parameter is <see langword="null"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
@@ -64,7 +64,7 @@ namespace System.Text.Json
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
@@ -89,7 +89,7 @@ namespace System.Text.Json
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
@@ -111,7 +111,7 @@ namespace System.Text.Json
         /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
@@ -131,7 +131,7 @@ namespace System.Text.Json
         /// The <paramref name="propertyName"/> parameter is <see langword="null"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
@@ -149,7 +149,7 @@ namespace System.Text.Json
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
@@ -166,7 +166,7 @@ namespace System.Text.Json
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.

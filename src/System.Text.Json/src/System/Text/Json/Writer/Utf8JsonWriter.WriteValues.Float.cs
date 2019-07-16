@@ -16,7 +16,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="float"/> using the default <see cref="StandardFormat"/> on .NET Core 3 or higher

@@ -497,8 +497,13 @@ namespace System.Text.Json
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
+        /// <para>
+        /// The value is escaped before writing.
+        /// </para>
+        /// <para>
         /// If <paramref name="value"/> is <see langword="null"/> the JSON null value is written,
         /// as if <see cref="WriteNull(System.Text.Json.JsonEncodedText)"/> was called.
+        /// </para>
         /// </remarks>
         public void WriteString(JsonEncodedText propertyName, string value)
         {

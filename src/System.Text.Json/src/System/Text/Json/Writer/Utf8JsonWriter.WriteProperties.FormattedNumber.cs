@@ -21,7 +21,7 @@ namespace System.Text.Json
         /// Thrown when <paramref name="utf8FormattedNumber"/> does not represent a valid JSON number.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
@@ -51,7 +51,7 @@ namespace System.Text.Json
         /// Thrown when <paramref name="utf8FormattedNumber"/> does not represent a valid JSON number.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.

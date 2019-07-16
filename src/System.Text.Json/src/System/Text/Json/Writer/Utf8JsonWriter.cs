@@ -433,7 +433,7 @@ namespace System.Text.Json
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartArray()
         {
@@ -446,7 +446,7 @@ namespace System.Text.Json
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartObject()
         {
@@ -570,7 +570,7 @@ namespace System.Text.Json
         /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartArray(JsonEncodedText propertyName)
         {
@@ -584,7 +584,7 @@ namespace System.Text.Json
         /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartObject(JsonEncodedText propertyName)
         {
@@ -617,7 +617,7 @@ namespace System.Text.Json
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartArray(ReadOnlySpan<byte> utf8PropertyName)
         {
@@ -643,7 +643,7 @@ namespace System.Text.Json
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartObject(ReadOnlySpan<byte> utf8PropertyName)
         {
@@ -725,7 +725,7 @@ namespace System.Text.Json
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartArray(string propertyName)
             => WriteStartArray((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan());
@@ -745,7 +745,7 @@ namespace System.Text.Json
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartObject(string propertyName)
             => WriteStartObject((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan());
@@ -762,7 +762,7 @@ namespace System.Text.Json
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartArray(ReadOnlySpan<char> propertyName)
         {
@@ -788,7 +788,7 @@ namespace System.Text.Json
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
-        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// OR if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStartObject(ReadOnlySpan<char> propertyName)
         {
@@ -859,7 +859,7 @@ namespace System.Text.Json
         /// Writes the end of a JSON array.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteEndArray()
         {
@@ -871,7 +871,7 @@ namespace System.Text.Json
         /// Writes the end of a JSON object.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteEndObject()
         {

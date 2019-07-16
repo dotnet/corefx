@@ -12,12 +12,12 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the raw bytes value as base 64 encoded JSON string as an element of a JSON array.
         /// </summary>
-        /// <param name="bytes">The Base64-encoded data to write..</param>
+        /// <param name="bytes">The Base64-encoded data to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// The bytes are encoded before writing.

@@ -14,7 +14,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="value">The JSON-encoded value to write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStringValue(JsonEncodedText value)
             => WriteStringValueHelper(value.EncodedUtf8Bytes);
@@ -37,7 +37,7 @@ namespace System.Text.Json
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// <para>
@@ -67,7 +67,7 @@ namespace System.Text.Json
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// The value is escaped before writing.
@@ -210,7 +210,7 @@ namespace System.Text.Json
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
         /// The value is escaped before writing.
