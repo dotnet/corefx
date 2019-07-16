@@ -82,10 +82,8 @@ namespace System.Text.Json
                 skipVisibility: true);
 
             ILGenerator generator = dynamicMethod.GetILGenerator();
-
             generator.Emit(OpCodes.Newobj, realMethod);
             generator.Emit(OpCodes.Ret);
-
 
             JsonClassInfo.ConstructorDelegate constructor = (JsonClassInfo.ConstructorDelegate)dynamicMethod.CreateDelegate(
                 typeof(JsonClassInfo.ConstructorDelegate));
@@ -124,10 +122,8 @@ namespace System.Text.Json
                 skipVisibility: true);
 
             ILGenerator generator = dynamicMethod.GetILGenerator();
-
             generator.Emit(OpCodes.Newobj, realMethod);
             generator.Emit(OpCodes.Ret);
-
 
             JsonClassInfo.ConstructorDelegate constructor = (JsonClassInfo.ConstructorDelegate)dynamicMethod.CreateDelegate(
                 typeof(JsonClassInfo.ConstructorDelegate));
