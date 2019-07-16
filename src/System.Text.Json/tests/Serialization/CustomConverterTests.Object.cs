@@ -16,7 +16,7 @@ namespace System.Text.Json.Serialization.Tests
             public override bool CanConvert(Type typeToConvert)
             {
                 return (typeToConvert == typeof(Customer) ||
-                    typeToConvert == typeof(int));
+                    typeToConvert == typeof(int) || typeToConvert == typeof(SimpleTestClass));
             }
 
             public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -32,6 +32,11 @@ namespace System.Text.Json.Serialization.Tests
                 if (typeToConvert == typeof(int))
                 {
                     return 42;
+                }
+
+                if (typeToConvert == typeof(SimpleTestClass))
+                {
+                    return new SimpleTestClass();
                 }
 
                 throw new NotSupportedException();
@@ -138,6 +143,103 @@ namespace System.Text.Json.Serialization.Tests
                 object obj = JsonSerializer.Deserialize<object>("{}", options);
                 Assert.IsType<JsonElement>(obj);
             }
+        }
+
+        private class ObjectToCustomerConverter : JsonConverter<Customer>
+        {
+            public override bool CanConvert(Type typeToConvert)
+            {
+                return (typeToConvert == typeof(Customer) || typeToConvert == typeof(DerivedCustomer));
+            }
+
+            public override Customer Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                Customer customer = null;
+                if (typeToConvert == typeof(Customer))
+                {
+                    customer = new Customer();
+                }
+
+                if (typeToConvert == typeof(DerivedCustomer))
+                {
+                    customer = new DerivedCustomer();
+                }
+
+                if(customer != null)
+                { 
+                    while (reader.Read())
+                    {
+                        if (reader.TokenType == JsonTokenType.EndObject)
+                        {
+                            return customer;
+                        }
+
+                        if (reader.TokenType == JsonTokenType.PropertyName)
+                        {
+                            string propertyName = reader.GetString();
+                            reader.Read();
+                            switch (propertyName)
+                            {
+                                case "CreditLimit":
+                                    decimal creditLimit = reader.GetDecimal();
+                                    customer.CreditLimit = creditLimit - 1;
+                                    break;
+                                case "Address":
+                                    string city = reader.GetString();
+                                    customer.Address.City = string.IsNullOrEmpty(city) ? "NA" : city;
+                                    break;
+                                case "Name":
+                                    string name = reader.GetString().ToUpper();
+                                    customer.Name = name;
+                                    break;
+                            }
+                        }
+                    }
+                    return customer;
+                }
+
+                throw new NotSupportedException();
+            }
+
+            public override void Write(Utf8JsonWriter writer, Customer value, JsonSerializerOptions options)
+            {
+                writer.WriteStartObject();
+                writer.WriteString("Name", value.Name);
+                writer.WriteNumber("CreditLimit", value.CreditLimit);
+                writer.WriteString("Address", value.Address.City);
+                writer.WriteEndObject();
+            }
+        }
+
+        [Fact]
+        public static void ClassWithFieldHavingCustomConverterTest()
+        {
+            TestClassWithFieldHavingCustomConverter testObject = new TestClassWithFieldHavingCustomConverter { IntValue = 32, Name = "John Doe",
+                Customer = new Customer { Name = "Customer Doe", CreditLimit = 1000 }, DerivedCustomer = new DerivedCustomer { Name = "Derived Doe", CreditLimit = 2000 } };
+
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new ObjectToCustomerConverter());
+
+            string json = JsonSerializer.Serialize(testObject, options);
+
+            TestClassWithFieldHavingCustomConverter testObj = JsonSerializer.Deserialize<TestClassWithFieldHavingCustomConverter>(json, options);
+
+            Assert.Equal(32, testObj.IntValue);
+            Assert.Equal("John Doe", testObj.Name);
+            Assert.Equal("CUSTOMER DOE", testObj.Customer.Name);
+            Assert.Equal("DERIVED DOE", testObj.DerivedCustomer.Name);
+            Assert.Equal(1999, testObj.DerivedCustomer.CreditLimit);
+            Assert.Equal("NA", testObj.DerivedCustomer.Address.City);
+        }
+
+        private class TestClassWithFieldHavingCustomConverter
+        {
+
+            public string Name { get; set; }
+            public Customer Customer { get; set; }
+            public DerivedCustomer DerivedCustomer { get; set; }
+            public int IntValue { get; set; }
+            public string Message { get; set; }
         }
     }
 }
