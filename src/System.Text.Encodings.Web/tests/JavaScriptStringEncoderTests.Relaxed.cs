@@ -258,8 +258,7 @@ namespace Microsoft.Framework.WebEncoders
         [InlineData("hello+world", "hello+world")]
         [InlineData("hello<world>", "hello<world>")]
         [InlineData("hello&world", "hello&world")]
-        [InlineData("hello&world", "hello&world")]
-        public void JavaScriptStringEncode_DoesNotOutputHtmlSensitiveCharacters_Relaxed(string input, string expected)
+        public void JavaScriptStringEncode_DoesOutputHtmlSensitiveCharacters_Relaxed(string input, string expected)
         {
             // Arrange
             JavaScriptStringEncoder encoder = JavaScriptStringEncoder.UnsafeRelaxedJsonEscaping;
