@@ -136,5 +136,22 @@ namespace Microsoft.VisualBasic.Tests
         {
             Assert.Throws<ArgumentException>(() => Interaction.Partition(Number, Start, Stop, Interval));
         }
+
+        [Theory]
+        [InlineData(null, null)] // empty
+        [InlineData(new object[] { false, "red", false, "green", false, "blue" }, null)] // none
+        [InlineData(new object[] { true, "red", false, "green", false, "blue" }, "red")]
+        [InlineData(new object[] { false, "red", true, "green", false, "blue" }, "green")]
+        [InlineData(new object[] { false, "red", false, "green", true, "blue" }, "blue")]
+        public void Switch(object[] VarExpr, object expected)
+        {
+            Assert.Equal(expected, Interaction.Switch(VarExpr));
+        }
+
+        [Fact]
+        public void Switch_Invalid()
+        {
+            Assert.Throws<ArgumentException>(() => Interaction.Switch(true, "a", false));
+        }
     }
 }

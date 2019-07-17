@@ -168,6 +168,34 @@ Namespace Microsoft.VisualBasic
             Buffer.Append(Buffer1)
         End Sub
 
+        Public Function Switch(ByVal ParamArray VarExpr() As Object) As Object
+            Dim Elements As Integer
+            Dim Index As Integer
+
+            If VarExpr Is Nothing Then
+                Return Nothing
+            End If
+
+            Elements = VarExpr.Length
+            Index = 0
+
+            'Ensure we have an even number of arguments (0 based)
+            If (Elements Mod 2) <> 0 Then
+                Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValue1, "VarExpr"))
+            End If
+
+            Do While Elements > 0
+                If CBool(VarExpr(Index)) Then
+                    Return VarExpr(Index + 1)
+                End If
+
+                Index += 2
+                Elements -= 2
+            Loop
+
+            Return Nothing 'If nothing matched above
+        End Function
+
         Public Function CreateObject(ByVal ProgId As String, Optional ByVal ServerName As String = "") As Object
             'Creates local or remote COM2 objects.  Should not be used to create COM+ objects.
             'Applications that need to be STA should set STA either on their Sub Main via STAThreadAttribute

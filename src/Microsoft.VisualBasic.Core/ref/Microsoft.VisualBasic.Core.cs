@@ -485,6 +485,7 @@ namespace Microsoft.VisualBasic
         public static object CreateObject(string ProgId, string ServerName = "") { throw null; }
         public static object IIf(bool Expression, object TruePart, object FalsePart) { throw null; }
         public static string Partition(long Number, long Start, long Stop, long Interval) { throw null; }
+        public static object Switch(params object[] VarExpr) { throw null; }
     }
     public enum MsgBoxResult
     {
