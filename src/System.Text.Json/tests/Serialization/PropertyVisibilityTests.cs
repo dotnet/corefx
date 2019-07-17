@@ -32,7 +32,9 @@ namespace System.Text.Json.Serialization.Tests
             var obj = new ClassWithNoSetter();
 
             string json = JsonSerializer.Serialize(obj, options);
-            Assert.Equal(@"{}", json);
+
+            // Collections are always serialized unless they have [JsonIgnore].
+            Assert.Equal(@"{""MyInts"":[1,2]}", json);
         }
 
         [Fact]
@@ -223,7 +225,7 @@ namespace System.Text.Json.Serialization.Tests
             Case2 = 1,
         }
 
-        private struct ClassWithOverride
+        private struct StructWithOverride
         {
             [JsonIgnore]
             public MyEnum EnumValue { get; set; }
@@ -238,7 +240,7 @@ namespace System.Text.Json.Serialization.Tests
                     {
                         EnumValue = MyEnum.Case1;
                     }
-                    if (value == "Case2")
+                    else if (value == "Case2")
                     {
                         EnumValue = MyEnum.Case2;
                     }
@@ -255,7 +257,7 @@ namespace System.Text.Json.Serialization.Tests
         {
             const string json = @"{""EnumValue"":""Case2""}";
 
-            ClassWithOverride obj = JsonSerializer.Deserialize<ClassWithOverride>(json);
+            StructWithOverride obj = JsonSerializer.Deserialize<StructWithOverride>(json);
 
             Assert.Equal(MyEnum.Case2, obj.EnumValue);
             Assert.Equal("Case2", obj.EnumString);

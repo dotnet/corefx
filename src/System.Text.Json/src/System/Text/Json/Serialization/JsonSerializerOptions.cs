@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
+using System.Text.Encodings.Web;
 
 namespace System.Text.Json
 {
@@ -20,11 +21,12 @@ namespace System.Text.Json
 
         private readonly ConcurrentDictionary<Type, JsonClassInfo> _classes = new ConcurrentDictionary<Type, JsonClassInfo>();
         private readonly ConcurrentDictionary<Type, JsonPropertyInfo> _objectJsonProperties = new ConcurrentDictionary<Type, JsonPropertyInfo>();
-        private static ConcurrentDictionary<string, object> s_createRangeDelegates = new ConcurrentDictionary<string, object>();
+        private static ConcurrentDictionary<string, ImmutableCollectionCreator> s_createRangeDelegates = new ConcurrentDictionary<string, ImmutableCollectionCreator>();
         private MemberAccessor _memberAccessorStrategy;
         private JsonNamingPolicy _dictionayKeyPolicy;
         private JsonNamingPolicy _jsonPropertyNamingPolicy;
         private JsonCommentHandling _readCommentHandling;
+        private JavaScriptEncoder _encoder;
         private int _defaultBufferSize = BufferSizeDefault;
         private int _maxDepth;
         private bool _allowTrailingCommas;
@@ -93,10 +95,28 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        /// The encoder to use when escaping strings, or <see langword="null" /> to use the default encoder.
+        /// </summary>
+        public JavaScriptEncoder Encoder
+        {
+            get
+            {
+                return _encoder;
+            }
+            set
+            {
+                VerifyMutable();
+
+                _encoder = value;
+            }
+        }
+
+        /// <summary>
         /// Specifies the policy used to convert a <see cref="System.Collections.IDictionary"/> key's name to another format, such as camel-casing.
         /// </summary>
         /// <remarks>
         /// This property can be set to <see cref="JsonNamingPolicy.CamelCase"/> to specify a camel-casing policy.
+        /// It is not used when deserializing.
         /// </remarks>
         public JsonNamingPolicy DictionaryKeyPolicy
         {
@@ -175,7 +195,9 @@ namespace System.Text.Json
                 VerifyMutable();
 
                 if (value < 0)
+                {
                     throw ThrowHelper.GetArgumentOutOfRangeException_MaxDepthMustBePositive(nameof(value));
+                }
 
                 _maxDepth = value;
                 EffectiveMaxDepth = (value == 0 ? JsonReaderOptions.DefaultMaxDepth : value);
@@ -321,6 +343,7 @@ namespace System.Text.Json
         {
             return new JsonWriterOptions
             {
+                Encoder = Encoder,
                 Indented = WriteIndented,
 #if !DEBUG
                 SkipValidation = true
@@ -328,16 +351,13 @@ namespace System.Text.Json
             };
         }
 
-        internal delegate object ImmutableCreateRangeDelegate<T>(IEnumerable<T> items);
-        internal delegate object ImmutableDictCreateRangeDelegate<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> items);
-
         internal JsonPropertyInfo GetJsonPropertyInfoFromClassInfo(JsonClassInfo classInfo, JsonSerializerOptions options)
         {
             Type objectType = classInfo.Type;
 
             if (!_objectJsonProperties.TryGetValue(objectType, out JsonPropertyInfo propertyInfo))
             {
-                propertyInfo = JsonClassInfo.CreateProperty(objectType, objectType, null, typeof(object), options);
+                propertyInfo = JsonClassInfo.CreateProperty(objectType, objectType, objectType, null, typeof(object), options);
                 _objectJsonProperties[objectType] = propertyInfo;
             }
 
@@ -349,12 +369,12 @@ namespace System.Text.Json
             return s_createRangeDelegates.ContainsKey(key);
         }
 
-        internal bool TryGetCreateRangeDelegate(string delegateKey, out object createRangeDelegate)
+        internal bool TryGetCreateRangeDelegate(string delegateKey, out ImmutableCollectionCreator createRangeDelegate)
         {
             return s_createRangeDelegates.TryGetValue(delegateKey, out createRangeDelegate) && createRangeDelegate != null;
         }
 
-        internal bool TryAddCreateRangeDelegate(string key, object createRangeDelegate)
+        internal bool TryAddCreateRangeDelegate(string key, ImmutableCollectionCreator createRangeDelegate)
         {
             return s_createRangeDelegates.TryAdd(key, createRangeDelegate);
         }

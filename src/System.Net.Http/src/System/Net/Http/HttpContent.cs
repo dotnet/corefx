@@ -322,6 +322,14 @@ namespace System.Net.Http
         internal virtual Task SerializeToStreamAsync(Stream stream, TransportContext context, CancellationToken cancellationToken) =>
             SerializeToStreamAsync(stream, context);
 
+        // TODO #38559: Expose something to enable this publicly.  For very specific HTTP/2 scenarios (e.g. gRPC), we need
+        // to be able to allow request content to continue sending after SendAsync has completed, which goes against the
+        // previous design of content, and which means that with some servers, even outside of desired scenarios we could
+        // end up unexpectedly having request content still sending even after the response completes, which could lead to
+        // spurious failures in unsuspecting client code.  To mitigate that, we prohibit duplex on all known HttpContent
+        // types, waiting for the request content to complete before completing the SendAsync task. 
+        internal virtual bool AllowDuplex => true;
+
         public Task CopyToAsync(Stream stream, TransportContext context) =>
             CopyToAsync(stream, context, CancellationToken.None);
 
@@ -362,7 +370,7 @@ namespace System.Net.Http
             }
             catch (Exception e) when (StreamCopyExceptionNeedsWrapping(e))
             {
-                throw GetStreamCopyException(e);
+                throw WrapStreamCopyException(e);
             }
         }
 
@@ -569,7 +577,7 @@ namespace System.Net.Http
             }
         }
 
-        private static bool StreamCopyExceptionNeedsWrapping(Exception e) => e is IOException || e is ObjectDisposedException;
+        internal static bool StreamCopyExceptionNeedsWrapping(Exception e) => e is IOException || e is ObjectDisposedException;
 
         private static Exception GetStreamCopyException(Exception originalException)
         {
@@ -583,8 +591,14 @@ namespace System.Net.Http
             // ObjectDisposedException is also wrapped, since aborting HWR after a request is complete will result in
             // the response stream being closed.
             return StreamCopyExceptionNeedsWrapping(originalException) ?
-                new HttpRequestException(SR.net_http_content_stream_copy_error, originalException) :
+                WrapStreamCopyException(originalException) :
                 originalException;
+        }
+
+        internal static Exception WrapStreamCopyException(Exception e)
+        {
+            Debug.Assert(StreamCopyExceptionNeedsWrapping(e));
+            return new HttpRequestException(SR.net_http_content_stream_copy_error, e);
         }
 
         private static int GetPreambleLength(ArraySegment<byte> buffer, Encoding encoding)

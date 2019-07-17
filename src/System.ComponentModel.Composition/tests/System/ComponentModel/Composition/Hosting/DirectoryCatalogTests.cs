@@ -38,7 +38,7 @@ namespace System.ComponentModel.Composition
     {
         internal const string NonExistentSearchPattern = "*.NonExistentSearchPattern";
 
-        public static void Constructor_NullReflectionContextArgument_ShouldThrowArgumentNull(Func<ReflectionContext, DirectoryCatalog> catalogCreator)
+        private static void Constructor_NullReflectionContextArgument_ShouldThrowArgumentNull(Func<ReflectionContext, DirectoryCatalog> catalogCreator)
         {
             Assert.Throws<ArgumentNullException>("reflectionContext", () =>
             {
@@ -46,7 +46,7 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        public static void Constructor_NullDefinitionOriginArgument_ShouldThrowArgumentNull(Func<ICompositionElement, DirectoryCatalog> catalogCreator)
+        private static void Constructor_NullDefinitionOriginArgument_ShouldThrowArgumentNull(Func<ICompositionElement, DirectoryCatalog> catalogCreator)
         {
             Assert.Throws<ArgumentNullException>("definitionOrigin", () =>
             {
@@ -229,14 +229,14 @@ namespace System.ComponentModel.Composition
         }
 
         [Fact]
-        public void AddAssembly1_NullPathArgument_ShouldThrowArugmentNull()
+        public void AddAssembly1_NullPathArgument_ShouldThrowArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 new DirectoryCatalog((string)null));
         }
 
         [Fact]
-        public void AddAssembly1_EmptyPathArgument_ShouldThrowArugment()
+        public void AddAssembly1_EmptyPathArgument_ShouldThrowArgument()
         {
             Assert.Throws<ArgumentException>(() =>
                 new DirectoryCatalog(""));

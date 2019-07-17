@@ -2894,7 +2894,7 @@ namespace System.Tests
         [InlineData(3, 2, 4)]
         [InlineData(3, 0, 3)]
         [InlineData(3, 1, 3)]
-        public static void LastIndexOf_InvalidStartIndexCount_ThrowsArgumentOutOfRangeExeption(int length, int startIndex, int count)
+        public static void LastIndexOf_InvalidStartIndexCount_ThrowsArgumentOutOfRangeException(int length, int startIndex, int count)
         {
             AssertExtensions.Throws<ArgumentOutOfRangeException>("endIndex", () => Array.LastIndexOf(new int[length], "", startIndex, count));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("count", () => Array.LastIndexOf(new int[length], 0, startIndex, count));
@@ -3137,7 +3137,7 @@ namespace System.Tests
             }
         }
 
-        public static void Reverse(Array array, int index, int length, Array expected)
+        private static void Reverse(Array array, int index, int length, Array expected)
         {
             if (index == array.GetLowerBound(0) && length == array.Length)
             {

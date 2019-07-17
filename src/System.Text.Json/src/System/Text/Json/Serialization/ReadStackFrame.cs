@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -68,51 +69,30 @@ namespace System.Text.Json
         public bool IsProcessingEnumerable => IsEnumerable || IsEnumerableProperty;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsProcessingValue(JsonTokenType tokenType)
+        // Determine whether a StartObject or StartArray token should be treated as a value.
+        public bool IsProcessingValue()
         {
             if (SkipProperty)
             {
                 return false;
             }
 
-            // Handle array case.
+            ClassType classType;
+
             if (CollectionPropertyInitialized)
             {
-                ClassType elementType;
-
-                if (IsCollectionForClass)
-                {
-                    // A custom converter for a class (to handle JSON array).
-                    elementType = JsonClassInfo.ElementClassInfo.ClassType;
-                    return (elementType == ClassType.Value || elementType == ClassType.Unknown);
-                }
-
-                Debug.Assert(IsCollectionForProperty);
-
-                if (tokenType == JsonTokenType.StartObject)
-                {
-                    elementType = JsonPropertyInfo.ElementClassInfo.ClassType;
-                    return (elementType == ClassType.Value || elementType == ClassType.Unknown);
-                }
-                else
-                {
-                    // A custom converter for an array element is handled by IsProcessingValueOnStartObject.
-                    return false;
-                }
+                classType = JsonPropertyInfo.ElementClassInfo.ClassType;
             }
-
-            // Handle object case.
-            ClassType type;
-            if (JsonPropertyInfo == null)
+            else if (JsonPropertyInfo == null)
             {
-                type = JsonClassInfo.ClassType;
+                classType = JsonClassInfo.ClassType;
             }
             else
             {
-                type = JsonPropertyInfo.ClassType;
+                classType = JsonPropertyInfo.ClassType;
             }
 
-            return type == ClassType.Value || type == ClassType.Unknown;
+            return classType == ClassType.Value || classType == ClassType.Unknown;
         }
 
         public void Initialize(Type type, JsonSerializerOptions options)
@@ -136,13 +116,17 @@ namespace System.Text.Json
         {
             Drain = false;
             JsonClassInfo = null;
-            KeyName = null;
             PropertyRefCache = null;
             ReturnValue = null;
             EndObject();
         }
 
-        public void ResetProperty()
+        public void EndObject()
+        {
+            PropertyIndex = 0;
+            EndProperty();
+        }
+        public void EndProperty()
         {
             CollectionPropertyInitialized = false;
             JsonPropertyInfo = null;
@@ -152,13 +136,7 @@ namespace System.Text.Json
             KeyName = null;
         }
 
-        public void EndObject()
-        {
-            PropertyIndex = 0;
-            ResetProperty();
-        }
-
-        public static object CreateEnumerableValue(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options)
+        public static object CreateEnumerableValue(ref Utf8JsonReader reader, ref ReadStack state)
         {
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
@@ -177,16 +155,40 @@ namespace System.Text.Json
 
                 state.Current.TempEnumerableValues = converterList;
 
+                // Clear the value if present to ensure we don't confuse tempEnumerableValues with the collection. 
+                if (!jsonPropertyInfo.IsPropertyPolicy &&
+                    !state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
+                {
+                    jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, null);
+                }
+
                 return null;
             }
 
-            Type propertyType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            Type propertyType = jsonPropertyInfo.RuntimePropertyType;
             if (typeof(IList).IsAssignableFrom(propertyType))
             {
                 // If IList, add the members as we create them.
-                JsonClassInfo collectionClassInfo = state.Current.JsonPropertyInfo.RuntimeClassInfo;
-                IList collection = (IList)collectionClassInfo.CreateObject();
-                return collection;
+                JsonClassInfo collectionClassInfo;
+                
+                if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
+                {
+                    collectionClassInfo = jsonPropertyInfo.RuntimeClassInfo;
+                }
+                else
+                {
+                    collectionClassInfo = jsonPropertyInfo.DeclaredTypeClassInfo;
+                }
+
+                if (collectionClassInfo.CreateObject() is IList collection)
+                {
+                    return collection;
+                }
+                else
+                {
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(jsonPropertyInfo.DeclaredPropertyType, reader, state.JsonPath);
+                    return null;
+                }
             }
             else
             {

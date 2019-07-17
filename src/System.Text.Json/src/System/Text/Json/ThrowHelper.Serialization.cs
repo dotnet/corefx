@@ -42,12 +42,6 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowJsonException_DeserializeCannotBeNull(in Utf8JsonReader reader, string path)
-        {
-            ThrowJsonException(SR.DeserializeCannotBeNull, in reader, path);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowJsonException_DepthTooLarge(int currentDepth, in WriteStack writeStack, JsonSerializerOptions options)
         {
             var ex = new JsonException(SR.Format(SR.DepthTooLarge, currentDepth, options.EffectiveMaxDepth));
@@ -119,6 +113,12 @@ namespace System.Text.Json
         public static void ThrowInvalidOperationException_SerializerPropertyNameNull(Type parentType, JsonPropertyInfo jsonPropertyInfo)
         {
             throw new InvalidOperationException(SR.Format(SR.SerializerPropertyNameNull, parentType, jsonPropertyInfo.PropertyInfo.Name));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowInvalidOperationException_SerializerDictionaryKeyNull(Type policyType)
+        {
+            throw new InvalidOperationException(SR.Format(SR.SerializerDictionaryKeyNull, policyType));
         }
 
         public static void ThrowJsonException_DeserializeDataRemaining(long length, long bytesRemaining)

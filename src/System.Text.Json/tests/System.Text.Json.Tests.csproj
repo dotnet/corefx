@@ -3,6 +3,7 @@
     <ProjectGuid>{5F553243-042C-45C0-8E49-C739131E11C3}</ProjectGuid>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
     <DefineConstants Condition="'$(TargetGroup)'!='netfx'">$(DefineConstants);BUILDING_INBOX_LIBRARY</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\IO\WrappedMemoryStream.cs">
@@ -21,6 +22,7 @@
     <Compile Include="JsonEncodedTextTests.cs" />
     <Compile Include="JsonGuidTestData.cs" />
     <Compile Include="JsonNumberTestData.cs" />
+    <Compile Include="JsonPropertyTests.cs" />
     <Compile Include="JsonReaderStateAndOptionsTests.cs" />
     <Compile Include="JsonTestHelper.cs" />
     <Compile Include="JsonWriterOptionsTests.cs" />
@@ -43,6 +45,7 @@
     <Compile Include="Serialization\CustomConverterTests.Exceptions.cs" />
     <Compile Include="Serialization\CustomConverterTests.Int32.cs" />
     <Compile Include="Serialization\CustomConverterTests.List.cs" />
+    <Compile Include="Serialization\CustomConverterTests.NullValueType.cs" />
     <Compile Include="Serialization\CustomConverterTests.Object.cs" />
     <Compile Include="Serialization\CustomConverterTests.Point.cs" />
     <Compile Include="Serialization\CustomConverterTests.Polymorphic.cs" />
@@ -50,6 +53,7 @@
     <Compile Include="Serialization\CustomConverterTests.Callback.cs" />
     <Compile Include="Serialization\CyclicTests.cs" />
     <Compile Include="Serialization\DictionaryTests.cs" />
+    <Compile Include="Serialization\DictionaryTests.KeyPolicy.cs" />
     <Compile Include="Serialization\EnumConverterTests.cs" />
     <Compile Include="Serialization\EnumTests.cs" />
     <Compile Include="Serialization\ExceptionTests.cs" />
@@ -68,7 +72,9 @@
     <Compile Include="Serialization\Stream.ReadTests.cs" />
     <Compile Include="Serialization\Stream.WriteTests.cs" />
     <Compile Include="Serialization\TestClasses.cs" />
-    <Compile Include="Serialization\TestClasses.Dictionary.cs" />
+    <Compile Include="Serialization\TestClasses.GenericCollections.cs" />
+    <Compile Include="Serialization\TestClasses.ImmutableCollections.cs" />
+    <Compile Include="Serialization\TestClasses.NonGenericCollections.cs" />
     <Compile Include="Serialization\TestClasses.Polymorphic.cs" />
     <Compile Include="Serialization\TestClasses.SimpleTestClass.cs" />
     <Compile Include="Serialization\TestClasses.SimpleTestClassWithNullables.cs" />
@@ -77,6 +83,7 @@
     <Compile Include="Serialization\TestClasses.SimpleTestClassWithSimpleObject.cs" />
     <Compile Include="Serialization\TestClasses.SimpleTestStruct.cs" />
     <Compile Include="Serialization\TestData.cs" />
+    <Compile Include="Serialization\ReadScenarioTests.cs" />
     <Compile Include="Serialization\Value.ReadTests.cs" />
     <Compile Include="Serialization\Value.ReadTests.GenericCollections.cs" />
     <Compile Include="Serialization\Value.ReadTests.ImmutableCollections.cs" />
@@ -91,6 +98,7 @@
     <Compile Include="Utf8JsonReaderTests.cs" />
     <Compile Include="Utf8JsonReaderTests.MultiSegment.cs" />
     <Compile Include="Utf8JsonReaderTests.TryGet.cs" />
+    <Compile Include="Utf8JsonReaderTests.TryGet.Date.cs" />
     <Compile Include="Utf8JsonReaderTests.ValueTextEquals.cs" />
     <Compile Include="Utf8JsonWriterTests.cs" />
   </ItemGroup>

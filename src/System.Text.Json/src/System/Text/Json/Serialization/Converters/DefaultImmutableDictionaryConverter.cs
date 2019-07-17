@@ -8,9 +8,12 @@ namespace System.Text.Json.Serialization.Converters
 {
     internal sealed class DefaultImmutableDictionaryConverter : JsonDictionaryConverter
     {
-        private const string ImmutableDictionaryGenericTypeName = "System.Collections.Immutable.ImmutableDictionary`2";
-        private const string ImmutableDictionaryGenericInterfaceTypeName = "System.Collections.Immutable.IImmutableDictionary`2";
-        private const string ImmutableSortedDictionaryGenericTypeName = "System.Collections.Immutable.ImmutableSortedDictionary`2";
+        public const string ImmutableDictionaryTypeName = "System.Collections.Immutable.ImmutableDictionary";
+        public const string ImmutableDictionaryGenericTypeName = "System.Collections.Immutable.ImmutableDictionary`2";
+        public const string ImmutableDictionaryGenericInterfaceTypeName = "System.Collections.Immutable.IImmutableDictionary`2";
+
+        public const string ImmutableSortedDictionaryTypeName = "System.Collections.Immutable.ImmutableSortedDictionary";
+        public const string ImmutableSortedDictionaryGenericTypeName = "System.Collections.Immutable.ImmutableSortedDictionary`2";
 
         public static void RegisterImmutableDictionary(Type immutableCollectionType, Type elementType, JsonSerializerOptions options)
         {
@@ -27,8 +30,8 @@ namespace System.Text.Json.Serialization.Converters
             Type constructingType = underlyingType.Assembly.GetType(constructingTypeName);
 
             // Create a delegate which will point to the CreateRange method.
-            object createRangeDelegate;
-            createRangeDelegate = options.MemberAccessorStrategy.ImmutableDictionaryCreateRange(constructingType, elementType);
+            ImmutableCollectionCreator createRangeDelegate;
+            createRangeDelegate = options.MemberAccessorStrategy.ImmutableDictionaryCreateRange(constructingType, immutableCollectionType, elementType);
 
             // Cache the delegate
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);
@@ -52,7 +55,7 @@ namespace System.Text.Json.Serialization.Converters
             }
         }
 
-        public override IDictionary CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
+        public override object CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
         {
             Type immutableCollectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
             Type elementType = state.Current.GetElementType();

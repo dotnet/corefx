@@ -21,8 +21,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
     public static partial class StateTests
     {
-        public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer);
-
         //
         // Exercises various edge cases when EnvelopedCms methods and properties are called out of the "expected" order.
         //
@@ -202,7 +200,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         // State 3: Called Decode()
         //
 
-        public static void PostDecode_Encode(bool isRunningOnDesktop)
+        private static void PostDecode_Encode(bool isRunningOnDesktop)
         {
             byte[] encodedMessage =
                 ("3082010c06092a864886f70d010703a081fe3081fb0201003181c83081c5020100302e301a311830160603550403130f5253"
@@ -236,7 +234,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             PostDecode_Encode(isRunningOnDesktop: false);
         }
 
-        public static void PostDecode_ContentInfo(bool isRunningOnDesktop)
+        private static void PostDecode_ContentInfo(bool isRunningOnDesktop)
         {
             byte[] encodedMessage =
                 ("3082010c06092a864886f70d010703a081fe3081fb0201003181c83081c5020100302e301a311830160603550403130f5253"
@@ -274,7 +272,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         //
         // State 4: Called Decode() + Decrypt()
         //
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
+        [Theory]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         [InlineData(false)]
 #if netcoreapp // API not supported on netfx
@@ -323,7 +321,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsCngCertificates))]
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void PostDecrypt_RecipientInfos()
         {
@@ -362,7 +360,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [ConditionalTheory(nameof(SupportsCngCertificates))]
+        [Theory]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         [InlineData(false)]
 #if netcoreapp // API not supported on netfx

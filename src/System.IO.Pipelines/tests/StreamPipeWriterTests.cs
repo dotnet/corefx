@@ -22,8 +22,43 @@ namespace System.IO.Pipelines.Tests
 
             Assert.Equal(0, stream.Length);
 
-            // This throws
             writer.Complete();
+        }
+
+        [Fact]
+        public void DataFlushedOnComplete()
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes("Hello World");
+            var stream = new MemoryStream();
+            PipeWriter writer = PipeWriter.Create(stream, new StreamPipeWriterOptions(leaveOpen: true));
+
+            bytes.AsSpan().CopyTo(writer.GetSpan(bytes.Length));
+            writer.Advance(bytes.Length);
+
+            Assert.Equal(0, stream.Length);
+
+            writer.Complete();
+
+            Assert.Equal(bytes.Length, stream.Length);
+            Assert.Equal("Hello World", Encoding.ASCII.GetString(stream.ToArray()));
+        }
+
+        [Fact]
+        public async Task DataFlushedOnCompleteAsync()
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes("Hello World");
+            var stream = new MemoryStream();
+            PipeWriter writer = PipeWriter.Create(stream, new StreamPipeWriterOptions(leaveOpen: true));
+
+            bytes.AsSpan().CopyTo(writer.GetSpan(bytes.Length));
+            writer.Advance(bytes.Length);
+
+            Assert.Equal(0, stream.Length);
+
+            await writer.CompleteAsync();
+
+            Assert.Equal(bytes.Length, stream.Length);
+            Assert.Equal("Hello World", Encoding.ASCII.GetString(stream.ToArray()));
         }
 
         [Fact]
@@ -402,7 +437,28 @@ namespace System.IO.Pipelines.Tests
         public void InvalidMinimumBufferSize_ThrowsArgException()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeWriterOptions(minimumBufferSize: 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeWriterOptions(minimumBufferSize: -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeWriterOptions(minimumBufferSize: -2));
+        }
+
+        [Fact]
+        public void StreamPipeWriterOptions_Ctor_Defaults()
+        {
+            var options = new StreamPipeWriterOptions();
+            Assert.Same(MemoryPool<byte>.Shared, options.Pool);
+            Assert.Equal(4096, options.MinimumBufferSize);
+            Assert.False(options.LeaveOpen);
+        }
+
+        [Fact]
+        public void StreamPipeWriterOptions_Ctor_Roundtrip()
+        {
+            using (var pool = new TestMemoryPool())
+            {
+                var options = new StreamPipeWriterOptions(pool: pool, minimumBufferSize: 1234, leaveOpen: true);
+                Assert.Same(pool, options.Pool);
+                Assert.Equal(1234, options.MinimumBufferSize);
+                Assert.True(options.LeaveOpen);
+            }
         }
 
         [Fact]
@@ -455,7 +511,9 @@ namespace System.IO.Pipelines.Tests
         {
             bool fired = false;
             PipeWriter writer = PipeWriter.Create(Stream.Null);
+#pragma warning disable CS0618 // Type or member is obsolete
             writer.OnReaderCompleted((_, __) => { fired = true; }, null);
+#pragma warning restore CS0618 // Type or member is obsolete
             writer.Complete();
             Assert.False(fired);
         }
