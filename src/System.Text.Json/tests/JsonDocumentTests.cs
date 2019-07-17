@@ -1831,7 +1831,7 @@ namespace System.Text.Json.Tests
             Assert.Throws<InvalidOperationException>(() =>
             {
                 var buffer = new ArrayBufferWriter<byte>(1024);
-                using var writer = new Utf8JsonWriter(buffer);                
+                using var writer = new Utf8JsonWriter(buffer);
                 root.WriteTo(writer);
             });
         }
