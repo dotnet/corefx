@@ -360,6 +360,17 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        public void StartTimeIsStable()
+        {
+            DateTime startTime = Process.GetCurrentProcess().StartTime;
+
+            Thread.Sleep(TimeSpan.FromSeconds(5));
+
+            // StartTime should be stable and should not change
+            Assert.Equals(startTime, Process.GetCurrentProcess().StartTime);
+        }
+
+        [Fact]
         [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestId()
         {
