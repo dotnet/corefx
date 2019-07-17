@@ -493,14 +493,7 @@ namespace System.IO.Pipelines
             ValidateReading();
             _readMrvts.OnCompleted(continuation, state, token, flags);
 
-            if ((flags & ValueTaskSourceOnCompletedFlags.FlowExecutionContext) != 0)
-            {
-                _readAwaiter.OnCompleted(_onReadCompleted);
-            }
-            else
-            {
-                _readAwaiter.UnsafeOnCompleted(_onReadCompleted);
-            }
+            _readAwaiter.UnsafeOnCompleted(_onReadCompleted);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
