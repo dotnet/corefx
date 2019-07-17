@@ -35,7 +35,10 @@ namespace System.Diagnostics
                 if (info == null)
                     throw new Win32Exception(SR.ProcessInformationUnavailable);
 
-                return DateTime.UnixEpoch + TimeSpan.FromSeconds(info.Value.pbsd.pbi_start_tvsec + info.Value.pbsd.pbi_start_tvusec / MicrosecondsToSecondsFactor);
+                DateTime startTime = DateTime.UnixEpoch + TimeSpan.FromSeconds(info.Value.pbsd.pbi_start_tvsec + info.Value.pbsd.pbi_start_tvusec / MicrosecondsToSecondsFactor);
+
+                // The return value is expected to be in the local time zone.
+                return startTime.ToLocalTime();
             }
         }
 
