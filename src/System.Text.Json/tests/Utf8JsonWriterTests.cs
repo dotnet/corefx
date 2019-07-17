@@ -4194,6 +4194,66 @@ namespace System.Text.Json.Tests
         [InlineData(true, false, "mess><age")]
         [InlineData(false, true, "mess><age")]
         [InlineData(false, false, "mess><age")]
+        [InlineData(true, true, ">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>")] // \u6f22 = 汉, \u5B57 = 字
+        [InlineData(true, false, ">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>")]
+        [InlineData(false, true, ">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>")]
+        [InlineData(false, false, ">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>")]
+        [InlineData(true, true, "mess\r\nage")]
+        [InlineData(true, false, "mess\r\nage")]
+        [InlineData(false, true, "mess\r\nage")]
+        [InlineData(false, false, "mess\r\nage")]
+        public void WriteStringsWithRelaxedEscaping(bool formatted, bool skipValidation, string keyString)
+        {
+            string expectedStr = GetExpectedString_RelaxedEscaping(prettyPrint: formatted, keyString);
+
+            var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
+            ReadOnlySpan<char> keyUtf16 = keyString.AsSpan();
+            ReadOnlySpan<byte> keyUtf8 = Encoding.UTF8.GetBytes(keyString);
+
+            for (int i = 0; i < 3; i++)
+            {
+                var output = new ArrayBufferWriter<byte>(1024);
+                var jsonUtf8 = new Utf8JsonWriter(output, options);
+
+                jsonUtf8.WriteStartObject();
+
+                switch (i)
+                {
+                    case 0:
+                        jsonUtf8.WriteString(keyString, keyString);
+                        jsonUtf8.WriteStartArray(keyString);
+                        break;
+                    case 1:
+                        jsonUtf8.WriteString(keyUtf16, keyString);
+                        jsonUtf8.WriteStartArray(keyUtf16);
+                        break;
+                    case 2:
+                        jsonUtf8.WriteString(keyUtf8, keyString);
+                        jsonUtf8.WriteStartArray(keyUtf8);
+                        break;
+                }
+
+                jsonUtf8.WriteStringValue(keyString);
+                jsonUtf8.WriteStringValue(keyString);
+                jsonUtf8.WriteEndArray();
+
+                jsonUtf8.WriteEndObject();
+                jsonUtf8.Flush();
+
+                AssertContents(expectedStr, output);
+            }
+        }
+
+        [Theory]
+        [InlineData(true, true, "message")]
+        [InlineData(true, false, "message")]
+        [InlineData(false, true, "message")]
+        [InlineData(false, false, "message")]
+        [InlineData(true, true, "mess><age")]
+        [InlineData(true, false, "mess><age")]
+        [InlineData(false, true, "mess><age")]
+        [InlineData(false, false, "mess><age")]
         [InlineData(true, true, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")]
         [InlineData(true, false, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")]
         [InlineData(false, true, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")]
@@ -5777,6 +5837,34 @@ namespace System.Text.Json.Tests
             json.WriteValue(ulongs[0]);
             json.WriteValue(decimals[0]);
             json.WriteEndArray();
+
+            json.WriteEnd();
+
+            json.Flush();
+
+            return Encoding.UTF8.GetString(ms.ToArray());
+        }
+
+        private static string GetExpectedString_RelaxedEscaping(bool prettyPrint, string keyString)
+        {
+            var ms = new MemoryStream();
+            TextWriter streamWriter = new StreamWriter(ms, new UTF8Encoding(false), 1024, true);
+
+            var json = new JsonTextWriter(streamWriter)
+            {
+                Formatting = prettyPrint ? Formatting.Indented : Formatting.None,
+            };
+
+            json.WriteStartObject();
+
+            json.WritePropertyName(keyString, escape: true);
+            json.WriteValue(keyString);
+
+            json.WritePropertyName(keyString, escape: true);
+            json.WriteStartArray();
+            json.WriteValue(keyString);
+            json.WriteValue(keyString);
+            json.WriteEnd();
 
             json.WriteEnd();
 
