@@ -172,7 +172,7 @@ namespace System.Threading.Tests
         public static IEnumerable<object[]> AbandonExisting_MemberData()
         {
             var nameGuidStr = Guid.NewGuid().ToString("N");
-            for (var waitType = WaitHandleWaitType.WaitOne; waitType <= WaitHandleWaitType.WaitAll; ++waitType)
+            foreach (WaitHandleWaitType waitType in Enum.GetValues(typeof(WaitHandleWaitType)))
             {
                 foreach (int waitCount in new int[] { 1, 3 })
                 {
