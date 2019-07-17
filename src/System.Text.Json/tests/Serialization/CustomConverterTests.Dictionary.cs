@@ -91,35 +91,33 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void CustomDictionaryConverterContravariant()
         {
-            const string json = @"{""Key1"":1,""Key2"":2}";
+            const string Json = @"{""Key1"":1,""Key2"":2}";
 
             var options = new JsonSerializerOptions();
             options.Converters.Add(new IDictionaryConverter(10));
 
-            Dictionary<string, long> dictionary = JsonSerializer.Deserialize<Dictionary<string, long>>(json, options);
+            Dictionary<string, long> dictionary = JsonSerializer.Deserialize<Dictionary<string, long>>(Json, options);
             Assert.Equal(11, dictionary["Key1"]);
             Assert.Equal(12, dictionary["Key2"]);
 
-            string jsonSerialized = JsonSerializer.Serialize(dictionary, options);
-            Assert.Equal(json, jsonSerialized);
+            Assert.Equal(Json, JsonSerializer.Serialize(dictionary, options));
         }
 
         [Fact]
         public static void ClassWithCustomDictionaryConverterTest()
         {
-            const string json = @"{""MyInt"":32,""MyDictionary"":{""Key1"":1,""Key2"":2},""MyString"":""Hello""}";
+            const string Json = @"{""MyInt"":32,""MyDictionary"":{""Key1"":1,""Key2"":2},""MyString"":""Hello""}";
 
             var options = new JsonSerializerOptions();
             options.Converters.Add(new IDictionaryConverter(10));
 
-            ClassWithCustomDictionaryConverter dictionary = JsonSerializer.Deserialize<ClassWithCustomDictionaryConverter>(json, options);
+            ClassWithCustomDictionaryConverter dictionary = JsonSerializer.Deserialize<ClassWithCustomDictionaryConverter>(Json, options);
             Assert.Equal(11, dictionary.MyDictionary["Key1"]);
             Assert.Equal(12, dictionary.MyDictionary["Key2"]);
             Assert.Equal(32, dictionary.MyInt);
             Assert.Equal("Hello", dictionary.MyString);
 
-            string jsonSerialized = JsonSerializer.Serialize(dictionary, options);
-            Assert.Equal(json, jsonSerialized);
+            Assert.Equal(Json, JsonSerializer.Serialize(dictionary, options));
         }
 
         private class ClassWithCustomDictionaryConverter
@@ -140,16 +138,7 @@ namespace System.Text.Json.Serialization.Tests
 
             public override bool CanConvert(Type typeToConvert)
             {
-                if (!typeToConvert.IsGenericType)
-                    return false;
-
-                Type generic = typeToConvert.GetGenericTypeDefinition();
-                if (generic != typeof(Dictionary<,>))
-                    return false;
-
-                Type arg1 = typeToConvert.GetGenericArguments()[0];
-                Type arg2 = typeToConvert.GetGenericArguments()[1];
-                return arg1 == typeof(string) && arg2 == typeof(long);
+                return typeToConvert == typeof(Dictionary<string, long>);
             }
 
             public override IDictionary<string, long> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

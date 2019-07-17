@@ -230,7 +230,6 @@ namespace System.Text.Json.Serialization.Tests
 
         private class TestClassWithFieldHavingCustomConverter
         {
-
             public string Name { get; set; }
             public Customer Customer { get; set; }
             public DerivedCustomer DerivedCustomer { get; set; }
