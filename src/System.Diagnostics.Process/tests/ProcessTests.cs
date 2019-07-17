@@ -364,10 +364,10 @@ namespace System.Diagnostics.Tests
         {
             DateTime startTime = Process.GetCurrentProcess().StartTime;
 
-            Thread.Sleep(TimeSpan.FromSeconds(5));
+            Thread.Sleep(TimeSpan.FromSeconds(0.5));
 
             // StartTime should be stable and should not change
-            Assert.Equals(startTime, Process.GetCurrentProcess().StartTime);
+            Assert.Equal(startTime, Process.GetCurrentProcess().StartTime);
         }
 
         [Fact]
