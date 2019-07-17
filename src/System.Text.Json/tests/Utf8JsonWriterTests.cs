@@ -4198,10 +4198,10 @@ namespace System.Text.Json.Tests
         [InlineData(true, false, ">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>")]
         [InlineData(false, true, ">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>")]
         [InlineData(false, false, ">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>")]
-        [InlineData(true, true, "mess\r\nage")]
-        [InlineData(true, false, "mess\r\nage")]
-        [InlineData(false, true, "mess\r\nage")]
-        [InlineData(false, false, "mess\r\nage")]
+        [InlineData(true, true, "mess\r\nage\u0008\u0001!")]
+        [InlineData(true, false, "mess\r\nage\u0008\u0001!")]
+        [InlineData(false, true, "mess\r\nage\u0008\u0001!")]
+        [InlineData(false, false, "mess\r\nage\u0008\u0001!")]
         public void WriteStringsWithRelaxedEscaping(bool formatted, bool skipValidation, string keyString)
         {
             string expectedStr = GetExpectedString_RelaxedEscaping(prettyPrint: formatted, keyString);
@@ -5331,9 +5331,9 @@ namespace System.Text.Json.Tests
 
                 ReadOnlySpan<char> nullStringSpan = nullString.AsSpan();
                 charSpanAction(writer, nullStringSpan, value);
-            
+
                 byteSpanAction(writer, ReadOnlySpan<byte>.Empty, value);
-                
+
                 writer.WriteEndObject();
                 writer.Flush();
             }
@@ -5421,7 +5421,7 @@ namespace System.Text.Json.Tests
         {
             var output = new ArrayBufferWriter<byte>(1024);
             string nullString = null;
-            
+
             using (var writer = new Utf8JsonWriter(output))
             {
                 writer.WriteStartArray();
