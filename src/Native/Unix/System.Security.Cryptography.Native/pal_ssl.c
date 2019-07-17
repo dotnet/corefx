@@ -152,9 +152,14 @@ void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
         protocolOptions |= SSL_OP_NO_TLSv1_3;
     }
 
+    // We manually set protocols - we need to reset OpenSSL restrictions
+    // to a maximum possible range
+    ResetProtocolRestrictions(ctx);
+
     // OpenSSL 1.0 calls this long, OpenSSL 1.1 calls it unsigned long.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-conversion"
+
     SSL_CTX_set_options(ctx, protocolOptions);
 #pragma clang diagnostic pop
 }
@@ -319,6 +324,12 @@ CryptoNative_SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallba
     SSL_CTX_set_cert_verify_callback(ctx, callback, arg);
 }
 
+void ResetProtocolRestrictions(SSL_CTX* ctx)
+{
+    SSL_CTX_set_min_proto_version(ctx, 0);
+    SSL_CTX_set_max_proto_version(ctx, 0);
+}
+
 int32_t CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
 {
     switch (policy)
@@ -327,6 +338,7 @@ int32_t CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
         case NoEncryption:
             // No minimum security policy, same as OpenSSL 1.0
             SSL_CTX_set_security_level(ctx, 0);
+            ResetProtocolRestrictions(ctx);
             return true;
         case RequireEncryption:
             return true;

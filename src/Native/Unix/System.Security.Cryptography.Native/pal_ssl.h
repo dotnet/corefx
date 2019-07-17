@@ -398,3 +398,6 @@ Looks up a cipher by the IANA identifier, returns a shared string for the OpenSS
 and emits a value indicating if the cipher belongs to the SSL2-TLS1.2 list, or the TLS1.3+ list.
 */
 DLLEXPORT const char* CryptoNative_GetOpenSslCipherSuiteName(SSL* ssl, int32_t cipherSuite, int32_t* isTls12OrLower);
+
+/* Internal APIs */
+void ResetProtocolRestrictions(SSL_CTX* ctx);
