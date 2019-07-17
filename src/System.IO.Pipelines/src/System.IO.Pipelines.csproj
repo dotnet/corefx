@@ -58,6 +58,8 @@
     <Reference Include="System.Threading.Tasks.Extensions" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.ThreadPool" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp'">
     <Reference Include="Microsoft.Bcl.AsyncInterfaces" />
   </ItemGroup>
 </Project>

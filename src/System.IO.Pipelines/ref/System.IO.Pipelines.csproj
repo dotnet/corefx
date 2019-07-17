@@ -16,9 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\System.Buffers\ref\System.Buffers.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
-    <Reference Include="Microsoft.Bcl.AsyncInterfaces" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netstandard'">
     <ProjectReference Include="..\..\Microsoft.Bcl.AsyncInterfaces\ref\Microsoft.Bcl.AsyncInterfaces.csproj" />
   </ItemGroup>
