@@ -211,21 +211,25 @@ namespace System.Text.Json.Serialization.Tests
         {
             TestClassWithFieldHavingCustomConverter testObject = new TestClassWithFieldHavingCustomConverter { IntValue = 32,
                 Name = "John Doe", Customer = new Customer { Name = "Customer Doe", CreditLimit = 1000 },
-                DerivedCustomer = new DerivedCustomer { Name = "Derived Doe", CreditLimit = 2000 } };
+                DerivedCustomer = new DerivedCustomer { Name = "Derived Doe", CreditLimit = 2000, Address = new Address { City = "UB" } } };
 
             var options = new JsonSerializerOptions();
             options.Converters.Add(new ObjectToCustomerConverter());
 
             string json = JsonSerializer.Serialize(testObject, options);
 
+            Assert.Equal("{\"Name\":\"John Doe\",\"Customer\":{\"Name\":\"Customer Doe\",\"CreditLimit\":1000,\"Address\":null}," +
+                "\"DerivedCustomer\":{\"Name\":\"Derived Doe\",\"CreditLimit\":2000,\"Address\":\"UB\"},\"IntValue\":32,\"Message\":null}", json);
+
             TestClassWithFieldHavingCustomConverter testObj = JsonSerializer.Deserialize<TestClassWithFieldHavingCustomConverter>(json, options);
 
             Assert.Equal(32, testObj.IntValue);
             Assert.Equal("John Doe", testObj.Name);
             Assert.Equal("CUSTOMER DOE", testObj.Customer.Name);
+            Assert.Equal("NA", testObj.Customer.Address.City);
             Assert.Equal("DERIVED DOE", testObj.DerivedCustomer.Name);
             Assert.Equal(1999, testObj.DerivedCustomer.CreditLimit);
-            Assert.Equal("NA", testObj.DerivedCustomer.Address.City);
+            Assert.Equal("UB", testObj.DerivedCustomer.Address.City);
         }
 
         private class TestClassWithFieldHavingCustomConverter
