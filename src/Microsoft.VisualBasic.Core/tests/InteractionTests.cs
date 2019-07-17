@@ -114,5 +114,27 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { false, 3, "str", "str" };
             yield return new object[] { true, 3, "str", 3 };
         }
+
+        [Theory]
+        [InlineData(0, 1, 100, 10, "   :  0")]
+        [InlineData(1, 1, 100, 10, "  1: 10")]
+        [InlineData(15, 1, 100, 10, " 11: 20")]
+        [InlineData(25, 1, 100, 10, " 21: 30")]
+        [InlineData(35, 1, 100, 10, " 31: 40")]
+        [InlineData(45, 1, 100, 10, " 41: 50")]
+        [InlineData(5001, 1, 10000, 100, " 5001: 5100")]
+        public void Partition(long Number, long Start, long Stop, long Interval, string expected)
+        {
+            Assert.Equal(expected, Interaction.Partition(Number, Start, Stop, Interval));
+        }
+
+        [Theory]
+        [InlineData(0, -1, 100, 10)] // Start < 0
+        [InlineData(0, 100, 100, 10)] // Stop <= Start
+        [InlineData(0, 1, 100, 0)] // Interval < 1
+        public void Partition_Invalid(long Number, long Start, long Stop, long Interval)
+        {
+            Assert.Throws<ArgumentException>(() => Interaction.Partition(Number, Start, Stop, Interval));
+        }
     }
 }

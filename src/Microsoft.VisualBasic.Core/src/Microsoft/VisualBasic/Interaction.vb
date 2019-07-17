@@ -3,6 +3,7 @@
 ' See the LICENSE file in the project root for more information.
 
 Imports System
+Imports System.Text
 Imports System.Runtime.InteropServices
 
 Imports Microsoft.VisualBasic.CompilerServices
@@ -56,6 +57,116 @@ Namespace Microsoft.VisualBasic
 
             Return falsePart
         End Function
+
+        Public Function Partition(ByVal Number As Long, ByVal Start As Long, ByVal [Stop] As Long, ByVal Interval As Long) As String
+            Dim Lower As Long
+            Dim Upper As Long
+            Dim NoUpper As Boolean
+            Dim NoLower As Boolean
+            Dim Buffer As StringBuilder
+            Dim Buffer1 As String
+            Dim Buffer2 As String
+            Dim Spaces As Long
+
+            'Validate arguments
+            If Start < 0 Then
+                Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValue1, "Start"))
+            End If
+
+            If [Stop] <= Start Then
+                Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValue1, "Stop"))
+            End If
+
+            If Interval < 1 Then
+                Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValue1, "Interval"))
+            End If
+
+            'Check for before-first and after-last ranges
+            If Number < Start Then
+                Upper = Start - 1
+                NoLower = True
+            ElseIf Number > [Stop] Then
+                Lower = [Stop] + 1
+                NoUpper = True
+            ElseIf Interval = 1 Then 'This is a special case
+                Lower = Number
+                Upper = Number
+            Else
+                'Calculate the upper and lower ranges
+                'Note the use of Integer division "\" which truncates to whole number
+                Lower = ((Number - Start) \ Interval) * Interval + Start
+                Upper = Lower + Interval - 1
+
+                'Adjust for first and last ranges
+                If Upper > [Stop] Then
+                    Upper = [Stop]
+                End If
+
+                If Lower < Start Then
+                    Lower = Start
+                End If
+            End If
+
+            'Build-up the string.  Calculate number of spaces needed: VB3 uses Stop + 1.
+            'This may seem bogus but it has to be this way for VB3 compatibilty.
+            Buffer1 = CStr([Stop] + 1)
+            Buffer2 = CStr(Start - 1)
+
+            If Len(Buffer1) > Len(Buffer2) Then
+                Spaces = Len(Buffer1)
+            Else
+                Spaces = Len(Buffer2)
+            End If
+
+            'Handle case where Upper is -1 and Stop < 9
+            If NoLower Then
+                Buffer1 = CStr(Upper)
+                If Spaces < Len(Buffer1) Then
+                    Spaces = Len(Buffer1)
+                End If
+            End If
+
+            Buffer = New StringBuilder
+
+            'Insert lower-end of partition range.
+            If NoLower Then
+                InsertSpaces(Buffer, Spaces)
+            Else
+                InsertNumber(Buffer, Lower, Spaces)
+            End If
+
+            'Insert the partition 
+            Buffer.Append(":"c)
+
+            'Insert upper-end of partition range
+            If NoUpper Then
+                InsertSpaces(Buffer, Spaces)
+            Else
+                InsertNumber(Buffer, Upper, Spaces)
+            End If
+
+            Return Buffer.ToString()
+        End Function
+
+        Private Sub InsertSpaces(Buffer As StringBuilder, ByVal Spaces As Long)
+            Do While Spaces > 0
+                Buffer.Append(" "c)
+                Spaces -= 1
+            Loop
+        End Sub
+
+        Private Sub InsertNumber(Buffer As StringBuilder, ByVal Num As Long, ByVal Spaces As Long)
+            Dim Buffer1 As String
+
+            'Convert number to a string
+            Buffer1 = CStr(Num)
+
+            'Insert leading spaces
+            InsertSpaces(Buffer, Spaces - Len(Buffer1))
+
+            'Append string
+            Buffer.Append(Buffer1)
+        End Sub
 
         Public Function CreateObject(ByVal ProgId As String, Optional ByVal ServerName As String = "") As Object
             'Creates local or remote COM2 objects.  Should not be used to create COM+ objects.
