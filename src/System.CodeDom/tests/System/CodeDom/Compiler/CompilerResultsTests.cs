@@ -30,20 +30,59 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "Assembly.Load ignores CodeBase by design, except on netfx. See https://github.com/dotnet/coreclr/issues/10561")]
-        public void CompiledAssembly_ValidPathToAssembly_ReturnsExpected()
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core ignores AssemblyName.CodeBase")]
+        public void CompiledAssembly_GetWithPathToAssembly_ReturnsExpected()
         {
-            var results = new CompilerResults(null) { PathToAssembly = typeof(int).Assembly.EscapedCodeBase };
-            Assert.Equal(typeof(int).Assembly, results.CompiledAssembly);
-            Assert.Same(results.CompiledAssembly, results.CompiledAssembly);
+            var results = new CompilerResults(null) { PathToAssembly = typeof(int).Assembly.CodeBase };
+            Assert.Null(results.CompiledAssembly);
         }
 
-        [Fact]
-        public void CompiledAssembly_Set_GetReturnsExpecte()
+        public static IEnumerable<object[]> CompiledAssembly_Set_TestData()
         {
-            Assembly assembly = typeof(CompilerResultsTests).Assembly;
-            var results = new CompilerResults(null) { CompiledAssembly = assembly };
-            Assert.Same(assembly, results.CompiledAssembly);
+            yield return new object[] { null };
+            yield return new object[] { typeof(CompilerResultsTests).Assembly };
+        }
+
+        [Theory]
+        [MemberData(nameof(CompiledAssembly_Set_TestData))]
+        public void CompiledAssembly_Set_GetReturnsExpected(Assembly value)
+        {
+            var results = new CompilerResults(null) { CompiledAssembly = value };
+            Assert.Same(value, results.CompiledAssembly);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("name")]
+        public void PathToAssembly_Set_GetReturnsExpected(string value)
+        {
+            var results = new CompilerResults(null) { PathToAssembly = value };
+            Assert.Same(value, results.PathToAssembly);
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(0)]
+        [InlineData(1)]
+        public void NativeCompilerReturnValue_Set_GetReturnsExpected(int value)
+        {
+            var results = new CompilerResults(null) { NativeCompilerReturnValue = value };
+            Assert.Equal(value, results.NativeCompilerReturnValue);
+        }
+
+        public static IEnumerable<object[]> TempFiles_Set_TestData()
+        {
+            yield return new object[] { null };
+            yield return new object[] { new TempFileCollection() };
+        }
+
+        [Theory]
+        [MemberData(nameof(TempFiles_Set_TestData))]
+        public void TempFiles_Set_GetReturnsExpected(TempFileCollection value)
+        {
+            var results = new CompilerResults(null) { TempFiles = value };
+            Assert.Same(value, results.TempFiles);
         }
     }
 }
