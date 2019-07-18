@@ -21,12 +21,14 @@
       }
     },
     "Microsoft.Bcl.AsyncInterfaces": {
+      "BaselineVersion": "1.0.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.0.0": "1.0.0"
       }
     },
     "Microsoft.Bcl.HashCode": {
+      "BaselineVersion": "1.0.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.0.0": "1.0.0"
@@ -119,6 +121,7 @@
         "2.0.0",
         "2.0.1"
       ],
+      "BaselineVersion": "2.1.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "2.0.0.0": "2.0.0",
@@ -127,6 +130,7 @@
       }
     },
     "Microsoft.IO.Redist": {
+      "BaselineVersion": "4.6.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.6.0"
@@ -352,6 +356,7 @@
         "1.0.0",
         "2.0.0"
       ],
+      "BaselineVersion": "2.1.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "1.0.0.0": "1.0.0",
@@ -924,6 +929,7 @@
       }
     },
     "System.ComponentModel.Composition.Registration": {
+      "BaselineVersion": "4.6.0",
       "InboxOn": {
         "net45": "4.0.0.0"
       },
@@ -1285,6 +1291,7 @@
       }
     },
     "System.Data.OleDb": {
+      "BaselineVersion": "4.6.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.6.0"
@@ -3428,7 +3435,7 @@
         "4.0.1",
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0",
+      "BaselineVersion": "4.6.0",
       "InboxOn": {
         "netcoreapp2.0": "4.0.3.0",
         "netcoreapp3.0": "4.1.0.0",
@@ -3455,7 +3462,7 @@
         "4.0.1",
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0",
+      "BaselineVersion": "4.6.0",
       "InboxOn": {
         "netcoreapp2.0": "4.0.3.0",
         "netcoreapp3.0": "4.1.0.0",
@@ -3546,6 +3553,7 @@
       }
     },
     "System.Reflection.MetadataLoadContext": {
+      "BaselineVersion": "4.6.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.6.0"
@@ -3624,6 +3632,7 @@
       }
     },
     "System.Resources.Extensions": {
+      "BaselineVersion": "4.6.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.6.0"
@@ -5026,6 +5035,7 @@
       }
     },
     "System.Text.Json": {
+      "BaselineVersion": "4.6.0",
       "InboxOn": {
         "netcoreapp3.0": "4.0.0.0",
         "uap10.0.16300": "4.0.0.0"
@@ -5558,6 +5568,7 @@
       }
     },
     "System.Windows.Extensions": {
+      "BaselineVersion": "4.6.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.6.0"
