@@ -5,6 +5,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization.Formatters.Tests;
 using Microsoft.CSharp;
 using Microsoft.VisualBasic;
 using Xunit;
@@ -132,6 +134,20 @@ namespace System.CodeDom.Compiler.Tests
 
             Exception ex2 = Assert.ThrowsAny<Exception>(() => CodeDomProvider.CreateProvider(language, new Dictionary<string, string>()));
             AssertIsConfigurationErrorsException(ex2);
+        }
+
+        [Fact]
+        public void CreateProvider_SerializeConfigurationErrorsException_ThrowsPlatformNotSupportedException()
+        {
+            Exception ex = Assert.ThrowsAny<Exception>(() => CodeDomProvider.CreateProvider(string.Empty));
+            AssertIsConfigurationErrorsException(ex);
+
+            // Because CodeDomProvider.CreateProvider(string.Empty) throws an internal ConfigurationErrorsException,
+            // rather than the publically exposed exception, we need to call BinaryFormatterHelpers.AssertExceptionDeserializationFails
+            // through reflection.
+            MethodInfo method = typeof(BinaryFormatterHelpers).GetMethod(nameof(BinaryFormatterHelpers.AssertExceptionDeserializationFails));
+            MethodInfo genericMethod = method.MakeGenericMethod(new Type[] { ex.GetType() });
+            genericMethod.Invoke(ex, new object[0]);
         }
 
         [Theory]
