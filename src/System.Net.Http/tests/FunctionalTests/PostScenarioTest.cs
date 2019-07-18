@@ -264,7 +264,7 @@ namespace System.Net.Http.Functional.Tests
             handler.PreAuthenticate = preAuthenticate;
             handler.Credentials = credential;
 
-            // Issue #39545: issue occassionally timing on CI using default timeout of 100 seconds.
+            // Issue #39545: test occassionally timing on CI using default timeout of 100 seconds.
             var timeout = TimeSpan.FromSeconds(150);
 
             using (HttpClient client = CreateHttpClientForRemoteServer(remoteServer, handler, timeout))
