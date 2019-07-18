@@ -120,6 +120,9 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(1, 1, 2, 1, "1:1")]
         [InlineData(2, 1, 2, 1, "2:2")]
         [InlineData(3, 1, 2, 1, "3: ")]
+        [InlineData(10, 1, 9, 1, "10:  ")]
+        [InlineData(-1, 0, 1, 1, "  :-1")]
+        [InlineData(-50, 0, 1, 1, "  :-1")]
         [InlineData(0, 1, 100, 10, "   :  0")]
         [InlineData(1, 1, 100, 10, "  1: 10")]
         [InlineData(15, 1, 100, 10, " 11: 20")]
@@ -130,6 +133,11 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(120, 100, 200, 10, "120:129")]
         [InlineData(150, 100, 120, 10, "121:   ")]
         [InlineData(5001, 1, 10000, 100, " 5001: 5100")]
+        [InlineData(1, 0, 1, long.MaxValue, " 0: 1")]
+        [InlineData(1, 0, long.MaxValue - 1, long.MaxValue, "                  0:9223372036854775806")]
+        [InlineData(long.MaxValue, 0, long.MaxValue - 1, 1, "9223372036854775807:                   ")]
+        [InlineData(long.MaxValue - 1, 0, long.MaxValue - 1, 1, "9223372036854775806:9223372036854775806")]
+        [InlineData(0, 1, 2, 1, " :0")]
         public void Partition(long Number, long Start, long Stop, long Interval, string expected)
         {
             Assert.Equal(expected, Interaction.Partition(Number, Start, Stop, Interval));
@@ -145,7 +153,18 @@ namespace Microsoft.VisualBasic.Tests
         }
 
         [Theory]
+        [InlineData(1, 0, long.MaxValue, 1)] // Stop + 1
+        [InlineData(1, 0, long.MaxValue, long.MaxValue)]
+        [InlineData(2, 1, 2, long.MaxValue)] // Lower + Interval
+        [InlineData(long.MaxValue - 1, long.MaxValue - 1, long.MaxValue, 1)]
+        public void Partition_Overflow(long Number, long Start, long Stop, long Interval)
+        {
+            Assert.Throws<OverflowException>(() => Interaction.Partition(Number, Start, Stop, Interval));
+        }
+
+        [Theory]
         [InlineData(null, null)] // empty
+        [InlineData(new object[0], null)] // empty
         [InlineData(new object[] { false, "red", false, "green", false, "blue" }, null)] // none
         [InlineData(new object[] { true, "red", false, "green", false, "blue" }, "red")]
         [InlineData(new object[] { false, "red", true, "green", false, "blue" }, "green")]
