@@ -11,7 +11,7 @@ namespace System.Diagnostics
     {
         private const int NanosecondsTo100NanosecondsFactor = 100;
         
-        private const double MicrosecondsToSecondsFactor = 1_000_000;
+        private const int MicrosecondsToSecondsFactor = 1_000_000;
 
         /// <summary>Gets the amount of time the process has spent running code inside the operating system core.</summary>
         public TimeSpan PrivilegedProcessorTime
@@ -35,7 +35,7 @@ namespace System.Diagnostics
                 if (info == null)
                     throw new Win32Exception(SR.ProcessInformationUnavailable);
 
-                DateTime startTime = DateTime.UnixEpoch + TimeSpan.FromSeconds(info.Value.pbsd.pbi_start_tvsec + info.Value.pbsd.pbi_start_tvusec / MicrosecondsToSecondsFactor);
+                DateTime startTime = DateTime.UnixEpoch + TimeSpan.FromSeconds(info.Value.pbsd.pbi_start_tvsec + info.Value.pbsd.pbi_start_tvusec / (double)MicrosecondsToSecondsFactor);
 
                 // The return value is expected to be in the local time zone.
                 return startTime.ToLocalTime();
