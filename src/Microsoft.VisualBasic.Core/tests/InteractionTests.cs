@@ -137,7 +137,6 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(1, 0, long.MaxValue - 1, long.MaxValue, "                  0:9223372036854775806")]
         [InlineData(long.MaxValue, 0, long.MaxValue - 1, 1, "9223372036854775807:                   ")]
         [InlineData(long.MaxValue - 1, 0, long.MaxValue - 1, 1, "9223372036854775806:9223372036854775806")]
-        [InlineData(0, 1, 2, 1, " :0")]
         public void Partition(long Number, long Start, long Stop, long Interval, string expected)
         {
             Assert.Equal(expected, Interaction.Partition(Number, Start, Stop, Interval));
