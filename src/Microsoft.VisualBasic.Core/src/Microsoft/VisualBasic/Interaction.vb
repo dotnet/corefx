@@ -59,11 +59,12 @@ Namespace Microsoft.VisualBasic
         End Function
 
         Public Function Partition(ByVal Number As Long, ByVal Start As Long, ByVal [Stop] As Long, ByVal Interval As Long) As String
+            'CONSIDER: Change to use StringBuilder
             Dim Lower As Long
             Dim Upper As Long
             Dim NoUpper As Boolean
             Dim NoLower As Boolean
-            Dim Buffer As StringBuilder
+            Dim Buffer As String = Nothing
             Dim Buffer1 As String
             Dim Buffer2 As String
             Dim Spaces As Long
@@ -126,8 +127,6 @@ Namespace Microsoft.VisualBasic
                 End If
             End If
 
-            Buffer = New StringBuilder
-
             'Insert lower-end of partition range.
             If NoLower Then
                 InsertSpaces(Buffer, Spaces)
@@ -136,7 +135,7 @@ Namespace Microsoft.VisualBasic
             End If
 
             'Insert the partition 
-            Buffer.Append(":"c)
+            Buffer = Buffer & ":"
 
             'Insert upper-end of partition range
             If NoUpper Then
@@ -145,18 +144,18 @@ Namespace Microsoft.VisualBasic
                 InsertNumber(Buffer, Upper, Spaces)
             End If
 
-            Return Buffer.ToString()
+            Return Buffer
         End Function
 
-        Private Sub InsertSpaces(Buffer As StringBuilder, ByVal Spaces As Long)
-            Do While Spaces > 0
-                Buffer.Append(" "c)
-                Spaces -= 1
+        Private Sub InsertSpaces(ByRef Buffer As String, ByVal Spaces As Long)
+            Do While Spaces > 0 'consider:  - use stringbuilder
+                Buffer = Buffer & " "
+                Spaces = Spaces - 1
             Loop
         End Sub
 
-        Private Sub InsertNumber(Buffer As StringBuilder, ByVal Num As Long, ByVal Spaces As Long)
-            Dim Buffer1 As String
+        Private Sub InsertNumber(ByRef Buffer As String, ByVal Num As Long, ByVal Spaces As Long)
+            Dim Buffer1 As String 'consider:  - use stringbuilder
 
             'Convert number to a string
             Buffer1 = CStr(Num)
@@ -165,7 +164,7 @@ Namespace Microsoft.VisualBasic
             InsertSpaces(Buffer, Spaces - Len(Buffer1))
 
             'Append string
-            Buffer.Append(Buffer1)
+            Buffer = Buffer & Buffer1
         End Sub
 
         Public Function Switch(ByVal ParamArray VarExpr() As Object) As Object
