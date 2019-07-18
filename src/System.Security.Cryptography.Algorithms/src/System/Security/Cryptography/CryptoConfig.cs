@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
@@ -32,18 +33,15 @@ namespace System.Security.Cryptography
 
         private const string ECDsaIdentifier = "ECDsa";
 
-        private static volatile Dictionary<string, string> s_defaultOidHT = null;
-        private static volatile Dictionary<string, object> s_defaultNameHT = null;
-        private static volatile Dictionary<string, Type> appNameHT = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-        private static volatile Dictionary<string, string> appOidHT = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private static volatile Dictionary<string, string> s_defaultOidHT;
+        private static volatile ConcurrentDictionary<string, object> s_defaultNameHT;
+        private static volatile ConcurrentDictionary<string, Type> appNameHT = new ConcurrentDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+        private static volatile ConcurrentDictionary<string, string> appOidHT = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly char[] SepArray = { '.' }; // valid ASN.1 separators
 
         // CoreFx does not support AllowOnlyFipsAlgorithms
         public static bool AllowOnlyFipsAlgorithms => false;
-
-        // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static object s_InternalSyncObject = new object();
 
         private static Dictionary<string, string> DefaultOidHT
         {
@@ -106,7 +104,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        private static Dictionary<string, object> DefaultNameHT
+        private static ConcurrentDictionary<string, object> DefaultNameHT
         {
             get
             {
@@ -115,7 +113,7 @@ namespace System.Security.Cryptography
                     return s_defaultNameHT;
                 }
 
-                Dictionary<string, object> ht = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                ConcurrentDictionary<string, object> ht = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
                 Type HMACMD5Type = typeof(System.Security.Cryptography.HMACMD5);
                 Type HMACSHA1Type = typeof(System.Security.Cryptography.HMACSHA1);
@@ -141,132 +139,132 @@ namespace System.Security.Cryptography
                 string ECDsaCngType = "System.Security.Cryptography.ECDsaCng, " + AssemblyName_Cng;
 
                 // Random number generator
-                ht.Add("RandomNumberGenerator", RNGCryptoServiceProviderType);
-                ht.Add("System.Security.Cryptography.RandomNumberGenerator", RNGCryptoServiceProviderType);
+                ht.TryAdd("RandomNumberGenerator", RNGCryptoServiceProviderType);
+                ht.TryAdd("System.Security.Cryptography.RandomNumberGenerator", RNGCryptoServiceProviderType);
 
                 // Hash functions
-                ht.Add("SHA", SHA1CryptoServiceProviderType);
-                ht.Add("SHA1", SHA1CryptoServiceProviderType);
-                ht.Add("System.Security.Cryptography.SHA1", SHA1CryptoServiceProviderType);
-                ht.Add("System.Security.Cryptography.HashAlgorithm", SHA1CryptoServiceProviderType);
+                ht.TryAdd("SHA", SHA1CryptoServiceProviderType);
+                ht.TryAdd("SHA1", SHA1CryptoServiceProviderType);
+                ht.TryAdd("System.Security.Cryptography.SHA1", SHA1CryptoServiceProviderType);
+                ht.TryAdd("System.Security.Cryptography.HashAlgorithm", SHA1CryptoServiceProviderType);
 
-                ht.Add("MD5", MD5CryptoServiceProviderType);
-                ht.Add("System.Security.Cryptography.MD5", MD5CryptoServiceProviderType);
+                ht.TryAdd("MD5", MD5CryptoServiceProviderType);
+                ht.TryAdd("System.Security.Cryptography.MD5", MD5CryptoServiceProviderType);
 
-                ht.Add("SHA256", SHA256DefaultType);
-                ht.Add("SHA-256", SHA256DefaultType);
-                ht.Add("System.Security.Cryptography.SHA256", SHA256DefaultType);
+                ht.TryAdd("SHA256", SHA256DefaultType);
+                ht.TryAdd("SHA-256", SHA256DefaultType);
+                ht.TryAdd("System.Security.Cryptography.SHA256", SHA256DefaultType);
 
-                ht.Add("SHA384", SHA384DefaultType);
-                ht.Add("SHA-384", SHA384DefaultType);
-                ht.Add("System.Security.Cryptography.SHA384", SHA384DefaultType);
+                ht.TryAdd("SHA384", SHA384DefaultType);
+                ht.TryAdd("SHA-384", SHA384DefaultType);
+                ht.TryAdd("System.Security.Cryptography.SHA384", SHA384DefaultType);
 
-                ht.Add("SHA512", SHA512DefaultType);
-                ht.Add("SHA-512", SHA512DefaultType);
-                ht.Add("System.Security.Cryptography.SHA512", SHA512DefaultType);
+                ht.TryAdd("SHA512", SHA512DefaultType);
+                ht.TryAdd("SHA-512", SHA512DefaultType);
+                ht.TryAdd("System.Security.Cryptography.SHA512", SHA512DefaultType);
 
                 // Keyed Hash Algorithms
-                ht.Add("System.Security.Cryptography.HMAC", HMACSHA1Type);
-                ht.Add("System.Security.Cryptography.KeyedHashAlgorithm", HMACSHA1Type);
-                ht.Add("HMACMD5", HMACMD5Type);
-                ht.Add("System.Security.Cryptography.HMACMD5", HMACMD5Type);
-                ht.Add("HMACSHA1", HMACSHA1Type);
-                ht.Add("System.Security.Cryptography.HMACSHA1", HMACSHA1Type);
-                ht.Add("HMACSHA256", HMACSHA256Type);
-                ht.Add("System.Security.Cryptography.HMACSHA256", HMACSHA256Type);
-                ht.Add("HMACSHA384", HMACSHA384Type);
-                ht.Add("System.Security.Cryptography.HMACSHA384", HMACSHA384Type);
-                ht.Add("HMACSHA512", HMACSHA512Type);
-                ht.Add("System.Security.Cryptography.HMACSHA512", HMACSHA512Type);
+                ht.TryAdd("System.Security.Cryptography.HMAC", HMACSHA1Type);
+                ht.TryAdd("System.Security.Cryptography.KeyedHashAlgorithm", HMACSHA1Type);
+                ht.TryAdd("HMACMD5", HMACMD5Type);
+                ht.TryAdd("System.Security.Cryptography.HMACMD5", HMACMD5Type);
+                ht.TryAdd("HMACSHA1", HMACSHA1Type);
+                ht.TryAdd("System.Security.Cryptography.HMACSHA1", HMACSHA1Type);
+                ht.TryAdd("HMACSHA256", HMACSHA256Type);
+                ht.TryAdd("System.Security.Cryptography.HMACSHA256", HMACSHA256Type);
+                ht.TryAdd("HMACSHA384", HMACSHA384Type);
+                ht.TryAdd("System.Security.Cryptography.HMACSHA384", HMACSHA384Type);
+                ht.TryAdd("HMACSHA512", HMACSHA512Type);
+                ht.TryAdd("System.Security.Cryptography.HMACSHA512", HMACSHA512Type);
 
                 // Asymmetric algorithms
-                ht.Add("RSA", RSACryptoServiceProviderType);
-                ht.Add("System.Security.Cryptography.RSA", RSACryptoServiceProviderType);
-                ht.Add("System.Security.Cryptography.AsymmetricAlgorithm", RSACryptoServiceProviderType);
+                ht.TryAdd("RSA", RSACryptoServiceProviderType);
+                ht.TryAdd("System.Security.Cryptography.RSA", RSACryptoServiceProviderType);
+                ht.TryAdd("System.Security.Cryptography.AsymmetricAlgorithm", RSACryptoServiceProviderType);
 
-                ht.Add("DSA", DSACryptoServiceProviderType);
-                ht.Add("System.Security.Cryptography.DSA", DSACryptoServiceProviderType);
+                ht.TryAdd("DSA", DSACryptoServiceProviderType);
+                ht.TryAdd("System.Security.Cryptography.DSA", DSACryptoServiceProviderType);
 
                 // Windows will register the public ECDsaCng type.  Non-Windows gets a special handler.
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    ht.Add(ECDsaIdentifier, ECDsaCngType);
+                    ht.TryAdd(ECDsaIdentifier, ECDsaCngType);
                 }
 
-                ht.Add("ECDsaCng", ECDsaCngType);
-                ht.Add("System.Security.Cryptography.ECDsaCng", ECDsaCngType);
+                ht.TryAdd("ECDsaCng", ECDsaCngType);
+                ht.TryAdd("System.Security.Cryptography.ECDsaCng", ECDsaCngType);
 
                 // Symmetric algorithms
-                ht.Add("DES", DESCryptoServiceProviderType);
-                ht.Add("System.Security.Cryptography.DES", DESCryptoServiceProviderType);
+                ht.TryAdd("DES", DESCryptoServiceProviderType);
+                ht.TryAdd("System.Security.Cryptography.DES", DESCryptoServiceProviderType);
 
-                ht.Add("3DES", TripleDESCryptoServiceProviderType);
-                ht.Add("TripleDES", TripleDESCryptoServiceProviderType);
-                ht.Add("Triple DES", TripleDESCryptoServiceProviderType);
-                ht.Add("System.Security.Cryptography.TripleDES", TripleDESCryptoServiceProviderType);
+                ht.TryAdd("3DES", TripleDESCryptoServiceProviderType);
+                ht.TryAdd("TripleDES", TripleDESCryptoServiceProviderType);
+                ht.TryAdd("Triple DES", TripleDESCryptoServiceProviderType);
+                ht.TryAdd("System.Security.Cryptography.TripleDES", TripleDESCryptoServiceProviderType);
 
-                ht.Add("RC2", RC2CryptoServiceProviderType);
-                ht.Add("System.Security.Cryptography.RC2", RC2CryptoServiceProviderType);
+                ht.TryAdd("RC2", RC2CryptoServiceProviderType);
+                ht.TryAdd("System.Security.Cryptography.RC2", RC2CryptoServiceProviderType);
 
-                ht.Add("Rijndael", RijndaelManagedType);
-                ht.Add("System.Security.Cryptography.Rijndael", RijndaelManagedType);
+                ht.TryAdd("Rijndael", RijndaelManagedType);
+                ht.TryAdd("System.Security.Cryptography.Rijndael", RijndaelManagedType);
                 // Rijndael is the default symmetric cipher because (a) it's the strongest and (b) we know we have an implementation everywhere
-                ht.Add("System.Security.Cryptography.SymmetricAlgorithm", RijndaelManagedType);
+                ht.TryAdd("System.Security.Cryptography.SymmetricAlgorithm", RijndaelManagedType);
 
-                ht.Add("AES", AesCryptoServiceProviderType);
-                ht.Add("AesCryptoServiceProvider", AesCryptoServiceProviderType);
-                ht.Add("System.Security.Cryptography.AesCryptoServiceProvider", AesCryptoServiceProviderType);
-                ht.Add("AesManaged", AesManagedType);
-                ht.Add("System.Security.Cryptography.AesManaged", AesManagedType);
+                ht.TryAdd("AES", AesCryptoServiceProviderType);
+                ht.TryAdd("AesCryptoServiceProvider", AesCryptoServiceProviderType);
+                ht.TryAdd("System.Security.Cryptography.AesCryptoServiceProvider", AesCryptoServiceProviderType);
+                ht.TryAdd("AesManaged", AesManagedType);
+                ht.TryAdd("System.Security.Cryptography.AesManaged", AesManagedType);
 
                 // Xml Dsig/ Enc Hash algorithms
-                ht.Add("http://www.w3.org/2000/09/xmldsig#sha1", SHA1CryptoServiceProviderType);
+                ht.TryAdd("http://www.w3.org/2000/09/xmldsig#sha1", SHA1CryptoServiceProviderType);
                 // Add the other hash algorithms introduced with XML Encryption
-                ht.Add("http://www.w3.org/2001/04/xmlenc#sha256", SHA256DefaultType);
-                ht.Add("http://www.w3.org/2001/04/xmlenc#sha512", SHA512DefaultType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmlenc#sha256", SHA256DefaultType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmlenc#sha512", SHA512DefaultType);
 
                 // Xml Encryption symmetric keys
-                ht.Add("http://www.w3.org/2001/04/xmlenc#des-cbc", DESCryptoServiceProviderType);
-                ht.Add("http://www.w3.org/2001/04/xmlenc#tripledes-cbc", TripleDESCryptoServiceProviderType);
-                ht.Add("http://www.w3.org/2001/04/xmlenc#kw-tripledes", TripleDESCryptoServiceProviderType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmlenc#des-cbc", DESCryptoServiceProviderType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmlenc#tripledes-cbc", TripleDESCryptoServiceProviderType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmlenc#kw-tripledes", TripleDESCryptoServiceProviderType);
 
-                ht.Add("http://www.w3.org/2001/04/xmlenc#aes128-cbc", RijndaelManagedType);
-                ht.Add("http://www.w3.org/2001/04/xmlenc#kw-aes128", RijndaelManagedType);
-                ht.Add("http://www.w3.org/2001/04/xmlenc#aes192-cbc", RijndaelManagedType);
-                ht.Add("http://www.w3.org/2001/04/xmlenc#kw-aes192", RijndaelManagedType);
-                ht.Add("http://www.w3.org/2001/04/xmlenc#aes256-cbc", RijndaelManagedType);
-                ht.Add("http://www.w3.org/2001/04/xmlenc#kw-aes256", RijndaelManagedType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmlenc#aes128-cbc", RijndaelManagedType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmlenc#kw-aes128", RijndaelManagedType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmlenc#aes192-cbc", RijndaelManagedType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmlenc#kw-aes192", RijndaelManagedType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmlenc#aes256-cbc", RijndaelManagedType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmlenc#kw-aes256", RijndaelManagedType);
 
                 // Xml Dsig HMAC URIs from http://www.w3.org/TR/xmldsig-core/
-                ht.Add("http://www.w3.org/2000/09/xmldsig#hmac-sha1", HMACSHA1Type);
+                ht.TryAdd("http://www.w3.org/2000/09/xmldsig#hmac-sha1", HMACSHA1Type);
 
                 // Xml Dsig-more Uri's as defined in http://www.ietf.org/rfc/rfc4051.txt
-                ht.Add("http://www.w3.org/2001/04/xmldsig-more#md5", MD5CryptoServiceProviderType);
-                ht.Add("http://www.w3.org/2001/04/xmldsig-more#sha384", SHA384DefaultType);
-                ht.Add("http://www.w3.org/2001/04/xmldsig-more#hmac-md5", HMACMD5Type);
-                ht.Add("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", HMACSHA256Type);
-                ht.Add("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", HMACSHA384Type);
-                ht.Add("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", HMACSHA512Type);
+                ht.TryAdd("http://www.w3.org/2001/04/xmldsig-more#md5", MD5CryptoServiceProviderType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmldsig-more#sha384", SHA384DefaultType);
+                ht.TryAdd("http://www.w3.org/2001/04/xmldsig-more#hmac-md5", HMACMD5Type);
+                ht.TryAdd("http://www.w3.org/2001/04/xmldsig-more#hmac-sha256", HMACSHA256Type);
+                ht.TryAdd("http://www.w3.org/2001/04/xmldsig-more#hmac-sha384", HMACSHA384Type);
+                ht.TryAdd("http://www.w3.org/2001/04/xmldsig-more#hmac-sha512", HMACSHA512Type);
                 // X509 Extensions (custom decoders)
                 // Basic Constraints OID value
-                ht.Add("2.5.29.10", "System.Security.Cryptography.X509Certificates.X509BasicConstraintsExtension, " + AssemblyName_X509Certificates);
-                ht.Add("2.5.29.19", "System.Security.Cryptography.X509Certificates.X509BasicConstraintsExtension, " + AssemblyName_X509Certificates);
+                ht.TryAdd("2.5.29.10", "System.Security.Cryptography.X509Certificates.X509BasicConstraintsExtension, " + AssemblyName_X509Certificates);
+                ht.TryAdd("2.5.29.19", "System.Security.Cryptography.X509Certificates.X509BasicConstraintsExtension, " + AssemblyName_X509Certificates);
                 // Subject Key Identifier OID value
-                ht.Add("2.5.29.14", "System.Security.Cryptography.X509Certificates.X509SubjectKeyIdentifierExtension, " + AssemblyName_X509Certificates);
+                ht.TryAdd("2.5.29.14", "System.Security.Cryptography.X509Certificates.X509SubjectKeyIdentifierExtension, " + AssemblyName_X509Certificates);
                 // Key Usage OID value
-                ht.Add("2.5.29.15", "System.Security.Cryptography.X509Certificates.X509KeyUsageExtension, " + AssemblyName_X509Certificates);
+                ht.TryAdd("2.5.29.15", "System.Security.Cryptography.X509Certificates.X509KeyUsageExtension, " + AssemblyName_X509Certificates);
                 // Enhanced Key Usage OID value
-                ht.Add("2.5.29.37", "System.Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension, " + AssemblyName_X509Certificates);
+                ht.TryAdd("2.5.29.37", "System.Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension, " + AssemblyName_X509Certificates);
 
                 // X509Chain class can be overridden to use a different chain engine.
-                ht.Add("X509Chain", "System.Security.Cryptography.X509Certificates.X509Chain, " + AssemblyName_X509Certificates);
+                ht.TryAdd("X509Chain", "System.Security.Cryptography.X509Certificates.X509Chain, " + AssemblyName_X509Certificates);
 
                 // PKCS9 attributes
-                ht.Add("1.2.840.113549.1.9.3", "System.Security.Cryptography.Pkcs.Pkcs9ContentType, " + AssemblyName_Pkcs);
-                ht.Add("1.2.840.113549.1.9.4", "System.Security.Cryptography.Pkcs.Pkcs9MessageDigest, " + AssemblyName_Pkcs);
-                ht.Add("1.2.840.113549.1.9.5", "System.Security.Cryptography.Pkcs.Pkcs9SigningTime, " + AssemblyName_Pkcs);
-                ht.Add("1.3.6.1.4.1.311.88.2.1", "System.Security.Cryptography.Pkcs.Pkcs9DocumentName, " + AssemblyName_Pkcs);
-                ht.Add("1.3.6.1.4.1.311.88.2.2", "System.Security.Cryptography.Pkcs.Pkcs9DocumentDescription, " + AssemblyName_Pkcs);
+                ht.TryAdd("1.2.840.113549.1.9.3", "System.Security.Cryptography.Pkcs.Pkcs9ContentType, " + AssemblyName_Pkcs);
+                ht.TryAdd("1.2.840.113549.1.9.4", "System.Security.Cryptography.Pkcs.Pkcs9MessageDigest, " + AssemblyName_Pkcs);
+                ht.TryAdd("1.2.840.113549.1.9.5", "System.Security.Cryptography.Pkcs.Pkcs9SigningTime, " + AssemblyName_Pkcs);
+                ht.TryAdd("1.3.6.1.4.1.311.88.2.1", "System.Security.Cryptography.Pkcs.Pkcs9DocumentName, " + AssemblyName_Pkcs);
+                ht.TryAdd("1.3.6.1.4.1.311.88.2.2", "System.Security.Cryptography.Pkcs.Pkcs9DocumentDescription, " + AssemblyName_Pkcs);
 
                 s_defaultNameHT = ht;
                 return s_defaultNameHT;
@@ -316,12 +314,9 @@ namespace System.Security.Cryptography
             }
 
             // Everything looks valid, so we're safe to take the table lock and add the name mappings.
-            lock (s_InternalSyncObject)
+            foreach (string name in algorithmNames)
             {
-                foreach (string name in algorithmNames)
-                {
-                    appNameHT[name] = algorithm;
-                }
+                appNameHT[name] = algorithm;
             }
         }
 
@@ -330,16 +325,10 @@ namespace System.Security.Cryptography
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            Type retvalType = null;
+            Type retvalType;
 
             // Check to see if we have an application defined mapping
-            lock (s_InternalSyncObject)
-            {
-                if (!appNameHT.TryGetValue(name, out retvalType))
-                {
-                    retvalType = null;
-                }
-            }
+            appNameHT.TryGetValue(name, out retvalType);
 
             // We allow the default table to Types and Strings
             // Types get used for types in .Algorithms assembly.
@@ -357,6 +346,12 @@ namespace System.Security.Cryptography
                     if (retvalType != null && !retvalType.IsVisible)
                     {
                         retvalType = null;
+                    }
+
+                    if (retvalType != null)
+                    {
+                        // replace String with Type, which makes subsequent calls much faster.
+                        DefaultNameHT[name] = retvalType;
                     }
                 }
                 else
@@ -474,12 +469,9 @@ namespace System.Security.Cryptography
             }
 
             // Everything is valid, so we're good to lock the hash table and add the application mappings
-            lock (s_InternalSyncObject)
+            foreach (string name in oidNames)
             {
-                foreach (string name in oidNames)
-                {
-                    appOidHT[name] = oid;
-                }
+                appOidHT[name] = oid;
             }
         }
 
@@ -489,15 +481,7 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(name));
 
             string oidName;
-
-            // Check to see if we have an application defined mapping
-            lock (s_InternalSyncObject)
-            {
-                if (!appOidHT.TryGetValue(name, out oidName))
-                {
-                    oidName = null;
-                }
-            }
+            appOidHT.TryGetValue(name, out oidName);
 
             if (string.IsNullOrEmpty(oidName) && !DefaultOidHT.TryGetValue(name, out oidName))
             {
