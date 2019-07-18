@@ -2233,14 +2233,6 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RemoteServersMemberData))]
         public async Task PostAsync_RedirectWith307_LargePayload(Configuration.Http.RemoteServer remoteServer)
         {
-            if (remoteServer.HttpVersion == new Version(2, 0))
-            {
-                // This is occasionally timing out in CI with SocketsHttpHandler and HTTP2, particularly on Linux
-                // Likely this is just a very slow test and not a product issue, so just increasing the timeout may be the right fix.
-                // Disable until we can investigate further.
-                return;
-            }
-
             await PostAsync_Redirect_LargePayload_Helper(remoteServer, 307, true);
         }
 
@@ -2276,7 +2268,10 @@ namespace System.Net.Http.Functional.Tests
                 // Compute MD5 of request body data. This will be verified by the server when it receives the request.
                 content.Headers.ContentMD5 = TestHelper.ComputeMD5Hash(contentBytes);
 
-                using (HttpClient client = CreateHttpClientForRemoteServer(remoteServer))
+                // Issue #39545: issue occassionally timing on CI using default timeout of 100 seconds.
+                var timeout = TimeSpan.FromSeconds(150);
+
+                using (HttpClient client = CreateHttpClientForRemoteServer(remoteServer, timeout))
                 using (HttpResponseMessage response = await client.PostAsync(redirectUri, content))
                 {
                     try

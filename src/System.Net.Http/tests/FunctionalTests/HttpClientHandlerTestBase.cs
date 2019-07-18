@@ -115,12 +115,12 @@ namespace System.Net.Http.Functional.Tests
 
         public static readonly IEnumerable<object[]> RemoteServersMemberData = Configuration.Http.RemoteServersMemberData;
 
-        protected HttpClient CreateHttpClientForRemoteServer(Configuration.Http.RemoteServer remoteServer)
+        protected HttpClient CreateHttpClientForRemoteServer(Configuration.Http.RemoteServer remoteServer, TimeSpan? timeout = null)
         {
-            return CreateHttpClientForRemoteServer(remoteServer, CreateHttpClientHandler());
+            return CreateHttpClientForRemoteServer(remoteServer, CreateHttpClientHandler(), timeout);
         }
 
-        protected HttpClient CreateHttpClientForRemoteServer(Configuration.Http.RemoteServer remoteServer, HttpClientHandler httpClientHandler)
+        protected HttpClient CreateHttpClientForRemoteServer(Configuration.Http.RemoteServer remoteServer, HttpClientHandler httpClientHandler, TimeSpan? timeout = null)
         {
             HttpMessageHandler wrappedHandler = httpClientHandler;
 
@@ -133,6 +133,11 @@ namespace System.Net.Http.Functional.Tests
 
             var client = new HttpClient(wrappedHandler);
             SetDefaultRequestVersion(client, remoteServer.HttpVersion);
+            if (timeout.HasValue)
+            {
+                client.Timeout = timeout.Value;
+            }
+
             return client;
         }
 
