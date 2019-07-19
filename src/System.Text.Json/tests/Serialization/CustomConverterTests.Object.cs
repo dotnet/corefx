@@ -219,7 +219,7 @@ namespace System.Text.Json.Serialization.Tests
             string json = JsonSerializer.Serialize(testObject, options);
 
             Assert.Equal("{\"Name\":\"John Doe\",\"Customer\":{\"Name\":\"Customer Doe\",\"CreditLimit\":1000,\"Address\":null}," +
-                "\"DerivedCustomer\":{\"Name\":\"Derived Doe\",\"CreditLimit\":2000,\"Address\":\"UB\"},\"IntValue\":32,\"Message\":null}", json);
+                "\"DerivedCustomer\":{\"Name\":\"Derived Doe\",\"CreditLimit\":2000,\"Address\":\"UB\"},\"NullDerivedCustomer\":null,\"IntValue\":32,\"Message\":null}", json);
 
             TestClassWithFieldHavingCustomConverter testObj = JsonSerializer.Deserialize<TestClassWithFieldHavingCustomConverter>(json, options);
 
@@ -230,6 +230,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("DERIVED DOE", testObj.DerivedCustomer.Name);
             Assert.Equal(1999, testObj.DerivedCustomer.CreditLimit);
             Assert.Equal("UB", testObj.DerivedCustomer.Address.City);
+            Assert.Null(testObj.NullDerivedCustomer);
         }
 
         private class TestClassWithFieldHavingCustomConverter
@@ -237,6 +238,7 @@ namespace System.Text.Json.Serialization.Tests
             public string Name { get; set; }
             public Customer Customer { get; set; }
             public DerivedCustomer DerivedCustomer { get; set; }
+            public DerivedCustomer NullDerivedCustomer { get; set; }
             public int IntValue { get; set; }
             public string Message { get; set; }
         }
