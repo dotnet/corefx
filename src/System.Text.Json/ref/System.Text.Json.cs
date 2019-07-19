@@ -84,6 +84,7 @@ namespace System.Text.Json
         public void Insert(int index, uint item) { }
         [System.CLSCompliantAttribute(false)]
         public void Insert(int index, ulong item) { }
+        public int LastIndexOf(System.Text.Json.JsonNode item) { throw null; }
         public bool Remove(System.Text.Json.JsonNode item) { throw null; }
         public void RemoveAt(int index) { }
         void System.Collections.Generic.ICollection<System.Text.Json.JsonNode>.CopyTo(System.Text.Json.JsonNode[] array, int arrayIndex) { }
@@ -130,6 +131,7 @@ namespace System.Text.Json
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
+        public bool IsImmutable { get { throw null; } }
         public System.Text.Json.JsonElement this[int index] { get { throw null; } }
         public System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
         public System.Text.Json.JsonElement Clone() { throw null; }
@@ -247,9 +249,20 @@ namespace System.Text.Json
         public static System.Text.Json.JsonNamingPolicy CamelCase { get { throw null; } }
         public abstract string ConvertName(string name);
     }
-    public partial class JsonNode
+    public abstract partial class JsonNode
     {
-        public JsonNode() { }
+        internal JsonNode() { }
+        public System.Text.Json.JsonElement AsJsonElement() { throw null; }
+        public static System.Text.Json.JsonNode DeepCopy(System.Text.Json.JsonDocument jsonDocument) { throw null; }
+        public static System.Text.Json.JsonNode DeepCopy(System.Text.Json.JsonElement jsonElement) { throw null; }
+        public static System.Text.Json.JsonNode DeepCopy(System.Text.Json.JsonNode jsonNode) { throw null; }
+        public static System.Text.Json.JsonNode GetNode(System.Text.Json.JsonElement jsonElement) { throw null; }
+        public static System.Text.Json.JsonNode Parse(System.Buffers.ReadOnlySequence<byte> utf8Json) { throw null; }
+        public static System.Text.Json.JsonNode Parse(System.IO.Stream utf8Json) { throw null; }
+        public static System.Text.Json.JsonNode Parse(System.ReadOnlyMemory<byte> utf8Json) { throw null; }
+        public static System.Text.Json.JsonNode Parse(System.ReadOnlyMemory<char> json) { throw null; }
+        public static System.Text.Json.JsonNode Parse(string json) { throw null; }
+        public static bool TryGetNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.JsonNode jsonNode) { throw null; }
     }
     public partial class JsonNumber : System.Text.Json.JsonNode
     {
@@ -360,9 +373,9 @@ namespace System.Text.Json
         public void AddRange(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties) { }
         public bool ContainsProperty(string propertyName) { throw null; }
         public System.Collections.Generic.IEnumerable<System.Text.Json.JsonNode> GetAllProperties(string propertyName) { throw null; }
-        public System.Text.Json.JsonArray GetArrayProperty(string propertyName) { throw null; }
         public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> GetEnumerator() { throw null; }
-        public System.Text.Json.JsonObject GetObjectProperty(string propertyName) { throw null; }
+        public System.Text.Json.JsonArray GetJsonArrayProperty(string propertyName) { throw null; }
+        public System.Text.Json.JsonObject GetJsonObjectProperty(string propertyName) { throw null; }
         public System.Text.Json.JsonNode GetProperty(string propertyName) { throw null; }
         public bool ModifyPropertyName(string oldName, string newName) { throw null; }
         public bool Remove(string propertyName) { throw null; }

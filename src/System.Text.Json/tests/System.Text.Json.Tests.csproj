@@ -101,7 +101,11 @@
     <Compile Include="Utf8JsonReaderTests.ValueTextEquals.cs" />
     <Compile Include="Utf8JsonWriterTests.cs" />
     <Compile Include="..\src\System\Text\Json\BitStack.cs" Link="BitStack.cs" />
+    <Compile Include="WritableJsonApiTests.TestAccessingNestedMembers.cs" />
+    <Compile Include="WritableJsonApiTests.TestModifying.cs" />
+    <Compile Include="WritableJsonApiTests.TestTransformations.cs" />
     <Compile Include="WritableJsonApiTests.cs" />
+    <Compile Include="WritableJsonApiTests.TestData.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Compile Include="$(CommonPath)\System\Buffers\ArrayBufferWriter.cs">
