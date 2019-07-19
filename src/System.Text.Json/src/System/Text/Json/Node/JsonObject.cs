@@ -47,9 +47,9 @@ namespace System.Text.Json
 
         public JsonNode GetProperty(string propertyName) { throw null; }
         public bool TryGetProperty(string propertyName, out JsonNode jsonNode) { throw null; }
-        public JsonObject GetObjectProperty(string propertyName) { throw null; }
+        public JsonObject GetJsonObjectProperty(string propertyName) { throw null; }
         public bool TryGetObjectProperty(string propertyName, out JsonObject jsonObject) { throw null; }
-        public JsonArray GetArrayProperty(string propertyName) { throw null; }
+        public JsonArray GetJsonArrayProperty(string propertyName) { throw null; }
         public bool TryGetArrayProperty(string propertyName, out JsonArray jsonArray) { throw null; }
         public IEnumerable<JsonNode> GetAllProperties(string propertyName) { throw null; }
 

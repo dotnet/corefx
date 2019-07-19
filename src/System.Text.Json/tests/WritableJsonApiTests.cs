@@ -6,107 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-
 namespace System.Text.Json
 {
 #pragma warning disable xUnit1000
-    internal static class WritableJsonApiTests
+    internal static partial class WritableJsonApiTests
 #pragma warning enable xUnit1000
     {
-        /// <summary>
-        /// Helper class simulating external library
-        /// </summary>
-        private static class EmployeesDatabase
-        {
-            private static int s_id = 0;
-            public static KeyValuePair<string, JsonNode> GetNextEmployee()
-            {
-                return new KeyValuePair<string, JsonNode>("employee" + s_id++, new JsonObject());
-            }
-
-            public static IEnumerable<KeyValuePair<string, JsonNode>> GetTenBestEmployees()
-            {
-                for (int i = 0; i < 10; i++)
-                    yield return GetNextEmployee();
-            }
-
-            /// <summary>
-            /// Returns following JsonObject:
-            /// {
-            ///     { "name" : "John" }
-            ///     { "phone numbers" : { "work" :  "123-456-7890", "home": "123-456-7890"  } }
-            ///     { 
-            ///         "reporting employees" : 
-            ///         {
-            ///             "software developers" :
-            ///             {
-            ///                 "full time employees" : /JsonObject of 3 employees fromk database/ 
-            ///                 "intern employees" : /JsonObject of 2 employees fromk database/ 
-            ///             },
-            ///             "HR" : /JsonObject of 10 employees fromk database/ 
-            ///         }
-            /// </summary>
-            /// <returns></returns>
-            public static JsonObject GetManager()
-            {
-                return new JsonObject
-                {
-                    { "name", "John" },
-                    {
-                        "phone numbers", new JsonObject()
-                        {
-                            { "work", "123-456-7890" }, { "home", "123-456-7890" }
-                        }
-                    },
-                    {
-                        "reporting employees", new JsonObject()
-                        {
-                            {
-                                "software developers", new JsonObject()
-                                {
-                                    {
-                                        "full time employees", new JsonObject()
-                                        {
-                                            EmployeesDatabase.GetNextEmployee(),
-                                            EmployeesDatabase.GetNextEmployee(),
-                                            EmployeesDatabase.GetNextEmployee(),
-                                        }
-                                    },
-                                    {
-                                        "intern employees", new JsonObject()
-                                        {
-                                            EmployeesDatabase.GetNextEmployee(),
-                                            EmployeesDatabase.GetNextEmployee(),
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                "HR", new JsonObject()
-                                {
-                                    {
-                                        "full time employees", new JsonObject(EmployeesDatabase.GetTenBestEmployees())
-                                    }
-                                }
-                            }
-                        }
-                    }
-                };
-            }
-
-            public static bool CheckSSN(string ssnNumber) => true;
-        }
-
-        /// <summary>
-        /// Helper class simulating enum
-        /// </summary>
-        private enum AvailableStateCodes
-        {
-            WA,
-            CA,
-            NY,
-        }
-
         /// <summary>
         /// Creating simple Json object
         /// </summary>
@@ -120,6 +25,20 @@ namespace System.Text.Json
                 { "is developer", true },
                 { "null property", (JsonNode) null }
             };
+
+            Assert.IsType<JsonString>(developer["name"]);
+            var developerNameCasted = developer["name"] as JsonString;
+            Assert.Equal("Kasia", developerNameCasted.Value);
+
+            Assert.IsType<JsonNumber>(developer["age"]);
+            var developerAgeCasted = developer["age"] as JsonNumber;
+            Assert.Equal(22, developerAgeCasted.GetInt32());
+
+            Assert.IsType<JsonBoolean>(developer["is developer"]);
+            var isDeveloperCasted = developer["is developer"] as JsonBoolean;
+            Assert.Equal(true, isDeveloperCasted.Value);
+
+            Assert.Null(developer["null property"]);
         }
 
         /// <summary>
@@ -134,6 +53,18 @@ namespace System.Text.Json
                 { "age", new JsonNumber(22) },
                 { "is developer", new JsonBoolean(true) }
             };
+
+            Assert.IsType<JsonString>(developer["name"]);
+            var developerNameCasted = developer["name"] as JsonString;
+            Assert.Equal("Kasia", developerNameCasted.Value);
+
+            Assert.IsType<JsonNumber>(developer["age"]);
+            var developerAgeCasted = developer["age"] as JsonNumber;
+            Assert.Equal(22, developerAgeCasted.GetInt32());
+
+            Assert.IsType<JsonBoolean>(developer["is developer"]);
+            var isDeveloperCasted = developer["is developer"] as JsonBoolean;
+            Assert.Equal(true, isDeveloperCasted.Value);
         }
 
         /// <summary>
@@ -150,11 +81,27 @@ namespace System.Text.Json
                 { "area", PI }
             };
 
-            JsonNumber bigConstantBoxed = Int64.MaxValue;
+            Assert.IsType<JsonNumber>(circle["radius"]);
+            var radius = circle["radius"] as JsonNumber;
+            Assert.Equal(radius, 1);
+
+            Assert.IsType<JsonNumber>(circle["length"]);
+            var length = circle["length"] as JsonNumber;
+            Assert.Equal(length, 2 * PI);
+
+            Assert.IsType<JsonNumber>(circle["area"]);
+            var area = circle["area"] as JsonNumber;
+            Assert.Equal(area, PI);
+
+            JsonNumber bigConstantBoxed = long.MaxValue;
             long bigConstant = bigConstantBoxed.GetInt64();
+
+            Assert.Equal(long.MaxValue, bigConstant);
 
             var smallValueBoxed = new JsonNumber(17);
             smallValueBoxed.TryGetInt16(out short smallValue);
+
+            Assert.Equal(17, smallValue);
         }
 
         /// <summary>
@@ -199,6 +146,16 @@ namespace System.Text.Json
                     }
                 }
             };
+
+            Assert.IsType<JsonObject>(person["phone numbers"]);
+            var phoneNumbers = person["phone numbers"] as JsonObject;
+            Assert.IsType<JsonString>(phoneNumbers["work"]);
+            Assert.IsType<JsonString>(phoneNumbers["home"]);
+
+            Assert.IsType<JsonObject>(person["addresses"]);
+            var addresses = person["office"] as JsonObject;
+            Assert.IsType<JsonObject>(addresses["office"]);
+            Assert.IsType<JsonObject>(addresses["home"]);
         }
 
         /// <summary>
@@ -208,6 +165,7 @@ namespace System.Text.Json
         public static void TestAssignmentDefinition()
         {
             JsonNode employee = EmployeesDatabase.GetNextEmployee().Value;
+            Assert.IsType<JsonObject>(employee);
         }
 
         /// <summary>
@@ -223,6 +181,15 @@ namespace System.Text.Json
                 EmployeesDatabase.GetNextEmployee(),
                 EmployeesDatabase.GetNextEmployee(),
             };
+
+            string prevId = "";
+            foreach((string id, JsonNode employee) in employees)
+            {
+                Assert.NotEqual(prevId, id);
+                prevId = id;
+
+                Assert.IsType<JsonObject>(employee);
+            }
         }
 
         /// <summary>
@@ -236,6 +203,15 @@ namespace System.Text.Json
             {
                 employees.Add(employee);
             }
+
+            string prevId = "";
+            foreach ((string id, JsonNode employee) in employees)
+            {
+                Assert.NotEqual(prevId, id);
+                prevId = id;
+
+                Assert.IsType<JsonObject>(employee);
+            }
         }
 
         /// <summary>
@@ -245,6 +221,15 @@ namespace System.Text.Json
         public static void TestAddingKeyValuePairsCollection()
         {
             var employees = new JsonObject(EmployeesDatabase.GetTenBestEmployees());
+
+            string prevId = "";
+            foreach ((string id, JsonNode employee) in employees)
+            {
+                Assert.NotEqual(prevId, id);
+                prevId = id;
+
+                Assert.IsType<JsonObject>(employee);
+            }
         }
 
         /// <summary>
@@ -255,16 +240,94 @@ namespace System.Text.Json
         {
             var employees = new JsonObject();
             employees.AddRange(EmployeesDatabase.GetTenBestEmployees());
+
+            string prevId = "";
+            foreach ((string id, JsonNode employee) in employees)
+            {
+                Assert.NotEqual(prevId, id);
+                prevId = id;
+
+                Assert.IsType<JsonObject>(employee);
+            }
         }
 
         /// <summary>
-        /// Creating Json array
+        /// Adding JsonArray to JsonObject by creating it in initializing collection
         /// </summary>
         [Fact]
-        public static void TestCreatingJsonArray()
+        public static void TestAddingJsonArray()
         {
-            string[] dishes = { "sushi", "pasta", "cucumber soup" };
+            var preferences = new JsonObject()
+            {
+                { "colours", new JsonArray{ "red", "green", "purple" } }       
+            };
 
+            Assert.IsType<JsonArray>(preferences["colours"]);
+            var colours = preferences["colours"] as JsonArray;
+            Assert.Equal(3, colours.Count);
+
+            string[] expected = { "red", "green", "blue" };
+
+            for (int i = 0; i < colours.Count; i++)
+            {
+                Assert.IsType<JsonString>(colours[i]);
+                Assert.Equal(expected[i], colours[i] as JsonString);
+            }
+        }
+
+        /// <summary>
+        /// Adding JsonArray to JsonObject by creating it from string array
+        /// </summary>
+        [Fact]
+        public static void TestCretingJsonArrayFromStringArray()
+        {
+            string[] expected = { "sushi", "pasta", "cucumber soup" };
+            var preferences = new JsonObject()
+            {
+                { "dishes", new JsonArray(expected) }
+            };
+
+            Assert.IsType<JsonArray>(preferences["dishes"]);
+            var dishesJson = preferences["dishes"] as JsonArray;
+            Assert.Equal(3, dishesJson.Count);
+
+            for (int i = 0; i < dishesJson.Count; i++)
+            {
+                Assert.IsType<JsonString>(dishesJson[i]);
+                Assert.Equal(expected[i], dishesJson[i] as JsonString);
+            }
+        }
+
+        /// <summary>
+        /// Adding JsonArray to JsonObject by passing JsonNumber array
+        /// </summary>
+        [Fact]
+        public static void TestAddingJsonArrayFromJsonNumberArray()
+        {
+            var preferences = new JsonObject()
+            {
+                { "prime numbers", new JsonNumber[] { 19, 37 } }
+            };
+
+            Assert.IsType<JsonArray>(preferences["prime numbers"]);
+            var primeNumbers = preferences["prime numbers"] as JsonArray;
+            Assert.Equal(2, primeNumbers.Count);
+
+            int[] expected = { 19, 37 };
+
+            for (int i = 0; i < primeNumbers.Count; i++)
+            {
+                Assert.IsType<JsonNumber>(primeNumbers[i]);
+                Assert.Equal(expected[i], primeNumbers[i] as JsonNumber);
+            }
+        }
+
+        /// <summary>
+        /// Adding JsonArray to JsonObject by passing IEnumerable of strings
+        /// </summary>
+        [Fact]
+        public static void TestAddingJsonArrayFromIEnumerableOfStrings()
+        {
             var sportsExperienceYears = new JsonObject()
             {
                 { "skiing", 5 },
@@ -277,6 +340,28 @@ namespace System.Text.Json
             // choose only sports with > 2 experience years
             IEnumerable<string> sports = sportsExperienceYears.Where(sport => ((JsonNumber)sport.Value).GetInt32() > 2).Select(sport => sport.Key);
 
+            var preferences = new JsonObject()
+            {
+                { "sports", new JsonArray(sports) }
+            };
+
+            Assert.IsType<JsonArray>(preferences["sports"]);
+            var sportsJsonArray = preferences["sports"] as JsonArray;
+            Assert.Equal(3, sportsJsonArray.Count);
+
+            for (int i = 0; i < sportsJsonArray.Count; i++)
+            {
+                Assert.IsType<JsonString>(sportsJsonArray[i]);
+                Assert.Equal(sports.ElementAt(i), sportsJsonArray[i] as JsonString);
+            }
+        }
+
+        /// <summary>
+        /// Adding JsonArray to JsonObject by passing IEnumerable of JsonNodes
+        /// </summary>
+        [Fact]
+        public static void TestAddingJsonArrayFromIEnumerableOfJsonNodes()
+        {
             var strangeWords = new JsonArray()
             {
                 "supercalifragilisticexpialidocious",
@@ -287,14 +372,20 @@ namespace System.Text.Json
 
             var preferences = new JsonObject()
             {
-                { "colours", new JsonArray { "red", "green", "purple" } },
-                { "numbers", new JsonArray { 4, 123, 88 } },
-                { "prime numbers", new JsonNumber[] { 19, 37 } },
-                { "varia", new JsonArray { 17, "green", true } },
-                { "dishes", new JsonArray(dishes) },
-                { "sports", new JsonArray(sports) },
-                { "strange words", strangeWords.Where(word => ((JsonString)word).Value.Length < 10) },
+                { "strange words", strangeWords.Where(word => ((JsonString)word).Value.Length < 10) }
             };
+
+            Assert.IsType<JsonArray>(preferences["strange words"]);
+            var strangeWordsJsonArray = preferences["strange words"] as JsonArray;
+            Assert.Equal(2, strangeWordsJsonArray.Count);
+
+            string [] expected = { "gladiolus", "albumen" };
+
+            for (int i = 0; i < strangeWordsJsonArray.Count; i++)
+            {
+                Assert.IsType<JsonString>(strangeWordsJsonArray[i]);
+                Assert.Equal(expected[i], strangeWordsJsonArray[i] as JsonString);
+            }
         }
 
         /// <summary>
@@ -332,21 +423,14 @@ namespace System.Text.Json
                     }
                 },
             };
+
+            Assert.IsType<JsonArray>(vertices[0]);
+            var innerJsonArray = vertices[0] as JsonArray;
+            Assert.IsType<JsonArray>(innerJsonArray[0]);
+            innerJsonArray = innerJsonArray[0] as JsonArray;
+            Assert.IsType<JsonArray>(innerJsonArray[0]);
         }
 
-        /// <summary>
-        /// Adding values to JsonArray
-        /// </summary>
-        [Fact]
-        public static void TestAddingToJsonArray()
-        {
-            var employeesIds = new JsonArray();
-
-            foreach (KeyValuePair<string, JsonNode> employee in EmployeesDatabase.GetTenBestEmployees())
-            {
-                employeesIds.Add(employee.Key);
-            }
-        }
 
         /// <summary>
         /// Creating Json array from collection
@@ -355,6 +439,15 @@ namespace System.Text.Json
         public static void TestCreatingJsonArrayFromCollection()
         {
             var employeesIds = new JsonArray(EmployeesDatabase.GetTenBestEmployees().Select(employee => new JsonString(employee.Key)));
+
+            JsonString prevId = new JsonString();
+            foreach (JsonNode employeeId in employeesIds)
+            {
+                Assert.IsType<JsonString>(employeeId);
+                var employeeIdString = employeeId as JsonString;
+                Assert.NotEqual(prevId, employeeIdString);
+                prevId = employeeIdString;
+            }
         }
 
         /// <summary>
@@ -364,6 +457,15 @@ namespace System.Text.Json
         public static void TestCreatingJsonArrayFromCollectionOfString()
         {
             var employeesIds = new JsonArray(EmployeesDatabase.GetTenBestEmployees().Select(employee => employee.Key));
+
+            JsonString prevId = new JsonString();
+            foreach (JsonNode employeeId in employeesIds)
+            {
+                Assert.IsType<JsonString>(employeeId);
+                var employeeIdString = employeeId as JsonString;
+                Assert.NotEqual(prevId, employeeIdString);
+                prevId = employeeIdString;
+            }
         }
 
         /// <summary>
@@ -382,6 +484,11 @@ namespace System.Text.Json
             {
                 EmployeesDatabase.CheckSSN(((JsonString)person["ssn"]).Value);
             }
+
+            Assert.True(person.ContainsProperty("ssn"));
+            Assert.False(person.ContainsProperty("surname"));
+
+            // Different scenario:
 
             var enabledOptions = new JsonArray
             {
@@ -409,197 +516,6 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Replacing Json object's primnary types
-        /// </summary>
-        [Fact]
-        public static void TestReplacingsonObjectPrimaryTypes()
-        {
-            var person1 = new JsonObject
-            {
-                { "name", "John" },
-                { "age", 45 },
-                { "is_married", true }
-            };
-
-            // Assign by creating a new instance of primary Json type
-            person1["name"] = new JsonString("Bob");
-
-            // Assign by using an implicit operator on primary Json type
-            JsonNumber newAge = 55;
-            person1["age"] = newAge;
-
-            // Assign by explicit cast from Json primary type
-            person1["is_married"] = (JsonBoolean)true;
-
-            // Not possible scenario (wold require implicit cast operators in JsonNode):
-            // person["name"] = "Bob";
-
-            var person2 = new JsonObject
-            {
-                { "name", new JsonString[]{ "Emily", "Rosalie" } },
-                { "age", 33 },
-                { "is_married", true }
-            };
-
-            // Copy property from another JsonObject
-            person1["age"] = person2["age"];
-
-            // Copy property of different typoe
-            person1["name"] = person2["name"];         
-        }
-
-        /// <summary>
-        /// Modifying Json object's primnary types
-        /// </summary>
-        [Fact]
-        public static void TestModifyingJsonObjectPrimaryTypes()
-        {
-            JsonString name = "previous name";
-            name.Value = "new name";
-
-            bool shouldBeEnabled = true;
-            var isEnabled = new JsonBoolean(false);
-            isEnabled.Value = shouldBeEnabled;
-
-            JsonNumber veryBigConstant = new JsonNumber();
-            veryBigConstant.SetString("1e1000");
-            string bigNumber = veryBigConstant.GetString();
-            veryBigConstant.SetInt16(123);
-            short smallNumber = veryBigConstant.GetInt16();
-        }
-
-        /// <summary>
-        /// Accesing nested Json object - casting with as operator
-        /// </summary>
-        [Fact]
-        public static void TestAccesingNestedJsonObjectCastWithAs()
-        {
-            // Casting with as operator
-            JsonObject manager = EmployeesDatabase.GetManager();
-
-            var reportingEmployees = manager["reporting employees"] as JsonObject;
-            if (reportingEmployees == null)
-                throw new InvalidCastException();
-
-            var softwareDevelopers = reportingEmployees["software developers"] as JsonObject;
-            if (softwareDevelopers == null)
-                throw new InvalidCastException();
-
-            var internDevelopers = softwareDevelopers["intern employees"] as JsonObject;
-            if (internDevelopers == null)
-                throw new InvalidCastException();
-
-            internDevelopers.Add(EmployeesDatabase.GetNextEmployee());
-        }
-
-        /// <summary>
-        /// Accesing nested Json object - casting with is operator
-        /// </summary>
-        [Fact]
-        public static void TestAccesingNestedJsonObjectCastWithIs()
-        {
-            JsonObject manager = EmployeesDatabase.GetManager();
-
-            if (manager["reporting employees"] is JsonObject reportingEmployees)
-            {
-                if (reportingEmployees["software developers"] is JsonObject softwareDevelopers)
-                {
-                    if (softwareDevelopers["full time employees"] is JsonObject fullTimeEmployees)
-                    {
-                        fullTimeEmployees.Add(EmployeesDatabase.GetNextEmployee());
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Accesing nested Json object - explicit casting
-        /// </summary>
-        [Fact]
-        public static void TestAccesingNestedJsonObjectExplicitCast()
-        {
-            JsonObject manager = EmployeesDatabase.GetManager();
-
-            ((JsonObject)((JsonObject)manager["reporting employees"])["HR"]).Add(EmployeesDatabase.GetNextEmployee());
-        }
-
-        /// <summary>
-        /// Accesing nested Json object - GetObjectProperty method
-        /// </summary>
-        [Fact]
-        public static void TestAccesingNestedJsonObjectGetPropertyMethod()
-        {
-            JsonObject manager = EmployeesDatabase.GetManager();
-            JsonObject internDevelopers = manager.GetObjectProperty("reporting employees")
-                                          .GetObjectProperty("software developers")
-                                          .GetObjectProperty("intern employees");
-            internDevelopers.Add(EmployeesDatabase.GetNextEmployee());
-        }
-
-        /// <summary>
-        /// Accesing nested Json object - TryGetObjectProperty method
-        /// </summary>
-        [Fact]
-        public static void TestAccesingNestedJsonObjectTryGetPropertyMethod()
-        {
-            JsonObject manager = EmployeesDatabase.GetManager();
-            if (manager.TryGetObjectProperty("reporting employees", out JsonObject reportingEmployees))
-            {
-                if (reportingEmployees.TryGetObjectProperty("software developers", out JsonObject softwareDevelopers))
-                {
-                    if (softwareDevelopers.TryGetObjectProperty("full time employees", out JsonObject fullTimeEmployees))
-                    {
-                        fullTimeEmployees.Add(EmployeesDatabase.GetNextEmployee());
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Accesing nested Json array - GetArrayProperty method
-        /// </summary>
-        [Fact]
-        public static void TestAccesingNestedJsonArrayGetPropertyMethod()
-        {
-            var issues = new JsonObject()
-            {
-                { "features", new JsonArray{ "new functionality 1", "new functionality 2" } },
-                { "bugs", new JsonArray{ "bug 123", "bug 4566", "bug 821" } },
-                { "tests", new JsonArray{ "code coverage" } },
-            };
-
-            issues.GetArrayProperty("bugs").Add("bug 12356");
-            ((JsonString)issues.GetArrayProperty("features")[0]).Value = "feature 1569";
-            ((JsonString)issues.GetArrayProperty("features")[1]).Value = "feature 56134";
-        }
-
-        /// <summary>
-        /// Modifying Json object key - remove and add
-        /// </summary>
-        [Fact]
-        public static void TestModifyingJsonObjectKeyRemoveAdd()
-        {
-            JsonObject manager = EmployeesDatabase.GetManager();
-            JsonObject reportingEmployees = manager.GetObjectProperty("reporting employees");
-
-            JsonNode softwareDevelopers = reportingEmployees["software developers"];
-            reportingEmployees.Remove("software developers");
-            reportingEmployees.Add("software engineers", softwareDevelopers);
-        }
-
-        /// <summary>
-        /// Modifying Json object key - modify method
-        /// </summary>
-        [Fact]
-        public static void TestModifyingJsonObjectKeyModifyMethod()
-        {
-            JsonObject manager = EmployeesDatabase.GetManager();
-            JsonObject reportingEmployees = manager.GetObjectProperty("reporting employees");
-
-            reportingEmployees.ModifyPropertyName("software developers", "software engineers");
-        }
-
-        /// <summary>
         /// Aquiring all values
         /// </summary>
         [Fact]
@@ -607,6 +523,11 @@ namespace System.Text.Json
         {
             var employees = new JsonObject(EmployeesDatabase.GetTenBestEmployees());
             ICollection<JsonNode> employeesWithoutId = employees.Values;
+
+            foreach(JsonNode employee in employeesWithoutId)
+            {
+                Assert.IsType<JsonObject>(employee);
+            }
         }
 
         /// <summary>
@@ -624,6 +545,11 @@ namespace System.Text.Json
             };
 
             IEnumerable<JsonNode> fullTimeEmployees = employees.GetAllProperties("FTE");
+
+            Assert.Equal(3, fullTimeEmployees.Count());
+            Assert.True(fullTimeEmployees.Contains((JsonString)"John Smith"));
+            Assert.True(fullTimeEmployees.Contains((JsonString)"Ann Predictable"));
+            Assert.True(fullTimeEmployees.Contains((JsonString)"Byron Shadow"));
         }
     }
 }

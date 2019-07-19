@@ -87,10 +87,11 @@ namespace System.Text.Json
         [CLSCompliant(false)]
         public bool Contains(ulong value) { throw null; }
 
-        public int Count => throw new NotImplementedException();
-        public bool IsReadOnly => throw new NotImplementedException();
+        public int Count => throw null;
+        public bool IsReadOnly => throw null;
 
         public int IndexOf(JsonNode item) { throw null; }
+        public int LastIndexOf(JsonNode item) { throw null; }
         public void RemoveAt(int index) { throw null; }
         public void Clear() { throw null; }
         public bool Remove(JsonNode item) { throw null; }

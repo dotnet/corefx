@@ -1440,5 +1440,10 @@ namespace System.Text.Json
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebuggerDisplay => $"ValueKind = {ValueKind} : \"{ToString()}\"";
+
+// for now disabling error caused by not adding documentation to methods 
+#pragma warning disable CS1591
+        public bool IsImmutable => throw null;
+#pragma warning restore CS1591
     }
 }
