@@ -104,14 +104,14 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void ClassWithCustomDictionaryConverterTest()
+        public static void ClassHavingDictionaryFieldWhichUsingCustomConverterTest()
         {
             const string Json = @"{""MyInt"":32,""MyDictionary"":{""Key1"":1,""Key2"":2},""MyString"":""Hello""}";
 
             var options = new JsonSerializerOptions();
             options.Converters.Add(new IDictionaryConverter(10));
 
-            ClassWithCustomDictionaryConverter dictionary = JsonSerializer.Deserialize<ClassWithCustomDictionaryConverter>(Json, options);
+            ClassHavingDictionaryFieldWhichUsingCustomConverter dictionary = JsonSerializer.Deserialize<ClassHavingDictionaryFieldWhichUsingCustomConverter>(Json, options);
             Assert.Equal(11, dictionary.MyDictionary["Key1"]);
             Assert.Equal(12, dictionary.MyDictionary["Key2"]);
             Assert.Equal(32, dictionary.MyInt);
@@ -120,7 +120,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(Json, JsonSerializer.Serialize(dictionary, options));
         }
 
-        private class ClassWithCustomDictionaryConverter
+        private class ClassHavingDictionaryFieldWhichUsingCustomConverter
         {
             public int MyInt { get; set; }
             public Dictionary<string, long> MyDictionary { get; set; }
