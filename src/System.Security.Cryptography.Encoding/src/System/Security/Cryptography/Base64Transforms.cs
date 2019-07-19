@@ -126,7 +126,7 @@ namespace System.Security.Cryptography
         // Converting from Base64 generates 3 bytes output from each 4 bytes input block
         public int InputBlockSize => 4;
         public int OutputBlockSize => 3;
-        public bool CanTransformMultipleBlocks => false;
+        public bool CanTransformMultipleBlocks => true;
         public virtual bool CanReuseTransform => true;
 
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
