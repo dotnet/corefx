@@ -5,9 +5,11 @@
     <_targetFrameworkIdentifier Condition="'$(_runtimeOSVersionIndex)' != '-1'">$(TargetFramework.SubString(0, $(_targetFrameworkVersionIndex)))</_targetFrameworkIdentifier>
     <ToolsDir>$(MSBuildThisFileDirectory)tools\</ToolsDir>
 
+    <!-- Remove aspnetcore feed whenever 3.0 is stable -->
     <RestoreSources>
       https://api.nuget.org/v3/index.json;
       https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
+      https://dotnetfeed.blob.core.windows.net/aspnet-aspnetcore/index.json;
       $(LocalPackagesPath)
     </RestoreSources>
   </PropertyGroup>
