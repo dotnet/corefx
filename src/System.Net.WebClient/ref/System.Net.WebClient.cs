@@ -71,7 +71,7 @@ namespace System.Net
         public byte[] Result { get { throw null; } }
     }
     public delegate void UploadValuesCompletedEventHandler(object sender, System.Net.UploadValuesCompletedEventArgs e);
-    [System.ObsoleteAttribute("WebClient is deprecated, please use HttpClient instead.", true)]
+    [System.ObsoleteAttribute("WebClient is deprecated, please use HttpClient instead.")]
     public partial class WebClient : System.ComponentModel.Component
     {
         public WebClient() { }
