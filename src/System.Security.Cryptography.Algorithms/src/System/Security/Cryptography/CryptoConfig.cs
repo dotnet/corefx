@@ -35,8 +35,8 @@ namespace System.Security.Cryptography
 
         private static volatile Dictionary<string, string> s_defaultOidHT;
         private static volatile ConcurrentDictionary<string, object> s_defaultNameHT;
-        private static volatile ConcurrentDictionary<string, Type> appNameHT = new ConcurrentDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-        private static volatile ConcurrentDictionary<string, string> appOidHT = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, Type> appNameHT = new ConcurrentDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, string> appOidHT = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly char[] SepArray = { '.' }; // valid ASN.1 separators
 
@@ -52,7 +52,8 @@ namespace System.Security.Cryptography
                     return s_defaultOidHT;
                 }
 
-                Dictionary<string, string> ht = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                int capacity = 37;
+                Dictionary<string, string> ht = new Dictionary<string, string>(capacity, StringComparer.OrdinalIgnoreCase);
 
                 ht.Add("SHA", OID_OIWSEC_SHA1);
                 ht.Add("SHA1", OID_OIWSEC_SHA1);
@@ -99,6 +100,7 @@ namespace System.Security.Cryptography
                 ht.Add("TripleDES", OID_RSA_DES_EDE3_CBC);
                 ht.Add("System.Security.Cryptography.TripleDESCryptoServiceProvider", OID_RSA_DES_EDE3_CBC);
 
+                Debug.Assert(ht.Count <= capacity); // if more entries are added in the future, increase initial capacity.
                 s_defaultOidHT = ht;
                 return s_defaultOidHT;
             }
@@ -113,7 +115,9 @@ namespace System.Security.Cryptography
                     return s_defaultNameHT;
                 }
 
-                ConcurrentDictionary<string, object> ht = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                const int capacity = 89;
+
+                ConcurrentDictionary<string, object> ht = new ConcurrentDictionary<string, object>(concurrencyLevel:1, capacity: capacity, comparer: StringComparer.OrdinalIgnoreCase);
 
                 Type HMACMD5Type = typeof(System.Security.Cryptography.HMACMD5);
                 Type HMACSHA1Type = typeof(System.Security.Cryptography.HMACSHA1);
@@ -265,6 +269,8 @@ namespace System.Security.Cryptography
                 ht.TryAdd("1.2.840.113549.1.9.5", "System.Security.Cryptography.Pkcs.Pkcs9SigningTime, " + AssemblyName_Pkcs);
                 ht.TryAdd("1.3.6.1.4.1.311.88.2.1", "System.Security.Cryptography.Pkcs.Pkcs9DocumentName, " + AssemblyName_Pkcs);
                 ht.TryAdd("1.3.6.1.4.1.311.88.2.2", "System.Security.Cryptography.Pkcs.Pkcs9DocumentDescription, " + AssemblyName_Pkcs);
+
+                Debug.Assert(ht.Count <= capacity); // // if more entries are added in the future, increase initial capacity.
 
                 s_defaultNameHT = ht;
                 return s_defaultNameHT;
