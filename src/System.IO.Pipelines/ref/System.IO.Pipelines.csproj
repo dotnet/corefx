@@ -11,6 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Memory" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
   <ItemGroup>
