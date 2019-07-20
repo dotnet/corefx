@@ -69,8 +69,8 @@ namespace System.IO.Pipelines
             {
                 Debug.Assert(_memoryOwner is byte[]);
 
-                byte[] pooolArray = Unsafe.As<byte[]>(_memoryOwner);
-                ArrayPool<byte>.Shared.Return(pooolArray);
+                byte[] poolArray = Unsafe.As<byte[]>(_memoryOwner);
+                ArrayPool<byte>.Shared.Return(poolArray);
             }
 
             // Order of below field clears is significant as it clears in a sequential order
