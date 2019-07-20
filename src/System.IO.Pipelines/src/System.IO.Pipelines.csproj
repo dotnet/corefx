@@ -53,6 +53,7 @@
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks.Extensions" />
     <Reference Include="System.Threading.Tasks" />

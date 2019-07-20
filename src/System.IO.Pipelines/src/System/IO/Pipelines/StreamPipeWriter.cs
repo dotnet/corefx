@@ -21,14 +21,14 @@ namespace System.IO.Pipelines
         private int _tailBytesBuffered;
         private int _bytesBuffered;
 
-        private MemoryPool<byte> _pool;
+        private readonly MemoryPool<byte> _pool;
 
         private CancellationTokenSource _internalTokenSource;
         private bool _isCompleted;
-        private object _lockObject = new object();
+        private readonly object _lockObject = new object();
 
         private BufferSegmentStack _bufferSegmentPool;
-        private bool _leaveOpen;
+        private readonly bool _leaveOpen;
 
         private CancellationTokenSource InternalTokenSource
         {
@@ -162,8 +162,8 @@ namespace System.IO.Pipelines
             }
             else
             {
-                // We can't use the pool so allocate an array
-                newSegment.SetUnownedMemory(new byte[sizeHint]);
+                // We can't use the pool so use the array pool
+                newSegment.SetOwnedMemory(ArrayPool<byte>.Shared.Rent(sizeHint));
             }
 
             _tailMemory = newSegment.AvailableMemory;

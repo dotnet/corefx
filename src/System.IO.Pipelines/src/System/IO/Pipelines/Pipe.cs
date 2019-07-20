@@ -235,8 +235,8 @@ namespace System.IO.Pipelines
             }
             else
             {
-                // We can't use the pool so allocate an array
-                newSegment.SetUnownedMemory(new byte[sizeHint]);
+                // We can't use the pool so use the array pool
+                newSegment.SetOwnedMemory(ArrayPool<byte>.Shared.Rent(sizeHint));
             }
 
             _writingHeadMemory = newSegment.AvailableMemory;
