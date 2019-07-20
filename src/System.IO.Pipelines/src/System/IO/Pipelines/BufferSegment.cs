@@ -67,9 +67,7 @@ namespace System.IO.Pipelines
             }
             else
             {
-                Debug.Assert(_memoryOwner is byte[]);
-
-                byte[] poolArray = Unsafe.As<byte[]>(_memoryOwner);
+                byte[] poolArray = (byte[])_memoryOwner;
                 ArrayPool<byte>.Shared.Return(poolArray);
             }
 
