@@ -375,6 +375,7 @@ namespace System
             try
             {
                 action(span);
+                exception = null;
             }
             catch (Exception ex)
             {
