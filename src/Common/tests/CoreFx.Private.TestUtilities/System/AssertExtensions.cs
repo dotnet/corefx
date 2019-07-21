@@ -345,33 +345,50 @@ namespace System
         // Cannot use standard Assert.Throws() when testing Span - Span and closures don't get along.
         public static void AssertThrows<E, T>(ReadOnlySpan<T> span, AssertThrowsActionReadOnly<T> action) where E : Exception
         {
+            Exception exception;
+
             try
             {
                 action(span);
-                throw new XunitException($"Expected exception: : {typeof(E).GetType()} -> Actual: No exception thrown");
+                exception = null;
             }
-            catch (E)
+            catch (Exception ex)
             {
+                exception = ex;
             }
-            catch (Exception wrongException)
+
+            if (exception == null)
             {
-                throw new XunitException($"Wrong exception thrown: Expected exception: : {typeof(E).GetType()} -> Actual: {wrongException.GetType()}");
+                throw new ThrowsException(typeof(E));
+            }
+
+            if (exception.GetType() != typeof(E))
+            {
+                throw new ThrowsException(typeof(E), exception);
             }
         }
 
         public static void AssertThrows<E, T>(Span<T> span, AssertThrowsAction<T> action) where E : Exception
         {
+            Exception exception;
+
             try
             {
                 action(span);
-                throw new XunitException($"Expected exception: : {typeof(E).GetType()} -> Actual: No exception thrown");
             }
-            catch (E)
+            catch (Exception ex)
             {
+                exception = ex;
             }
-            catch (Exception wrongException)
+
+            if ( exception == null)
             {
-                throw new XunitException($"Wrong exception thrown: Expected exception: : {typeof(E).GetType()} -> Actual: {wrongException.GetType()}");
+                throw new ThrowsException(typeof(E));
+            }
+
+            if (exception.GetType() != typeof(E))
+            {
+                throw new ThrowsException(typeof(E), exception);
             }
         }
     }
