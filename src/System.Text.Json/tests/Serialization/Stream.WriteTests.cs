@@ -5,6 +5,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Text.Json.Serialization.TestsSchemas.BlogPost;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -279,7 +281,7 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(1000, false, false)]
         public static async Task VeryLargeJsonFileTest(int payloadSize, bool ignoreNull, bool writeIndented)
         {
-            List<Post> list = populateLargeObject(payloadSize);
+            List<Post> list = PopulateLargeObject(payloadSize);
 
             JsonSerializerOptions options = new JsonSerializerOptions
             {
@@ -332,14 +334,15 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(16, true, false)]
         [InlineData(16, false, true)]
         [InlineData(16, false, false)]
-        public static async Task DeepJsonFileTest(int depthFactor, bool ignoreNull, bool writeIndented) {
+        public static async Task DeepNestedJsonFileTest(int depthFactor, bool ignoreNull, bool writeIndented)
+        {
             int length = 10 * depthFactor;
             List<Post>[] posts = new List<Post>[length];
-            posts[0] = populateLargeObject(1);
+            posts[0] = PopulateLargeObject(1);
             for (int i = 1; i < length; i++ )
             {
-                posts[i] = populateLargeObject(1);
-                posts[i - 1][0].Value.PrimaryTopic.RelatedTopics = new List<object> { posts[i] };
+                posts[i] = PopulateLargeObject(1);
+                posts[i - 1][0].Value.PrimaryTopic.RelatedTopics = posts[i];
             }
 
             JsonSerializerOptions options = new JsonSerializerOptions()
@@ -370,7 +373,7 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
-        private static List<Post> populateLargeObject(int size)
+        private static List<Post> PopulateLargeObject(int size)
         {
             List<Post> posts = new List<Post>(size);
             for (int i = 0; i < size; i++)
@@ -401,7 +404,7 @@ namespace System.Text.Json.Serialization.Tests
                             Subtitle = $"The difference between solving any problem and the right one {i}",
                             BodyModel = new ContentBodyModel()
                             {
-                                Paragraphs = new List<PurpleParagraph>(),  // depth 7
+                                Paragraphs = new List<PurpleParagraph>(),  
                                 Sections = new List<PurpleSection>()
                             },
                             PostDisplay = new PostDisplay { Coverless = i % 3 == 0 }
@@ -411,7 +414,7 @@ namespace System.Text.Json.Serialization.Tests
                             AllowNotes = i % 2 == 0,
                             PreviewImage = new PreviewImage
                             {
-                                ImageId = $"1*SNhelFbiMUTGX73GF_c_{i}.jpeg",  //depth 6
+                                ImageId = $"1*SNhelFbiMUTGX73GF_c_{i}.jpeg",  
                                 OriginalWidth = 1200 + i,
                                 OriginalHeight = 400 + i,
                                 Strategy = "resample",
@@ -435,21 +438,108 @@ namespace System.Text.Json.Serialization.Tests
                             NoIndex = false,
                             IsBookmarked = true,
                             Recommends = 100 + i,
-                            Tags = new List<Tag>(),  // TODO
+                            Tags = new List<Tag>
+                            {
+                                new Tag
+                                {
+                                    Slug = "javascript",
+                                    Name = "JavaScript",
+                                    PostCount = 98130,
+                                    Metadata = new Metadata
+                                    {
+                                        PostCount = 98130,
+                                        CoverImage = new CoverImage
+                                        {
+                                            Id = "1*uq5ZTlw6HLRRqbHaPYYL0g.png",
+                                            OriginalWidth = 1112,
+                                            OriginalHeight = 556,
+                                            IsFeatured = true,
+                                            FocusPercentX = 30,
+                                            FocusPercentY = 44
+                                        }
+                                    },
+                                    Type = "Tag"
+                                },
+                                new Tag
+                                {
+                                    Slug =  "software-development",
+                                    Name = "Software Development",
+                                    PostCount = 62810,
+                                    Metadata = new Metadata
+                                    {
+                                        PostCount = 62810,
+                                        CoverImage = new CoverImage
+                                        {
+                                            Id = "0*R1c-uLLQzlqqiA-b",
+                                            OriginalWidth = 8192,
+                                            OriginalHeight = 5461,
+                                            IsFeatured = true,
+                                            UnsplashPhotoId = "UKdCsFKBbkQ"
+                                        }
+                                    },
+                                    Type = "Tag"
+                                }
+                            },
                             SocialRecommendsCount = i / 2,
                             ResponsesCreatedCount = 2 + i,
                             Links = new Links {
-                                Entries = new List<Entry>(), // TODO
+                                Entries = new List<Entry>
+                                {
+                                    new Entry
+                                    {
+                                        Url = new Uri("http://test.com/link/entries/entry/1"),
+                                        Alts = new List<Alt>(),
+                                        HttpStatus = HttpStatusCode.OK
+                                    },
+                                    new Entry
+                                    {
+                                        Url = new Uri("http://test.com/link/entries/entry/2"),
+                                        Alts = new List<Alt>
+                                        {
+                                            new Alt
+                                            {
+                                                Type = 3,
+                                                Url = new Uri("http://test.com/link/entries/alts/1")
+                                            },
+                                            new Alt
+                                            {
+                                                Type = 2,
+                                                Url = new Uri("http://test.com/link/entries/alts/2")
+                                            }
+                                        },
+                                        HttpStatus = HttpStatusCode.Accepted
+                                    }
+                                },
                                 Version = $"0.{i}",
                                 GeneratedAt = new DateTime(2019, 12, 28)
                             },
                             IsLockedPreviewOnly = false,
                             TotalClapCount = 4000 + i,
                             SectionCount = i,
-                            Topics = new List<Topic>() //TODO
+                            Topics = new List<Topic>
+                            {
+                                new Topic
+                                {
+                                    TopicId = "decb52b64abf",
+                                    Slug = "programming",
+                                    CreatedAt  = 1493934116328,
+                                    DeletedAt = 0,
+                                    Image = new Image
+                                    {
+                                        Id = "1*iPa136b1cGEO7lvoXg6uHQ@2x.jpeg",
+                                        OriginalWidth = 6016,
+                                        OriginalHeight = 4016
+                                    },
+                                    Name = "Programming",
+                                    Description = "The good, the bad, the buggy.",
+                                    RelatedTopics = new List<Post>(),
+                                    Visibility = 1,
+                                    Type = "Topic"
+                                 }
+                            }
                         },
                         Coverless = i % 3 == 0,
-                        Slug = $"a-smart-programmer-understands-the-problems-worth-fixing-{i}",
+                        Slug = $"a smart programmer understands the problems worth fixing{i}",
                         TranslationSourcePostId = string.Empty,
                         TranslationSourceCreatorId = string.Empty,
                         IsApprovedTranslation = false,
@@ -460,7 +550,7 @@ namespace System.Text.Json.Serialization.Tests
                         ImportedUrl = string.Empty,
                         ImportedPublishedAt = 0,
                         Visibility = 1,
-                        UniqueSlug = $"a-smart-programmer-understands-the-problems-worth-fixing-dcf15871f943{i}",
+                        UniqueSlug = $"a smart programmer understands the problems worth fixing dcf15871f943{i}",
                         PreviewContent = new PreviewContent {
                             BodyModel = new PreviewContentBodyModel
                             {
@@ -474,7 +564,7 @@ namespace System.Text.Json.Serialization.Tests
                                         Layout = 10,
                                         Metadata = new Image
                                         {
-                                            Id = "1*SNhelFbiMUTGX73GF_c_ew.jpeg", //depth 8
+                                            Id = "1*SNhelFbiMUTGX73GF_c_ew.jpeg",
                                             OriginalWidth = 1200,
                                             OriginalHeight = 412,
                                             IsFeatured = true
@@ -500,7 +590,7 @@ namespace System.Text.Json.Serialization.Tests
                                                 Type = 3,
                                                 Start = 35,
                                                 End = 42,
-                                                Href = new Uri("https://levelup.gitconnected.com/the-problem-you-solve-is-more-important-than-the-code-you-write-d0e5493132c6"),
+                                                Href = new Uri("http://test.uri.com/markup"),
                                                 Title = string.Empty,
                                                 Rel = string.Empty,
                                                 AnchorType = 0
@@ -522,11 +612,11 @@ namespace System.Text.Json.Serialization.Tests
                         },
                         License = i,
                         InResponseToMediaResourceId = string.Empty,
-                        CanonicalUrl = new Uri("https://medium.com/@fagnerbracka-smart-programmer-understands-the-problems-worth-fixing-dcf15871f943"),
+                        CanonicalUrl = new Uri("http://test.uri.com/CanonicalUrl"),
                         ApprovedHomeCollectionId = string.Empty,
                         NewsletterId = string.Empty + i,
-                        WebCanonicalUrl = new Uri("https://medium.com/@fagnerbrack/a-smart-programmer-understands-the-problems-worth-fixing-dcf15871f943"),
-                        MediumUrl = new Uri("https://medium.com/@fagnerbrack/a-smart-programmer-understands-the-problems-worth-fixing-dcf15871f943"),
+                        WebCanonicalUrl = new Uri("http://test.uri.com/WebCanonicalUrl"),
+                        MediumUrl = new Uri("http://test.uri.com/MediumUrl"),
                         MigrationId = string.Empty,
                         NotifyFollowers = true,
                         NotifyFacebook = false,
@@ -555,15 +645,15 @@ namespace System.Text.Json.Serialization.Tests
                         {
                             TopicId = $"{i}decb52b64abf",
                             Slug = "programming",
-                            CreatedAt = 1493934116328, //TODO it should be DateTime
-                            DeletedAt = 0,             // This one too
+                            CreatedAt = 1493934116328, // TODO should be DateTime
+                            DeletedAt = 0,
                             Image = new Image
                             {
-
+                                
                             },
                             Name = "Programming",
                             Description = "The good, the bad, the buggy.",
-                            RelatedTopics = new List<object>(),
+                            RelatedTopics = new List<Post>(),
                             Visibility = i,
                             RelatedTags = new List<object>(),
                             RelatedTopicIds = new List<object>(),
@@ -581,14 +671,14 @@ namespace System.Text.Json.Serialization.Tests
                         new MentionedUser()
                         {
                             UserId = "c4ccb3ab8d17",
-                            Name = "Ian Tinsley",
-                            Username = "itinsley",
+                            Name = "Lorem Ipsam ",
+                            Username = "loremipsam",
                             CreatedAt = 1438064675373,
                             ImageId = string.Empty,
                             BackgroundImageId = string.Empty,
                             Bio = string.Empty,
                             TwitterScreenName = string.Empty,
-                            FacebookAccountId = "10155043593360477",
+                            FacebookAccountId = "987654321987654",
                             AllowNotes = 1,
                             MediumMemberAt = 0,
                             IsNsfw = false,
@@ -604,14 +694,14 @@ namespace System.Text.Json.Serialization.Tests
                             User  = new MentionedUser
                             {
                                 UserId = "c4ccb3ab8d17",
-                                Name = "Ian Tinsley",
-                                Username = "itinsley",
+                                Name = "Green Field",
+                                Username = "greenfield",
                                 CreatedAt = 1438064675373,
                                 ImageId = string.Empty,
                                 BackgroundImageId = string.Empty,
                                 Bio = string.Empty,
                                 TwitterScreenName = string.Empty,
-                                FacebookAccountId = "10155043593360477",
+                                FacebookAccountId = "123456789123465",
                                 AllowNotes = 1,
                                 MediumMemberAt = 0,
                                 IsNsfw = false,
@@ -639,16 +729,16 @@ namespace System.Text.Json.Serialization.Tests
                             The7Ef192B7F545 = new MentionedUser
                             {
                                 UserId = $"7ef192b7f545",
-                                Username = "fagnerbrack",
-                                Name = "Fagner Brack",
+                                Username = "johndoe",
+                                Name = "John Doe",
                                 CreatedAt = 1456628553936, // TODO should be datetime
                                 ImageId = $"{i}*h8Ph7pgNeQHZTiLlah3h-A.jpeg",
                                 BackgroundImageId = string.Empty,
-                                Bio = "I believe ideas should be open and free. This is a non-profit initiative to write about fundamentals you won't find anywhere else. ~7 min post every few weeks.",
-                                TwitterScreenName = "FagnerBrack",
+                                Bio = "I believe ideas should be open and free. This is a non-profit initiative to write about fundamentals you won't find anywhere else.",
+                                TwitterScreenName = "JohnDoe",
                                 SocialStats = new SocialStats
                                 {
-                                    UserId = "7ef192b7f545",   // depth 8
+                                    UserId = "7ef192b7f545",
                                     UsersFollowedByCount = 4000 + i,
                                     UsersFollowedCount = i,
                                     Type = "SocialStats"
@@ -690,7 +780,7 @@ namespace System.Text.Json.Serialization.Tests
                     } 
                 };
             
-                for (int j = 0; j < i % 10; j++)
+                for (int j = 0; j < i % 4; j++)
                 {
                     PurpleParagraph purpleParagraph = new PurpleParagraph
                     {
@@ -704,7 +794,7 @@ namespace System.Text.Json.Serialization.Tests
                         purpleParagraph.Layout = j;
                         for (int a = j % 5; a >= 0; a--)
                         {
-                            purpleParagraph.Markups.Add(new Markup // depth 9
+                            purpleParagraph.Markups.Add(new Markup
                             {
                                 Type = j,
                                 AnchorType = a,
@@ -728,7 +818,7 @@ namespace System.Text.Json.Serialization.Tests
                     post.Value.Content.BodyModel.Paragraphs.Add(purpleParagraph);
                 }
 
-                for (int j = 0; j < i % 5; j++)
+                for (int j = 0; j < i % 3; j++)
                 {
                     PurpleSection section = new PurpleSection
                     {

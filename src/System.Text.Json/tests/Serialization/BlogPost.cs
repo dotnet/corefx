@@ -3,8 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Net;
 
-namespace System.Text.Json.Serialization.Tests
+namespace System.Text.Json.Serialization.TestsSchemas.BlogPost
 { 
     public class Post
     {
@@ -558,7 +559,7 @@ namespace System.Text.Json.Serialization.Tests
         public string Description { get; set; }
 
         [JsonPropertyName("relatedTopics")]
-        public List<object> RelatedTopics { get; set; }
+        public List<Post> RelatedTopics { get; set; }
 
         [JsonPropertyName("visibility")]
         public long Visibility { get; set; }
@@ -660,7 +661,7 @@ namespace System.Text.Json.Serialization.Tests
         public List<Alt> Alts { get; set; }
 
         [JsonPropertyName("httpStatus")]
-        public long HttpStatus { get; set; }
+        public HttpStatusCode HttpStatus { get; set; }
     }
 
     public class Alt
@@ -669,7 +670,7 @@ namespace System.Text.Json.Serialization.Tests
         public long Type { get; set; }
 
         [JsonPropertyName("url")]
-        public string Url { get; set; }
+        public Uri Url { get; set; }
     }
 
     public class PreviewImage
