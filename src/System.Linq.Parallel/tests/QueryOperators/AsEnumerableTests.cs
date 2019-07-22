@@ -58,7 +58,9 @@ namespace System.Linq.Parallel.Tests
             Assert.IsNotType<ParallelQuery<int>>(enumerable.Cast<int>());
             Assert.True(enumerable.Cast<int>() is ParallelQuery<int>);
 
-            Assert.False(enumerable.Concat(Enumerable.Range(0, count)) is ParallelQuery<int>);
+            // LINQ Concat is optimized to return the non-empty enumerable directly
+            Assert.Equal(count == 0, enumerable.Concat(Enumerable.Range(0, count)) is ParallelQuery<int>);
+
             Assert.False(enumerable.DefaultIfEmpty() is ParallelQuery<int>);
             Assert.False(enumerable.Distinct() is ParallelQuery<int>);
             Assert.False(enumerable.Except(Enumerable.Range(0, count)) is ParallelQuery<int>);

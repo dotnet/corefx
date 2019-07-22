@@ -11,19 +11,37 @@ namespace System.Linq
     {
         public static IEnumerable<TSource> Concat<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second)
         {
-            if (first == null)
+            if (first is null)
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.first);
             }
 
-            if (second == null)
+            if (second is null)
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.second);
             }
 
-            return first is ConcatIterator<TSource> firstConcat
-                ? firstConcat.Concat(second)
-                : new Concat2Iterator<TSource>(first, second);
+            return ConcatIterator(first, second);
+
+            static IEnumerable<TSource> ConcatIterator (IEnumerable<TSource> first, IEnumerable<TSource> second)
+            {
+                if (IsEmpty(second))
+                {
+                    return first;
+                }
+
+                if (IsEmpty(first))
+                {
+                    return second;
+                }
+
+                return first is ConcatIterator<TSource> firstConcat
+                    ? firstConcat.Concat(second)
+                    : new Concat2Iterator<TSource>(first, second);
+            }
+
+            static bool IsEmpty(IEnumerable<TSource> source)
+                => source == Empty<TSource>() || (source is TSource[] array && array.Length == 0);
         }
 
         /// <summary>
