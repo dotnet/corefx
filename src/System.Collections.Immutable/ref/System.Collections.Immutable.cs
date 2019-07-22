@@ -249,7 +249,7 @@ namespace System.Collections.Immutable
         }
         public partial struct Enumerator
         {
-            private readonly T[] _array;
+            private T[] _array;
             private object _dummy;
             private int _dummyPrimitive;
             public T Current { get { throw null; } }
