@@ -326,6 +326,13 @@ CryptoNative_SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallba
 
 void ResetProtocolRestrictions(SSL_CTX* ctx)
 {
+#ifndef SSL_CTRL_SET_MIN_PROTO_VERSION
+#define SSL_CTRL_SET_MIN_PROTO_VERSION 123
+#endif
+#ifndef SSL_CTRL_SET_MAX_PROTO_VERSION
+#define SSL_CTRL_SET_MAX_PROTO_VERSION 124
+#endif
+
     SSL_CTX_ctrl(ctx, SSL_CTRL_SET_MIN_PROTO_VERSION, 0, NULL);
     SSL_CTX_ctrl(ctx, SSL_CTRL_SET_MAX_PROTO_VERSION, 0, NULL);
 }
