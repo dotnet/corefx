@@ -94,7 +94,7 @@ namespace System.Text.Json.Serialization.Tests
             const string Json = @"{""Key1"":1,""Key2"":2}";
 
             var options = new JsonSerializerOptions();
-            options.Converters.Add(new IDictionaryConverter(10));
+            options.Converters.Add(new ConverterForIDictionary(10));
 
             Dictionary<string, long> dictionary = JsonSerializer.Deserialize<Dictionary<string, long>>(Json, options);
             Assert.Equal(11, dictionary["Key1"]);
@@ -109,9 +109,9 @@ namespace System.Text.Json.Serialization.Tests
             const string Json = @"{""MyInt"":32,""MyDictionary"":{""Key1"":1,""Key2"":2},""MyString"":""Hello""}";
 
             var options = new JsonSerializerOptions();
-            options.Converters.Add(new IDictionaryConverter(10));
+            options.Converters.Add(new ConverterForIDictionary(10));
 
-            ClassHavingDictionaryFieldWhichUsingCustomConverter dictionary = JsonSerializer.Deserialize<ClassHavingDictionaryFieldWhichUsingCustomConverter>(Json, options);
+            ClassHavingDictionaryFieldWhichUsesCustomConverter dictionary = JsonSerializer.Deserialize<ClassHavingDictionaryFieldWhichUsesCustomConverter>(Json, options);
             Assert.Equal(11, dictionary.MyDictionary["Key1"]);
             Assert.Equal(12, dictionary.MyDictionary["Key2"]);
             Assert.Equal(32, dictionary.MyInt);
@@ -120,18 +120,18 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(Json, JsonSerializer.Serialize(dictionary, options));
         }
 
-        private class ClassHavingDictionaryFieldWhichUsingCustomConverter
+        private class ClassHavingDictionaryFieldWhichUsesCustomConverter
         {
             public int MyInt { get; set; }
             public Dictionary<string, long> MyDictionary { get; set; }
             public string MyString { get; set; }
         }
 
-        private class IDictionaryConverter : JsonConverter<IDictionary<string, long>>
+        private class ConverterForIDictionary : JsonConverter<IDictionary<string, long>>
         {
             private long _offset;
 
-            public IDictionaryConverter(long offset)
+            public ConverterForIDictionary(long offset)
             {
                 _offset = offset;
             }
