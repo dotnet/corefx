@@ -13,7 +13,6 @@
     <Rule Id="CA1000" Action="None" /> <!-- Do not declare static members on generic types -->
     <Rule Id="CA1001" Action="None" /> <!-- Non disposable class owns disposable fields -->
     <Rule Id="CA1010" Action="None" /> <!-- Collections should implement generic interface -->
-    <Rule Id="CA1018" Action="Error" /> <!-- Specify attribute usage on attribute -->
     <Rule Id="CA1028" Action="None" /> <!-- Enum storage should be Int32 -->
     <Rule Id="CA1030" Action="None" /> <!-- Use events where appropriate -->
     <Rule Id="CA1031" Action="None" /> <!-- Do not catch general exception types -->
@@ -84,20 +83,13 @@
     <Rule Id="CA2219" Action="None" /> <!-- Do not raise exceptions in finally clauses -->
     <Rule Id="CA2225" Action="None" /> <!-- Operator overloads have named alternates -->
     <Rule Id="CA2227" Action="None" /> <!-- Collection properties should be read only -->
-    <Rule Id="CA2229" Action="Error" /> <!-- Serializable type doesn't have a serialization constructor -->
     <Rule Id="CA2231" Action="None" /> <!-- Overload operator equals when overriding ValueType.Equals -->
     <Rule Id="CA2235" Action="None" /> <!-- Serializable type has non serializable field -->
     <Rule Id="CA2237" Action="None" /> <!-- Add [Serializable] to types that implement ISerializable -->
-    <Rule Id="CA5350" Action="Error" /> <!-- Do not use weak cryptographic algorithms -->
-    <Rule Id="CA5364" Action="None" /> <!-- Do Not Use Deprecated Security Protocols -->
     <Rule Id="CA5366" Action="None" /> <!-- Use XmlReader For DataSet Read Xml -->
     <Rule Id="CA5369" Action="None" /> <!-- Use XmlReader For Deserialize -->
     <Rule Id="CA5371" Action="None" /> <!-- Use XmlReader For Schema Read -->
     <Rule Id="CA5372" Action="None" /> <!-- Use XmlReader For XPathDocument -->
-    <Rule Id="CA5373" Action="None" /> <!-- Do not use obsolete key derivation function -->
-    <Rule Id="CA5379" Action="None" /> <!-- Do Not Use Weak Key Derivation Function Algorithm -->
-    <Rule Id="CA5384" Action="None" /> <!-- Do Not Use Digital Signature Algorithm (DSA) --> <!-- TODO -->
-    <Rule Id="CA5385" Action="None" /> <!-- Use Rivest–Shamir–Adleman (RSA) Algorithm With Sufficient Key Size --> <!-- TODO -->
 
   </Rules>
   <Rules AnalyzerId="System.Runtime.Analyzers" RuleNamespace="System.Runtime.Analyzers">
