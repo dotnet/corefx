@@ -172,7 +172,7 @@ namespace System.Diagnostics.SymbolStore
     }
     public readonly partial struct SymbolToken
     {
-        private readonly int _dummyPrimitive;
+        private readonly object _dummy;
         public SymbolToken(int val) { throw null; }
         public bool Equals(System.Diagnostics.SymbolStore.SymbolToken obj) { throw null; }
         public override bool Equals(object? obj) { throw null; }
