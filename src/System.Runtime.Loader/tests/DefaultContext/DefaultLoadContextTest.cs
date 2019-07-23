@@ -280,7 +280,7 @@ namespace System.Runtime.Loader.Tests
             // Confirm assembly loaded from the intended LoadContext
             Assert.NotEqual(lcDefault, loadedContext);
             Assert.Equal(olc, loadedContext);
-            Assert.Equal(false, olc.LoadedFromContext);
+            Assert.False(olc.LoadedFromContext);
         }
     }
 }

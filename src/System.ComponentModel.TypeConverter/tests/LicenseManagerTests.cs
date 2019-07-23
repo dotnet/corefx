@@ -174,11 +174,11 @@ namespace System.ComponentModel.Tests
             //** bool IsValid(Type);
             Assert.True(LicenseManager.IsLicensed(typeof(UnlicensedObject)));
             Assert.True(LicenseManager.IsLicensed(typeof(LicensedObject)));
-            Assert.Equal(false, LicenseManager.IsLicensed(typeof(InvalidLicensedObject)));
+            Assert.False(LicenseManager.IsLicensed(typeof(InvalidLicensedObject)));
 
             Assert.True(LicenseManager.IsValid(typeof(UnlicensedObject)));
             Assert.True(LicenseManager.IsValid(typeof(LicensedObject)));
-            Assert.Equal(false, LicenseManager.IsValid(typeof(InvalidLicensedObject)));
+            Assert.False(LicenseManager.IsValid(typeof(InvalidLicensedObject)));
 
             UnlicensedObject unlicensedObject = new UnlicensedObject();
             LicensedObject licensedObject = new LicensedObject();
@@ -194,7 +194,7 @@ namespace System.ComponentModel.Tests
             Assert.Equal("TestLicense", license.GetType().Name);
 
             license = null;
-            Assert.Equal(false, LicenseManager.IsValid(invalidLicensedObject.GetType(), invalidLicensedObject, out license));
+            Assert.False(LicenseManager.IsValid(invalidLicensedObject.GetType(), invalidLicensedObject, out license));
             Assert.Null(license);
 
             //** void Validate(Type);

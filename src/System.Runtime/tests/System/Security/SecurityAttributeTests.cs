@@ -45,7 +45,7 @@ namespace System.Tests
         {
             var att = new SecurityRulesAttribute(SecurityRuleSet.Level1);
             Assert.Equal(SecurityRuleSet.Level1, att.RuleSet);
-            Assert.Equal(false, att.SkipVerificationInFullTrust);
+            Assert.False(att.SkipVerificationInFullTrust);
 
             att.SkipVerificationInFullTrust = true;
             Assert.True(att.SkipVerificationInFullTrust);

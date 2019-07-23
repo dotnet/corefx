@@ -167,7 +167,7 @@ namespace System.IO.Tests
                 {
                     Assert.Equal(i, outStructArr[i].int1);
                     Assert.Equal(i+1, outStructArr[i].int2);
-                    Assert.Equal(false, outStructArr[i].bool1);
+                    Assert.False(outStructArr[i].bool1);
                     Assert.Equal((char)i, outStructArr[i].char1);
                     Assert.True(outStructArr[i].bool2);
                 }

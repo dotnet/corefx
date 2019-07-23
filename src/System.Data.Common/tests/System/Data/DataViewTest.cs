@@ -142,7 +142,7 @@ namespace System.Data.Tests
             Assert.True(dv1.AllowNew);
             Assert.True(dv1.AllowEdit);
             Assert.True(dv1.AllowDelete);
-            Assert.Equal(false, dv1.ApplyDefaultSort);
+            Assert.False(dv1.ApplyDefaultSort);
             Assert.Equal(string.Empty, dv1.RowFilter);
             Assert.Equal(DataViewRowState.CurrentRows, dv1.RowStateFilter);
             Assert.Equal(string.Empty, dv1.Sort);
@@ -150,7 +150,7 @@ namespace System.Data.Tests
             dv2 = new DataView(_dataTable);
             Assert.Equal("itemTable", dv2.Table.TableName);
             Assert.Equal(string.Empty, dv2.Sort);
-            Assert.Equal(false, dv2.ApplyDefaultSort);
+            Assert.False(dv2.ApplyDefaultSort);
             Assert.Equal(_dataTable.Rows[0], dv2[0].Row);
 
             dv3 = new DataView(_dataTable, "", "itemId DESC", DataViewRowState.CurrentRows);

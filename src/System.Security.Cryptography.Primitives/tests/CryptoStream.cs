@@ -215,7 +215,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                     encryptStream.Dispose();
                 }
 
-                Assert.Equal(false, output.CanRead);
+                Assert.False(output.CanRead);
             }
 
 #if netcoreapp
@@ -226,7 +226,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                     encryptStream.Dispose();
                 }
 
-                Assert.Equal(false, output.CanRead);
+                Assert.False(output.CanRead);
             }
 
             using (MemoryStream output = new MemoryStream())

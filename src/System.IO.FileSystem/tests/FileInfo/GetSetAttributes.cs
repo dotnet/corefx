@@ -26,7 +26,7 @@ namespace System.IO.Tests
             // Set To False
             test.IsReadOnly = false;
             test.Refresh();
-            Assert.Equal(false, test.IsReadOnly);
+            Assert.False(test.IsReadOnly);
         }
 
         [Theory]

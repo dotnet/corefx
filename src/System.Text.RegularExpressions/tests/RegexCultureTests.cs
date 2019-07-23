@@ -31,14 +31,14 @@ namespace System.Text.RegularExpressions.Tests
                 // when the Regex was created with a turkish locale the lower cased turkish version will
                 // no longer match the input string which contains upper and lower case iiiis hence even the input string 
                 // will no longer match
-                Assert.All(turkishRegex, rex => Assert.Equal(false, rex.IsMatch(input)));
+                Assert.All(turkishRegex, rex => Assert.False(rex.IsMatch(input)));
 
                 // Now comes the tricky part depending on the use locale in ToUpper the results differ
                 // Hence the regular expression will not match if different locales were used
                 Assert.All(cultInvariantRegex, rex => Assert.True(rex.IsMatch(input.ToLowerInvariant())));
-                Assert.All(cultInvariantRegex, rex => Assert.Equal(false, rex.IsMatch(input.ToLower(turkish))));
+                Assert.All(cultInvariantRegex, rex => Assert.False(rex.IsMatch(input.ToLower(turkish))));
 
-                Assert.All(turkishRegex, rex => Assert.Equal(false, rex.IsMatch(input.ToLowerInvariant())));
+                Assert.All(turkishRegex, rex => Assert.False(rex.IsMatch(input.ToLowerInvariant())));
                 Assert.All(turkishRegex, rex => Assert.True(rex.IsMatch(input.ToLower(turkish))));
             }).Dispose();
         }

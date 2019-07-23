@@ -114,7 +114,7 @@ namespace System.Data.Tests
             drv = dv.AddNew();
             drv.Row["col"] = "test";
             drv.Row.CancelEdit();
-            Assert.Equal(false, drv.IsEdit);
+            Assert.False(drv.IsEdit);
         }
 
         [Fact]

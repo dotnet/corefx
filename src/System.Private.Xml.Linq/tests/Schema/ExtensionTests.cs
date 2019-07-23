@@ -115,7 +115,7 @@ namespace CoreXml.Test.XLinq
 			validationSucceded = true;
 			ExtensionsClass.Validate (xmlDocument, schemaSet,
 				new ValidationEventHandler(TestValidationHandler));
-			Assert.Equal(false, validationSucceded);
+			Assert.False(validationSucceded);
 		}
 
 		/*
@@ -278,7 +278,7 @@ namespace CoreXml.Test.XLinq
 			date.SetValue(attributeValue);
 			ExtensionsClass.Validate(date, date.GetSchemaInfo ().SchemaAttribute, schemaSet,
 				new ValidationEventHandler(TestValidationHandler));
-			Assert.Equal(false, validationSucceded);
+			Assert.False(validationSucceded);
 		}
 
 		/*
@@ -347,7 +347,7 @@ namespace CoreXml.Test.XLinq
 
 			ExtensionsClass.Validate(root, root.GetSchemaInfo().SchemaElement, schemaSet,
 				new ValidationEventHandler(TestValidationHandler));
-			Assert.Equal(false, validationSucceded);
+			Assert.False(validationSucceded);
 
 		}
 

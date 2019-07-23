@@ -325,7 +325,7 @@ namespace System.Data.Tests
             Assert.Equal(string.Empty, table.Namespace);
             Assert.Equal(ds, table.DataSet);
             Assert.Equal(3, table.Columns.Count);
-            Assert.Equal(false, table.CaseSensitive);
+            Assert.False(table.CaseSensitive);
             Assert.Equal(tableName, table.TableName);
             Assert.Equal(2, table.Constraints.Count);
             Assert.Equal(string.Empty, table.Prefix);
@@ -342,8 +342,8 @@ namespace System.Data.Tests
             //Check properties of each column
             //First Column
             DataColumn col = table.Columns[0];
-            Assert.Equal(false, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.False(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -351,7 +351,7 @@ namespace System.Data.Tests
             Assert.Equal("id", col.ColumnName);
             Assert.Equal("System.Int32", col.DataType.ToString());
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(0, col.Ordinal);
@@ -362,7 +362,7 @@ namespace System.Data.Tests
             //Second Column
             col = table.Columns[1];
             Assert.True(col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -370,18 +370,18 @@ namespace System.Data.Tests
             Assert.Equal("ParentItem", col.ColumnName);
             Assert.Equal("System.String", col.DataType.ToString());
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(1, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ParentTable", col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
 
             //Third Column
             col = table.Columns[2];
-            Assert.Equal(false, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.False(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -389,13 +389,13 @@ namespace System.Data.Tests
             Assert.Equal("DepartmentID", col.ColumnName);
             Assert.Equal("System.Int32", col.DataType.ToString());
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(2, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ParentTable", col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
 
             //Test the Xml
             Assert.Equal(3, table.Rows.Count);
@@ -423,7 +423,7 @@ namespace System.Data.Tests
             Assert.Equal(string.Empty, table.Namespace);
             Assert.Equal(ds.DataSetName, table.DataSet.DataSetName);
             Assert.Equal(3, table.Columns.Count);
-            Assert.Equal(false, table.CaseSensitive);
+            Assert.False(table.CaseSensitive);
             Assert.Equal(tableName, table.TableName);
             Assert.Equal(2, table.Constraints.Count);
             Assert.Equal(string.Empty, table.Prefix);
@@ -440,8 +440,8 @@ namespace System.Data.Tests
             //Check properties of each column
             //First Column
             DataColumn col = table.Columns[0];
-            Assert.Equal(false, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.False(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -449,7 +449,7 @@ namespace System.Data.Tests
             Assert.Equal("id", col.ColumnName);
             Assert.Equal(typeof(int), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(0, col.Ordinal);
@@ -460,7 +460,7 @@ namespace System.Data.Tests
             //Second Column
             col = table.Columns[1];
             Assert.True(col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -468,18 +468,18 @@ namespace System.Data.Tests
             Assert.Equal("ParentItem", col.ColumnName);
             Assert.Equal(typeof(string), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(1, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ParentTable", col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
 
             //Third Column
             col = table.Columns[2];
-            Assert.Equal(false, col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.False(col.AllowDBNull);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -487,13 +487,13 @@ namespace System.Data.Tests
             Assert.Equal("DepartmentID", col.ColumnName);
             Assert.Equal(typeof(int), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(2, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ParentTable", col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
 
             //Test the Xml
             Assert.Equal(3, table.Rows.Count);
@@ -519,10 +519,10 @@ namespace System.Data.Tests
             //This method checks the properties of the <id> element
             Assert.True(reader.IsStartElement());
             Assert.Equal(3, reader.Depth);
-            Assert.Equal(false, reader.HasAttributes);
-            Assert.Equal(false, reader.HasValue);
-            Assert.Equal(false, reader.IsDefault);
-            Assert.Equal(false, reader.IsEmptyElement);
+            Assert.False(reader.HasAttributes);
+            Assert.False(reader.HasValue);
+            Assert.False(reader.IsDefault);
+            Assert.False(reader.IsEmptyElement);
             Assert.Equal("id", reader.Name);
             Assert.Equal("id", reader.LocalName);
             Assert.Equal(XmlNodeType.Element, reader.NodeType);
@@ -531,7 +531,7 @@ namespace System.Data.Tests
         private void VerifyDiffGramElement3(XmlReader reader)
         {
             //This method checks the property of </id> end elem
-            Assert.Equal(false, reader.IsStartElement());
+            Assert.False(reader.IsStartElement());
             Assert.Equal("id", reader.Name);
             Assert.Equal("id", reader.LocalName);
             Assert.Equal(XmlNodeType.EndElement, reader.NodeType);
@@ -542,10 +542,10 @@ namespace System.Data.Tests
             //This method tests the properties of the <DummyItem> elemnent
             Assert.True(reader.IsStartElement());
             Assert.Equal(3, reader.Depth);
-            Assert.Equal(false, reader.HasAttributes);
-            Assert.Equal(false, reader.HasValue);
-            Assert.Equal(false, reader.IsDefault);
-            Assert.Equal(false, reader.IsEmptyElement);
+            Assert.False(reader.HasAttributes);
+            Assert.False(reader.HasValue);
+            Assert.False(reader.IsDefault);
+            Assert.False(reader.IsEmptyElement);
             Assert.Equal("DummyItem", reader.Name);
             Assert.Equal("DummyItem", reader.LocalName);
             Assert.Equal(XmlNodeType.Element, reader.NodeType);
@@ -554,7 +554,7 @@ namespace System.Data.Tests
         private void VerifyDiffGramElement4(XmlReader reader)
         {
             //This method checks the properties of </DummyItem> end element
-            Assert.Equal(false, reader.IsStartElement());
+            Assert.False(reader.IsStartElement());
             Assert.Equal("DummyItem", reader.Name);
             Assert.Equal("DummyItem", reader.LocalName);
             Assert.Equal(XmlNodeType.EndElement, reader.NodeType);
@@ -563,7 +563,7 @@ namespace System.Data.Tests
         private void VerifyDiffGramElement5(XmlReader reader)
         {
             //This method check the properties of </DummyTable> end element
-            Assert.Equal(false, reader.IsStartElement());
+            Assert.False(reader.IsStartElement());
             Assert.Equal("DummyTable", reader.Name);
             Assert.Equal("DummyTable", reader.LocalName);
             Assert.Equal(XmlNodeType.EndElement, reader.NodeType);
@@ -729,7 +729,7 @@ namespace System.Data.Tests
             Assert.Equal(typeof(string), firstChildTable.Columns[1].DataType);
             Assert.Equal(typeof(int), firstChildTable.Columns[2].DataType);
             Assert.Equal(6, firstChildTable.Rows.Count);
-            Assert.Equal(false, firstChildTable.CaseSensitive);
+            Assert.False(firstChildTable.CaseSensitive);
             Assert.Equal("ChildTable", firstChildTable.TableName);
             Assert.Equal(string.Empty, firstChildTable.Prefix);
             Assert.Equal(2, firstChildTable.Constraints.Count);
@@ -750,7 +750,7 @@ namespace System.Data.Tests
             Assert.Equal(typeof(int), secondChildTable.Columns[2].DataType);
             Assert.Equal(typeof(int), secondChildTable.Columns[3].DataType);
             Assert.Equal(6, secondChildTable.Rows.Count);
-            Assert.Equal(false, secondChildTable.CaseSensitive);
+            Assert.False(secondChildTable.CaseSensitive);
             Assert.Equal("SecondChildTable", secondChildTable.TableName);
             Assert.Equal(string.Empty, secondChildTable.Prefix);
             Assert.Equal(2, secondChildTable.Constraints.Count);
@@ -786,7 +786,7 @@ namespace System.Data.Tests
             Assert.Equal(string.Empty, table.Namespace);
             Assert.Null(table.DataSet);
             Assert.Equal(3, table.Columns.Count);
-            Assert.Equal(false, table.CaseSensitive);
+            Assert.False(table.CaseSensitive);
             Assert.Equal("ChildTable", table.TableName);
             Assert.Equal(string.Empty, table.Prefix);
             Assert.Equal(1, table.Constraints.Count);
@@ -808,7 +808,7 @@ namespace System.Data.Tests
             Assert.Equal("ChildID", col.ColumnName);
             Assert.Equal(typeof(int), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(0, col.Ordinal);
@@ -826,18 +826,18 @@ namespace System.Data.Tests
             Assert.Equal("ChildItem", col.ColumnName);
             Assert.Equal(typeof(string), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(1, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ChildTable", col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
 
             //Third Column
             col = table.Columns[2];
             Assert.True(col.AllowDBNull);
-            Assert.Equal(false, col.AutoIncrement);
+            Assert.False(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -845,13 +845,13 @@ namespace System.Data.Tests
             Assert.Equal("ParentID", col.ColumnName);
             Assert.Equal(typeof(int), col.DataType);
             Assert.Equal(string.Empty, col.DefaultValue.ToString());
-            Assert.Equal(false, col.DesignMode);
+            Assert.False(col.DesignMode);
             Assert.Equal("System.Data.PropertyCollection", col.ExtendedProperties.ToString());
             Assert.Equal(-1, col.MaxLength);
             Assert.Equal(2, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ChildTable", col.Table.ToString());
-            Assert.Equal(false, col.Unique);
+            Assert.False(col.Unique);
 
             //Test the Xml
             Assert.Equal(6, table.Rows.Count);
@@ -1065,9 +1065,9 @@ namespace System.Data.Tests
                 Assert.True(reader.IsStartElement());
                 Assert.Equal(0, reader.Depth);
                 Assert.True(reader.HasAttributes);
-                Assert.Equal(false, reader.HasValue);
-                Assert.Equal(false, reader.IsDefault);
-                Assert.Equal(false, reader.IsEmptyElement);
+                Assert.False(reader.HasValue);
+                Assert.False(reader.IsDefault);
+                Assert.False(reader.IsEmptyElement);
                 Assert.Equal("diffgr:diffgram", reader.Name);
                 Assert.Equal("diffgram", reader.LocalName);
                 Assert.Equal(2, reader.AttributeCount);
@@ -1079,10 +1079,10 @@ namespace System.Data.Tests
                 reader.Read();
                 Assert.True(reader.IsStartElement());
                 Assert.Equal(1, reader.Depth);
-                Assert.Equal(false, reader.HasAttributes);
-                Assert.Equal(false, reader.HasValue);
-                Assert.Equal(false, reader.IsDefault);
-                Assert.Equal(false, reader.IsEmptyElement);
+                Assert.False(reader.HasAttributes);
+                Assert.False(reader.HasValue);
+                Assert.False(reader.IsDefault);
+                Assert.False(reader.IsEmptyElement);
                 Assert.Equal("NewDataSet", reader.Name);
                 Assert.Equal("NewDataSet", reader.LocalName);
                 Assert.Equal(XmlNodeType.Element, reader.NodeType);
@@ -1091,9 +1091,9 @@ namespace System.Data.Tests
                 Assert.True(reader.IsStartElement());
                 Assert.Equal(2, reader.Depth);
                 Assert.True(reader.HasAttributes);
-                Assert.Equal(false, reader.HasValue);
-                Assert.Equal(false, reader.IsDefault);
-                Assert.Equal(false, reader.IsEmptyElement);
+                Assert.False(reader.HasValue);
+                Assert.False(reader.IsDefault);
+                Assert.False(reader.IsEmptyElement);
                 Assert.Equal("DummyTable", reader.Name);
                 Assert.Equal("DummyTable", reader.LocalName);
                 Assert.Equal(2, reader.AttributeCount);
@@ -1121,13 +1121,13 @@ namespace System.Data.Tests
                 Assert.Equal("DummyItem 1", reader.Value);
 
                 reader.Read();
-                Assert.Equal(false, reader.IsStartElement());
+                Assert.False(reader.IsStartElement());
                 Assert.Equal("DummyItem", reader.Name);
                 Assert.Equal("DummyItem", reader.LocalName);
                 Assert.Equal(XmlNodeType.EndElement, reader.NodeType);
 
                 reader.Read();
-                Assert.Equal(false, reader.IsStartElement());
+                Assert.False(reader.IsStartElement());
                 Assert.Equal("DummyTable", reader.Name);
                 Assert.Equal("DummyTable", reader.LocalName);
                 Assert.Equal(XmlNodeType.EndElement, reader.NodeType);
@@ -1136,9 +1136,9 @@ namespace System.Data.Tests
                 Assert.True(reader.IsStartElement());
                 Assert.Equal(2, reader.Depth);
                 Assert.True(reader.HasAttributes);
-                Assert.Equal(false, reader.HasValue);
-                Assert.Equal(false, reader.IsDefault);
-                Assert.Equal(false, reader.IsEmptyElement);
+                Assert.False(reader.HasValue);
+                Assert.False(reader.IsDefault);
+                Assert.False(reader.IsEmptyElement);
                 Assert.Equal("DummyTable", reader.Name);
                 Assert.Equal("DummyTable", reader.LocalName);
                 Assert.Equal(3, reader.AttributeCount);
@@ -1176,9 +1176,9 @@ namespace System.Data.Tests
                 Assert.True(reader.IsStartElement());
                 Assert.Equal(2, reader.Depth);
                 Assert.True(reader.HasAttributes);
-                Assert.Equal(false, reader.HasValue);
-                Assert.Equal(false, reader.IsDefault);
-                Assert.Equal(false, reader.IsEmptyElement);
+                Assert.False(reader.HasValue);
+                Assert.False(reader.IsDefault);
+                Assert.False(reader.IsEmptyElement);
                 Assert.Equal("DummyTable", reader.Name);
                 Assert.Equal("DummyTable", reader.LocalName);
                 Assert.Equal(2, reader.AttributeCount);
@@ -1213,7 +1213,7 @@ namespace System.Data.Tests
                 VerifyDiffGramElement5(reader);
 
                 reader.Read();
-                Assert.Equal(false, reader.IsStartElement());
+                Assert.False(reader.IsStartElement());
                 Assert.Equal("NewDataSet", reader.Name);
                 Assert.Equal("NewDataSet", reader.LocalName);
                 Assert.Equal(XmlNodeType.EndElement, reader.NodeType);
@@ -1221,10 +1221,10 @@ namespace System.Data.Tests
                 reader.Read();
                 Assert.True(reader.IsStartElement());
                 Assert.Equal(1, reader.Depth);
-                Assert.Equal(false, reader.HasAttributes);
-                Assert.Equal(false, reader.HasValue);
-                Assert.Equal(false, reader.IsDefault);
-                Assert.Equal(false, reader.IsEmptyElement);
+                Assert.False(reader.HasAttributes);
+                Assert.False(reader.HasValue);
+                Assert.False(reader.IsDefault);
+                Assert.False(reader.IsEmptyElement);
                 Assert.Equal("diffgr:before", reader.Name);
                 Assert.Equal("before", reader.LocalName);
                 Assert.Equal(XmlNodeType.Element, reader.NodeType);
@@ -1233,9 +1233,9 @@ namespace System.Data.Tests
                 Assert.True(reader.IsStartElement());
                 Assert.Equal(2, reader.Depth);
                 Assert.True(reader.HasAttributes);
-                Assert.Equal(false, reader.HasValue);
-                Assert.Equal(false, reader.IsDefault);
-                Assert.Equal(false, reader.IsEmptyElement);
+                Assert.False(reader.HasValue);
+                Assert.False(reader.IsDefault);
+                Assert.False(reader.IsEmptyElement);
                 Assert.Equal("DummyTable", reader.Name);
                 Assert.Equal("DummyTable", reader.LocalName);
                 Assert.Equal(2, reader.AttributeCount);
@@ -1269,13 +1269,13 @@ namespace System.Data.Tests
                 VerifyDiffGramElement5(reader);
 
                 reader.Read();
-                Assert.Equal(false, reader.IsStartElement());
+                Assert.False(reader.IsStartElement());
                 Assert.Equal("diffgr:before", reader.Name);
                 Assert.Equal("before", reader.LocalName);
                 Assert.Equal(XmlNodeType.EndElement, reader.NodeType);
 
                 reader.Read();
-                Assert.Equal(false, reader.IsStartElement());
+                Assert.False(reader.IsStartElement());
                 Assert.Equal("diffgr:diffgram", reader.Name);
                 Assert.Equal("diffgram", reader.LocalName);
                 Assert.Equal(XmlNodeType.EndElement, reader.NodeType);

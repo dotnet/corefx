@@ -88,7 +88,7 @@ namespace System.Data.Tests
 
             // AllowDelete - false
             dv.AllowDelete = false;
-            Assert.Equal(false, dv.AllowDelete);
+            Assert.False(dv.AllowDelete);
 
             dv.AllowDelete = false;
             // AllowDelete false- Exception
@@ -119,7 +119,7 @@ namespace System.Data.Tests
 
             // AllowEdit - false
             dv.AllowEdit = false;
-            Assert.Equal(false, dv.AllowEdit);
+            Assert.False(dv.AllowEdit);
 
             dv.AllowEdit = false;
 
@@ -151,7 +151,7 @@ namespace System.Data.Tests
 
             // AllowNew - false
             dv.AllowNew = false;
-            Assert.Equal(false, dv.AllowNew);
+            Assert.False(dv.AllowNew);
 
             // AllowNew - exception
             Assert.Throws<DataException>(() =>
@@ -174,7 +174,7 @@ namespace System.Data.Tests
             DataView dv = new DataView(dt);
 
             // ApplyDefaultSort - default value
-            Assert.Equal(false, dv.ApplyDefaultSort);
+            Assert.False(dv.ApplyDefaultSort);
 
             // ApplyDefaultSort - true
             dv.ApplyDefaultSort = true;
@@ -182,7 +182,7 @@ namespace System.Data.Tests
 
             // ApplyDefaultSort - false
             dv.ApplyDefaultSort = false;
-            Assert.Equal(false, dv.ApplyDefaultSort);
+            Assert.False(dv.ApplyDefaultSort);
         }
 
         [Fact]
@@ -914,7 +914,7 @@ namespace System.Data.Tests
             dv = new DataView();
 
             // ctor
-            Assert.Equal(false, dv == null);
+            Assert.False(dv == null);
         }
 
         [Fact]
@@ -925,7 +925,7 @@ namespace System.Data.Tests
 
             // ctor
             dv = new DataView(dt);
-            Assert.Equal(false, dv == null);
+            Assert.False(dv == null);
 
             // ctor - table
             Assert.Equal(dt, dv.Table);
@@ -965,7 +965,7 @@ namespace System.Data.Tests
 
             // ctor
             dv = new DataView(dt, "CustomerId > 100", "Age", DataViewRowState.Added);
-            Assert.Equal(false, dv == null);
+            Assert.False(dv == null);
 
             // ctor - table
             Assert.Equal(dt, dv.Table);

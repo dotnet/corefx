@@ -144,7 +144,7 @@ namespace System.Net.Security.Tests
 
                 await client.ShutdownAsync();
 
-                Assert.Equal(false, client.CanWrite);
+                Assert.False(client.CanWrite);
 
                 await Assert.ThrowsAsync<InvalidOperationException>(() => client.ShutdownAsync());
                 await Assert.ThrowsAsync<InvalidOperationException>(() => client.WriteAsync(buffer, 0, buffer.Length));

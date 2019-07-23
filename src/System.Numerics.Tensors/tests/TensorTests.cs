@@ -1312,7 +1312,7 @@ namespace System.Numerics.Tensors.Tests
 
             var actual = TensorOperations.UnaryPlus(tensor);
             Assert.True(StructuralComparisons.StructuralEqualityComparer.Equals(actual, expected));
-            Assert.Equal(false, ReferenceEquals(actual, expected));
+            Assert.False(ReferenceEquals(actual, expected));
             Assert.Equal(tensorConstructor.IsReversedStride, actual.IsReversedStride);
         }
 
@@ -1388,7 +1388,7 @@ namespace System.Numerics.Tensors.Tests
 
             var actual = TensorOperations.UnaryMinus(tensor);
             Assert.True(StructuralComparisons.StructuralEqualityComparer.Equals(actual, expected));
-            Assert.Equal(false, ReferenceEquals(actual, expected));
+            Assert.False(ReferenceEquals(actual, expected));
             Assert.Equal(tensorConstructor.IsReversedStride, actual.IsReversedStride);
         }
 
@@ -1452,7 +1452,7 @@ namespace System.Numerics.Tensors.Tests
             tensor = TensorOperations.Increment(tensor);
             Assert.True(StructuralComparisons.StructuralEqualityComparer.Equals(actual, expectedResult));
             Assert.True(StructuralComparisons.StructuralEqualityComparer.Equals(tensor, expectedTensor));
-            Assert.Equal(false, ReferenceEquals(tensor, actual));
+            Assert.False(ReferenceEquals(tensor, actual));
             Assert.Equal(tensorConstructor.IsReversedStride, actual.IsReversedStride);
         }
 
@@ -1516,7 +1516,7 @@ namespace System.Numerics.Tensors.Tests
             tensor = TensorOperations.Decrement(tensor);
             Assert.True(StructuralComparisons.StructuralEqualityComparer.Equals(actual, expectedResult));
             Assert.True(StructuralComparisons.StructuralEqualityComparer.Equals(tensor, expectedTensor));
-            Assert.Equal(false, ReferenceEquals(tensor, actual));
+            Assert.False(ReferenceEquals(tensor, actual));
             Assert.Equal(tensorConstructor.IsReversedStride, actual.IsReversedStride);
         }
 

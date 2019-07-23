@@ -35,7 +35,7 @@ namespace System.IO.Ports.Tests
 
                 Debug.WriteLine("Verifying CanTimeout property retunrs false After Open() then Close()");
 
-                Assert.Equal(false, serialStream.CanTimeout);
+                Assert.False(serialStream.CanTimeout);
             }
         }
 
@@ -66,7 +66,7 @@ namespace System.IO.Ports.Tests
 
                 Debug.WriteLine("Verifying CanTimeout property returns false After Open() then BaseStream.Close()");
 
-                Assert.Equal(false, serialStream.CanTimeout);
+                Assert.False(serialStream.CanTimeout);
             }
         }
     }

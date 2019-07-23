@@ -104,7 +104,7 @@ namespace System.Data.Tests
         public void CanRemove_NullValue()
         {
             var ds = new DataSet();
-            Assert.Equal(false, ds.Tables.CanRemove(null));
+            Assert.False(ds.Tables.CanRemove(null));
         }
 
         [Fact]
@@ -113,7 +113,7 @@ namespace System.Data.Tests
             var ds = new DataSet();
             DataSet ds1 = new DataSet();
             ds1.Tables.Add();
-            Assert.Equal(false, ds.Tables.CanRemove(ds1.Tables[0]));
+            Assert.False(ds.Tables.CanRemove(ds1.Tables[0]));
         }
 
         [Fact]
@@ -125,15 +125,15 @@ namespace System.Data.Tests
 
             ds.Relations.Add("rel", ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"], false);
 
-            Assert.Equal(false, ds.Tables.CanRemove(ds.Tables[0]));
-            Assert.Equal(false, ds.Tables.CanRemove(ds.Tables[1]));
+            Assert.False(ds.Tables.CanRemove(ds.Tables[0]));
+            Assert.False(ds.Tables.CanRemove(ds.Tables[1]));
         }
         [Fact]
         public void CanRemove_PartOfConstraint()
         {
             DataSet ds = DataProvider.CreateForeignConstraint();
-            Assert.Equal(false, ds.Tables.CanRemove(ds.Tables[0]));
-            Assert.Equal(false, ds.Tables.CanRemove(ds.Tables[1]));
+            Assert.False(ds.Tables.CanRemove(ds.Tables[0]));
+            Assert.False(ds.Tables.CanRemove(ds.Tables[1]));
         }
 
         [Fact]
@@ -185,10 +185,10 @@ namespace System.Data.Tests
 
             Assert.True(ds.Tables.Contains("NewTable1"));
             Assert.True(ds.Tables.Contains("NewTable2"));
-            Assert.Equal(false, ds.Tables.Contains("NewTable3"));
+            Assert.False(ds.Tables.Contains("NewTable3"));
 
             ds.Tables["NewTable1"].TableName = "Tbl1";
-            Assert.Equal(false, ds.Tables.Contains("NewTable1"));
+            Assert.False(ds.Tables.Contains("NewTable1"));
             Assert.True(ds.Tables.Contains("Tbl1"));
         }
 

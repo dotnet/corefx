@@ -92,9 +92,9 @@ namespace System.Data.Tests.Common
             Assert.True(eq);
 
             eq = _cols[0].Equals(_columnMapCollection[0]);
-            Assert.Equal(false, eq);
+            Assert.False(eq);
             eq = _cols[1].Equals(_columnMapCollection[0]);
-            Assert.Equal(false, eq);
+            Assert.False(eq);
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace System.Data.Tests.Common
             Assert.True(eq);
 
             eq = _columnMapCollection.Contains(col1);
-            Assert.Equal(false, eq);
+            Assert.False(eq);
 
             eq = _columnMapCollection.Contains(_cols[0].SourceColumn);
             Assert.True(eq);
@@ -134,12 +134,12 @@ namespace System.Data.Tests.Common
             Assert.True(eq);
 
             eq = _columnMapCollection.Contains(_cols[0].DataSetColumn);
-            Assert.Equal(false, eq);
+            Assert.False(eq);
             eq = _columnMapCollection.Contains(_cols[1].DataSetColumn);
-            Assert.Equal(false, eq);
+            Assert.False(eq);
 
             eq = _columnMapCollection.Contains(col1.DataSetColumn);
-            Assert.Equal(false, eq);
+            Assert.False(eq);
         }
 
         [Fact]
@@ -173,9 +173,9 @@ namespace System.Data.Tests.Common
                 Assert.True(eq);
             }
             eq = _columnMapCollection[0].Equals(colcops[0]);
-            Assert.Equal(false, eq);
+            Assert.False(eq);
             eq = _columnMapCollection[0].Equals(colcops[1]);
-            Assert.Equal(false, eq);
+            Assert.False(eq);
         }
 
         [Fact]
@@ -260,7 +260,7 @@ namespace System.Data.Tests.Common
             eq = (col1.DataSetColumn.Equals("sourceData") && col1.SourceColumn.Equals("sourceData"));
             Assert.True(eq);
             eq = _columnMapCollection.Contains(col1);
-            Assert.Equal(false, eq);
+            Assert.False(eq);
             col1 = DataColumnMappingCollection.GetColumnMappingBySchemaAction(_columnMapCollection, "sourceData", MissingMappingAction.Ignore);
             Assert.Null(col1);
         }
@@ -387,13 +387,13 @@ namespace System.Data.Tests.Common
             bool eq;
             _columnMapCollection.RemoveAt(0);
             eq = _columnMapCollection.Contains(_cols[0]);
-            Assert.Equal(false, eq);
+            Assert.False(eq);
             eq = _columnMapCollection.Contains(_cols[1]);
             Assert.True(eq);
 
             _columnMapCollection.RemoveAt("sourceID");
             eq = _columnMapCollection.Contains(_cols[1]);
-            Assert.Equal(false, eq);
+            Assert.False(eq);
             eq = _columnMapCollection.Contains(_cols[2]);
             Assert.True(eq);
         }

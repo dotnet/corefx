@@ -113,7 +113,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
 
                 Assert.True(parser.HasFieldsEnclosedInQuotes);
                 parser.HasFieldsEnclosedInQuotes = false;
-                Assert.Equal(false, parser.HasFieldsEnclosedInQuotes);
+                Assert.False(parser.HasFieldsEnclosedInQuotes);
 
                 Assert.Equal(FieldType.Delimited, parser.TextFieldType);
                 parser.TextFieldType = FieldType.FixedWidth;
@@ -121,7 +121,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
 
                 Assert.True(parser.TrimWhiteSpace);
                 parser.TrimWhiteSpace = false;
-                Assert.Equal(false, parser.TrimWhiteSpace);
+                Assert.False(parser.TrimWhiteSpace);
             }
         }
 

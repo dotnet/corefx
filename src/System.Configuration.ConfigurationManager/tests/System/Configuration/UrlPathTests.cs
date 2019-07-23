@@ -60,7 +60,7 @@ namespace System.ConfigurationTests
         public void IsEqualOrSubDirectory_NullSubDir()
         {
             bool test = UrlPath.IsEqualOrSubdirectory("Hello", null);
-            Assert.Equal(false, test);
+            Assert.False(test);
         }
 
         [Fact]

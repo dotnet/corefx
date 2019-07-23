@@ -196,7 +196,7 @@ namespace System.Data.Tests
             ds.Relations.Add(dRel);
 
             // DataRelation - CTor
-            Assert.Equal(false, dRel == null);
+            Assert.False(dRel == null);
 
             // DataRelation - parent Constraints
             Assert.Equal(1, dtParent.Constraints.Count);
@@ -293,7 +293,7 @@ namespace System.Data.Tests
                 ds.Relations.Add(dRel);
 
                 // DataRelation - CTor,createConstraints=
-                Assert.Equal(false, dRel == null);
+                Assert.False(dRel == null);
 
                 // DataRelation - parent Constraints,createConstraints=
                 Assert.Equal(i, dtParent.Constraints.Count);
@@ -357,7 +357,7 @@ namespace System.Data.Tests
             Assert.Equal(1, ds.Relations.Count);
 
             // DataRelation - CTor
-            Assert.Equal(false, dRel == null);
+            Assert.False(dRel == null);
 
             // DataRelation - parent Constraints
             Assert.Equal(1, dtParent.Constraints.Count);
@@ -420,7 +420,7 @@ namespace System.Data.Tests
                 ds.Relations.Add(dRel);
 
                 // DataRelation - CTor,createConstraints=
-                Assert.Equal(false, dRel == null);
+                Assert.False(dRel == null);
 
                 // DataRelation - parent Constraints,createConstraints=
                 Assert.Equal(i, dtParent.Constraints.Count);
@@ -476,7 +476,7 @@ namespace System.Data.Tests
             ds.Relations.Add(dRel);
 
             // Nested default 
-            Assert.Equal(false, dRel.Nested);
+            Assert.False(dRel.Nested);
 
             dRel.Nested = true;
 

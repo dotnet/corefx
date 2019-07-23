@@ -59,7 +59,7 @@ namespace System.IO.Tests
 
             using (FileStream fs = CreateFileStream(fileName, FileMode.Open, FileAccess.Read))
             {
-                Assert.Equal(false, fs.CanWrite);
+                Assert.False(fs.CanWrite);
                 Assert.Throws<NotSupportedException>(() => fs.WriteByte(0));
                 Assert.True(fs.CanRead);
                 Assert.Equal(0, fs.ReadByte());
@@ -73,7 +73,7 @@ namespace System.IO.Tests
             {
                 Assert.True(fs.CanWrite);
                 fs.WriteByte(0); // should not throw
-                Assert.Equal(false, fs.CanRead);
+                Assert.False(fs.CanRead);
                 Assert.Throws<NotSupportedException>(() => fs.ReadByte());
             }
         }

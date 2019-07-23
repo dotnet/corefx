@@ -268,7 +268,7 @@ namespace System.Data.Tests
             dt.PrimaryKey = new DataColumn[] { dt.Columns[0] };
 
             Assert.True(dt.Rows.Contains(1));
-            Assert.Equal(false, dt.Rows.Contains(10));
+            Assert.False(dt.Rows.Contains(10));
         }
 
         [Fact]
@@ -277,7 +277,7 @@ namespace System.Data.Tests
             Assert.Throws<MissingPrimaryKeyException>(() =>
            {
                DataTable dt = DataProvider.CreateParentDataTable();
-               Assert.Equal(false, dt.Rows.Contains(1));
+               Assert.False(dt.Rows.Contains(1));
            });
         }
 
@@ -296,7 +296,7 @@ namespace System.Data.Tests
 
             arr[0] = 8;
 
-            Assert.Equal(false, dt.Rows.Contains(arr));
+            Assert.False(dt.Rows.Contains(arr));
         }
 
         [Fact]
@@ -311,7 +311,7 @@ namespace System.Data.Tests
                object[] arr = new object[1];
                arr[0] = 1;
 
-               Assert.Equal(false, dt.Rows.Contains(arr));
+               Assert.False(dt.Rows.Contains(arr));
            });
         }
 

@@ -109,7 +109,7 @@ namespace System.Text.Json.Tests
         public void DeserializeCommentTestObjectWithComments()
         {
             CommentTestObject o = JsonSerializer.Deserialize<CommentTestObject>(@"{/* Test */}", new JsonSerializerOptions { ReadCommentHandling = JsonCommentHandling.Skip });
-            Assert.Equal(false, o.A);
+            Assert.False(o.A);
 
             o = JsonSerializer.Deserialize<CommentTestObject>(@"{""A"": true/* Test */}", new JsonSerializerOptions { ReadCommentHandling = JsonCommentHandling.Skip });
             Assert.True(o.A);
