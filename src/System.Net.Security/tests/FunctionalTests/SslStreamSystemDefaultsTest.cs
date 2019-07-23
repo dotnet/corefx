@@ -48,6 +48,10 @@ namespace System.Net.Security.Tests
 #pragma warning disable 0618
         [InlineData(SslProtocols.Default, NegotiatedCipherSuiteTest.NonTls13Protocols)]
         [InlineData(NegotiatedCipherSuiteTest.NonTls13Protocols, SslProtocols.Default)]
+
+        // TODO: remove me, just for testing
+        [InlineData(SslProtocols.Tls11, NegotiatedCipherSuiteTest.NonTls13Protocols & (~SslProtocols.Ssl2))]
+
 #pragma warning restore 0618
         public async Task ClientAndServer_OneOrBothUseDefault_Ok(SslProtocols? clientProtocols, SslProtocols? serverProtocols)
         {
