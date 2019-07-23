@@ -52,7 +52,7 @@ namespace System.IO.Ports.Tests
 
                 Debug.WriteLine("Verifying CanWrite property returns true after a call to Open()");
 
-                Assert.Equal(true, com.BaseStream.CanWrite);
+                Assert.True(com.BaseStream.CanWrite);
             }
         }
         #endregion

@@ -753,7 +753,7 @@ namespace System.Data.Tests
             // Checking HasErrors Get 
             dtParent.Rows[0].RowError = "Error on row 0";
             dtParent.Rows[2].RowError = "Error on row 2";
-            Assert.Equal(true, dtParent.HasErrors);
+            Assert.True(dtParent.HasErrors);
         }
 
         [Fact]
@@ -921,9 +921,9 @@ namespace System.Data.Tests
             dt.ColumnChanged += new DataColumnChangeEventHandler(OnColumnChanged_Handler);
             dt.OnColumnChanged_Test();
             // OnColumnChanged Event 2
-            Assert.Equal(true, _eventRaised);
+            Assert.True(_eventRaised);
             // OnColumnChanged Values
-            Assert.Equal(true, _eventValues);
+            Assert.True(_eventValues);
             dt.ColumnChanged -= new DataColumnChangeEventHandler(OnColumnChanged_Handler);
         }
 
@@ -955,9 +955,9 @@ namespace System.Data.Tests
             dt.ColumnChanging += new DataColumnChangeEventHandler(OnColumnChanging_Handler);
             dt.OnColumnChanging_Test();
             // OnColumnChanging Event 2
-            Assert.Equal(true, _eventRaised);
+            Assert.True(_eventRaised);
             // OnColumnChanging Values
-            Assert.Equal(true, _eventValues);
+            Assert.True(_eventValues);
             dt.ColumnChanging -= new DataColumnChangeEventHandler(OnColumnChanging_Handler);
         }
 
@@ -1088,7 +1088,7 @@ namespace System.Data.Tests
             _EventTriggered = false;
             // RowChanged - 1
             dt.Rows[0][1] = "NewValue";
-            Assert.Equal(true, _EventTriggered);
+            Assert.True(_EventTriggered);
 
             _EventTriggered = false;
             // RowChanged - 2
@@ -1099,7 +1099,7 @@ namespace System.Data.Tests
             _EventTriggered = false;
             // RowChanged - 3
             dt.Rows[0].EndEdit();
-            Assert.Equal(true, _EventTriggered);
+            Assert.True(_EventTriggered);
 
             _EventTriggered = false;
             dt.RowChanged -= new DataRowChangeEventHandler(Row_Changed);
@@ -1123,7 +1123,7 @@ namespace System.Data.Tests
             _EventTriggered = false;
             // RowChanging - 1
             dt.Rows[0][1] = "NewValue";
-            Assert.Equal(true, _EventTriggered);
+            Assert.True(_EventTriggered);
 
             _EventTriggered = false;
             // RowChanging - 2
@@ -1134,7 +1134,7 @@ namespace System.Data.Tests
             _EventTriggered = false;
             // RowChanging - 3
             dt.Rows[0].EndEdit();
-            Assert.Equal(true, _EventTriggered);
+            Assert.True(_EventTriggered);
 
             _EventTriggered = false;
             dt.RowChanging -= new DataRowChangeEventHandler(Row_Changing);

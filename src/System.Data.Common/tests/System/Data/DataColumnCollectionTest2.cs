@@ -226,7 +226,7 @@ namespace System.Data.Tests
             Assert.Equal(false, dt.Columns.CanRemove(null));
             Assert.Equal(false, dt.Columns.CanRemove(dummyCol));
             Assert.Equal(false, dt.Columns.CanRemove(dt.Columns[0]));
-            Assert.Equal(true, dt.Columns.CanRemove(dt.Columns[1]));
+            Assert.True(dt.Columns.CanRemove(dt.Columns[1]));
         }
         [Fact]
         public void TestCanRemove_ForigenConstraint()
@@ -313,9 +313,9 @@ namespace System.Data.Tests
         public void TestContains_ByColumnName()
         {
             DataTable dt = DataProvider.CreateParentDataTable();
-            Assert.Equal(true, dt.Columns.Contains("ParentId"));
-            Assert.Equal(true, dt.Columns.Contains("String1"));
-            Assert.Equal(true, dt.Columns.Contains("ParentBool"));
+            Assert.True(dt.Columns.Contains("ParentId"));
+            Assert.True(dt.Columns.Contains("String1"));
+            Assert.True(dt.Columns.Contains("ParentBool"));
 
             Assert.Equal(false, dt.Columns.Contains("ParentId1"));
             dt.Columns.Remove("ParentId");
@@ -324,7 +324,7 @@ namespace System.Data.Tests
             dt.Columns["String1"].ColumnName = "Temp1";
 
             Assert.Equal(false, dt.Columns.Contains("String1"));
-            Assert.Equal(true, dt.Columns.Contains("Temp1"));
+            Assert.True(dt.Columns.Contains("Temp1"));
         }
 
         [Fact]
@@ -784,7 +784,7 @@ namespace System.Data.Tests
             int originalColumnCount = dt.Columns.Count;
             dt.Columns.RemoveAt(0);
             Assert.Equal(originalColumnCount - 1, dt.Columns.Count);
-            Assert.Equal(true, _eventOccurred);
+            Assert.True(_eventOccurred);
 
             Assert.Throws<IndexOutOfRangeException>(() =>
             {

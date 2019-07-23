@@ -357,11 +357,11 @@ namespace System.Data.Tests
             Assert.Equal(0, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ParentTable", col.Table.ToString());
-            Assert.Equal(true, col.Unique);
+            Assert.True(col.Unique);
 
             //Second Column
             col = table.Columns[1];
-            Assert.Equal(true, col.AllowDBNull);
+            Assert.True(col.AllowDBNull);
             Assert.Equal(false, col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
@@ -455,11 +455,11 @@ namespace System.Data.Tests
             Assert.Equal(0, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ParentTable", col.Table.ToString());
-            Assert.Equal(true, col.Unique);
+            Assert.True(col.Unique);
 
             //Second Column
             col = table.Columns[1];
-            Assert.Equal(true, col.AllowDBNull);
+            Assert.True(col.AllowDBNull);
             Assert.Equal(false, col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
@@ -517,7 +517,7 @@ namespace System.Data.Tests
         private void VerifyDiffGramElement1(XmlReader reader)
         {
             //This method checks the properties of the <id> element
-            Assert.Equal(true, reader.IsStartElement());
+            Assert.True(reader.IsStartElement());
             Assert.Equal(3, reader.Depth);
             Assert.Equal(false, reader.HasAttributes);
             Assert.Equal(false, reader.HasValue);
@@ -540,7 +540,7 @@ namespace System.Data.Tests
         private void VerifyDiffGramElement2(XmlReader reader)
         {
             //This method tests the properties of the <DummyItem> elemnent
-            Assert.Equal(true, reader.IsStartElement());
+            Assert.True(reader.IsStartElement());
             Assert.Equal(3, reader.Depth);
             Assert.Equal(false, reader.HasAttributes);
             Assert.Equal(false, reader.HasValue);
@@ -800,7 +800,7 @@ namespace System.Data.Tests
             //Check properties of each column
             //First Column
             DataColumn col = table.Columns[0];
-            Assert.Equal(true, col.AllowDBNull);
+            Assert.True(col.AllowDBNull);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -814,11 +814,11 @@ namespace System.Data.Tests
             Assert.Equal(0, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ChildTable", col.Table.ToString());
-            Assert.Equal(true, col.Unique);
+            Assert.True(col.Unique);
 
             //Second Column
             col = table.Columns[1];
-            Assert.Equal(true, col.AllowDBNull);
+            Assert.True(col.AllowDBNull);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -836,7 +836,7 @@ namespace System.Data.Tests
 
             //Third Column
             col = table.Columns[2];
-            Assert.Equal(true, col.AllowDBNull);
+            Assert.True(col.AllowDBNull);
             Assert.Equal(false, col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
@@ -1062,9 +1062,9 @@ namespace System.Data.Tests
                 XmlReader reader = XmlReader.Create(stream, settings);
 
                 reader.Read();
-                Assert.Equal(true, reader.IsStartElement());
+                Assert.True(reader.IsStartElement());
                 Assert.Equal(0, reader.Depth);
-                Assert.Equal(true, reader.HasAttributes);
+                Assert.True(reader.HasAttributes);
                 Assert.Equal(false, reader.HasValue);
                 Assert.Equal(false, reader.IsDefault);
                 Assert.Equal(false, reader.IsEmptyElement);
@@ -1077,7 +1077,7 @@ namespace System.Data.Tests
                 Assert.Equal(XmlNodeType.Element, reader.NodeType);
 
                 reader.Read();
-                Assert.Equal(true, reader.IsStartElement());
+                Assert.True(reader.IsStartElement());
                 Assert.Equal(1, reader.Depth);
                 Assert.Equal(false, reader.HasAttributes);
                 Assert.Equal(false, reader.HasValue);
@@ -1088,9 +1088,9 @@ namespace System.Data.Tests
                 Assert.Equal(XmlNodeType.Element, reader.NodeType);
 
                 reader.Read();
-                Assert.Equal(true, reader.IsStartElement());
+                Assert.True(reader.IsStartElement());
                 Assert.Equal(2, reader.Depth);
-                Assert.Equal(true, reader.HasAttributes);
+                Assert.True(reader.HasAttributes);
                 Assert.Equal(false, reader.HasValue);
                 Assert.Equal(false, reader.IsDefault);
                 Assert.Equal(false, reader.IsEmptyElement);
@@ -1106,7 +1106,7 @@ namespace System.Data.Tests
 
                 reader.Read();
                 Assert.Equal(XmlNodeType.Text, reader.NodeType);
-                Assert.Equal(true, reader.HasValue);
+                Assert.True(reader.HasValue);
                 Assert.Equal("1", reader.Value);
 
                 reader.Read();
@@ -1117,7 +1117,7 @@ namespace System.Data.Tests
 
                 reader.Read();
                 Assert.Equal(XmlNodeType.Text, reader.NodeType);
-                Assert.Equal(true, reader.HasValue);
+                Assert.True(reader.HasValue);
                 Assert.Equal("DummyItem 1", reader.Value);
 
                 reader.Read();
@@ -1133,9 +1133,9 @@ namespace System.Data.Tests
                 Assert.Equal(XmlNodeType.EndElement, reader.NodeType);
 
                 reader.Read();
-                Assert.Equal(true, reader.IsStartElement());
+                Assert.True(reader.IsStartElement());
                 Assert.Equal(2, reader.Depth);
-                Assert.Equal(true, reader.HasAttributes);
+                Assert.True(reader.HasAttributes);
                 Assert.Equal(false, reader.HasValue);
                 Assert.Equal(false, reader.IsDefault);
                 Assert.Equal(false, reader.IsEmptyElement);
@@ -1152,7 +1152,7 @@ namespace System.Data.Tests
 
                 reader.Read();
                 Assert.Equal(XmlNodeType.Text, reader.NodeType);
-                Assert.Equal(true, reader.HasValue);
+                Assert.True(reader.HasValue);
                 Assert.Equal("2", reader.Value);
 
                 reader.Read();
@@ -1163,7 +1163,7 @@ namespace System.Data.Tests
 
                 reader.Read();
                 Assert.Equal(XmlNodeType.Text, reader.NodeType);
-                Assert.Equal(true, reader.HasValue);
+                Assert.True(reader.HasValue);
                 Assert.Equal("Changed_DummyItem 2", reader.Value);
 
                 reader.Read();
@@ -1173,9 +1173,9 @@ namespace System.Data.Tests
                 VerifyDiffGramElement5(reader);
 
                 reader.Read();
-                Assert.Equal(true, reader.IsStartElement());
+                Assert.True(reader.IsStartElement());
                 Assert.Equal(2, reader.Depth);
-                Assert.Equal(true, reader.HasAttributes);
+                Assert.True(reader.HasAttributes);
                 Assert.Equal(false, reader.HasValue);
                 Assert.Equal(false, reader.IsDefault);
                 Assert.Equal(false, reader.IsEmptyElement);
@@ -1191,7 +1191,7 @@ namespace System.Data.Tests
 
                 reader.Read();
                 Assert.Equal(XmlNodeType.Text, reader.NodeType);
-                Assert.Equal(true, reader.HasValue);
+                Assert.True(reader.HasValue);
                 Assert.Equal("3", reader.Value);
 
                 reader.Read();
@@ -1203,7 +1203,7 @@ namespace System.Data.Tests
 
                 reader.Read();
                 Assert.Equal(XmlNodeType.Text, reader.NodeType);
-                Assert.Equal(true, reader.HasValue);
+                Assert.True(reader.HasValue);
                 Assert.Equal("DummyItem 3", reader.Value);
 
                 reader.Read();
@@ -1219,7 +1219,7 @@ namespace System.Data.Tests
                 Assert.Equal(XmlNodeType.EndElement, reader.NodeType);
 
                 reader.Read();
-                Assert.Equal(true, reader.IsStartElement());
+                Assert.True(reader.IsStartElement());
                 Assert.Equal(1, reader.Depth);
                 Assert.Equal(false, reader.HasAttributes);
                 Assert.Equal(false, reader.HasValue);
@@ -1230,9 +1230,9 @@ namespace System.Data.Tests
                 Assert.Equal(XmlNodeType.Element, reader.NodeType);
 
                 reader.Read();
-                Assert.Equal(true, reader.IsStartElement());
+                Assert.True(reader.IsStartElement());
                 Assert.Equal(2, reader.Depth);
-                Assert.Equal(true, reader.HasAttributes);
+                Assert.True(reader.HasAttributes);
                 Assert.Equal(false, reader.HasValue);
                 Assert.Equal(false, reader.IsDefault);
                 Assert.Equal(false, reader.IsEmptyElement);
@@ -1248,7 +1248,7 @@ namespace System.Data.Tests
 
                 reader.Read();
                 Assert.Equal(XmlNodeType.Text, reader.NodeType);
-                Assert.Equal(true, reader.HasValue);
+                Assert.True(reader.HasValue);
                 Assert.Equal("2", reader.Value);
 
                 reader.Read();
@@ -1259,7 +1259,7 @@ namespace System.Data.Tests
 
                 reader.Read();
                 Assert.Equal(XmlNodeType.Text, reader.NodeType);
-                Assert.Equal(true, reader.HasValue);
+                Assert.True(reader.HasValue);
                 Assert.Equal("DummyItem 2", reader.Value);
 
                 reader.Read();

@@ -149,9 +149,9 @@ namespace System.Data.Tests
         {
             DataSet ds = getDataSet();
             ds.Relations.Add(ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"]);
-            Assert.Equal(true, ds.Relations.CanRemove(ds.Relations[0]));
-            Assert.Equal(true, ds.Tables[0].ChildRelations.CanRemove(ds.Tables[0].ChildRelations[0]));
-            Assert.Equal(true, ds.Tables[1].ParentRelations.CanRemove(ds.Tables[1].ParentRelations[0]));
+            Assert.True(ds.Relations.CanRemove(ds.Relations[0]));
+            Assert.True(ds.Tables[0].ChildRelations.CanRemove(ds.Tables[0].ChildRelations[0]));
+            Assert.True(ds.Tables[1].ParentRelations.CanRemove(ds.Tables[1].ParentRelations[0]));
             Assert.Equal(false, ds.Relations.CanRemove(null));
         }
         [Fact]
@@ -204,7 +204,7 @@ namespace System.Data.Tests
             DataSet ds = getDataSet();
             ds.Relations.Add("rel1", ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"]);
 
-            Assert.Equal(true, ds.Relations.Contains("rel1"));
+            Assert.True(ds.Relations.Contains("rel1"));
             Assert.Equal(false, ds.Relations.Contains("RelL"));
             Assert.Equal(false, ds.Relations.Contains("rel2"));
         }

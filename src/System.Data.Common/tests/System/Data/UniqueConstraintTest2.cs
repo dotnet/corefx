@@ -62,7 +62,7 @@ namespace System.Data.Tests
             //Two System.Data.ForeignKeyConstraint are equal if they constrain the same columns.
             // same column
             uc2 = new UniqueConstraint(dtParent.Columns[0]);
-            Assert.Equal(true, uc1.Equals(uc2));
+            Assert.True(uc1.Equals(uc2));
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace System.Data.Tests
             dtParent.Constraints.Add(uc);
 
             // primary key 2
-            Assert.Equal(true, uc.IsPrimaryKey);
+            Assert.True(uc.IsPrimaryKey);
         }
 
         [Fact]
@@ -360,7 +360,7 @@ namespace System.Data.Tests
             PropertyCollection pc = uc.ExtendedProperties;
 
             // Checking ExtendedProperties default 
-            Assert.Equal(true, pc != null);
+            Assert.True(pc != null);
 
             // Checking ExtendedProperties count 
             Assert.Equal(0, pc.Count);

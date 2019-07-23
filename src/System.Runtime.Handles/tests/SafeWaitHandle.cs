@@ -13,7 +13,7 @@ public partial class SafeWaitHandle_4000_Tests
     {
         SafeWaitHandle swh = new SafeWaitHandle(IntPtr.Zero, false);
         Assert.Equal(false, swh.IsClosed);
-        Assert.Equal(true, swh.IsInvalid);
+        Assert.True(swh.IsInvalid);
     }
 
     [Fact]

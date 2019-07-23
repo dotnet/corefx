@@ -16,7 +16,7 @@ namespace System.ComponentModel.Tests
         [Fact]
         public static void Ctor()
         {
-            Assert.Equal(true, new DefaultValueAttribute(true).Value);
+            Assert.True(new DefaultValueAttribute(true).Value);
             Assert.Equal(false, new DefaultValueAttribute(false).Value);
 
             Assert.Equal(3.14, new DefaultValueAttribute(3.14).Value);
@@ -142,7 +142,7 @@ namespace System.ComponentModel.Tests
             var attr = new CustomDefaultValueAttribute(null);
 
             attr.SetValue(true);
-            Assert.Equal(true, attr.Value);
+            Assert.True(attr.Value);
 
             attr.SetValue(false);
             Assert.Equal(false, attr.Value);

@@ -31,7 +31,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Assert.Same(metadata, definition.Metadata);
             Assert.Equal(CreationPolicy.NonShared, definition.RequiredCreationPolicy);
             Assert.Equal(false, definition.IsRecomposable);
-            Assert.Equal(true, definition.IsPrerequisite);
+            Assert.True(definition.IsPrerequisite);
             Assert.Null(((ICompositionElement)definition).Origin);
             Assert.NotNull(((ICompositionElement)definition).DisplayName);
         }

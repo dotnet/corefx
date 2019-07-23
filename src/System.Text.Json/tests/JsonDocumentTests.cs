@@ -751,7 +751,7 @@ namespace System.Text.Json.Tests
                 JsonElement parsedObject = doc.RootElement;
                 bool first = parsedObject[0].GetBoolean();
                 bool second = parsedObject[1].GetBoolean();
-                Assert.Equal(true, first);
+                Assert.True(first);
                 Assert.Equal(false, second);
             }
         }

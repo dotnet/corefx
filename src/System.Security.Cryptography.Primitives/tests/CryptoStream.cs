@@ -236,7 +236,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                     encryptStream.Dispose();
                 }
 
-                Assert.Equal(true, output.CanRead);
+                Assert.True(output.CanRead);
             }
 #endif
         }

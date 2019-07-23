@@ -97,7 +97,7 @@ namespace System.Data.Tests
         {
             var ds = new DataSet();
             ds.Tables.Add();
-            Assert.Equal(true, ds.Tables.CanRemove(ds.Tables[0]));
+            Assert.True(ds.Tables.CanRemove(ds.Tables[0]));
         }
 
         [Fact]
@@ -183,13 +183,13 @@ namespace System.Data.Tests
             ds.Tables.Add("NewTable1");
             ds.Tables.Add("NewTable2");
 
-            Assert.Equal(true, ds.Tables.Contains("NewTable1"));
-            Assert.Equal(true, ds.Tables.Contains("NewTable2"));
+            Assert.True(ds.Tables.Contains("NewTable1"));
+            Assert.True(ds.Tables.Contains("NewTable2"));
             Assert.Equal(false, ds.Tables.Contains("NewTable3"));
 
             ds.Tables["NewTable1"].TableName = "Tbl1";
             Assert.Equal(false, ds.Tables.Contains("NewTable1"));
-            Assert.Equal(true, ds.Tables.Contains("Tbl1"));
+            Assert.True(ds.Tables.Contains("Tbl1"));
         }
 
         [Fact]

@@ -52,7 +52,7 @@ namespace System.IO.Ports.Tests
 
                 Debug.WriteLine("Verifying CanRead property returns true after a call to Open()");
 
-                Assert.Equal(true, com.BaseStream.CanRead);
+                Assert.True(com.BaseStream.CanRead);
             }
         }
 

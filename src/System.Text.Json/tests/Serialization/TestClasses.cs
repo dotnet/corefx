@@ -1173,7 +1173,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, MyInt32Dict["key2"]);
             Assert.Equal(2, MyInt32Dict.Count);
 
-            Assert.Equal(true, MyBooleanDict["key1"]);
+            Assert.True(MyBooleanDict["key1"]);
             Assert.Equal(false, MyBooleanDict["key2"]);
             Assert.Equal(2, MyBooleanDict.Count);
 
@@ -1193,7 +1193,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, MyInt32IDict["key2"]);
             Assert.Equal(2, MyInt32IDict.Count);
 
-            Assert.Equal(true, MyBooleanIDict["key1"]);
+            Assert.True(MyBooleanIDict["key1"]);
             Assert.Equal(false, MyBooleanIDict["key2"]);
             Assert.Equal(2, MyBooleanIDict.Count);
 
@@ -1213,7 +1213,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, MyInt32IReadOnlyDict["key2"]);
             Assert.Equal(2, MyInt32IReadOnlyDict.Count);
 
-            Assert.Equal(true, MyBooleanIReadOnlyDict["key1"]);
+            Assert.True(MyBooleanIReadOnlyDict["key1"]);
             Assert.Equal(false, MyBooleanIReadOnlyDict["key2"]);
             Assert.Equal(2, MyBooleanIReadOnlyDict.Count);
 

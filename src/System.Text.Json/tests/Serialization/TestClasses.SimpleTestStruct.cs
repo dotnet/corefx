@@ -179,7 +179,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyString);
             Assert.Equal(3.3m, MyDecimal);
             Assert.Equal(false, MyBooleanFalse);
-            Assert.Equal(true, MyBooleanTrue);
+            Assert.True(MyBooleanTrue);
             Assert.Equal(1.1f, MySingle);
             Assert.Equal(2.2d, MyDouble);
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTime);
@@ -202,7 +202,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyStringArray[0]);
             Assert.Equal(3.3m, MyDecimalArray[0]);
             Assert.Equal(false, MyBooleanFalseArray[0]);
-            Assert.Equal(true, MyBooleanTrueArray[0]);
+            Assert.True(MyBooleanTrueArray[0]);
             Assert.Equal(1.1f, MySingleArray[0]);
             Assert.Equal(2.2d, MyDoubleArray[0]);
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTimeArray[0]);

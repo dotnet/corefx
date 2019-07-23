@@ -67,7 +67,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(JsonValueKind.String, elements[1].ValueKind);
                 Assert.Equal("Hello", elements[1].ToString());
                 Assert.Equal(JsonValueKind.True, elements[2].ValueKind);
-                Assert.Equal(true, elements[2].GetBoolean());
+                Assert.True(elements[2].GetBoolean());
                 Assert.Equal(JsonValueKind.False, elements[3].ValueKind);
                 Assert.Equal(false, elements[3].GetBoolean());
             }

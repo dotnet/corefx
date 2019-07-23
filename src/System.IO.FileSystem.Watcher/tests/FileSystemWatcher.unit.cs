@@ -187,7 +187,7 @@ namespace System.IO.Tests
                 Assert.Equal(false, watcher.EnableRaisingEvents);
 
                 watcher.EnableRaisingEvents = true;
-                Assert.Equal(true, watcher.EnableRaisingEvents);
+                Assert.True(watcher.EnableRaisingEvents);
 
                 watcher.EnableRaisingEvents = false;
                 Assert.Equal(false, watcher.EnableRaisingEvents);
@@ -255,7 +255,7 @@ namespace System.IO.Tests
             Assert.Equal(false, watcher.IncludeSubdirectories);
 
             watcher.IncludeSubdirectories = true;
-            Assert.Equal(true, watcher.IncludeSubdirectories);
+            Assert.True(watcher.IncludeSubdirectories);
 
             watcher.IncludeSubdirectories = false;
             Assert.Equal(false, watcher.IncludeSubdirectories);

@@ -20,7 +20,7 @@ namespace System.Data.SqlClient.Tests
             attrib.Precision = 234;
             attrib.Scale = 345;
 
-            Assert.Equal(true, attrib.IsFixedLength);
+            Assert.True(attrib.IsFixedLength);
             Assert.Equal(false, attrib.IsNullable);
             Assert.Equal(123, attrib.MaxSize);
             Assert.Equal(234, attrib.Precision);

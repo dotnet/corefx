@@ -71,7 +71,7 @@ namespace System.Data.Tests
             //Two System.Data.ForeignKeyConstraint are equal if they constrain the same columns.
             // same column
             fc2 = new ForeignKeyConstraint(dtParent.Columns[0], dtChild.Columns[0]);
-            Assert.Equal(true, fc1.Equals(fc2));
+            Assert.True(fc1.Equals(fc2));
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace System.Data.Tests
             //Update the parent 
 
             ds.Tables[0].Rows[0]["ParentId"] = 777;
-            Assert.Equal(true, ds.Tables[1].Select("ParentId=777").Length > 0);
+            Assert.True(ds.Tables[1].Select("ParentId=777").Length > 0);
             ds.Tables[0].RejectChanges();
             Assert.Equal(0, ds.Tables[1].Select("ParentId=777").Length);
         }
@@ -415,7 +415,7 @@ namespace System.Data.Tests
             PropertyCollection pc = fc.ExtendedProperties;
 
             // Checking ExtendedProperties default 
-            Assert.Equal(true, fc != null);
+            Assert.True(fc != null);
 
             // Checking ExtendedProperties count 
             Assert.Equal(0, pc.Count);

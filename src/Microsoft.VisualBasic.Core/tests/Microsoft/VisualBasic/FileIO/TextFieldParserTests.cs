@@ -111,7 +111,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
                 Assert.Equal(new[] { int.MaxValue, 3 }, parser.FieldWidths);
                 Assert.Throws<ArgumentException>(() => parser.SetFieldWidths(new[] { -1, -1 }));
 
-                Assert.Equal(true, parser.HasFieldsEnclosedInQuotes);
+                Assert.True(parser.HasFieldsEnclosedInQuotes);
                 parser.HasFieldsEnclosedInQuotes = false;
                 Assert.Equal(false, parser.HasFieldsEnclosedInQuotes);
 
@@ -119,7 +119,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
                 parser.TextFieldType = FieldType.FixedWidth;
                 Assert.Equal(FieldType.FixedWidth, parser.TextFieldType);
 
-                Assert.Equal(true, parser.TrimWhiteSpace);
+                Assert.True(parser.TrimWhiteSpace);
                 parser.TrimWhiteSpace = false;
                 Assert.Equal(false, parser.TrimWhiteSpace);
             }

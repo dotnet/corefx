@@ -93,7 +93,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(@"{""IsTransient"":true}", JsonSerializer.Serialize(new ChildClass { IsTransient = true }));
 
             ChildClass childClass = JsonSerializer.Deserialize<ChildClass>(@"{""IsTransient"":true}");
-            Assert.Equal(true, childClass.IsTransient);
+            Assert.True(childClass.IsTransient);
         }
 
         [Fact]
@@ -102,7 +102,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(@"{""IsTransient"":true}", JsonSerializer.Serialize(new ChildClassVirtual { IsTransient = true }));
 
             ChildClassVirtual childClass = JsonSerializer.Deserialize<ChildClassVirtual>(@"{""IsTransient"":true}");
-            Assert.Equal(true, childClass.IsTransient);
+            Assert.True(childClass.IsTransient);
         }
 
         [Fact]
@@ -112,7 +112,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(false, o.A);
 
             o = JsonSerializer.Deserialize<CommentTestObject>(@"{""A"": true/* Test */}", new JsonSerializerOptions { ReadCommentHandling = JsonCommentHandling.Skip });
-            Assert.Equal(true, o.A);
+            Assert.True(o.A);
         }
 
         [Fact]

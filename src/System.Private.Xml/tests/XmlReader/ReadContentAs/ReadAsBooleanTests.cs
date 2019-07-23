@@ -23,7 +23,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root> t<!-- Comment inbetween-->ru<?a?>e </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.Equal(true, reader.ReadContentAs(typeof(bool), null));
+            Assert.True(reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root><![CDATA[1]]><?a?></Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.Equal(true, reader.ReadContentAs(typeof(bool), null));
+            Assert.True(reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root> <!-- Comment inbetween--><![CDATA[1]]><?a?> </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.Equal(true, reader.ReadContentAsBoolean());
+            Assert.True(reader.ReadContentAsBoolean());
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root> t<!-- Comment inbetween-->ru<?a?>e </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.Equal(true, reader.ReadContentAsBoolean());
+            Assert.True(reader.ReadContentAsBoolean());
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root><![CDATA[1]]><?a?></Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.Equal(true, reader.ReadContentAsBoolean());
+            Assert.True(reader.ReadContentAsBoolean());
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root> <!-- Comment inbetween--><![CDATA[1]]><?a?> </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.Equal(true, reader.ReadContentAs(typeof(bool), null));
+            Assert.True(reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]

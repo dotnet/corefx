@@ -456,7 +456,7 @@ namespace System.Data.Tests
             pc = dRel.ExtendedProperties;
 
             // Checking ExtendedProperties default 
-            Assert.Equal(true, pc != null);
+            Assert.True(pc != null);
 
             // Checking ExtendedProperties count 
             Assert.Equal(0, pc.Count);
@@ -481,7 +481,7 @@ namespace System.Data.Tests
             dRel.Nested = true;
 
             // Nested get/set
-            Assert.Equal(true, dRel.Nested);
+            Assert.True(dRel.Nested);
         }
 
         [Fact]

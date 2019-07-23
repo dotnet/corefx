@@ -44,7 +44,7 @@ namespace System.Data.Tests
             dc.AutoIncrement = false;
 
             // Checking default value (True)
-            Assert.Equal(true, dc.AllowDBNull);
+            Assert.True(dc.AllowDBNull);
 
             // AllowDBNull=true - adding new row with null value
             dt.Rows.Add(dt.NewRow());
@@ -83,7 +83,7 @@ namespace System.Data.Tests
             //Cheking Set
             dc.AutoIncrement = true;
             // Checking Get
-            Assert.Equal(true, dc.AutoIncrement);
+            Assert.True(dc.AutoIncrement);
         }
 
         [Fact]
@@ -214,7 +214,7 @@ namespace System.Data.Tests
 
             pc = dc.ExtendedProperties;
             // Checking ExtendedProperties default 
-            Assert.Equal(true, pc != null);
+            Assert.True(pc != null);
 
             // Checking ExtendedProperties count 
             Assert.Equal(0, pc.Count);
@@ -327,7 +327,7 @@ namespace System.Data.Tests
             dc.ReadOnly = true;
             //Checking Get
             // ReadOnly Get/Set
-            Assert.Equal(true, dc.ReadOnly);
+            Assert.True(dc.ReadOnly);
         }
 
         [Fact]
@@ -383,7 +383,7 @@ namespace System.Data.Tests
 
             //Checking Get
             // Unique Get/Set
-            Assert.Equal(true, dc.Unique);
+            Assert.True(dc.Unique);
         }
 
         [Fact]

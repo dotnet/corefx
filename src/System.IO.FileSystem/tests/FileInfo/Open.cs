@@ -19,7 +19,7 @@ namespace System.IO.Tests
             using (FileStream fs = CreateFileStream(GetTestFilePath() + streamSpecifier, FileMode.Append))
             {
                 Assert.Equal(false, fs.CanRead);
-                Assert.Equal(true, fs.CanWrite);
+                Assert.True(fs.CanWrite);
             }
         }
 

@@ -126,7 +126,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(false, ((JsonElement)MyBooleanFalse).GetBoolean());
             Assert.IsType<JsonElement>(MyBooleanTrue);
             Assert.Equal(JsonValueKind.True, ((JsonElement)MyBooleanTrue).ValueKind);
-            Assert.Equal(true, ((JsonElement)MyBooleanTrue).GetBoolean());
+            Assert.True(((JsonElement)MyBooleanTrue).GetBoolean());
             Assert.IsType<JsonElement>(MySingle);
             Assert.Equal(JsonValueKind.Number, ((JsonElement)MySingle).ValueKind);
             Assert.Equal(1.1f, ((JsonElement)MySingle).GetSingle());

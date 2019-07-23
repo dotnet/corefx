@@ -124,17 +124,17 @@ namespace System.Tests
             Assert.Equal(f2.GetHashCode(), f3.GetHashCode());
             Assert.Equal(f1.GetHashCode(), f3.GetHashCode());
 
-            Assert.Equal(true, d1.GetHashCode().Equals(a1.GetHashCode()));
-            Assert.Equal(true, d2.GetHashCode().Equals(a2.GetHashCode()));
-            Assert.Equal(true, d3.GetHashCode().Equals(a3.GetHashCode()));
-            Assert.Equal(true, d1.GetHashCode().Equals(a3.GetHashCode()));
-            Assert.Equal(true, d3.GetHashCode().Equals(a1.GetHashCode()));
+            Assert.True(d1.GetHashCode().Equals(a1.GetHashCode()));
+            Assert.True(d2.GetHashCode().Equals(a2.GetHashCode()));
+            Assert.True(d3.GetHashCode().Equals(a3.GetHashCode()));
+            Assert.True(d1.GetHashCode().Equals(a3.GetHashCode()));
+            Assert.True(d3.GetHashCode().Equals(a1.GetHashCode()));
 
-            Assert.Equal(true, d1.GetHashCode().Equals(s1.GetHashCode()));
-            Assert.Equal(true, d2.GetHashCode().Equals(s2.GetHashCode()));
-            Assert.Equal(true, d3.GetHashCode().Equals(s3.GetHashCode()));
-            Assert.Equal(true, d1.GetHashCode().Equals(s3.GetHashCode()));
-            Assert.Equal(true, d3.GetHashCode().Equals(s1.GetHashCode()));
+            Assert.True(d1.GetHashCode().Equals(s1.GetHashCode()));
+            Assert.True(d2.GetHashCode().Equals(s2.GetHashCode()));
+            Assert.True(d3.GetHashCode().Equals(s3.GetHashCode()));
+            Assert.True(d1.GetHashCode().Equals(s3.GetHashCode()));
+            Assert.True(d3.GetHashCode().Equals(s1.GetHashCode()));
 
             Assert.NotEqual(f1.GetHashCode(), a1.GetHashCode());
             Assert.NotEqual(f2.GetHashCode(), a2.GetHashCode());
@@ -229,7 +229,7 @@ namespace System.Tests
             StringValueAttribute sav =  new StringValueAttribute("test");
             Assert.Equal(false, sav.IsDefaultAttribute());
             Assert.Equal(sav.GetType(), sav.TypeId);
-            Assert.Equal(true, sav.Match(sav));
+            Assert.True(sav.Match(sav));
         }
     }
 }

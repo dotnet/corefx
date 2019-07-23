@@ -315,11 +315,11 @@ namespace System.Data.Tests
             Assert.Equal(0, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal(tableName, col.Table.ToString());
-            Assert.Equal(true, col.Unique);
+            Assert.True(col.Unique);
 
             //Second Column
             col = table.Columns[1];
-            Assert.Equal(true, col.AllowDBNull);
+            Assert.True(col.AllowDBNull);
             Assert.Equal(false, col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
@@ -416,11 +416,11 @@ namespace System.Data.Tests
             Assert.Equal(0, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ParentTable", col.Table.ToString());
-            Assert.Equal(true, col.Unique);
+            Assert.True(col.Unique);
 
             //Second Column
             col = table.Columns[1];
-            Assert.Equal(true, col.AllowDBNull);
+            Assert.True(col.AllowDBNull);
             Assert.Equal(false, col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
@@ -563,8 +563,8 @@ namespace System.Data.Tests
 
             //First Column
             DataColumn col = table.Columns[0];
-            Assert.Equal(true, col.AllowDBNull);
-            Assert.Equal(true, col.AutoIncrement);
+            Assert.True(col.AllowDBNull);
+            Assert.True(col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
             Assert.Equal("Element", col.ColumnMapping.ToString());
@@ -577,11 +577,11 @@ namespace System.Data.Tests
             Assert.Equal(0, col.Ordinal);
             Assert.Equal(string.Empty, col.Prefix);
             Assert.Equal("ChildTable", col.Table.ToString());
-            Assert.Equal(true, col.Unique);
+            Assert.True(col.Unique);
 
             //Second Column
             col = table.Columns[1];
-            Assert.Equal(true, col.AllowDBNull);
+            Assert.True(col.AllowDBNull);
             Assert.Equal(false, col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);
@@ -600,7 +600,7 @@ namespace System.Data.Tests
 
             //Third Column
             col = table.Columns[2];
-            Assert.Equal(true, col.AllowDBNull);
+            Assert.True(col.AllowDBNull);
             Assert.Equal(false, col.AutoIncrement);
             Assert.Equal(0, col.AutoIncrementSeed);
             Assert.Equal(1, col.AutoIncrementStep);

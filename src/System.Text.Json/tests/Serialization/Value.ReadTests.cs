@@ -63,7 +63,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", s2);
 
             bool b = JsonSerializer.Deserialize<bool>(" \ttrue ");
-            Assert.Equal(true, b);
+            Assert.True(b);
 
             bool b2 = JsonSerializer.Deserialize<bool>(" false\n");
             Assert.Equal(false, b2);

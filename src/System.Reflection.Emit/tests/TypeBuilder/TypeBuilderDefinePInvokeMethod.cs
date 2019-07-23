@@ -196,7 +196,7 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal(p.NativeCallConv, dia.CallingConvention);
             Assert.Equal(false, dia.BestFitMapping);
             Assert.Equal(false, dia.ExactSpelling);
-            Assert.Equal(true, dia.PreserveSig);  
+            Assert.True(dia.PreserveSig);  
             Assert.Equal(false, dia.SetLastError);
 
             IList<Type> returnTypeOptMods = method.ReturnParameter.GetOptionalCustomModifiers();

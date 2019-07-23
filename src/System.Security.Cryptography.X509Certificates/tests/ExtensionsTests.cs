@@ -280,7 +280,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             X509BasicConstraintsExtension ext;
             ext = new X509BasicConstraintsExtension(new AsnEncodedData("30800101000201080000".HexToByteArray()), false);
             Assert.Equal(false, ext.CertificateAuthority);
-            Assert.Equal(true, ext.HasPathLengthConstraint);
+            Assert.True(ext.HasPathLengthConstraint);
             Assert.Equal(8, ext.PathLengthConstraint);
         }
 

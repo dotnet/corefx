@@ -48,7 +48,7 @@ namespace System.Tests
             Assert.Equal(false, att.SkipVerificationInFullTrust);
 
             att.SkipVerificationInFullTrust = true;
-            Assert.Equal(true, att.SkipVerificationInFullTrust);
+            Assert.True(att.SkipVerificationInFullTrust);
         }
     }
 #pragma warning restore 618

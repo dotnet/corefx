@@ -40,7 +40,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
             var handler = new WinHttpHandler();
 
             Assert.Equal(SslProtocols.None, handler.SslProtocols);
-            Assert.Equal(true, handler.AutomaticRedirection);
+            Assert.True(handler.AutomaticRedirection);
             Assert.Equal(50, handler.MaxAutomaticRedirections);
             Assert.Equal(DecompressionMethods.None, handler.AutomaticDecompression);
             Assert.Equal(CookieUsePolicy.UseInternalCookieStoreOnly, handler.CookieUsePolicy);
@@ -220,7 +220,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
                     handler.CookieContainer = new CookieContainer();
                 });
 
-            Assert.Equal(true, APICallHistory.WinHttpOptionDisableCookies.HasValue);
+            Assert.True(APICallHistory.WinHttpOptionDisableCookies.HasValue);
         }
 
         [Fact]
