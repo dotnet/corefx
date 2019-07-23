@@ -23,7 +23,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root> t<!-- Comment inbetween-->ru<?a?>e </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.True(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(true, reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root>  <?a?><!-- Comment inbetween-->0   </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.False(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(false, reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root><![CDATA[1]]><?a?></Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.True(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(true, reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root> <?a?><!-- Comment inbetween--><![CDATA[0]]> </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.False(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(false, reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root> <!-- Comment inbetween--><![CDATA[1]]><?a?> </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.True(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(true, reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -113,7 +113,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root> f<!-- Comment inbetween-->a<?a?>lse<!-- Comment inbetween--> </Root>");
             reader.PositionOnElement("Root");
             reader.Read();
-            Assert.False(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(false, reader.ReadContentAs(typeof(bool), null));
         }
     }
 }

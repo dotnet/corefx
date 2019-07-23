@@ -158,7 +158,7 @@ namespace System.Data.Tests
             Assert.Equal("1-String2", dt.Rows[0]["String2"]);
             Assert.Equal(new DateTime(2005, 1, 1, 0, 0, 0, 0), dt.Rows[0]["ParentDateTime"]);
             Assert.Equal(1.534, dt.Rows[0]["ParentDouble"]);
-            Assert.True(dt.Rows[0]["ParentBool"]);
+            Assert.Equal(true, dt.Rows[0]["ParentBool"]);
         }
 
         [Fact]

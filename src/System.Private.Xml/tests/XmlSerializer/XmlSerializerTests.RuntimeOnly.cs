@@ -2313,7 +2313,7 @@ public static partial class XmlSerializerTests
         Assert.Equal(2, xmlAttributes.Length);
         Assert.Equal("myattribute1", xmlAttributes[0].Name);
         Assert.Equal("myattribute2", xmlAttributes[1].Name);
-        Assert.True(deserialized[2]);
+        Assert.Equal(true, deserialized[2]);
 
         ms = new MemoryStream();
         serializer.Serialize(ms, deserialized);
@@ -2358,7 +2358,7 @@ public static partial class XmlSerializerTests
         Assert.Equal(2, xmlAttributes.Length);
         Assert.Equal("myattribute1", xmlAttributes[0].Name);
         Assert.Equal("myattribute2", xmlAttributes[1].Name);
-        Assert.False(deserialized[2]);
+        Assert.Equal(false, deserialized[2]);
 
         ms = new MemoryStream();
         serializer.Serialize(ms, deserialized);

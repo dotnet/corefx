@@ -32,7 +32,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a='0'/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.False(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(false, reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a=' 1 '/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.True(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(false, reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a=' false '/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.False(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(false, reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -59,7 +59,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a=' true '/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.True(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(true, reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a='  0  '/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.False(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(false, reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
@@ -77,7 +77,7 @@ namespace System.Xml.Tests
             var reader = Utils.CreateFragmentReader("<Root a='  1  '/>");
             reader.PositionOnElement("Root");
             reader.MoveToAttribute("a");
-            Assert.True(reader.ReadContentAs(typeof(bool), null));
+            Assert.Equal(true, reader.ReadContentAs(typeof(bool), null));
         }
 
         [Fact]
