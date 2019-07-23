@@ -154,7 +154,7 @@ namespace System.Net.WebSockets.Client.Tests
             {
                 Assert.Null(cws.CloseStatus);
                 Assert.Null(cws.CloseStatusDescription);
-                Assert.NotEqual(null, cws.Options);
+                Assert.NotNull(cws.Options);
                 Assert.Equal(WebSocketState.None, cws.State);
                 Assert.Null(cws.SubProtocol);
                 Assert.Equal("System.Net.WebSockets.ClientWebSocket", cws.ToString());
@@ -245,7 +245,7 @@ namespace System.Net.WebSockets.Client.Tests
 
             Assert.Null(cws.CloseStatus);
             Assert.Null(cws.CloseStatusDescription);
-            Assert.NotEqual(null, cws.Options);
+            Assert.NotNull(cws.Options);
             Assert.Equal(WebSocketState.Closed, cws.State);
             Assert.Null(cws.SubProtocol);
             Assert.Equal("System.Net.WebSockets.ClientWebSocket", cws.ToString());

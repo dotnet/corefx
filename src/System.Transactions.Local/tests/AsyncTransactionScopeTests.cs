@@ -1677,7 +1677,7 @@ namespace System.Transactions.Tests
 
         private static void AssertTransactionNotNull()
         {
-            Assert.NotEqual(null, Transaction.Current);
+            Assert.NotNull(Transaction.Current);
         }
 
         private static string AssertAndGetCurrentTransactionId()
