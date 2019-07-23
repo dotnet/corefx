@@ -33,7 +33,10 @@
 #elif HAVE_SENDFILE_4
 #include <sys/sendfile.h>
 #endif
-#if HAVE_INOTIFY
+#if defined(__FreeBSD__) & defined(HAVE_INOTIFY)
+// FreeBSD requires a fully explicit path when using libinotify shim
+#include </usr/local/include/sys/inotify.h>
+#elif HAVE_INOTIFY
 #include <sys/inotify.h>
 #endif
 
