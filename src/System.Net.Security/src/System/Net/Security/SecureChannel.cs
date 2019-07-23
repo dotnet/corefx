@@ -199,7 +199,7 @@ namespace System.Net.Security
             {
                 // Protecting from X509Certificate2 derived classes.
                 X509Certificate2 certEx = MakeEx(certificate);
-                
+
                 if (certEx != null)
                 {
                     if (certEx.HasPrivateKey)
@@ -600,7 +600,19 @@ namespace System.Net.Security
                 }
                 else
                 {
-                    _credentialsHandle = SslStreamPal.AcquireCredentialsHandle(selectedCert, _sslAuthenticationOptions.EnabledSslProtocols, _sslAuthenticationOptions.EncryptionPolicy, _sslAuthenticationOptions.IsServer);
+                    SslProtocols protocols = _sslAuthenticationOptions.EnabledSslProtocols;
+
+                    if (protocols.HasFlag(SslProtocols.Tls12) || protocols.HasFlag(SslProtocols.Tls13))
+                    {
+#pragma warning disable 0618
+                        // SSL2 is mutually exclusive with >= TLS1.2
+                        // On Windows10 SSL2 flag has no effect but on earlier versions of the OS
+                        // opting into both SSL2 and >= TLS1.2 causes negotiation to always fail.
+                        protocols &= ~SslProtocols.Ssl2;
+#pragma warning restore 0618
+                    }
+
+                    _credentialsHandle = SslStreamPal.AcquireCredentialsHandle(selectedCert, protocols, _sslAuthenticationOptions.EncryptionPolicy, _sslAuthenticationOptions.IsServer);
 
                     thumbPrint = guessedThumbPrint; // Delay until here in case something above threw.
                     _selectedClientCertificate = clientCertificate;
@@ -633,7 +645,7 @@ namespace System.Net.Security
             X509Certificate localCertificate = null;
             bool cachedCred = false;
 
-            // There are three options for selecting the server certificate. When 
+            // There are three options for selecting the server certificate. When
             // selecting which to use, we prioritize the new ServerCertSelectionDelegate
             // API. If the new API isn't used we call LocalCertSelectionCallback (for compat
             // with .NET Framework), and if neither is set we fall back to using ServerCertificate.
@@ -1324,4 +1336,3 @@ namespace System.Net.Security
 #endif
     }
 }
-

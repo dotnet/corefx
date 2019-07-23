@@ -215,7 +215,7 @@ namespace System.Net.Security
 
             // Copy the input into the output buffer to prepare for SCHANNEL's expectations
             input.Span.CopyTo(new Span<byte>(output, headerSize, input.Length));
-            
+
             const int NumSecBuffers = 4; // header + data + trailer + empty
             var unmanagedBuffer = stackalloc Interop.SspiCli.SecBuffer[NumSecBuffers];
             var sdcInOut = new Interop.SspiCli.SecBufferDesc(NumSecBuffers);
@@ -377,16 +377,6 @@ namespace System.Net.Security
 
         private static int GetProtocolFlagsFromSslProtocols(SslProtocols protocols, bool isServer)
         {
-            if (protocols.HasFlag(SslProtocols.Tls12) || protocols.HasFlag(SslProtocols.Tls13))
-            {
-#pragma warning disable 0618
-                // SSL2 is mutually exclusive with >= TLS1.2
-                // On Windows10 SSL2 flag has no effect but on earlier versions of the OS
-                // opting into both SSL2 and >= TLS1.2 causes negotiation to always fail.
-                protocols &= ~SslProtocols.Ssl2;
-#pragma warning restore 0618
-            }
-
             int protocolFlags = (int)protocols;
 
             if (isServer)
