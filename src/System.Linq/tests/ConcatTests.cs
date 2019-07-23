@@ -525,5 +525,66 @@ namespace System.Linq.Tests
                 }
             };
         }
+
+        [Theory]
+        [MemberData(nameof(GetConcatOptimizationDataSources))]
+        public void CollectionConcatenationOfEmptyOptimized(ConcatOptimizationCase[] testCases)
+        {
+            foreach (var a in testCases)
+            {
+                foreach (var b in testCases)
+                {
+                    var concatResult = a.Value.Concat(b.Value);
+
+                    if (b.Optimized)
+                    {
+                        Assert.Same(a.Value, concatResult);
+                    }
+                    else if (a.Optimized)
+                    {
+                        Assert.Same(b.Value, concatResult);
+                    }
+                    else
+                    {
+                        Assert.NotSame(a.Value, concatResult);
+                        Assert.NotSame(b.Value, concatResult);
+                    }
+                }
+            }
+        }
+
+        public class ConcatOptimizationCase
+        {
+            public IEnumerable<int> Value { get; }
+            public bool Optimized { get; }
+
+            public ConcatOptimizationCase(IEnumerable<int> enumerable, bool optimized)
+            {
+                Value = enumerable;
+                Optimized = optimized;
+            }
+        }
+
+        public static IEnumerable<object[]> GetConcatOptimizationDataSources()
+        {
+            yield return new object[]
+            {
+                new ConcatOptimizationCase[]
+                {
+                    new ConcatOptimizationCase(new int[0], true),
+                    new ConcatOptimizationCase(Array.Empty<int>(), true),
+                    new ConcatOptimizationCase(Enumerable.Empty<int>(), true),
+                    new ConcatOptimizationCase(new List<int>(), false),
+                    new ConcatOptimizationCase(new int[] { 0 }, false),
+                    new ConcatOptimizationCase(Enumerable.Repeat(1, 1), false),
+                    new ConcatOptimizationCase(CompilerGenerated(), false),
+                },
+            };
+
+            static IEnumerable<int> CompilerGenerated()
+            {
+                yield break;
+            }
+        }
     }
 }
