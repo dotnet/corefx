@@ -373,6 +373,35 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
+        [Theory]
+        [InlineData(1)]
+        [InlineData(16)]
+        public static async Task DeepNestedJsonFileCircularDependencyTest(int depthFactor)
+        {
+            int length = 10 * depthFactor;
+            List<Post>[] posts = new List<Post>[length];
+            posts[0] = PopulateLargeObject(1000);
+            for (int i = 1; i < length; i++)
+            {
+                posts[i] = PopulateLargeObject(1);
+                posts[i - 1][0].Value.PrimaryTopic.RelatedTopics = posts[i];
+            }
+            posts[length - 1][0].Value.PrimaryTopic.RelatedTopics = posts[0];
+
+            JsonSerializerOptions options = new JsonSerializerOptions()
+            {
+                MaxDepth = depthFactor * 64,
+                IgnoreNullValues = true
+            };
+
+            Assert.Throws<JsonException> (() => JsonSerializer.Serialize(posts[0], options));
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await Assert.ThrowsAsync<JsonException>(async () => await JsonSerializer.SerializeAsync(memoryStream, posts[0], options));
+            }
+        }
+
         private static List<Post> PopulateLargeObject(int size)
         {
             List<Post> posts = new List<Post>(size);
