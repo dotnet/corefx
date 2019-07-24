@@ -4,5 +4,7 @@
     <AssemblyVersion>0.2.0.0</AssemblyVersion>
     <PackageVersion>0.2.0</PackageVersion>
     <StrongNameKeyId>Open</StrongNameKeyId>
+    <!-- This is a preview package. Do not mark as stable. -->
+    <BlockStable>true</BlockStable>
   </PropertyGroup>
 </Project>
