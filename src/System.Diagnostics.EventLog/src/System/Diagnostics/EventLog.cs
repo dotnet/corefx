@@ -667,6 +667,11 @@ namespace System.Diagnostics
                     handle.Close();
                     logs.Add(log);
                 }
+                else if (Marshal.GetLastWin32Error() != 87)
+                {
+                    // Windows returns ERROR_INVALID_PARAMETER for special keys which were added in RS5+ but do not represent actual event logs.
+                    logs.Add(log);
+                }
             }
 
             return logs.ToArray();
