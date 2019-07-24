@@ -3,7 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Dynamic;
+using System.IO;
+using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Encodings.Web;
+using System.Text.Json.Tests;
 using System.Text.Unicode;
 using Xunit;
 
@@ -320,6 +325,144 @@ namespace System.Text.Json.Serialization.Tests
 
             obj = JsonSerializer.Deserialize<TestClassForEncoding>(json);
             Assert.Equal(obj.MyString, message);
+        }
+
+        [Fact]
+        public static void Options_GetBooleanConverter_Read()
+        {
+            ReadOnlySpan<byte> data = Encoding.UTF8.GetBytes("true");
+            var options = new JsonSerializerOptions();
+            var reader = new Utf8JsonReader(data);
+            JsonConverter<bool> converter = (JsonConverter<bool>)options.GetConverter(typeof(bool));
+
+            reader.Read();
+            bool value = converter.Read(ref reader, typeof(bool), options);
+            Assert.True(value);
+            value = converter.Read(ref reader, typeof(bool), null);
+            Assert.True(value);
+        }
+
+
+        [Fact]
+        public static void Options_GetConverterForObjectJsonElement_GivesCorrectConverter()
+        {
+            GenericObjectOrJsonElementConverterTestHelper<object>("JsonConverterObject", new object(), "[3]", true);
+            JsonElement element = JsonDocument.Parse("[3]").RootElement;
+            GenericObjectOrJsonElementConverterTestHelper<JsonElement>("JsonConverterJsonElement", element, "[3]", false);
+        }
+
+        private static void GenericObjectOrJsonElementConverterTestHelper<T>(string converterName, object objectValue, string stringValue, bool throws)
+        {
+            var options = new JsonSerializerOptions();
+
+            JsonConverter<T> converter = (JsonConverter<T>)options.GetConverter(typeof(T));
+            Assert.Equal(converterName, converter.GetType().Name);
+            
+            ReadOnlySpan<byte> data = Encoding.UTF8.GetBytes(stringValue);
+            Utf8JsonReader reader = new Utf8JsonReader(data);
+            reader.Read();
+            T readValue = converter.Read(ref reader, typeof(T), null);
+
+            if (readValue is JsonElement element)
+            {
+                Assert.Equal(JsonValueKind.Array, element.ValueKind);
+                JsonElement.ArrayEnumerator iterator = element.EnumerateArray();
+                Assert.True(iterator.MoveNext());
+                Assert.Equal(3, iterator.Current.GetInt32());
+            }
+            else
+            {
+                Assert.True(false, "Must be JsonElement");
+            }
+
+            using (var stream = new MemoryStream())
+            using (var writer = new Utf8JsonWriter(stream))
+            {
+                if (throws)
+                {
+                    Assert.Throws<InvalidOperationException>(() => converter.Write(writer, (T)objectValue, options));
+                    Assert.Throws<InvalidOperationException>(() => converter.Write(writer, (T)objectValue, null));
+                }
+                else
+                {
+                    converter.Write(writer, (T)objectValue, options);
+                    writer.Flush();
+                    Assert.Equal(stringValue, Encoding.UTF8.GetString(stream.ToArray()));
+
+                    writer.Reset(stream);
+                    converter.Write(writer, (T)objectValue, null);
+                    writer.Flush();
+                    Assert.Equal(stringValue + stringValue, Encoding.UTF8.GetString(stream.ToArray()));
+                }
+            }
+        }
+
+        [Fact]
+
+        public static void Options_GetConverter_GivesCorrectConverterAndReadWriteSuccess()
+        {
+            GenericConverterTestHelper<bool>("JsonConverterBoolean", true, "true");
+            GenericConverterTestHelper<byte>("JsonConverterByte", (byte)128, "128");
+            GenericConverterTestHelper<char>("JsonConverterChar", 'A', "\"A\"");
+            GenericConverterTestHelper<double>("JsonConverterDouble", 3.14d, "3.14");
+            GenericConverterTestHelper<SampleEnum>("JsonConverterEnum`1", SampleEnum.Two, "2");
+            GenericConverterTestHelper<short>("JsonConverterInt16", (short)5, "5");
+            GenericConverterTestHelper<int>("JsonConverterInt32", -100, "-100");
+            GenericConverterTestHelper<long>("JsonConverterInt64", (long)11111, "11111");
+            GenericConverterTestHelper<sbyte>("JsonConverterSByte", (sbyte)-121, "-121");
+            GenericConverterTestHelper<float>("JsonConverterSingle", 3.14f, "3.14");
+            GenericConverterTestHelper<string>("JsonConverterString", "Hello", "\"Hello\"");
+            GenericConverterTestHelper<ushort>("JsonConverterUInt16", (ushort)1206, "1206");
+            GenericConverterTestHelper<uint>("JsonConverterUInt32", (uint)3333, "3333");
+            GenericConverterTestHelper<ulong>("JsonConverterUInt64", (ulong)44444, "44444");
+            GenericConverterTestHelper<decimal>("JsonConverterDecimal", 3.3m, "3.3");
+            GenericConverterTestHelper<byte[]>("JsonConverterByteArray", new byte[] { 1, 2, 3, 4 }, "\"AQIDBA==\"");
+            GenericConverterTestHelper<DateTime>("JsonConverterDateTime", new DateTime(2018, 12, 3), "\"2018-12-03T00:00:00\"");
+            GenericConverterTestHelper<DateTimeOffset>("JsonConverterDateTimeOffset", new DateTimeOffset(new DateTime(2018, 12, 3, 00, 00, 00, DateTimeKind.Utc)), "\"2018-12-03T00:00:00+00:00\"");
+            Guid testGuid = new Guid();
+            GenericConverterTestHelper<Guid>("JsonConverterGuid", testGuid, $"\"{testGuid.ToString()}\"");
+            GenericConverterTestHelper<KeyValuePair<string, string>>("JsonKeyValuePairConverter`2", KeyValuePair.Create("key", "value"), @"{""Key"":""key"",""Value"":""value""}");
+            GenericConverterTestHelper<Uri>("JsonConverterUri", new Uri("http://test.com"), "\"http://test.com\"");
+            GenericConverterTestHelper<Dictionary<string, long>>("DictionaryConverter", new Dictionary<string, long> { { "val1", 123 }, { "val2", 456 } }, "{\"val1\":103,\"val2\":436}");
+            GenericConverterTestHelper<long[]>("LongArrayConverter", new long[] { 1, 2, 3, 4 }, "\"1,2,3,4\"");
+        }
+
+        private static void GenericConverterTestHelper<T>(string converterName, object objectValue, string stringValue)
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CustomConverterTests.LongArrayConverter());
+            options.Converters.Add(new CustomConverterTests.DictionaryConverter(20));
+
+            JsonConverter<T> converter = (JsonConverter<T>)options.GetConverter(typeof(T));
+
+            Assert.True(converter.CanConvert(typeof(T)));
+            Assert.Equal(converterName, converter.GetType().Name);
+
+            ReadOnlySpan<byte> data = Encoding.UTF8.GetBytes(stringValue);
+            Utf8JsonReader reader = new Utf8JsonReader(data);
+            reader.Read();
+
+            T valueRead = converter.Read(ref reader, typeof(T), null);
+            Assert.Equal(objectValue, valueRead);
+
+            if (reader.TokenType != JsonTokenType.EndObject)
+            {
+                valueRead = converter.Read(ref reader, typeof(T), options);
+                Assert.Equal(objectValue, valueRead);
+            }
+
+            using (var stream = new MemoryStream())
+            using (var writer = new Utf8JsonWriter(stream))
+            {
+                converter.Write(writer, (T)objectValue, options);
+                writer.Flush();
+                Assert.Equal(stringValue, Encoding.UTF8.GetString(stream.ToArray()));
+
+                writer.Reset(stream);
+                converter.Write(writer, (T)objectValue, null);
+                writer.Flush();
+                Assert.Equal(stringValue + stringValue, Encoding.UTF8.GetString(stream.ToArray()));
+            }
         }
     }
 }

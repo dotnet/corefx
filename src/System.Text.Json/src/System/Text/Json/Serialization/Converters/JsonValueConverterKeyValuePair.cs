@@ -94,7 +94,7 @@ namespace System.Text.Json.Serialization.Converters
             Type typeToConvert = typeof(T);
 
             // Attempt to use existing converter first before re-entering through JsonSerializer.Read().
-            JsonConverter<T> keyConverter = options.GetConverter(typeToConvert) as JsonConverter<T>;
+            JsonConverter<T> keyConverter = options?.GetConverter(typeToConvert) as JsonConverter<T>;
             if (keyConverter == null)
             {
                 k = JsonSerializer.Deserialize<T>(ref reader, options);
@@ -113,7 +113,7 @@ namespace System.Text.Json.Serialization.Converters
             writer.WritePropertyName(name);
 
             // Attempt to use existing converter first before re-entering through JsonSerializer.Write().
-            JsonConverter<T> keyConverter = options.GetConverter(typeof(T)) as JsonConverter<T>;
+            JsonConverter<T> keyConverter = options?.GetConverter(typeof(T)) as JsonConverter<T>;
             if (keyConverter == null)
             {
                 JsonSerializer.Serialize<T>(writer, value, options);
