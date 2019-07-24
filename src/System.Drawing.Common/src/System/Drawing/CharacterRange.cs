@@ -53,11 +53,12 @@ namespace System.Drawing
 
         public override bool Equals(object obj)
         {
-            if (obj.GetType() != typeof(CharacterRange))
+            if (!(obj is CharacterRange cr))
+            {
                 return false;
+            }
 
-            CharacterRange cr = (CharacterRange)obj;
-            return ((_first == cr.First) && (_length == cr.Length));
+            return First == cr.First && Length == cr.Length;
         }
 
         public static bool operator ==(CharacterRange cr1, CharacterRange cr2)
