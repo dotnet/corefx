@@ -243,7 +243,7 @@ namespace System.Reflection.Metadata
         /// <exception cref="PlatformNotSupportedException">The current platform is big-endian.</exception>
         /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
         /// <exception cref="ObjectDisposedException">Provider has been disposed.</exception>
-        public unsafe MetadataReader GetMetadataReader(MetadataReaderOptions options = MetadataReaderOptions.ApplyWindowsRuntimeProjections, MetadataStringDecoder utf8Decoder = null)
+        public unsafe MetadataReader GetMetadataReader(MetadataReaderOptions options = MetadataReaderOptions.Default, MetadataStringDecoder utf8Decoder = null)
         {
             var cachedReader = _lazyMetadataReader;
 

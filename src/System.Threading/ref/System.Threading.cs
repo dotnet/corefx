@@ -186,7 +186,7 @@ namespace System.Threading
     }
     public partial struct LockCookie
     {
-        private object _dummy;
+        private int _dummyPrimitive;
         public override bool Equals(object? obj) { throw null; }
         public bool Equals(System.Threading.LockCookie obj) { throw null; }
         public override int GetHashCode() { throw null; }

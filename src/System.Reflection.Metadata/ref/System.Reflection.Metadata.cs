@@ -1733,7 +1733,7 @@ namespace System.Reflection.Metadata
         public unsafe static System.Reflection.Metadata.MetadataReaderProvider FromPortablePdbImage(byte* start, int size) { throw null; }
         public static System.Reflection.Metadata.MetadataReaderProvider FromPortablePdbImage(System.Collections.Immutable.ImmutableArray<byte> image) { throw null; }
         public static System.Reflection.Metadata.MetadataReaderProvider FromPortablePdbStream(System.IO.Stream stream, System.Reflection.Metadata.MetadataStreamOptions options = System.Reflection.Metadata.MetadataStreamOptions.Default, int size = 0) { throw null; }
-        public System.Reflection.Metadata.MetadataReader GetMetadataReader(System.Reflection.Metadata.MetadataReaderOptions options = System.Reflection.Metadata.MetadataReaderOptions.ApplyWindowsRuntimeProjections, System.Reflection.Metadata.MetadataStringDecoder utf8Decoder = null) { throw null; }
+        public System.Reflection.Metadata.MetadataReader GetMetadataReader(System.Reflection.Metadata.MetadataReaderOptions options = System.Reflection.Metadata.MetadataReaderOptions.Default, System.Reflection.Metadata.MetadataStringDecoder utf8Decoder = null) { throw null; }
     }
     [System.FlagsAttribute]
     public enum MetadataStreamOptions
