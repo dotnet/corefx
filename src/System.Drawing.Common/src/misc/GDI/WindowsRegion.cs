@@ -112,7 +112,7 @@ namespace System.Drawing.Internal
 
                 if (_ownHandle)
                 {
-                    IntUnsafeNativeMethods.DeleteObject(new HandleRef(this, _nativeHandle));
+                    Interop.Gdi32.DeleteObject(new HandleRef(this, _nativeHandle));
                 }
 
                 _nativeHandle = IntPtr.Zero;

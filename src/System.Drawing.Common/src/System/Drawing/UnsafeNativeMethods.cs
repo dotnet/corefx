@@ -23,9 +23,6 @@ namespace System.Drawing
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
         public static extern IntPtr CreateCompatibleDC(HandleRef hDC);
 
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
-        public static extern IntPtr GetStockObject(int nIndex);
-
         [DllImport(ExternDll.Kernel32, SetLastError = true)]
         public static extern int GetSystemDefaultLCID();
 
@@ -37,8 +34,5 @@ namespace System.Drawing
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern int GetDeviceCaps(HandleRef hDC, int nIndex);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern int GetObjectType(HandleRef hObject);
     }
 }

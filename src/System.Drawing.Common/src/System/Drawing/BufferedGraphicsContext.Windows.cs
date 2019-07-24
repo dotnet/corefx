@@ -140,7 +140,7 @@ namespace System.Drawing
             {
                 if (hbm != IntPtr.Zero)
                 {
-                    SafeNativeMethods.DeleteObject(new HandleRef(null, hbm));
+                    Interop.Gdi32.DeleteObject(hbm);
                     hbm = IntPtr.Zero;
                 }
             }
@@ -262,14 +262,13 @@ namespace System.Drawing
             var pbmi = new NativeMethods.BITMAPINFO_FLAT();
 
             // Validate hdc.
-            int objType = UnsafeNativeMethods.GetObjectType(new HandleRef(null, hdc));
-
+            Interop.Gdi32.ObjectType objType = Interop.Gdi32.GetObjectType(hdc);
             switch (objType)
             {
-                case NativeMethods.OBJ_DC:
-                case NativeMethods.OBJ_METADC:
-                case NativeMethods.OBJ_MEMDC:
-                case NativeMethods.OBJ_ENHMETADC:
+                case Interop.Gdi32.ObjectType.OBJ_DC:
+                case Interop.Gdi32.ObjectType.OBJ_METADC:
+                case Interop.Gdi32.ObjectType.OBJ_MEMDC:
+                case Interop.Gdi32.ObjectType.OBJ_ENHMETADC:
                     break;
                 default:
                     throw new ArgumentException(SR.DCTypeInvalid);
@@ -347,7 +346,7 @@ namespace System.Drawing
             {
                 Debug.Assert(_oldBitmap == IntPtr.Zero);
 
-                SafeNativeMethods.DeleteObject(new HandleRef(this, _dib));
+                Interop.Gdi32.DeleteObject(new HandleRef(this, _dib));
                 _dib = IntPtr.Zero;
             }
         }

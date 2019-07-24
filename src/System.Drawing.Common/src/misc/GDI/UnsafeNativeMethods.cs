@@ -97,20 +97,5 @@ namespace System.Drawing.Internal
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern IntPtr CreateFontIndirect(ref SafeNativeMethods.LOGFONT lf);
-
-        // Common.
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
-        public static extern bool DeleteObject(HandleRef hObject);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "GetCurrentObject", CharSet = CharSet.Auto)]
-        public static extern IntPtr IntGetCurrentObject(HandleRef hDC, int uObjectType);
-
-        public static IntPtr GetCurrentObject(HandleRef hDC, int uObjectType)
-        {
-            IntPtr hGdiObj = IntGetCurrentObject(hDC, uObjectType);
-            // If the selected object is a region the return value is HGI_ERROR on failure.
-            DbgUtil.AssertWin32(hGdiObj != IntPtr.Zero, "GetObject(hdc=[0x{0:X8}], type=[{1}]) failed.", hDC, uObjectType);
-            return hGdiObj;
-        }
     }
 }

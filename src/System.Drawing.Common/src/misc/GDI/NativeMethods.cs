@@ -9,11 +9,6 @@ namespace System.Drawing.Internal
 {
     internal partial class IntNativeMethods
     {
-        public const int OBJ_PEN = 1;
-        public const int OBJ_BRUSH = 2;
-        public const int OBJ_FONT = 6;
-        public const int OBJ_BITMAP = 7;
-
         public enum RegionFlags
         {
             ERROR = 0,

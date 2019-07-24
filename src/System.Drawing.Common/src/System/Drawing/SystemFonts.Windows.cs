@@ -147,7 +147,7 @@ namespace System.Drawing
                 // First try DEFAULT_GUI.
                 if (defaultFont == null)
                 {
-                    IntPtr handle = UnsafeNativeMethods.GetStockObject(NativeMethods.DEFAULT_GUI_FONT);
+                    IntPtr handle = Interop.Gdi32.GetStockObject(Interop.Gdi32.StockObject.DEFAULT_GUI_FONT);
                     try
                     {
                         using (Font fontInWorldUnits = Font.FromHfont(handle))

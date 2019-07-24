@@ -226,6 +226,21 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.DeleteObject.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.DeleteObject.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.GetCurrentObject.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.GetCurrentObject.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.GetObjectType.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.GetObjectType.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.GetStockObject.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.GetStockObject.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.ObjectType.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.ObjectType.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.FreeLibrary.cs</Link>
     </Compile>

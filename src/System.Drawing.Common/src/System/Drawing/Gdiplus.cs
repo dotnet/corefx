@@ -459,7 +459,7 @@ namespace System.Drawing
             {
                 if (hTempRgn != IntPtr.Zero)
                 {
-                    DeleteObject(new HandleRef(null, hTempRgn));
+                    Interop.Gdi32.DeleteObject(hTempRgn);
                 }
             }
 
@@ -476,7 +476,7 @@ namespace System.Drawing
             {
                 if (hRgn != IntPtr.Zero)
                 {
-                    DeleteObject(new HandleRef(null, hRgn));
+                   Interop.Gdi32.DeleteObject(hRgn);
                 }
             }
         }
@@ -794,14 +794,6 @@ namespace System.Drawing
                 + ", dmPanningHeight=" + dmPanningHeight
                 + "]";
             }
-        }
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "DeleteObject", CharSet = CharSet.Auto)]
-        internal static extern int IntDeleteObject(HandleRef hObject);
-
-        public static int DeleteObject(HandleRef hObject)
-        {
-            return IntDeleteObject(hObject);
         }
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]

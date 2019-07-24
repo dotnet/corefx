@@ -227,7 +227,7 @@ namespace System.Drawing
                             new HandleRef(null, info.hbmColor),
                             sizeof(SafeNativeMethods.BITMAP),
                             ref bitmap);
-                        SafeNativeMethods.IntDeleteObject(new HandleRef(null, info.hbmColor));
+                        Interop.Gdi32.DeleteObject(info.hbmColor);
                         _iconSize = new Size((int)bitmap.bmWidth, (int)bitmap.bmHeight);
                     }
                     else if (info.hbmMask != IntPtr.Zero)
@@ -241,7 +241,7 @@ namespace System.Drawing
 
                     if (info.hbmMask != IntPtr.Zero)
                     {
-                        SafeNativeMethods.IntDeleteObject(new HandleRef(null, info.hbmMask));
+                        Interop.Gdi32.DeleteObject(info.hbmMask);
                     }
                 }
 
@@ -792,11 +792,11 @@ namespace System.Drawing
                 {
                     if (info.hbmColor != IntPtr.Zero)
                     {
-                        SafeNativeMethods.IntDeleteObject(new HandleRef(null, info.hbmColor));
+                        Interop.Gdi32.DeleteObject(info.hbmColor);
                     }
                     if (info.hbmMask != IntPtr.Zero)
                     {
-                        SafeNativeMethods.IntDeleteObject(new HandleRef(null, info.hbmMask));
+                        Interop.Gdi32.DeleteObject(info.hbmMask);
                     }
                 }
             }
