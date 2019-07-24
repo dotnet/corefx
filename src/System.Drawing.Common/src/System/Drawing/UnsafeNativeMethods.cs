@@ -11,25 +11,10 @@ namespace System.Drawing
         [DllImport(ExternDll.Kernel32, SetLastError = true, ExactSpelling = true, EntryPoint = "RtlMoveMemory")]
         public static extern void CopyMemory(HandleRef destData, HandleRef srcData, int size);
 
-        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true)]
-        public static extern IntPtr GetDC(HandleRef hWnd);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
-        public static extern bool DeleteDC(HandleRef hDC);
-
-        [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true)]
-        public static extern int ReleaseDC(HandleRef hWnd, HandleRef hDC);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
-        public static extern IntPtr CreateCompatibleDC(HandleRef hDC);
-
         [DllImport(ExternDll.Kernel32, SetLastError = true)]
         public static extern int GetSystemDefaultLCID();
 
         [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true)]
         public static extern int GetSystemMetrics(int nIndex);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern int GetDeviceCaps(HandleRef hDC, int nIndex);
     }
 }

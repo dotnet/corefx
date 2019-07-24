@@ -17,7 +17,6 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(regionHandle));
             }
 
-            // On Windows HRGN are (old) GDI objects. Deskop .NET does not check the return code of DeleteObject
             Interop.Gdi32.DeleteObject(new HandleRef(this, regionHandle));
         }
     }

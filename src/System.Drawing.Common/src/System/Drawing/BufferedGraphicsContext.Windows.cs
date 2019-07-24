@@ -209,7 +209,7 @@ namespace System.Drawing
             _busy = BufferBusyDisposing;
             DisposeDC();
             _busy = BufferBusyPainting;
-            _compatDC = UnsafeNativeMethods.CreateCompatibleDC(new HandleRef(null, src));
+            _compatDC = Interop.Gdi32.CreateCompatibleDC(src);
 
             // Recreate the bitmap if necessary.
             if (width > _bufferSize.Width || height > _bufferSize.Height)
@@ -332,7 +332,7 @@ namespace System.Drawing
 
             if (_compatDC != IntPtr.Zero)
             {
-                UnsafeNativeMethods.DeleteDC(new HandleRef(this, _compatDC));
+                Interop.Gdi32.DeleteDC(new HandleRef(this, _compatDC));
                 _compatDC = IntPtr.Zero;
             }
         }

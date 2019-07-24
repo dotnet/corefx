@@ -489,10 +489,10 @@ namespace System.Drawing
 
             if (s_bitDepth == 0)
             {
-                IntPtr dc = UnsafeNativeMethods.GetDC(NativeMethods.NullHandleRef);
-                s_bitDepth = UnsafeNativeMethods.GetDeviceCaps(new HandleRef(null, dc), SafeNativeMethods.BITSPIXEL);
-                s_bitDepth *= UnsafeNativeMethods.GetDeviceCaps(new HandleRef(null, dc), SafeNativeMethods.PLANES);
-                UnsafeNativeMethods.ReleaseDC(NativeMethods.NullHandleRef, new HandleRef(null, dc));
+                IntPtr dc = Interop.User32.GetDC(IntPtr.Zero);
+                s_bitDepth = Interop.Gdi32.GetDeviceCaps(dc, Interop.Gdi32.DeviceCapability.BITSPIXEL);
+                s_bitDepth *= Interop.Gdi32.GetDeviceCaps(dc, Interop.Gdi32.DeviceCapability.PLANES);
+                Interop.User32.ReleaseDC(IntPtr.Zero, dc);
 
                 // If the bitdepth is 8, make it 4 because windows does not
                 // choose a 256 color icon if the display is running in 256 color mode

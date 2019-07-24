@@ -6,13 +6,11 @@ gdi32.dll!BitBlt
 gdi32.dll!CombineRgn
 gdi32.dll!CreateCompatibleBitmap
 gdi32.dll!CreateCompatibleDC
-gdi32.dll!CreateCompatibleDC
-gdi32.dll!CreateDC
+gdi32.dll!CreateDCW
 gdi32.dll!CreateDIBSection
 gdi32.dll!CreateFontIndirectW
-gdi32.dll!CreateIC
+gdi32.dll!CreateICW
 gdi32.dll!CreateRectRgn
-gdi32.dll!DeleteDC
 gdi32.dll!DeleteDC
 gdi32.dll!DeleteObject
 gdi32.dll!EndDoc
@@ -23,7 +21,6 @@ gdi32.dll!GetClipRgn
 gdi32.dll!GetCurrentObject
 gdi32.dll!GetDeviceCaps
 gdi32.dll!GetDIBits
-gdi32.dll!GetObject
 gdi32.dll!GetObject
 gdi32.dll!GetObjectType
 gdi32.dll!GetPaletteEntries
@@ -51,10 +48,8 @@ user32.dll!GetSysColor
 user32.dll!GetSystemMetrics
 user32.dll!LoadIcon
 user32.dll!ReleaseDC
-user32.dll!ReleaseDC
 user32.dll!SystemParametersInfoW
 user32.dll!WindowFromDC
 winspool.drv!DeviceCapabilities
-winspool.drv!DocumentProperties
 winspool.drv!DocumentProperties
 winspool.drv!EnumPrinters
