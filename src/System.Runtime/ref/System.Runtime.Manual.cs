@@ -33,6 +33,7 @@ namespace System
         // We need to add this into the manual ref assembly to preserve it because the
         // implementation doesn't have any reference field, hence GenApi will not emit it.
         private object _dummy;
+        // Placing the value type field in the manual ref as well to avoid the error CS0282: There is no defined ordering between fields in multiple declarations of partial struct 'TypedReference'.
         private int _dummyPrimitive;
     }
 }
