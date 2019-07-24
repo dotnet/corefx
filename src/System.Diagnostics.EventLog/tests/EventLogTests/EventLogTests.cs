@@ -366,7 +366,7 @@ namespace System.Diagnostics.Tests
         public void GetEventLogContainsSecurityLogTest()
         {
             EventLog[] eventlogs = EventLog.GetEventLogs();
-            Assert.True(eventlogs.Select(t => t.Log).Contains("Security", StringComparer.CurrentCultureIgnoreCase));
+            Assert.True(eventlogs.Select(t => t.Log).Contains("Security", StringComparer.OrdinalIgnoreCase));
         }
     }
 }
