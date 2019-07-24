@@ -106,6 +106,19 @@ static long TrySetECDHNamedCurve(SSL_CTX* ctx)
 #endif
 }
 
+static void ResetProtocolRestrictions(SSL_CTX* ctx)
+{
+#ifndef SSL_CTRL_SET_MIN_PROTO_VERSION
+#define SSL_CTRL_SET_MIN_PROTO_VERSION 123
+#endif
+#ifndef SSL_CTRL_SET_MAX_PROTO_VERSION
+#define SSL_CTRL_SET_MAX_PROTO_VERSION 124
+#endif
+
+    SSL_CTX_ctrl(ctx, SSL_CTRL_SET_MIN_PROTO_VERSION, 0, NULL);
+    SSL_CTX_ctrl(ctx, SSL_CTRL_SET_MAX_PROTO_VERSION, 0, NULL);
+}
+
 void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
 {
     // Ensure that ECDHE is available
@@ -159,7 +172,6 @@ void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
     // OpenSSL 1.0 calls this long, OpenSSL 1.1 calls it unsigned long.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-conversion"
-
     SSL_CTX_set_options(ctx, protocolOptions);
 #pragma clang diagnostic pop
 }
@@ -322,19 +334,6 @@ void
 CryptoNative_SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallbackCallback callback, void* arg)
 {
     SSL_CTX_set_cert_verify_callback(ctx, callback, arg);
-}
-
-void ResetProtocolRestrictions(SSL_CTX* ctx)
-{
-#ifndef SSL_CTRL_SET_MIN_PROTO_VERSION
-#define SSL_CTRL_SET_MIN_PROTO_VERSION 123
-#endif
-#ifndef SSL_CTRL_SET_MAX_PROTO_VERSION
-#define SSL_CTRL_SET_MAX_PROTO_VERSION 124
-#endif
-
-    SSL_CTX_ctrl(ctx, SSL_CTRL_SET_MIN_PROTO_VERSION, 0, NULL);
-    SSL_CTX_ctrl(ctx, SSL_CTRL_SET_MAX_PROTO_VERSION, 0, NULL);
 }
 
 int32_t CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
