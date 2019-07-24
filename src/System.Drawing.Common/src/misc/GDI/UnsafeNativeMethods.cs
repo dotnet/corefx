@@ -44,55 +44,6 @@ namespace System.Drawing.Internal
             return retVal;
         }
 
-        // Region.
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "CombineRgn", CharSet = CharSet.Auto)]
-        public static extern IntNativeMethods.RegionFlags IntCombineRgn(HandleRef hRgnDest, HandleRef hRgnSrc1, HandleRef hRgnSrc2, RegionCombineMode combineMode);
-
-        public static IntNativeMethods.RegionFlags CombineRgn(HandleRef hRgnDest, HandleRef hRgnSrc1, HandleRef hRgnSrc2, RegionCombineMode combineMode)
-        {
-            Debug.Assert(hRgnDest.Wrapper != null && hRgnDest.Handle != IntPtr.Zero, "Destination region is invalid");
-            Debug.Assert(hRgnSrc1.Wrapper != null && hRgnSrc1.Handle != IntPtr.Zero, "Source region 1 is invalid");
-            Debug.Assert(hRgnSrc2.Wrapper != null && hRgnSrc2.Handle != IntPtr.Zero, "Source region 2 is invalid");
-
-            if (hRgnDest.Wrapper == null || hRgnSrc1.Wrapper == null || hRgnSrc2.Wrapper == null)
-            {
-                return IntNativeMethods.RegionFlags.ERROR;
-            }
-
-            // Note: CombineRgn can return Error when no regions are combined, this is not an error condition.
-            return IntCombineRgn(hRgnDest, hRgnSrc1, hRgnSrc2, combineMode);
-        }
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "GetClipRgn", CharSet = CharSet.Auto)]
-        public static extern int IntGetClipRgn(HandleRef hDC, HandleRef hRgn);
-
-        public static int GetClipRgn(HandleRef hDC, HandleRef hRgn)
-        {
-            int retVal = IntGetClipRgn(hDC, hRgn);
-            DbgUtil.AssertWin32(retVal != -1, "IntGetClipRgn([hdc=0x{0:X8}], [hRgn]) failed.", hDC.Handle);
-            return retVal;
-        }
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "SelectClipRgn", CharSet = CharSet.Auto)]
-        public static extern IntNativeMethods.RegionFlags IntSelectClipRgn(HandleRef hDC, HandleRef hRgn);
-
-        public static IntNativeMethods.RegionFlags SelectClipRgn(HandleRef hDC, HandleRef hRgn)
-        {
-            IntNativeMethods.RegionFlags result = IntSelectClipRgn(hDC, hRgn);
-            DbgUtil.AssertWin32(result != IntNativeMethods.RegionFlags.ERROR, "SelectClipRgn([hdc=0x{0:X8}], [hRegion=0x{1:X8}]) failed.", hDC.Handle, hRgn.Handle);
-            return result;
-        }
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, EntryPoint = "GetRgnBox", CharSet = CharSet.Auto)]
-        public static extern IntNativeMethods.RegionFlags IntGetRgnBox(HandleRef hRgn, [In, Out] ref IntNativeMethods.RECT clipRect);
-
-        public static IntNativeMethods.RegionFlags GetRgnBox(HandleRef hRgn, [In, Out] ref IntNativeMethods.RECT clipRect)
-        {
-            IntNativeMethods.RegionFlags result = IntGetRgnBox(hRgn, ref clipRect);
-            DbgUtil.AssertWin32(result != IntNativeMethods.RegionFlags.ERROR, "GetRgnBox([hRegion=0x{0:X8}], [out rect]) failed.", hRgn.Handle);
-            return result;
-        }
-
         // Font.
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Unicode)]

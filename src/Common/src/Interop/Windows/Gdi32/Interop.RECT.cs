@@ -2,18 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace System.Drawing.Internal
+internal static partial class Interop
 {
-    internal partial class IntNativeMethods
+    internal static partial class Gdi32
     {
         [StructLayout(LayoutKind.Sequential)]
-        public class POINT
+        public struct RECT
         {
-            public int x;
-            public int y;
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
+
+            public Size Size => new Size(right - left, bottom - top);
         }
     }
 }

@@ -215,19 +215,26 @@
     <Compile Include="misc\GDI\DeviceContexts.cs" />
     <Compile Include="misc\GDI\DeviceContextType.cs" />
     <Compile Include="misc\GDI\NativeMethods.cs" />
-    <Compile Include="misc\GDI\SafeNativeMethods.cs" />
     <Compile Include="misc\GDI\UnsafeNativeMethods.cs" />
     <Compile Include="misc\GDI\WindowsGraphics.cs" />
     <Compile Include="misc\GDI\WindowsRegion.cs" />
-    <Compile Include="misc\GDI\WindowsRegionCombineMode.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\LocalAppContextSwitches.Common.cs">
       <Link>Common\CoreLib\System\LocalAppContextSwitches.Common.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.CombineRgn.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.CombineRgn.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.CreateRectRgn.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.CreateRectRgn.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.DeleteObject.cs">
       <Link>Common\Interop\Windows\Gdi32\Interop.DeleteObject.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.GetClipRgn.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.GetClipRgn.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.GetCurrentObject.cs">
       <Link>Common\Interop\Windows\Gdi32\Interop.GetCurrentObject.cs</Link>
@@ -235,11 +242,23 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.GetObjectType.cs">
       <Link>Common\Interop\Windows\Gdi32\Interop.GetObjectType.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.GetRgnBox.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.GetRgnBox.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.GetStockObject.cs">
       <Link>Common\Interop\Windows\Gdi32\Interop.GetStockObject.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.ObjectType.cs">
       <Link>Common\Interop\Windows\Gdi32\Interop.ObjectType.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.RECT.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.RECT.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.RegionType.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.RegionType.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Gdi32\Interop.SelectClipRgn.cs">
+      <Link>Common\Interop\Windows\Gdi32\Interop.SelectClipRgn.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.FreeLibrary.cs</Link>

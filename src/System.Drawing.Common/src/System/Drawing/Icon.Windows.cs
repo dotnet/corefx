@@ -358,7 +358,7 @@ namespace System.Drawing
             // The ROP is SRCCOPY, so we can be simple here and take
             // advantage of clipping regions.  Drawing the cursor
             // is merely a matter of offsetting and clipping.
-            IntPtr hSaveRgn = SafeNativeMethods.SaveClipRgn(dc);
+            IntPtr hSaveRgn = SaveClipRgn(dc);
             try
             {
                 SafeNativeMethods.IntersectClipRect(new HandleRef(this, dc), targetX, targetY, targetX + clipWidth, targetY + clipHeight);
@@ -374,7 +374,46 @@ namespace System.Drawing
             }
             finally
             {
-                SafeNativeMethods.RestoreClipRgn(dc, hSaveRgn);
+                RestoreClipRgn(dc, hSaveRgn);
+            }
+        }
+
+        private static IntPtr SaveClipRgn(IntPtr hDC)
+        {
+            IntPtr hTempRgn = Interop.Gdi32.CreateRectRgn(0, 0, 0, 0);
+            IntPtr hSaveRgn = IntPtr.Zero;
+            try
+            {
+                int result = Interop.Gdi32.GetClipRgn(hDC, hTempRgn);
+                if (result > 0)
+                {
+                    hSaveRgn = hTempRgn;
+                    hTempRgn = IntPtr.Zero;
+                }
+            }
+            finally
+            {
+                if (hTempRgn != IntPtr.Zero)
+                {
+                    Interop.Gdi32.DeleteObject(hTempRgn);
+                }
+            }
+
+            return hSaveRgn;
+        }
+
+        private static void RestoreClipRgn(IntPtr hDC, IntPtr hRgn)
+        {
+            try
+            {
+                Interop.Gdi32.SelectClipRgn(new HandleRef(null, hDC), new HandleRef(null, hRgn));
+            }
+            finally
+            {
+                if (hRgn != IntPtr.Zero)
+                {
+                   Interop.Gdi32.DeleteObject(hRgn);
+                }
             }
         }
 

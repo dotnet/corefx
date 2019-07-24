@@ -425,60 +425,12 @@ namespace System.Drawing
         [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr /*HDC*/ ResetDC(HandleRef hDC, HandleRef /*DEVMODE*/ lpDevMode);
 
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
-        public static extern IntPtr CreateRectRgn(int x1, int y1, int x2, int y2);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern int GetClipRgn(HandleRef hDC, HandleRef hRgn);
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
-        public static extern int SelectClipRgn(HandleRef hDC, HandleRef hRgn);
-
         [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern int AddFontResourceEx(string lpszFilename, int fl, IntPtr pdv);
 
         public static int AddFontFile(string fileName)
         {
             return AddFontResourceEx(fileName, /*FR_PRIVATE*/ 0x10, IntPtr.Zero);
-        }
-
-        internal static IntPtr SaveClipRgn(IntPtr hDC)
-        {
-            IntPtr hTempRgn = CreateRectRgn(0, 0, 0, 0);
-            IntPtr hSaveRgn = IntPtr.Zero;
-            try
-            {
-                int result = GetClipRgn(new HandleRef(null, hDC), new HandleRef(null, hTempRgn));
-                if (result > 0)
-                {
-                    hSaveRgn = hTempRgn;
-                    hTempRgn = IntPtr.Zero;
-                }
-            }
-            finally
-            {
-                if (hTempRgn != IntPtr.Zero)
-                {
-                    Interop.Gdi32.DeleteObject(hTempRgn);
-                }
-            }
-
-            return hSaveRgn;
-        }
-
-        internal static void RestoreClipRgn(IntPtr hDC, IntPtr hRgn)
-        {
-            try
-            {
-                SelectClipRgn(new HandleRef(null, hDC), new HandleRef(null, hRgn));
-            }
-            finally
-            {
-                if (hRgn != IntPtr.Zero)
-                {
-                   Interop.Gdi32.DeleteObject(hRgn);
-                }
-            }
         }
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]

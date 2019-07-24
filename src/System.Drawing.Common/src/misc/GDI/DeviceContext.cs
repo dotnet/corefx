@@ -395,7 +395,7 @@ namespace System.Drawing.Internal
             HandleRef hdc = new HandleRef(this, _hDC);
             HandleRef hRegion = new HandleRef(region, region.HRegion);
 
-            IntUnsafeNativeMethods.SelectClipRgn(hdc, hRegion);
+            Interop.Gdi32.SelectClipRgn(hdc, hRegion);
         }
 
         ///<summary>
@@ -412,13 +412,13 @@ namespace System.Drawing.Internal
             WindowsRegion clip = new WindowsRegion(0, 0, 0, 0);
             try
             {
-                int result = IntUnsafeNativeMethods.GetClipRgn(new HandleRef(this, _hDC), new HandleRef(clip, clip.HRegion));
+                int result = Interop.Gdi32.GetClipRgn(new HandleRef(this, _hDC), new HandleRef(clip, clip.HRegion));
 
                 // If the function succeeds and there is a clipping region for the given device context, the return value is 1.
                 if (result == 1)
                 {
                     Debug.Assert(clip.HRegion != IntPtr.Zero);
-                    wr.CombineRegion(clip, wr, RegionCombineMode.AND); //1 = AND (or Intersect)
+                    wr.CombineRegion(clip, wr, Interop.Gdi32.CombineMode.RGN_AND);
                 }
 
                 SetClip(wr);
