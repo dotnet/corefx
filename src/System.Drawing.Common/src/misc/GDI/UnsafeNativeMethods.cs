@@ -43,10 +43,5 @@ namespace System.Drawing.Internal
             DbgUtil.AssertWin32(retVal, "OffsetViewportOrgEx([hdc=0x{0:X8}], dx=[{1}], dy=[{2}], [out pPoint]) failed.", hDC.Handle, nXOffset, nYOffset);
             return retVal;
         }
-
-        // Font.
-
-        [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern IntPtr CreateFontIndirect(ref SafeNativeMethods.LOGFONT lf);
     }
 }

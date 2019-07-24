@@ -19,11 +19,6 @@ namespace System.Drawing
         internal const int BI_RGB = 0;
         internal const int BITMAPINFO_MAX_COLORSIZE = 256;
 
-        internal const uint SPI_GETICONTITLELOGFONT = 0x001F;
-
-        // Gets metrics associated with the nonclient area of nonminimized windows
-        internal const uint SPI_GETNONCLIENTMETRICS = 41;
-
         [StructLayout(LayoutKind.Sequential)]
         internal struct BITMAPINFO_FLAT
         {
@@ -75,29 +70,6 @@ namespace System.Drawing
             public byte rgbGreen;
             public byte rgbRed;
             public byte rgbReserved;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        internal struct NONCLIENTMETRICS
-        {
-            public uint cbSize;
-            public int iBorderWidth;
-            public int iScrollWidth;
-            public int iScrollHeight;
-            public int iCaptionWidth;
-            public int iCaptionHeight;
-            public SafeNativeMethods.LOGFONT lfCaptionFont;
-            public int iSmCaptionWidth;
-            public int iSmCaptionHeight;
-            public SafeNativeMethods.LOGFONT lfSmCaptionFont;
-            public int iMenuWidth;
-            public int iMenuHeight;
-            public SafeNativeMethods.LOGFONT lfMenuFont;
-            public SafeNativeMethods.LOGFONT lfStatusFont;
-            public SafeNativeMethods.LOGFONT lfMessageFont;
-
-            // This is supported on Windows vista and later
-            public int iPaddedBorderWidth;
         }
     }
 }

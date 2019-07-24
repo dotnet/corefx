@@ -591,50 +591,6 @@ namespace System.Drawing
             public int biClrImportant;
         }
 
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        public unsafe struct LOGFONT
-        {
-            private const int LF_FACESIZE = 32;
-
-            public int lfHeight;
-            public int lfWidth;
-            public int lfEscapement;
-            public int lfOrientation;
-            public int lfWeight;
-            public byte lfItalic;
-            public byte lfUnderline;
-            public byte lfStrikeOut;
-            public byte lfCharSet;
-            public byte lfOutPrecision;
-            public byte lfClipPrecision;
-            public byte lfQuality;
-            public byte lfPitchAndFamily;
-            private fixed char _lfFaceName[LF_FACESIZE];
-            public Span<char> lfFaceName
-            {
-                get { fixed (char* c = _lfFaceName) { return new Span<char>(c, LF_FACESIZE); } }
-            }
-
-            public override string ToString()
-            {
-                return
-                    "lfHeight=" + lfHeight + ", " +
-                    "lfWidth=" + lfWidth + ", " +
-                    "lfEscapement=" + lfEscapement + ", " +
-                    "lfOrientation=" + lfOrientation + ", " +
-                    "lfWeight=" + lfWeight + ", " +
-                    "lfItalic=" + lfItalic + ", " +
-                    "lfUnderline=" + lfUnderline + ", " +
-                    "lfStrikeOut=" + lfStrikeOut + ", " +
-                    "lfCharSet=" + lfCharSet + ", " +
-                    "lfOutPrecision=" + lfOutPrecision + ", " +
-                    "lfClipPrecision=" + lfClipPrecision + ", " +
-                    "lfQuality=" + lfQuality + ", " +
-                    "lfPitchAndFamily=" + lfPitchAndFamily + ", " +
-                    "lfFaceName=" + lfFaceName.ToString();
-            }
-        }
-
         // https://devblogs.microsoft.com/oldnewthing/20101018-00/?p=12513
         // https://devblogs.microsoft.com/oldnewthing/20120720-00/?p=7083
 
@@ -778,10 +734,10 @@ namespace System.Drawing
         public static extern int GetObject(HandleRef hObject, int nSize, ref BITMAP bm);
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern int GetObject(HandleRef hObject, int nSize, ref LOGFONT lf);
+        public static extern int GetObject(HandleRef hObject, int nSize, ref Interop.User32.LOGFONT lf);
 
-        public static unsafe int GetObject(HandleRef hObject, ref LOGFONT lp)
-            => GetObject(hObject, sizeof(LOGFONT), ref lp);
+        public static unsafe int GetObject(HandleRef hObject, ref Interop.User32.LOGFONT lp)
+            => GetObject(hObject, sizeof(Interop.User32.LOGFONT), ref lp);
 
         [DllImport(ExternDll.User32, SetLastError = true, ExactSpelling = true)]
         public static extern bool GetIconInfo(HandleRef hIcon, ref ICONINFO info);
