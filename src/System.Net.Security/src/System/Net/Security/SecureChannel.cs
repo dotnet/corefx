@@ -600,19 +600,7 @@ namespace System.Net.Security
                 }
                 else
                 {
-                    SslProtocols protocols = _sslAuthenticationOptions.EnabledSslProtocols;
-
-                    if (protocols.HasFlag(SslProtocols.Tls12) || protocols.HasFlag(SslProtocols.Tls13))
-                    {
-#pragma warning disable 0618
-                        // SSL2 is mutually exclusive with >= TLS1.2
-                        // On Windows10 SSL2 flag has no effect but on earlier versions of the OS
-                        // opting into both SSL2 and >= TLS1.2 causes negotiation to always fail.
-                        protocols &= ~SslProtocols.Ssl2;
-#pragma warning restore 0618
-                    }
-
-                    _credentialsHandle = SslStreamPal.AcquireCredentialsHandle(selectedCert, protocols, _sslAuthenticationOptions.EncryptionPolicy, _sslAuthenticationOptions.IsServer);
+                    _credentialsHandle = SslStreamPal.AcquireCredentialsHandle(selectedCert, _sslAuthenticationOptions.EnabledSslProtocols, _sslAuthenticationOptions.EncryptionPolicy, _sslAuthenticationOptions.IsServer);
 
                     thumbPrint = guessedThumbPrint; // Delay until here in case something above threw.
                     _selectedClientCertificate = clientCertificate;
