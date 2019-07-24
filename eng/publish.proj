@@ -23,6 +23,12 @@
     <SymbolsPublishExperimentalPattern>$(SymbolsOutputRoot)*Experimental*.nupkg</SymbolsPublishExperimentalPattern>
   </PropertyGroup>
 
+  <!-- List of packages to exclude from nuget.org publishing -->
+  <!-- We can't use the `IsShippingPackage` metadata since CoreFx doesn't output packages
+  to shipping/nonshipping directories -->
+  <ItemGroup>
+    <NonShippingPackages Include="$(PackageOutputRoot)*System.Numerics.Tensors*.nupkg" />
+  </ItemGroup>
 
   <ItemGroup Condition="'$(PackagesGlob)' != ''">
     <PackagesToPublish Include="$(PackagesGlob)" />
@@ -30,6 +36,9 @@
 
   <ItemGroup Condition="'$(PackagesGlob)' == ''">
     <PackagesToPublish Include="$(FinalPublishPrivatePattern);$(FinalPublishExperimentalPattern)">
+      <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
+    </PackagesToPublish>
+    <PackagesToPublish Include="@(NonShippingPackages)">
       <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
     </PackagesToPublish>
     <PackagesToPublish Include="$(FinalPublishPattern)" Exclude="@(PackagesToPublish)" />
