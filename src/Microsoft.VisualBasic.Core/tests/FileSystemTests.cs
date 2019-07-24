@@ -723,7 +723,15 @@ namespace Microsoft.VisualBasic.Tests
             {
                 ex = e;
             }
-            Assert.True(ex?.GetType() == typeof(TException));
+            if (ex == null)
+            {
+                throw new ThrowsException(typeof(TException));
+            }
+            
+            if (ex.GetType() != typeof(TException))
+            {
+                throw new ThrowsException(typeof(TException), ex);
+            }
         }
     }
 }
