@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -76,8 +77,102 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void AttributeCreateConverterFail()
         {
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new PocoWithNullConverter()));
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<PocoWithNullConverter>("{}"));
+            try
+            {
+                JsonSerializer.Serialize(new PocoWithNullConverter());
+                Assert.True(false, "Expected InvalidOperationException was not thrown.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Message should be in the form: "The converter specified on 'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithNullConverter.MyInt' does not derive from JsonConverter or have a public parameterless constructor."
+                Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithNullConverter.MyInt'", ex.Message);
+            }
+
+            try
+            {
+                JsonSerializer.Deserialize<PocoWithNullConverter>("{}");
+                Assert.True(false, "Expected InvalidOperationException was not thrown.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithNullConverter.MyInt'", ex.Message);
+            }
+        }
+
+        private class InvalidTypeConverterClass
+        {
+            [JsonConverter(typeof(JsonStringEnumConverter))]
+            public ICollection<InvalidTypeConverterEnum> MyEnumValues { get; set; }
+        }
+
+        private enum InvalidTypeConverterEnum
+        {
+            Value1,
+            Value2,
+        }
+
+        [Fact]
+        public static void AttributeOnPropertyFail()
+        {
+            try
+            {
+                JsonSerializer.Serialize(new InvalidTypeConverterClass());
+                Assert.True(false, "Expected InvalidOperationException was not thrown.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Message should be in the form "The converter specified on 'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClass.MyEnumValues' is not compatible with the type 'System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterEnum]'."
+                Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClass.MyEnumValues'", ex.Message);
+                Assert.Contains("'System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterEnum]'", ex.Message);
+            }
+
+            try
+            {
+                JsonSerializer.Deserialize<InvalidTypeConverterClass>("{}");
+                Assert.True(false, "Expected InvalidOperationException was not thrown.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClass.MyEnumValues'", ex.Message);
+                Assert.Contains("'System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterEnum]'", ex.Message);
+            }
+        }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        private class InvalidTypeConverterClassWithAttribute { }
+
+        [Fact]
+        public static void AttributeOnClassFail()
+        {
+            try
+            {
+                JsonSerializer.Serialize(new InvalidTypeConverterClassWithAttribute());
+                Assert.True(false, "Expected InvalidOperationException was not thrown.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Message should be in the form "The converter specified on 'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClassWithAttribute' is not compatible with the type 'System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterClassWithAttribute'."
+
+                const string expectedSubStr = "'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClassWithAttribute'";
+                int pos = ex.Message.IndexOf(expectedSubStr);
+                Assert.True(pos > 0);
+
+                // The same string is repeated again.
+                Assert.Contains(expectedSubStr, ex.Message.Substring(pos + expectedSubStr.Length));
+            }
+
+            try
+            {
+                JsonSerializer.Deserialize<InvalidTypeConverterClassWithAttribute>("{}");
+                Assert.True(false, "Expected InvalidOperationException was not thrown.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                const string expectedSubStr = "'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClassWithAttribute'";
+                int pos = ex.Message.IndexOf(expectedSubStr);
+                Assert.True(pos > 0);
+                Assert.Contains(expectedSubStr, ex.Message.Substring(pos + expectedSubStr.Length));
+            }
         }
 
         private class ConverterThatReturnsNull : JsonConverterFactory
