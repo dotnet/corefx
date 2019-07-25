@@ -3,12 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
-using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Encodings.Web;
-using System.Text.Json.Tests;
 using System.Text.Unicode;
 using Xunit;
 
@@ -328,22 +324,6 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void Options_GetBooleanConverter_Read()
-        {
-            ReadOnlySpan<byte> data = Encoding.UTF8.GetBytes("true");
-            var options = new JsonSerializerOptions();
-            var reader = new Utf8JsonReader(data);
-            JsonConverter<bool> converter = (JsonConverter<bool>)options.GetConverter(typeof(bool));
-
-            reader.Read();
-            bool value = converter.Read(ref reader, typeof(bool), options);
-            Assert.True(value);
-            value = converter.Read(ref reader, typeof(bool), null);
-            Assert.True(value);
-        }
-
-
-        [Fact]
         public static void Options_GetConverterForObjectJsonElement_GivesCorrectConverter()
         {
             GenericObjectOrJsonElementConverterTestHelper<object>("JsonConverterObject", new object(), "[3]", true);
@@ -398,7 +378,6 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-
         public static void Options_GetConverter_GivesCorrectConverterAndReadWriteSuccess()
         {
             GenericConverterTestHelper<bool>("JsonConverterBoolean", true, "true");
