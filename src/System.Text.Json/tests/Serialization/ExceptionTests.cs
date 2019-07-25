@@ -350,7 +350,7 @@ namespace System.Text.Json.Serialization.Tests
             }
             catch (InvalidOperationException e)
             {
-                Assert.Equal("The converter specified on 'System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterClass.System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterEnum] MyEnumValues' is not compatible with the type 'System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterEnum]  MyEnumValues'.", e.Message);
+                Assert.Equal("The converter specified on 'System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterClass.System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterEnum] MyEnumValues' is not compatible with the type 'System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterEnum] MyEnumValues'.", e.Message);
             }
         }
 
