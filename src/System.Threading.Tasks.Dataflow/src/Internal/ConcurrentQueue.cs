@@ -98,7 +98,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
         /// </summary>
         /// <param name="array">The one-dimensional <see cref="System.Array">Array</see> that is the
         /// destination of the elements copied from the
-        /// <see cref="System.Collections.Concurrent.ConcurrentBag"/>. The <see
+        /// <see cref="ConcurrentQueue{T}"/>. The <see
         /// cref="System.Array">Array</see> must have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying
         /// begins.</param>
@@ -172,10 +172,10 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
 
         /// <summary>
         /// Attempts to add an object to the <see
-        /// cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/>.
+        /// cref="IProducerConsumerCollection{T}"/>.
         /// </summary>
         /// <param name="item">The object to add to the <see
-        /// cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/>. The value can be a null
+        /// cref="IProducerConsumerCollection{T}"/>. The value can be a null
         /// reference (Nothing in Visual Basic) for reference types.
         /// </param>
         /// <returns>true if the object was added successfully; otherwise, false.</returns>
@@ -190,7 +190,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
 
         /// <summary>
         /// Attempts to remove and return an object from the <see
-        /// cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/>.
+        /// cref="IProducerConsumerCollection{T}"/>.
         /// </summary>
         /// <param name="item">
         /// When this method returns, if the operation was successful, <paramref name="item"/> contains the
@@ -574,7 +574,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
         /// without removing it.
         /// </summary>
         /// <param name="result">When this method returns, <paramref name="result"/> contains an object from
-        /// the beginning of the <see cref="System.Collections.Concurrent.ConcurrentQueue{T}"/> or an
+        /// the beginning of the <see cref="ConcurrentQueue{T}"/> or an
         /// unspecified value if the operation failed.</param>
         /// <returns>true if and object was returned successfully; otherwise, false.</returns>
         public bool TryPeek(out T result)
