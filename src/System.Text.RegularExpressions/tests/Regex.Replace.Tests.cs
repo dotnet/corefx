@@ -229,7 +229,7 @@ namespace System.Text.RegularExpressions.Tests
         [InlineData(RegexOptions.RightToLeft)]
         public void Replace_MatchEvaluatorReturnsNullOrEmpty(RegexOptions options)
         {
-            string input = "abcd123";
+            string input = "abcde";
             string result = Regex.Replace(input, @"[abcd]", (Match match) => {
                 switch(match.Value)
                 {
@@ -246,7 +246,7 @@ namespace System.Text.RegularExpressions.Tests
                 }
             }, options);
 
-            Assert.Equal("xy123", result);
+            Assert.Equal("xye", result);
         }
 
         [Fact]
