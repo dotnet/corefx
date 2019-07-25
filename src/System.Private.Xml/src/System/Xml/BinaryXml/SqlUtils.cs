@@ -607,9 +607,9 @@ Error:
 
         // Number of (100ns) ticks per time unit
         private const double s_SQLTicksPerMillisecond = 0.3;
-        public const int SQLTicksPerSecond = 300;
-        public const int SQLTicksPerMinute = SQLTicksPerSecond * 60;
-        public const int SQLTicksPerHour = SQLTicksPerMinute * 60;
+        internal const int SQLTicksPerSecond = 300;
+        internal const int SQLTicksPerMinute = SQLTicksPerSecond * 60;
+        internal const int SQLTicksPerHour = SQLTicksPerMinute * 60;
 
 
         public static string SqlSmallDateTimeToString(short dateticks, ushort timeticks)

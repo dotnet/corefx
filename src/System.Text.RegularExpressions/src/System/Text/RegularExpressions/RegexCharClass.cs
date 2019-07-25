@@ -23,8 +23,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Text;
 
 namespace System.Text.RegularExpressions
 {
@@ -53,12 +51,12 @@ namespace System.Text.RegularExpressions
         private const string Word = "\u0000\u0002\u0004\u0005\u0003\u0001\u0006\u0009\u0013\u0000";
         private const string NotWord = "\u0000\uFFFE\uFFFC\uFFFB\uFFFD\uFFFF\uFFFA\uFFF7\uFFED\u0000";
 
-        public const string SpaceClass = "\u0000\u0000\u0001\u0064";
-        public const string NotSpaceClass = "\u0001\u0000\u0001\u0064";
-        public const string WordClass = "\u0000\u0000\u000A\u0000\u0002\u0004\u0005\u0003\u0001\u0006\u0009\u0013\u0000";
-        public const string NotWordClass = "\u0001\u0000\u000A\u0000\u0002\u0004\u0005\u0003\u0001\u0006\u0009\u0013\u0000";
-        public const string DigitClass = "\u0000\u0000\u0001\u0009";
-        public const string NotDigitClass = "\u0000\u0000\u0001\uFFF7";
+        internal const string SpaceClass = "\u0000\u0000\u0001\u0064";
+        internal const string NotSpaceClass = "\u0001\u0000\u0001\u0064";
+        internal const string WordClass = "\u0000\u0000\u000A\u0000\u0002\u0004\u0005\u0003\u0001\u0006\u0009\u0013\u0000";
+        internal const string NotWordClass = "\u0001\u0000\u000A\u0000\u0002\u0004\u0005\u0003\u0001\u0006\u0009\u0013\u0000";
+        internal const string DigitClass = "\u0000\u0000\u0001\u0009";
+        internal const string NotDigitClass = "\u0000\u0000\u0001\uFFF7";
 
         private const string ECMASpaceSet = "\u0009\u000E\u0020\u0021";
         private const string NotECMASpaceSet = "\0\u0009\u000E\u0020\u0021";
@@ -67,15 +65,15 @@ namespace System.Text.RegularExpressions
         private const string ECMADigitSet = "\u0030\u003A";
         private const string NotECMADigitSet = "\0\u0030\u003A";
 
-        public const string ECMASpaceClass = "\x00\x04\x00" + ECMASpaceSet;
-        public const string NotECMASpaceClass = "\x01\x04\x00" + ECMASpaceSet;
-        public const string ECMAWordClass = "\x00\x0A\x00" + ECMAWordSet;
-        public const string NotECMAWordClass = "\x01\x0A\x00" + ECMAWordSet;
-        public const string ECMADigitClass = "\x00\x02\x00" + ECMADigitSet;
-        public const string NotECMADigitClass = "\x01\x02\x00" + ECMADigitSet;
+        internal const string ECMASpaceClass = "\x00\x04\x00" + ECMASpaceSet;
+        internal const string NotECMASpaceClass = "\x01\x04\x00" + ECMASpaceSet;
+        internal const string ECMAWordClass = "\x00\x0A\x00" + ECMAWordSet;
+        internal const string NotECMAWordClass = "\x01\x0A\x00" + ECMAWordSet;
+        internal const string ECMADigitClass = "\x00\x02\x00" + ECMADigitSet;
+        internal const string NotECMADigitClass = "\x01\x02\x00" + ECMADigitSet;
 
-        public const string AnyClass = "\x00\x01\x00\x00";
-        public const string EmptyClass = "\x00\x00\x00";
+        internal const string AnyClass = "\x00\x01\x00\x00";
+        internal const string EmptyClass = "\x00\x00\x00";
 
         // UnicodeCategory is zero based, so we add one to each value and subtract it off later
         private const int DefinedCategoriesCapacity = 38;
