@@ -2269,5 +2269,50 @@ namespace System.Net.Http.Functional.Tests
         public SocketsHttpHandler_HttpClientHandler_Cancellation_Test_Http2(ITestOutputHelper output) : base(output) { }
         protected override bool UseSocketsHttpHandler => true;
         protected override bool UseHttp2 => true;
+
+        [Fact]
+        public async Task Expect100Continue_NonSuccessResponse_RequestBodyNotSent()
+        {
+            string responseContent = "no no!";
+
+            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                using (var handler = new SocketsHttpHandler())
+                using (var invoker = new HttpMessageInvoker(handler))
+                {
+                    handler.SslOptions.RemoteCertificateValidationCallback = delegate { return true; };
+
+                    // Increase default Expect: 100-continue timeout to ensure that we don't accidentally fire the timer and send the request body.
+                    TimeSpan delay = TimeSpan.FromSeconds(5);
+                    handler.Expect100ContinueTimeout = delay;
+
+                    var request = new HttpRequestMessage(HttpMethod.Post, url);
+                    request.Version = new Version(2, 0);
+                    request.Content = new StringContent(new string('*', 3000));
+                    request.Headers.ExpectContinue = true;
+
+                    HttpResponseMessage response = await invoker.SendAsync(request, default);
+                    Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+                    Assert.Equal(responseContent, await response.Content.ReadAsStringAsync());
+                }
+            },
+            async server =>
+            {
+                Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
+
+                (int streamId, HttpRequestData requestData) = await connection.ReadAndParseRequestHeaderAsync(readBody: false);
+                Assert.Equal("100-continue", requestData.GetSingleHeaderValue("Expect"));
+
+                // Reject content with 403.
+                await connection.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.Forbidden);
+                await connection.SendResponseBodyAsync(streamId, Encoding.ASCII.GetBytes(responseContent));
+
+                // Client should send empty request body
+                byte[] requestBody = await connection.ReadBodyAsync();
+                Assert.Null(requestBody);
+
+                await connection.ShutdownIgnoringErrorsAsync(streamId);
+            });
+        }
     }
 }

@@ -1890,45 +1890,6 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [Fact]
-        public async Task PostAsyncExpect100Continue_NonSuccessResponse_RequestBodyNotSent()
-        {
-            string responseContent = "no no!";
-
-            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
-            {
-                using (HttpClient client = CreateHttpClient())
-                {
-                    var request = new HttpRequestMessage(HttpMethod.Post, url);
-                    request.Version = new Version(2,0);
-                    request.Content = new StringContent(new string('*', 3000));
-                    request.Headers.ExpectContinue = true;
-                    request.Headers.Add("x-test", "PostAsyncExpect100Continue_NonSuccessResponse_RequestBodyNotSent");
-
-                    HttpResponseMessage response = await client.SendAsync(request);
-                    Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-                    Assert.Equal(responseContent, await response.Content.ReadAsStringAsync());
-                }
-            },
-            async server =>
-            {
-                Http2LoopbackConnection connection = await server.EstablishConnectionAsync();
-
-                (int streamId, HttpRequestData requestData) = await connection.ReadAndParseRequestHeaderAsync(readBody : false);
-                Assert.Equal("100-continue", requestData.GetSingleHeaderValue("Expect"));
-
-                // Reject content with 403.
-                await connection.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.Forbidden);
-                await connection.SendResponseBodyAsync(streamId, Encoding.ASCII.GetBytes(responseContent));
-
-                // Client should send empty request body
-                byte[] requestBody = await connection.ReadBodyAsync();
-                Assert.Null(requestBody);
-
-                await connection.ShutdownIgnoringErrorsAsync(streamId);
-            });
-        }
-
         class DuplexContent : HttpContent
         {
             private TaskCompletionSource<Stream> _waitForStream;
