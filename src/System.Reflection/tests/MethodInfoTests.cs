@@ -392,7 +392,7 @@ namespace System.Reflection.Tests
         {
             MethodInfo methodInfo = GetMethod(typeof(MI_SubClass), "ReturnVoidMethod");
             CallingConventions callingConvention = methodInfo.CallingConvention;
-            Assert.True(callingConvention.HasFlag(CallingConventions.VarArgs));
+            Assert.True(callingConvention.HasFlag(CallingConventions.HasThis));
         }
 
         [Theory]

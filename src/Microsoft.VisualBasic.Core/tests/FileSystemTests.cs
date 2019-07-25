@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Microsoft.VisualBasic.Tests
 {
