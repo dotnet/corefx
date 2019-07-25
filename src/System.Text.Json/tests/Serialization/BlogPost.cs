@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.Net;
 
-namespace System.Text.Json.Serialization.TestsSchemas.BlogPost
+namespace System.Text.Json.Serialization.Tests.Schemas.BlogPost
 { 
     public class Post
     {

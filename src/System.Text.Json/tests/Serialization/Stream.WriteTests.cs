@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text.Json.Serialization.TestsSchemas.BlogPost;
+using System.Text.Json.Serialization.Tests.Schemas.BlogPost;
 using System.Threading.Tasks;
 using Xunit;
 
