@@ -113,7 +113,7 @@ namespace System.Drawing
                     //
                     Debug.WriteLineIf(GdiPlusInitialization.TraceVerbose, "Instruct GDI+ to shutdown");
 
-                    GdiplusShutdown(new HandleRef(null, initToken));
+                    GdiplusShutdown(ref initToken);
                     initToken = IntPtr.Zero;
 #endif
 
@@ -473,6 +473,10 @@ namespace System.Drawing
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true)]
         public static extern IntPtr CreateCompatibleBitmap(HandleRef hDC, int width, int height);
+
+        [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
+        public static extern int BitBlt(IntPtr hDC, int x, int y, int nWidth, int nHeight,
+                                         IntPtr hSrcDC, int xSrc, int ySrc, int dwRop);
 
         [DllImport(ExternDll.Gdi32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Auto)]
         public static extern int BitBlt(HandleRef hDC, int x, int y, int nWidth, int nHeight,
