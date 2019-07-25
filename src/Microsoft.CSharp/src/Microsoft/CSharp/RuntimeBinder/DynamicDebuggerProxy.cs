@@ -398,19 +398,19 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 value = site.Target(site, obj);
             }
-            catch (DynamicBindingFailedException exp)
+            catch (DynamicBindingFailedException)
             {
                 if (ignoreException)
                     value = null;
                 else
-                    throw exp;
+                    throw;
             }
-            catch (MissingMemberException exp)
+            catch (MissingMemberException)
             {
                 if (ignoreException)
                     value = SR.GetValueonWriteOnlyProperty;
                 else
-                    throw exp;
+                    throw;
             }
             return value;
         }
@@ -437,7 +437,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     return result;
                 }
             }
-            return new KeyValuePair<string, object>[0];
+            return Array.Empty<KeyValuePair<string, object>>();
         }
 
         [Serializable]
