@@ -114,7 +114,7 @@ namespace System.Linq
             /// </summary>
             /// <remarks>
             /// This flag allows us to determine in O(1) time whether we can preallocate for <see cref="ToArray"/>
-            /// and <see cref="M:System.Linq.Enumerable.ConcatIterator`1.ToList"/>, and whether we can get the count of the iterator cheaply.
+            /// and <see cref="System.Linq.Enumerable.ConcatIterator{T}.ToList"/>, and whether we can get the count of the iterator cheaply.
             /// </remarks>
             private readonly bool _hasOnlyCollections;
 
