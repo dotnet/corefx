@@ -340,6 +340,20 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
+        [Fact]
+        public static void ThrowsExceptionIfTypeConverterAttributeIsIncompatible()
+        {
+            try
+            {
+                JsonSerializer.Serialize(new InvalidTypeConverterClass());
+                Assert.True(false, "Expected InvalidOperationException was not thrown.");
+            }
+            catch (InvalidOperationException e)
+            {
+                Assert.Equal("The converter specified on 'System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterClass.System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterEnum] MyEnumValues' is not compatible with the type 'System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterEnum]'.", e.Message);
+            }
+        }
+
         public class RootClass
         {
             public ChildClass Child { get; set; }
@@ -351,6 +365,18 @@ namespace System.Text.Json.Serialization.Tests
             public int[] MyIntArray { get; set; }
             public Dictionary<string, ChildClass> MyDictionary { get; set; }
             public ChildClass[] Children { get; set; }
+        }
+
+        public class InvalidTypeConverterClass
+        {
+            [JsonConverter(typeof(JsonStringEnumConverter))]
+            public ICollection<InvalidTypeConverterEnum> MyEnumValues { get; set; }
+        }
+
+        public enum InvalidTypeConverterEnum
+        {
+            Value1,
+            Value2,
         }
     }
 }

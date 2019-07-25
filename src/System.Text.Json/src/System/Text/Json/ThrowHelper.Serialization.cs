@@ -89,12 +89,15 @@ namespace System.Text.Json
         public static void ThrowInvalidOperationException_SerializationConverterOnAttributeNotCompatible(Type classType, PropertyInfo propertyInfo)
         {
             string location = classType.ToString();
+            string type = location;
+
             if (propertyInfo != null)
             {
-                location += $".{propertyInfo.ToString()}";
+                type = propertyInfo.ToString();
+                location += $".{type}";
             }
 
-            throw new InvalidOperationException(SR.Format(SR.SerializationConverterOnAttributeNotCompatible, location));
+            throw new InvalidOperationException(SR.Format(SR.SerializationConverterOnAttributeNotCompatible, location, type));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
