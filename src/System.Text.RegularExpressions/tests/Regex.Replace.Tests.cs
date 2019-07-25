@@ -229,21 +229,15 @@ namespace System.Text.RegularExpressions.Tests
         [InlineData(RegexOptions.RightToLeft)]
         public void Replace_MatchEvaluatorReturnsNullOrEmpty(RegexOptions options)
         {
-            string input = "abcde";
-            string result = Regex.Replace(input, @"[abcd]", (Match match) => {
-                switch(match.Value)
+            string result = Regex.Replace("abcde", @"[abcd]", (Match match) => {
+                return match.Value switch
                 {
-                    case "a":
-                        return "x";
-                    case "b":
-                        return null;
-                    case "c":
-                        return "";
-                    case "d":
-                        return "y";
-                    default:
-                        throw new InvalidOperationException();
-                }
+                    "a" => "x",
+                    "b" => null,
+                    "c" => "",
+                    "d" => "y",
+                    _ => throw new InvalidOperationException()
+                };
             }, options);
 
             Assert.Equal("xye", result);
