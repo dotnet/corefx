@@ -128,8 +128,8 @@ namespace Microsoft.VisualBasic
         public const MsgBoxStyle vbMsgBoxRight = MsgBoxStyle.MsgBoxRight;
         public const MsgBoxStyle vbMsgBoxRtlReading = MsgBoxStyle.MsgBoxRtlReading;
         public const MsgBoxStyle vbMsgBoxSetForeground = MsgBoxStyle.MsgBoxSetForeground;
-        [System.ObsoleteAttribute("For a carriage return and line feed, use vbCrLf.  For the current platform's newline, use System.Environment.NewLine.")]
         public const VbStrConv vbNarrow = VbStrConv.Narrow;
+        [System.ObsoleteAttribute("For a carriage return and line feed, use vbCrLf.  For the current platform's newline, use System.Environment.NewLine.")]
         public const string vbNewLine = "\r\n";
         public const MsgBoxResult vbNo = MsgBoxResult.No;
         public const FileAttribute vbNormal = FileAttribute.Normal;
