@@ -7,9 +7,9 @@ namespace System.Net.Sockets
     /// <summary>Represents a Unix Domain Socket endpoint as a path.</summary>
     public sealed partial class UnixDomainSocketEndPoint : EndPoint
     {
-        private static readonly int s_nativePathOffset = 2; // sizeof(sun_family)
-        private static readonly int s_nativePathLength = 108; // sizeof(sun_path)
-        private static readonly int s_nativeAddressSize = s_nativePathOffset + s_nativePathLength; // sizeof(sockaddr_un)
+        private const int s_nativePathOffset = 2; // sizeof(sun_family)
+        private const int s_nativePathLength = 108; // sizeof(sun_path)
+        private const int s_nativeAddressSize = s_nativePathOffset + s_nativePathLength; // sizeof(sockaddr_un)
 
         private SocketAddress CreateSocketAddressForSerialize() =>
             new SocketAddress(AddressFamily.Unix, s_nativeAddressSize);

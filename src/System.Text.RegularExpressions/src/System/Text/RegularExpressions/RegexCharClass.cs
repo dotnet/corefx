@@ -47,18 +47,18 @@ namespace System.Text.RegularExpressions
         private const char ZeroWidthJoiner = '\u200D';
         private const char ZeroWidthNonJoiner = '\u200C';
 
-        private static readonly string s_internalRegexIgnoreCase = "__InternalRegexIgnoreCase__";
-        private static readonly string s_space = "\x64";
-        private static readonly string s_notSpace = "\uFF9C";
-        private static readonly string s_word = "\u0000\u0002\u0004\u0005\u0003\u0001\u0006\u0009\u0013\u0000";
-        private static readonly string s_notWord = "\u0000\uFFFE\uFFFC\uFFFB\uFFFD\uFFFF\uFFFA\uFFF7\uFFED\u0000";
+        private const string InternalRegexIgnoreCase = "__InternalRegexIgnoreCase__";
+        private const string Space = "\x64";
+        private const string NotSpace = "\uFF9C";
+        private const string Word = "\u0000\u0002\u0004\u0005\u0003\u0001\u0006\u0009\u0013\u0000";
+        private const string NotWord = "\u0000\uFFFE\uFFFC\uFFFB\uFFFD\uFFFF\uFFFA\uFFF7\uFFED\u0000";
 
-        public static readonly string SpaceClass = "\u0000\u0000\u0001\u0064";
-        public static readonly string NotSpaceClass = "\u0001\u0000\u0001\u0064";
-        public static readonly string WordClass = "\u0000\u0000\u000A\u0000\u0002\u0004\u0005\u0003\u0001\u0006\u0009\u0013\u0000";
-        public static readonly string NotWordClass = "\u0001\u0000\u000A\u0000\u0002\u0004\u0005\u0003\u0001\u0006\u0009\u0013\u0000";
-        public static readonly string DigitClass = "\u0000\u0000\u0001\u0009";
-        public static readonly string NotDigitClass = "\u0000\u0000\u0001\uFFF7";
+        public const string SpaceClass = "\u0000\u0000\u0001\u0064";
+        public const string NotSpaceClass = "\u0001\u0000\u0001\u0064";
+        public const string WordClass = "\u0000\u0000\u000A\u0000\u0002\u0004\u0005\u0003\u0001\u0006\u0009\u0013\u0000";
+        public const string NotWordClass = "\u0001\u0000\u000A\u0000\u0002\u0004\u0005\u0003\u0001\u0006\u0009\u0013\u0000";
+        public const string DigitClass = "\u0000\u0000\u0001\u0009";
+        public const string NotDigitClass = "\u0000\u0000\u0001\uFFF7";
 
         private const string ECMASpaceSet = "\u0009\u000E\u0020\u0021";
         private const string NotECMASpaceSet = "\0\u0009\u000E\u0020\u0021";
@@ -529,13 +529,13 @@ namespace System.Text.RegularExpressions
 
         public void AddCategoryFromName(string categoryName, bool invert, bool caseInsensitive, string pattern, int currentPos)
         {
-            if (s_definedCategories.TryGetValue(categoryName, out string category) && !categoryName.Equals(s_internalRegexIgnoreCase))
+            if (s_definedCategories.TryGetValue(categoryName, out string category) && !categoryName.Equals(InternalRegexIgnoreCase))
             {
                 if (caseInsensitive)
                 {
                     if (categoryName.Equals("Ll") || categoryName.Equals("Lu") || categoryName.Equals("Lt"))
                         // when RegexOptions.IgnoreCase is specified then {Ll}, {Lu}, and {Lt} cases should all match
-                        category = s_definedCategories[s_internalRegexIgnoreCase];
+                        category = s_definedCategories[InternalRegexIgnoreCase];
                 }
 
                 if (invert)
@@ -641,14 +641,14 @@ namespace System.Text.RegularExpressions
                 if (ecma)
                     AddSet(NotECMAWordSet);
                 else
-                    AddCategory(s_notWord);
+                    AddCategory(NotWord);
             }
             else
             {
                 if (ecma)
                     AddSet(ECMAWordSet);
                 else
-                    AddCategory(s_word);
+                    AddCategory(Word);
             }
         }
 
@@ -659,14 +659,14 @@ namespace System.Text.RegularExpressions
                 if (ecma)
                     AddSet(NotECMASpaceSet);
                 else
-                    AddCategory(s_notSpace);
+                    AddCategory(NotSpace);
             }
             else
             {
                 if (ecma)
                     AddSet(ECMASpaceSet);
                 else
-                    AddCategory(s_space);
+                    AddCategory(Space);
             }
         }
 
@@ -1166,7 +1166,7 @@ namespace System.Text.RegularExpressions
 #if DEBUG
 
         public static readonly char[] Hex = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-        public static readonly string[] Categories = new string[] {"Lu", "Ll", "Lt", "Lm", "Lo", s_internalRegexIgnoreCase,
+        public static readonly string[] Categories = new string[] {"Lu", "Ll", "Lt", "Lm", "Lo", InternalRegexIgnoreCase,
                                                                      "Mn", "Mc", "Me",
                                                                      "Nd", "Nl", "No",
                                                                      "Zs", "Zl", "Zp",
@@ -1243,9 +1243,9 @@ namespace System.Text.RegularExpressions
 
                     if (!found)
                     {
-                        if (group.Equals(s_word))
+                        if (group.Equals(Word))
                             desc.Append("\\w");
-                        else if (group.Equals(s_notWord))
+                        else if (group.Equals(NotWord))
                             desc.Append("\\W");
                         else
                             Debug.Fail("Couldn't find a group to match '" + group + "'");
