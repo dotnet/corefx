@@ -36,8 +36,8 @@ namespace HttpStress
             ContentSource = contentSource;
             Content = GetRandomSubstring(contentSource);
             ContentBytes = Encoding.UTF8.GetBytes(Content);
-            ClientBufferSize = clientMaxBufferSize > 0 
-                                ? GetRandomInt32(1, clientMaxBufferSize) 
+            ClientBufferSize = clientMaxBufferSize > 0
+                                ? GetRandomInt32(1, clientMaxBufferSize)
                                 : (ContentBytes.Length == 0 ? 1 : ContentBytes.Length);
         }
 
@@ -397,7 +397,7 @@ namespace HttpStress
             return (sb.ToString(), multipartContent);
         }
 
-        /// <summary>HttpContent that trickles out N byte at a time.</summary>
+        /// <summary>HttpContent that trickles out N bytes at a time.</summary>
         private sealed class NBytesAtATime : HttpContent
         {
             private readonly byte[] _buffer;

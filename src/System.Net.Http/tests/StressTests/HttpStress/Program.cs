@@ -70,7 +70,7 @@ public class Program
             numParameters           : cmdline.ValueForOption<int>("-numParameters"),
             cancellationProbability : Math.Max(0, Math.Min(1, cmdline.ValueForOption<double>("-cancelRate"))),
             displayIntervalSeconds  : cmdline.ValueForOption<int>("-displayInterval"),
-            clientMaxBufferSize     : cmdline.ValueForOption<int>("-clientMaxBufferSize"), 
+            clientMaxBufferSize     : cmdline.ValueForOption<int>("-clientMaxBufferSize"),
             serverBufferSize        : cmdline.ValueForOption<int>("-serverBufferSize"));
     }
 

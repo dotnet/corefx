@@ -40,7 +40,7 @@ namespace HttpStress
             ServerUri = serverUri;
             IWebHostBuilder host = WebHost.CreateDefaultBuilder();
 
-            ServerBufferSize = serverBufferSize > 0 
+            ServerBufferSize = serverBufferSize > 0
                                     ? serverBufferSize
                                     : (maxContentLength == 0 ? 1 : maxContentLength);
 
