@@ -192,6 +192,8 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(4000)]
         [InlineData(8000)]
         [InlineData(16000)]
+        [InlineData(32000)]
+        [InlineData(64000)]
         public static async Task LargeJsonFile(int bufferSize)
         {
             const int SessionResponseCount = 100;
@@ -267,18 +269,10 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(1, true, false)]
         [InlineData(1, false, true)]
         [InlineData(1, false, false)]
-        [InlineData(10, true, true)]
         [InlineData(10, true, false)]
-        [InlineData(10, false, true)]
         [InlineData(10, false, false)]
-        [InlineData(100, true, true)]
         [InlineData(100, true, false)]
-        [InlineData(100, false, true)]
-        [InlineData(100, false, false)]
-        [InlineData(1000, true, true)]
         [InlineData(1000, true, false)]
-        [InlineData(1000, false, true)]
-        [InlineData(1000, false, false)]
         public static async Task VeryLargeJsonFileTest(int payloadSize, bool ignoreNull, bool writeIndented)
         {
             List<Post> list = PopulateLargeObject(payloadSize);
@@ -318,22 +312,11 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(1, true, false)]
         [InlineData(1, false, true)]
         [InlineData(1, false, false)]
-        [InlineData(2, true, true)]
         [InlineData(2, true, false)]
-        [InlineData(2, false, true)]
         [InlineData(2, false, false)]
-        [InlineData(4, true, true)]
         [InlineData(4, true, false)]
-        [InlineData(4, false, true)]
-        [InlineData(4, false, false)]
-        [InlineData(8, true, true)]
         [InlineData(8, true, false)]
-        [InlineData(8, false, true)]
-        [InlineData(8, false, false)]
-        [InlineData(16, true, true)]
         [InlineData(16, true, false)]
-        [InlineData(16, false, true)]
-        [InlineData(16, false, false)]
         public static async Task DeepNestedJsonFileTest(int depthFactor, bool ignoreNull, bool writeIndented)
         {
             int length = 10 * depthFactor;
@@ -400,6 +383,59 @@ namespace System.Text.Json.Serialization.Tests
             {
                 await Assert.ThrowsAsync<JsonException>(async () => await JsonSerializer.SerializeAsync(memoryStream, posts[0], options));
             }
+        }
+
+
+        [Theory]
+        [InlineData(128)]
+        [InlineData(1024)]
+        [InlineData(4096)]
+        [InlineData(8192)]
+        [InlineData(16384)]
+        [InlineData(65536)]
+        public static async void FlushThresholdTest(int bufferSize)
+        {
+            int thresholdSize = (int )(bufferSize * 0.9 - 2);
+            FlushThresholdTestClass serialaizeObject = new FlushThresholdTestClass(PopulateObjectWhichProduceJsonWithGivenSize(bufferSize));
+            List<object> list = new List<object>();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < thresholdSize; i++)
+            {
+                builder.Append("a");
+            }
+            list.Add(builder.ToString());
+            serialaizeObject.StringProperty = builder.ToString();
+            list.Add(serialaizeObject);
+            JsonSerializerOptions options = new JsonSerializerOptions();
+            options.DefaultBufferSize = bufferSize;
+
+            string json = JsonSerializer.Serialize(list);
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await JsonSerializer.SerializeAsync(memoryStream, list, options);
+                string jsonSerialized = Encoding.UTF8.GetString(memoryStream.ToArray());
+                Assert.Equal(json, jsonSerialized);
+            }
+        }
+
+        private class FlushThresholdTestClass {
+            public string StringProperty { get; set; }
+            public List<int> ListOfInts { get; set; }
+            public FlushThresholdTestClass(List<int> list)
+            {
+                ListOfInts = list;
+            }
+        }
+
+        private static List<int> PopulateObjectWhichProduceJsonWithGivenSize(int size)
+        {
+            List<int> list = new List<int>();
+            for (int i = 0; i < size; i++)
+            {
+                list.Add(1);
+            }
+            return list;
         }
 
         private static List<Post> PopulateLargeObject(int size)
