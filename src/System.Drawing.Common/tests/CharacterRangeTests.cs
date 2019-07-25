@@ -70,7 +70,12 @@ namespace System.Drawing.Tests
             yield return new object[] { new CharacterRange(1, 2), new CharacterRange(2, 2), false };
             yield return new object[] { new CharacterRange(1, 2), new CharacterRange(1, 1), false };
             yield return new object[] { new CharacterRange(1, 2), new object(), false };
-            yield return new object[] { new CharacterRange(1, 2), null, false };
+
+            // .NET Framework throws NullReferenceException.
+            if (!PlatformDetection.IsFullFramework)
+            {
+                yield return new object[] { new CharacterRange(1, 2), null, false };
+            }
         }
 
         [Theory]
