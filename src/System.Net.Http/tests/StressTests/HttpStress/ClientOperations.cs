@@ -3,9 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -24,7 +22,7 @@ namespace HttpStress
 
         public RequestContext(HttpClient httpClient, Random random, int taskNum,
                                 string contentSource, int maxRequestParameters, int maxRequestLineSize,
-                                double cancellationProbability, double http2Probability)
+                                double cancellationProbability, double http2Probability, int clientMaxBufferSize)
         {
             _random = random;
             _client = httpClient;
@@ -36,10 +34,18 @@ namespace HttpStress
             MaxRequestParameters = maxRequestParameters;
             MaxRequestLineSize = maxRequestLineSize;
             ContentSource = contentSource;
+            Content = GetRandomSubstring(contentSource);
+            ContentBytes = Encoding.UTF8.GetBytes(Content);
+            ClientBufferSize = clientMaxBufferSize > 0 
+                                ? GetRandomInt32(1, clientMaxBufferSize) 
+                                : (ContentBytes.Length == 0 ? 1 : ContentBytes.Length);
         }
 
         public int TaskNum { get; }
         public bool IsCancellationRequested { get; set; }
+        public string Content { get; }
+        public byte[] ContentBytes { get; }
+        public int ClientBufferSize { get; }
         public string ContentSource { get; }
         public int MaxRequestParameters { get; }
         public int MaxRequestLineSize { get; }
@@ -216,14 +222,13 @@ namespace HttpStress
                 ("POST",
                 async ctx =>
                 {
-                    string content = ctx.GetRandomSubstring(ctx.ContentSource);
                     Version httpVersion = ctx.GetRandomHttpVersion();
 
-                    using (var req = new HttpRequestMessage(HttpMethod.Post, "/") { Version = httpVersion, Content = new StringDuplexContent(content) })
+                    using (var req = new HttpRequestMessage(HttpMethod.Post, "/") { Version = httpVersion, Content = new NBytesAtATime(ctx.ContentBytes, ctx.ClientBufferSize) })
                     using (HttpResponseMessage m = await ctx.SendAsync(req))
                     {
                         ValidateResponse(m, httpVersion);
-                        ValidateContent(content, await m.Content.ReadAsStringAsync());;
+                        ValidateContent(ctx.Content, await m.Content.ReadAsStringAsync());;
                     }
                 }),
 
@@ -237,51 +242,48 @@ namespace HttpStress
                     using (HttpResponseMessage m = await ctx.SendAsync(req))
                     {
                         ValidateResponse(m, httpVersion);
-                        ValidateContent($"{formData.expected}", await m.Content.ReadAsStringAsync());;
+                        ValidateContent($"{formData.expected}", await m.Content.ReadAsStringAsync());
                     }
                 }),
 
                 ("POST Duplex",
                 async ctx =>
                 {
-                    string content = ctx.GetRandomSubstring(ctx.ContentSource);
                     Version httpVersion = ctx.GetRandomHttpVersion();
 
-                    using (var req = new HttpRequestMessage(HttpMethod.Post, "/duplex") { Version = httpVersion, Content = new StringDuplexContent(content) })
+                    using (var req = new HttpRequestMessage(HttpMethod.Post, "/duplex") { Version = httpVersion, Content = new NBytesAtATime(ctx.ContentBytes, ctx.ClientBufferSize) })
                     using (HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead))
                     {
                         ValidateResponse(m, httpVersion);
-                        ValidateContent(content, await m.Content.ReadAsStringAsync());
+                        ValidateContent(ctx.Content, await m.Content.ReadAsStringAsync());
                     }
                 }),
 
                 ("POST Duplex Slow",
                 async ctx =>
                 {
-                    string content = ctx.GetRandomSubstring(ctx.ContentSource);
                     Version httpVersion = ctx.GetRandomHttpVersion();
 
-                    using (var req = new HttpRequestMessage(HttpMethod.Post, "/duplexSlow") { Version = httpVersion, Content = new ByteAtATimeNoLengthContent(Encoding.ASCII.GetBytes(content)) })
+                    using (var req = new HttpRequestMessage(HttpMethod.Post, "/duplexSlow") { Version = httpVersion, Content = new NBytesAtATime(ctx.ContentBytes, 1, length: 0) })
                     using (HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead))
                     {
                         ValidateResponse(m, httpVersion);
-                        ValidateContent(content, await m.Content.ReadAsStringAsync());
+                        ValidateContent(ctx.Content, await m.Content.ReadAsStringAsync());
                     }
                 }),
 
                 ("POST ExpectContinue",
                 async ctx =>
                 {
-                    string content = ctx.GetRandomSubstring(ctx.ContentSource);
                     Version httpVersion = ctx.GetRandomHttpVersion();
 
-                    using (var req = new HttpRequestMessage(HttpMethod.Post, "/") { Version = httpVersion, Content = new StringContent(content) })
+                    using (var req = new HttpRequestMessage(HttpMethod.Post, "/") { Version = httpVersion,Content = new NBytesAtATime(ctx.ContentBytes, ctx.ClientBufferSize) })
                     {
                         req.Headers.ExpectContinue = true;
                         using (HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead))
                         {
                             ValidateResponse(m, httpVersion);
-                            ValidateContent(content, await m.Content.ReadAsStringAsync());
+                            ValidateContent(ctx.Content, await m.Content.ReadAsStringAsync());
                         }
                     }
                 }),
@@ -395,43 +397,51 @@ namespace HttpStress
             return (sb.ToString(), multipartContent);
         }
 
-        /// <summary>HttpContent that's similar to StringContent but that can be used with HTTP/2 duplex communication.</summary>
-        private sealed class StringDuplexContent : HttpContent
-        {
-            private readonly byte[] _data;
-
-            public StringDuplexContent(string value) => _data = Encoding.UTF8.GetBytes(value);
-
-            protected override Task SerializeToStreamAsync(Stream stream, TransportContext context) =>
-                stream.WriteAsync(_data, 0, _data.Length);
-
-            protected override bool TryComputeLength(out long length)
-            {
-                length = _data.Length;
-                return true;
-            }
-        }
-
-        /// <summary>HttpContent that trickles out a byte at a time.</summary>
-        private sealed class ByteAtATimeNoLengthContent : HttpContent
+        /// <summary>HttpContent that trickles out N byte at a time.</summary>
+        private sealed class NBytesAtATime : HttpContent
         {
             private readonly byte[] _buffer;
+            private readonly int _numbytes;
+            private readonly int _length;
 
-            public ByteAtATimeNoLengthContent(byte[] buffer) => _buffer = buffer;
+            public NBytesAtATime(byte[] buffer, int numbytes) : this(buffer, numbytes, buffer.Length)
+            {
+            }
+
+            public NBytesAtATime(byte[] buffer, int numbytes, int length)
+            {
+                if (numbytes <= 0)
+                    throw new ArgumentOutOfRangeException(nameof(numbytes));
+
+                if (length < 0)
+                    throw new ArgumentOutOfRangeException((nameof(length)));
+
+                _buffer = buffer;
+                _numbytes = numbytes;
+                _length = length;
+            }
 
             protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
             {
-                for (int i = 0; i < _buffer.Length; i++)
+                int i;
+
+                for (i = 0; i < _buffer.Length - _numbytes + 1; i += _numbytes)
                 {
-                    await stream.WriteAsync(_buffer.AsMemory(i, 1));
+                    await stream.WriteAsync(_buffer.AsMemory(i, _numbytes));
+                    await stream.FlushAsync();
+                }
+
+                if (i < _buffer.Length)
+                {
+                    await stream.WriteAsync(_buffer.AsMemory(i));
                     await stream.FlushAsync();
                 }
             }
 
             protected override bool TryComputeLength(out long length)
             {
-                length = 0;
-                return false;
+                length = _length;
+                return _length != 0;
             }
         }
     }

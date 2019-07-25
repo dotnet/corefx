@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.Tracing;
 using System.IO;
@@ -34,11 +33,16 @@ namespace HttpStress
 
         public Uri ServerUri { get; }
         public int MaxRequestLineSize { get; private set; } = -1;
+        public int ServerBufferSize { get; }
 
-        public StressServer(Uri serverUri, bool httpSys, int maxContentLength, string logPath, bool enableAspNetLogs)
+        public StressServer(Uri serverUri, bool httpSys, int maxContentLength, string logPath, bool enableAspNetLogs, int serverBufferSize)
         {
             ServerUri = serverUri;
             IWebHostBuilder host = WebHost.CreateDefaultBuilder();
+
+            ServerBufferSize = serverBufferSize > 0 
+                                    ? serverBufferSize
+                                    : (maxContentLength == 0 ? 1 : maxContentLength);
 
             if (httpSys)
             {
@@ -168,14 +172,26 @@ namespace HttpStress
             {
                 // Post echos back the requested content, first buffering it all server-side, then sending it all back.
                 var s = new MemoryStream();
-                await context.Request.Body.CopyToAsync(s);
+                var buffer = new byte[ServerBufferSize];
+                int bytesRead;
+                while ((bytesRead = await context.Request.Body.ReadAsync(buffer)) > 0)
+                {
+                    s.Write(buffer, 0, bytesRead);
+                }
+
                 s.Position = 0;
                 await s.CopyToAsync(context.Response.Body);
             });
             endpoints.MapPost("/duplex", async context =>
             {
                 // Echos back the requested content in a full duplex manner.
-                await context.Request.Body.CopyToAsync(context.Response.Body);
+                var buffer = new byte[ServerBufferSize];
+                int bytesRead;
+
+                while ((bytesRead = await context.Request.Body.ReadAsync(buffer)) > 0)
+                {
+                    await context.Response.Body.WriteAsync(buffer, 0, bytesRead);
+                }
             });
             endpoints.MapPost("/duplexSlow", async context =>
             {

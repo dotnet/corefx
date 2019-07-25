@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Security;
@@ -22,7 +21,7 @@ namespace HttpStress
         public StressClient(Uri serverUri, (string name, Func<RequestContext, Task> operation)[] clientOperations, int concurrentRequests,
                                 int maxContentLength, int maxRequestParameters, int maxRequestLineSize,
                                 int randomSeed, double cancellationProbability, double http2Probability,
-                                int? connectionLifetime, TimeSpan displayInterval)
+                                int? connectionLifetime, TimeSpan displayInterval, int clientMaxBufferSize)
         {
             _cts = new CancellationTokenSource();
             _clientTask = RunClient();
@@ -125,7 +124,7 @@ namespace HttpStress
                         // Random instance should be shared across all requests made by same worker
                         Random random = CreateRandomInstance();
 
-                        return () => new RequestContext(client, random, taskNum, contentSource, maxRequestParameters, maxRequestLineSize, cancellationProbability, http2Probability);
+                        return () => new RequestContext(client, random, taskNum, contentSource, maxRequestParameters, maxRequestLineSize, cancellationProbability, http2Probability, clientMaxBufferSize);
                     }
 
                     async Task RunWorker(int taskNum)

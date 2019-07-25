@@ -38,6 +38,8 @@ public class Program
         cmd.AddOption(new Option("-cancelRate", "Number between 0 and 1 indicating rate of client-side request cancellation attempts. Defaults to 0.1.") { Argument = new Argument<double>("probability", 0.1) });
         cmd.AddOption(new Option("-httpSys", "Use http.sys instead of Kestrel.") { Argument = new Argument<bool>("enable", false) });
         cmd.AddOption(new Option("-displayInterval", "Client stats display interval in seconds. Defaults to 1 second.") { Argument = new Argument<int>("displayInterval", 1) });
+        cmd.AddOption(new Option("-clientMaxBufferSize", "Client max buffer size") { Argument = new Argument<int>("clientMaxBufferSize", -1) });
+        cmd.AddOption(new Option("-serverBufferSize", "Server buffer size") { Argument = new Argument<int>("serverBufferSize", -1) });
 
         ParseResult cmdline = cmd.Parse(args);
         if (cmdline.Errors.Count > 0)
@@ -67,10 +69,12 @@ public class Program
             seed                    : cmdline.ValueForOption<int?>("-seed") ?? new Random().Next(),
             numParameters           : cmdline.ValueForOption<int>("-numParameters"),
             cancellationProbability : Math.Max(0, Math.Min(1, cmdline.ValueForOption<double>("-cancelRate"))),
-            displayIntervalSeconds  : cmdline.ValueForOption<int>("-displayInterval"));
+            displayIntervalSeconds  : cmdline.ValueForOption<int>("-displayInterval"),
+            clientMaxBufferSize     : cmdline.ValueForOption<int>("-clientMaxBufferSize"), 
+            serverBufferSize        : cmdline.ValueForOption<int>("-serverBufferSize"));
     }
 
-    private static void Run(RunMode runMode, Uri serverUri, bool httpSys, int concurrentRequests, int maxContentLength, int maxRequestLineSize, Version httpVersion, int? connectionLifetime, int[] opIndices, string logPath, bool aspnetLog, bool listOps, int seed, int numParameters, double cancellationProbability, int displayIntervalSeconds)
+    private static void Run(RunMode runMode, Uri serverUri, bool httpSys, int concurrentRequests, int maxContentLength, int maxRequestLineSize, Version httpVersion, int? connectionLifetime, int[] opIndices, string logPath, bool aspnetLog, bool listOps, int seed, int numParameters, double cancellationProbability, int displayIntervalSeconds, int clientMaxBufferSize, int serverBufferSize)
     {
 
         if (serverUri.Scheme != "https")
@@ -81,20 +85,22 @@ public class Program
 
         (string name, Func<RequestContext, Task> op)[] clientOperations = ClientOperations.Operations;
 
-        Console.WriteLine("       .NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(object).Assembly.Location)));
-        Console.WriteLine("    ASP.NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(WebHost).Assembly.Location)));
-        Console.WriteLine("          Server: " + (httpSys ? "http.sys" : "Kestrel"));
-        Console.WriteLine("      Server URL: " + serverUri);
-        Console.WriteLine("         Tracing: " + (logPath == null ? (object)false : logPath.Length == 0 ? (object)true : logPath));
-        Console.WriteLine("     ASP.NET Log: " + aspnetLog);
-        Console.WriteLine("     Concurrency: " + concurrentRequests);
-        Console.WriteLine("  Content Length: " + maxContentLength);
-        Console.WriteLine("    HTTP Version: " + httpVersion);
-        Console.WriteLine("        Lifetime: " + (connectionLifetime.HasValue ? $"{connectionLifetime}ms" : "(infinite)"));
-        Console.WriteLine("      Operations: " + string.Join(", ", clientOperations.Select(o => o.name)));
-        Console.WriteLine("     Random Seed: " + seed);
-        Console.WriteLine("    Cancellation: " + 100 * cancellationProbability + "%");
-        Console.WriteLine("Query Parameters: " + numParameters);
+        Console.WriteLine("             .NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(object).Assembly.Location)));
+        Console.WriteLine("          ASP.NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(WebHost).Assembly.Location)));
+        Console.WriteLine("                Server: " + (httpSys ? "http.sys" : "Kestrel"));
+        Console.WriteLine("            Server URL: " + serverUri);
+        Console.WriteLine("               Tracing: " + (logPath == null ? (object)false : logPath.Length == 0 ? (object)true : logPath));
+        Console.WriteLine("           ASP.NET Log: " + aspnetLog);
+        Console.WriteLine("           Concurrency: " + concurrentRequests);
+        Console.WriteLine("        Content Length: " + maxContentLength);
+        Console.WriteLine("          HTTP Version: " + httpVersion);
+        Console.WriteLine("              Lifetime: " + (connectionLifetime.HasValue ? $"{connectionLifetime}ms" : "(infinite)"));
+        Console.WriteLine("            Operations: " + string.Join(", ", clientOperations.Select(o => o.name)));
+        Console.WriteLine("           Random Seed: " + seed);
+        Console.WriteLine("          Cancellation: " + 100 * cancellationProbability + "%");
+        Console.WriteLine("      Query Parameters: " + numParameters);
+        Console.WriteLine("Client Max Buffer Size: " + clientMaxBufferSize);
+        Console.WriteLine("    Server Buffer Size: " + serverBufferSize);
         Console.WriteLine();
 
         if (listOps)
@@ -116,7 +122,7 @@ public class Program
         {
             // Start the Kestrel web server in-proc.
             Console.WriteLine($"Starting {(httpSys ? "http.sys" : "Kestrel")} server.");
-            var server = new StressServer(serverUri, httpSys, maxContentLength, logPath, aspnetLog);
+            var server = new StressServer(serverUri, httpSys, maxContentLength, logPath, aspnetLog, serverBufferSize);
             maxRequestLineSize = server.MaxRequestLineSize;
             Console.WriteLine($"Server started at {server.ServerUri}");
         }
@@ -141,7 +147,8 @@ public class Program
                 cancellationProbability: cancellationProbability,
                 http2Probability: (httpVersion == new Version(2, 0)) ? 1 : 0,
                 connectionLifetime: connectionLifetime,
-                displayInterval: TimeSpan.FromSeconds(displayIntervalSeconds));
+                displayInterval: TimeSpan.FromSeconds(displayIntervalSeconds),
+                clientMaxBufferSize : clientMaxBufferSize);
         }
 
         AwaitCancelKeyPress().Wait();
