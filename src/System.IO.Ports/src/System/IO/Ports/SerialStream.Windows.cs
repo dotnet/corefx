@@ -560,16 +560,10 @@ namespace System.IO.Ports
             {
                  throw new ArgumentNullException(nameof(portName));
             }
-
-            if (!portName.StartsWith("COM", StringComparison.OrdinalIgnoreCase) ||
-                !uint.TryParse(portName.Substring(3), out uint portNumber))
-            {
-                throw new ArgumentException(SR.Format(SR.Arg_InvalidSerialPort, portName), nameof(portName));
-            }
-
+                       
             // Error checking done in SerialPort.
 
-            SafeFileHandle tempHandle = OpenPort(portNumber);
+            SafeFileHandle tempHandle = OpenPort(portName); // OpenPort(portNumber);
 
             if (tempHandle.IsInvalid)
             {
