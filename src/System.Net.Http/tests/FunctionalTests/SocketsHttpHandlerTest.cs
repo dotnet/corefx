@@ -2283,7 +2283,7 @@ namespace System.Net.Http.Functional.Tests
                     handler.SslOptions.RemoteCertificateValidationCallback = delegate { return true; };
 
                     // Increase default Expect: 100-continue timeout to ensure that we don't accidentally fire the timer and send the request body.
-                    TimeSpan delay = TimeSpan.FromSeconds(5);
+                    TimeSpan delay = TimeSpan.FromSeconds(300);
                     handler.Expect100ContinueTimeout = delay;
 
                     var request = new HttpRequestMessage(HttpMethod.Post, url);
