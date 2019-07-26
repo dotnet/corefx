@@ -29,16 +29,16 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Arcade dependencies -->
-    <MicrosoftDotNetApiCompatPackageVersion>1.0.0-beta.19375.2</MicrosoftDotNetApiCompatPackageVersion>
-    <MicrosoftDotNetCodeAnalysisPackageVersion>1.0.0-beta.19375.2</MicrosoftDotNetCodeAnalysisPackageVersion>
-    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19375.2</MicrosoftDotNetGenAPIPackageVersion>
-    <MicrosoftDotNetGenFacadesPackageVersion>1.0.0-beta.19375.2</MicrosoftDotNetGenFacadesPackageVersion>
-    <MicrosoftDotNetXUnitExtensionsPackageVersion>2.4.1-beta.19375.2</MicrosoftDotNetXUnitExtensionsPackageVersion>
-    <MicrosoftDotNetXUnitConsoleRunnerPackageVersion>2.5.1-beta.19375.2</MicrosoftDotNetXUnitConsoleRunnerPackageVersion>
-    <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.19375.2</MicrosoftDotNetBuildTasksPackagingPackageVersion>
-    <MicrosoftDotNetRemoteExecutorPackageVersion>1.0.0-beta.19375.2</MicrosoftDotNetRemoteExecutorPackageVersion>
-    <MicrosoftDotNetBuildTasksFeedPackageVersion>2.2.0-beta.19375.2</MicrosoftDotNetBuildTasksFeedPackageVersion>
-    <MicrosoftDotNetVersionToolsTasksPackageVersion>1.0.0-beta.19375.2</MicrosoftDotNetVersionToolsTasksPackageVersion>
+    <MicrosoftDotNetApiCompatPackageVersion>1.0.0-beta.19375.15</MicrosoftDotNetApiCompatPackageVersion>
+    <MicrosoftDotNetCodeAnalysisPackageVersion>1.0.0-beta.19375.15</MicrosoftDotNetCodeAnalysisPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19375.15</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenFacadesPackageVersion>1.0.0-beta.19375.15</MicrosoftDotNetGenFacadesPackageVersion>
+    <MicrosoftDotNetXUnitExtensionsPackageVersion>2.4.1-beta.19375.15</MicrosoftDotNetXUnitExtensionsPackageVersion>
+    <MicrosoftDotNetXUnitConsoleRunnerPackageVersion>2.5.1-beta.19375.15</MicrosoftDotNetXUnitConsoleRunnerPackageVersion>
+    <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.19375.15</MicrosoftDotNetBuildTasksPackagingPackageVersion>
+    <MicrosoftDotNetRemoteExecutorPackageVersion>1.0.0-beta.19375.15</MicrosoftDotNetRemoteExecutorPackageVersion>
+    <MicrosoftDotNetBuildTasksFeedPackageVersion>2.2.0-beta.19375.15</MicrosoftDotNetBuildTasksFeedPackageVersion>
+    <MicrosoftDotNetVersionToolsTasksPackageVersion>1.0.0-beta.19375.15</MicrosoftDotNetVersionToolsTasksPackageVersion>
     <!-- Core-setup dependencies -->
     <MicrosoftNETCoreAppPackageVersion>5.0.0-alpha1.19374.9</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreDotNetHostPackageVersion>5.0.0-alpha1.19374.9</MicrosoftNETCoreDotNetHostPackageVersion>
