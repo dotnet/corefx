@@ -1022,15 +1022,16 @@ namespace System.Text.Json.Tests
 
         private void ValidateAction(Utf8JsonWriter writer, Action action, bool skipValidation)
         {
+            int originalBytesPending = writer.BytesPending;
             if (skipValidation)
             {
-                int originalBytesPending = writer.BytesPending;
                 action.Invoke();
                 Assert.NotEqual(originalBytesPending, writer.BytesPending);
             }
             else
             {
                 Assert.Throws<InvalidOperationException>(action);
+                Assert.Equal(originalBytesPending, writer.BytesPending);
             }
         }
 
@@ -5420,9 +5421,9 @@ namespace System.Text.Json.Tests
 
                 ReadOnlySpan<char> nullStringSpan = nullString.AsSpan();
                 charSpanAction(writer, nullStringSpan, value);
-            
+
                 byteSpanAction(writer, ReadOnlySpan<byte>.Empty, value);
-                
+
                 writer.WriteEndObject();
                 writer.Flush();
             }
@@ -5510,7 +5511,7 @@ namespace System.Text.Json.Tests
         {
             var output = new ArrayBufferWriter<byte>(1024);
             string nullString = null;
-            
+
             using (var writer = new Utf8JsonWriter(output))
             {
                 writer.WriteStartArray();
