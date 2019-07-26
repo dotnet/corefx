@@ -52,7 +52,7 @@ namespace System.Net.Security
             CipherSuitesPolicy = sslServerAuthenticationOptions.CipherSuitesPolicy;
         }
 
-        static private SslProtocols FilterOutIncompatibleSslProtocols(SslProtocols protocols)
+        private static SslProtocols FilterOutIncompatibleSslProtocols(SslProtocols protocols)
         {
             if (protocols.HasFlag(SslProtocols.Tls12) || protocols.HasFlag(SslProtocols.Tls13))
             {
