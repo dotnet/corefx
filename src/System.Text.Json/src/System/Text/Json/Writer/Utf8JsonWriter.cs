@@ -48,7 +48,6 @@ namespace System.Text.Json
         private Memory<byte> _memory;
 
         private bool _inObject;
-        private bool _isNotPrimitive;
         private JsonTokenType _tokenType;
         private BitStack _bitStack;
 
@@ -116,7 +115,6 @@ namespace System.Text.Json
             _memory = default;
 
             _inObject = default;
-            _isNotPrimitive = default;
             _tokenType = default;
             _currentDepth = default;
             _options = options;
@@ -152,7 +150,6 @@ namespace System.Text.Json
             _memory = default;
 
             _inObject = default;
-            _isNotPrimitive = default;
             _tokenType = default;
             _currentDepth = default;
             _options = options;
@@ -249,7 +246,6 @@ namespace System.Text.Json
             _memory = default;
 
             _inObject = default;
-            _isNotPrimitive = default;
             _tokenType = default;
             _currentDepth = default;
 
@@ -470,7 +466,6 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
         }
 
         private void WriteStartMinimized(byte token)
@@ -524,7 +519,7 @@ namespace System.Text.Json
             {
                 Debug.Assert(_tokenType != JsonTokenType.PropertyName);
                 Debug.Assert(_tokenType != JsonTokenType.StartObject);
-                if (_tokenType != JsonTokenType.None && (!_isNotPrimitive || CurrentDepth == 0))
+                if (_tokenType != JsonTokenType.None && CurrentDepth == 0)
                 {
                     ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotStartObjectArrayAfterPrimitiveOrClose, currentDepth: default, token: default, _tokenType);
                 }
@@ -602,7 +597,6 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
         }
 
         /// <summary>
@@ -627,7 +621,6 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
             _tokenType = JsonTokenType.StartArray;
         }
 
@@ -653,7 +646,6 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
             _tokenType = JsonTokenType.StartObject;
         }
 
@@ -772,7 +764,6 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
             _tokenType = JsonTokenType.StartArray;
         }
 
@@ -798,7 +789,6 @@ namespace System.Text.Json
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
-            _isNotPrimitive = true;
             _tokenType = JsonTokenType.StartObject;
         }
 
