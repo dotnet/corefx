@@ -81,7 +81,7 @@ namespace System.Reflection.Tests
             TypeInfo ti = t.GetTypeInfo();
 
             Guid myguid = ti.GUID;
-            Assert.NotEqual(myguid, Guid.Empty);
+            Assert.NotEqual(Guid.Empty, myguid);
         }
 
         // Verify HasElementType
