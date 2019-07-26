@@ -26,9 +26,9 @@ namespace System.Text.Json
                 else
                 {
                     Debug.Assert(_tokenType != JsonTokenType.PropertyName);
-                    if (!_isNotPrimitive && _tokenType != JsonTokenType.None)
+                    if (_tokenType != JsonTokenType.None && (!_isNotPrimitive || CurrentDepth == 0))
                     {
-                        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueAfterPrimitive, currentDepth: default, token: default, _tokenType);
+                        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueAfterPrimitiveOrClose, currentDepth: default, token: default, _tokenType);
                     }
                 }
             }
