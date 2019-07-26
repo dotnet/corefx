@@ -58,45 +58,29 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<SuccessException>(() => JsonSerializer.Serialize<Person>(new DerivedCustomer(), options));
         }
 
-        private class CanConvertNullConverterAttribute : JsonConverterAttribute
+        private class InvalidConverterAttribute : JsonConverterAttribute
         {
-            public CanConvertNullConverterAttribute() : base(typeof(int)) { }
-
-            public override JsonConverter CreateConverter(Type typeToConvert)
-            {
-                return null;
-            }
+            // converterType is not valid since typeof(int) is not a type that derives from JsonConverter.
+            public InvalidConverterAttribute() : base(converterType: typeof(int)) { }
         }
 
-        private class PocoWithNullConverter
+        private class PocoWithInvalidConverter
         {
-            [CanConvertNullConverter]
+            [InvalidConverter]
             public int MyInt { get; set; }
         }
 
         [Fact]
         public static void AttributeCreateConverterFail()
         {
-            try
-            {
-                JsonSerializer.Serialize(new PocoWithNullConverter());
-                Assert.True(false, "Expected InvalidOperationException was not thrown.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                // Message should be in the form: "The converter specified on 'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithNullConverter.MyInt' does not derive from JsonConverter or have a public parameterless constructor."
-                Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithNullConverter.MyInt'", ex.Message);
-            }
+            InvalidOperationException ex;
 
-            try
-            {
-                JsonSerializer.Deserialize<PocoWithNullConverter>("{}");
-                Assert.True(false, "Expected InvalidOperationException was not thrown.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithNullConverter.MyInt'", ex.Message);
-            }
+            ex = Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new PocoWithInvalidConverter()));
+            // Message should be in the form "The converter specified on 'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithInvalidConverter.MyInt' does not derive from JsonConverter or have a public parameterless constructor."
+            Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithInvalidConverter.MyInt'", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<PocoWithInvalidConverter>("{}"));
+            Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithInvalidConverter.MyInt'", ex.Message);
         }
 
         private class InvalidTypeConverterClass
@@ -114,28 +98,15 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void AttributeOnPropertyFail()
         {
-            try
-            {
-                JsonSerializer.Serialize(new InvalidTypeConverterClass());
-                Assert.True(false, "Expected InvalidOperationException was not thrown.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                // Message should be in the form "The converter specified on 'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClass.MyEnumValues' is not compatible with the type 'System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterEnum]'."
-                Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClass.MyEnumValues'", ex.Message);
-                Assert.Contains("'System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterEnum]'", ex.Message);
-            }
+            InvalidOperationException ex;
 
-            try
-            {
-                JsonSerializer.Deserialize<InvalidTypeConverterClass>("{}");
-                Assert.True(false, "Expected InvalidOperationException was not thrown.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClass.MyEnumValues'", ex.Message);
-                Assert.Contains("'System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterEnum]'", ex.Message);
-            }
+            ex = Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new InvalidTypeConverterClass()));
+            // Message should be in the form "The converter specified on 'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClass.MyEnumValues' is not compatible with the type 'System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterEnum]'."
+            Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClass.MyEnumValues'", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<InvalidTypeConverterClass>("{}"));
+            Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClass.MyEnumValues'", ex.Message);
+            Assert.Contains("'System.Collections.Generic.ICollection`1[System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterEnum]'", ex.Message);
         }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -144,35 +115,21 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void AttributeOnClassFail()
         {
-            try
-            {
-                JsonSerializer.Serialize(new InvalidTypeConverterClassWithAttribute());
-                Assert.True(false, "Expected InvalidOperationException was not thrown.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                // Message should be in the form "The converter specified on 'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClassWithAttribute' is not compatible with the type 'System.Text.Json.Serialization.Tests.ExceptionTests+InvalidTypeConverterClassWithAttribute'."
+            const string expectedSubStr = "'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClassWithAttribute'";
 
-                const string expectedSubStr = "'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClassWithAttribute'";
-                int pos = ex.Message.IndexOf(expectedSubStr);
-                Assert.True(pos > 0);
+            InvalidOperationException ex;
 
-                // The same string is repeated again.
-                Assert.Contains(expectedSubStr, ex.Message.Substring(pos + expectedSubStr.Length));
-            }
+            ex = Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new InvalidTypeConverterClassWithAttribute()));
+            // Message should be in the form "The converter specified on 'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClassWithAttribute' is not compatible with the type 'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClassWithAttribute'."
 
-            try
-            {
-                JsonSerializer.Deserialize<InvalidTypeConverterClassWithAttribute>("{}");
-                Assert.True(false, "Expected InvalidOperationException was not thrown.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                const string expectedSubStr = "'System.Text.Json.Serialization.Tests.CustomConverterTests+InvalidTypeConverterClassWithAttribute'";
-                int pos = ex.Message.IndexOf(expectedSubStr);
-                Assert.True(pos > 0);
-                Assert.Contains(expectedSubStr, ex.Message.Substring(pos + expectedSubStr.Length));
-            }
+            int pos = ex.Message.IndexOf(expectedSubStr);
+            Assert.True(pos > 0);
+            Assert.Contains(expectedSubStr, ex.Message.Substring(pos + expectedSubStr.Length)); // The same string is repeated again.
+
+            ex = Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<InvalidTypeConverterClassWithAttribute>("{}"));
+            pos = ex.Message.IndexOf(expectedSubStr);
+            Assert.True(pos > 0);
+            Assert.Contains(expectedSubStr, ex.Message.Substring(pos + expectedSubStr.Length));
         }
 
         private class ConverterThatReturnsNull : JsonConverterFactory
@@ -334,7 +291,7 @@ namespace System.Text.Json.Serialization.Tests
 
         private class PocoWithTwoConvertersOnProperty
         {
-            [CanConvertNullConverter]
+            [InvalidConverter]
             [PointConverter]
             public int MyInt { get; set; }
         }
@@ -342,11 +299,19 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void PropertyHasMoreThanOneConverter()
         {
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new PocoWithTwoConvertersOnProperty()));
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<PocoWithTwoConvertersOnProperty>("{}"));
+            InvalidOperationException ex;
+
+            ex = Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new PocoWithTwoConvertersOnProperty()));
+            // Message should be in the form "The attribute 'System.Text.Json.Serialization.JsonConverterAttribute' cannot exist more than once on 'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithTwoConvertersOnProperty.MyInt'."
+            Assert.Contains("'System.Text.Json.Serialization.JsonConverterAttribute'", ex.Message);
+            Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithTwoConvertersOnProperty.MyInt'", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<PocoWithTwoConvertersOnProperty>("{}"));
+            Assert.Contains("'System.Text.Json.Serialization.JsonConverterAttribute'", ex.Message);
+            Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithTwoConvertersOnProperty.MyInt'", ex.Message);
         }
 
-        [CanConvertNullConverter]
+        [InvalidConverter]
         [PointConverter]
         private class PocoWithTwoConverters
         {
@@ -356,8 +321,16 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void TypeHasMoreThanOneConverter()
         {
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new PocoWithTwoConverters()));
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<PocoWithTwoConverters>("{}"));
+            InvalidOperationException ex;
+
+            ex = Assert.Throws<InvalidOperationException>(() => JsonSerializer.Serialize(new PocoWithTwoConverters()));
+            // Message should be in the form "The attribute 'System.Text.Json.Serialization.JsonConverterAttribute' cannot exist more than once on 'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithTwoConverters'."
+            Assert.Contains("'System.Text.Json.Serialization.JsonConverterAttribute'", ex.Message);
+            Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithTwoConverters'", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<PocoWithTwoConverters>("{}"));
+            Assert.Contains("'System.Text.Json.Serialization.JsonConverterAttribute'", ex.Message);
+            Assert.Contains("'System.Text.Json.Serialization.Tests.CustomConverterTests+PocoWithTwoConverters'", ex.Message);
         }
     }
 }
