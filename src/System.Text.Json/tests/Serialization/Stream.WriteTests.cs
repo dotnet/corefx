@@ -395,7 +395,7 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(65536)]
         public static async void FlushThresholdTest(int bufferSize)
         {
-            int thresholdSize = (int )(bufferSize * 0.9 - 2);
+            int thresholdSize = (int)(bufferSize * 0.9 - 2);
             FlushThresholdTestClass serialaizeObject = new FlushThresholdTestClass(PopulateObjectWhichProduceJsonWithGivenSize(bufferSize));
             List<object> list = new List<object>();
             StringBuilder builder = new StringBuilder();
@@ -416,6 +416,12 @@ namespace System.Text.Json.Serialization.Tests
                 await JsonSerializer.SerializeAsync(memoryStream, list, options);
                 string jsonSerialized = Encoding.UTF8.GetString(memoryStream.ToArray());
                 Assert.Equal(json, jsonSerialized);
+
+                List<object> deserializedList = JsonSerializer.Deserialize<List<object>>(json, options);
+                Assert.Equal(builder.ToString(), ((JsonElement)deserializedList[0]).GetString());
+                JsonElement.ObjectEnumerator obj = ((JsonElement)deserializedList[1]).EnumerateObject();
+                obj.MoveNext();               
+                Assert.Equal(builder.ToString(), obj.Current.Value.GetString());
             }
         }
 
@@ -467,10 +473,10 @@ namespace System.Text.Json.Serialization.Tests
                         Content = new Content()
                         {
                             Subtitle = $"The difference between solving any problem and the right one {i}",
-                            BodyModel = new ContentBodyModel()
+                            BodyModel = new BodyModel()
                             {
-                                Paragraphs = new List<PurpleParagraph>(),  
-                                Sections = new List<PurpleSection>()
+                                Paragraphs = new List<Paragraph>(),  
+                                Sections = new List<Section>()
                             },
                             PostDisplay = new PostDisplay { Coverless = i % 3 == 0 }
                         },
@@ -510,7 +516,7 @@ namespace System.Text.Json.Serialization.Tests
                                     Slug = "javascript",
                                     Name = "JavaScript",
                                     PostCount = 98130,
-                                    Metadata = new Metadata
+                                    Metadata = new Metadata1
                                     {
                                         PostCount = 98130,
                                         CoverImage = new CoverImage
@@ -530,7 +536,7 @@ namespace System.Text.Json.Serialization.Tests
                                     Slug =  "software-development",
                                     Name = "Software Development",
                                     PostCount = 62810,
-                                    Metadata = new Metadata
+                                    Metadata = new Metadata1
                                     {
                                         PostCount = 62810,
                                         CoverImage = new CoverImage
@@ -617,17 +623,17 @@ namespace System.Text.Json.Serialization.Tests
                         Visibility = 1,
                         UniqueSlug = $"a smart programmer understands the problems worth fixing dcf15871f943{i}",
                         PreviewContent = new PreviewContent {
-                            BodyModel = new PreviewContentBodyModel
+                            BodyModel = new BodyModel
                             {
-                                Paragraphs = new List<FluffyParagraph>
+                                Paragraphs = new List<Paragraph>
                                 {
-                                    new FluffyParagraph
+                                    new Paragraph
                                     {
                                         Name = "previewImage",
                                         Type = 4,
                                         Text = string.Empty,
                                         Layout = 10,
-                                        Metadata = new Image
+                                        Metadata = new Metadata
                                         {
                                             Id = "1*SNhelFbiMUTGX73GF_c_ew.jpeg",
                                             OriginalWidth = 1200,
@@ -635,7 +641,7 @@ namespace System.Text.Json.Serialization.Tests
                                             IsFeatured = true
                                         }
                                     },
-                                    new FluffyParagraph
+                                    new Paragraph
                                     {
                                         Name = "97c6",
                                         Type = 3,
@@ -643,7 +649,7 @@ namespace System.Text.Json.Serialization.Tests
                                         Markups = new List<Markup>(),
                                         Alignment = 1
                                     },
-                                    new FluffyParagraph
+                                    new Paragraph
                                     {
                                         Name = "d1b2",
                                         Type = 13,
@@ -664,9 +670,9 @@ namespace System.Text.Json.Serialization.Tests
                                         Alignment = 1
                                     }
                                 },
-                                Sections = new List<FluffySection>
+                                Sections = new List<Section>
                                 {
-                                    new FluffySection
+                                    new Section
                                     {
                                         StartIndex = 0  
                                     }
@@ -710,7 +716,7 @@ namespace System.Text.Json.Serialization.Tests
                         {
                             TopicId = $"{i}decb52b64abf",
                             Slug = "programming",
-                            CreatedAt = 1493934116328, // TODO should be DateTime
+                            CreatedAt = 1493934116328,
                             DeletedAt = 0,
                             Image = new Image
                             {
@@ -756,7 +762,7 @@ namespace System.Text.Json.Serialization.Tests
                     {
                         new Collaborator
                         {
-                            User  = new MentionedUser
+                            User  = new User
                             {
                                 UserId = "c4ccb3ab8d17",
                                 Name = "Green Field",
@@ -791,63 +797,54 @@ namespace System.Text.Json.Serialization.Tests
                     {
                         User = new User
                         {
-                            The7Ef192B7F545 = new MentionedUser
+                            UserId = $"7ef192b7f545",
+                            Username = "johndoe",
+                            Name = "John Doe",
+                            CreatedAt = 1456628553936,
+                            ImageId = $"{i}*h8Ph7pgNeQHZTiLlah3h-A.jpeg",
+                            BackgroundImageId = string.Empty,
+                            Bio = "I believe ideas should be open and free. This is a non-profit initiative to write about fundamentals you won't find anywhere else.",
+                            TwitterScreenName = "JohnDoe",
+                            SocialStats = new SocialStats
                             {
-                                UserId = $"7ef192b7f545",
-                                Username = "johndoe",
-                                Name = "John Doe",
-                                CreatedAt = 1456628553936, // TODO should be datetime
-                                ImageId = $"{i}*h8Ph7pgNeQHZTiLlah3h-A.jpeg",
-                                BackgroundImageId = string.Empty,
-                                Bio = "I believe ideas should be open and free. This is a non-profit initiative to write about fundamentals you won't find anywhere else.",
-                                TwitterScreenName = "JohnDoe",
-                                SocialStats = new SocialStats
-                                {
-                                    UserId = "7ef192b7f545",
-                                    UsersFollowedByCount = 4000 + i,
-                                    UsersFollowedCount = i,
-                                    Type = "SocialStats"
-                                },
-                                Social = new Social
-                                {
-                                    UserId = "78aeffcb483e",
-                                    TargetUserId = "7ef192b7f545",
-                                    Type = "Social"
-                                },
-                                FacebookAccountId = string.Empty,
-                                AllowNotes = 1,
-                                MediumMemberAt = 0,
-                                IsNsfw = false,
-                                IsWriterProgramEnrolled = true,
-                                IsQuarantined = false,
-                                Type = "User"
-                            }
-                        },
-                        Social = new SocialClass
-                        {
-                            The7Ef192B7F545 = new Social
+                                UserId = "7ef192b7f545",
+                                UsersFollowedByCount = 4000 + i,
+                                UsersFollowedCount = i,
+                                Type = "SocialStats"
+                            },
+                            Social = new Social
                             {
                                 UserId = "78aeffcb483e",
                                 TargetUserId = "7ef192b7f545",
                                 Type = "Social"
-                            }
+                            },
+                            FacebookAccountId = string.Empty,
+                            AllowNotes = 1,
+                            MediumMemberAt = 0,
+                            IsNsfw = false,
+                            IsWriterProgramEnrolled = true,
+                            IsQuarantined = false,
+                            Type = "User"
                         },
-                        SocialStats = new SocialStatsClass
+                        Social = new Social
                         {
-                            The7Ef192B7F545 = new SocialStats
-                            {
-                                UserId = "7ef192b7f545",
-                                UsersFollowedByCount = 4000+i,
-                                UsersFollowedCount = i,
-                                Type = "SocialStats"
-                            }
+                            UserId = "78aeffcb483e",
+                            TargetUserId = "7ef192b7f545",
+                            Type = "Social"
+                        },
+                        SocialStats = new SocialStats
+                        {
+                            UserId = "7ef192b7f545",
+                            UsersFollowedByCount = 4000 + i,
+                            UsersFollowedCount = i,
+                            Type = "SocialStats"
                         }
                     } 
                 };
             
                 for (int j = 0; j < i % 4; j++)
                 {
-                    PurpleParagraph purpleParagraph = new PurpleParagraph
+                    Paragraph purpleParagraph = new Paragraph
                     {
                         Name = $"a{i}b{j}",
                         Type = i,
@@ -872,7 +869,7 @@ namespace System.Text.Json.Serialization.Tests
                     }
                     if (j % 3 == 0)
                     {
-                        purpleParagraph.Metadata = new Image
+                        purpleParagraph.Metadata = new Metadata
                         {
                             IsFeatured = i % 6 == 0,
                             Id = $"{i}*{j}5XZrAmo8ToLaZsP5vxSY9A.png",
@@ -885,7 +882,7 @@ namespace System.Text.Json.Serialization.Tests
 
                 for (int j = 0; j < i % 3; j++)
                 {
-                    PurpleSection section = new PurpleSection
+                    Section section = new Section
                     {
                         Name = $"ca{i}{j}",
                         StartIndex = i + j

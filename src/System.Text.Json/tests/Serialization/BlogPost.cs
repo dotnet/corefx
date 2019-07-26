@@ -1,822 +1,364 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Text;
 
 namespace System.Text.Json.Serialization.Tests.Schemas.BlogPost
-{ 
+{
     public class Post
     {
-        [JsonPropertyName("value")]
         public Value Value { get; set; }
-
-        [JsonPropertyName("mentionedUsers")]
         public List<MentionedUser> MentionedUsers { get; set; }
-
-        [JsonPropertyName("collaborators")]
         public List<Collaborator> Collaborators { get; set; }
-
-        [JsonPropertyName("hideMeter")]
         public bool HideMeter { get; set; }
-
-        [JsonPropertyName("collectionUserRelations")]
         public List<CollectionUserRelation> CollectionUserRelations { get; set; }
-
-        [JsonPropertyName("mode")]
         public object Mode { get; set; }
-
-        [JsonPropertyName("references")]
         public References References { get; set; }
-    }
-
-    public class Collaborator
-    {
-        [JsonPropertyName("user")]
-        public MentionedUser User { get; set; }
-
-        [JsonPropertyName("state")]
-        public string State { get; set; }
-    }
-
-    public class MentionedUser
-    {
-        [JsonPropertyName("userId")]
-        public string UserId { get; set; }
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        [JsonPropertyName("username")]
-        public string Username { get; set; }
-
-        [JsonPropertyName("createdAt")]
-        public long CreatedAt { get; set; }
-
-        [JsonPropertyName("imageId")]
-        public string ImageId { get; set; }
-
-        [JsonPropertyName("backgroundImageId")]
-        public string BackgroundImageId { get; set; }
-
-        [JsonPropertyName("bio")]
-        public string Bio { get; set; }
-
-        [JsonPropertyName("twitterScreenName")]
-        public string TwitterScreenName { get; set; }
-
-        [JsonPropertyName("facebookAccountId")]
-        public string FacebookAccountId { get; set; }
-
-        [JsonPropertyName("allowNotes")]
-        public long AllowNotes { get; set; }
-
-        [JsonPropertyName("mediumMemberAt")]
-        public long MediumMemberAt { get; set; }
-
-        [JsonPropertyName("isNsfw")]
-        public bool IsNsfw { get; set; }
-
-        [JsonPropertyName("isWriterProgramEnrolled")]
-        public bool IsWriterProgramEnrolled { get; set; }
-
-        [JsonPropertyName("isQuarantined")]
-        public bool IsQuarantined { get; set; }
-
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-
-        [JsonPropertyName("socialStats")]
-        public SocialStats SocialStats { get; set; }
-
-        [JsonPropertyName("social")]
-        public Social Social { get; set; }
-    }
-
-    public class Social
-    {
-        [JsonPropertyName("userId")]
-        public string UserId { get; set; }
-
-        [JsonPropertyName("targetUserId")]
-        public string TargetUserId { get; set; }
-
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-    }
-
-    public class SocialStats
-    {
-        [JsonPropertyName("userId")]
-        public string UserId { get; set; }
-
-        [JsonPropertyName("usersFollowedCount")]
-        public long UsersFollowedCount { get; set; }
-
-        [JsonPropertyName("usersFollowedByCount")]
-        public long UsersFollowedByCount { get; set; }
-
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-    }
-
-    public class CollectionUserRelation
-    {
-        [JsonPropertyName("collectionId")]
-        public string CollectionId { get; set; }
-
-        [JsonPropertyName("userId")]
-        public string UserId { get; set; }
-
-        [JsonPropertyName("role")]
-        public string Role { get; set; }
-    }
-
-    public class References
-    {
-        [JsonPropertyName("User")]
-        public User User { get; set; }
-
-        [JsonPropertyName("Social")]
-        public SocialClass Social { get; set; }
-
-        [JsonPropertyName("SocialStats")]
-        public SocialStatsClass SocialStats { get; set; }
-    }
-
-    public class SocialClass
-    {
-        [JsonPropertyName("7ef192b7f545")]
-        public Social The7Ef192B7F545 { get; set; }
-    }
-
-    public class SocialStatsClass
-    {
-        [JsonPropertyName("7ef192b7f545")]
-        public SocialStats The7Ef192B7F545 { get; set; }
-    }
-
-    public class User
-    {
-        [JsonPropertyName("7ef192b7f545")]
-        public MentionedUser The7Ef192B7F545 { get; set; }
     }
 
     public class Value
     {
-        [JsonPropertyName("id")]
         public Guid Id { get; set; }
-
-        [JsonPropertyName("versionId")]
         public string VersionId { get; set; }
-
-        [JsonPropertyName("creatorId")]
         public string CreatorId { get; set; }
-
-        [JsonPropertyName("homeCollectionId")]
         public string HomeCollectionId { get; set; }
-
-        [JsonPropertyName("title")]
         public string Title { get; set; }
-
-        [JsonPropertyName("detectedLanguage")]
         public string DetectedLanguage { get; set; }
-
-        [JsonPropertyName("latestVersion")]
         public string LatestVersion { get; set; }
-
-        [JsonPropertyName("latestPublishedVersion")]
         public string LatestPublishedVersion { get; set; }
-
-        [JsonPropertyName("hasUnpublishedEdits")]
         public bool HasUnpublishedEdits { get; set; }
-
-        [JsonPropertyName("latestRev")]
-        public long LatestRev { get; set; }
-
-        [JsonPropertyName("createdAt")]
+        public int LatestRev { get; set; }
         public DateTime CreatedAt { get; set; }
-
-        [JsonPropertyName("updatedAt")]
         public DateTime UpdatedAt { get; set; }
-
-        [JsonPropertyName("acceptedAt")]
         public DateTime AcceptedAt { get; set; }
-
-        [JsonPropertyName("firstPublishedAt")]
         public DateTime FirstPublishedAt { get; set; }
-
-        [JsonPropertyName("latestPublishedAt")]
         public DateTime LatestPublishedAt { get; set; }
-
-        [JsonPropertyName("vote")]
         public bool Vote { get; set; }
-
-        [JsonPropertyName("experimentalCss")]
         public string ExperimentalCss { get; set; }
-
-        [JsonPropertyName("displayAuthor")]
         public string DisplayAuthor { get; set; }
-
-        [JsonPropertyName("content")]
         public Content Content { get; set; }
-
-        [JsonPropertyName("virtuals")]
         public Virtuals Virtuals { get; set; }
-
-        [JsonPropertyName("coverless")]
         public bool Coverless { get; set; }
-
-        [JsonPropertyName("slug")]
         public string Slug { get; set; }
-
-        [JsonPropertyName("translationSourcePostId")]
         public string TranslationSourcePostId { get; set; }
-
-        [JsonPropertyName("translationSourceCreatorId")]
         public string TranslationSourceCreatorId { get; set; }
-
-        [JsonPropertyName("isApprovedTranslation")]
         public bool IsApprovedTranslation { get; set; }
-
-        [JsonPropertyName("inResponseToPostId")]
         public string InResponseToPostId { get; set; }
-
-        [JsonPropertyName("inResponseToRemovedAt")]
-        public long InResponseToRemovedAt { get; set; }
-
-        [JsonPropertyName("isTitleSynthesized")]
+        public int InResponseToRemovedAt { get; set; }
         public bool IsTitleSynthesized { get; set; }
-
-        [JsonPropertyName("allowResponses")]
         public bool AllowResponses { get; set; }
-
-        [JsonPropertyName("importedUrl")]
         public string ImportedUrl { get; set; }
-
-        [JsonPropertyName("importedPublishedAt")]
-        public long ImportedPublishedAt { get; set; }
-
-        [JsonPropertyName("visibility")]
-        public long Visibility { get; set; }
-
-        [JsonPropertyName("uniqueSlug")]
+        public int ImportedPublishedAt { get; set; }
+        public int Visibility { get; set; }
         public string UniqueSlug { get; set; }
-
-        [JsonPropertyName("previewContent")]
         public PreviewContent PreviewContent { get; set; }
-
-        [JsonPropertyName("license")]
-        public long License { get; set; }
-
-        [JsonPropertyName("inResponseToMediaResourceId")]
+        public int License { get; set; }
         public string InResponseToMediaResourceId { get; set; }
-
-        [JsonPropertyName("canonicalUrl")]
         public Uri CanonicalUrl { get; set; }
-
-        [JsonPropertyName("approvedHomeCollectionId")]
         public string ApprovedHomeCollectionId { get; set; }
-
-        [JsonPropertyName("newsletterId")]
         public string NewsletterId { get; set; }
-
-        [JsonPropertyName("webCanonicalUrl")]
         public Uri WebCanonicalUrl { get; set; }
-
-        [JsonPropertyName("mediumUrl")]
         public Uri MediumUrl { get; set; }
-
-        [JsonPropertyName("migrationId")]
         public string MigrationId { get; set; }
-
-        [JsonPropertyName("notifyFollowers")]
         public bool NotifyFollowers { get; set; }
-
-        [JsonPropertyName("notifyTwitter")]
         public bool NotifyTwitter { get; set; }
-
-        [JsonPropertyName("notifyFacebook")]
         public bool NotifyFacebook { get; set; }
-
-        [JsonPropertyName("responseHiddenOnParentPostAt")]
-        public long ResponseHiddenOnParentPostAt { get; set; }
-
-        [JsonPropertyName("isSeries")]
+        public int ResponseHiddenOnParentPostAt { get; set; }
         public bool IsSeries { get; set; }
-
-        [JsonPropertyName("isSubscriptionLocked")]
         public bool IsSubscriptionLocked { get; set; }
-
-        [JsonPropertyName("seriesLastAppendedAt")]
-        public long SeriesLastAppendedAt { get; set; }
-
-        [JsonPropertyName("audioVersionDurationSec")]
-        public long AudioVersionDurationSec { get; set; }
-
-        [JsonPropertyName("sequenceId")]
+        public int SeriesLastAppendedAt { get; set; }
+        public int AudioVersionDurationSec { get; set; }
         public string SequenceId { get; set; }
-
-        [JsonPropertyName("isNsfw")]
         public bool IsNsfw { get; set; }
-
-        [JsonPropertyName("isEligibleForRevenue")]
         public bool IsEligibleForRevenue { get; set; }
-
-        [JsonPropertyName("isBlockedFromHightower")]
         public bool IsBlockedFromHightower { get; set; }
-
-        [JsonPropertyName("deletedAt")]
         public DateTime DeletedAt { get; set; }
-
-        [JsonPropertyName("lockedPostSource")]
-        public long LockedPostSource { get; set; }
-
-        [JsonPropertyName("hightowerMinimumGuaranteeStartsAt")]
-        public long HightowerMinimumGuaranteeStartsAt { get; set; }
-
-        [JsonPropertyName("hightowerMinimumGuaranteeEndsAt")]
-        public long HightowerMinimumGuaranteeEndsAt { get; set; }
-
-        [JsonPropertyName("featureLockRequestAcceptedAt")]
-        public long FeatureLockRequestAcceptedAt { get; set; }
-
-        [JsonPropertyName("mongerRequestType")]
-        public long MongerRequestType { get; set; }
-
-        [JsonPropertyName("layerCake")]
-        public long LayerCake { get; set; }
-
-        [JsonPropertyName("socialTitle")]
+        public int LockedPostSource { get; set; }
+        public int HightowerMinimumGuaranteeStartsAt { get; set; }
+        public int HightowerMinimumGuaranteeEndsAt { get; set; }
+        public int FeatureLockRequestAcceptedAt { get; set; }
+        public int MongerRequestType { get; set; }
+        public int LayerCake { get; set; }
         public string SocialTitle { get; set; }
-
-        [JsonPropertyName("socialDek")]
         public string SocialDek { get; set; }
-
-        [JsonPropertyName("editorialPreviewTitle")]
         public string EditorialPreviewTitle { get; set; }
-
-        [JsonPropertyName("editorialPreviewDek")]
         public string EditorialPreviewDek { get; set; }
-
-        [JsonPropertyName("curationEligibleAt")]
-        public long CurationEligibleAt { get; set; }
-
-        [JsonPropertyName("primaryTopic")]
+        public int CurationEligibleAt { get; set; }
+        [JsonPropertyName("PrimaryTopic")]
         public Topic PrimaryTopic { get; set; }
-
-        [JsonPropertyName("primaryTopicId")]
         public string PrimaryTopicId { get; set; }
-
-        [JsonPropertyName("isProxyPost")]
         public bool IsProxyPost { get; set; }
-
-        [JsonPropertyName("proxyPostFaviconUrl")]
         public string ProxyPostFaviconUrl { get; set; }
-
-        [JsonPropertyName("proxyPostProviderName")]
         public string ProxyPostProviderName { get; set; }
-
-        [JsonPropertyName("proxyPostType")]
-        public long ProxyPostType { get; set; }
-
-        [JsonPropertyName("type")]
+        public int ProxyPostType { get; set; }
         public string Type { get; set; }
     }
 
     public class Content
     {
-        [JsonPropertyName("subtitle")]
         public string Subtitle { get; set; }
-
-        [JsonPropertyName("bodyModel")]
-        public ContentBodyModel BodyModel { get; set; }
-
-        [JsonPropertyName("postDisplay")]
+        public BodyModel BodyModel { get; set; }
         public PostDisplay PostDisplay { get; set; }
     }
 
-    public class ContentBodyModel
+    public class BodyModel
     {
-        [JsonPropertyName("paragraphs")]
-        public List<PurpleParagraph> Paragraphs { get; set; }
-
-        [JsonPropertyName("sections")]
-        public List<PurpleSection> Sections { get; set; }
+        public List<Paragraph> Paragraphs { get; set; }
+        public List<Section> Sections { get; set; }
     }
 
-    public class PurpleParagraph
+    public class Metadata
     {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        [JsonPropertyName("type")]
-        public long Type { get; set; }
-
-        [JsonPropertyName("text")]
-        public string Text { get; set; }
-
-        [JsonPropertyName("markups")]
-        public List<Markup> Markups { get; set; }
-
-        [JsonPropertyName("layout")]
-        public long? Layout { get; set; }
-
-        [JsonPropertyName("metadata")]
-        public Image Metadata { get; set; }
+        public string Id { get; set; }
+        public int OriginalWidth { get; set; }
+        public int OriginalHeight { get; set; }
+        public bool IsFeatured { get; set; }
     }
 
     public class Markup
     {
-        [JsonPropertyName("type")]
-        public long Type { get; set; }
-
-        [JsonPropertyName("start")]
-        public long Start { get; set; }
-
-        [JsonPropertyName("end")]
-        public long End { get; set; }
-
-        [JsonPropertyName("href")]
+        public int Type { get; set; }
+        public int Start { get; set; }
+        public int End { get; set; }
         public Uri Href { get; set; }
-
-        [JsonPropertyName("title")]
         public string Title { get; set; }
-
-        [JsonPropertyName("rel")]
         public string Rel { get; set; }
-
-        [JsonPropertyName("anchorType")]
-        public long? AnchorType { get; set; }
-
-        [JsonPropertyName("userId")]
+        public int AnchorType { get; set; }
         public string UserId { get; set; }
     }
 
-    public class Image
+    public class Section
     {
-        [JsonPropertyName("id")]
-        public string Id { get; set; }
-
-        [JsonPropertyName("originalWidth")]
-        public long OriginalWidth { get; set; }
-
-        [JsonPropertyName("originalHeight")]
-        public long OriginalHeight { get; set; }
-
-        [JsonPropertyName("isFeatured")]
-        public bool? IsFeatured { get; set; }
-    }
-
-    public class PurpleSection
-    {
-        [JsonPropertyName("name")]
         public string Name { get; set; }
-
-        [JsonPropertyName("startIndex")]
-        public long StartIndex { get; set; }
+        public int StartIndex { get; set; }
     }
 
     public class PostDisplay
     {
-        [JsonPropertyName("coverless")]
         public bool Coverless { get; set; }
-    }
-
-    public class PreviewContent
-    {
-        [JsonPropertyName("bodyModel")]
-        public PreviewContentBodyModel BodyModel { get; set; }
-
-        [JsonPropertyName("isFullContent")]
-        public bool IsFullContent { get; set; }
-
-        [JsonPropertyName("subtitle")]
-        public string Subtitle { get; set; }
-    }
-
-    public class PreviewContentBodyModel
-    {
-        [JsonPropertyName("paragraphs")]
-        public List<FluffyParagraph> Paragraphs { get; set; }
-
-        [JsonPropertyName("sections")]
-        public List<FluffySection> Sections { get; set; }
-    }
-
-    public class FluffyParagraph
-    {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        [JsonPropertyName("type")]
-        public long Type { get; set; }
-
-        [JsonPropertyName("text")]
-        public string Text { get; set; }
-
-        [JsonPropertyName("layout")]
-        public long? Layout { get; set; }
-
-        [JsonPropertyName("metadata")]
-        public Image Metadata { get; set; }
-
-        [JsonPropertyName("markups")]
-        public List<Markup> Markups { get; set; }
-
-        [JsonPropertyName("alignment")]
-        public long? Alignment { get; set; }
-    }
-
-    public class FluffySection
-    {
-        [JsonPropertyName("startIndex")]
-        public long StartIndex { get; set; }
-    }
-
-    public class Topic
-    {
-        [JsonPropertyName("topicId")]
-        public string TopicId { get; set; }
-
-        [JsonPropertyName("slug")]
-        public string Slug { get; set; }
-
-        [JsonPropertyName("createdAt")]
-        public long CreatedAt { get; set; }
-
-        [JsonPropertyName("deletedAt")]
-        public long DeletedAt { get; set; }
-
-        [JsonPropertyName("image")]
-        public Image Image { get; set; }
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        [JsonPropertyName("description")]
-        public string Description { get; set; }
-
-        [JsonPropertyName("relatedTopics")]
-        public List<Post> RelatedTopics { get; set; }
-
-        [JsonPropertyName("visibility")]
-        public long Visibility { get; set; }
-
-        [JsonPropertyName("relatedTags")]
-        public List<object> RelatedTags { get; set; }
-
-        [JsonPropertyName("relatedTopicIds")]
-        public List<object> RelatedTopicIds { get; set; }
-
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
     }
 
     public class Virtuals
     {
-        [JsonPropertyName("allowNotes")]
         public bool AllowNotes { get; set; }
-
-        [JsonPropertyName("previewImage")]
         public PreviewImage PreviewImage { get; set; }
-
-        [JsonPropertyName("wordCount")]
-        public long WordCount { get; set; }
-
-        [JsonPropertyName("imageCount")]
-        public long ImageCount { get; set; }
-
-        [JsonPropertyName("readingTime")]
+        public int WordCount { get; set; }
+        public int ImageCount { get; set; }
         public double ReadingTime { get; set; }
-
-        [JsonPropertyName("subtitle")]
         public string Subtitle { get; set; }
-
-        [JsonPropertyName("userPostRelation")]
         public UserPostRelation UserPostRelation { get; set; }
-
-        [JsonPropertyName("usersBySocialRecommends")]
         public List<object> UsersBySocialRecommends { get; set; }
-
-        [JsonPropertyName("noIndex")]
         public bool NoIndex { get; set; }
-
-        [JsonPropertyName("recommends")]
-        public long Recommends { get; set; }
-
-        [JsonPropertyName("isBookmarked")]
+        public int Recommends { get; set; }
         public bool IsBookmarked { get; set; }
-
-        [JsonPropertyName("tags")]
         public List<Tag> Tags { get; set; }
-
-        [JsonPropertyName("socialRecommendsCount")]
-        public long SocialRecommendsCount { get; set; }
-
-        [JsonPropertyName("responsesCreatedCount")]
-        public long ResponsesCreatedCount { get; set; }
-
-        [JsonPropertyName("links")]
+        public int SocialRecommendsCount { get; set; }
+        public int ResponsesCreatedCount { get; set; }
         public Links Links { get; set; }
-
-        [JsonPropertyName("isLockedPreviewOnly")]
         public bool IsLockedPreviewOnly { get; set; }
-
-        [JsonPropertyName("metaDescription")]
         public string MetaDescription { get; set; }
-
-        [JsonPropertyName("totalClapCount")]
-        public long TotalClapCount { get; set; }
-
-        [JsonPropertyName("sectionCount")]
-        public long SectionCount { get; set; }
-
-        [JsonPropertyName("readingList")]
-        public long ReadingList { get; set; }
-
-        [JsonPropertyName("topics")]
+        public int TotalClapCount { get; set; }
+        public int SectionCount { get; set; }
+        public int ReadingList { get; set; }
         public List<Topic> Topics { get; set; }
+    }
+
+    public class PreviewImage
+    {
+        public string ImageId { get; set; }
+        public string Filter { get; set; }
+        public string BackgroundSize { get; set; }
+        public int OriginalWidth { get; set; }
+        public int OriginalHeight { get; set; }
+        public string Strategy { get; set; }
+        public int Height { get; set; }
+        public int Width { get; set; }
+    }
+
+    public class UserPostRelation
+    {
+        public string UserId { get; set; }
+        public string PostId { get; set; }
+        public int ReadAt { get; set; }
+        public int ReadLaterAddedAt { get; set; }
+        public int VotedAt { get; set; }
+        public int CollaboratorAddedAt { get; set; }
+        public int NotesAddedAt { get; set; }
+        public int SubscribedAt { get; set; }
+        public string LastReadSectionName { get; set; }
+        public string LastReadVersionId { get; set; }
+        public int LastReadAt { get; set; }
+        public string LastReadParagraphName { get; set; }
+        public int LastReadPercentage { get; set; }
+        public DateTime ViewedAt { get; set; }
+        public int PresentedCountInResponseManagement { get; set; }
+        public int ClapCount { get; set; }
+        public int SeriesUpdateNotifsOptedInAt { get; set; }
+        public int QueuedAt { get; set; }
+        public int SeriesFirstViewedAt { get; set; }
+        public int PresentedCountInStream { get; set; }
+        public int SeriesLastViewedAt { get; set; }
+        public int AudioProgressSec { get; set; }
     }
 
     public class Links
     {
-        [JsonPropertyName("entries")]
         public List<Entry> Entries { get; set; }
-
-        [JsonPropertyName("version")]
         public string Version { get; set; }
-
-        [JsonPropertyName("generatedAt")]
         public DateTime GeneratedAt { get; set; }
     }
 
     public class Entry
     {
-        [JsonPropertyName("url")]
         public Uri Url { get; set; }
-
-        [JsonPropertyName("alts")]
         public List<Alt> Alts { get; set; }
-
-        [JsonPropertyName("httpStatus")]
         public HttpStatusCode HttpStatus { get; set; }
     }
 
     public class Alt
     {
-        [JsonPropertyName("type")]
-        public long Type { get; set; }
-
-        [JsonPropertyName("url")]
+        public int Type { get; set; }
         public Uri Url { get; set; }
-    }
-
-    public class PreviewImage
-    {
-        [JsonPropertyName("imageId")]
-        public string ImageId { get; set; }
-
-        [JsonPropertyName("filter")]
-        public string Filter { get; set; }
-
-        [JsonPropertyName("backgroundSize")]
-        public string BackgroundSize { get; set; }
-
-        [JsonPropertyName("originalWidth")]
-        public long OriginalWidth { get; set; }
-
-        [JsonPropertyName("originalHeight")]
-        public long OriginalHeight { get; set; }
-
-        [JsonPropertyName("strategy")]
-        public string Strategy { get; set; }
-
-        [JsonPropertyName("height")]
-        public long Height { get; set; }
-
-        [JsonPropertyName("width")]
-        public long Width { get; set; }
     }
 
     public class Tag
     {
-        [JsonPropertyName("slug")]
         public string Slug { get; set; }
-
-        [JsonPropertyName("name")]
         public string Name { get; set; }
-
-        [JsonPropertyName("postCount")]
-        public long PostCount { get; set; }
-
-        [JsonPropertyName("metadata")]
-        public Metadata Metadata { get; set; }
-
-        [JsonPropertyName("type")]
+        public int PostCount { get; set; }
+        public Metadata1 Metadata { get; set; }
         public string Type { get; set; }
     }
 
-    public class Metadata
+    public class Metadata1
     {
-        [JsonPropertyName("postCount")]
-        public long PostCount { get; set; }
-
-        [JsonPropertyName("coverImage")]
+        public int PostCount { get; set; }
         public CoverImage CoverImage { get; set; }
     }
 
     public class CoverImage
     {
-        [JsonPropertyName("id")]
         public string Id { get; set; }
-
-        [JsonPropertyName("originalWidth")]
-        public long OriginalWidth { get; set; }
-
-        [JsonPropertyName("originalHeight")]
-        public long OriginalHeight { get; set; }
-
-        [JsonPropertyName("isFeatured")]
+        public int OriginalWidth { get; set; }
+        public int OriginalHeight { get; set; }
         public bool IsFeatured { get; set; }
-
-        [JsonPropertyName("unsplashPhotoId")]
         public string UnsplashPhotoId { get; set; }
-
-        [JsonPropertyName("focusPercentX")]
-        public long? FocusPercentX { get; set; }
-
-        [JsonPropertyName("focusPercentY")]
-        public long? FocusPercentY { get; set; }
+        public int FocusPercentX { get; set; }
+        public int FocusPercentY { get; set; }
+    }
+    public class Image
+    {
+        public string Id { get; set; }
+        public int OriginalWidth { get; set; }
+        public int OriginalHeight { get; set; }
     }
 
-    public class UserPostRelation
+    public class PreviewContent
     {
-        [JsonPropertyName("userId")]
+        public BodyModel BodyModel { get; set; }
+        public bool IsFullContent { get; set; }
+        public string Subtitle { get; set; }
+    }
+
+    public class Paragraph
+    {
+        public string Name { get; set; }
+        public int Type { get; set; }
+        public string Text { get; set; }
+        public int Layout { get; set; }
+        public Metadata Metadata { get; set; }
+        public List<Markup> Markups { get; set; }
+        public int Alignment { get; set; }
+    }
+
+    public class Topic
+    {
+        public string TopicId { get; set; }
+        public string Slug { get; set; }
+        public long CreatedAt { get; set; }
+        public int DeletedAt { get; set; }
+        public Image Image { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public List<Post> RelatedTopics { get; set; }
+        public int Visibility { get; set; }
+        public List<object> RelatedTags { get; set; }
+        public List<object> RelatedTopicIds { get; set; }
+        public string Type { get; set; }
+    }
+
+    public class References
+    {
+        public User User { get; set; }
+        public Social Social { get; set; }
+        public SocialStats SocialStats { get; set; }
+    }
+
+    public class User
+    {
         public string UserId { get; set; }
+        public string Name { get; set; }
+        public string Username { get; set; }
+        public long CreatedAt { get; set; }
+        public string ImageId { get; set; }
+        public string BackgroundImageId { get; set; }
+        public string Bio { get; set; }
+        public string TwitterScreenName { get; set; }
+        public SocialStats SocialStats { get; set; }
+        public Social Social { get; set; }
+        public string FacebookAccountId { get; set; }
+        public int AllowNotes { get; set; }
+        public int MediumMemberAt { get; set; }
+        public bool IsNsfw { get; set; }
+        public bool IsWriterProgramEnrolled { get; set; }
+        public bool IsQuarantined { get; set; }
+        public string Type { get; set; }
+    }
 
-        [JsonPropertyName("postId")]
-        public string PostId { get; set; }
+    public class SocialStats
+    {
+        public string UserId { get; set; }
+        public int UsersFollowedCount { get; set; }
+        public int UsersFollowedByCount { get; set; }
+        public string Type { get; set; }
+    }
 
-        [JsonPropertyName("readAt")]
-        public long ReadAt { get; set; }
+    public class Social
+    {
+        public string UserId { get; set; }
+        public string TargetUserId { get; set; }
+        public string Type { get; set; }
+    }
 
-        [JsonPropertyName("readLaterAddedAt")]
-        public long ReadLaterAddedAt { get; set; }
+    public class MentionedUser
+    {
+        public string UserId { get; set; }
+        public string Name { get; set; }
+        public string Username { get; set; }
+        public long CreatedAt { get; set; }
+        public string ImageId { get; set; }
+        public string BackgroundImageId { get; set; }
+        public string Bio { get; set; }
+        public string TwitterScreenName { get; set; }
+        public string FacebookAccountId { get; set; }
+        public int AllowNotes { get; set; }
+        public int MediumMemberAt { get; set; }
+        public bool IsNsfw { get; set; }
+        public bool IsWriterProgramEnrolled { get; set; }
+        public bool IsQuarantined { get; set; }
+        public string Type { get; set; }
+    }
 
-        [JsonPropertyName("votedAt")]
-        public long VotedAt { get; set; }
+    public class Collaborator
+    {
+        public User User { get; set; }
+        public string State { get; set; }
+    }
 
-        [JsonPropertyName("collaboratorAddedAt")]
-        public long CollaboratorAddedAt { get; set; }
-
-        [JsonPropertyName("notesAddedAt")]
-        public long NotesAddedAt { get; set; }
-
-        [JsonPropertyName("subscribedAt")]
-        public long SubscribedAt { get; set; }
-
-        [JsonPropertyName("lastReadSectionName")]
-        public string LastReadSectionName { get; set; }
-
-        [JsonPropertyName("lastReadVersionId")]
-        public string LastReadVersionId { get; set; }
-
-        [JsonPropertyName("lastReadAt")]
-        public long LastReadAt { get; set; }
-
-        [JsonPropertyName("lastReadParagraphName")]
-        public string LastReadParagraphName { get; set; }
-
-        [JsonPropertyName("lastReadPercentage")]
-        public long LastReadPercentage { get; set; }
-
-        [JsonPropertyName("viewedAt")]
-        public DateTime ViewedAt { get; set; }
-
-        [JsonPropertyName("presentedCountInResponseManagement")]
-        public long PresentedCountInResponseManagement { get; set; }
-
-        [JsonPropertyName("clapCount")]
-        public long ClapCount { get; set; }
-
-        [JsonPropertyName("seriesUpdateNotifsOptedInAt")]
-        public long SeriesUpdateNotifsOptedInAt { get; set; }
-
-        [JsonPropertyName("queuedAt")]
-        public long QueuedAt { get; set; }
-
-        [JsonPropertyName("seriesFirstViewedAt")]
-        public long SeriesFirstViewedAt { get; set; }
-
-        [JsonPropertyName("presentedCountInStream")]
-        public long PresentedCountInStream { get; set; }
-
-        [JsonPropertyName("seriesLastViewedAt")]
-        public long SeriesLastViewedAt { get; set; }
-
-        [JsonPropertyName("audioProgressSec")]
-        public long AudioProgressSec { get; set; }
+    public class CollectionUserRelation
+    {
+        public string CollectionId { get; set; }
+        public string UserId { get; set; }
+        public string Role { get; set; }
     }
 }
