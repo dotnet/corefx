@@ -21,29 +21,34 @@ namespace System.IO.Ports
             // QueryDosDevice involves finding any ports that map to \Device\Serialx (call with null to get all, then iterate to get the actual device name) [Typically maps to COMx value]
             // https://docs.microsoft.com/en-gb/previous-versions/ff546502%28v%3dvs.85%29
 
+
+            // Use HashSet HashSet<string> strings = new HashSet<string>();
+            HashSet<string> uniquPortNames = new HashSet<string>();
+
             using (RegistryKey serialKey = Registry.LocalMachine.OpenSubKey(@"HARDWARE\DEVICEMAP\SERIALCOMM"))
             {
                 if (serialKey != null)
                 {
-                    string[] result = serialKey.GetValueNames();
-                    for (int i = 0; i < result.Length; i++)
+                    foreach (string valueName in serialKey.GetValueNames())
                     {
-                        // Replace the name in the array with its value.
-                        result[i] = (string)serialKey.GetValue(result[i]);
+                        // Add the key's value (portname)
+                        uniquPortNames.Add((string)serialKey.GetValue(valueName));
                     }
-                    return result;
                 }
             }
 
-            return Array.Empty<string>();
-        }
-
-        public static string[] GetPortDosDeviceNames()
-        {
             // USB Serial Ports on Win10IoT are not initalised in registry key HKLM\HARDWARE\DEVICEMAP\SERIALCOMM correctly, placing garbage chars in this keys value
             // So to handle this, we are building a list of both, and assuming consumer will handle dual mapping between 
 
-            string[] result = QueryDosDeviceComPorts("86E0D1E0-8089-11D0-9CE4-08003E301F73"); // Is GUID class ID for COM ports https://docs.microsoft.com/en-us/windows-hardware/drivers/install/guid-devinterface-comport
+            // Is GUID class ID for COM ports https://docs.microsoft.com/en-us/windows-hardware/drivers/install/guid-devinterface-comport
+
+            foreach (string dosName in QueryDosDeviceComPorts("86e0d1e0-8089-11d0-9ce4-08003e301f73"))
+            {
+                uniquPortNames.Add(dosName);
+            }
+
+            string[] result = new string[uniquPortNames.Count];
+            uniquPortNames.CopyTo(result);
 
             return result;
         }
@@ -56,49 +61,46 @@ namespace System.IO.Ports
             int maxSize = 1024;
             string allDevices = null;
             const uint ERROR_INSUFFICIENT_BUFFER = 122;
-            IntPtr mem;
+           // IntPtr mem;
+
             string[] allDevicesArray = null;
             List<string> retList = new List<string>();
 
             while (returnSize == 0)
             {
-                mem = Marshal.AllocHGlobal(maxSize);
-                if (mem != IntPtr.Zero)
+                unsafe
                 {
-                    // mem points to memory that needs freeing
-                    try
-                    {
-                        returnSize = Interop.Kernel32.QueryDosDevice(null, mem, maxSize);
-                        if (returnSize != 0)
+                    //fixed (mem = new byte[3]); // Marshal.AllocHGlobal(maxSize);
+                    fixed (void* m = new byte[maxSize])
+                        try
                         {
-                            allDevices = Marshal.PtrToStringAnsi(mem, (int)returnSize);
-                            allDevicesArray = allDevices.Split('\0');
-                            break;
+                            returnSize = Interop.Kernel32.QueryDosDevice(null, (System.IntPtr)m, maxSize);
+                            if (returnSize != 0)
+                            {
+                                allDevices = Marshal.PtrToStringAnsi((System.IntPtr)m, (int)returnSize);
+                                allDevicesArray = allDevices.Split('\0');
+                                break;
+                            }
+                            else if (Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER)
+                            {
+                                maxSize += 1024;
+                            }
+                            else
+                            {
+                                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                            }
                         }
-                        else if (Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER)
+                        finally
                         {
-                            maxSize += 1024;
+                            //Marshal.FreeHGlobal(mem);
                         }
-                        else
-                        {
-                            Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-                        }
-                    }
-                    finally
-                    {
-                        Marshal.FreeHGlobal(mem);
-                    }
-                }
-                else
-                {
-                    throw new OutOfMemoryException();
                 }
             }
 
             // Build devices matching guid for serial ports
             foreach (string name in allDevicesArray)
             {
-                if (name.ToLower().Contains(guid.ToLower()))
+                if (name.ToLower().Contains(guid))
                 {
                     retList.Add(name);
                 }

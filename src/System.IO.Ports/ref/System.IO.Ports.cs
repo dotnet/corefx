@@ -104,7 +104,6 @@ namespace System.IO.Ports
         public void DiscardOutBuffer() { }
         protected override void Dispose(bool disposing) { }
         public static string[] GetPortNames() { throw null; }
-        public static string[] GetPortDosDeviceNames() { throw null; }
         public void Open() { }
         public int Read(byte[] buffer, int offset, int count) { throw null; }
         public int Read(char[] buffer, int offset, int count) { throw null; }
