@@ -855,153 +855,169 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData(true, true)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
-        [InlineData(false, false)]
-        public void InvalidJsonDueToWritingTooMuch(bool formatted, bool skipValidation)
+        [InlineData(JsonValueKind.Array, true, true)]
+        [InlineData(JsonValueKind.Array, true, false)]
+        [InlineData(JsonValueKind.Array, false, true)]
+        [InlineData(JsonValueKind.Array, false, false)]
+        [InlineData(JsonValueKind.Object, true, true)]
+        [InlineData(JsonValueKind.Object, true, false)]
+        [InlineData(JsonValueKind.Object, false, true)]
+        [InlineData(JsonValueKind.Object, false, false)]
+        [InlineData(JsonValueKind.String, true, true)]
+        [InlineData(JsonValueKind.String, true, false)]
+        [InlineData(JsonValueKind.String, false, true)]
+        [InlineData(JsonValueKind.String, false, false)]
+        [InlineData(JsonValueKind.Number, true, true)]
+        [InlineData(JsonValueKind.Number, true, false)]
+        [InlineData(JsonValueKind.Number, false, true)]
+        [InlineData(JsonValueKind.Number, false, false)]
+        [InlineData(JsonValueKind.True, true, true)]
+        [InlineData(JsonValueKind.True, true, false)]
+        [InlineData(JsonValueKind.True, false, true)]
+        [InlineData(JsonValueKind.True, false, false)]
+        [InlineData(JsonValueKind.False, true, true)]
+        [InlineData(JsonValueKind.False, true, false)]
+        [InlineData(JsonValueKind.False, false, true)]
+        [InlineData(JsonValueKind.False, false, false)]
+        [InlineData(JsonValueKind.Null, true, true)]
+        [InlineData(JsonValueKind.Null, true, false)]
+        [InlineData(JsonValueKind.Null, false, true)]
+        [InlineData(JsonValueKind.Null, false, false)]
+        public void InvalidJsonDueToWritingTooMuch(JsonValueKind kind, bool formatted, bool skipValidation)
         {
             var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
             var output = new ArrayBufferWriter<byte>(1024);
 
-            foreach (JsonValueKind kind in Enum.GetValues(typeof(JsonValueKind)))
+            var jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
             {
-                if (kind == JsonValueKind.Undefined)
-                {
-                    continue;
-                }
+                jsonUtf8.WriteStartObject();
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStartObject());
+            }
 
-                var jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WriteStartObject();
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStartObject());
-                }
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
+            {
+                jsonUtf8.WriteStartObject("foo");
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStartObject("foo"));
+            }
 
-                jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WriteStartObject("foo");
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStartObject("foo"));
-                }
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
+            {
+                jsonUtf8.WriteStartArray();
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStartArray());
+            }
 
-                jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WriteStartArray();
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStartArray());
-                }
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
+            {
+                jsonUtf8.WriteStartArray("foo");
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStartArray("foo"));
+            }
 
-                jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WriteStartArray("foo");
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStartArray("foo"));
-                }
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
+            {
+                jsonUtf8.WriteEndObject();
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteEndObject());
+            }
 
-                jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WriteEndObject();
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteEndObject());
-                }
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
+            {
+                jsonUtf8.WriteEndArray();
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteEndArray());
+            }
 
-                jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WriteEndArray();
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteEndArray());
-                }
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
+            {
+                jsonUtf8.WritePropertyName("foo");
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WritePropertyName("foo"));
+            }
 
-                jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WritePropertyName("foo");
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WritePropertyName("foo"));
-                }
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
+            {
+                jsonUtf8.WriteStringValue("foo");
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStringValue("foo"));
+            }
 
-                jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WriteStringValue("foo");
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStringValue("foo"));
-                }
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
+            {
+                jsonUtf8.WriteNumberValue(1);
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteNumberValue(1));
+            }
 
-                jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WriteNumberValue(1);
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStringValue("foo"));
-                }
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
+            {
+                jsonUtf8.WriteBooleanValue(true);
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteBooleanValue(true));
+            }
 
-                jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WriteBooleanValue(true);
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStringValue("foo"));
-                }
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
+            {
+                jsonUtf8.WriteBooleanValue(false);
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteBooleanValue(false));
+            }
 
-                jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WriteBooleanValue(false);
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStringValue("foo"));
-                }
-
-                jsonUtf8 = new Utf8JsonWriter(output, options);
-                WritePreamble(jsonUtf8, kind);
-                if (skipValidation)
-                {
-                    jsonUtf8.WriteNullValue();
-                }
-                else
-                {
-                    Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStringValue("foo"));
-                }
+            jsonUtf8 = new Utf8JsonWriter(output, options);
+            WritePreamble(jsonUtf8, kind);
+            if (skipValidation)
+            {
+                jsonUtf8.WriteNullValue();
+            }
+            else
+            {
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteNullValue());
             }
         }
 
@@ -1033,6 +1049,9 @@ namespace System.Text.Json.Tests
                     break;
                 case JsonValueKind.Null:
                     writer.WriteNullValue();
+                    break;
+                default:
+                    Debug.Fail($"Invalid JsonValueKind passed in '{kind}'.");
                     break;
             }
         }
