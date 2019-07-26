@@ -107,7 +107,7 @@ namespace System.Net.Primitives.Functional.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public static void ToString_AllFamilies_Success()
         {
-            foreach (AddressFamily family in  Enum.GetValues(typeof(AddressFamily)))
+            foreach (AddressFamily family in Enum.GetValues(typeof(AddressFamily)))
             {
                 if ((int)family > (int)AddressFamily.Max)
                 {
