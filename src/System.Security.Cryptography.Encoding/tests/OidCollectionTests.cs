@@ -164,13 +164,13 @@ namespace System.Security.Cryptography.Encoding.Tests
             for (int i = 0; i < 2; i++)
             {
                 Assert.True(e.MoveNext());
-                Assert.Same(item1, getCurrent(e));
+                Assert.Equal(item1, getCurrent(e));
 
                 Assert.True(e.MoveNext());
-                Assert.Same(item2, getCurrent(e));
+                Assert.Equal(item2, getCurrent(e));
 
                 Assert.True(e.MoveNext());
-                Assert.Same(item3, getCurrent(e));
+                Assert.Equal(item3, getCurrent(e));
 
                 Assert.False(e.MoveNext());
                 Assert.False(e.MoveNext());

@@ -1108,10 +1108,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<T> f = e.Compile(useInterpreter);
 
-            if (default(T) == null)
-                Assert.Same(condition ? a : b, f());
-            else
-                Assert.Equal(condition ? a : b, f());
+            Assert.Equal(condition ? a : b, f());
         }
 
         private static void VerifyGenericWithClassRestriction<Tc>(bool condition, Tc a, Tc b, bool useInterpreter)
@@ -1125,7 +1122,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<Tc> f = e.Compile(useInterpreter);
 
-            Assert.Same(condition ? a : b, f());
+            Assert.Equal(condition ? a : b, f());
         }
 
         private static void VerifyGenericWithSubClassRestriction<TC>(bool condition, TC a, TC b, bool useInterpreter)
@@ -1139,7 +1136,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<TC> f = e.Compile(useInterpreter);
 
-            Assert.Same(condition ? a : b, f());
+            Assert.Equal(condition ? a : b, f());
         }
 
         private static void VerifyGenericWithClassAndNewRestriction<Tcn>(bool condition, Tcn a, Tcn b, bool useInterpreter)
@@ -1153,7 +1150,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<Tcn> f = e.Compile(useInterpreter);
 
-            Assert.Same(condition ? a : b, f());
+            Assert.Equal(condition ? a : b, f());
         }
 
         private static void VerifyGenericWithSubClassAndNewRestriction<TCn>(bool condition, TCn a, TCn b, bool useInterpreter)
@@ -1167,7 +1164,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<TCn> f = e.Compile(useInterpreter);
 
-            Assert.Same(condition ? a : b, f());
+            Assert.Equal(condition ? a : b, f());
         }
 
         private static void VerifyGenericWithStructRestriction<Ts>(bool condition, Ts a, Ts b, bool useInterpreter)

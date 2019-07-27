@@ -129,14 +129,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(typeof(T), rv.GetType());
             }
 
-            if (typeof(T).IsValueType)
-            {
-                Assert.Equal(value, rv);
-            }
-            else
-            {
-                Assert.Same(value, rv);
-            }
+            Assert.Equal(value, rv);
         }
 
         private static void TestRefReturnInvokeNullable<T>(T? nullable) where T : struct
