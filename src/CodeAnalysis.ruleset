@@ -26,7 +26,6 @@
     <Rule Id="CA1066" Action="None" /> <!-- Type should implement IEquatable -->
     <Rule Id="CA1067" Action="None" /> <!-- Override Object.Equals(object) when implementing IEquatable -->
     <Rule Id="CA1068" Action="None" /> <!-- CancellationToken parameters must come last -->
-    <Rule Id="CA1200" Action="None" /> <!-- Avoid using cref tags with a prefix -->
     <Rule Id="CA1303" Action="None" /> <!-- Do not pass literals as localized parameters -->
     <Rule Id="CA1304" Action="None" /> <!-- Specify CultureInfo -->
     <Rule Id="CA1305" Action="None" /> <!-- Specify IFormatProvider -->
@@ -43,7 +42,6 @@
     <Rule Id="CA1721" Action="None" /> <!-- Property names should not match get methods -->
     <Rule Id="CA1724" Action="None" /> <!-- Type names should not match namespaces -->
     <Rule Id="CA1801" Action="None" /> <!-- Review unused parameters -->
-    <Rule Id="CA1802" Action="None" /> <!-- Use literals where appropriate -->
     <Rule Id="CA1806" Action="None" /> <!-- Do not ignore method results -->
     <Rule Id="CA1810" Action="None" /> <!-- Initialize reference type static fields inline -->
     <Rule Id="CA1812" Action="None" /> <!-- Avoid uninstantiated internal classes -->
@@ -82,7 +80,6 @@
     <Rule Id="xUnit1024" Action="None" /> <!-- Test methods cannot have overloads -->
     <Rule Id="xUnit1026" Action="None" /> <!-- Theory methods should use all of their parameters -->
     <Rule Id="xUnit2000" Action="None" /> <!-- Constants and literals should be the expected argument -->
-    <Rule Id="xUnit2002" Action="None" /> <!-- Do not use null check on value type -->
     <Rule Id="xUnit2005" Action="None" /> <!-- Do not use identity check on value type -->
     <Rule Id="xUnit2006" Action="None" /> <!-- Do not use invalid string equality check -->
     <Rule Id="xUnit2009" Action="None" /> <!-- Do not use boolean check to check for substrings -->
