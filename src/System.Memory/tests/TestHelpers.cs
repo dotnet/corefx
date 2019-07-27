@@ -26,7 +26,7 @@ namespace System
             for (int i = 0; i < expected.Length; i++)
             {
                 T actual = span[i];
-                Assert.Same(expected[i], actual);
+                Assert.Equal(expected[i], actual);
             }
 
             T ignore;
@@ -90,7 +90,7 @@ namespace System
             for (int i = 0; i < expected.Length; i++)
             {
                 T actual = span[i];
-                Assert.Same(expected[i], actual);
+                Assert.Equal(expected[i], actual);
             }
 
             T ignore;
@@ -155,7 +155,7 @@ namespace System
             for (int i = 0; i < expected.Length; i++)
             {
                 T actual = bufferArray[i];
-                Assert.Same(expected[i], actual);
+                Assert.Equal(expected[i], actual);
             }
         }
 
@@ -171,7 +171,7 @@ namespace System
             for (int i = 0; i < expected.Length; i++)
             {
                 T actual = bufferArray[i];
-                Assert.Same(expected[i], actual);
+                Assert.Equal(expected[i], actual);
             }
         }
 

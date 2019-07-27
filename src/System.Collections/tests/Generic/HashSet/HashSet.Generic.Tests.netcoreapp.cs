@@ -97,7 +97,7 @@ namespace System.Collections.Tests
             Assert.Equal(value, actualValue);
             if (!typeof(T).IsValueType)
             {
-                Assert.Same(value, actualValue);
+                Assert.Equal(value, actualValue);
             }
         }
 
@@ -112,7 +112,7 @@ namespace System.Collections.Tests
             Assert.Equal(value, actualValue);
             if (!typeof(T).IsValueType)
             {
-                Assert.Same(value, actualValue);
+                Assert.Equal(value, actualValue);
             }
         }
 

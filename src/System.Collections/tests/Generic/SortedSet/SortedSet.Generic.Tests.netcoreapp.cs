@@ -24,10 +24,6 @@ namespace System.Collections.Tests
             T actualValue;
             Assert.True(set.TryGetValue(equalValue, out actualValue));
             Assert.Equal(value, actualValue);
-            if (!typeof(T).IsValueType)
-            {
-                Assert.Same(value, actualValue);
-            }
         }
 
         [Fact]
@@ -39,10 +35,6 @@ namespace System.Collections.Tests
             T actualValue = CreateT(2);
             Assert.True(set.TryGetValue(equalValue, out actualValue));
             Assert.Equal(value, actualValue);
-            if (!typeof(T).IsValueType)
-            {
-                Assert.Same(value, actualValue);
-            }
         }
 
         [Fact]
