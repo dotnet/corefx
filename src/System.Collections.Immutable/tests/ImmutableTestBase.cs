@@ -23,14 +23,7 @@ namespace System.Collections.Immutable.Tests
 
         internal static void AssertAreSame<T>(T expected, T actual, string message = null, params object[] formattingArgs)
         {
-            if (typeof(T).GetTypeInfo().IsValueType)
-            {
-                Assert.Equal(expected, actual); //, message, formattingArgs);
-            }
-            else
-            {
-                Assert.Same(expected, actual); //, message, formattingArgs);
-            }
+            Assert.Equal(expected, actual); //, message, formattingArgs);
         }
 
         internal static void CollectionAssertAreEquivalent<T>(ICollection<T> expected, ICollection<T> actual)
