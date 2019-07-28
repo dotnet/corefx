@@ -1994,7 +1994,6 @@ public static partial class XmlSerializerTests
         var getDataRequestBodyValue = 3;
         var getDataRequestBodyActual = RoundTripWithXmlMembersMapping<int>(getDataRequestBodyValue, memberName, "<?xml version=\"1.0\"?>\r\n<value xmlns=\"http://tempuri.org/\">3</value>");
 
-        Assert.NotNull(getDataRequestBodyActual);
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
@@ -2313,7 +2312,7 @@ public static partial class XmlSerializerTests
         Assert.Equal(2, xmlAttributes.Length);
         Assert.Equal("myattribute1", xmlAttributes[0].Name);
         Assert.Equal("myattribute2", xmlAttributes[1].Name);
-        Assert.Equal(true, deserialized[2]);
+        Assert.Equal((object)true, deserialized[2]);
 
         ms = new MemoryStream();
         serializer.Serialize(ms, deserialized);
@@ -2358,7 +2357,7 @@ public static partial class XmlSerializerTests
         Assert.Equal(2, xmlAttributes.Length);
         Assert.Equal("myattribute1", xmlAttributes[0].Name);
         Assert.Equal("myattribute2", xmlAttributes[1].Name);
-        Assert.Equal(false, deserialized[2]);
+        Assert.Equal((object)false, deserialized[2]);
 
         ms = new MemoryStream();
         serializer.Serialize(ms, deserialized);
@@ -2434,7 +2433,6 @@ public static partial class XmlSerializerTests
         var getDataRequestBodyValue = 3;
         var getDataRequestBodyActual = RoundTripWithXmlMembersMappingSoap<int>(getDataRequestBodyValue, memberName, "<?xml version=\"1.0\"?>\r\n<int d1p1:type=\"int\" xmlns:d1p1=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.w3.org/2001/XMLSchema\">3</int>");
 
-        Assert.NotNull(getDataRequestBodyActual);
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
@@ -2473,7 +2471,6 @@ public static partial class XmlSerializerTests
             "<?xml version=\"1.0\"?>\r\n<q1:wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:q1=\"http://tempuri.org/\">\r\n  <value xsi:type=\"xsd:int\">3</value>\r\n</q1:wrapper>",
             wrapperName: "wrapper");
 
-        Assert.NotNull(getDataRequestBodyActual);
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
@@ -2488,7 +2485,6 @@ public static partial class XmlSerializerTests
             wrapperName: "wrapper",
             validate: true);
 
-        Assert.NotNull(getDataRequestBodyActual);
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 

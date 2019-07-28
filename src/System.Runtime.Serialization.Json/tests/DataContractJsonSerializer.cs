@@ -1016,7 +1016,6 @@ public static partial class DataContractJsonSerializerTests
         var x = new KeyValuePair<string, object>("key1", "key1value");
 
         var y = SerializeAndDeserialize<KeyValuePair<string, object>>(x, @"{""key"":""key1"",""value"":""key1value""}");
-        Assert.NotNull(y);
         Assert.StrictEqual(y.Key, "key1");
         Assert.StrictEqual(y.Value, "key1value");
     }
@@ -1728,7 +1727,7 @@ public static partial class DataContractJsonSerializerTests
 
         TypeWithPropertyWithoutDefaultCtor deserializedValue = (TypeWithPropertyWithoutDefaultCtor)dcjs.ReadObject(ms);
         Assert.StrictEqual("Foo", deserializedValue.Name);
-        Assert.StrictEqual(null, deserializedValue.MemberWithInvalidDataContract);
+        Assert.Null(deserializedValue.MemberWithInvalidDataContract);
     }
 
     [Fact]
@@ -1843,7 +1842,7 @@ public static partial class DataContractJsonSerializerTests
         Assert.NotNull(deserializedValue);
         Assert.NotNull(deserializedValue.CollectionProperty);
         Assert.StrictEqual(value.CollectionProperty.Count, deserializedValue.CollectionProperty.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value.CollectionProperty, deserializedValue.CollectionProperty));
+        Assert.True(Enumerable.SequenceEqual(value.CollectionProperty, deserializedValue.CollectionProperty));
     }
 
     [Fact]
@@ -1996,7 +1995,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new bool[] { true, false, true };
         var deserialized = SerializeAndDeserialize(value, "[true,false,true]");
         Assert.StrictEqual(value.Length, deserialized.Length);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2005,7 +2004,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new DateTime[] { new DateTime(2000, 1, 2, 3, 4, 5, DateTimeKind.Utc), new DateTime(2011, 2, 3, 4, 5, 6, DateTimeKind.Utc) };
         var deserialized = SerializeAndDeserialize(value, "[\"\\/Date(946782245000)\\/\",\"\\/Date(1296705906000)\\/\"]");
         Assert.StrictEqual(value.Length, deserialized.Length);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2014,7 +2013,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new decimal[] { new decimal(1, 2, 3, false, 1), new decimal(4, 5, 6, true, 2) };
         var deserialized = SerializeAndDeserialize(value, "[5534023222971858944.1,-1106804644637321461.80]");
         Assert.StrictEqual(value.Length, deserialized.Length);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2023,7 +2022,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new int[] { 123, int.MaxValue, int.MinValue };
         var deserialized = SerializeAndDeserialize(value, "[123,2147483647,-2147483648]");
         Assert.StrictEqual(value.Length, deserialized.Length);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2032,7 +2031,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new long[] { 123, long.MaxValue, long.MinValue };
         var deserialized = SerializeAndDeserialize(value, "[123,9223372036854775807,-9223372036854775808]");
         Assert.StrictEqual(value.Length, deserialized.Length);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2041,7 +2040,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new float[] { 1.23f, 4.56f, 7.89f };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
         Assert.StrictEqual(value.Length, deserialized.Length);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2050,7 +2049,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new double[] { 1.23, 4.56, 7.89 };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
         Assert.StrictEqual(value.Length, deserialized.Length);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2059,7 +2058,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new string[] { "abc", "def", "xyz" };
         var deserialized = SerializeAndDeserialize(value, "[\"abc\",\"def\",\"xyz\"]");
         Assert.StrictEqual(value.Length, deserialized.Length);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2072,7 +2071,7 @@ public static partial class DataContractJsonSerializerTests
         };
         var deserialized = SerializeAndDeserialize(value, "[{\"P1\":\"abc\",\"P2\":123},{\"P1\":\"def\",\"P2\":456}]");
         Assert.StrictEqual(value.Length, deserialized.Length);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
 #endregion
@@ -2085,7 +2084,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new TypeImplementsGenericICollection<bool>() { true, false, true };
         var deserialized = SerializeAndDeserialize(value, "[true,false,true]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2094,7 +2093,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new TypeImplementsGenericICollection<decimal>() { new decimal(1, 2, 3, false, 1), new decimal(4, 5, 6, true, 2) };
         var deserialized = SerializeAndDeserialize(value, "[5534023222971858944.1,-1106804644637321461.80]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2114,7 +2113,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new TypeImplementsGenericICollection<long>() { 123, long.MaxValue, long.MinValue };
         var deserialized = SerializeAndDeserialize(value, "[123,9223372036854775807,-9223372036854775808]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2123,7 +2122,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new TypeImplementsGenericICollection<float>() { 1.23f, 4.56f, 7.89f };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2132,7 +2131,7 @@ public static partial class DataContractJsonSerializerTests
         var value = new TypeImplementsGenericICollection<double>() { 1.23, 4.56, 7.89 };
         var deserialized = SerializeAndDeserialize(value, "[1.23,4.56,7.89]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
     [Fact]
@@ -2156,7 +2155,7 @@ public static partial class DataContractJsonSerializerTests
         };
         var deserialized = SerializeAndDeserialize(value, "[{\"P1\":\"abc\",\"P2\":123},{\"P1\":\"def\",\"P2\":456}]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value, deserialized));
+        Assert.True(Enumerable.SequenceEqual(value, deserialized));
     }
 
 #endregion
@@ -2171,7 +2170,7 @@ public static partial class DataContractJsonSerializerTests
         value.Add(456, false);
         var deserialized = SerializeAndDeserialize(value, "[{\"Key\":123,\"Value\":true},{\"Key\":456,\"Value\":false}]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value.ToArray(), deserialized.ToArray()));
+        Assert.True(Enumerable.SequenceEqual(value.ToArray(), deserialized.ToArray()));
     }
 
     [Fact]
@@ -2182,7 +2181,7 @@ public static partial class DataContractJsonSerializerTests
         value.Add(456, "def");
         var deserialized = SerializeAndDeserialize(value, "[{\"Key\":123,\"Value\":\"abc\"},{\"Key\":456,\"Value\":\"def\"}]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value.ToArray(), deserialized.ToArray()));
+        Assert.True(Enumerable.SequenceEqual(value.ToArray(), deserialized.ToArray()));
     }
 
     [Fact]
@@ -2193,7 +2192,7 @@ public static partial class DataContractJsonSerializerTests
         value.Add("def", 456);
         var deserialized = SerializeAndDeserialize(value, "[{\"Key\":\"abc\",\"Value\":123},{\"Key\":\"def\",\"Value\":456}]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value.ToArray(), deserialized.ToArray()));
+        Assert.True(Enumerable.SequenceEqual(value.ToArray(), deserialized.ToArray()));
     }
 
 #endregion
@@ -2208,8 +2207,8 @@ public static partial class DataContractJsonSerializerTests
         value.Add(456, false);
         var deserialized = SerializeAndDeserialize(value, "[{\"Key\":123,\"Value\":true},{\"Key\":456,\"Value\":false}]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value.Keys.Cast<int>().ToArray(), deserialized.Keys.Cast<int>().ToArray()));
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value.Values.Cast<bool>().ToArray(), deserialized.Values.Cast<bool>().ToArray()));
+        Assert.True(Enumerable.SequenceEqual(value.Keys.Cast<int>().ToArray(), deserialized.Keys.Cast<int>().ToArray()));
+        Assert.True(Enumerable.SequenceEqual(value.Values.Cast<bool>().ToArray(), deserialized.Values.Cast<bool>().ToArray()));
     }
 
     [Fact]
@@ -2220,8 +2219,8 @@ public static partial class DataContractJsonSerializerTests
         value.Add(456, "def");
         var deserialized = SerializeAndDeserialize(value, "[{\"Key\":123,\"Value\":\"abc\"},{\"Key\":456,\"Value\":\"def\"}]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value.Keys.Cast<int>().ToArray(), deserialized.Keys.Cast<int>().ToArray()));
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value.Values.Cast<string>().ToArray(), deserialized.Values.Cast<string>().ToArray()));
+        Assert.True(Enumerable.SequenceEqual(value.Keys.Cast<int>().ToArray(), deserialized.Keys.Cast<int>().ToArray()));
+        Assert.True(Enumerable.SequenceEqual(value.Values.Cast<string>().ToArray(), deserialized.Values.Cast<string>().ToArray()));
     }
 
     [Fact]
@@ -2232,8 +2231,8 @@ public static partial class DataContractJsonSerializerTests
         value.Add("def", 456);
         var deserialized = SerializeAndDeserialize(value, "[{\"Key\":\"abc\",\"Value\":123},{\"Key\":\"def\",\"Value\":456}]");
         Assert.StrictEqual(value.Count, deserialized.Count);
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value.Keys.Cast<string>().ToArray(), deserialized.Keys.Cast<string>().ToArray()));
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(value.Values.Cast<int>().ToArray(), deserialized.Values.Cast<int>().ToArray()));
+        Assert.True(Enumerable.SequenceEqual(value.Keys.Cast<string>().ToArray(), deserialized.Keys.Cast<string>().ToArray()));
+        Assert.True(Enumerable.SequenceEqual(value.Values.Cast<int>().ToArray(), deserialized.Values.Cast<int>().ToArray()));
     }
 
     [Fact]
@@ -2468,7 +2467,6 @@ public static partial class DataContractJsonSerializerTests
                 },
             };
             var actual = SerializeAndDeserialize(original, null, dcjsSettings, null, true);
-            Assert.NotNull(actual);
             Assert.Equal(original, actual);
         }
     }
@@ -2512,7 +2510,6 @@ public static partial class DataContractJsonSerializerTests
             };
             var original = DateTime.Now;
             var actual = SerializeAndDeserialize(original, null, dcjsSettings, null, true);
-            Assert.NotNull(actual);
             Assert.Equal(original, actual);
         }
     }
@@ -2593,7 +2590,6 @@ public static partial class DataContractJsonSerializerTests
         var graph = new DateTimeOffset(2008, 5, 1, 8, 6, 32, new TimeSpan(1, 0, 0));
         dcjsSettings = new DataContractJsonSerializerSettings() { DateTimeFormat = jsonTypes.DTF_DMMMM };
         var actual3 = SerializeAndDeserialize(graph, "{\"DateTime\":\"1, mayo\",\"OffsetMinutes\":60}", dcjsSettings);
-        Assert.NotNull(actual3);
         var expected3 = new DateTimeOffset(DateTime.Now.Year, 5, 1, 0, 0, 0, new TimeSpan(1, 0, 0));
         Assert.True(actual3 == expected3, 
             $"{nameof(actual3)} was not as expected.\r\nExpected: {expected3} \r\n Actual: {actual3}");
@@ -2621,7 +2617,6 @@ public static partial class DataContractJsonSerializerTests
         expectedOutput = string.Format("\"{0}\"", expectedOutput);
         dcjsSettings = new DataContractJsonSerializerSettings() { DateTimeFormat = jsonTypes.DTF_DefaultFormatProviderIsDateTimeFormatInfoDotCurrentInfo };
         var actual6 = SerializeAndDeserialize(dateTime, expectedOutput, dcjsSettings);
-        Assert.NotNull(actual6);
         Assert.True(actual6 == dateTime);
     }
 
@@ -2639,7 +2634,6 @@ public static partial class DataContractJsonSerializerTests
             KnownTypes = new List<Type>()
         };
         var actual = SerializeAndDeserialize(dateTime, expectedString, dcjsSettings);
-        Assert.NotNull(actual);
         Assert.True(actual == dateTime);
 
         dcjsSettings = new DataContractJsonSerializerSettings()
@@ -2652,7 +2646,6 @@ public static partial class DataContractJsonSerializerTests
         string actualam = GetAmString(jsonTypes.DTF_hmsFt);
         string baseline = $"\"03:58:32.00 {actualam}\"";
         var actual2 = SerializeAndDeserialize(new DateTime(1, 1, 1, 3, 58, 32), baseline, dcjsSettings);
-        Assert.NotNull(actual2);
         Assert.True(actual2 == new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 3, 58, 32));
 
         dcjsSettings = new DataContractJsonSerializerSettings()
@@ -2664,7 +2657,6 @@ public static partial class DataContractJsonSerializerTests
         };
         var value3 = new DateTime(DateTime.Now.Year, 12, 20);
         var actual3 = SerializeAndDeserialize(value3, "\"20, diciembre\"", dcjsSettings);
-        Assert.NotNull(actual3);
         Assert.Equal(value3, actual3);
 
         dcjsSettings = new DataContractJsonSerializerSettings()
@@ -2676,7 +2668,6 @@ public static partial class DataContractJsonSerializerTests
         };
         var value4 = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 32);
         var actual4 = SerializeAndDeserialize(value4, "\"32\"", dcjsSettings);
-        Assert.NotNull(actual4);
         Assert.Equal(value4, actual4);
 
         dcjsSettings = new DataContractJsonSerializerSettings()
@@ -2688,7 +2679,6 @@ public static partial class DataContractJsonSerializerTests
         };
         var value5 = new DateTime(1998, 1, 1);
         var actual5 = SerializeAndDeserialize(value5, "\"1998 A.D.\"", dcjsSettings);
-        Assert.NotNull(actual5);
         Assert.Equal(value5, actual5);
 
         dcjsSettings = new DataContractJsonSerializerSettings()
@@ -2700,7 +2690,6 @@ public static partial class DataContractJsonSerializerTests
         };
         var value6 = new DateTime(1998, 1, 1, 8, 25, 32, DateTimeKind.Utc);
         var actual6 = SerializeAndDeserialize(value6, "\"1998-01-01T08:25:32.000Z\"", dcjsSettings);
-        Assert.NotNull(actual6);
         Assert.Equal(value6, actual6);
     }
 

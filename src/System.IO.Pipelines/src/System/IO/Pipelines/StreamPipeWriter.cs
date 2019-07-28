@@ -214,9 +214,9 @@ namespace System.IO.Pipelines
 
             _isCompleted = true;
 
-            _internalTokenSource?.Dispose();
-
             FlushInternal();
+
+            _internalTokenSource?.Dispose();
 
             if (!_leaveOpen)
             {
@@ -233,9 +233,9 @@ namespace System.IO.Pipelines
 
             _isCompleted = true;
 
-            _internalTokenSource?.Dispose();
-
             await FlushAsyncInternal().ConfigureAwait(false);
+
+            _internalTokenSource?.Dispose();
 
             if (!_leaveOpen)
             {
@@ -245,11 +245,6 @@ namespace System.IO.Pipelines
                 InnerStream.Dispose();
 #endif
             }
-        }
-
-        /// <inheritdoc />
-        public override void OnReaderCompleted(Action<Exception, object> callback, object state)
-        {
         }
 
         /// <inheritdoc />

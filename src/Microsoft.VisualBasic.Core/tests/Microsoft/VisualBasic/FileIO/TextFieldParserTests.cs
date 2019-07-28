@@ -98,30 +98,30 @@ namespace Microsoft.VisualBasic.FileIO.Tests
                 parser.CommentTokens = new[] { "[", "]" };
                 Assert.Equal(new[] { "[", "]" }, parser.CommentTokens);
 
-                Assert.Equal(null, parser.Delimiters);
+                Assert.Null(parser.Delimiters);
                 parser.Delimiters = new[] { "A", "123" };
                 Assert.Equal(new[] { "A", "123" }, parser.Delimiters);
                 parser.SetDelimiters(new[] { "123", "B" });
                 Assert.Equal(new[] { "123", "B" }, parser.Delimiters);
 
-                Assert.Equal(null, parser.FieldWidths);
+                Assert.Null(parser.FieldWidths);
                 parser.FieldWidths = new[] { 1, 2, int.MaxValue };
                 Assert.Equal(new[] { 1, 2, int.MaxValue }, parser.FieldWidths);
                 parser.SetFieldWidths(new[] { int.MaxValue, 3 });
                 Assert.Equal(new[] { int.MaxValue, 3 }, parser.FieldWidths);
                 Assert.Throws<ArgumentException>(() => parser.SetFieldWidths(new[] { -1, -1 }));
 
-                Assert.Equal(true, parser.HasFieldsEnclosedInQuotes);
+                Assert.True(parser.HasFieldsEnclosedInQuotes);
                 parser.HasFieldsEnclosedInQuotes = false;
-                Assert.Equal(false, parser.HasFieldsEnclosedInQuotes);
+                Assert.False(parser.HasFieldsEnclosedInQuotes);
 
                 Assert.Equal(FieldType.Delimited, parser.TextFieldType);
                 parser.TextFieldType = FieldType.FixedWidth;
                 Assert.Equal(FieldType.FixedWidth, parser.TextFieldType);
 
-                Assert.Equal(true, parser.TrimWhiteSpace);
+                Assert.True(parser.TrimWhiteSpace);
                 parser.TrimWhiteSpace = false;
-                Assert.Equal(false, parser.TrimWhiteSpace);
+                Assert.False(parser.TrimWhiteSpace);
             }
         }
 
@@ -226,8 +226,8 @@ ghi,789");
                 Assert.Equal("ghi,789", parser.PeekChars(10));
                 Assert.Equal(new[] { "ghi", "789" }, parser.ReadFields());
 
-                Assert.Equal(null, parser.PeekChars(1));
-                Assert.Equal(null, parser.PeekChars(10));
+                Assert.Null(parser.PeekChars(1));
+                Assert.Null(parser.PeekChars(10));
             }
         }
 
@@ -256,7 +256,7 @@ ghi,789");
                 Assert.Equal(new[] { "ghi", ",7" }, parser.ReadFields());
 
                 parser.SetFieldWidths(new[] { 3, 2 });
-                Assert.Equal(null, parser.ReadFields());
+                Assert.Null(parser.ReadFields());
             }
         }
 
@@ -306,10 +306,10 @@ ghi,789");
                 Assert.Equal(new[] { "", "" }, parser.ReadFields());
                 Assert.Equal(-1, parser.LineNumber);
 
-                Assert.Equal(null, parser.ReadFields());
+                Assert.Null(parser.ReadFields());
                 Assert.Equal(-1, parser.LineNumber);
 
-                Assert.Equal(null, parser.ReadFields());
+                Assert.Null(parser.ReadFields());
                 Assert.Equal(-1, parser.LineNumber);
             }
         }
@@ -355,7 +355,7 @@ ghi,789");
                 Assert.Equal(-1, parser.LineNumber);
                 Assert.True(parser.EndOfData);
 
-                Assert.Equal(null, parser.ReadToEnd());
+                Assert.Null(parser.ReadToEnd());
                 Assert.Equal(-1, parser.LineNumber);
                 Assert.True(parser.EndOfData);
             }

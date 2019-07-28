@@ -4,6 +4,8 @@
 
 using Xunit;
 using System.Buffers;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace System.Text.Json.Tests
 {
@@ -40,6 +42,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        [InlineData("12E-3", false)]    
         [InlineData("1e6", false)]
         [InlineData("1e6", true)]
         [InlineData("1e+6", false)]
@@ -48,7 +51,7 @@ namespace System.Text.Json.Tests
         [InlineData("1e-6", true)]
         [InlineData("-1e6", false)]
         [InlineData("-1e6", true)]
-        [InlineData("-1e+6", true)]
+        [InlineData("-1e+6", false)]
         [InlineData("-1e+6", true)]
         [InlineData("-1e-6", false)]
         [InlineData("-1e-6", true)]
@@ -58,6 +61,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        [InlineData("1.2E+3", false)]
         [InlineData("5.012e-20", false)]
         [InlineData("5.012e-20", true)]
         [InlineData("5.012e20", false)]
@@ -107,6 +111,68 @@ namespace System.Text.Json.Tests
             // PositiveInfinity instead (or throw if using double.Parse on frameworks
             // older than .NET Core 3.0).
             WriteSimpleValue(indented, OneQuarticGoogol);
+        }
+
+        [Theory]
+        [InlineData("6.022e+23", "6,022e+23")]
+        [InlineData("6.022e+23", "6.022f+23")]
+        [InlineData("6.022e+23", "6.022e+ 3")]
+        [InlineData("6.022e+23", "6e022e+23")]
+        [InlineData("6.022e+23", "6.022e+f3")]
+        [InlineData("1", "-")]
+        [InlineData("12", "+2")]
+        [InlineData("12", "1e")]
+        [InlineData("12", "1.")]
+        [InlineData("12", "02")]
+        [InlineData("123", "1e+")]
+        [InlineData("123", "1e-")]
+        [InlineData("0.12", "0.1e")]
+        [InlineData("0.123", "0.1e+")]
+        [InlineData("0.123", "0.1e-")]
+        [InlineData("10", "+0")]
+        [InlineData("101", "-01")]
+        [InlineData("12", "1a")]
+        [InlineData("10", "00")]
+        [InlineData("11", "01")]
+        [InlineData("10.5e-012", "10.5e-0.2")]
+        [InlineData("10.5e012", "10.5.012")]
+        [InlineData("0.123", "0.-23")]
+        [InlineData("12345", "hello")]
+        public static void WriteCorruptedNumber(string parseJson, string overwriteJson)
+        {
+            if (overwriteJson.Length != parseJson.Length)
+            {
+                throw new InvalidOperationException("Invalid test, parseJson and overwriteJson must have the same length");
+            }
+
+            byte[] utf8Data = Encoding.UTF8.GetBytes(parseJson);
+
+            using (JsonDocument document = JsonDocument.Parse(utf8Data))
+            using (MemoryStream stream = new MemoryStream(Array.Empty<byte>()))
+            using (Utf8JsonWriter writer = new Utf8JsonWriter(stream))
+            {
+                // Use fixed and the older version of GetBytes-in-place because of the NetFX build.
+                unsafe
+                {
+                    fixed (byte* dataPtr = utf8Data)
+                    fixed (char* inputPtr = overwriteJson)
+                    {
+                        // Overwrite the number in the memory buffer still referenced by the document.
+                        // If it doesn't hit a 100% overlap then we're not testing what we thought we were.
+                        Assert.Equal(
+                            utf8Data.Length,
+                            Encoding.UTF8.GetBytes(inputPtr, overwriteJson.Length, dataPtr, utf8Data.Length));
+                    }
+                }
+
+                JsonElement rootElement = document.RootElement;
+
+                Assert.Equal(overwriteJson, rootElement.GetRawText());
+                
+                AssertExtensions.Throws<ArgumentException>(
+                    "utf8FormattedNumber",
+                    () => rootElement.WriteTo(writer));
+            }
         }
 
         [Theory]
@@ -458,6 +524,41 @@ null,
   ""m\u00eal\u00e9e"": 1e6
 }",
                 "{\"m\\u00eal\\u00e9e\":1e6}");
+        }
+
+        [Fact]
+        public static void WriteValueSurrogatesEscapeString()
+        {
+            string unicodeString = "\uD800\uDC00\uD803\uDE6D \uD834\uDD1E\uDBFF\uDFFF";
+            string json = $"[\"{unicodeString}\"]";
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            string expectedStr = GetEscapedExpectedString(unicodeString, StringEscapeHandling.EscapeNonAscii);
+
+            using (JsonDocument doc = JsonDocument.Parse(json, s_options))
+            {
+                JsonElement target = doc.RootElement[0];
+
+                using (var writer = new Utf8JsonWriter(buffer))
+                {
+                    target.WriteTo(writer);
+                    writer.Flush();
+                }
+                AssertContents(expectedStr, buffer);
+            }
+        }
+
+        private static string GetEscapedExpectedString(string value, StringEscapeHandling escaping)
+        {
+            using (TextWriter stringWriter = new StringWriter())
+            using (var json = new JsonTextWriter(stringWriter)
+            {
+                StringEscapeHandling = escaping
+            })
+            {
+                json.WriteValue(value);
+                json.Flush();
+                return stringWriter.ToString();
+            }
         }
 
         [Theory]
@@ -997,11 +1098,11 @@ null,
                     Indented = indented,
                 };
 
-                var writer = new Utf8JsonWriter(buffer, options);
-
-                target.WriteTo(writer);
-                writer.Flush();
-
+                using (var writer = new Utf8JsonWriter(buffer, options))
+                {
+                    target.WriteTo(writer);
+                    writer.Flush();
+                }
                 AssertContents(jsonOut ?? jsonIn, buffer);
             }
         }
@@ -1228,7 +1329,7 @@ null,
 #endif
                     );
 
-            // Temporary hack until we can use the same escape algorithm throughout.
+            // Temporary hack until we can use the same escape algorithm on both sides and make sure we want uppercase hex.
             Assert.Equal(expectedValue.NormalizeToJsonNetFormat(), value.NormalizeToJsonNetFormat());
         }
     }

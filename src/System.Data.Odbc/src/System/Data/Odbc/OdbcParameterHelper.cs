@@ -139,7 +139,7 @@ namespace System.Data.Odbc
             get
             {
                 string sourceColumn = _sourceColumn;
-                return ((null != sourceColumn) ? sourceColumn : ADP.StrEmpty);
+                return ((null != sourceColumn) ? sourceColumn : string.Empty);
             }
             set
             {
@@ -159,7 +159,7 @@ namespace System.Data.Odbc
             }
         }
 
-        override public DataRowVersion SourceVersion
+        public override DataRowVersion SourceVersion
         { // V1.2.3300, XXXParameter V1.0.3300
             get
             {

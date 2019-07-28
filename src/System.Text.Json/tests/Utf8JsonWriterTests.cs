@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -10,11 +10,17 @@ using System.Globalization;
 using System.Threading.Tasks;
 using System.IO.Pipelines;
 using System.Collections.Generic;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 
 namespace System.Text.Json.Tests
 {
     public class Utf8JsonWriterTests
     {
+        private const int MaxExpansionFactorWhileEscaping = 6;
+        private const int MaxEscapedTokenSize = 1_000_000_000;   // Max size for already escaped value.
+        private const int MaxUnescapedTokenSize = MaxEscapedTokenSize / MaxExpansionFactorWhileEscaping;  // 166_666_666 bytes
+
         public static bool IsX64 { get; } = IntPtr.Size >= 8;
 
         [Theory]
@@ -61,6 +67,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, writer.BytesCommitted);
             Assert.Equal(0, writer.BytesPending);
             Assert.Equal(0, writer.CurrentDepth);
+            Assert.Null(writer.Options.Encoder);
             Assert.Equal(formatted, writer.Options.Indented);
             Assert.Equal(skipValidation, writer.Options.SkipValidation);
             Assert.Equal(0, stream.Position);
@@ -70,6 +77,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, writer.BytesCommitted);
             Assert.Equal(0, writer.BytesPending);
             Assert.Equal(0, writer.CurrentDepth);
+            Assert.Null(writer.Options.Encoder);
             Assert.Equal(formatted, writer.Options.Indented);
             Assert.Equal(skipValidation, writer.Options.SkipValidation);
             Assert.Equal(0, output.FormattedCount);
@@ -95,6 +103,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, writeToStream.BytesCommitted);
             Assert.Equal(0, writeToStream.BytesPending);
             Assert.Equal(0, writeToStream.CurrentDepth);
+            Assert.Null(writeToStream.Options.Encoder);
             Assert.Equal(formatted, writeToStream.Options.Indented);
             Assert.Equal(skipValidation, writeToStream.Options.SkipValidation);
             Assert.True(stream.Position != 0);
@@ -114,6 +123,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, writeToIBW.BytesCommitted);
             Assert.Equal(0, writeToIBW.BytesPending);
             Assert.Equal(0, writeToIBW.CurrentDepth);
+            Assert.Null(writeToIBW.Options.Encoder);
             Assert.Equal(formatted, writeToIBW.Options.Indented);
             Assert.Equal(skipValidation, writeToIBW.Options.SkipValidation);
             Assert.True(output.FormattedCount != 0);
@@ -143,6 +153,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, writeToStream.BytesCommitted);
             Assert.Equal(0, writeToStream.BytesPending);
             Assert.Equal(0, writeToStream.CurrentDepth);
+            Assert.Null(writeToStream.Options.Encoder);
             Assert.Equal(formatted, writeToStream.Options.Indented);
             Assert.Equal(skipValidation, writeToStream.Options.SkipValidation);
             Assert.True(stream.Position != 0);
@@ -168,6 +179,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, writeToIBW.BytesCommitted);
             Assert.Equal(0, writeToIBW.BytesPending);
             Assert.Equal(0, writeToIBW.CurrentDepth);
+            Assert.Null(writeToIBW.Options.Encoder);
             Assert.Equal(formatted, writeToIBW.Options.Indented);
             Assert.Equal(skipValidation, writeToIBW.Options.SkipValidation);
             Assert.True(output.FormattedCount != 0);
@@ -204,6 +216,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, writeToStream.BytesCommitted);
             Assert.Equal(0, writeToStream.BytesPending);
             Assert.Equal(0, writeToStream.CurrentDepth);
+            Assert.Null(writeToStream.Options.Encoder);
             Assert.Equal(formatted, writeToStream.Options.Indented);
             Assert.Equal(skipValidation, writeToStream.Options.SkipValidation);
             Assert.True(stream.Position != 0);
@@ -234,6 +247,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, writeToIBW.BytesCommitted);
             Assert.Equal(0, writeToIBW.BytesPending);
             Assert.Equal(0, writeToIBW.CurrentDepth);
+            Assert.Null(writeToIBW.Options.Encoder);
             Assert.Equal(formatted, writeToIBW.Options.Indented);
             Assert.Equal(skipValidation, writeToIBW.Options.SkipValidation);
             Assert.True(output.FormattedCount != 0);
@@ -1595,6 +1609,11 @@ namespace System.Text.Json.Tests
             Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStartArray(JsonEncodedText.Encode("name")));
         }
 
+        // NOTE: WritingTooLargeProperty test is constrained to run on Windows and MacOSX because it causes
+        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        //       time the memory is accessed which triggers the full memory allocation.
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         [ConditionalTheory(nameof(IsX64))]
         [OuterLoop]
         [InlineData(true, true)]
@@ -1608,8 +1627,8 @@ namespace System.Text.Json.Tests
 
             try
             {
-                key = new byte[1_000_000_000];
-                keyChars = new char[1_000_000_000];
+                key = new byte[MaxUnescapedTokenSize + 1];
+                keyChars = new char[MaxUnescapedTokenSize + 1];
             }
             catch (OutOfMemoryException)
             {
@@ -1631,6 +1650,11 @@ namespace System.Text.Json.Tests
             Assert.Throws<ArgumentException>(() => jsonUtf8.WriteStartArray(key));
         }
 
+        // NOTE: WritingTooLargePropertyStandalone test is constrained to run on Windows and MacOSX because it causes
+        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        //       time the memory is accessed which triggers the full memory allocation.
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         [ConditionalTheory(nameof(IsX64))]
         [OuterLoop]
         [InlineData(true, true)]
@@ -1644,8 +1668,8 @@ namespace System.Text.Json.Tests
 
             try
             {
-                key = new byte[1_000_000_000];
-                keyChars = new char[1_000_000_000];
+                key = new byte[MaxUnescapedTokenSize + 1];
+                keyChars = new char[MaxUnescapedTokenSize + 1];
             }
             catch (OutOfMemoryException)
             {
@@ -2194,64 +2218,21 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData(true, true)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
-        [InlineData(false, false)]
-        public void WriteBase64String(bool formatted, bool skipValidation)
+        [InlineData(true, true, "message")]
+        [InlineData(true, false, "message")]
+        [InlineData(false, true, "message")]
+        [InlineData(false, false, "message")]
+        [InlineData(true, true, "escape mess><age")]
+        [InlineData(true, false, "escape mess><age")]
+        [InlineData(false, true, "escape mess><age")]
+        [InlineData(false, false, "escape mess><age")]
+        [InlineData(true, true, "<write base64 string when escape length bigger than given string")]
+        [InlineData(true, false, "<write base64 string when escape length bigger than given string")]
+        [InlineData(false, true, "<write base64 string when escape length bigger than given string")]
+        [InlineData(false, false, "<write base64 string when escape length bigger than given string")]
+        public void WriteBase64String(bool formatted, bool skipValidation, string inputValue)
         {
-            string propertyName = "message";
-            byte[] value = { 1, 2, 3, 4, 5 };
-            string expectedStr = GetBase64ExpectedString(prettyPrint: formatted, propertyName, value);
-
-            JsonEncodedText encodedPropertyName = JsonEncodedText.Encode(propertyName);
-
-            byte[] utf8PropertyName = Encoding.UTF8.GetBytes("message");
-
-            var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
-
-            for (int i = 0; i < 4; i++)
-            {
-                var output = new ArrayBufferWriter<byte>(32);
-                var jsonUtf8 = new Utf8JsonWriter(output, options);
-
-                jsonUtf8.WriteStartObject();
-
-                switch (i)
-                {
-                    case 0:
-                        jsonUtf8.WriteBase64String(propertyName, value);
-                        jsonUtf8.WriteBase64String(propertyName, value);
-                        break;
-                    case 1:
-                        jsonUtf8.WriteBase64String(propertyName.AsSpan(), value);
-                        jsonUtf8.WriteBase64String(propertyName.AsSpan(), value);
-                        break;
-                    case 2:
-                        jsonUtf8.WriteBase64String(utf8PropertyName, value);
-                        jsonUtf8.WriteBase64String(utf8PropertyName, value);
-                        break;
-                    case 3:
-                        jsonUtf8.WriteBase64String(encodedPropertyName, value);
-                        jsonUtf8.WriteBase64String(encodedPropertyName, value);
-                        break;
-                }
-
-                jsonUtf8.WriteEndObject();
-                jsonUtf8.Flush();
-
-                AssertContents(expectedStr, output);
-            }
-        }
-
-        [Theory]
-        [InlineData(true, true)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
-        [InlineData(false, false)]
-        public void WriteBase64StringEscaped(bool formatted, bool skipValidation)
-        {
-            string propertyName = "mess><age";
+            string propertyName = inputValue;
             byte[] value = { 1, 2, 3, 4, 5, 6 };
             string expectedStr = GetBase64ExpectedString(prettyPrint: formatted, propertyName, value);
 
@@ -2295,7 +2276,7 @@ namespace System.Text.Json.Tests
             }
 
             // Verify that escaping does not change the input strings/spans.
-            Assert.Equal("mess><age", propertyName);
+            Assert.Equal(inputValue, propertyName);
             Assert.Equal(new byte[] { 1, 2, 3, 4, 5, 6 }, value);
             Assert.True(propertyName.AsSpan().SequenceEqual(propertyNameSpan));
             Assert.True(Encoding.UTF8.GetBytes(propertyName).AsSpan().SequenceEqual(propertyNameSpanUtf8));
@@ -2453,7 +2434,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public void WriteBase64Escapes()
+        public void WriteBase64DoesNotEscape()
         {
             var output = new ArrayBufferWriter<byte>(10);
             using var jsonUtf8 = new Utf8JsonWriter(output);
@@ -2463,11 +2444,11 @@ namespace System.Text.Json.Tests
 
             jsonUtf8.Flush();
 
-            AssertContents("\"\\u002b\\u002b\\u002b\\u002b\"", output);
+            AssertContents("\"++++\"", output);
         }
 
         [Fact]
-        public void WriteBase64EscapesLarge()
+        public void WriteBase64DoesNotEscapeLarge()
         {
             var output = new ArrayBufferWriter<byte>(10);
             using var jsonUtf8 = new Utf8JsonWriter(output);
@@ -2487,7 +2468,7 @@ namespace System.Text.Json.Tests
             jsonUtf8.Flush();
 
             var builder = new StringBuilder();
-            builder.Append("\"ZGRkZPvvvmRkZGRkZGRkABC\\/");
+            builder.Append("\"ZGRkZPvvvmRkZGRkZGRkABC/");
             for (int i = 0; i < 60; i++)
             {
                 builder.Append("ZGRk");
@@ -3087,54 +3068,69 @@ namespace System.Text.Json.Tests
             }
         }
 
-        [Theory(Skip = "Update test to match JavaScriptEncoder semantics.")]
-        [InlineData(true, true)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
-        [InlineData(false, false)]
-        public void InvalidUTF8(bool formatted, bool skipValidation)
+        [Fact]
+        public void EscapeSurrogatePairsThrowsHighSurrogateMissing()
         {
-            var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
+            string propertyName = "a \uD800\uDC00\uDE6D a";
+            string value = propertyName;
+            var output = new ArrayBufferWriter<byte>(12);
+            using var jsonUtf8 = new Utf8JsonWriter(output);
 
-            var output = new ArrayBufferWriter<byte>(1024);
-            var jsonUtf8 = new Utf8JsonWriter(output, options);
+            Assert.Throws<ArgumentException>(() => jsonUtf8.WriteString(propertyName, value));
+        }
+
+        private const string InvalidUtf8 = "\"\\uFFFD(\"";
+        private const string ValidUtf8 = "\"\\u00F1\"";
+
+        // todo: verify that we should be using replacement char and not throwing here if skipValidation=true
+        [Theory]
+        [InlineData(true,
+            "{" + InvalidUtf8 + ":" + InvalidUtf8 + "}",
+            "{" + InvalidUtf8 + ":" + ValidUtf8 + "}",
+            "{" + ValidUtf8 + ":" + InvalidUtf8 + "}",
+            "{" + ValidUtf8 + ":" + ValidUtf8 + "}")]
+        [InlineData(false,
+            "{" + InvalidUtf8 + ":" + InvalidUtf8 + "}",
+            "{" + InvalidUtf8 + ":" + ValidUtf8 + "}",
+            "{" + ValidUtf8 + ":" + InvalidUtf8 + "}",
+            "{" + ValidUtf8 + ":" + ValidUtf8 + "}")]
+        public void UTF8ReplacementCharacters(bool skipValidation, string expected0, string expected1, string expected2, string expected3)
+        {
+            var options = new JsonWriterOptions { SkipValidation = skipValidation };
 
             var validUtf8 = new byte[2] { 0xc3, 0xb1 }; // 0xF1
             var invalidUtf8 = new byte[2] { 0xc3, 0x28 };
 
-            jsonUtf8.WriteStartObject();
-            for (int i = 0; i < 6; i++)
+            string WriteProperty(byte[] propertyName, byte[] value)
             {
-                switch (i)
-                {
-                    case 0:
-                        Assert.Throws<ArgumentException>(() => jsonUtf8.WriteString(invalidUtf8, invalidUtf8));
-                        break;
-                    case 1:
-                        Assert.Throws<ArgumentException>(() => jsonUtf8.WriteString(invalidUtf8, validUtf8));
-                        break;
-                    case 2:
-                        Assert.Throws<ArgumentException>(() => jsonUtf8.WriteString(validUtf8, invalidUtf8));
-                        break;
-                    case 3:
-                        jsonUtf8.WriteString(validUtf8, validUtf8);
-                        break;
-                    case 4:
-                        Assert.Throws<ArgumentException>(() => jsonUtf8.WritePropertyName(invalidUtf8));
-                        break;
-                    case 5:
-                        jsonUtf8.WritePropertyName(validUtf8);
-                        Assert.Throws<ArgumentException>(() => jsonUtf8.WriteStringValue(invalidUtf8));
-                        jsonUtf8.WriteStringValue(validUtf8);
-                        break;
-                    case 6:
-                        jsonUtf8.WritePropertyName(validUtf8);
-                        jsonUtf8.WriteStringValue(validUtf8);
-                        break;
-                }
+                var output = new ArrayBufferWriter<byte>(1024);
+                var jsonUtf8 = new Utf8JsonWriter(output, options);
+                jsonUtf8.WriteStartObject();
+                jsonUtf8.WriteString(propertyName, value);
+                jsonUtf8.WriteEndObject();
+                jsonUtf8.Flush();
+                string result = Encoding.UTF8.GetString(
+                        output.WrittenSpan
+#if netfx
+                        .ToArray()
+#endif
+                    );
+                output.Clear();
+                return result;
             }
-            jsonUtf8.WriteEndObject();
-            jsonUtf8.Flush();
+
+            string result;
+            result = WriteProperty(invalidUtf8, invalidUtf8);
+            Assert.Equal(expected0, result);
+
+            result = WriteProperty(invalidUtf8, validUtf8);
+            Assert.Equal(expected1, result);
+
+            result = WriteProperty(validUtf8, invalidUtf8);
+            Assert.Equal(expected2, result);
+
+            result = WriteProperty(validUtf8, validUtf8);
+            Assert.Equal(expected3, result);
         }
 
         [Theory]
@@ -3185,6 +3181,76 @@ namespace System.Text.Json.Tests
             }
             jsonUtf8.WriteEndObject();
             jsonUtf8.Flush();
+        }
+
+        public static IEnumerable<object[]> JsonEncodedTextStringsCustomAll
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] { "éééééêêêêê", "{\"Prop\":\"éééééêêêêê\"}" },
+                    new object[] { "aѧѦa", "{\"Prop\":\"aѧѦa\"}" }, // U0467, U0466
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonEncodedTextStringsCustomAll))]
+        public void CustomEscaper(string value, string expectedStr)
+        {
+            const string PropertyName = "Prop";
+
+            // Allow all unicode values (except forbidden characters which we don't have in test data here)
+            JavaScriptEncoder encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
+
+            var options = new JsonWriterOptions();
+            options.Encoder = encoder;
+
+            for (int i = 0; i < 6; i++)
+            {
+                var output = new ArrayBufferWriter<byte>(1024);
+                var jsonUtf8 = new Utf8JsonWriter(output, options);
+
+                jsonUtf8.WriteStartObject();
+
+                switch (i)
+                {
+                    case 0:
+                        jsonUtf8.WriteString(PropertyName, value);
+                        break;
+                    case 1:
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(PropertyName), Encoding.UTF8.GetBytes(value));
+                        break;
+                    case 2:
+                        jsonUtf8.WriteString(JsonEncodedText.Encode(PropertyName), JsonEncodedText.Encode(value, encoder));
+                        break;
+                    case 3:
+                        jsonUtf8.WritePropertyName(PropertyName);
+                        jsonUtf8.WriteStringValue(value);
+                        break;
+                    case 4:
+                        jsonUtf8.WritePropertyName(Encoding.UTF8.GetBytes(PropertyName));
+                        jsonUtf8.WriteStringValue(Encoding.UTF8.GetBytes(value));
+                        break;
+                    case 5:
+                        jsonUtf8.WritePropertyName(JsonEncodedText.Encode(PropertyName, encoder));
+                        jsonUtf8.WriteStringValue(JsonEncodedText.Encode(value, encoder));
+                        break;
+                }
+
+                jsonUtf8.WriteEndObject();
+                jsonUtf8.Flush();
+
+                string result = Encoding.UTF8.GetString(
+                        output.WrittenSpan
+#if netfx
+                        .ToArray()
+#endif
+                    );
+
+                Assert.Equal(expectedStr, result);
+            }
         }
 
         [Theory]
@@ -4306,6 +4372,11 @@ namespace System.Text.Json.Tests
             }
         }
 
+        // NOTE: WriteLargeKeyOrValue test is constrained to run on Windows and MacOSX because it causes
+        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        //       time the memory is accessed which triggers the full memory allocation.
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         [ConditionalTheory(nameof(IsX64))]
         [OuterLoop]
         [InlineData(true, true)]
@@ -4319,8 +4390,8 @@ namespace System.Text.Json.Tests
 
             try
             {
-                key = new byte[1_000_000_001];
-                value = new byte[1_000_000_001];
+                key = new byte[MaxUnescapedTokenSize + 1];
+                value = new byte[MaxUnescapedTokenSize + 1];
             }
             catch (OutOfMemoryException)
             {
@@ -4348,6 +4419,11 @@ namespace System.Text.Json.Tests
             }
         }
 
+        // NOTE: WriteLargeKeyValue test is constrained to run on Windows and MacOSX because it causes
+        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        //       time the memory is accessed which triggers the full memory allocation.
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         [ConditionalTheory(nameof(IsX64))]
         [OuterLoop]
         [InlineData(true, true)]
@@ -4363,8 +4439,8 @@ namespace System.Text.Json.Tests
 
             try
             {
-                key = new byte[1_000_000_001];
-                value = new byte[1_000_000_001];
+                key = new byte[MaxUnescapedTokenSize + 1];
+                value = new byte[MaxUnescapedTokenSize + 1];
             }
             catch (OutOfMemoryException)
             {
@@ -4372,9 +4448,41 @@ namespace System.Text.Json.Tests
             }
 
             WriteTooLargeHelper(options, key, value);
-            WriteTooLargeHelper(options, key.Slice(0, 1_000_000_000), value);
-            WriteTooLargeHelper(options, key, value.Slice(0, 1_000_000_000));
+            WriteTooLargeHelper(options, key.Slice(0, MaxUnescapedTokenSize), value);
+            WriteTooLargeHelper(options, key, value.Slice(0, MaxUnescapedTokenSize));
             WriteTooLargeHelper(options, key.Slice(0, 10_000_000 / 3), value.Slice(0, 10_000_000 / 3), noThrow: true);
+        }
+
+        // NOTE: WriteLargeKeyEscapedValue test is constrained to run on Windows and MacOSX because it causes
+        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        //       time the memory is accessed which triggers the full memory allocation.
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
+        [ConditionalTheory(nameof(IsX64))]
+        [OuterLoop]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void WriteLargeKeyEscapedValue(bool formatted, bool skipValidation)
+        {
+            var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
+
+            Span<byte> key;
+            Span<byte> value;
+
+            try
+            {
+                // Since the byte values are 0 they will be escaped and size > MaxUnescapedTokenSize but < MaxEscapedTokenSize.
+                key = new byte[MaxUnescapedTokenSize / 2];
+                value = new byte[MaxUnescapedTokenSize / 2];
+            }
+            catch (OutOfMemoryException)
+            {
+                return;
+            }
+
+            WriteTooLargeHelper(options, key, value, noThrow: true);
         }
 
         [Theory]
@@ -5387,23 +5495,21 @@ namespace System.Text.Json.Tests
 
         private static string GetEscapedExpectedString(bool prettyPrint, string propertyName, string value, StringEscapeHandling escaping, bool escape = true)
         {
-            var ms = new MemoryStream();
-            TextWriter streamWriter = new StreamWriter(ms, new UTF8Encoding(false), 1024, true);
-
-            var json = new JsonTextWriter(streamWriter)
+            using (TextWriter stringWriter = new StringWriter())
+            using (var json = new JsonTextWriter(stringWriter)
             {
                 Formatting = prettyPrint ? Formatting.Indented : Formatting.None,
                 StringEscapeHandling = escaping
-            };
+            })
+            {
+                json.WriteStartObject();
+                json.WritePropertyName(propertyName, escape);
+                json.WriteValue(value);
+                json.WriteEnd();
 
-            json.WriteStartObject();
-            json.WritePropertyName(propertyName, escape);
-            json.WriteValue(value);
-            json.WriteEnd();
-
-            json.Flush();
-
-            return Encoding.UTF8.GetString(ms.ToArray());
+                json.Flush();
+                return stringWriter.ToString();
+            }
         }
 
         private static string GetCustomExpectedString(bool prettyPrint)
@@ -5828,7 +5934,7 @@ namespace System.Text.Json.Tests
 #endif
                     );
 
-            // Temporary hack until we can use the same escape algorithm throughout.
+            // Temporary hack until we can use the same escape algorithm on both sides and make sure we want uppercase hex.
             Assert.Equal(expectedValue.NormalizeToJsonNetFormat(), value.NormalizeToJsonNetFormat());
         }
 
@@ -5857,7 +5963,7 @@ namespace System.Text.Json.Tests
         {
             var sb = new StringBuilder(json.Length);
             int i = 0;
-            while (i < json.Length - 1)
+            while (i < json.Length)
             {
                 if (json[i] == '\\')
                 {

@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Microsoft.VisualBasic.Tests
 {
@@ -275,7 +276,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.True(FileSystem.EOF(fileNumber));
             FileSystem.FileClose(fileNumber);
 
-            Assert.Equal(true, _bool);
+            Assert.True(_bool);
             Assert.Equal((byte)1, _byte);
             Assert.Equal((char)2, _char);
             Assert.Equal((decimal)3, _decimal);
@@ -342,7 +343,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.True(FileSystem.EOF(fileNumber));
             FileSystem.FileClose(fileNumber);
 
-            Assert.Equal(true, _bool);
+            Assert.Equal((object)true, _bool);
             Assert.Equal((byte)1, _byte);
             Assert.Equal((char)2, _char);
             Assert.Equal((decimal)3, _decimal);
@@ -471,7 +472,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.True(FileSystem.EOF(fileNumber));
             FileSystem.FileClose(fileNumber);
 
-            Assert.Equal(true, _bool);
+            Assert.True(_bool);
             Assert.Equal((byte)1, _byte);
             Assert.Equal((char)2, _char);
             Assert.Equal((decimal)3, _decimal);
@@ -529,7 +530,7 @@ namespace Microsoft.VisualBasic.Tests
                 Assert.True(FileSystem.EOF(fileNumber));
 
                 Assert.Equal(DBNull.Value, _dbnull);
-                Assert.Equal(true, _bool);
+                Assert.Equal((object)true, _bool);
                 Assert.Equal((short)1, _byte);
                 Assert.Equal("\u0002", _char);
                 Assert.Equal((short)3, _decimal);
@@ -723,7 +724,15 @@ namespace Microsoft.VisualBasic.Tests
             {
                 ex = e;
             }
-            Assert.NotNull(ex?.GetType() == typeof(TException));
+            if (ex == null)
+            {
+                throw new ThrowsException(typeof(TException));
+            }
+            
+            if (ex.GetType() != typeof(TException))
+            {
+                throw new ThrowsException(typeof(TException), ex);
+            }
         }
     }
 }

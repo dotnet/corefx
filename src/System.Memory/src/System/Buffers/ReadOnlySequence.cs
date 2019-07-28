@@ -111,21 +111,21 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the <see cref="T:T[]"/>.
+        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the array.
         /// </summary>
         public ReadOnlySequence(T[] array)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
 
-            _startObject = array!; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
-            _endObject = array!; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            _startObject = array;
+            _endObject = array;
             _startInteger = ReadOnlySequence.ArrayToSequenceStart(0);
             _endInteger = ReadOnlySequence.ArrayToSequenceEnd(array!.Length); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the <see cref="T:T[]"/>, start and index.
+        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the array, start, and index.
         /// </summary>
         public ReadOnlySequence(T[] array, int start, int length)
         {

@@ -122,7 +122,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
                 @"""MyDateTimeOffset"" : ""2019-01-30T12:01:02.0000000+01:00""," +
                 @"""MyGuid"" : ""1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6""," +
-                @"""MyUri"" : ""https:\/\/github.com\/dotnet\/corefx""," +
+                @"""MyUri"" : ""https://github.com/dotnet/corefx""," +
                 @"""MyEnum"" : 2," + // int by default
                 @"""MyInt64Enum"" : -9223372036854775808," +
                 @"""MyUInt64Enum"" : 18446744073709551615," +
@@ -156,7 +156,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDateTimeArray"" : [""2019-01-30T12:01:02.0000000Z""]," +
                 @"""MyDateTimeOffsetArray"" : [""2019-01-30T12:01:02.0000000+01:00""]," +
                 @"""MyGuidArray"" : [""1B33498A-7B7D-4DDA-9C13-F6AA4AB449A6""]," +
-                @"""MyUriArray"" : [""https:\/\/github.com\/dotnet\/corefx""]," +
+                @"""MyUriArray"" : [""https://github.com/dotnet/corefx""]," +
                 @"""MyEnumArray"" : [2]," + // int by default
                 @"""MyInt16TwoDimensionArray"" : [[10, 11],[20, 21]]," +
                 @"""MyInt16TwoDimensionList"" : [[10, 11],[20, 21]]," +
@@ -319,8 +319,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal('a', MyChar);
             Assert.Equal("Hello", MyString);
             Assert.Equal(3.3m, MyDecimal);
-            Assert.Equal(false, MyBooleanFalse);
-            Assert.Equal(true, MyBooleanTrue);
+            Assert.False(MyBooleanFalse);
+            Assert.True(MyBooleanTrue);
             Assert.Equal(1.1f, MySingle);
             Assert.Equal(2.2d, MyDouble);
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTime);
@@ -347,8 +347,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal('a', MyCharArray[0]);
             Assert.Equal("Hello", MyStringArray[0]);
             Assert.Equal(3.3m, MyDecimalArray[0]);
-            Assert.Equal(false, MyBooleanFalseArray[0]);
-            Assert.Equal(true, MyBooleanTrueArray[0]);
+            Assert.False(MyBooleanFalseArray[0]);
+            Assert.True(MyBooleanTrueArray[0]);
             Assert.Equal(1.1f, MySingleArray[0]);
             Assert.Equal(2.2d, MyDoubleArray[0]);
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTimeArray[0]);

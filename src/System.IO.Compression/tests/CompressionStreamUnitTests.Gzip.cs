@@ -66,7 +66,7 @@ namespace System.IO.Compression
         [InlineData(1000, true, false, 1, 1)]
         [InlineData(1000, false, false, 1001 * 24, 1)]
         [InlineData(1000, true, false, 1001 * 24, 1)]
-        public async void ManyConcatenatedGzipStreams(int streamCount, bool useAsync, bool useReadByte, int bufferSize, int bytesPerStream)
+        public async Task ManyConcatenatedGzipStreams(int streamCount, bool useAsync, bool useReadByte, int bufferSize, int bytesPerStream)
         {
             await TestConcatenatedGzipStreams(streamCount, useAsync, useReadByte, bufferSize, bytesPerStream);
         }
@@ -82,7 +82,7 @@ namespace System.IO.Compression
         [InlineData(1000, true, false, 1, 9000)]
         [InlineData(1000, false, false, 1001 * 24, 9000)]
         [InlineData(1000, true, false, 1001 * 24, 9000)]
-        public async void ManyManyConcatenatedGzipStreams(int streamCount, bool useAsync, bool useReadByte, int bufferSize, int bytesPerStream)
+        public async Task ManyManyConcatenatedGzipStreams(int streamCount, bool useAsync, bool useReadByte, int bufferSize, int bytesPerStream)
         {
             await TestConcatenatedGzipStreams(streamCount, useAsync, useReadByte, bufferSize, bytesPerStream);
         }
@@ -197,7 +197,7 @@ namespace System.IO.Compression
         [InlineData(false, false)]
         [InlineData(false, true)]
         [InlineData(true, false)]
-        [InlineData(true, false)]
+        [InlineData(true, true)]
         public async Task DisposeAsync_Flushes(bool derived, bool leaveOpen)
         {
             var ms = new MemoryStream();
@@ -227,7 +227,7 @@ namespace System.IO.Compression
         [InlineData(false, false)]
         [InlineData(false, true)]
         [InlineData(true, false)]
-        [InlineData(true, false)]
+        [InlineData(true, true)]
         public async Task DisposeAsync_MultipleCallsAllowed(bool derived, bool leaveOpen)
         {
             using (var gs = derived ?

@@ -67,7 +67,6 @@ namespace System.Net.Tests
 
         [Theory]
         [InlineData(AuthenticationSchemes.Basic)]
-        [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.None)]
         [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.Anonymous)]
         public async Task BasicAuthentication_ValidUsernameAndPassword_Success(AuthenticationSchemes authScheme)
         {
@@ -337,7 +336,7 @@ namespace System.Net.Tests
         {
             using (var listener = new HttpListener())
             {
-                Assert.Equal(false, listener.UnsafeConnectionNtlmAuthentication);
+                Assert.False(listener.UnsafeConnectionNtlmAuthentication);
 
                 listener.UnsafeConnectionNtlmAuthentication = true;
                 Assert.True(listener.UnsafeConnectionNtlmAuthentication);

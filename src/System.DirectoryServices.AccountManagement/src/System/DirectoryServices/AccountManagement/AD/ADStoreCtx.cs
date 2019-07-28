@@ -431,7 +431,7 @@ namespace System.DirectoryServices.AccountManagement
                 if (e is System.Runtime.InteropServices.COMException)
                     throw ExceptionHelper.GetExceptionFromCOMException((System.Runtime.InteropServices.COMException)e);
                 else
-                    throw e;
+                    throw;
             }
         }
 
@@ -2477,7 +2477,7 @@ namespace System.DirectoryServices.AccountManagement
         protected StoreCapabilityMap storeCapability = 0;
 
         // Must be called inside of lock(domainInfoLock)
-        virtual protected void LoadDomainInfo()
+        protected virtual void LoadDomainInfo()
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "ADStoreCtx", "LoadComputerInfo");
 
