@@ -428,15 +428,15 @@ namespace System.Diagnostics.Tests
             ProcessPriorityClass priorityClass = _process.PriorityClass;
 
             _process.PriorityClass = ProcessPriorityClass.Idle;
-            Assert.Equal(_process.PriorityClass, ProcessPriorityClass.Idle);
+            Assert.Equal(ProcessPriorityClass.Idle, _process.PriorityClass);
 
             try
             {
                 _process.PriorityClass = ProcessPriorityClass.High;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.High);
+                Assert.Equal(ProcessPriorityClass.High, _process.PriorityClass);
 
                 _process.PriorityClass = ProcessPriorityClass.Normal;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.Normal);
+                Assert.Equal(ProcessPriorityClass.Normal, _process.PriorityClass);
 
                 _process.PriorityClass = priorityClass;
             }
