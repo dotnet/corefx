@@ -259,7 +259,7 @@ public static partial class XmlSerializerTests
 <string> </string>"), string.Empty);
         Assert.StrictEqual("Hello World! \u6F22 \u00F1", SerializeAndDeserialize<string>("Hello World! \u6F22 \u00F1",
 @"<?xml version=""1.0""?>
-<string>Hello World! \u6F22 \u00F1</string>"));
+<string>Hello World! 漢 ñ</string>"));
     }
 
     [Fact]

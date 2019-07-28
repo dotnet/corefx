@@ -322,57 +322,6 @@ namespace System.Net.Http
                 {
                     _waitSource.SetResult(true);
                 }
-
-                _connection.RemoveStream(this);
-
-                // Do cleanup.
-                _streamWindow.Dispose();
-                _requestBodyCancellationSource?.Dispose();
-            }
-
-            private void Cancel()
-            {
-                if (NetEventSource.IsEnabled) Trace("");
-
-                CancellationTokenSource requestBodyCancellationSource = null;
-                bool signalWaiter = false;
-
-                lock (SyncObject)
-                {
-                    if (_requestCompletionState == StreamCompletionState.InProgress)
-                    {
-                        requestBodyCancellationSource = _requestBodyCancellationSource;
-                        Debug.Assert(requestBodyCancellationSource != null);
-                    }
-
-                    if (_responseCompletionState == StreamCompletionState.InProgress)
-                    {
-                        _responseCompletionState = StreamCompletionState.Failed;
-                        CheckForCompletion();
-                    }
-
-                    // Discard any remaining buffered response data
-                    if (_responseBuffer.ActiveLength != 0)
-                    {
-                        _responseBuffer.Discard(_responseBuffer.ActiveLength);
-                    }
-
-                    _responseProtocolState = ResponseProtocolState.Aborted;
-
-                    signalWaiter = _hasWaiter;
-                    _hasWaiter = false;
-                }
-
-                if (requestBodyCancellationSource != null)
-                {
-                    // When cancellation propagates, SendRequestBodyAsync will set _requestCompletionState to Failed
-                    requestBodyCancellationSource.Cancel();
-                }
-
-                if (signalWaiter)
-                {
-                    _waitSource.SetResult(true);
-                }
             }
 
             public void OnWindowUpdate(int amount) => _streamWindow.AdjustCredit(amount);

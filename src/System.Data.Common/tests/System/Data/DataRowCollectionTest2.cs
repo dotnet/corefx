@@ -245,7 +245,7 @@ namespace System.Data.Tests
         {
             DataTable dt = DataProvider.CreateParentDataTable();
             int count = dt.Rows.Count;
-            Assert.Equal(0, count);
+            Assert.NotEqual(0, count);
             dt.Rows.Clear();
             Assert.Equal(0, dt.Rows.Count);
         }
