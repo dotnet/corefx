@@ -221,7 +221,7 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Linux)] // test relies on xdg-open
         public void ProcessStart_UseShellExecute_OnUnix_DocumentFile_IgnoresArguments()
         {
-            Assert.Equal(s_allowedProgramsToRun[0], "xdg-open");
+            Assert.Equal("xdg-open", s_allowedProgramsToRun[0]);
 
             if (!IsProgramInstalled("xdg-open"))
             {
