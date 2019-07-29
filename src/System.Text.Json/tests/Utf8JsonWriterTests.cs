@@ -631,7 +631,7 @@ namespace System.Text.Json.Tests
 
         private sealed class ThrowingFromWriteMemoryStream : MemoryStream
         {
-            public Exception ExceptionToThrow;
+            public Exception ExceptionToThrow { get; set; }
 
             public override void Write(byte[] buffer, int offset, int count)
             {

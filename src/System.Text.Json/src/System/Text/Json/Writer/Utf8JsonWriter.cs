@@ -300,7 +300,7 @@ namespace System.Text.Json
                     _stream.Write(underlyingBuffer.Array, underlyingBuffer.Offset, underlyingBuffer.Count);
 #endif
 
-                    BytesCommitted += _arrayBufferWriter.WrittenSpan.Length;
+                    BytesCommitted += _arrayBufferWriter.WrittenCount;
                     _arrayBufferWriter.Clear();
                 }
                 _stream.Flush();
@@ -413,7 +413,7 @@ namespace System.Text.Json
                     await _stream.WriteAsync(underlyingBuffer.Array, underlyingBuffer.Offset, underlyingBuffer.Count, cancellationToken).ConfigureAwait(false);
 #endif
 
-                    BytesCommitted += _arrayBufferWriter.WrittenMemory.Length;
+                    BytesCommitted += _arrayBufferWriter.WrittenCount;
                     _arrayBufferWriter.Clear();
                 }
                 await _stream.FlushAsync(cancellationToken).ConfigureAwait(false);
@@ -1052,7 +1052,7 @@ namespace System.Text.Json
                 Debug.Assert(_arrayBufferWriter.WrittenCount == underlyingBuffer.Count);
                 _stream.Write(underlyingBuffer.Array, underlyingBuffer.Offset, underlyingBuffer.Count);
 #endif
-                BytesCommitted += _arrayBufferWriter.WrittenSpan.Length;
+                BytesCommitted += _arrayBufferWriter.WrittenCount;
                 _arrayBufferWriter.Clear();
 
                 _memory = _arrayBufferWriter.GetMemory(sizeHint);
