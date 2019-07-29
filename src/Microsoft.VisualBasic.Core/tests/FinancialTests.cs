@@ -11,7 +11,8 @@ namespace Microsoft.VisualBasic.Tests
     public class FinancialTests
     {
         // The accuracy of some numeric parsing and formatting depends on the platform.
-        private static readonly int s_precision = PlatformDetection.IsFullFramework || PlatformDetection.IsArmOrArm64Process || PlatformDetection.IsAlpine ? 14 : 15;
+        private static readonly int s_precision = PlatformDetection.IsAlpine ? 12 :
+            PlatformDetection.IsFullFramework || PlatformDetection.IsArmOrArm64Process ? 14 : 15;
 
         [Theory]
         [InlineData(0, 1.0, 1.0, 1.0, 1.0, 0)]
