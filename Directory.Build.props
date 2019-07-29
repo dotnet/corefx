@@ -216,6 +216,9 @@
     
     <!-- Workaround for codecov issue https://github.com/tonerdo/coverlet/issues/312 -->
     <EnableSourceLink Condition="'$(ContinuousIntegrationBuild)' != 'true' and '$(OfficialBuildId)' == ''">false</EnableSourceLink>
+
+    <!-- TODO-NULLABLE: Remove once netstandard has annotations for Debug.Assert, string.IsNullOrEmpty, etc. -->
+    <NoWarn Condition="'$(TargetsNetFx)' == 'true' OR '$(TargetsNetStandard)' == 'true'">$(NoWarn);nullable</NoWarn>
   </PropertyGroup>
     
   <!-- Set up Default symbol and optimization for Configuration -->
@@ -243,7 +246,8 @@
     <NoStdLib>true</NoStdLib>
     <NoExplicitReferenceToStdLib>true</NoExplicitReferenceToStdLib>
     <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
-    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <!-- Enable the target framework attribute on test assemblies as vstest relies on that property. -->
+    <GenerateTargetFrameworkAttribute Condition="'$(IsTestProject)' != 'true'">false</GenerateTargetFrameworkAttribute>
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <!-- Don't reference implicit framework packages, all projects in this repo must be explicit -->
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>

@@ -180,7 +180,7 @@ namespace System.Text.Json.Tests
         public static void TestValidIntegerValue()
         {
             StoreColor c = JsonSerializer.Deserialize<StoreColor>("1");
-            Assert.Equal(c, StoreColor.Black);
+            Assert.Equal(StoreColor.Black, c);
         }
 
         [Fact]
@@ -265,7 +265,7 @@ namespace System.Text.Json.Tests
             EnumClass enumClass = JsonSerializer.Deserialize<EnumClass>(json);
             Assert.Equal(StoreColor.Red, enumClass.StoreColor);
             Assert.Equal(StoreColor.White, enumClass.NullableStoreColor1);
-            Assert.Equal(null, enumClass.NullableStoreColor2);
+            Assert.Null(enumClass.NullableStoreColor2);
         }
 
         [Fact]

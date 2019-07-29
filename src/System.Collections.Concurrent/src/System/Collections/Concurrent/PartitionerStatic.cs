@@ -12,6 +12,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace System.Collections.Concurrent
@@ -150,9 +151,9 @@ namespace System.Collections.Concurrent
         /// <typeparam name="TSource">Type of the elements in source enumerable.</typeparam>
         /// <param name="source">The enumerable to be partitioned.</param>
         /// <param name="partitionerOptions">Options to control the buffering behavior of the partitioner.</param>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">
+        /// <exception cref="System.ArgumentOutOfRangeException">
         /// The <paramref name="partitionerOptions"/> argument specifies an invalid value for <see
-        /// cref="T:System.Collections.Concurrent.EnumerablePartitionerOptions"/>.
+        /// cref="System.Collections.Concurrent.EnumerablePartitionerOptions"/>.
         /// </exception>
         /// <returns>
         /// An orderable partitioner based on the input array.
@@ -178,7 +179,7 @@ namespace System.Collections.Concurrent
         /// <param name="fromInclusive">The lower, inclusive bound of the range.</param>
         /// <param name="toExclusive">The upper, exclusive bound of the range.</param>
         /// <returns>A partitioner.</returns>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"> The <paramref name="toExclusive"/> argument is 
+        /// <exception cref="System.ArgumentOutOfRangeException"> The <paramref name="toExclusive"/> argument is 
         /// less than or equal to the <paramref name="fromInclusive"/> argument.</exception>
         public static OrderablePartitioner<Tuple<long, long>> Create(long fromInclusive, long toExclusive)
         {
@@ -199,9 +200,9 @@ namespace System.Collections.Concurrent
         /// <param name="toExclusive">The upper, exclusive bound of the range.</param>
         /// <param name="rangeSize">The size of each subrange.</param>
         /// <returns>A partitioner.</returns>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"> The <paramref name="toExclusive"/> argument is 
+        /// <exception cref="System.ArgumentOutOfRangeException"> The <paramref name="toExclusive"/> argument is 
         /// less than or equal to the <paramref name="fromInclusive"/> argument.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"> The <paramref name="rangeSize"/> argument is 
+        /// <exception cref="System.ArgumentOutOfRangeException"> The <paramref name="rangeSize"/> argument is 
         /// less than or equal to 0.</exception>
         public static OrderablePartitioner<Tuple<long, long>> Create(long fromInclusive, long toExclusive, long rangeSize)
         {
@@ -235,7 +236,7 @@ namespace System.Collections.Concurrent
         /// <param name="fromInclusive">The lower, inclusive bound of the range.</param>
         /// <param name="toExclusive">The upper, exclusive bound of the range.</param>
         /// <returns>A partitioner.</returns>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"> The <paramref name="toExclusive"/> argument is 
+        /// <exception cref="System.ArgumentOutOfRangeException"> The <paramref name="toExclusive"/> argument is 
         /// less than or equal to the <paramref name="fromInclusive"/> argument.</exception>
         public static OrderablePartitioner<Tuple<int, int>> Create(int fromInclusive, int toExclusive)
         {
@@ -256,9 +257,9 @@ namespace System.Collections.Concurrent
         /// <param name="toExclusive">The upper, exclusive bound of the range.</param>
         /// <param name="rangeSize">The size of each subrange.</param>
         /// <returns>A partitioner.</returns>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"> The <paramref name="toExclusive"/> argument is 
+        /// <exception cref="System.ArgumentOutOfRangeException"> The <paramref name="toExclusive"/> argument is 
         /// less than or equal to the <paramref name="fromInclusive"/> argument.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"> The <paramref name="rangeSize"/> argument is 
+        /// <exception cref="System.ArgumentOutOfRangeException"> The <paramref name="rangeSize"/> argument is 
         /// less than or equal to 0.</exception>
         public static OrderablePartitioner<Tuple<int, int>> Create(int fromInclusive, int toExclusive, int rangeSize)
         {
@@ -321,10 +322,10 @@ namespace System.Collections.Concurrent
 
             //deferred allocating in MoveNext() with initial value 0, to avoid false sharing
             //we also use the fact that: (_currentChunkSize==null) means MoveNext is never called on this enumerator 
-            protected SharedInt? _currentChunkSize;
+            protected StrongBox<int>? _currentChunkSize;
 
             //deferring allocation in MoveNext() with initial value -1, to avoid false sharing
-            protected SharedInt? _localOffset;
+            protected StrongBox<int>? _localOffset;
 
             private const int CHUNK_DOUBLING_RATE = 3; // Double the chunk size every this many grabs
             private int _doublingCountdown; // Number of grabs remaining until chunk size doubles
@@ -425,8 +426,8 @@ namespace System.Collections.Concurrent
                 if (_localOffset == null)
                 {
                     Debug.Assert(_currentChunkSize == null);
-                    _localOffset = new SharedInt(-1);
-                    _currentChunkSize = new SharedInt(0);
+                    _localOffset = new StrongBox<int>(-1);
+                    _currentChunkSize = new StrongBox<int>(0);
                     _doublingCountdown = CHUNK_DOUBLING_RATE;
                 }
                 Debug.Assert(_currentChunkSize != null);
@@ -507,7 +508,7 @@ namespace System.Collections.Concurrent
             /// </summary>
             /// <param name="partitionCount">number of partitions requested</param>
             /// <returns>A list containing <paramref name="partitionCount"/> enumerators.</returns>
-            override public IList<IEnumerator<KeyValuePair<long, TSource>>> GetOrderablePartitions(int partitionCount)
+            public override IList<IEnumerator<KeyValuePair<long, TSource>>> GetOrderablePartitions(int partitionCount)
             {
                 if (partitionCount <= 0)
                 {
@@ -528,7 +529,7 @@ namespace System.Collections.Concurrent
             /// Overrides OrderablePartitioner.GetOrderableDynamicPartitions
             /// </summary>
             /// <returns>a enumerable collection of orderable partitions</returns>
-            override public IEnumerable<KeyValuePair<long, TSource>> GetOrderableDynamicPartitions()
+            public override IEnumerable<KeyValuePair<long, TSource>> GetOrderableDynamicPartitions()
             {
                 return new InternalPartitionEnumerable(_source.GetEnumerator(), _useSingleChunking, false);
             }
@@ -536,7 +537,7 @@ namespace System.Collections.Concurrent
             /// <summary>
             /// Whether additional partitions can be created dynamically.
             /// </summary>
-            override public bool SupportsDynamicPartitions
+            public override bool SupportsDynamicPartitions
             {
                 get { return true; }
             }
@@ -925,7 +926,7 @@ namespace System.Collections.Concurrent
                 /// true if we successfully reserved at least one element (up to #=requestedChunkSize) 
                 /// false if all elements in the source collection have been reserved.
                 /// </returns>
-                override protected bool GrabNextChunk(int requestedChunkSize)
+                protected override bool GrabNextChunk(int requestedChunkSize)
                 {
                     Debug.Assert(requestedChunkSize > 0);
 
@@ -940,10 +941,8 @@ namespace System.Collections.Concurrent
                         _localList = new KeyValuePair<long, TSource>[_maxChunkSize];
                     }
 
-#pragma warning disable 0420 // TODO: https://github.com/dotnet/corefx/issues/35022
                     // make the actual call to the enumerable that grabs a chunk
                     return _enumerable.GrabChunk(_localList, requestedChunkSize, ref _currentChunkSize!.Value);
-#pragma warning restore 0420
                 }
 
                 /// <summary>
@@ -955,12 +954,12 @@ namespace System.Collections.Concurrent
                 /// or not, because we can't undo MoveNext(). Thus we need to maintain a shared 
                 /// boolean value _hasNoElementsLeft across all partitions
                 /// </remarks>
-                override protected bool HasNoElementsLeft
+                protected override bool HasNoElementsLeft
                 {
                     get { return _hasNoElementsLeft.Value; }
                 }
 
-                override public KeyValuePair<long, TSource> Current
+                public override KeyValuePair<long, TSource> Current
                 {
                     get
                     {
@@ -975,7 +974,7 @@ namespace System.Collections.Concurrent
                     }
                 }
 
-                override public void Dispose()
+                public override void Dispose()
                 {
                     // If this is static partitioning, i.e. _activePartitionCount != null, since the current partition 
                     // is disposed, we decrement the number of active partitions for the shared reader. 
@@ -1029,7 +1028,7 @@ namespace System.Collections.Concurrent
             /// </summary>
             /// <param name="partitionCount">number of partitions requested</param>
             /// <returns>A list containing <paramref name="partitionCount"/> enumerators.</returns>
-            override public IList<IEnumerator<KeyValuePair<long, TSource>>> GetOrderablePartitions(int partitionCount)
+            public override IList<IEnumerator<KeyValuePair<long, TSource>>> GetOrderablePartitions(int partitionCount)
             {
                 if (partitionCount <= 0)
                 {
@@ -1049,7 +1048,7 @@ namespace System.Collections.Concurrent
             /// Overrides OrderablePartitioner.GetOrderableDynamicPartitions
             /// </summary>
             /// <returns>a enumerable collection of orderable partitions</returns>
-            override public IEnumerable<KeyValuePair<long, TSource>> GetOrderableDynamicPartitions()
+            public override IEnumerable<KeyValuePair<long, TSource>> GetOrderableDynamicPartitions()
             {
                 return GetOrderableDynamicPartitions_Factory(_data);
             }
@@ -1057,7 +1056,7 @@ namespace System.Collections.Concurrent
             /// <summary>
             /// Whether additional partitions can be created dynamically.
             /// </summary>
-            override public bool SupportsDynamicPartitions
+            public override bool SupportsDynamicPartitions
             {
                 get { return true; }
             }
@@ -1104,7 +1103,7 @@ namespace System.Collections.Concurrent
             /// true if we successfully reserved at least one element (up to #=requestedChunkSize) 
             /// false if all elements in the source collection have been reserved.
             /// </returns>
-            override protected bool GrabNextChunk(int requestedChunkSize)
+            protected override bool GrabNextChunk(int requestedChunkSize)
             {
                 Debug.Assert(requestedChunkSize > 0);
 
@@ -1148,7 +1147,7 @@ namespace System.Collections.Concurrent
             /// Returns whether or not the shared reader has already read the last 
             /// element of the source data 
             /// </summary>
-            override protected bool HasNoElementsLeft
+            protected override bool HasNoElementsLeft
             {
                 get
                 {
@@ -1162,7 +1161,7 @@ namespace System.Collections.Concurrent
             /// For source data type IList and Array, the type of the shared reader is just the data itself.
             /// We don't do anything in Dispose method for IList and Array. 
             /// </summary>
-            override public void Dispose()
+            public override void Dispose()
             { }
         }
 
@@ -1181,7 +1180,7 @@ namespace System.Collections.Concurrent
             { }
 
             //override methods
-            override protected IEnumerable<KeyValuePair<long, TSource>> GetOrderableDynamicPartitions_Factory(IList<TSource> _data)
+            protected override IEnumerable<KeyValuePair<long, TSource>> GetOrderableDynamicPartitions_Factory(IList<TSource> _data)
             {
                 //_data itself serves as shared reader
                 return new InternalPartitionEnumerable(_data);
@@ -1226,14 +1225,14 @@ namespace System.Collections.Concurrent
                 { }
 
                 //overriding methods
-                override protected int SourceCount
+                protected override int SourceCount
                 {
                     get { return _sharedReader.Count; }
                 }
                 /// <summary>
                 /// return a KeyValuePair of the current element and its key 
                 /// </summary>
-                override public KeyValuePair<long, TSource> Current
+                public override KeyValuePair<long, TSource> Current
                 {
                     get
                     {
@@ -1267,7 +1266,7 @@ namespace System.Collections.Concurrent
             { }
 
             //override methods
-            override protected IEnumerable<KeyValuePair<long, TSource>> GetOrderableDynamicPartitions_Factory(TSource[] _data)
+            protected override IEnumerable<KeyValuePair<long, TSource>> GetOrderableDynamicPartitions_Factory(TSource[] _data)
             {
                 return new InternalPartitionEnumerable(_data);
             }
@@ -1312,12 +1311,12 @@ namespace System.Collections.Concurrent
                 { }
 
                 //overriding methods
-                override protected int SourceCount
+                protected override int SourceCount
                 {
                     get { return _sharedReader.Length; }
                 }
 
-                override public KeyValuePair<long, TSource> Current
+                public override KeyValuePair<long, TSource> Current
                 {
                     get
                     {
@@ -1388,7 +1387,7 @@ namespace System.Collections.Concurrent
             /// </summary>
             /// <param name="partitionCount">specified number of partitions</param>
             /// <returns>a list of partitions</returns>
-            override public IList<IEnumerator<KeyValuePair<long, TSource>>> GetOrderablePartitions(int partitionCount)
+            public override IList<IEnumerator<KeyValuePair<long, TSource>>> GetOrderablePartitions(int partitionCount)
             {
                 if (partitionCount <= 0)
                 {
@@ -1518,11 +1517,11 @@ namespace System.Collections.Concurrent
                 Debug.Assert(list != null);
                 _list = list;
             }
-            override protected int SourceCount
+            protected override int SourceCount
             {
                 get { return _list.Count; }
             }
-            override protected IEnumerator<KeyValuePair<long, TSource>> CreatePartition(int startIndex, int endIndex)
+            protected override IEnumerator<KeyValuePair<long, TSource>> CreatePartition(int startIndex, int endIndex)
             {
                 return new StaticIndexRangePartitionForIList<TSource>(_list, startIndex, endIndex);
             }
@@ -1545,7 +1544,7 @@ namespace System.Collections.Concurrent
                 _list = list;
             }
 
-            override public KeyValuePair<long, TSource> Current
+            public override KeyValuePair<long, TSource> Current
             {
                 get
                 {
@@ -1576,11 +1575,11 @@ namespace System.Collections.Concurrent
                 Debug.Assert(array != null);
                 _array = array;
             }
-            override protected int SourceCount
+            protected override int SourceCount
             {
                 get { return _array.Length; }
             }
-            override protected IEnumerator<KeyValuePair<long, TSource>> CreatePartition(int startIndex, int endIndex)
+            protected override IEnumerator<KeyValuePair<long, TSource>> CreatePartition(int startIndex, int endIndex)
             {
                 return new StaticIndexRangePartitionForArray<TSource>(_array, startIndex, endIndex);
             }
@@ -1602,7 +1601,7 @@ namespace System.Collections.Concurrent
                 _array = array;
             }
 
-            override public KeyValuePair<long, TSource> Current
+            public override KeyValuePair<long, TSource> Current
             {
                 get
                 {

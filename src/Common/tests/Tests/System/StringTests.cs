@@ -549,9 +549,7 @@ namespace System.Tests
         [InlineData("HELLO", 2, "hello", 2, 3, StringComparison.Ordinal, -1)]
         [InlineData("Hello", 2, "Goodbye", 2, 3, StringComparison.Ordinal, -1)]
         [InlineData("Hello", 0, "Hello", 0, 0, StringComparison.Ordinal, 0)]
-        [InlineData("Hello", 0, "Hello", 0, 5, StringComparison.Ordinal, 0)]
         [InlineData("Hello", 0, "Hello", 0, 3, StringComparison.Ordinal, 0)]
-        [InlineData("Hello", 2, "Hello", 2, 3, StringComparison.Ordinal, 0)]
         [InlineData("Hello", 0, "He" + SoftHyphen + "llo", 0, 5, StringComparison.Ordinal, -1)]
         [InlineData("Hello", 0, "-=<Hello>=-", 3, 5, StringComparison.Ordinal, 0)]
         [InlineData("\uD83D\uDD53Hello\uD83D\uDD50", 1, "\uD83D\uDD53Hello\uD83D\uDD54", 1, 7, StringComparison.Ordinal, 0)] // Surrogate split
@@ -2620,7 +2618,7 @@ namespace System.Tests
             Assert.Throws<FormatException>(() => string.Format(formatter, "{-1}", obj1, obj2));
             Assert.Throws<FormatException>(() => string.Format(formatter, "{-1}", obj1, obj2, obj3));
             Assert.Throws<FormatException>(() => string.Format(formatter, "{-1}", obj1, obj2, obj3, obj4));
-
+#pragma warning disable IDE0043 // Format string contains invalid placeholder - the purpose of this is to test the functions
             // Format has out of range value
             Assert.Throws<FormatException>(() => string.Format("{1}", obj1));
             Assert.Throws<FormatException>(() => string.Format("{2}", obj1, obj2));
@@ -2630,6 +2628,7 @@ namespace System.Tests
             Assert.Throws<FormatException>(() => string.Format(formatter, "{2}", obj1, obj2));
             Assert.Throws<FormatException>(() => string.Format(formatter, "{3}", obj1, obj2, obj3));
             Assert.Throws<FormatException>(() => string.Format(formatter, "{4}", obj1, obj2, obj3, obj4));
+#pragma warning restore IDE0043 // Format string contains invalid placeholder
         }
 
         [Theory]
@@ -2642,8 +2641,6 @@ namespace System.Tests
         [InlineData("Hello", 'l', 3, 0, -1)]
         [InlineData("Hello", 'l', 0, 2, -1)]
         [InlineData("Hello", 'l', 0, 3, 2)]
-        [InlineData("Hello", 'l', 4, 1, -1)]
-        [InlineData("Hello", 'x', 1, 4, -1)]
         [InlineData("Hello", 'o', 5, 0, -1)]
         [InlineData("H" + SoftHyphen + "ello", 'e', 0, 3, 2)]
         // For some reason, this is failing on *nix with ordinal comparisons.
@@ -3841,13 +3838,9 @@ namespace System.Tests
         [InlineData("Hello", 'l', 1, 2, -1)]
         [InlineData("Hello", 'l', 0, 1, -1)]
         [InlineData("Hello", 'x', 3, 4, -1)]
-        [InlineData("Hello", 'l', 3, 4, 3)]
-        [InlineData("Hello", 'l', 1, 2, -1)]
         [InlineData("Hello", 'l', 1, 0, -1)]
         [InlineData("Hello", 'l', 4, 2, 3)]
         [InlineData("Hello", 'l', 4, 3, 3)]
-        [InlineData("Hello", 'l', 0, 1, -1)]
-        [InlineData("Hello", 'x', 3, 4, -1)]
         [InlineData("H" + SoftHyphen + "ello", 'H', 2, 3, 0)]
         [InlineData("", 'H', 0, 0, -1)]
         public static void LastIndexOf_SingleLetter(string s, char value, int startIndex, int count, int expected)

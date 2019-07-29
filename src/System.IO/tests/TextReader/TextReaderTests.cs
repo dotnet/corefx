@@ -164,7 +164,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public async void ReadBlockAsyncCharArr()
+        public async Task ReadBlockAsyncCharArr()
         {
             (char[] chArr, CharArrayTextReader textReader) baseInfo = GetCharArray();
             using (CharArrayTextReader tr = baseInfo.textReader)
@@ -190,7 +190,7 @@ namespace System.IO.Tests
                 char[] chArr = new char[baseInfo.chArr.Length];
 
                 var read = await tr.ReadAsync(chArr, 4, 3);
-                Assert.Equal(read, 3);
+                Assert.Equal(3, read);
 
                 for (int count = 0; count < 3; ++count)
                 {

@@ -33,7 +33,6 @@ namespace System.Net.Tests
         [Theory]
         [InlineData("Accept: Test", new string[] { "Test" })]
         [InlineData("Accept: Test, Test2,Test3 ,  Test4", new string[] { "Test", "Test2", "Test3 ", " Test4" })]
-        [InlineData("Accept: Test", new string[] { "Test" })]
         [InlineData("Accept: ", new string[] { "" })]
         [InlineData("Unknown-Header: ", null)]
         public async Task AcceptTypes_GetProperty_ReturnsExpected(string acceptString, string[] expected)
@@ -135,7 +134,6 @@ namespace System.Net.Tests
         [InlineData("PUT", "Content-Length: 1\nContent-Length: 1", 1, true)]
         [InlineData("POST", "Transfer-Encoding: chunked", -1, true)]
         [InlineData("PUT", "Transfer-Encoding: chunked", -1, true)]
-        [InlineData("PUT", "Transfer-Encoding: chunked", -1, true)]
         [InlineData("PUT", "Content-Length: 10\nTransfer-Encoding: chunked", -1, true)]
         [InlineData("PUT", "Transfer-Encoding: chunked\nContent-Length: 10", -1, true)]
         public async Task ContentLength_GetProperty_ReturnsExpected(string method, string contentLengthString, long expected, bool hasEntityBody)
@@ -143,25 +141,6 @@ namespace System.Net.Tests
             HttpListenerRequest request = await GetRequest(method, "", contentLengthString.Split('\n'), content: "\r\n");
             Assert.Equal(expected, request.ContentLength64);
             Assert.Equal(hasEntityBody, request.HasEntityBody);
-        }
-
-        [Theory]
-        [InlineData(100)]
-        [InlineData("-100")]
-        [InlineData("")]
-        [InlineData("abc")]
-        [InlineData("9223372036854775808")]
-        [ActiveIssue(20294, TargetFrameworkMonikers.Netcoreapp)]
-        public async Task ContentLength_ManuallySetInHeaders_ReturnsExpected(string newValue)
-        {
-            HttpListenerRequest request = await GetRequest("POST", null, new string[] { "Content-Length: 1" }, content: "\r\n");
-            Assert.Equal("1", request.Headers["Content-Length"]);
-
-            request.Headers.Set("Content-Length", newValue);
-            Assert.Equal(newValue, request.Headers["Content-Length"]);
-            Assert.Equal(1, request.ContentLength64);
-
-            Assert.True(request.HasEntityBody);
         }
 
         [Fact]

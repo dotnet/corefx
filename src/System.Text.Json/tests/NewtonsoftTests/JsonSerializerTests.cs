@@ -69,22 +69,22 @@ namespace System.Text.Json.Tests
         public void IncompleteContainers()
         {
             JsonException e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IList<object>>("[1,"));
-            Assert.Equal(e.Message, "Expected start of a property name or value, but instead reached end of data. Path: $[1] | LineNumber: 0 | BytePositionInLine: 2.");
+            Assert.Equal("Expected start of a property name or value, but instead reached end of data. Path: $[1] | LineNumber: 0 | BytePositionInLine: 2.", e.Message);
             
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IList<int>>("[1,"));
-            Assert.Equal(e.Message, "Expected start of a property name or value, but instead reached end of data. Path: $[1] | LineNumber: 0 | BytePositionInLine: 2.");
+            Assert.Equal("Expected start of a property name or value, but instead reached end of data. Path: $[1] | LineNumber: 0 | BytePositionInLine: 2.", e.Message);
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IList<int>>("[1"));
-            Assert.Equal(e.Message, "'1' is an invalid end of a number. Expected a delimiter. Path: $[0] | LineNumber: 0 | BytePositionInLine: 2.");
+            Assert.Equal("'1' is an invalid end of a number. Expected a delimiter. Path: $[0] | LineNumber: 0 | BytePositionInLine: 2.", e.Message);
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IDictionary<string, int>>("{\"key\":1,"));
-            Assert.Equal(e.Message, "Expected start of a property name or value, but instead reached end of data. Path: $.key | LineNumber: 0 | BytePositionInLine: 8.");
+            Assert.Equal("Expected start of a property name or value, but instead reached end of data. Path: $.key | LineNumber: 0 | BytePositionInLine: 8.", e.Message);
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IDictionary<string, int>>("{\"key\":1"));
-            Assert.Equal(e.Message, "'1' is an invalid end of a number. Expected a delimiter. Path: $.key | LineNumber: 0 | BytePositionInLine: 8.");
+            Assert.Equal("'1' is an invalid end of a number. Expected a delimiter. Path: $.key | LineNumber: 0 | BytePositionInLine: 8.", e.Message);
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IncompleteTestClass>("{\"key\":1,"));
-            Assert.Equal(e.Message, "Expected start of a property name or value, but instead reached end of data. Path: $ | LineNumber: 0 | BytePositionInLine: 8.");
+            Assert.Equal("Expected start of a property name or value, but instead reached end of data. Path: $ | LineNumber: 0 | BytePositionInLine: 8.", e.Message);
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(@"{""IsTransient"":true}", JsonSerializer.Serialize(new ChildClass { IsTransient = true }));
 
             ChildClass childClass = JsonSerializer.Deserialize<ChildClass>(@"{""IsTransient"":true}");
-            Assert.Equal(true, childClass.IsTransient);
+            Assert.True(childClass.IsTransient);
         }
 
         [Fact]
@@ -102,17 +102,17 @@ namespace System.Text.Json.Tests
             Assert.Equal(@"{""IsTransient"":true}", JsonSerializer.Serialize(new ChildClassVirtual { IsTransient = true }));
 
             ChildClassVirtual childClass = JsonSerializer.Deserialize<ChildClassVirtual>(@"{""IsTransient"":true}");
-            Assert.Equal(true, childClass.IsTransient);
+            Assert.True(childClass.IsTransient);
         }
 
         [Fact]
         public void DeserializeCommentTestObjectWithComments()
         {
             CommentTestObject o = JsonSerializer.Deserialize<CommentTestObject>(@"{/* Test */}", new JsonSerializerOptions { ReadCommentHandling = JsonCommentHandling.Skip });
-            Assert.Equal(false, o.A);
+            Assert.False(o.A);
 
             o = JsonSerializer.Deserialize<CommentTestObject>(@"{""A"": true/* Test */}", new JsonSerializerOptions { ReadCommentHandling = JsonCommentHandling.Skip });
-            Assert.Equal(true, o.A);
+            Assert.True(o.A);
         }
 
         [Fact]

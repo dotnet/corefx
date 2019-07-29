@@ -15,7 +15,7 @@ namespace System.ConfigurationTests
         public void GetDirectoryOrRootName_Null()
         {
             string test = UrlPath.GetDirectoryOrRootName(null);
-            Assert.Equal(null, null);
+            Assert.Null(null);
         }
 
         [Fact]
@@ -53,14 +53,14 @@ namespace System.ConfigurationTests
         public void IsEqualOrSubDirectory_NullDir()
         {
             bool test = UrlPath.IsEqualOrSubdirectory(null, "Hello");
-            Assert.Equal(true, test);
+            Assert.True(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_NullSubDir()
         {
             bool test = UrlPath.IsEqualOrSubdirectory("Hello", null);
-            Assert.Equal(false, test);
+            Assert.False(test);
         }
 
         [Fact]

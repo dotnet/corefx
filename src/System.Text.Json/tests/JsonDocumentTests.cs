@@ -751,8 +751,8 @@ namespace System.Text.Json.Tests
                 JsonElement parsedObject = doc.RootElement;
                 bool first = parsedObject[0].GetBoolean();
                 bool second = parsedObject[1].GetBoolean();
-                Assert.Equal(true, first);
-                Assert.Equal(false, second);
+                Assert.True(first);
+                Assert.False(second);
             }
         }
 
@@ -2050,7 +2050,7 @@ namespace System.Text.Json.Tests
                 void assertOdd(JsonElement elem)
                 {
                     Assert.Equal(JsonValueKind.False, elem.ValueKind);
-                    Assert.Equal(false, elem.GetBoolean());
+                    Assert.False(elem.GetBoolean());
                 }
 
                 Assert.True(root.TryGetProperty(PascalString, out JsonElement pascal));
@@ -2237,7 +2237,7 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData(-1)]
-        [InlineData(JsonCommentHandling.Allow)]
+        [InlineData((int)JsonCommentHandling.Allow)]
         [InlineData(3)]
         [InlineData(byte.MaxValue)]
         [InlineData(byte.MaxValue + 3)] // Other values, like byte.MaxValue + 1 overflows to 0 (i.e. JsonCommentHandling.Disallow), which is valid.

@@ -122,8 +122,8 @@ namespace System.Composition.UnitTests
         {
             var cc = CreateContainer(typeof(ACircular), typeof(BLazy));
             var x = cc.GetExport<BLazy>();
-            Assert.IsAssignableFrom(typeof(ACircular), x.A.Value);
-            Assert.IsAssignableFrom(typeof(BLazy), ((ACircular)x.A.Value).B);
+            Assert.IsAssignableFrom<ACircular>(x.A.Value);
+            Assert.IsAssignableFrom<BLazy>(((ACircular)x.A.Value).B);
         }
 
         [Fact]
@@ -132,7 +132,7 @@ namespace System.Composition.UnitTests
         {
             var cc = CreateContainer(typeof(ACircular), typeof(BLazy));
             var x = cc.GetExport<IA>();
-            Assert.IsAssignableFrom(typeof(BLazy), ((ACircular)((ACircular)x).B.A.Value).B);
+            Assert.IsAssignableFrom<BLazy>(((ACircular)((ACircular)x).B.A.Value).B);
         }
 
         [Fact]
@@ -178,8 +178,8 @@ namespace System.Composition.UnitTests
             var cc = CreateContainer(typeof(MetadataCircularityA), typeof(MetadataCircularityB));
             var a = cc.GetExport<MetadataCircularityA>();
 
-            Assert.Equal(a.B.Metadata.Name, "B");
-            Assert.Equal(a.B.Value.A.Metadata.Name, "A");
+            Assert.Equal("B", a.B.Metadata.Name);
+            Assert.Equal("A", a.B.Value.A.Metadata.Name);
         }
 
         [Fact]

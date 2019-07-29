@@ -4,6 +4,7 @@
 
 using Xunit;
 using System.Buffers;
+using Newtonsoft.Json;
 using System.IO;
 using System.Text.Encodings.Web;
 
@@ -42,6 +43,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        [InlineData("12E-3", false)]    
         [InlineData("1e6", false)]
         [InlineData("1e6", true)]
         [InlineData("1e+6", false)]
@@ -50,7 +52,7 @@ namespace System.Text.Json.Tests
         [InlineData("1e-6", true)]
         [InlineData("-1e6", false)]
         [InlineData("-1e6", true)]
-        [InlineData("-1e+6", true)]
+        [InlineData("-1e+6", false)]
         [InlineData("-1e+6", true)]
         [InlineData("-1e-6", false)]
         [InlineData("-1e-6", true)]
@@ -60,6 +62,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        [InlineData("1.2E+3", false)]
         [InlineData("5.012e-20", false)]
         [InlineData("5.012e-20", true)]
         [InlineData("5.012e20", false)]
@@ -522,6 +525,41 @@ null,
   ""m\u00eal\u00e9e"": 1e6
 }",
                 "{\"m\\u00eal\\u00e9e\":1e6}");
+        }
+
+        [Fact]
+        public static void WriteValueSurrogatesEscapeString()
+        {
+            string unicodeString = "\uD800\uDC00\uD803\uDE6D \uD834\uDD1E\uDBFF\uDFFF";
+            string json = $"[\"{unicodeString}\"]";
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            string expectedStr = GetEscapedExpectedString(unicodeString, StringEscapeHandling.EscapeNonAscii);
+
+            using (JsonDocument doc = JsonDocument.Parse(json, s_options))
+            {
+                JsonElement target = doc.RootElement[0];
+
+                using (var writer = new Utf8JsonWriter(buffer))
+                {
+                    target.WriteTo(writer);
+                    writer.Flush();
+                }
+                AssertContents(expectedStr, buffer);
+            }
+        }
+
+        private static string GetEscapedExpectedString(string value, StringEscapeHandling escaping)
+        {
+            using (TextWriter stringWriter = new StringWriter())
+            using (var json = new JsonTextWriter(stringWriter)
+            {
+                StringEscapeHandling = escaping
+            })
+            {
+                json.WriteValue(value);
+                json.Flush();
+                return stringWriter.ToString();
+            }
         }
 
         [Theory]
@@ -1115,11 +1153,11 @@ null,
                     Indented = indented,
                 };
 
-                using var writer = new Utf8JsonWriter(buffer, options);
-
-                target.WriteTo(writer);
-                writer.Flush();
-
+                using (var writer = new Utf8JsonWriter(buffer, options))
+                {
+                    target.WriteTo(writer);
+                    writer.Flush();
+                }
                 JsonTestHelper.AssertContents(jsonOut ?? jsonIn, buffer);
             }
         }

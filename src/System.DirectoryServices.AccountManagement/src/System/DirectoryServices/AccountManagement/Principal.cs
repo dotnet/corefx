@@ -13,7 +13,7 @@ using System.Collections;
 namespace System.DirectoryServices.AccountManagement
 {
     [System.Diagnostics.DebuggerDisplay("Name ( {Name} )")]
-    abstract public class Principal : IDisposable
+    public abstract class Principal : IDisposable
     {
         //
         // Public properties
@@ -434,7 +434,7 @@ namespace System.DirectoryServices.AccountManagement
                     if (e is System.Runtime.InteropServices.COMException)
                         throw ExceptionHelper.GetExceptionFromCOMException((System.Runtime.InteropServices.COMException)e);
                     else
-                        throw e;
+                        throw;
                 }
             }
 

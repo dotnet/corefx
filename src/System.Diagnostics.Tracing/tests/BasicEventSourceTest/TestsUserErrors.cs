@@ -46,13 +46,13 @@ namespace BasicEventSourceTests
                     listener.Dispose();
 
                     // Confirm that we get exactly one event from this whole process, that has the error message we expect.  
-                    Assert.Equal(events.Count, 1);
+                    Assert.Equal(1, events.Count);
                     Event _event = events[0];
                     Assert.Equal("EventSourceMessage", _event.EventName);
 
                     string message = _event.PayloadString(0, "message");
                     // expected message: "ERROR: Exception in Command Processing for EventSource BadEventSource_Bad_Type_ByteArray: Unsupported type Byte[] in event source. "
-                    Assert.True(Regex.IsMatch(message, "Unsupported type"));
+                    Assert.Matches("Unsupported type", message);
                 }
             }
             finally
@@ -119,14 +119,14 @@ namespace BasicEventSourceTests
             listener.Dispose();
 
             // Confirm that we get exactly one event from this whole process, that has the error message we expect.  
-            Assert.Equal(events.Count, 1);
+            Assert.Equal(1, events.Count);
             Event _event = events[0];
             Assert.Equal("EventSourceMessage", _event.EventName);
             string message = _event.PayloadString(0, "message");
             Debug.WriteLine(string.Format("Message=\"{0}\"", message));
             // expected message: "ERROR: Exception in Command Processing for EventSource BadEventSource_MismatchedIds: Event Event2 was assigned event ID 2 but 1 was passed to WriteEvent. "
             if (!PlatformDetection.IsFullFramework) // Full framework has typo
-                Assert.True(Regex.IsMatch(message, "Event Event2 was assigned event ID 2 but 1 was passed to WriteEvent"));
+                Assert.Matches("Event Event2 was assigned event ID 2 but 1 was passed to WriteEvent", message);
         }
 
         [Fact]
@@ -156,7 +156,7 @@ namespace BasicEventSourceTests
                     bes.RelatedActivity(newGuid2, "Hello", 42, "AA", "BB");
 
                     // Confirm that we get exactly one event from this whole process, that has the error message we expect.  
-                    Assert.Equal(events.Count, 1);
+                    Assert.Equal(1, events.Count);
                     Event _event = events[0];
                     Assert.Equal("EventSourceMessage", _event.EventName);
                     string message = _event.PayloadString(0, "message");

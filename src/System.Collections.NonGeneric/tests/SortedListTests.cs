@@ -1403,7 +1403,7 @@ namespace System.Collections.Tests
                 Assert.Equal(2048, sortList2[101]);
 
                 sortList2[102] = null;
-                Assert.Equal(null, sortList2[102]);
+                Assert.Null(sortList2[102]);
             });
         }
 
@@ -1566,7 +1566,7 @@ namespace System.Collections.Tests
                 sortListMother.Add("Key_" + i, "Value_" + i);
             }
 
-            Assert.Equal(sortListMother.SyncRoot.GetType(), typeof(SortedList));
+            Assert.Equal(typeof(SortedList), sortListMother.SyncRoot.GetType());
 
             SortedList sortListSon = SortedList.Synchronized(sortListMother);
             _sortListGrandDaughter = SortedList.Synchronized(sortListSon);

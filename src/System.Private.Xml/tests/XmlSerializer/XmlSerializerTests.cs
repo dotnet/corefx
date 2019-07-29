@@ -158,30 +158,30 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
     [Fact]
     public static void Xml_EnumAsRoot()
     {
-        Assert.StrictEqual(SerializeAndDeserialize<MyEnum>(MyEnum.Two,
+        Assert.StrictEqual(MyEnum.Two, SerializeAndDeserialize<MyEnum>(MyEnum.Two,
 @"<?xml version=""1.0""?>
-<MyEnum>Two</MyEnum>"), MyEnum.Two);
-        Assert.StrictEqual(SerializeAndDeserialize<ByteEnum>(ByteEnum.Option1,
+<MyEnum>Two</MyEnum>"));
+        Assert.StrictEqual(ByteEnum.Option1, SerializeAndDeserialize<ByteEnum>(ByteEnum.Option1,
 @"<?xml version=""1.0""?>
-<ByteEnum>Option1</ByteEnum>"), ByteEnum.Option1);
-        Assert.StrictEqual(SerializeAndDeserialize<SByteEnum>(SByteEnum.Option1,
+<ByteEnum>Option1</ByteEnum>"));
+        Assert.StrictEqual(SByteEnum.Option1, SerializeAndDeserialize<SByteEnum>(SByteEnum.Option1,
 @"<?xml version=""1.0""?>
-<SByteEnum>Option1</SByteEnum>"), SByteEnum.Option1);
-        Assert.StrictEqual(SerializeAndDeserialize<ShortEnum>(ShortEnum.Option1,
+<SByteEnum>Option1</SByteEnum>"));
+        Assert.StrictEqual(ShortEnum.Option1, SerializeAndDeserialize<ShortEnum>(ShortEnum.Option1,
 @"<?xml version=""1.0""?>
-<ShortEnum>Option1</ShortEnum>"), ShortEnum.Option1);
-        Assert.StrictEqual(SerializeAndDeserialize<IntEnum>(IntEnum.Option1,
+<ShortEnum>Option1</ShortEnum>"));
+        Assert.StrictEqual(IntEnum.Option1, SerializeAndDeserialize<IntEnum>(IntEnum.Option1,
 @"<?xml version=""1.0""?>
-<IntEnum>Option1</IntEnum>"), IntEnum.Option1);
-        Assert.StrictEqual(SerializeAndDeserialize<UIntEnum>(UIntEnum.Option1,
+<IntEnum>Option1</IntEnum>"));
+        Assert.StrictEqual(UIntEnum.Option1, SerializeAndDeserialize<UIntEnum>(UIntEnum.Option1,
 @"<?xml version=""1.0""?>
-<UIntEnum>Option1</UIntEnum>"), UIntEnum.Option1);
-        Assert.StrictEqual(SerializeAndDeserialize<LongEnum>(LongEnum.Option1,
+<UIntEnum>Option1</UIntEnum>"));
+        Assert.StrictEqual(LongEnum.Option1, SerializeAndDeserialize<LongEnum>(LongEnum.Option1,
 @"<?xml version=""1.0""?>
-<LongEnum>Option1</LongEnum>"), LongEnum.Option1);
-        Assert.StrictEqual(SerializeAndDeserialize<ULongEnum>(ULongEnum.Option1,
+<LongEnum>Option1</LongEnum>"));
+        Assert.StrictEqual(ULongEnum.Option1, SerializeAndDeserialize<ULongEnum>(ULongEnum.Option1,
 @"<?xml version=""1.0""?>
-<ULongEnum>Option1</ULongEnum>"), ULongEnum.Option1);
+<ULongEnum>Option1</ULongEnum>"));
     }
 
     [Fact]
@@ -467,7 +467,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         var actual = SerializeAndDeserialize<TypeWithPropertyNameSpecified>(value,
 @"<?xml version=""1.0""?><TypeWithPropertyNameSpecified xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><MyField>MyField</MyField></TypeWithPropertyNameSpecified>");
         Assert.StrictEqual(value.MyField, actual.MyField);
-        Assert.StrictEqual(actual.MyFieldIgnored, 0);
+        Assert.StrictEqual(0, actual.MyFieldIgnored);
     }
 
     [Fact]
@@ -604,8 +604,8 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         obj.BinaryHexContent = Encoding.Unicode.GetBytes(str);
         var actual = SerializeAndDeserialize(obj,
 @"<?xml version=""1.0"" encoding=""utf-8""?><TypeWithBinaryProperty xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><BinaryHexContent>540068006500200071007500690063006B002000620072006F0077006E00200066006F00780020006A0075006D007000730020006F00760065007200200074006800650020006C0061007A007900200064006F0067002E00</BinaryHexContent><Base64Content>VABoAGUAIABxAHUAaQBjAGsAIABiAHIAbwB3AG4AIABmAG8AeAAgAGoAdQBtAHAAcwAgAG8AdgBlAHIAIAB0AGgAZQAgAGwAYQB6AHkAIABkAG8AZwAuAA==</Base64Content></TypeWithBinaryProperty>");
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(obj.Base64Content, actual.Base64Content));
-        Assert.StrictEqual(true, Enumerable.SequenceEqual(obj.BinaryHexContent, actual.BinaryHexContent));
+        Assert.True(Enumerable.SequenceEqual(obj.Base64Content, actual.Base64Content));
+        Assert.True(Enumerable.SequenceEqual(obj.BinaryHexContent, actual.BinaryHexContent));
     }
 
     [Fact]
@@ -712,7 +712,6 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         using (StringReader reader = new StringReader(xml))
         {
             TimeSpan deserializedObj = (TimeSpan)serializer.Deserialize(reader);
-            Assert.NotNull(deserializedObj);
             Assert.Equal(default(TimeSpan), deserializedObj);
         }
     }

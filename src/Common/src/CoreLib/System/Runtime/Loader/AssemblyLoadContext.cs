@@ -38,11 +38,11 @@ namespace System.Runtime.Loader
         // synchronization primitive to protect against usage of this instance while unloading
         private readonly object _unloadLock;
 
-        private event Func<Assembly, string, IntPtr> _resolvingUnmanagedDll;
+        private event Func<Assembly, string, IntPtr>? _resolvingUnmanagedDll;
 
-        private event Func<AssemblyLoadContext, AssemblyName, Assembly> _resolving;
+        private event Func<AssemblyLoadContext, AssemblyName, Assembly>? _resolving;
 
-        private event Action<AssemblyLoadContext> _unloading;
+        private event Action<AssemblyLoadContext>? _unloading;
 
         private readonly string? _name;
 
@@ -168,7 +168,7 @@ namespace System.Runtime.Loader
         //
         // Inputs: Invoking assembly, and library name to resolve
         // Returns: A handle to the loaded native library
-        public event Func<Assembly, string, IntPtr> ResolvingUnmanagedDll
+        public event Func<Assembly, string, IntPtr>? ResolvingUnmanagedDll
         {
             add
             {
@@ -186,7 +186,7 @@ namespace System.Runtime.Loader
         //
         // Inputs: The AssemblyLoadContext and AssemblyName to be loaded
         // Returns: The Loaded assembly object.
-        public event Func<AssemblyLoadContext, AssemblyName, Assembly?> Resolving
+        public event Func<AssemblyLoadContext, AssemblyName, Assembly?>? Resolving
         {
             add
             {
@@ -198,7 +198,7 @@ namespace System.Runtime.Loader
             }
         }
 
-        public event Action<AssemblyLoadContext> Unloading
+        public event Action<AssemblyLoadContext>? Unloading
         {
             add
             {
@@ -212,17 +212,17 @@ namespace System.Runtime.Loader
 
 #region AppDomainEvents
         // Occurs when an Assembly is loaded
-        internal static event AssemblyLoadEventHandler AssemblyLoad;
+        internal static event AssemblyLoadEventHandler? AssemblyLoad;
 
         // Occurs when resolution of type fails
-        internal static event ResolveEventHandler TypeResolve;
+        internal static event ResolveEventHandler? TypeResolve;
 
         // Occurs when resolution of resource fails
-        internal static event ResolveEventHandler ResourceResolve;
+        internal static event ResolveEventHandler? ResourceResolve;
 
         // Occurs when resolution of assembly fails
         // This event is fired after resolve events of AssemblyLoadContext fails
-        internal static event ResolveEventHandler AssemblyResolve;
+        internal static event ResolveEventHandler? AssemblyResolve;
 #endregion
 
         public static AssemblyLoadContext Default => DefaultAssemblyLoadContext.s_loadContext;

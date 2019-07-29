@@ -135,7 +135,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             }
             catch (ArgumentException ex)
             {
-                Assert.Equal(ex.GetType().Name, "RegexParseException");
+                Assert.Equal("RegexParseException", ex.GetType().Name);
                 ArgumentException clone = BinaryFormatterHelpers.Clone(ex);
                 Assert.IsType<ArgumentException>(clone);
             }
@@ -339,7 +339,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
             f.Binder = binder;
             Assert.Same(binder, f.Binder);
 
-            Assert.NotNull(f.Context);
             Assert.Null(f.Context.Context);
             Assert.Equal(StreamingContextStates.All, f.Context.State);
             var context = new StreamingContext(StreamingContextStates.Clone);
@@ -393,7 +392,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             {
                 var result = (Version2ClassWithoutOptionalField)f.Deserialize(s);
                 Assert.NotNull(result);
-                Assert.Equal(null, result.Value);
+                Assert.Null(result.Value);
             }
         }
 
@@ -411,7 +410,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             f.Binder = new DelegateBinder { BindToTypeDelegate = (_, __) => typeof(Version2ClassWithOptionalField) };
             var result = (Version2ClassWithOptionalField)f.Deserialize(s);
             Assert.NotNull(result);
-            Assert.Equal(null, result.Value);
+            Assert.Null(result.Value);
         }
 
         [Fact]

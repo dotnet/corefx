@@ -12,12 +12,9 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the pre-encoded property name and the JSON literal "null" as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The JSON encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <remarks>
-        /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
-        /// </remarks>
+        /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteNull(JsonEncodedText propertyName)
         {
@@ -27,7 +24,7 @@ namespace System.Text.Json
 
         private void WriteLiteralHelper(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> value)
         {
-            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxUnescapedTokenSize);
 
             WriteLiteralByOptions(utf8PropertyName, value);
 
@@ -37,10 +34,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the property name and the JSON literal "null" as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
+        /// <param name="propertyName">The name of the property to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -48,24 +42,27 @@ namespace System.Text.Json
         /// The <paramref name="propertyName"/> parameter is <see langword="null"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteNull(string propertyName)
             => WriteNull((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan());
 
         /// <summary>
         /// Writes the property name and the JSON literal "null" as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
+        /// <param name="propertyName">The name of the property to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteNull(ReadOnlySpan<char> propertyName)
         {
             JsonWriterHelper.ValidateProperty(propertyName);
@@ -81,16 +78,16 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the property name and the JSON literal "null" as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
+        /// <param name="utf8PropertyName">The UTF-8 encoded name of the property to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteNull(ReadOnlySpan<byte> utf8PropertyName)
         {
             JsonWriterHelper.ValidateProperty(utf8PropertyName);
@@ -106,13 +103,10 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the pre-encoded property name and <see cref="bool"/> value (as a JSON literal "true" or "false") as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The JSON encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <param name="value">The value to be written as a JSON literal "true" or "false" as part of the name/value pair.</param>
-        /// <remarks>
-        /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
-        /// </remarks>
+        /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteBoolean(JsonEncodedText propertyName, bool value)
         {
@@ -131,11 +125,8 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the property name and <see cref="bool"/> value (as a JSON literal "true" or "false") as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <param name="value">The value to be written as a JSON literal "true" or "false" as part of the name/value pair.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
+        /// <param name="propertyName">The name of the property to write.</param>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -143,25 +134,28 @@ namespace System.Text.Json
         /// The <paramref name="propertyName"/> parameter is <see langword="null"/>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteBoolean(string propertyName, bool value)
             => WriteBoolean((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan(), value);
 
         /// <summary>
         /// Writes the property name and <see cref="bool"/> value (as a JSON literal "true" or "false") as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <param name="value">The value to be written as a JSON literal "true" or "false" as part of the name/value pair.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
+        /// <param name="propertyName">The name of the property to write.</param>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteBoolean(ReadOnlySpan<char> propertyName, bool value)
         {
             JsonWriterHelper.ValidateProperty(propertyName);
@@ -177,17 +171,17 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the property name and <see cref="bool"/> value (as a JSON literal "true" or "false") as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
-        /// <param name="value">The value to be written as a JSON literal "true" or "false" as part of the name/value pair.</param>
-        /// <remarks>
-        /// The property name is escaped before writing.
-        /// </remarks>
+        /// <param name="utf8PropertyName">The UTF-8 encoded name of the property to write.</param>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The property name is escaped before writing.
+        /// </remarks>
         public void WriteBoolean(ReadOnlySpan<byte> utf8PropertyName, bool value)
         {
             JsonWriterHelper.ValidateProperty(utf8PropertyName);
@@ -306,7 +300,7 @@ namespace System.Text.Json
 
         private void WriteLiteralMinimized(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<byte> value)
         {
-            Debug.Assert(value.Length <= JsonConstants.MaxTokenSize);
+            Debug.Assert(value.Length <= JsonConstants.MaxUnescapedTokenSize);
             Debug.Assert(escapedPropertyName.Length < (int.MaxValue / JsonConstants.MaxExpansionFactorWhileTranscoding) - value.Length - 4);
 
             // All ASCII, 2 quotes for property name, and 1 colon => escapedPropertyName.Length + value.Length + 3
@@ -337,7 +331,7 @@ namespace System.Text.Json
 
         private void WriteLiteralMinimized(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<byte> value)
         {
-            Debug.Assert(value.Length <= JsonConstants.MaxTokenSize);
+            Debug.Assert(value.Length <= JsonConstants.MaxUnescapedTokenSize);
             Debug.Assert(escapedPropertyName.Length < int.MaxValue - value.Length - 4);
 
             int minRequired = escapedPropertyName.Length + value.Length + 3; // 2 quotes for property name, and 1 colon
@@ -371,7 +365,7 @@ namespace System.Text.Json
             int indent = Indentation;
             Debug.Assert(indent <= 2 * JsonConstants.MaxWriterDepth);
 
-            Debug.Assert(value.Length <= JsonConstants.MaxTokenSize);
+            Debug.Assert(value.Length <= JsonConstants.MaxUnescapedTokenSize);
             Debug.Assert(escapedPropertyName.Length < (int.MaxValue / JsonConstants.MaxExpansionFactorWhileTranscoding) - indent - value.Length - 5 - s_newLineLength);
 
             // All ASCII, 2 quotes for property name, 1 colon, and 1 space => escapedPropertyName.Length + value.Length + 4
@@ -417,7 +411,7 @@ namespace System.Text.Json
             int indent = Indentation;
             Debug.Assert(indent <= 2 * JsonConstants.MaxWriterDepth);
 
-            Debug.Assert(value.Length <= JsonConstants.MaxTokenSize);
+            Debug.Assert(value.Length <= JsonConstants.MaxUnescapedTokenSize);
             Debug.Assert(escapedPropertyName.Length < int.MaxValue - indent - value.Length - 5 - s_newLineLength);
 
             int minRequired = indent + escapedPropertyName.Length + value.Length + 4; // 2 quotes for property name, 1 colon, and 1 space

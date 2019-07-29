@@ -51,12 +51,12 @@ namespace System.Text.Json.Serialization.Tests
             // Verify defaults and ensure getters do not throw.
             Assert.False(options.AllowTrailingCommas);
             Assert.Equal(16 * 1024, options.DefaultBufferSize);
-            Assert.Equal(null, options.DictionaryKeyPolicy);
+            Assert.Null(options.DictionaryKeyPolicy);
             Assert.Null(options.Encoder);
             Assert.False(options.IgnoreNullValues);
             Assert.Equal(0, options.MaxDepth);
-            Assert.Equal(false, options.PropertyNameCaseInsensitive);
-            Assert.Equal(null, options.PropertyNamingPolicy);
+            Assert.False(options.PropertyNameCaseInsensitive);
+            Assert.Null(options.PropertyNamingPolicy);
             Assert.Equal(JsonCommentHandling.Disallow, options.ReadCommentHandling);
             Assert.False(options.WriteIndented);
 
@@ -206,7 +206,7 @@ namespace System.Text.Json.Serialization.Tests
 
         [Theory]
         [InlineData(-1)]
-        [InlineData(JsonCommentHandling.Allow)]
+        [InlineData((int)JsonCommentHandling.Allow)]
         [InlineData(3)]
         [InlineData(byte.MaxValue)]
         [InlineData(byte.MaxValue + 3)] // Other values, like byte.MaxValue + 1 overflows to 0 (i.e. JsonCommentHandling.Disallow), which is valid.

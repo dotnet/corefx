@@ -6,6 +6,8 @@ using Xunit;
 using Xunit.Sdk;
 using System.Collections.Generic;
 
+#pragma warning disable xUnit1025 // reporting duplicate test cases due to not distinguishing 0.0 from -0.0
+
 namespace System.Tests
 {
     public static partial class MathTests
@@ -43,7 +45,7 @@ namespace System.Tests
         /// <param name="actual">The value to be compared against</param>
         /// <param name="allowedVariance">The total variance allowed between the expected and actual results.</param>
         /// <exception cref="EqualException">Thrown when the values are not equal</exception>
-        public static void AssertEqual(double expected, double actual, double variance)
+        private static void AssertEqual(double expected, double actual, double variance)
         {
             if (double.IsNaN(expected))
             {

@@ -442,13 +442,13 @@ namespace System.Diagnostics.Tests
                     // add two new subscribers
                     using (var listener1 = new DiagnosticListener("TestListen1"))
                     {
-                        Assert.Equal(listener1.Name, "TestListen1");
+                        Assert.Equal("TestListen1", listener1.Name);
                         Assert.Equal(listener1, returnedListener);
                         returnedListener = null;
 
                         using (var listener2 = new DiagnosticListener("TestListen2"))
                         {
-                            Assert.Equal(listener2.Name, "TestListen2");
+                            Assert.Equal("TestListen2", listener2.Name);
                             Assert.Equal(listener2, returnedListener);
                             returnedListener = null;
                         }   // Dispose of listener2
@@ -503,10 +503,10 @@ namespace System.Diagnostics.Tests
         [OuterLoop]
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35539)]
         [InlineData(100, 100)] // run multiple times to stress it further
-        [InlineData(100, 100)]
-        [InlineData(100, 100)]
-        [InlineData(100, 100)]
-        [InlineData(100, 100)]
+        [InlineData(100, 101)]
+        [InlineData(100, 102)]
+        [InlineData(100, 103)]
+        [InlineData(100, 104)]
         public void AllSubscriberStress(int numThreads, int numListenersPerThread)
         {
             // No listeners have been created yet

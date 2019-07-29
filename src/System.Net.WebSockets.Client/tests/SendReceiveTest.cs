@@ -58,7 +58,7 @@ namespace System.Net.WebSockets.Client.Tests
                 await SendAsync(cws, sendSegment, WebSocketMessageType.Binary, true, ctsDefault.Token);
 
                 WebSocketReceiveResult recvResult = await ReceiveAsync(cws, receiveSegment, ctsDefault.Token);
-                Assert.Equal(false, recvResult.EndOfMessage);
+                Assert.False(recvResult.EndOfMessage);
 
                 while (recvResult.EndOfMessage == false)
                 {
@@ -99,7 +99,7 @@ namespace System.Net.WebSockets.Client.Tests
                         new ArraySegment<byte>(receiveBuffer, totalBytesReceived, receiveBuffer.Length - totalBytesReceived),
                         ctsDefault.Token);
 
-                    Assert.Equal(false, recvResult.EndOfMessage);
+                    Assert.False(recvResult.EndOfMessage);
                     Assert.InRange(recvResult.Count, 0, receiveBuffer.Length - totalBytesReceived);
                     totalBytesReceived += recvResult.Count;
                 }
@@ -292,9 +292,9 @@ namespace System.Net.WebSockets.Client.Tests
                 Assert.Equal(WebSocketState.Open, cws.State);
                 Assert.Equal(message.Length, recvRet.Count);
                 Assert.Equal(WebSocketMessageType.Text, recvRet.MessageType);
-                Assert.Equal(true, recvRet.EndOfMessage);
-                Assert.Equal(null, recvRet.CloseStatus);
-                Assert.Equal(null, recvRet.CloseStatusDescription);
+                Assert.True(recvRet.EndOfMessage);
+                Assert.Null(recvRet.CloseStatus);
+                Assert.Null(recvRet.CloseStatusDescription);
 
                 var recvSegment = new ArraySegment<byte>(receiveSegment.Array, receiveSegment.Offset, recvRet.Count);
                 Assert.Equal(message, WebSocketData.GetTextFromBuffer(recvSegment));
@@ -384,7 +384,7 @@ namespace System.Net.WebSockets.Client.Tests
                 Task acceptTask = server.AcceptConnectionAsync(async connection =>
                 {
                     // Complete the WebSocket upgrade. After this is done, the client-side ConnectAsync should complete.
-                    Assert.True(await LoopbackHelper.WebSocketHandshakeAsync(connection));
+                    Assert.NotNull(await LoopbackHelper.WebSocketHandshakeAsync(connection));
 
                     // Wait for client-side ConnectAsync to complete and for a pending ReceiveAsync to be posted.
                     await pendingReceiveAsyncPosted.Task.TimeoutAfter(TimeOutMilliseconds);
