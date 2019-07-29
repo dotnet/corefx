@@ -11,7 +11,7 @@ namespace Microsoft.VisualBasic.Tests
     public class FinancialTests
     {
         // The accuracy of some numeric parsing and formatting depends on the platform.
-        private static readonly int precision = PlatformDetection.IsFullFramework || PlatformDetection.IsArmOrArm64Process || PlatformDetection.IsAlpine ? 14 : 15;
+        private static readonly int s_precision = PlatformDetection.IsFullFramework || PlatformDetection.IsArmOrArm64Process || PlatformDetection.IsAlpine ? 14 : 15;
 
         [Theory]
         [InlineData(0, 1.0, 1.0, 1.0, 1.0, 0)]
@@ -23,13 +23,13 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(10100.0, 10100.0, 70.0, 20.0, 2.0, 0)] // cost = salvage
         public void DDB(double Cost, double Salvage, double Life, double Period, double Factor, double expected)
         {
-            Assert.Equal(expected, Financial.DDB(Cost, Salvage, Life, Period, Factor), precision);
+            Assert.Equal(expected, Financial.DDB(Cost, Salvage, Life, Period, Factor), s_precision);
         }
 
         [Fact]
         public void DDB_Default()
         {
-            Assert.Equal(57.32680635388748, Financial.DDB(10000.0, 4350.0, 84.0, 35.0), precision);
+            Assert.Equal(57.32680635388748, Financial.DDB(10000.0, 4350.0, 84.0, 35.0), s_precision);
         }
 
         [Theory]
@@ -51,14 +51,14 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(1e+25, 12, 1797, 0, (DueDate)1, -1.797000000000002e+303)] // overFlow
         public void FV(double Rate, double NPer, double Pmt, double PV, DueDate Due, double expected)
         {
-            Assert.Equal(expected, Financial.FV(Rate, NPer, Pmt, PV, Due), precision);
+            Assert.Equal(expected, Financial.FV(Rate, NPer, Pmt, PV, Due), s_precision);
         }
 
         [Fact]
         public void FV_Default()
         {
-            Assert.Equal(-4182.657291138164, Financial.FV(0.0083, 15, 263.0, 0), precision);
-            Assert.Equal(-4182.657291138164, Financial.FV(0.0083, 15, 263.0), precision);
+            Assert.Equal(-4182.657291138164, Financial.FV(0.0083, 15, 263.0, 0), s_precision);
+            Assert.Equal(-4182.657291138164, Financial.FV(0.0083, 15, 263.0), s_precision);
         }
 
         [Theory]
@@ -72,14 +72,14 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(0.008, 4, 12, 3000, 0, (DueDate)7, -18.068845222400633)] // type <> 0 and type <> 1
         public void IPmt(double Rate, double Per, double NPer, double PV, double FV, DueDate Due, double expected)
         {
-            Assert.Equal(expected, Financial.IPmt(Rate, Per, NPer, PV, FV, Due), precision);
+            Assert.Equal(expected, Financial.IPmt(Rate, Per, NPer, PV, FV, Due), s_precision);
         }
 
         [Fact]
         public void IPmt_Default()
         {
-            Assert.Equal(-18.21339598417987, Financial.IPmt(0.008, 4, 12, 3000, 0), precision);
-            Assert.Equal(-18.21339598417987, Financial.IPmt(0.008, 4, 12, 3000), precision);
+            Assert.Equal(-18.21339598417987, Financial.IPmt(0.008, 4, 12, 3000, 0), s_precision);
+            Assert.Equal(-18.21339598417987, Financial.IPmt(0.008, 4, 12, 3000), s_precision);
         }
 
         [Theory]
@@ -98,14 +98,14 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(new double[] { -30000.0, -10000.0, 25000.0, 12000.0, 15000.0 }, 0.1, 0.10928101434575987)]
         public void IRR(double[] ValueArray, double Guess, double expected)
         {
-            Assert.Equal(expected, Financial.IRR(ref ValueArray, Guess), precision);
+            Assert.Equal(expected, Financial.IRR(ref ValueArray, Guess), s_precision);
         }
 
         [Fact]
         public void IRR_Default()
         {
             double[] ValueArray = new double[] { -70000.0, 22000.0, 25000.0, 28000.0, 31000.0 };
-            Assert.Equal(0.177435884421108, Financial.IRR(ref ValueArray), precision);
+            Assert.Equal(0.177435884421108, Financial.IRR(ref ValueArray), s_precision);
         }
 
         [Theory]
@@ -122,7 +122,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(new double[] { -70000.0, 22000.0, 25000.0, 28000.0, 31000.0 }, 0.1, 0.12, 0.15512706281927668)]
         public void MIRR(double[] ValueArray, double FinanceRate, double ReinvestRate, double expected)
         {
-            Assert.Equal(expected, Financial.MIRR(ref ValueArray, FinanceRate, ReinvestRate), precision);
+            Assert.Equal(expected, Financial.MIRR(ref ValueArray, FinanceRate, ReinvestRate), s_precision);
         }
 
         [Theory]
@@ -144,14 +144,14 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(0.0072, -9000.0, 200.0, 0, DueDate.EndOfPeriod, 0.02230391092683241)] // pmt > pv
         public void NPer(double Rate, double Pmt, double PV, double FV, DueDate Due, double expected)
         {
-            Assert.Equal(expected, Financial.NPer(Rate, Pmt, PV, FV, Due), precision);
+            Assert.Equal(expected, Financial.NPer(Rate, Pmt, PV, FV, Due), s_precision);
         }
 
         [Fact]
         public void NPer_Default()
         {
-            Assert.Equal(21.672774889301333, Financial.NPer(0.0072, -350.0, 7000.0, 0), precision);
-            Assert.Equal(21.672774889301333, Financial.NPer(0.0072, -350.0, 7000.0), precision);
+            Assert.Equal(21.672774889301333, Financial.NPer(0.0072, -350.0, 7000.0, 0), s_precision);
+            Assert.Equal(21.672774889301333, Financial.NPer(0.0072, -350.0, 7000.0), s_precision);
         }
 
         [Theory]
@@ -165,7 +165,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(0.0625, new double[] { -70000.0, -22000.0, -25000.0, -28000.0, -31000.0 }, -151077.27609188814)] // all negative cash flows
         public void NPV(double Rate, double[] ValueArray, double expected)
         {
-            Assert.Equal(expected, Financial.NPV(Rate, ref ValueArray), precision);
+            Assert.Equal(expected, Financial.NPV(Rate, ref ValueArray), s_precision);
         }
 
         [Theory]
@@ -188,14 +188,14 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(0, 25, 3000, 0, DueDate.EndOfPeriod, -120)] // rate = 0
         public void Pmt(double Rate, double NPer, double PV, double FV, DueDate Due, double expected)
         {
-            Assert.Equal(expected, Financial.Pmt(Rate, NPer, PV, FV, Due), precision);
+            Assert.Equal(expected, Financial.Pmt(Rate, NPer, PV, FV, Due), s_precision);
         }
 
         [Fact]
         public void Pmt_Default()
         {
-            Assert.Equal(131.2245402332282, Financial.Pmt(0.007, 25, -3000, 0), precision);
-            Assert.Equal(131.2245402332282, Financial.Pmt(0.007, 25, -3000), precision);
+            Assert.Equal(131.2245402332282, Financial.Pmt(0.007, 25, -3000, 0), s_precision);
+            Assert.Equal(131.2245402332282, Financial.Pmt(0.007, 25, -3000), s_precision);
         }
 
         [Theory]
@@ -208,14 +208,14 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(0.008, 4, 12, 3000, 0, (DueDate)7, -243.03222512529004)] // type <> 0 and type <> 1
         public void PPmt(double Rate, double Per, double NPer, double PV, double FV, DueDate Due, double expected)
         {
-            Assert.Equal(expected, Financial.PPmt(Rate, Per, NPer, PV, FV, Due), precision);
+            Assert.Equal(expected, Financial.PPmt(Rate, Per, NPer, PV, FV, Due), s_precision);
         }
 
         [Fact]
         public void PPmt_Default()
         {
-            Assert.Equal(-244.97648292629228, Financial.PPmt(0.008, 4, 12, 3000, 0), precision);
-            Assert.Equal(-244.97648292629228, Financial.PPmt(0.008, 4, 12, 3000), precision);
+            Assert.Equal(-244.97648292629228, Financial.PPmt(0.008, 4, 12, 3000, 0), s_precision);
+            Assert.Equal(-244.97648292629228, Financial.PPmt(0.008, 4, 12, 3000), s_precision);
         }
 
         [Theory]
@@ -230,14 +230,14 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(1E25, 12, 1797, 0, DueDate.BegOfPeriod, -1797)] // overflow
         public void PV(double Rate, double NPer, double Pmt, double FV, DueDate Due, double expected)
         {
-            Assert.Equal(expected, Financial.PV(Rate, NPer, Pmt, FV, Due), precision);
+            Assert.Equal(expected, Financial.PV(Rate, NPer, Pmt, FV, Due), s_precision);
         }
 
         [Fact]
         public void PV_Default()
         {
-            Assert.Equal(-2952.944852320145, Financial.PV(0.008, 4, 12, 3000, 0), precision);
-            Assert.Equal(-2952.944852320145, Financial.PV(0.008, 4, 12, 3000), precision);
+            Assert.Equal(-2952.944852320145, Financial.PV(0.008, 4, 12, 3000, 0), s_precision);
+            Assert.Equal(-2952.944852320145, Financial.PV(0.008, 4, 12, 3000), s_precision);
         }
 
         [Theory]
@@ -249,14 +249,14 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(12, -3000.0, 300, 0, DueDate.EndOfPeriod, 0.1, -1.9850238772287565)] // pmt > pv
         public void Rate(double NPer, double Pmt, double PV, double FV, DueDate Due, double Guess, double expected)
         {
-            Assert.Equal(expected, Financial.Rate(NPer, Pmt, PV, FV, Due, Guess), precision);
+            Assert.Equal(expected, Financial.Rate(NPer, Pmt, PV, FV, Due, Guess), s_precision);
         }
 
         [Fact]
         public void Rate_Default()
         {
-            Assert.Equal(0.007886438377633958, Financial.Rate(12, -263.0, 3000, 0), precision);
-            Assert.Equal(0.007886438377633958, Financial.Rate(12, -263.0, 3000), precision);
+            Assert.Equal(0.007886438377633958, Financial.Rate(12, -263.0, 3000, 0), s_precision);
+            Assert.Equal(0.007886438377633958, Financial.Rate(12, -263.0, 3000), s_precision);
         }
 
         [Fact]
@@ -277,7 +277,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(-5000, -1000, -20, 200)] // all parameter -ve
         public void SLN(double Cost, double Salvage, double Life, double expected)
         {
-            Assert.Equal(expected, Financial.SLN(Cost, Salvage, Life), precision);
+            Assert.Equal(expected, Financial.SLN(Cost, Salvage, Life), s_precision);
         }
 
         [Theory]
@@ -290,7 +290,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(1009.0, 4322.0, 73, 23, -62.55572010366531)] // salvage > cost
         public void SYD(double Cost, double Salvage, double Life, double Period, double expected)
         {
-            Assert.Equal(expected, Financial.SYD(Cost, Salvage, Life, Period), precision);
+            Assert.Equal(expected, Financial.SYD(Cost, Salvage, Life, Period), s_precision);
         }
 
         [Theory]
