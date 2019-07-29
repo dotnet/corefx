@@ -111,17 +111,13 @@ namespace System.Net.Http
                 {
                     // Create this here because it can be canceled before SendRequestBodyAsync is even called.
                     _requestBodyCancellationSource = new CancellationTokenSource();
-                }
 
-                if (_request.HasHeaders && _request.Headers.ExpectContinue == true)
-                {
-                    // Create a TCS that will complete when one of two things occurs:
-                    // 1. if a timer fires before we receive the relevant response from the server.
-                    // 2. if we receive the relevant response from the server before a timer fires.
-                    // In the first case, we could run this continuation synchronously, but in the latter, we shouldn't,
-                    // as we could end up starting the body copy operation on the main event loop thread, which could
-                    // then starve the processing of other requests.  So, we make the TCS RunContinuationsAsynchronously.
-                    _expect100ContinueWaiter = new TaskCompletionSource<bool>(TaskContinuationOptions.RunContinuationsAsynchronously);
+                    if (_request.HasHeaders && _request.Headers.ExpectContinue == true)
+                    {
+                        // Create a TCS for handling Expect: 100-continue semantics. See WaitFor100ContinueAsync.
+                        // Note we need to create this in the constructor, because we can receive a 100 Continue response at any time after the constructor finishes.
+                        _expect100ContinueWaiter = new TaskCompletionSource<bool>(TaskContinuationOptions.RunContinuationsAsynchronously);
+                    }
                 }
 
                 if (NetEventSource.IsEnabled) Trace($"{request}, {nameof(initialWindowSize)}={initialWindowSize}");
@@ -232,7 +228,7 @@ namespace System.Net.Http
                 Debug.Assert(_request.Content != null);
                 if (NetEventSource.IsEnabled) Trace($"Waiting to send request body content for 100-Continue.");
 
-                // Create a TCS that will complete when one of two things occurs:
+                // use TCS created in constructor. It will complete when one of two things occurs:
                 // 1. if a timer fires before we receive the relevant response from the server.
                 // 2. if we receive the relevant response from the server before a timer fires.
                 // In the first case, we could run this continuation synchronously, but in the latter, we shouldn't,
