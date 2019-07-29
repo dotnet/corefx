@@ -43,7 +43,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("12E-3", false)]    
+        [InlineData("12E-3", false)]
         [InlineData("1e6", false)]
         [InlineData("1e6", true)]
         [InlineData("1e+6", false)]
@@ -544,7 +544,7 @@ null,
                     target.WriteTo(writer);
                     writer.Flush();
                 }
-                AssertContents(expectedStr, buffer);
+                JsonTestHelper.AssertContents(expectedStr, buffer);
             }
         }
 
