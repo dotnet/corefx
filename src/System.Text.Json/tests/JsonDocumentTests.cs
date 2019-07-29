@@ -1769,19 +1769,19 @@ namespace System.Text.Json.Tests
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
+                    using var writer = new Utf8JsonWriter(buffer);
                     root.WriteTo(writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
+                    using var writer = new Utf8JsonWriter(buffer);
                     doc.WriteTo(writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
+                    using var writer = new Utf8JsonWriter(buffer);
                     property.WriteTo(writer);
                 });
             }
@@ -1831,7 +1831,7 @@ namespace System.Text.Json.Tests
             Assert.Throws<InvalidOperationException>(() =>
             {
                 var buffer = new ArrayBufferWriter<byte>(1024);
-                Utf8JsonWriter writer = new Utf8JsonWriter(buffer);                
+                using var writer = new Utf8JsonWriter(buffer);
                 root.WriteTo(writer);
             });
         }
@@ -2237,7 +2237,7 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData(-1)]
-        [InlineData(JsonCommentHandling.Allow)]
+        [InlineData((int)JsonCommentHandling.Allow)]
         [InlineData(3)]
         [InlineData(byte.MaxValue)]
         [InlineData(byte.MaxValue + 3)] // Other values, like byte.MaxValue + 1 overflows to 0 (i.e. JsonCommentHandling.Disallow), which is valid.
@@ -3693,7 +3693,7 @@ namespace System.Text.Json.Tests
             var expectedNonIndentedJson = $"[{OneQuarticGoogol}]";
             using (JsonDocument doc = JsonDocument.Parse($"[ {OneQuarticGoogol} ]"))
             {
-                var writer = new Utf8JsonWriter(buffer, default);
+                using var writer = new Utf8JsonWriter(buffer, default);
                 doc.WriteTo(writer);
                 writer.Flush();
 
