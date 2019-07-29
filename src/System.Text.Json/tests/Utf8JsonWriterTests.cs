@@ -888,106 +888,256 @@ namespace System.Text.Json.Tests
             var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
             var output = new ArrayBufferWriter<byte>(1024);
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteStartObject(), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteStartObject("foo"), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteStartArray(), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteEndObject(), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteEndArray(), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WritePropertyName("foo"), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteString("key", "foo"), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteStringValue("foo"), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteNumber("key", 123), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteNumberValue(123), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteBoolean("key", true), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteBooleanValue(true), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteBoolean("key", false), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteBooleanValue(false), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteNull("key"), skipValidation);
             }
 
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
             {
-                using var jsonUtf8 = new Utf8JsonWriter(output, options);
                 WritePreamble(jsonUtf8, kind);
                 ValidateAction(jsonUtf8, () => jsonUtf8.WriteNullValue(), skipValidation);
             }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind);
+                // Writing a comment after any preamable is valid (even when skipValidation is false)
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteCommentValue("some comment"), skipValidation: true);
+            }
         }
 
-        private void WritePreamble(Utf8JsonWriter writer, JsonValueKind kind)
+        [Theory]
+        [InlineData(JsonValueKind.Array, true, true)]
+        [InlineData(JsonValueKind.Array, true, false)]
+        [InlineData(JsonValueKind.Array, false, true)]
+        [InlineData(JsonValueKind.Array, false, false)]
+        [InlineData(JsonValueKind.Object, true, true)]
+        [InlineData(JsonValueKind.Object, true, false)]
+        [InlineData(JsonValueKind.Object, false, true)]
+        [InlineData(JsonValueKind.Object, false, false)]
+        [InlineData(JsonValueKind.String, true, true)]
+        [InlineData(JsonValueKind.String, true, false)]
+        [InlineData(JsonValueKind.String, false, true)]
+        [InlineData(JsonValueKind.String, false, false)]
+        [InlineData(JsonValueKind.Number, true, true)]
+        [InlineData(JsonValueKind.Number, true, false)]
+        [InlineData(JsonValueKind.Number, false, true)]
+        [InlineData(JsonValueKind.Number, false, false)]
+        [InlineData(JsonValueKind.True, true, true)]
+        [InlineData(JsonValueKind.True, true, false)]
+        [InlineData(JsonValueKind.True, false, true)]
+        [InlineData(JsonValueKind.True, false, false)]
+        [InlineData(JsonValueKind.False, true, true)]
+        [InlineData(JsonValueKind.False, true, false)]
+        [InlineData(JsonValueKind.False, false, true)]
+        [InlineData(JsonValueKind.False, false, false)]
+        [InlineData(JsonValueKind.Null, true, true)]
+        [InlineData(JsonValueKind.Null, true, false)]
+        [InlineData(JsonValueKind.Null, false, true)]
+        [InlineData(JsonValueKind.Null, false, false)]
+        public void InvalidJsonDueToWritingMultipleValuesWithComments(JsonValueKind kind, bool formatted, bool skipValidation)
+        {
+            var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
+            var output = new ArrayBufferWriter<byte>(1024);
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteStartObject(), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteStartObject("foo"), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteStartArray(), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteEndObject(), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteEndArray(), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WritePropertyName("foo"), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteString("key", "foo"), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteStringValue("foo"), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteNumber("key", 123), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteNumberValue(123), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteBoolean("key", true), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteBooleanValue(true), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteBoolean("key", false), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteBooleanValue(false), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteNull("key"), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteNullValue(), skipValidation);
+            }
+
+            using (var jsonUtf8 = new Utf8JsonWriter(output, options))
+            {
+                WritePreamble(jsonUtf8, kind, addComments: true);
+                // Writing a comment after any preamable is valid (even when skipValidation is false)
+                ValidateAction(jsonUtf8, () => jsonUtf8.WriteCommentValue("some comment"), skipValidation: true);
+            }
+        }
+
+        private void WritePreamble(Utf8JsonWriter writer, JsonValueKind kind, bool addComments = false)
         {
             Debug.Assert(writer.BytesCommitted == 0 && writer.BytesPending == 0 && writer.CurrentDepth == 0 && kind != JsonValueKind.Undefined);
+
+            if (addComments)
+            {
+                writer.WriteCommentValue(" comment value before ");
+            }
 
             switch (kind)
             {
@@ -1017,6 +1167,11 @@ namespace System.Text.Json.Tests
                 default:
                     Debug.Fail($"Invalid JsonValueKind passed in '{kind}'.");
                     break;
+            }
+
+            if (addComments)
+            {
+                writer.WriteCommentValue(" comment value after ");
             }
         }
 

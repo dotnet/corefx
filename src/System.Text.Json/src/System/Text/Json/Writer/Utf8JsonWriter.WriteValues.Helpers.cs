@@ -28,7 +28,7 @@ namespace System.Text.Json
                     Debug.Assert(_tokenType != JsonTokenType.PropertyName);
 
                     // It is more likely for CurrentDepth to not equal 0 when writing valid JSON, so check that first to rely on short-circuiting and return quickly.
-                    if (_tokenType != JsonTokenType.None && CurrentDepth == 0)
+                    if (CurrentDepth == 0 && _tokenType != JsonTokenType.None)
                     {
                         ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueAfterPrimitiveOrClose, currentDepth: default, token: default, _tokenType);
                     }
