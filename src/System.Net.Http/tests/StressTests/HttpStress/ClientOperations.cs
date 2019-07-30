@@ -337,7 +337,7 @@ namespace HttpStress
                     {
                         ValidateHttpVersion(m, httpVersion);
                         ValidateStatusCode(m);
-                        // Leave scope (and dispose of the response), potentially before the client has had the chance to read the entire content
+                        // Cause the response to be disposed without reading the response body, which will cause the client to cancel the request
                     }
                 }),
 
