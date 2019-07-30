@@ -581,8 +581,12 @@ namespace System.Text.Json.Tests
             Assert.Throws<ObjectDisposedException>(() => jsonUtf8.Reset(output));
         }
 
-        [Fact]
-        public void FlushToStreamThrows_RemainsInConsistentState()
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public async Task FlushToStreamThrows_WriterRemainsInConsistentState(bool useAsync, bool throwFromDispose)
         {
             var stream = new ThrowingFromWriteMemoryStream();
             var jsonUtf8 = new Utf8JsonWriter(stream);
@@ -590,43 +594,31 @@ namespace System.Text.Json.Tests
             // Write and flush some of an object.
             jsonUtf8.WriteStartObject();
             jsonUtf8.WriteString("someProp1", "someValue1");
-            jsonUtf8.Flush();
+            await jsonUtf8.FlushAsync(useAsync);
 
             // Write some more, but fail while flushing to write to the underlying stream.
             stream.ExceptionToThrow = new FormatException("uh oh");
             jsonUtf8.WriteString("someProp2", "someValue2");
-            Assert.Same(stream.ExceptionToThrow, Assert.Throws<FormatException>(() => jsonUtf8.Flush()));
+            Assert.Same(stream.ExceptionToThrow, await Assert.ThrowsAsync<FormatException>(() => jsonUtf8.FlushAsync(useAsync)));
 
             // Write some more.
-            stream.ExceptionToThrow = null;
             jsonUtf8.WriteEndObject();
 
-            // Disposing should not fail.
-            jsonUtf8.Dispose();
-        }
-
-        [Fact]
-        public async Task FlushAsyncToStreamThrows_RemainsInConsistentState()
-        {
-            var stream = new ThrowingFromWriteMemoryStream();
-            var jsonUtf8 = new Utf8JsonWriter(stream);
-
-            // Write and flush some of an object.
-            jsonUtf8.WriteStartObject();
-            jsonUtf8.WriteString("someProp1", "someValue1");
-            await jsonUtf8.FlushAsync();
-
-            // Write some more, but fail while flushing to write to the underlying stream.
-            stream.ExceptionToThrow = new FormatException("uh oh");
-            jsonUtf8.WriteString("someProp2", "someValue2");
-            Assert.Same(stream.ExceptionToThrow, await Assert.ThrowsAsync<FormatException>(() => jsonUtf8.FlushAsync()));
-
-            // Write some more.
-            stream.ExceptionToThrow = null;
-            jsonUtf8.WriteEndObject();
-
-            // Disposing should not fail.
-            await jsonUtf8.DisposeAsync();
+            // Dispose, potentially throwing from the subsequent attempt to flush.
+            if (throwFromDispose)
+            {
+                // Disposing should propagate the new exception
+                stream.ExceptionToThrow = new FormatException("uh oh again");
+                Assert.Same(stream.ExceptionToThrow, await Assert.ThrowsAsync<FormatException>(() => jsonUtf8.DisposeAsync(useAsync)));
+                Assert.Equal("{\"someProp1\":\"someValue1\"", Encoding.UTF8.GetString(stream.ToArray()));
+            }
+            else
+            {
+                // Disposing should not fail.
+                stream.ExceptionToThrow = null;
+                await jsonUtf8.DisposeAsync(useAsync);
+                Assert.Equal("{\"someProp1\":\"someValue1\",\"someProp2\":\"someValue2\"}", Encoding.UTF8.GetString(stream.ToArray()));
+            }
         }
 
         private sealed class ThrowingFromWriteMemoryStream : MemoryStream
@@ -6654,6 +6646,30 @@ namespace System.Text.Json.Tests
             }
 
             return sb.ToString();
+        }
+
+        public static async Task FlushAsync(this Utf8JsonWriter writer, bool useAsync)
+        {
+            if (useAsync)
+            {
+                await writer.FlushAsync();
+            }
+            else
+            {
+                writer.Flush();
+            }
+        }
+
+        public static async Task DisposeAsync(this Utf8JsonWriter writer, bool useAsync)
+        {
+            if (useAsync)
+            {
+                await writer.DisposeAsync();
+            }
+            else
+            {
+                writer.Dispose();
+            }
         }
     }
 }
