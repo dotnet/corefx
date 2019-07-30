@@ -111,7 +111,7 @@ static uint32_t NetSecurityNative_DisplayStatus(uint32_t* minorStatus,
     assert(minorStatus != nullptr);
     assert(outBuffer != nullptr);
 
-    uint32_t messageContext;
+    uint32_t messageContext = 0; // Must initialize to 0 before calling gss_display_status.
     GssBuffer gssBuffer{.length = 0, .value = nullptr};
     uint32_t majorStatus =
         gss_display_status(minorStatus, statusValue, statusType, GSS_C_NO_OID, &messageContext, &gssBuffer);
@@ -155,19 +155,36 @@ extern "C" uint32_t NetSecurityNative_ImportPrincipalName(uint32_t* minorStatus,
     assert(outputName != nullptr);
     assert(*outputName == nullptr);
 
-    gss_OID nameType;
-
-    if (strchr(inputName, '/') != nullptr)
+    // Principal name will usually be in the form SERVICE/HOST. But SPNEGO protocol prefers
+    // GSS_C_NT_HOSTBASED_SERVICE format. That format uses '@' separator instead of '/' between
+    // service name and host name. So convert input string into that format.
+    char* ptrSlash = (char*) memchr(inputName, '/', inputNameLen);
+    char* inputNameCopy = NULL;
+    if (ptrSlash != NULL)
     {
-        nameType = const_cast<gss_OID>(GSS_KRB5_NT_PRINCIPAL_NAME);
-    }
-    else
-    {
-        nameType = const_cast<gss_OID>(GSS_C_NT_HOSTBASED_SERVICE);
+        inputNameCopy = (char*) malloc(inputNameLen);
+        if (inputNameCopy != NULL)
+        {
+            memcpy(inputNameCopy, inputName, inputNameLen);
+            inputNameCopy[ptrSlash - inputName] = '@';
+            inputName = inputNameCopy;
+        }
+        else
+        {
+          *minorStatus = 0;
+          return GSS_S_BAD_NAME;
+        }
     }
 
-    GssBuffer inputNameBuffer{.length = inputNameLen, .value = inputName};
-    return gss_import_name(minorStatus, &inputNameBuffer, nameType, outputName);
+    GssBuffer inputNameBuffer = {.length = inputNameLen, .value = inputName};
+    uint32_t result = gss_import_name(minorStatus, &inputNameBuffer, GSS_C_NT_HOSTBASED_SERVICE, outputName);
+
+    if (inputNameCopy != NULL)
+    {
+        free(inputNameCopy);
+    }
+
+    return result;
 }
 
 extern "C" uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
