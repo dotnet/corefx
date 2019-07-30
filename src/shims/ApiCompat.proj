@@ -80,9 +80,9 @@
     </PropertyGroup>
 
     <Exec Command="$(_ApiCompatCommand) &quot;$(_netStandard21OnlyRef)&quot; @&quot;$(ApiCompatResponseFile)&quot; $(_netStandard21BaselineModifer) &quot;$(ApiCompatNSOnlyBaselineFile)&quot;"
-      CustomErrorRegularExpression="^[a-zA-Z]+ :"
-      StandardOutputImportance="Low"
-      IgnoreExitCode="true"
+          CustomErrorRegularExpression="^[a-zA-Z]+ :"
+          StandardOutputImportance="Low"
+          IgnoreExitCode="true"
     >
       <Output TaskParameter="ExitCode" PropertyName="ApiCompatExitCode" />
     </Exec>
