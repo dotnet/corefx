@@ -5,8 +5,6 @@
 // for now disabling error caused by not adding documentation to methods 
 #pragma warning disable CS1591
 
-using System.Buffers;
-
 namespace System.Text.Json
 {
     public partial class JsonNumber : JsonNode, IEquatable<JsonNumber>
