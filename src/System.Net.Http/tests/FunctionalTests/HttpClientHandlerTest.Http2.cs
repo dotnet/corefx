@@ -1897,8 +1897,13 @@ namespace System.Net.Http.Functional.Tests
 
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
+                using (var handler = new SocketsHttpHandler())
                 using (HttpClient client = CreateHttpClient())
                 {
+                    handler.SslOptions.RemoteCertificateValidationCallback = delegate { return true; };
+                    // Increase default Expect: 100-continue timeout to ensure that we don't accidentally fire the timer and send the request body.
+                    handler.Expect100ContinueTimeout = TimeSpan.FromSeconds(300);
+
                     var request = new HttpRequestMessage(HttpMethod.Post, url);
                     request.Version = new Version(2,0);
                     request.Content = new StringContent(new string('*', 3000));
@@ -3001,6 +3006,43 @@ namespace System.Net.Http.Functional.Tests
                     // A small malicious/corrupt payload that expands into two 1GB strings. We don't want HPackDecoder to allocate buffers when they exceed MaxResponseHeadersLength.
                     byte[] headerData = new byte[] { 0x88, 0x00, 0x7F, 0x81, 0xFF, 0xFF, 0xFF, 0x03, 0x70, 0x6C, 0x61, 0x69, 0x6E, 0x2D, 0x74, 0x65, 0x78, 0x74, 0x7F, 0x81, 0xFF, 0xFF, 0xFF, 0x03, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61 };
                     HeadersFrame frame = new HeadersFrame(headerData, FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId);
+
+                    await con.WriteFrameAsync(frame);
+                    await con.ShutdownIgnoringErrorsAsync(streamId);
+                });
+        }
+
+        [ActiveIssue(39876)]
+        [Fact]
+        public async Task DynamicTableSizeUpdate_Exceeds_Settings_Throws()
+        {
+            await Http2LoopbackServer.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    using HttpClient client = CreateHttpClient();
+                    Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(uri));
+
+                    Assert.NotNull(e.InnerException);
+                    Assert.Contains("Dynamic table size update", e.InnerException.Message);
+                },
+                async server =>
+                {
+                    (Http2LoopbackConnection con, SettingsFrame settings) = await server.EstablishConnectionGetSettingsAsync();
+                    int streamId = await con.ReadRequestHeaderAsync();
+
+                    int headerTableSize = 4096; // Default per HTTP2 spec.
+
+                    foreach (SettingsEntry setting in settings.Entries)
+                    {
+                        if (setting.SettingId == SettingId.HeaderTableSize)
+                        {
+                            headerTableSize = (int)setting.Value;
+                        }
+                    }
+
+                    byte[] headerData = new byte[16];
+                    int headersLen = Http2LoopbackConnection.EncodeDynamicTableSizeUpdate(headerTableSize + 1, headerData);
+                    HeadersFrame frame = new HeadersFrame(headerData.AsMemory(0, headersLen), FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId);
 
                     await con.WriteFrameAsync(frame);
                     await con.ShutdownIgnoringErrorsAsync(streamId);
