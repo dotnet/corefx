@@ -3014,12 +3014,7 @@ namespace System.Net.Http.Functional.Tests
                 async uri =>
                 {
                     using HttpClient client = CreateHttpClient();
-                    Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(uri));
-
-                    IOException io = Assert.IsType<IOException>(e.InnerException);
-
-                    Assert.NotNull(io.InnerException);
-                    Assert.Contains("Dynamic table size update", io.InnerException.Message);
+                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(uri));
                 },
                 async server =>
                 {
