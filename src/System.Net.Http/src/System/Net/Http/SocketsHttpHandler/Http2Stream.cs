@@ -47,6 +47,10 @@ namespace System.Net.Http
             private Exception _resetException;
             private bool _canRetry;             // if _resetException != null, this indicates the stream was refused and so the request is retryable
 
+            // This flag indicates that, per section 8.1 of the RFC, the server completed the response and then sent a RST_STREAM with error = NO_ERROR.
+            // This is a signal to stop sending the request body, but the request is still considered successful.
+            private bool _requestBodyAbandoned;
+
             /// <summary>
             /// The core logic for the IValueTaskSource implementation.
             /// 
@@ -184,12 +188,22 @@ namespace System.Net.Http
                     {
                         Debug.Assert(_requestCompletionState == StreamCompletionState.InProgress, $"Request already completed with state={_requestCompletionState}");
 
-                        _requestCompletionState = StreamCompletionState.Failed;
-
                         // Cancel above should ensure that the response is either Completed or Failed now.
                         Debug.Assert(_responseCompletionState != StreamCompletionState.InProgress);
 
-                        Reset();
+                        if (_requestBodyAbandoned)
+                        {
+                            // See comments on _requestBodyAbandoned.
+                            // In this case, the request is still considered successful and we do not want to send a RST_STREAM.
+                            Debug.Assert(_responseCompletionState == StreamCompletionState.Completed);
+                            _requestCompletionState = StreamCompletionState.Completed;
+                            Complete();
+                        }
+                        else
+                        {
+                            _requestCompletionState = StreamCompletionState.Failed;
+                            Reset();
+                        }
                     }
 
                     throw;
@@ -609,9 +623,17 @@ namespace System.Net.Http
                 }
             }
 
-            public void OnReset(Exception resetException, bool canRetry = false)
+            // This is called in several different cases:
+            // (1) Receiving RST_STREAM on this stream. If so, the resetStreamErrorCode will be non-null, and canRetry will be true only if the error code was REFUSED_STREAM.
+            // (2) Receiving GOAWAY that indicates this stream has not been processed. If so, canRetry will be true.
+            // (3) Connection IO failure or protocol violation. If so, resetException will contain the relevant exception and canRetry will be false.
+            // (4) Receiving EOF from the server. If so, resetException will contain an exception like "expected 9 bytes of data", and canRetry will be false.
+            public void OnReset(Exception resetException, Http2ProtocolErrorCode? resetStreamErrorCode = null, bool canRetry = false)
             {
-                if (NetEventSource.IsEnabled) Trace($"{nameof(resetException)}={resetException}");
+                if (NetEventSource.IsEnabled) Trace($"{nameof(resetException)}={resetException}, {nameof(resetStreamErrorCode )}={resetStreamErrorCode}");
+
+                bool cancel = false;
+                CancellationTokenSource requestBodyCancellationSource = null;
 
                 lock (SyncObject)
                 {
@@ -639,11 +661,39 @@ namespace System.Net.Http
                         canRetry = false;
                     }
 
-                    _resetException = resetException;
-                    _canRetry = canRetry;
+                    // Per section 8.1 in the RFC:
+                    // If the server has completed the response body (i.e. we've received EndStream)
+                    // but the request body is still sending, and we then receive a RST_STREAM with errorCode = NO_ERROR,
+                    // we treat this specially and simply cancel sending the request body, rather than treating
+                    // the entire request as failed.
+                    if (resetStreamErrorCode == Http2ProtocolErrorCode.NoError && 
+                        _responseCompletionState == StreamCompletionState.Completed)
+                    {
+                        if (_requestCompletionState == StreamCompletionState.InProgress)
+                        {
+                            _requestBodyAbandoned = true;
+                            requestBodyCancellationSource = _requestBodyCancellationSource;
+                            Debug.Assert(requestBodyCancellationSource != null);
+                        }
+                    }
+                    else
+                    {
+                        _resetException = resetException;
+                        _canRetry = canRetry;
+                        cancel = true;
+                    }
                 }
 
-                Cancel();
+                if (requestBodyCancellationSource != null)
+                {
+                    Debug.Assert(_requestBodyAbandoned);
+                    Debug.Assert(!cancel);
+                    requestBodyCancellationSource.Cancel();
+                }
+                else
+                {
+                    Cancel();
+                }
             }
 
             private void CheckResponseBodyState()
