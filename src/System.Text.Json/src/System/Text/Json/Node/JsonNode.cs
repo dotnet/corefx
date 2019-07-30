@@ -8,7 +8,7 @@ using System.IO;
 namespace System.Text.Json
 {
     /// <summary>
-    ///  Represents a specific JSON node.
+    ///   Defines the core behavior of JSON nodes and provides a base for derived classes.
     /// </summary>
     public abstract partial class JsonNode
     {
