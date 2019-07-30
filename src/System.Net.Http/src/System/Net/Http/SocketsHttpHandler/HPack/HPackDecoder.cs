@@ -254,6 +254,11 @@ namespace System.Net.Http.HPack
 
                         if (_integerDecoder.StartDecode((byte)(b & ~HuffmanMask), StringLengthPrefix))
                         {
+                            if (_integerDecoder.Value == 0)
+                            {
+                                throw new HPackDecodingException(SR.Format(SR.net_http_invalid_response_header_name, ""));
+                            }
+
                             OnStringLength(_integerDecoder.Value, nextState: State.HeaderName);
                         }
                         else
@@ -265,6 +270,7 @@ namespace System.Net.Http.HPack
                     case State.HeaderNameLengthContinue:
                         if (_integerDecoder.Decode(b))
                         {
+                            Debug.Assert(_integerDecoder.Value != 0, "HPACK integer decoder failed to stop an overlong 0.");
                             OnStringLength(_integerDecoder.Value, nextState: State.HeaderName);
                         }
 
@@ -302,6 +308,7 @@ namespace System.Net.Http.HPack
                     case State.HeaderValueLengthContinue:
                         if (_integerDecoder.Decode(b))
                         {
+                            Debug.Assert(_integerDecoder.Value != 0, "HPACK integer decoder failed to stop an overlong 0.");
                             OnStringLength(_integerDecoder.Value, nextState: State.HeaderValue);
                         }
 

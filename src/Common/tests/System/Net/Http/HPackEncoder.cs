@@ -2,23 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Net.Http.Functional.Tests;
-using System.Net.Security;
-using System.Net.Sockets;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-using Xunit;
 
 namespace System.Net.Test.Common
 {
-
     public static class HPackEncoder
     {
+        /// <summary>
+        /// Encodes a dynamic table size update.
+        /// </summary>
+        /// <param name="newMaximumSize">The new maximum size of the dynamic table. This must be less than or equal to the connection's maximum table size setting, which defaults to 4096 bytes.</param>
+        /// <param name="headerBlock">A span to write the encoded header to.</param>
+        /// <returns>The number of bytes written to <paramref name="headerBlock"/>.</returns>
         public static int EncodeDynamicTableSizeUpdate(int newMaximumSize, Span<byte> headerBlock)
         {
             return EncodeInteger(newMaximumSize, 0b00100000, 0b11100000, headerBlock);
@@ -160,14 +156,39 @@ namespace System.Net.Test.Common
 
     public enum HPackFlags
     {
+        /// <summary>
+        /// Encodes a header literal without indexing and without huffman encoding.
+        /// </summary>
         None = 0,
 
+        /// <summary>
+        /// Applies Huffman encoding to the header's name.
+        /// </summary>
         HuffmanEncodeName = 1,
+
+        /// <summary>
+        /// Applies Huffman encoding to the header's value.
+        /// </summary>
         HuffmanEncodeValue = 2,
+
+        /// <summary>
+        /// Applies Huffman encoding to both the name and the value of the header.
+        /// </summary>
         HuffmanEncode = HuffmanEncodeName | HuffmanEncodeValue,
 
+        /// <summary>
+        /// Encode a literal value without adding a new dynamic index. Intermediaries (such as a proxy) are still allowed to index the value when forwarding the header.
+        /// </summary>
         WithoutIndexing = 0,
+
+        /// <summary>
+        /// Encode a literal value to a new dynamic index.
+        /// </summary>
         NewIndexed = 4,
+
+        /// <summary>
+        /// Encode a literal value without adding a new dynamic index. Intermediaries (such as a proxy) must not index the value when forwarding the header.
+        /// </summary>
         NeverIndexed = 8
     }
 }
