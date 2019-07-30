@@ -6,9 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Text.Json
 {
-#pragma warning disable xUnit1000
-    internal static partial class WritableJsonApiTests
-#pragma warning enable xUnit1000
+    public static partial class WritableJsonApiTests
     {
         /// <summary>
         /// Helper class simulating external library

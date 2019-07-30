@@ -107,6 +107,7 @@
     <Compile Include="WritableJsonApiTests.TestTransformations.cs" />
     <Compile Include="WritableJsonApiTests.cs" />
     <Compile Include="WritableJsonApiTests.TestData.cs" />
+    <Compile Include="WritableJsonApiTests.JsonNumberUnitTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Compile Include="$(CommonPath)\System\Buffers\ArrayBufferWriter.cs">

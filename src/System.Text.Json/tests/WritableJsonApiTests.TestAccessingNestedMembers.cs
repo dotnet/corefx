@@ -6,9 +6,7 @@ using Xunit;
 
 namespace System.Text.Json
 {
-#pragma warning disable xUnit1000
-    internal static partial class WritableJsonApiTests
-#pragma warning enable xUnit1000
+    public static partial class WritableJsonApiTests
     {
         /// <summary>
         /// Accesing nested Json object - casting with as operator
@@ -139,8 +137,8 @@ namespace System.Text.Json
             ((JsonString)issues.GetJsonArrayProperty("features")[1]).Value = "feature 56134";
 
             Assert.True(((JsonArray)issues["bugs"]).Contains("bug 12356"));
-            Assert.Equal((JsonString)((JsonArray)issues["features"])[0], "feature 1569");
-            Assert.Equal((JsonString)((JsonArray)issues["features"])[1], "feature 56134");
+            Assert.Equal("feature 1569", (JsonString)((JsonArray)issues["features"])[0]);
+            Assert.Equal("feature 56134", (JsonString)((JsonArray)issues["features"])[1]);
         }
     }
 }

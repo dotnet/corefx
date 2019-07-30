@@ -37,6 +37,7 @@ namespace System.Text.Json
         public void Add(string propertyName, uint propertyValue) { }
         [CLSCompliant(false)]
         public void Add(string propertyName, ulong propertyValue) { }
+        public void Add(string propertyName, decimal propertyValue) { }
         public void Add(string propertyName, IEnumerable<JsonNode> propertyValue) { }
         public void AddRange(IEnumerable<KeyValuePair<string, JsonNode>> jsonProperties) { }
 

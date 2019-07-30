@@ -7,9 +7,7 @@ using Xunit;
 
 namespace System.Text.Json
 {
-#pragma warning disable xUnit1000
-    internal static partial class WritableJsonApiTests
-#pragma warning enable xUnit1000
+    public static partial class WritableJsonApiTests
     {
         /// <summary>
         /// Replacing Json object's primnary types
@@ -28,20 +26,20 @@ namespace System.Text.Json
             person1["name"] = new JsonString("Bob");
 
             Assert.IsType<JsonString>(person1["name"]);
-            Assert.Equal(person1["name"] as JsonString, "Bob");
+            Assert.Equal("Bob", person1["name"] as JsonString);
 
             // Assign by using an implicit operator on primary Json type
             JsonNumber newAge = 55;
             person1["age"] = newAge;
 
             Assert.IsType<JsonNumber>(person1["age"]);
-            Assert.Equal(person1["age"] as JsonNumber, 55);
+            Assert.Equal(55, person1["age"] as JsonNumber);
 
             // Assign by explicit cast from Json primary type
             person1["is_married"] = (JsonBoolean)false;
 
             Assert.IsType<JsonBoolean>(person1["is_married"]);
-            Assert.Equal(person1["is_married"] as JsonBoolean, false);
+            Assert.Equal(false, person1["is_married"] as JsonBoolean);
 
             // Not possible scenario (wold require implicit cast operators in JsonNode):
             // person["name"] = "Bob";
@@ -57,7 +55,7 @@ namespace System.Text.Json
             person1["age"] = person2["age"];
 
             Assert.IsType<JsonNumber>(person1["age"]);
-            Assert.Equal(person1["age"] as JsonNumber, 33);
+            Assert.Equal(33, person1["age"] as JsonNumber);
 
             // Copy property of different typoe
             person1["name"] = person2["name"];
@@ -83,8 +81,8 @@ namespace System.Text.Json
             Assert.True(isEnabled.Value);
 
             JsonNumber veryBigConstant = new JsonNumber();
-            veryBigConstant.SetString("1e1000");
-            string bigNumber = veryBigConstant.GetString();
+            veryBigConstant.SetFormattedValue("1e1000");
+            string bigNumber = veryBigConstant.ToString();
 
             Assert.Equal("1e1000", bigNumber);
 

@@ -8,9 +8,7 @@ using Xunit;
 
 namespace System.Text.Json
 {
-#pragma warning disable xUnit1000
-    internal static partial class WritableJsonApiTests
-#pragma warning enable xUnit1000
+    public static partial class WritableJsonApiTests
     {
         /// <summary>
         /// Creating simple Json object
@@ -36,7 +34,7 @@ namespace System.Text.Json
 
             Assert.IsType<JsonBoolean>(developer["is developer"]);
             var isDeveloperCasted = developer["is developer"] as JsonBoolean;
-            Assert.Equal(true, isDeveloperCasted.Value);
+            Assert.True(isDeveloperCasted.Value);
 
             Assert.Null(developer["null property"]);
         }
@@ -64,7 +62,7 @@ namespace System.Text.Json
 
             Assert.IsType<JsonBoolean>(developer["is developer"]);
             var isDeveloperCasted = developer["is developer"] as JsonBoolean;
-            Assert.Equal(true, isDeveloperCasted.Value);
+            Assert.True(isDeveloperCasted.Value);
         }
 
         /// <summary>
@@ -83,7 +81,7 @@ namespace System.Text.Json
 
             Assert.IsType<JsonNumber>(circle["radius"]);
             var radius = circle["radius"] as JsonNumber;
-            Assert.Equal(radius, 1);
+            Assert.Equal(1, radius);
 
             Assert.IsType<JsonNumber>(circle["length"]);
             var length = circle["length"] as JsonNumber;

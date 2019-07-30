@@ -30,6 +30,7 @@ namespace System.Text.Json
         public JsonArray(IEnumerable<uint> values) { }
         [CLSCompliant(false)]
         public JsonArray(IEnumerable<ulong> values) { }
+        public JsonArray(IEnumerable<decimal> values) { }
 
         public JsonNode this[int idx] { get => throw null; set => throw null; }
 
@@ -50,6 +51,7 @@ namespace System.Text.Json
         public void Add(uint value) { }
         [CLSCompliant(false)]
         public void Add(ulong value) { }
+        public void Add(decimal value) { }
 
         public void Insert(int index, JsonNode item) { throw null; }
         public void Insert(int index, string item) { throw null; }
@@ -68,6 +70,7 @@ namespace System.Text.Json
         public void Insert(int index, uint item) { throw null; }
         [CLSCompliant(false)]
         public void Insert(int index, ulong item) { throw null; }
+        public void Insert(int index, decimal item) { throw null; }
 
         public bool Contains(JsonNode value) { throw null; }
         public bool Contains(string value) { throw null; }
@@ -86,6 +89,7 @@ namespace System.Text.Json
         public bool Contains(uint value) { throw null; }
         [CLSCompliant(false)]
         public bool Contains(ulong value) { throw null; }
+        public bool Contains(decimal value) { throw null; }
 
         public int Count => throw null;
         public bool IsReadOnly => throw null;

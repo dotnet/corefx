@@ -7,7 +7,7 @@
 
 namespace System.Text.Json
 {
-    public partial class JsonBoolean : JsonNode
+    public partial class JsonBoolean : JsonNode, IEquatable<JsonBoolean>
     {
         public JsonBoolean() { }
         public JsonBoolean(bool value) { }
@@ -18,7 +18,11 @@ namespace System.Text.Json
 
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
+
+        public bool Equals(JsonBoolean other) { throw null; }
+
+        public static bool operator ==(JsonBoolean left, JsonBoolean right) => throw null;
+        public static bool operator !=(JsonBoolean left, JsonBoolean right) => throw null;
     }
 }
-
 #pragma warning restore CS1591
