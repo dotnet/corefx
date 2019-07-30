@@ -180,30 +180,50 @@ namespace System.Net.Http
                 {
                     if (NetEventSource.IsEnabled) Trace($"Failed to send request body: {e}");
 
-                    // Cancel the stream before we set _requestCompletionState below.
-                    // Otherwise, a response stream reader may race with the actual Cancel.
-                    Cancel();
+                    bool signalWaiter = false;
 
                     lock (SyncObject)
                     {
                         Debug.Assert(_requestCompletionState == StreamCompletionState.InProgress, $"Request already completed with state={_requestCompletionState}");
 
-                        // Cancel above should ensure that the response is either Completed or Failed now.
-                        Debug.Assert(_responseCompletionState != StreamCompletionState.InProgress);
-
                         if (_requestBodyAbandoned)
                         {
                             // See comments on _requestBodyAbandoned.
-                            // In this case, the request is still considered successful and we do not want to send a RST_STREAM.
+                            // In this case, the request is still considered successful and we do not want to send a RST_STREAM, 
+                            // and we also don't want to propagate any error to the caller, in particular for non-duplex scenarios.
                             Debug.Assert(_responseCompletionState == StreamCompletionState.Completed);
                             _requestCompletionState = StreamCompletionState.Completed;
                             Complete();
+                            return;
                         }
                         else
                         {
                             _requestCompletionState = StreamCompletionState.Failed;
+
+                            // Cancel the response body, if not complete.
+                            if (_responseCompletionState == StreamCompletionState.InProgress)
+                            {
+                                _responseCompletionState = StreamCompletionState.Failed;
+                            }
+
+                            // Discard any remaining buffered response data
+                            if (_responseBuffer.ActiveLength != 0)
+                            {
+                                _responseBuffer.Discard(_responseBuffer.ActiveLength);
+                            }
+
+                            _responseProtocolState = ResponseProtocolState.Aborted;
+
+                            signalWaiter = _hasWaiter;
+                            _hasWaiter = false;
+
                             Reset();
                         }
+                    }
+
+                    if (signalWaiter)
+                    {
+                        _waitSource.SetResult(true);
                     }
 
                     throw;
