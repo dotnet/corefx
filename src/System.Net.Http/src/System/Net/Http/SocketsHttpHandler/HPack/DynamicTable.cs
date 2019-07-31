@@ -38,6 +38,7 @@ namespace System.Net.Http.HPack
 
                 if (index < 0)
                 {
+                    // _buffer is circular; wrap the index back around.
                     index += _buffer.Length;
                 }
 
