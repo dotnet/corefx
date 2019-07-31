@@ -22,7 +22,7 @@ namespace System.Data.ProviderBase
         private const int Win32_CheckTokenMembership = 1;
         private const int Win32_CreateWellKnownSid = 5;
 
-        static public readonly DbConnectionPoolIdentity NoIdentity = new DbConnectionPoolIdentity(String.Empty, false, true);
+        static public readonly DbConnectionPoolIdentity NoIdentity = new DbConnectionPoolIdentity(string.Empty, false, true);
 
         private readonly string _sidString;
         private readonly bool _isRestricted;

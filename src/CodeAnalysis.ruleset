@@ -113,7 +113,6 @@
     <Rule Id="SA1118" Action="None" /> <!-- Parameter should not span multiple lines -->
     <Rule Id="SA1119" Action="None" /> <!-- Statement should not use unnecessary parenthesis -->
     <Rule Id="SA1120" Action="None" /> <!-- Comments should contain text -->
-    <Rule Id="SA1121" Action="None" /> <!-- Use built-in type alias -->
     <Rule Id="SA1122" Action="None" /> <!-- Use string.Empty for empty strings -->
     <Rule Id="SA1123" Action="None" /> <!-- Region should not be located within a code element -->
     <Rule Id="SA1124" Action="None" /> <!-- Do not use regions -->

@@ -56,7 +56,7 @@ namespace System.Data.OleDb
 
             NameValueCollection settings = (NameValueCollection)ConfigurationManager.GetSection("system.data.oledb");
             Stream XMLStream = null;
-            String providerFileName = oleDbOuterConnection.GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_PROVIDERFILENAME) as string;
+            string providerFileName = oleDbOuterConnection.GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_PROVIDERFILENAME) as string;
 
             if (settings != null)
             {

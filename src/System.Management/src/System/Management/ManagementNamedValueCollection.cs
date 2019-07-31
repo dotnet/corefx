@@ -172,7 +172,7 @@ namespace System.Management
         /// </summary>
         /// <param name=' name'>The name of the value to be returned.</param>
         /// <value>
-        /// <para>An <see cref='System.Object'/> containing the 
+        /// <para>An <see cref='object'/> containing the 
         ///    value of the specified item in this collection.</para>
         /// </value>
         public object this[string name] 
