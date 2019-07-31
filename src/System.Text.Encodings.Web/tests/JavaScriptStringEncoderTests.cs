@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -18,11 +19,29 @@ namespace Microsoft.Framework.WebEncoders
         public void TestSurrogate()
         {
             Assert.Equal("\\uD83D\\uDCA9", System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode("\U0001f4a9"));
+
             using (var writer = new StringWriter())
             {
                 System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(writer, "\U0001f4a9");
                 Assert.Equal("\\uD83D\\uDCA9", writer.GetStringBuilder().ToString());
             }
+
+            Span<char> destination = new char[12];
+            OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode("\U0001f4a9".AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+            Assert.Equal(OperationStatus.Done, status);
+            Assert.Equal(2, charsConsumed);
+            Assert.Equal(12, charsWritten);
+            Assert.Equal("\\uD83D\\uDCA9", new string(destination.Slice(0, charsWritten).ToArray()));
+        }
+
+        [Fact]
+        public void TestSurrogateBufferTooSmall()
+        {
+            Span<char> destination = new char[11];
+            OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode("\U0001f4a9".AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+            Assert.Equal(OperationStatus.DestinationTooSmall, status);
+            Assert.Equal(0, charsConsumed);
+            Assert.Equal(0, charsWritten);
         }
 
         [Fact]
@@ -237,6 +256,83 @@ namespace Microsoft.Framework.WebEncoders
 
             // Assert
             Assert.Equal(expected, retVal);
+        }
+
+        [Fact]
+        public void JavaScriptEncoder_BadSurrogates_ReturnsUnicodeReplacementChar()
+        {
+            // Arrange
+            JavaScriptEncoder encoder = JavaScriptEncoder.Create(UnicodeRanges.All); // allow all codepoints
+
+            // "a<unpaired leading>b<unpaired trailing>c<trailing before leading>d<unpaired trailing><valid>e<high at end of string>"
+            const string input = "a\uD800b\uDFFFc\uDFFF\uD800d\uDFFF\uD800\uDFFFe\uD800";
+            const string expected = "a\uFFFDb\uFFFDc\uFFFD\uFFFDd\uFFFD\\uD800\\uDFFFe\uFFFD"; // 'D800' 'DFFF' was preserved since it's valid
+
+            // String-based Encode()
+            string retVal = encoder.Encode(input);
+            Assert.Equal(expected, retVal);
+
+            // OperationStatus-based Encode()
+            Span<char> destination = new char[23];
+            OperationStatus status = encoder.Encode(input.AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+            Assert.Equal(OperationStatus.Done, status);
+            Assert.Equal(13, charsConsumed);
+            Assert.Equal(13, input.Length);
+            Assert.Equal(23, charsWritten);
+            Assert.Equal(expected, new string(destination.Slice(0, charsWritten).ToArray()));
+        }
+
+        [Fact]
+        public void JavaScriptEncoder_BadSurrogates_NeedsMoreData()
+        {
+            // Arrange
+            JavaScriptEncoder encoder = JavaScriptEncoder.Create(UnicodeRanges.All); // allow all codepoints
+
+            // "a<unpaired leading>"
+            const string input = "a\uD800";
+            const string expected = "a\uFFFD";
+
+            // String-based Encode()
+            string retVal = encoder.Encode(input);
+            Assert.Equal(expected, retVal);
+
+            // OperationStatus-based Encode()
+            Span<char> destination = new char[100];
+            OperationStatus status = encoder.Encode(input.AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+            Assert.Equal(OperationStatus.Done, status);
+            Assert.Equal(2, charsConsumed);
+            Assert.Equal(2, input.Length);
+            Assert.Equal(2, charsWritten);
+            Assert.Equal(expected, new string(destination.Slice(0, charsWritten).ToArray()));
+
+            // OperationStatus-based Encode() with isFinalBlock=false
+            destination.Clear();
+            status = encoder.Encode(input.AsSpan(), destination, out charsConsumed, out charsWritten, isFinalBlock: false);
+            Assert.Equal(OperationStatus.NeedMoreData, status);
+            Assert.Equal(1, charsConsumed);
+            Assert.Equal(1, charsWritten);
+            Assert.Equal("a", new string(destination.Slice(0, charsWritten).ToArray()));
+
+            // "<paired leading><paired trailing>"
+            const string inputContinued = "\uD800\uDFFF";
+
+            // Append additional data; keep IsFinalBlock=false
+            {
+                status = encoder.Encode(inputContinued.AsSpan(), destination.Slice(charsWritten), out int charsConsumed2, out int charsWritten2, isFinalBlock: false);
+                Assert.Equal(OperationStatus.Done, status);
+                Assert.Equal(2, charsConsumed2);
+                Assert.Equal(12, charsWritten2);
+                Assert.Equal("a\\uD800\\uDFFF", new string(destination.Slice(0, charsWritten + charsWritten2).ToArray()));
+            }
+
+            // Append additional data; set IsFinalBlock=true
+            {
+                status = encoder.Encode(inputContinued.AsSpan(), destination.Slice(charsWritten), out int charsConsumed2, out int charsWritten2, isFinalBlock: true);
+                Assert.Equal(OperationStatus.Done, status);
+                Assert.Equal(2, charsConsumed2);
+                Assert.Equal(12, charsWritten2);
+                Assert.Equal("a\\uD800\\uDFFF", new string(destination.Slice(0, charsWritten + charsWritten2).ToArray()));
+            }
         }
 
         [Fact]

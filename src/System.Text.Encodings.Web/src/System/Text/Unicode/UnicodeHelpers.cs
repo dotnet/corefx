@@ -309,23 +309,25 @@ namespace System.Text.Unicode
         /// Set 'endOfString' to true if 'pChar' points to the last character in the stream.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int GetScalarValueFromUtf16(char first, char? second, out bool wasSurrogatePair)
+        internal static int GetScalarValueFromUtf16(char first, char? second, out bool wasSurrogatePair, out bool wasUnmatchedSurrogate)
         {
             if (!char.IsSurrogate(first))
             {
                 wasSurrogatePair = false;
+                wasUnmatchedSurrogate = false;
                 return first;
             }
-            return GetScalarValueFromUtf16Slow(first, second, out wasSurrogatePair);
+            return GetScalarValueFromUtf16Slow(first, second, out wasSurrogatePair, out wasUnmatchedSurrogate);
         }
 
-        private static int GetScalarValueFromUtf16Slow(char first, char? second, out bool wasSurrogatePair)
+        private static int GetScalarValueFromUtf16Slow(char first, char? second, out bool wasSurrogatePair, out bool wasUnmatchedSurrogate)
         {
 #if DEBUG
-            if (!Char.IsSurrogate(first))
+            if (!char.IsSurrogate(first))
             {
                 Debug.Assert(false, "This case should've been handled by the fast path.");
                 wasSurrogatePair = false;
+                wasUnmatchedSurrogate = false;
                 return first;
             }
 #endif
@@ -337,12 +339,14 @@ namespace System.Text.Unicode
                     {
                         // valid surrogate pair - extract codepoint
                         wasSurrogatePair = true;
+                        wasUnmatchedSurrogate = false;
                         return GetScalarValueFromUtf16SurrogatePair(first, second.Value);
                     }
                     else
                     {
                         // unmatched surrogate - substitute
                         wasSurrogatePair = false;
+                        wasUnmatchedSurrogate = true;
                         return UNICODE_REPLACEMENT_CHAR;
                     }
                 }
@@ -350,6 +354,7 @@ namespace System.Text.Unicode
                 {
                     // unmatched surrogate - substitute
                     wasSurrogatePair = false;
+                    wasUnmatchedSurrogate = true;
                     return UNICODE_REPLACEMENT_CHAR;
                 }
             }
@@ -358,6 +363,7 @@ namespace System.Text.Unicode
                 // unmatched surrogate - substitute
                 Debug.Assert(char.IsLowSurrogate(first));
                 wasSurrogatePair = false;
+                wasUnmatchedSurrogate = true;
                 return UNICODE_REPLACEMENT_CHAR;
             }
         }
