@@ -151,6 +151,8 @@ namespace HttpStress
                 ErrorText = errorText;
                 Failures = failures;
             }
+
+            public int FailureCount => Failures.Values.Sum();
         }
 
         private sealed class StressResultAggregator
@@ -295,7 +297,7 @@ namespace HttpStress
                 Console.ResetColor();
 
                 int i = 0;
-                foreach (StressFailureType failure in _failureTypes.Values)
+                foreach (StressFailureType failure in _failureTypes.Values.OrderByDescending(x => x.FailureCount))
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine($"Failure Type {++i}/{_failureTypes.Count}:");
@@ -307,7 +309,7 @@ namespace HttpStress
                     {
                         Console.WriteLine($"\t{_operationNames[operation.Key].PadRight(30)}: {operation.Value}");
                     }
-                    Console.WriteLine($"\t{"TOTAL".PadRight(30)}: {failure.Failures.Values.Sum()}");
+                    Console.WriteLine($"\t{"TOTAL".PadRight(30)}: {failure.FailureCount}");
                     Console.ResetColor();
                     Console.WriteLine();
                 }
