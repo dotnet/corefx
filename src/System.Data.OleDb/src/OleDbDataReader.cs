@@ -2577,7 +2577,7 @@ namespace System.Data.OleDb
         }
     }
 
-    sealed internal class MetaData : IComparable
+    internal sealed class MetaData : IComparable
     {
         internal Bindings bindings;
         internal ColumnBinding columnBinding;

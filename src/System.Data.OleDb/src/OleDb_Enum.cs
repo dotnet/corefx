@@ -40,7 +40,7 @@ namespace System.Data.OleDb
         S_ROWSETCOLUMN = 29, // 2.6
     }
 
-    sealed internal class NativeDBType
+    internal sealed class NativeDBType
     { // from 4214.0
         // Variant compatible
         internal const short EMPTY = 0;       //

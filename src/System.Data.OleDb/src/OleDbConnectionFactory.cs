@@ -12,7 +12,7 @@ using System.Runtime.Versioning;
 
 namespace System.Data.OleDb
 {
-    sealed internal class OleDbConnectionFactory : DbConnectionFactory
+    internal sealed class OleDbConnectionFactory : DbConnectionFactory
     {
         private OleDbConnectionFactory() : base() { }
         // At this time, the OleDb Managed Provider doesn't have any connection pool

@@ -688,7 +688,7 @@ namespace System.Data.OleDb
             }
         }
 
-        sealed internal class OleDbConnectionStringBuilderConverter : ExpandableObjectConverter
+        internal sealed class OleDbConnectionStringBuilderConverter : ExpandableObjectConverter
         {
             // converter classes should have public ctor
             public OleDbConnectionStringBuilderConverter()

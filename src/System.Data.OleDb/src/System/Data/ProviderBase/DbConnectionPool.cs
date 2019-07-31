@@ -17,7 +17,7 @@ namespace System.Data.ProviderBase
 {
     using SysTx = Transactions;
 
-    sealed internal class DbConnectionPool
+    internal sealed class DbConnectionPool
     {
         private enum State
         {

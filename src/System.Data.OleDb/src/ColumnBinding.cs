@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace System.Data.OleDb
 {
-    sealed internal class ColumnBinding
+    internal sealed class ColumnBinding
     {
         // shared with other ColumnBindings
         private readonly OleDbDataReader _dataReader; // HCHAPTER

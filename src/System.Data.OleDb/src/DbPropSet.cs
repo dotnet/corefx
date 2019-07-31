@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Data.OleDb
 {
-    sealed internal class DBPropSet : SafeHandle
+    internal sealed class DBPropSet : SafeHandle
     {
         private readonly Int32 propertySetCount;
 

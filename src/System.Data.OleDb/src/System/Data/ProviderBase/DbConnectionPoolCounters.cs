@@ -89,7 +89,7 @@ namespace System.Data.ProviderBase
                                                                         PerformanceCounterType.NumberOfItems32);
         };
 
-        sealed internal class Counter
+        internal sealed class Counter
         {
             private PerformanceCounter _instance;
 
@@ -331,7 +331,7 @@ namespace System.Data.ProviderBase
         }
     }
 
-    sealed internal class DbConnectionPoolCountersNoCounters : DbConnectionPoolCounters
+    internal sealed class DbConnectionPoolCountersNoCounters : DbConnectionPoolCounters
     {
         public static readonly DbConnectionPoolCountersNoCounters SingletonInstance = new DbConnectionPoolCountersNoCounters();
 

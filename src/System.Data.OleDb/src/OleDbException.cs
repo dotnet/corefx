@@ -131,7 +131,7 @@ namespace System.Data.OleDb
             }
         }
 
-        sealed internal class ErrorCodeConverter : Int32Converter
+        internal sealed class ErrorCodeConverter : Int32Converter
         {
             // converter classes should have public ctor
             public ErrorCodeConverter()

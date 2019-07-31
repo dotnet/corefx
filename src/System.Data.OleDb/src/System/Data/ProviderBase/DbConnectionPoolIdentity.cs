@@ -16,7 +16,7 @@ using System.Runtime.Versioning;
 
 namespace System.Data.ProviderBase
 {
-    sealed internal class DbConnectionPoolIdentity
+    internal sealed class DbConnectionPoolIdentity
     {
         private const int E_NotImpersonationToken = unchecked((int)0x8007051D);
         private const int Win32_CheckTokenMembership = 1;

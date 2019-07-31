@@ -80,7 +80,7 @@ namespace System.Data.Common
         [DllImport(Interop.Libraries.OleAut32, PreserveSig = false)]
         static internal extern void VariantClear(IntPtr pObject);
 
-        sealed internal class Wrapper
+        internal sealed class Wrapper
         {
             private Wrapper() { }
 

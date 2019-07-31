@@ -14,7 +14,7 @@ namespace System.Data.OleDb
 {
     using SysTx = Transactions;
 
-    sealed internal class OleDbConnectionInternal : DbConnectionInternal, IDisposable
+    internal sealed class OleDbConnectionInternal : DbConnectionInternal, IDisposable
     {
         static private volatile OleDbServicesWrapper idataInitialize;
         static private object dataInitializeLock = new object();

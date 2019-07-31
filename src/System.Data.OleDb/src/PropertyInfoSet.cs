@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Data.OleDb
 {
-    sealed internal class OleDbPropertyInfo
+    internal sealed class OleDbPropertyInfo
     {
         public Guid _propertySet;
         public Int32 _propertyID;

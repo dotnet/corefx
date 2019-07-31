@@ -730,7 +730,7 @@ namespace System.Data.OleDb
 
     internal class NativeOledbWrapper
     {
-        internal unsafe static OleDbHResult IChapteredRowsetReleaseChapter(System.IntPtr ptr, System.IntPtr chapter)
+        internal static unsafe OleDbHResult IChapteredRowsetReleaseChapter(System.IntPtr ptr, System.IntPtr chapter)
         {
             OleDbHResult hr = OleDbHResult.E_UNEXPECTED;
             IntPtr hchapter = chapter;
@@ -752,7 +752,7 @@ namespace System.Data.OleDb
             return hr;
         }
 
-        internal unsafe static OleDbHResult ITransactionAbort(System.IntPtr ptr)
+        internal static unsafe OleDbHResult ITransactionAbort(System.IntPtr ptr)
         {
             OleDbHResult hr = OleDbHResult.E_UNEXPECTED;
             ITransactionLocal transactionLocal = null;
@@ -773,7 +773,7 @@ namespace System.Data.OleDb
             return hr;
         }
 
-        internal unsafe static OleDbHResult ITransactionCommit(System.IntPtr ptr)
+        internal static unsafe OleDbHResult ITransactionCommit(System.IntPtr ptr)
         {
             OleDbHResult hr = OleDbHResult.E_UNEXPECTED;
             ITransactionLocal transactionLocal = null;
