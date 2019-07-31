@@ -34,12 +34,12 @@ namespace HttpStress
 
         public Uri ServerUri { get; }
 
-        public StressServer(Uri serverUri, bool httpSys, int maxContentLength, int maxRequestUriSize, string logPath, bool enableAspNetLogs)
+        public StressServer(Configuration configuration)
         {
-            ServerUri = serverUri;
+            ServerUri = configuration.ServerUri;
             IWebHostBuilder host = WebHost.CreateDefaultBuilder();
 
-            if (httpSys)
+            if (configuration.UseHttpSys)
             {
                 // Use http.sys.  This requires additional manual configuration ahead of time;
                 // see https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/httpsys?view=aspnetcore-2.2#configure-windows-server.
@@ -62,9 +62,9 @@ namespace HttpStress
                 host = host.UseKestrel(ko =>
                 {
                     // conservative estimation based on https://github.com/aspnet/AspNetCore/blob/caa910ceeba5f2b2c02c47a23ead0ca31caea6f0/src/Servers/Kestrel/Core/src/Internal/Http2/Http2Stream.cs#L204
-                    ko.Limits.MaxRequestLineSize = Math.Max(ko.Limits.MaxRequestLineSize, maxRequestUriSize + 100);
+                    ko.Limits.MaxRequestLineSize = Math.Max(ko.Limits.MaxRequestLineSize, configuration.MaxRequestUriSize + 100);
 
-                    ko.ListenLocalhost(serverUri.Port, listenOptions =>
+                    ko.ListenLocalhost(configuration.ServerUri.Port, listenOptions =>
                     {
                         // Create self-signed cert for server.
                         using (RSA rsa = RSA.Create())
@@ -86,19 +86,19 @@ namespace HttpStress
 
             // Output only warnings and errors from Kestrel
             host = host
-                .ConfigureLogging(log => log.AddFilter("Microsoft.AspNetCore", level => enableAspNetLogs ? level >= LogLevel.Warning : false))
+                .ConfigureLogging(log => log.AddFilter("Microsoft.AspNetCore", level => configuration.LogAspNet ? level >= LogLevel.Warning : false))
                 // Set up how each request should be handled by the server.
                 .Configure(app =>
                 {
                     var head = new[] { "HEAD" };
                     app.UseRouting();
-                    app.UseEndpoints(e => MapRoutes(e, maxContentLength));
+                    app.UseEndpoints(e => MapRoutes(e, configuration.MaxContentLength));
                 });
 
             // Handle command-line arguments.
             _eventListener =
-                logPath == null ? null :
-                new HttpEventListener(logPath != "console" ? new StreamWriter(logPath) { AutoFlush = true } : null);
+                configuration.LogPath == null ? null :
+                new HttpEventListener(configuration.LogPath != "console" ? new StreamWriter(configuration.LogPath) { AutoFlush = true } : null);
 
             SetUpJustInTimeLogging();
 
@@ -106,7 +106,7 @@ namespace HttpStress
             _webHost.Start();
         }
 
-        private void MapRoutes(IEndpointRouteBuilder endpoints, int maxContentLength)
+        private static void MapRoutes(IEndpointRouteBuilder endpoints, int maxContentLength)
         {
             string contentSource = string.Concat(Enumerable.Repeat("1234567890", maxContentLength / 10));
             var head = new[] { "HEAD" };
