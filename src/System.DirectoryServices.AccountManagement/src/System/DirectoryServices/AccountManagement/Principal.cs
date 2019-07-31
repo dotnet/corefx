@@ -772,7 +772,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        static internal Principal MakePrincipal(PrincipalContext ctx, Type principalType)
+        internal static Principal MakePrincipal(PrincipalContext ctx, Type principalType)
         {
             Principal p = null;
 
