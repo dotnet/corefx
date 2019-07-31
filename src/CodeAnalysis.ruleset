@@ -198,7 +198,6 @@
     <Rule Id="SA1614" Action="None" /> <!-- Element parameter documentation should have text -->
     <Rule Id="SA1615" Action="None" /> <!-- Element return value should be documented -->
     <Rule Id="SA1616" Action="None" /> <!-- Element return value documentation should have text -->
-    <Rule Id="SA1617" Action="None" /> <!-- Void return value should not be documented -->
     <Rule Id="SA1618" Action="None" /> <!-- The documentation for type parameter is missing -->
     <Rule Id="SA1619" Action="None" /> <!-- The documentation for type parameter is missing -->
     <Rule Id="SA1622" Action="None" /> <!-- Generic type parameter documentation should have text -->
