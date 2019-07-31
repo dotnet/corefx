@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 
 namespace System.Management 
 {
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
+    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     /// <summary>
     ///    <para> Represents a collection of named values
     ///       suitable for use as context information to WMI operations. The

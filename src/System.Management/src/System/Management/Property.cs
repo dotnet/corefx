@@ -30,7 +30,7 @@ namespace System.Management
         }
     }
 
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
+    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     /// <summary>
     ///    <para> Represents information about a WMI property.</para>
     /// </summary>
@@ -100,7 +100,7 @@ namespace System.Management
         //This private function is used to refresh the information from the Wmi object before returning the requested data
         private void RefreshPropertyInfo()
         {
-            propertyValue = null;	// Needed so we don't leak this in/out parameter...
+            propertyValue = null;    // Needed so we don't leak this in/out parameter...
 
             int status = parent.wbemObject.Get_(propertyName, 0, ref propertyValue, ref propertyType, ref propertyFlavor);
 
@@ -223,7 +223,7 @@ namespace System.Management
                 if (status < 0)
                 {
                     if (status == (int)tag_WBEMSTATUS.WBEM_E_INVALID_OBJECT)
-                        className = string.Empty;	// Interpret as an unspecified property - return ""
+                        className = string.Empty;    // Interpret as an unspecified property - return ""
                     else if ((status & 0xfffff000) == 0x80041000)
                         ManagementException.ThrowWithExtendedInfo((ManagementStatus)status);
                     else
@@ -439,7 +439,7 @@ namespace System.Management
                                 wmiValue = new int [length];
                                 for (int i = 0; i < length; i++)
                                     ((int[])(wmiValue))[i] = Convert.ToInt32(valArray.GetValue(i),(IFormatProvider)culInfo.GetFormat(typeof(int)));
-                            }				
+                            }                
                             break;
 
                         case CimType.UInt32:
@@ -468,7 +468,7 @@ namespace System.Management
                                 wmiValue = new float [length];
                                 for (int i = 0; i < length; i++)
                                     ((float[])(wmiValue))[i] = Convert.ToSingle(valArray.GetValue(i),(IFormatProvider)culInfo.GetFormat(typeof(float)));
-                            }				
+                            }                
                             break;
 
                         case CimType.Real64:
@@ -479,7 +479,7 @@ namespace System.Management
                                 wmiValue = new double [length];
                                 for (int i = 0; i < length; i++)
                                     ((double[])(wmiValue))[i] = Convert.ToDouble(valArray.GetValue(i),(IFormatProvider)culInfo.GetFormat(typeof(double)));
-                            }				
+                            }                
                             break;
 
                         case CimType.Char16: 
@@ -648,7 +648,7 @@ namespace System.Management
                         {
                             type = CimType.Boolean;
                             wmiValue = (bool[])val;
-                        }					
+                        }
                         else if (elementType == typeof(ushort))
                         {
                             ushort[] arrayValue = (ushort[])val;
@@ -746,7 +746,7 @@ namespace System.Management
                         }
                     }
                 }
-                else	// Non-array values
+                else    // Non-array values
                 {
                     if (valueType == typeof(ushort))
                     {

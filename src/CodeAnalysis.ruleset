@@ -95,7 +95,6 @@
     <Rule Id="SA1024" Action="None" /> <!-- Colon should be followed by a space -->
     <Rule Id="SA1025" Action="None" /> <!-- Code should not contain multiple whitespace characters in a row -->
     <Rule Id="SA1026" Action="None" /> <!-- The keyword 'new' should not be followed by a space or a blank line -->
-    <Rule Id="SA1027" Action="None" /> <!-- Tabs and spaces should be used correctly -->
     <Rule Id="SA1028" Action="None" /> <!-- Code should not contain trailing whitespace -->
     <Rule Id="SA1100" Action="None" /> <!-- Do not prefix calls with base unless local implementation exists -->
     <Rule Id="SA1101" Action="None" /> <!-- Prefix local calls with this -->

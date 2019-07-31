@@ -231,10 +231,10 @@ namespace System.Data.Common
             [Obsolete("not used", true)] void GetBindings(/*deleted parameters signature*/);
 
             /*[local]
-        	HRESULT ReleaseAccessor(
-        		[in] HACCESSOR hAccessor,
-        		[in, out, unique] DBREFCOUNT * pcRefCount
-        	);*/
+            HRESULT ReleaseAccessor(
+                [in] HACCESSOR hAccessor,
+                [in, out, unique] DBREFCOUNT * pcRefCount
+            );*/
             [PreserveSig]
             System.Data.OleDb.OleDbHResult ReleaseAccessor(
                 [In] IntPtr hAccessor,
@@ -261,10 +261,10 @@ namespace System.Data.Common
         internal interface IColumnsInfo
         {
             /*[local]
-        	HRESULT GetColumnInfo(
-        		[in, out] DBORDINAL * pcColumns,
-        		[out, size_is(,(ULONG)*pcColumns)] DBCOLUMNINFO ** prgInfo,
-        		[out] OLECHAR ** ppStringsBuffer
+            HRESULT GetColumnInfo(
+                [in, out] DBORDINAL * pcColumns,
+                [out, size_is(,(ULONG)*pcColumns)] DBCOLUMNINFO ** prgInfo,
+                [out] OLECHAR ** ppStringsBuffer
             );*/
             [PreserveSig]
             System.Data.OleDb.OleDbHResult GetColumnInfo(
@@ -329,12 +329,12 @@ namespace System.Data.Common
         internal interface ICommandProperties
         {
             /*[local]
-        	HRESULT GetProperties(
-        		[in] const ULONG cPropertyIDSets,
-        		[in, size_is(cPropertyIDSets)] const DBPROPIDSET rgPropertyIDSets[],
-        		[in, out] ULONG * pcPropertySets,
-        		[out, size_is(,*pcPropertySets)] DBPROPSET ** prgPropertySets
-        	);*/
+            HRESULT GetProperties(
+                [in] const ULONG cPropertyIDSets,
+                [in, size_is(cPropertyIDSets)] const DBPROPIDSET rgPropertyIDSets[],
+                [in, out] ULONG * pcPropertySets,
+                [out, size_is(,*pcPropertySets)] DBPROPSET ** prgPropertySets
+            );*/
             [PreserveSig]
             System.Data.OleDb.OleDbHResult GetProperties(
                 [In] int cPropertyIDSets,
@@ -419,9 +419,9 @@ namespace System.Data.Common
         internal interface IDBInfo
         {
             /*[local]
-        	HRESULT	GetKeywords(
-        		[out] LPOLESTR * ppwszKeywords
-        	);*/
+            HRESULT    GetKeywords(
+                [out] LPOLESTR * ppwszKeywords
+            );*/
             [PreserveSig]
             System.Data.OleDb.OleDbHResult GetKeywords(
                 [Out, MarshalAs(UnmanagedType.LPWStr)] out string ppwszKeywords);
@@ -500,11 +500,11 @@ namespace System.Data.Common
                 [Out, MarshalAs(UnmanagedType.Interface)] out IRowset ppRowset);
 
             /*[local]
-        	HRESULT GetSchemas(
-        		[in, out] ULONG * pcSchemas,
-        		[out, size_is(,*pcSchemas)] GUID ** prgSchemas,
-        		[out, size_is(,*pcSchemas)] ULONG ** prgRestrictionSupport
-        	);*/
+            HRESULT GetSchemas(
+                [in, out] ULONG * pcSchemas,
+                [out, size_is(,*pcSchemas)] GUID ** prgSchemas,
+                [out, size_is(,*pcSchemas)] ULONG ** prgRestrictionSupport
+            );*/
             [PreserveSig]
             System.Data.OleDb.OleDbHResult GetSchemas(
                 [Out] out int pcSchemas,
