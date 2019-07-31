@@ -268,7 +268,7 @@ namespace Microsoft.VisualBasic.MyServices.Tests
         public void GetDirectories_Directory()
         {
             var DirectoryList = _fileSystem.GetDirectories(TestDirectory);
-            Assert.Equal(0, DirectoryList.Count);
+            Assert.Empty(DirectoryList);
             for (int i = 0; i < 6; i++)
             {
                 System.IO.Directory.CreateDirectory(System.IO.Path.Combine(TestDirectory, $"GetDirectories_DirectoryNewSubDirectory{i}"));
@@ -288,7 +288,7 @@ namespace Microsoft.VisualBasic.MyServices.Tests
         public void GetDirectories_Directory_SearchOption()
         {
             var DirectoryList = _fileSystem.GetDirectories(TestDirectory, SearchOption.SearchTopLevelOnly);
-            Assert.Equal(0, DirectoryList.Count);
+            Assert.Empty(DirectoryList);
             for (int i = 0; i < 6; i++)
             {
                 System.IO.Directory.CreateDirectory(System.IO.Path.Combine(TestDirectory, $"GetDirectories_Directory_SearchOptionNewSubDirectory{i}"));
@@ -310,7 +310,7 @@ namespace Microsoft.VisualBasic.MyServices.Tests
         public void GetDirectories_Directory_SearchOption_Wildcards()
         {
             var DirectoryList = _fileSystem.GetDirectories(TestDirectory, SearchOption.SearchTopLevelOnly, "*");
-            Assert.Equal(0, DirectoryList.Count);
+            Assert.Empty(DirectoryList);
             var CreatedDirectories = new List<string>();
             for (int i = 0; i < 6; i++)
             {
@@ -325,7 +325,7 @@ namespace Microsoft.VisualBasic.MyServices.Tests
             }
             System.IO.Directory.CreateDirectory(System.IO.Path.Combine(TestDirectory, $"NewSubDirectory000", $"NewSubSubDirectory000"));
             DirectoryList = _fileSystem.GetDirectories(TestDirectory, SearchOption.SearchTopLevelOnly, "*000");
-            Assert.Equal(1, DirectoryList.Count);
+            Assert.Single(DirectoryList);
             DirectoryList = _fileSystem.GetDirectories(TestDirectory, SearchOption.SearchAllSubDirectories, "*000");
             Assert.Equal(2, DirectoryList.Count);
         }
@@ -385,7 +385,7 @@ namespace Microsoft.VisualBasic.MyServices.Tests
         public void GetFiles_Directory()
         {
             var FileList = _fileSystem.GetFiles(TestDirectory);
-            Assert.Equal(0, FileList.Count);
+            Assert.Empty(FileList);
             for (int i = 0; i < 6; i++)
             {
                 CreateTestFile(SourceData, PathFromBase: null, TestFileName: $"NewFile{i}");
@@ -409,7 +409,7 @@ namespace Microsoft.VisualBasic.MyServices.Tests
             System.IO.Directory.CreateDirectory(NewSubDirectoryPath);
             CreateTestFile(SourceData, PathFromBase: "GetFiles_Directory_SearchOptionNewSubDirectory", TestFileName: "NewFile");
             var FileList = _fileSystem.GetFiles(TestDirectory);
-            Assert.Equal(0, FileList.Count);
+            Assert.Empty(FileList);
             for (int i = 0; i < 6; i++)
             {
                 CreateTestFile(SourceData, PathFromBase: null, TestFileName: $"NewFile{i}");
@@ -433,7 +433,7 @@ namespace Microsoft.VisualBasic.MyServices.Tests
         public void GetFiles_Directory_SearchOption_Wildcards()
         {
             var FileList = _fileSystem.GetFiles(TestDirectory);
-            Assert.Equal(0, FileList.Count);
+            Assert.Empty(FileList);
             var TestFileList = new List<string>();
             for (int i = 0; i < 6; i++)
             {
@@ -522,7 +522,7 @@ namespace Microsoft.VisualBasic.MyServices.Tests
             Assert.Throws<System.IO.IOException>(() => _fileSystem.MoveDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite: false));
             string[] RemainingSourceFilesWithPath = System.IO.Directory.GetFiles(FullPathToSourceDirectory);
             // We couldn't move one file
-            Assert.Equal(1, RemainingSourceFilesWithPath.Length);
+            Assert.Single(RemainingSourceFilesWithPath);
             // Ensure the file left has correct data
             Assert.True(HasExpectedData(RemainingSourceFilesWithPath[0], SourceData));
 

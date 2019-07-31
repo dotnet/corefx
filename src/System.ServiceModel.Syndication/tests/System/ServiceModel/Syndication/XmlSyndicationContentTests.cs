@@ -139,7 +139,7 @@ namespace System.ServiceModel.Syndication.Tests
 
             var clone = new XmlSyndicationContentSubclass(original);
             Assert.NotSame(clone.AttributeExtensions, original.AttributeExtensions);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
 
             Assert.Same(original.Extension, clone.Extension);
@@ -172,7 +172,7 @@ namespace System.ServiceModel.Syndication.Tests
 
             XmlSyndicationContent clone = Assert.IsType<XmlSyndicationContent>(original.Clone());
             Assert.NotSame(clone.AttributeExtensions, original.AttributeExtensions);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
 
             Assert.Same(original.Extension, clone.Extension);

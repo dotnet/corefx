@@ -46,8 +46,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", objWithNoGetter.GetMyString());
 
             // Currently we don't support setters without getters.
-            Assert.Equal(0, objWithNoGetter.GetMyIntArray().Length);
-            Assert.Equal(0, objWithNoGetter.GetMyIntList().Count);
+            Assert.Empty(objWithNoGetter.GetMyIntArray());
+            Assert.Empty(objWithNoGetter.GetMyIntList());
         }
 
         [Fact]

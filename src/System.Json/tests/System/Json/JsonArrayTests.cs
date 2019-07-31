@@ -105,7 +105,7 @@ namespace System.Json.Tests
             JsonArray array = new JsonArray();
             JsonValue value = new JsonPrimitive(true);
             array.Add(value);
-            Assert.Equal(1, array.Count);
+            Assert.Single(array);
             Assert.Same(value, array[0]);
         }
 
@@ -114,7 +114,7 @@ namespace System.Json.Tests
         {
             JsonArray array = new JsonArray();
             array.Add(null);
-            Assert.Equal(1, array.Count);
+            Assert.Single(array);
         }
 
         [Fact]
@@ -146,7 +146,7 @@ namespace System.Json.Tests
         {
             JsonArray array = new JsonArray();
             array.AddRange(null);
-            Assert.Equal(0, array.Count);
+            Assert.Empty(array);
         }
 
         [Fact]
@@ -222,10 +222,10 @@ namespace System.Json.Tests
             JsonArray array = new JsonArray((IEnumerable<JsonValue>)items);
 
             array.Remove(items[0]);
-            Assert.Equal(0, array.Count);
+            Assert.Empty(array);
 
             array.Remove(items[0]);
-            Assert.Equal(0, array.Count);
+            Assert.Empty(array);
         }
 
         [Fact]
@@ -235,7 +235,7 @@ namespace System.Json.Tests
             JsonArray array = new JsonArray((IEnumerable<JsonValue>)items);
 
             array.RemoveAt(0);
-            Assert.Equal(0, array.Count);
+            Assert.Empty(array);
         }
 
         [Fact]
@@ -252,10 +252,10 @@ namespace System.Json.Tests
         {
             JsonArray array = new JsonArray(new JsonValue[3]);
             array.Clear();
-            Assert.Equal(0, array.Count);
+            Assert.Empty(array);
 
             array.Clear();
-            Assert.Equal(0, array.Count);
+            Assert.Empty(array);
         }
 
         [Fact]

@@ -616,7 +616,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             {
                 referenceTime = cert.NotAfter.AddDays(-1);
 
-                Assert.Equal(0, cert.Extensions.OfType<X509EnhancedKeyUsageExtension>().Count());
+                Assert.Empty(cert.Extensions.OfType<X509EnhancedKeyUsageExtension>());
             }
 
             CustomBuild_CertMismatch(
@@ -671,7 +671,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
                 var ekuExts = cert.Extensions.OfType<X509EnhancedKeyUsageExtension>().ToList();
 
-                Assert.Equal(1, ekuExts.Count);
+                Assert.Single(ekuExts);
                 Assert.False(ekuExts[0].Critical, "ekuExts[0].Critical");
             }
 

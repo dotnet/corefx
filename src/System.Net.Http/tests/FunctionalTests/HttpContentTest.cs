@@ -476,7 +476,7 @@ namespace System.Net.Http.Functional.Tests
         {
             var content = new MockContent(new byte[0]);
             byte[] bytes = await content.ReadAsByteArrayAsync();
-            Assert.Equal(0, bytes.Length);
+            Assert.Empty(bytes);
         }
 
         [Fact]

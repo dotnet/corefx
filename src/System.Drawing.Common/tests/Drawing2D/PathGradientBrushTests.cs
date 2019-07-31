@@ -300,7 +300,7 @@ namespace System.Drawing.Drawing2D.Tests
                 else
                 {
                     Assert.Equal(factors, brush.Blend.Factors);
-                    Assert.Equal(1, brush.Blend.Positions.Length);
+                    Assert.Single(brush.Blend.Positions);
                 }
             }
         }
@@ -311,13 +311,13 @@ namespace System.Drawing.Drawing2D.Tests
             using (PathGradientBrush brush = new PathGradientBrush(_defaultFloatPoints, WrapMode.TileFlipXY))
             {
                 brush.Blend.Factors = new float[0];
-                Assert.Equal(1, brush.Blend.Factors.Length);
+                Assert.Single(brush.Blend.Factors);
                 brush.Blend.Factors = new float[2];
-                Assert.Equal(1, brush.Blend.Factors.Length);
+                Assert.Single(brush.Blend.Factors);
                 brush.Blend.Positions = new float[0];
-                Assert.Equal(1, brush.Blend.Positions.Length);
+                Assert.Single(brush.Blend.Positions);
                 brush.Blend.Positions = new float[2];
-                Assert.Equal(1, brush.Blend.Positions.Length);
+                Assert.Single(brush.Blend.Positions);
             }
         }
 
@@ -632,9 +632,9 @@ namespace System.Drawing.Drawing2D.Tests
                 Assert.NotEqual(Color.Pink, brush.InterpolationColors.Colors[0]);
                 Assert.Equal(defaultColors, brush.InterpolationColors.Colors);
                 brush.InterpolationColors.Positions = new float[0];
-                Assert.Equal(1, brush.InterpolationColors.Positions.Length);
+                Assert.Single(brush.InterpolationColors.Positions);
                 brush.InterpolationColors.Positions = new float[2];
-                Assert.Equal(1, brush.InterpolationColors.Positions.Length);
+                Assert.Single(brush.InterpolationColors.Positions);
             }
         }
 
@@ -1082,7 +1082,7 @@ namespace System.Drawing.Drawing2D.Tests
         {
             Assert.Equal(_defaultRectangle, brush.Rectangle);
             Assert.Equal(new float[] { 1 }, brush.Blend.Factors);
-            Assert.Equal(1, brush.Blend.Positions.Length);
+            Assert.Single(brush.Blend.Positions);
             Assert.Equal(new PointF(10.5f, 16f), brush.CenterPoint);
             Assert.Equal(new Color[] { Color.Empty }, brush.InterpolationColors.Colors);
             Assert.Equal(new Color[] { Color.FromArgb(255, 255, 255, 255) }, brush.SurroundColors);

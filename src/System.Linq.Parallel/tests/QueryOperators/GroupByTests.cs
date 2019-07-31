@@ -502,7 +502,7 @@ namespace System.Linq.Parallel.Tests
                 .ToArray();
 
             Assert.NotNull(result);
-            Assert.Equal(1, result.Length);
+            Assert.Single(result);
 
             Assert.Equal(Key, result[0].Key);
             Assert.Equal(LargeSize, result[0].Count());

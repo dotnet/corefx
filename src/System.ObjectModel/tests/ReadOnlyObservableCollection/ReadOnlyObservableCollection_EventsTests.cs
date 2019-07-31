@@ -343,7 +343,7 @@ namespace System.Collections.ObjectModel.Tests
             _expectedOldStartingIndex = -1;
 
             collection.Clear();
-            Assert.Equal(0, readOnlyCol.Count);
+            Assert.Empty(readOnlyCol);
             Assert.Equal(_expectedCollectionChangedFired, _numCollectionChangedFired);
 
             foreach (var item in _expectedPropertyChanged)

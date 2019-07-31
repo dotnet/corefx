@@ -21,7 +21,7 @@ namespace System.Net.Tests
         public void DefaultPropertyValues_ReturnEmptyAfterConstruction_Success()
         {
             WebHeaderCollection w = new WebHeaderCollection();
-            Assert.Equal(0, w.AllKeys.Length);
+            Assert.Empty(w.AllKeys);
             Assert.Equal(0, w.Count);
             Assert.Equal("\r\n", w.ToString());
             Assert.Empty(w);
@@ -612,7 +612,7 @@ namespace System.Net.Tests
             w.Add(HeaderType, CookieInvalid);
 
             string[] values = w.GetValues(HeaderType);
-            Assert.Equal(0, values.Length);
+            Assert.Empty(values);
         }
         
         [Fact]

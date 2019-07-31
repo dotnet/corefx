@@ -66,7 +66,7 @@ namespace System.Collections.Specialized.Tests
             NameValueCollection nameValueCollection = new NameValueCollection();
             nameValueCollection.Add(null, "value");
             nameValueCollection.Remove(null);
-            Assert.Equal(0, nameValueCollection.Count);
+            Assert.Empty(nameValueCollection);
             Assert.Null(nameValueCollection[null]);
         }
     }

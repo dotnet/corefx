@@ -32,7 +32,7 @@ namespace System.Drawing.Drawing2D.Tests
             using (var brush = new LinearGradientBrush((PointF)point1, point2, color1, color2))
             {
                 Assert.Equal(new float[] { 1 }, brush.Blend.Factors);
-                Assert.Equal(1, brush.Blend.Positions.Length);
+                Assert.Single(brush.Blend.Positions);
 
                 Assert.False(brush.GammaCorrection);
                 AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
@@ -65,7 +65,7 @@ namespace System.Drawing.Drawing2D.Tests
             using (var brush = new LinearGradientBrush(point1, point2, color1, color2))
             {
                 Assert.Equal(new float[] { 1 }, brush.Blend.Factors);
-                Assert.Equal(1, brush.Blend.Positions.Length);
+                Assert.Single(brush.Blend.Positions);
 
                 Assert.False(brush.GammaCorrection);
                 AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
@@ -102,7 +102,7 @@ namespace System.Drawing.Drawing2D.Tests
             using (var brush = new LinearGradientBrush(rectangle, color1, color2, linearGradientMode))
             {
                 Assert.Equal(new float[] { 1 }, brush.Blend.Factors);
-                Assert.Equal(1, brush.Blend.Positions.Length);
+                Assert.Single(brush.Blend.Positions);
 
                 Assert.False(brush.GammaCorrection);
                 AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
@@ -121,7 +121,7 @@ namespace System.Drawing.Drawing2D.Tests
             using (var brush = new LinearGradientBrush((RectangleF)rectangle, color1, color2, linearGradientMode))
             {
                 Assert.Equal(new float[] { 1 }, brush.Blend.Factors);
-                Assert.Equal(1, brush.Blend.Positions.Length);
+                Assert.Single(brush.Blend.Positions);
 
                 Assert.False(brush.GammaCorrection);
                 AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
@@ -149,7 +149,7 @@ namespace System.Drawing.Drawing2D.Tests
             using (var brush = new LinearGradientBrush(rectangle, color1, color2, angle))
             {
                 Assert.Equal(new float[] { 1 }, brush.Blend.Factors);
-                Assert.Equal(1, brush.Blend.Positions.Length);
+                Assert.Single(brush.Blend.Positions);
 
                 Assert.False(brush.GammaCorrection);
                 AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
@@ -168,7 +168,7 @@ namespace System.Drawing.Drawing2D.Tests
             using (var brush = new LinearGradientBrush((RectangleF)rectangle, color1, color2, angle))
             {
                 Assert.Equal(new float[] { 1 }, brush.Blend.Factors);
-                Assert.Equal(1, brush.Blend.Positions.Length);
+                Assert.Single(brush.Blend.Positions);
 
                 Assert.False(brush.GammaCorrection);
                 AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
@@ -195,7 +195,7 @@ namespace System.Drawing.Drawing2D.Tests
             using (var brush = new LinearGradientBrush(rectangle, color1, color2, angle, isAngleScalable))
             {
                 Assert.Equal(new float[] { 1 }, brush.Blend.Factors);
-                Assert.Equal(1, brush.Blend.Positions.Length);
+                Assert.Single(brush.Blend.Positions);
 
                 Assert.False(brush.GammaCorrection);
                 AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
@@ -214,7 +214,7 @@ namespace System.Drawing.Drawing2D.Tests
             using (var brush = new LinearGradientBrush((RectangleF)rectangle, color1, color2, angle, isAngleScalable))
             {
                 Assert.Equal(new float[] { 1 }, brush.Blend.Factors);
-                Assert.Equal(1, brush.Blend.Positions.Length);
+                Assert.Single(brush.Blend.Positions);
 
                 Assert.False(brush.GammaCorrection);
                 AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);

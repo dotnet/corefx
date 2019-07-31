@@ -147,8 +147,8 @@ namespace System.ComponentModel.Tests
             Assert.Null(compA.Site);
             TestComponent compB = new TestComponent();
             Assert.Null(compB.Site);
-            Assert.Equal(0, containerA.Components.Count);
-            Assert.Equal(0, containerB.Components.Count);
+            Assert.Empty(containerA.Components);
+            Assert.Empty(containerB.Components);
 
             containerA.Add(compA);
             siteA = compA.Site;
@@ -167,7 +167,7 @@ namespace System.ComponentModel.Tests
 
             Assert.False(object.ReferenceEquals(siteA, siteB));
             Assert.Equal(2, containerA.Components.Count);
-            Assert.Equal(0, containerB.Components.Count);
+            Assert.Empty(containerB.Components);
             Assert.Same(compA, containerA.Components[0]);
             Assert.Same(compB, containerA.Components[1]);
 
@@ -182,8 +182,8 @@ namespace System.ComponentModel.Tests
             Assert.False(siteA.DesignMode);
             Assert.Null(siteA.Name);
 
-            Assert.Equal(1, containerA.Components.Count);
-            Assert.Equal(1, containerB.Components.Count);
+            Assert.Single(containerA.Components);
+            Assert.Single(containerB.Components);
             Assert.Same(compB, containerA.Components[0]);
             Assert.Same(compA, containerB.Components[0]);
 
@@ -191,8 +191,8 @@ namespace System.ComponentModel.Tests
             containerB.Add(compA);
             Assert.Same(siteA, compA.Site);
 
-            Assert.Equal(1, containerA.Components.Count);
-            Assert.Equal(1, containerB.Components.Count);
+            Assert.Single(containerA.Components);
+            Assert.Single(containerB.Components);
             Assert.Same(compB, containerA.Components[0]);
             Assert.Same(compA, containerB.Components[0]);
         }
@@ -201,7 +201,7 @@ namespace System.ComponentModel.Tests
         public void Add1_Component_Null()
         {
             _container.Add((IComponent)null);
-            Assert.Equal(0, _container.Components.Count);
+            Assert.Empty(_container.Components);
         }
 
         [Fact] // Add (IComponent, String)
@@ -217,8 +217,8 @@ namespace System.ComponentModel.Tests
             Assert.Null(compA.Site);
             TestComponent compB = new TestComponent();
             Assert.Null(compB.Site);
-            Assert.Equal(0, containerA.Components.Count);
-            Assert.Equal(0, containerB.Components.Count);
+            Assert.Empty(containerA.Components);
+            Assert.Empty(containerB.Components);
 
             containerA.Add(compA, "A");
             siteA = compA.Site;
@@ -237,7 +237,7 @@ namespace System.ComponentModel.Tests
 
             Assert.False(object.ReferenceEquals(siteA, siteB));
             Assert.Equal(2, containerA.Components.Count);
-            Assert.Equal(0, containerB.Components.Count);
+            Assert.Empty(containerB.Components);
             Assert.Same(compA, containerA.Components[0]);
             Assert.Same(compB, containerA.Components[1]);
 
@@ -252,8 +252,8 @@ namespace System.ComponentModel.Tests
             Assert.False(siteA.DesignMode);
             Assert.Equal("A2", siteA.Name);
 
-            Assert.Equal(1, containerA.Components.Count);
-            Assert.Equal(1, containerB.Components.Count);
+            Assert.Single(containerA.Components);
+            Assert.Single(containerB.Components);
             Assert.Same(compB, containerA.Components[0]);
             Assert.Same(compA, containerB.Components[0]);
 
@@ -262,8 +262,8 @@ namespace System.ComponentModel.Tests
             Assert.Same(siteA, compA.Site);
             Assert.Equal("A2", siteA.Name);
 
-            Assert.Equal(1, containerA.Components.Count);
-            Assert.Equal(1, containerB.Components.Count);
+            Assert.Single(containerA.Components);
+            Assert.Single(containerB.Components);
             Assert.Same(compB, containerA.Components[0]);
             Assert.Same(compA, containerB.Components[0]);
 
@@ -272,8 +272,8 @@ namespace System.ComponentModel.Tests
             Assert.Same(siteA, compA.Site);
             Assert.Equal("A2", siteA.Name);
 
-            Assert.Equal(1, containerA.Components.Count);
-            Assert.Equal(1, containerB.Components.Count);
+            Assert.Single(containerA.Components);
+            Assert.Single(containerB.Components);
             Assert.Same(compB, containerA.Components[0]);
             Assert.Same(compA, containerB.Components[0]);
 
@@ -300,11 +300,11 @@ namespace System.ComponentModel.Tests
         public void Add2_Component_Null()
         {
             _container.Add((IComponent)null, "A");
-            Assert.Equal(0, _container.Components.Count);
+            Assert.Empty(_container.Components);
             _container.Add(new TestComponent(), "A");
-            Assert.Equal(1, _container.Components.Count);
+            Assert.Single(_container.Components);
             _container.Add((IComponent)null, "A");
-            Assert.Equal(1, _container.Components.Count);
+            Assert.Single(_container.Components);
         }
 
         [Fact]
@@ -324,7 +324,7 @@ namespace System.ComponentModel.Tests
             Assert.NotNull(ex.Message);
             Assert.True(ex.Message.IndexOf("'dup'") != -1);
             Assert.Null(ex.ParamName);
-            Assert.Equal(1, container.Components.Count);
+            Assert.Single(container.Components);
 
             // new component, different case
             TestComponent c3 = new TestComponent();
@@ -336,7 +336,7 @@ namespace System.ComponentModel.Tests
             Assert.NotNull(ex.Message);
             Assert.True(ex.Message.IndexOf("'duP'") != -1);
             Assert.Null(ex.ParamName);
-            Assert.Equal(1, container.Components.Count);
+            Assert.Single(container.Components);
 
             // existing component, same case
             TestComponent c4 = new TestComponent();
@@ -359,7 +359,7 @@ namespace System.ComponentModel.Tests
             Assert.True(ex.Message.IndexOf("'dup'") != -1);
             Assert.Null(ex.ParamName);
             Assert.Equal(2, container.Components.Count);
-            Assert.Equal(1, container2.Components.Count);
+            Assert.Single(container2.Components);
             Assert.Same(c5, container2.Components[0]);
 
             container.AllowDuplicateNames = true;
@@ -444,7 +444,7 @@ namespace System.ComponentModel.Tests
 
             _container.Dispose();
 
-            Assert.Equal(0, _container.Components.Count);
+            Assert.Empty(_container.Components);
             Assert.True(compA.IsDisposed);
             Assert.Null(compA.Site);
             Assert.True(compB.IsDisposed);
@@ -460,7 +460,7 @@ namespace System.ComponentModel.Tests
             Assert.Throws<InvalidOperationException>(() => _container.Dispose());
             // assert that component is not removed from components until after
             // Dispose of component has succeeded
-            Assert.Equal(0, _container.Components.Count);
+            Assert.Empty(_container.Components);
             Assert.False(compA.IsDisposed);
             Assert.Null(compA.Site);
             Assert.True(compB.IsDisposed);
@@ -476,7 +476,7 @@ namespace System.ComponentModel.Tests
             _container.Add(compB);
 
             Assert.Throws<InvalidOperationException>(() => _container.Dispose());
-            Assert.Equal(1, _container.Components.Count);
+            Assert.Single(_container.Components);
             Assert.Same(compA, _container.Components[0]);
             Assert.False(compA.IsDisposed);
             Assert.NotNull(compA.Site);
@@ -506,7 +506,7 @@ namespace System.ComponentModel.Tests
 
             _container.Dispose(true);
 
-            Assert.Equal(0, _container.Components.Count);
+            Assert.Empty(_container.Components);
             Assert.True(compA.IsDisposed);
             Assert.Null(compA.Site);
             Assert.True(compB.IsDisposed);
@@ -525,7 +525,7 @@ namespace System.ComponentModel.Tests
 
             _container.Dispose(true);
 
-            Assert.Equal(0, _container.Components.Count);
+            Assert.Empty(_container.Components);
             Assert.True(compA.IsDisposed);
             Assert.Null(compA.Site);
             Assert.True(compB.IsDisposed);
@@ -538,7 +538,7 @@ namespace System.ComponentModel.Tests
             MyComponent comp = new MyComponent();
             Container container = comp.CreateContainer();
             comp.Dispose();
-            Assert.Equal(0, container.Components.Count);
+            Assert.Empty(container.Components);
         }
 
         [Fact]
@@ -575,7 +575,7 @@ namespace System.ComponentModel.Tests
             _container.Remove(compB);
             Assert.Same(siteA, compA.Site);
             Assert.Null(compB.Site);
-            Assert.Equal(1, _container.Components.Count);
+            Assert.Single(_container.Components);
             Assert.Same(compA, _container.Components[0]);
 
             // remove component with no site
@@ -583,7 +583,7 @@ namespace System.ComponentModel.Tests
             _container.Remove(compB);
             Assert.Same(siteA, compA.Site);
             Assert.Null(compB.Site);
-            Assert.Equal(1, _container.Components.Count);
+            Assert.Single(_container.Components);
             Assert.Same(compA, _container.Components[0]);
 
             // remove component associated with other container
@@ -594,9 +594,9 @@ namespace System.ComponentModel.Tests
             _container.Remove(compB);
             Assert.Same(siteA, compA.Site);
             Assert.Same(siteB, compB.Site);
-            Assert.Equal(1, _container.Components.Count);
+            Assert.Single(_container.Components);
             Assert.Same(compA, _container.Components[0]);
-            Assert.Equal(1, container2.Components.Count);
+            Assert.Single(container2.Components);
             Assert.Same(compB, container2.Components[0]);
         }
 
@@ -605,7 +605,7 @@ namespace System.ComponentModel.Tests
         {
             _container.Add(new TestComponent());
             _container.Remove((IComponent)null);
-            Assert.Equal(1, _container.Components.Count);
+            Assert.Single(_container.Components);
         }
 
         [Fact]
@@ -625,7 +625,7 @@ namespace System.ComponentModel.Tests
             _container.RemoveWithoutUnsiting(compB);
             Assert.Same(siteA, compA.Site);
             Assert.Same(siteB, compB.Site);
-            Assert.Equal(1, _container.Components.Count);
+            Assert.Single(_container.Components);
             Assert.Same(compA, _container.Components[0]);
 
             // remove component with no site
@@ -633,7 +633,7 @@ namespace System.ComponentModel.Tests
             _container.RemoveWithoutUnsiting(compB);
             Assert.Same(siteA, compA.Site);
             Assert.Null(compB.Site);
-            Assert.Equal(1, _container.Components.Count);
+            Assert.Single(_container.Components);
             Assert.Same(compA, _container.Components[0]);
 
             // remove component associated with other container
@@ -644,9 +644,9 @@ namespace System.ComponentModel.Tests
             _container.RemoveWithoutUnsiting(compB);
             Assert.Same(siteA, compA.Site);
             Assert.Same(siteB, compB.Site);
-            Assert.Equal(1, _container.Components.Count);
+            Assert.Single(_container.Components);
             Assert.Same(compA, _container.Components[0]);
-            Assert.Equal(1, container2.Components.Count);
+            Assert.Single(container2.Components);
             Assert.Same(compB, container2.Components[0]);
         }
 
@@ -661,7 +661,7 @@ namespace System.ComponentModel.Tests
             site = component.Site;
             _container.RemoveWithoutUnsiting((IComponent)null);
             Assert.Same(site, component.Site);
-            Assert.Equal(1, _container.Components.Count);
+            Assert.Single(_container.Components);
             Assert.Same(component, _container.Components[0]);
         }
 
@@ -676,13 +676,13 @@ namespace System.ComponentModel.Tests
             container.Add(component2);
 
             container.DoRemoveWithoutUnsitting(component1);
-            Assert.Equal(1, container.Components.Count);
+            Assert.Single(container.Components);
 
             container.DoRemoveWithoutUnsitting(component1);
-            Assert.Equal(1, container.Components.Count);
+            Assert.Single(container.Components);
 
             container.DoRemoveWithoutUnsitting(component2);
-            Assert.Equal(0, container.Components.Count);
+            Assert.Empty(container.Components);
         }
 
         private class SitingContainer : Container
@@ -761,7 +761,7 @@ namespace System.ComponentModel.Tests
             Assert.Null(ex.ParamName);
             Assert.Equal(2, _container.Components.Count);
             _container.InvokeValidateName(compD, "whatever");
-            Assert.Equal(1, container2.Components.Count);
+            Assert.Single(container2.Components);
             Assert.Same(compD, container2.Components[0]);
         }
 

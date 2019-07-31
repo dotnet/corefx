@@ -43,7 +43,7 @@ namespace System.Collections.Immutable.Tests
             Assert.False(ordinalSet.Contains("aPpLe"));
 
             var ignoreCaseSet = ordinalSet.WithComparer(StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(1, ignoreCaseSet.Count);
+            Assert.Single(ignoreCaseSet);
             Assert.True(ignoreCaseSet.Contains("aPpLe"));
         }
 
@@ -104,19 +104,19 @@ namespace System.Collections.Immutable.Tests
             var comparer = StringComparer.OrdinalIgnoreCase;
 
             var set = ImmutableHashSet.Create<string>();
-            Assert.Equal(0, set.Count);
+            Assert.Empty(set);
             Assert.Same(EqualityComparer<string>.Default, set.KeyComparer);
 
             set = ImmutableHashSet.Create<string>(comparer);
-            Assert.Equal(0, set.Count);
+            Assert.Empty(set);
             Assert.Same(comparer, set.KeyComparer);
 
             set = ImmutableHashSet.Create("a");
-            Assert.Equal(1, set.Count);
+            Assert.Single(set);
             Assert.Same(EqualityComparer<string>.Default, set.KeyComparer);
 
             set = ImmutableHashSet.Create(comparer, "a");
-            Assert.Equal(1, set.Count);
+            Assert.Single(set);
             Assert.Same(comparer, set.KeyComparer);
 
             set = ImmutableHashSet.Create("a", "b");
@@ -136,7 +136,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Same(comparer, set.KeyComparer);
 
             set = ImmutableHashSet.Create(default(string));
-            Assert.Equal(1, set.Count);
+            Assert.Single(set);
 
             set = ImmutableHashSet.CreateRange(new[] { null, "a", null, "b" });
             Assert.Equal(3, set.Count);
@@ -153,7 +153,7 @@ namespace System.Collections.Immutable.Tests
             var set = ImmutableHashSet.Create<int>(new BadHasher<int>(), 5, 6);
             Assert.Same(set, set.Remove(2));
             var setAfterRemovingFive = set.Remove(5);
-            Assert.Equal(1, setAfterRemovingFive.Count);
+            Assert.Single(setAfterRemovingFive);
             Assert.Equal(new[] { 6 }, setAfterRemovingFive);
         }
 
@@ -168,7 +168,7 @@ namespace System.Collections.Immutable.Tests
             var set = ImmutableHashSet.Create<string>(new BadHasher<string>(), "a", "b");
             Assert.Same(set, set.Remove("c"));
             var setAfterRemovingA = set.Remove("a");
-            Assert.Equal(1, setAfterRemovingA.Count);
+            Assert.Single(setAfterRemovingA);
             Assert.Equal(new[] { "b" }, setAfterRemovingA);
         }
 

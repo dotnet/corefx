@@ -18,7 +18,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             Assert.NotNull(f.m_idGenerator);
             Assert.NotNull(f.m_objectQueue);
-            Assert.Equal(0, f.m_objectQueue.Count);
+            Assert.Empty(f.m_objectQueue);
 
             bool firstTime;
             AssertExtensions.Throws<ArgumentNullException>("obj", () => f.m_idGenerator.GetId(null, out firstTime));

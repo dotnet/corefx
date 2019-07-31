@@ -27,7 +27,7 @@ namespace System.ServiceModel.Syndication.Tests
             var content = new SyndicationContentSubclass();
 
             SyndicationContentSubclass clone = new SyndicationContentSubclass(content);
-            Assert.Equal(0, clone.AttributeExtensions.Count);
+            Assert.Empty(clone.AttributeExtensions);
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace System.ServiceModel.Syndication.Tests
             content.AttributeExtensions.Add(new XmlQualifiedName("name"), "value");
 
             SyndicationContentSubclass clone = new SyndicationContentSubclass(content);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
         }
 

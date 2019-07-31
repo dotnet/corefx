@@ -52,7 +52,7 @@ namespace System.Security.Cryptography.Xml.Tests
 
                     Assert.Equal(encryptedKey.EncryptionMethod.KeyAlgorithm, EncryptedXml.XmlEncRSAOAEPUrl);
                     Assert.Equal(1, encryptedKey.KeyInfo.Count);
-                    Assert.NotEqual(0, _asymmetricKeys.Count);
+                    Assert.NotEmpty(_asymmetricKeys);
 
                     RSAParameters rsaParams = new RSAParameters();
                     RSAParameters rsaInputParams = new RSAParameters();

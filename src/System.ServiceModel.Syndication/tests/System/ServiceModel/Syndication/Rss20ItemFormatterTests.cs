@@ -740,7 +740,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", thirdAuthor.AttributeExtensions[new XmlQualifiedName("author_name2", "author_namespace")]);
                 Assert.Equal("author_value", thirdAuthor.AttributeExtensions[new XmlQualifiedName("author_name3", "author_namespace")]);
                 Assert.Equal("", thirdAuthor.AttributeExtensions[new XmlQualifiedName("author_name4", "xmlns")]);
-                Assert.Equal(1, thirdAuthor.ElementExtensions.Count);
+                Assert.Single(thirdAuthor.ElementExtensions);
                 Assert.Equal(10, thirdAuthor.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.Equal("author_email", thirdAuthor.Email);
                 Assert.Equal("author_name", thirdAuthor.Name);
@@ -843,7 +843,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", thirdContributor.AttributeExtensions[new XmlQualifiedName("contributor_name2", "contributor_namespace")]);
                 Assert.Equal("contributor_value", thirdContributor.AttributeExtensions[new XmlQualifiedName("contributor_name3", "contributor_namespace")]);
                 Assert.Equal("", thirdContributor.AttributeExtensions[new XmlQualifiedName("contributor_name4", "xmlns")]);
-                Assert.Equal(1, thirdContributor.ElementExtensions.Count);
+                Assert.Single(thirdContributor.ElementExtensions);
                 Assert.Equal(10, thirdContributor.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.Equal("contributor_email", thirdContributor.Email);
                 Assert.Equal("contributor_name", thirdContributor.Name);
@@ -898,7 +898,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", thirdLink.AttributeExtensions[new XmlQualifiedName("link_name2", "link_namespace")]);
                 Assert.Equal("link_value", thirdLink.AttributeExtensions[new XmlQualifiedName("link_name3", "link_namespace")]);
                 Assert.Equal("", thirdLink.AttributeExtensions[new XmlQualifiedName("link_name4", "xmlns")]);
-                Assert.Equal(1, thirdLink.ElementExtensions.Count);
+                Assert.Single(thirdLink.ElementExtensions);
                 Assert.Equal(10, thirdLink.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.Equal(new Uri("http://link_url.com/"), thirdLink.BaseUri);
                 Assert.Equal(10, thirdLink.Length);
@@ -944,7 +944,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", sixthLink.AttributeExtensions[new XmlQualifiedName("alternate_name2", "alternate_namespace")]);
                 Assert.Equal("alternate_value", sixthLink.AttributeExtensions[new XmlQualifiedName("alternate_name3", "alternate_namespace")]);
                 Assert.Equal("", sixthLink.AttributeExtensions[new XmlQualifiedName("alternate_name4", "xmlns")]);
-                Assert.Equal(1, sixthLink.ElementExtensions.Count);
+                Assert.Single(sixthLink.ElementExtensions);
                 Assert.Equal(10, sixthLink.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.Equal(new Uri("http://alternate_url.com/"), sixthLink.BaseUri);
                 Assert.Equal(10, sixthLink.Length);

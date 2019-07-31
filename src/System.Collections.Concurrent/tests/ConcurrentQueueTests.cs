@@ -271,7 +271,7 @@ namespace System.Collections.Concurrent.Tests
                 }
             });
 
-            Assert.Equal(0, cq.Count);
+            Assert.Empty(cq);
             Assert.True(cq.IsEmpty);
             Assert.Equal(Iters, dequeues);
         }

@@ -197,7 +197,7 @@ namespace System.Data.Tests
             dt.Columns.Add("id1", typeof(int));
 
             // DataColumnCollection add
-            Assert.Equal(1, dt.Columns.Count);
+            Assert.Single(dt.Columns);
 
             // add row
             DataRow dr = dt.NewRow();
@@ -207,7 +207,7 @@ namespace System.Data.Tests
             dt.Columns.Remove("id1");
 
             // DataColumnCollection remove
-            Assert.Equal(0, dt.Columns.Count);
+            Assert.Empty(dt.Columns);
 
             //row is still there
 
@@ -215,7 +215,7 @@ namespace System.Data.Tests
             dt.Columns.Add("id2", typeof(int));
 
             // DataColumnCollection add again
-            Assert.Equal(1, dt.Columns.Count);
+            Assert.Single(dt.Columns);
         }
 
         [Fact]
@@ -457,7 +457,7 @@ namespace System.Data.Tests
             DataTable dt = new DataTable();
             DataColumn col = new DataColumn("col1", Type.GetType("System.String"));
             dt.Columns.Add(col);
-            Assert.Equal(1, dt.Columns.Count);
+            Assert.Single(dt.Columns);
             Assert.Equal("col1", dt.Columns[0].ColumnName);
             Assert.Equal("System.String", dt.Columns[0].DataType.ToString());
         }
@@ -489,7 +489,7 @@ namespace System.Data.Tests
         {
             DataTable dt = new DataTable();
             dt.Columns.Add("col1");
-            Assert.Equal(1, dt.Columns.Count);
+            Assert.Single(dt.Columns);
             Assert.Equal("col1", dt.Columns[0].ColumnName);
         }
 
@@ -558,7 +558,7 @@ namespace System.Data.Tests
         {
             DataTable dt = DataProvider.CreateParentDataTable();
             dt.Columns.Clear();
-            Assert.Equal(0, dt.Columns.Count);
+            Assert.Empty(dt.Columns);
         }
 
         [Fact]
@@ -579,8 +579,8 @@ namespace System.Data.Tests
             ds.Tables[0].Constraints.RemoveAt(0);
             ds.Tables[0].Columns.Clear();
             ds.Tables[1].Columns.Clear();
-            Assert.Equal(0, ds.Tables[0].Columns.Count);
-            Assert.Equal(0, ds.Tables[1].Columns.Count);
+            Assert.Empty(ds.Tables[0].Columns);
+            Assert.Empty(ds.Tables[1].Columns);
         }
 
         [Fact]
@@ -815,7 +815,7 @@ namespace System.Data.Tests
             }
 
             DataRow[] rows = dt.Select("A=5");
-            Assert.Equal(1, rows.Length);
+            Assert.Single(rows);
 
             dt.Columns.Remove("A");
 

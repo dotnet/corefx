@@ -104,7 +104,7 @@ namespace System.Collections.Immutable.Tests
             Assert.False(ordinalSet.Contains("aPpLe"));
 
             var ignoreCaseSet = ordinalSet.WithComparer(StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(1, ignoreCaseSet.Count);
+            Assert.Single(ignoreCaseSet);
             Assert.True(ignoreCaseSet.Contains("aPpLe"));
         }
 
@@ -275,19 +275,19 @@ namespace System.Collections.Immutable.Tests
             var comparer = StringComparer.OrdinalIgnoreCase;
 
             var set = ImmutableSortedSet.Create<string>();
-            Assert.Equal(0, set.Count);
+            Assert.Empty(set);
             Assert.Same(Comparer<string>.Default, set.KeyComparer);
 
             set = ImmutableSortedSet.Create<string>(comparer);
-            Assert.Equal(0, set.Count);
+            Assert.Empty(set);
             Assert.Same(comparer, set.KeyComparer);
 
             set = ImmutableSortedSet.Create("a");
-            Assert.Equal(1, set.Count);
+            Assert.Single(set);
             Assert.Same(Comparer<string>.Default, set.KeyComparer);
 
             set = ImmutableSortedSet.Create(comparer, "a");
-            Assert.Equal(1, set.Count);
+            Assert.Single(set);
             Assert.Same(comparer, set.KeyComparer);
 
             set = ImmutableSortedSet.Create("a", "b");
@@ -307,7 +307,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Same(comparer, set.KeyComparer);
 
             set = ImmutableSortedSet.Create(default(string));
-            Assert.Equal(1, set.Count);
+            Assert.Single(set);
 
             set = ImmutableSortedSet.CreateRange(new[] { null, "a", null, "b" });
             Assert.Equal(3, set.Count);

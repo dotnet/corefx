@@ -61,7 +61,7 @@ namespace System.ConfigurationTests
         [Fact]
         public void InitialCountIsZero()
         {
-            Assert.Equal(0, new SimpleCollection().Count);
+            Assert.Empty(new SimpleCollection());
         }
 
         [Fact]
@@ -145,7 +145,7 @@ namespace System.ConfigurationTests
         {
             var collection = new SimpleCollection();
             collection.TestBaseAdd(new SimpleElement());
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
         }
 
         [Fact]
@@ -153,7 +153,7 @@ namespace System.ConfigurationTests
         {
             var collection = new SimpleCollection();
             collection.TestBaseAdd(-1, new SimpleElement());
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
         }
 
         [Fact]

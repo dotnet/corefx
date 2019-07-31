@@ -224,7 +224,7 @@ namespace System.Data.Tests
             dataView[0]["col1"] = -1;
             dataView.RowStateFilter = DataViewRowState.ModifiedOriginal;
             v = dataView[0][0].ToString();
-            Assert.Equal(1, dataView.Count);
+            Assert.Single(dataView);
             Assert.Equal("1", v);
 
             // Deleting the row
@@ -232,7 +232,7 @@ namespace System.Data.Tests
             dataView.RowStateFilter = DataViewRowState.Deleted;
 
             v = dataView[0][0].ToString();
-            Assert.Equal(1, dataView.Count);
+            Assert.Single(dataView);
             Assert.Equal("1", v);
         }
 
@@ -430,7 +430,7 @@ namespace System.Data.Tests
             dv.EndInit();
 
             Assert.Null(dv.Table);
-            Assert.Equal(0, table.Columns.Count);
+            Assert.Empty(table.Columns);
 
             table.EndInit();
             Assert.Equal(table, dv.Table);
@@ -463,7 +463,7 @@ namespace System.Data.Tests
             dv.EndInit();
 
             Assert.Null(dv.Table);
-            Assert.Equal(0, table.Columns.Count);
+            Assert.Empty(table.Columns);
 
             table.EndInit();
 
@@ -579,7 +579,7 @@ namespace System.Data.Tests
             DataView TestView = new DataView(_dataTable);
             TestView.Sort = "itemId";
             DataRowView[] Result = TestView.FindRows("item 3");
-            Assert.Equal(1, Result.Length);
+            Assert.Single(Result);
             Assert.Equal("item 3", Result[0]["itemId"]);
         }
 

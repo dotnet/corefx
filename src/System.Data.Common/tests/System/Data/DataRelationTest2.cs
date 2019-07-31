@@ -45,7 +45,7 @@ namespace System.Data.Tests
             ds.Relations.Add(dRel);
 
             // ChildColumns 1
-            Assert.Equal(1, dRel.ChildColumns.Length);
+            Assert.Single(dRel.ChildColumns);
 
             // ChildColumns 2
             Assert.Equal(dtChild.Columns[0], dRel.ChildColumns[0]);
@@ -116,7 +116,7 @@ namespace System.Data.Tests
             ds.Relations.Add(dRel);
 
             // ParentColumns 1
-            Assert.Equal(1, dRel.ParentColumns.Length);
+            Assert.Single(dRel.ParentColumns);
 
             // ParentColumns 2
             Assert.Equal(dtParent.Columns[0], dRel.ParentColumns[0]);
@@ -199,10 +199,10 @@ namespace System.Data.Tests
             Assert.False(dRel == null);
 
             // DataRelation - parent Constraints
-            Assert.Equal(1, dtParent.Constraints.Count);
+            Assert.Single(dtParent.Constraints);
 
             // DataRelation - child Constraints
-            Assert.Equal(1, dtChild.Constraints.Count);
+            Assert.Single(dtChild.Constraints);
 
             // DataRelation - child relations
             Assert.Equal(dRel, dtParent.ChildRelations[0]);
@@ -221,16 +221,16 @@ namespace System.Data.Tests
 
             ds.Relations.Clear();
             // Remove DataRelation - Parent Constraints
-            Assert.Equal(1, dtParent.Constraints.Count);
+            Assert.Single(dtParent.Constraints);
 
             // Remove DataRelation - Child Constraints
-            Assert.Equal(1, dtChild.Constraints.Count);
+            Assert.Single(dtChild.Constraints);
 
             // Remove DataRelation - child relations
-            Assert.Equal(0, dtParent.ChildRelations.Count);
+            Assert.Empty(dtParent.ChildRelations);
 
             // Remove DataRelation - parent relations
-            Assert.Equal(0, dtChild.ParentRelations.Count);
+            Assert.Empty(dtChild.ParentRelations);
 
             //add relation which will create invalid constraint
             dtChild.Constraints.Clear();
@@ -338,13 +338,13 @@ namespace System.Data.Tests
             });
 
             // DataRelation ArgumentException - parent Constraints
-            Assert.Equal(1, dtParent.Constraints.Count);
+            Assert.Single(dtParent.Constraints);
 
             // DataRelation ArgumentException - child Constraints
-            Assert.Equal(0, dtChild.Constraints.Count);
+            Assert.Empty(dtChild.Constraints);
 
             // DataRelation ArgumentException - DataSet.Relation count
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
 
             //begin to check the relation ctor
             dtParent.Constraints.Clear();
@@ -354,16 +354,16 @@ namespace System.Data.Tests
             ds.Relations.Add(dRel);
 
             // DataSet DataRelation count
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
 
             // DataRelation - CTor
             Assert.False(dRel == null);
 
             // DataRelation - parent Constraints
-            Assert.Equal(1, dtParent.Constraints.Count);
+            Assert.Single(dtParent.Constraints);
 
             // DataRelation - child Constraints
-            Assert.Equal(1, dtChild.Constraints.Count);
+            Assert.Single(dtChild.Constraints);
 
             // DataRelation - child relations
             Assert.Equal(dRel, dtParent.ChildRelations[0]);
@@ -459,7 +459,7 @@ namespace System.Data.Tests
             Assert.True(pc != null);
 
             // Checking ExtendedProperties count 
-            Assert.Equal(0, pc.Count);
+            Assert.Empty(pc);
         }
 
         [Fact]

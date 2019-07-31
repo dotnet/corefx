@@ -13,7 +13,7 @@ namespace System.Security.Cryptography.Xml.Tests
         public void Ctor_Default()
         {
             EncryptionPropertyCollection encPropertyCollection = new EncryptionPropertyCollection();
-            Assert.Equal(0, encPropertyCollection.Count);
+            Assert.Empty(encPropertyCollection);
             Assert.False(encPropertyCollection.IsFixedSize);
             Assert.False(encPropertyCollection.IsReadOnly);
             Assert.False(encPropertyCollection.IsSynchronized);
@@ -26,7 +26,7 @@ namespace System.Security.Cryptography.Xml.Tests
             EncryptionPropertyCollection encPropertyCollection = new EncryptionPropertyCollection();
             EncryptionProperty encProperty = new EncryptionProperty();
             encPropertyCollection.Add(encProperty);
-            Assert.Equal(1, encPropertyCollection.Count);
+            Assert.Single(encPropertyCollection);
             Assert.NotNull(encPropertyCollection.Item(0));
             Assert.Equal(encProperty, encPropertyCollection.Item(0));
         }
@@ -199,7 +199,7 @@ namespace System.Security.Cryptography.Xml.Tests
             EncryptionProperty encProperty = new EncryptionProperty();
             encPropertyCollection.Add(encProperty);
             encPropertyCollection.Clear();
-            Assert.Equal(0, encPropertyCollection.Count);
+            Assert.Empty(encPropertyCollection);
         }
 
         [Fact]

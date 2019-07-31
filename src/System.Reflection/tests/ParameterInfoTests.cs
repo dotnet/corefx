@@ -232,7 +232,7 @@ namespace System.Reflection.Tests
                     Assert.False(c.IsStatic);
                     Assert.False(c.IsPublic);
                     ParameterInfo[] paramInfo = c.GetParameters();
-                    Assert.Equal(1, paramInfo.Length);
+                    Assert.Single(paramInfo);
                     Assert.Equal(typeof(int), paramInfo[0].ParameterType);
                     return;
                 }

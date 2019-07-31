@@ -70,7 +70,7 @@ namespace System.Linq.Tests
         public void Repeat_ZeroCountLeadToEmptySequence()
         {
             var array = Enumerable.Repeat(1, 0).ToArray();
-            Assert.Equal(0, array.Length);
+            Assert.Empty(array);
         }
 
         [Fact]

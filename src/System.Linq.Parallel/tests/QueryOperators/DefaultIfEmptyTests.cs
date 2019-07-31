@@ -131,12 +131,12 @@ namespace System.Linq.Parallel.Tests
         {
             IList<T> notEmpty = labeled.Item.DefaultIfEmpty().ToList();
             Assert.NotEmpty(notEmpty);
-            Assert.Equal(1, notEmpty.Count());
+            Assert.Single(notEmpty);
             Assert.Single(notEmpty, default(T));
 
             IList<T> specified = labeled.Item.DefaultIfEmpty(def).ToList();
             Assert.NotEmpty(specified);
-            Assert.Equal(1, specified.Count());
+            Assert.Single(specified);
             Assert.Single(specified, def);
         }
 

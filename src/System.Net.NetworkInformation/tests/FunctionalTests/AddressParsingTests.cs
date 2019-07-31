@@ -45,10 +45,10 @@ namespace System.Net.NetworkInformation.Tests
             FileUtil.NormalizeLineEndings("NetworkFiles/ipv6_route", fileName);
             List<GatewayIPAddressInformation> gatewayAddresses = new List<GatewayIPAddressInformation>();
             StringParsingHelpers.ParseIPv6GatewayAddressesFromRouteFile(gatewayAddresses, fileName, "lo", 42);
-            Assert.Equal(0, gatewayAddresses.Count);
+            Assert.Empty(gatewayAddresses);
 
             StringParsingHelpers.ParseIPv6GatewayAddressesFromRouteFile(gatewayAddresses, fileName, "foo", 42);
-            Assert.Equal(0, gatewayAddresses.Count);
+            Assert.Empty(gatewayAddresses);
 
             StringParsingHelpers.ParseIPv6GatewayAddressesFromRouteFile(gatewayAddresses, fileName, "enp0s5", 42);
             Assert.Equal(2, gatewayAddresses.Count);
@@ -71,7 +71,7 @@ namespace System.Net.NetworkInformation.Tests
             string fileName = GetTestFilePath();
             FileUtil.NormalizeLineEndings("NetworkFiles/dhclient.leases", fileName);
             List<IPAddress> dhcpServerAddresses = StringParsingHelpers.ParseDhcpServerAddressesFromLeasesFile(fileName, "wlan0");
-            Assert.Equal(1, dhcpServerAddresses.Count);
+            Assert.Single(dhcpServerAddresses);
             Assert.Equal(IPAddress.Parse("10.105.128.4"), dhcpServerAddresses[0]);
         }
 
@@ -82,7 +82,7 @@ namespace System.Net.NetworkInformation.Tests
             FileUtil.NormalizeLineEndings("NetworkFiles/smb.conf", fileName);
 
             List<IPAddress> winsServerAddresses = StringParsingHelpers.ParseWinsServerAddressesFromSmbConfFile(fileName);
-            Assert.Equal(1, winsServerAddresses.Count);
+            Assert.Single(winsServerAddresses);
             Assert.Equal(IPAddress.Parse("255.1.255.1"), winsServerAddresses[0]);
         }
     }

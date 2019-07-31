@@ -22,17 +22,17 @@ namespace Tests.Integration
             var catalog = new TypeLoadNotifyingCatalog(typeof(ExportingPart));
             var container = new CompositionContainer(catalog);
             catalog.AssertNotLoaded(typeof(ExportingPart));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             Lazy<IExporter> lazyContract = container.GetExport<IExporter>();
             Assert.NotNull(lazyContract);
             catalog.AssertNotLoaded(typeof(ExportingPart));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             IExporter value = lazyContract.Value;
 
             catalog.AssertLoaded(typeof(ExportingPart));
-            Assert.Equal(1, catalog.LoadedTypes.Count());
+            Assert.Single(catalog.LoadedTypes);
         }
 
         [Fact]
@@ -42,13 +42,13 @@ namespace Tests.Integration
             var container = new CompositionContainer(catalog);
             catalog.AssertNotLoaded(typeof(ExportingPart));
             catalog.AssertNotLoaded(typeof(PartImportingEagerly));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             Lazy<IImporter> lazyContract = container.GetExport<IImporter>();
             Assert.NotNull(lazyContract);
             catalog.AssertNotLoaded(typeof(PartImportingEagerly));
             catalog.AssertNotLoaded(typeof(ExportingPart));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             IImporter value = lazyContract.Value;
             catalog.AssertLoaded(typeof(PartImportingEagerly));
@@ -63,18 +63,18 @@ namespace Tests.Integration
             var container = new CompositionContainer(catalog);
             catalog.AssertNotLoaded(typeof(ExportingPart));
             catalog.AssertNotLoaded(typeof(PartImportingLazily));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             Lazy<IImporter> lazyContract = container.GetExport<IImporter>();
             Assert.NotNull(lazyContract);
             catalog.AssertNotLoaded(typeof(PartImportingLazily));
             catalog.AssertNotLoaded(typeof(ExportingPart));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             IImporter value = lazyContract.Value;
             catalog.AssertLoaded(typeof(PartImportingLazily));
             catalog.AssertNotLoaded(typeof(ExportingPart));
-            Assert.Equal(1, catalog.LoadedTypes.Count());
+            Assert.Single(catalog.LoadedTypes);
         }
 
         [Fact]
@@ -84,13 +84,13 @@ namespace Tests.Integration
             var container = new CompositionContainer(catalog);
             catalog.AssertNotLoaded(typeof(ExportingPart));
             catalog.AssertNotLoaded(typeof(PartImportingCollectionEagerly));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             Lazy<IImporter> lazyContract = container.GetExport<IImporter>();
             Assert.NotNull(lazyContract);
             catalog.AssertNotLoaded(typeof(PartImportingCollectionEagerly));
             catalog.AssertNotLoaded(typeof(ExportingPart));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             IImporter value = lazyContract.Value;
             catalog.AssertLoaded(typeof(PartImportingCollectionEagerly));
@@ -105,18 +105,18 @@ namespace Tests.Integration
             var container = new CompositionContainer(catalog);
             catalog.AssertNotLoaded(typeof(ExportingPart));
             catalog.AssertNotLoaded(typeof(PartImportingCollectionLazily));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             Lazy<IImporter> lazyContract = container.GetExport<IImporter>();
             Assert.NotNull(lazyContract);
             catalog.AssertNotLoaded(typeof(PartImportingCollectionLazily));
             catalog.AssertNotLoaded(typeof(ExportingPart));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             IImporter value = lazyContract.Value;
             catalog.AssertLoaded(typeof(PartImportingCollectionLazily));
             catalog.AssertNotLoaded(typeof(ExportingPart));
-            Assert.Equal(1, catalog.LoadedTypes.Count());
+            Assert.Single(catalog.LoadedTypes);
         }
 
         [Fact]
@@ -126,18 +126,18 @@ namespace Tests.Integration
             var container = new CompositionContainer(catalog);
             catalog.AssertNotLoaded(typeof(LazyLoopImporter));
             catalog.AssertNotLoaded(typeof(LazyLoopExporter));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             Lazy<IImporter> lazyContract = container.GetExport<IImporter>();
             Assert.NotNull(lazyContract);
             catalog.AssertNotLoaded(typeof(LazyLoopImporter));
             catalog.AssertNotLoaded(typeof(LazyLoopExporter));
-            Assert.Equal(0, catalog.LoadedTypes.Count());
+            Assert.Empty(catalog.LoadedTypes);
 
             IImporter value = lazyContract.Value;
             catalog.AssertLoaded(typeof(LazyLoopImporter));
             catalog.AssertNotLoaded(typeof(LazyLoopExporter));
-            Assert.Equal(1, catalog.LoadedTypes.Count());
+            Assert.Single(catalog.LoadedTypes);
         }
 
         public class IExporter

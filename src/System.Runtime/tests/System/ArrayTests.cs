@@ -1926,12 +1926,12 @@ namespace System.Tests
         public static void Empty()
         {
             Assert.True(Array.Empty<int>() != null);
-            Assert.Equal(0, Array.Empty<int>().Length);
+            Assert.Empty(Array.Empty<int>());
             Assert.Equal(1, Array.Empty<int>().Rank);
             Assert.Same(Array.Empty<int>(), Array.Empty<int>());
 
             Assert.True(Array.Empty<object>() != null);
-            Assert.Equal(0, Array.Empty<object>().Length);
+            Assert.Empty(Array.Empty<object>());
             Assert.Equal(1, Array.Empty<object>().Rank);
             Assert.Same(Array.Empty<object>(), Array.Empty<object>());
         }

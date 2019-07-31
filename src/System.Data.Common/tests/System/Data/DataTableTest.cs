@@ -168,13 +168,13 @@ namespace System.Data.Tests
 
             // test with apos escaped
             Rows = Mom.Select("Name = '''Jhon O'''' Collenal'''");
-            Assert.Equal(1, Rows.Length);
+            Assert.Single(Rows);
 
             Rows = Mom.Select("Name = 'Teresa' and ChildName = 'Nick'");
-            Assert.Equal(0, Rows.Length);
+            Assert.Empty(Rows);
 
             Rows = Mom.Select("Name = 'Teresa' and ChildName = 'Jack'");
-            Assert.Equal(1, Rows.Length);
+            Assert.Single(Rows);
 
             Rows = Mom.Select("Name = 'Teresa' and ChildName <> 'Jack'");
             Assert.Equal("Mack", Rows[0][1]);
@@ -183,7 +183,7 @@ namespace System.Data.Tests
             Assert.Equal(6, Rows.Length);
 
             Rows = Child.Select("age = 20 - 1");
-            Assert.Equal(1, Rows.Length);
+            Assert.Single(Rows);
 
             Rows = Child.Select("age <= 20");
             Assert.Equal(3, Rows.Length);
@@ -195,7 +195,7 @@ namespace System.Data.Tests
             Assert.Equal(2, Rows.Length);
 
             Rows = Child.Select("age >= 20 and (name = 'Mack' or name = 'Nick')");
-            Assert.Equal(1, Rows.Length);
+            Assert.Single(Rows);
             Assert.Equal("Mack", Rows[0][0]);
 
             Rows = Child.Select("not (Name = 'Jack')");
@@ -328,7 +328,7 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(EvaluateException), e.GetType());
             }
 
-            Assert.Equal(1, T.Select("age = '13'").Length);
+            Assert.Single(T.Select("age = '13'"));
         }
 
         [Fact]
@@ -339,10 +339,10 @@ namespace System.Data.Tests
             dt.Rows.Add(new object[] { "\t" });
             dt.Rows.Add(new object[] { "\\" });
 
-            Assert.Equal(0, dt.Select(@"SomeCol='\t'").Length);
-            Assert.Equal(0, dt.Select(@"SomeCol='\\'").Length);
+            Assert.Empty(dt.Select(@"SomeCol='\t'"));
+            Assert.Empty(dt.Select(@"SomeCol='\\'"));
 
-            Assert.Equal(0, dt.Select(@"SomeCol='\x'").Length);
+            Assert.Empty(dt.Select(@"SomeCol='\x'"));
         }
 
         [Fact]
@@ -442,8 +442,8 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(EvaluateException), e.GetType());
             }
 
-            Assert.Equal(1, T.Select("id = '12'").Length);
-            Assert.Equal(1, T.Select("id = 12").Length);
+            Assert.Single(T.Select("id = '12'"));
+            Assert.Single(T.Select("id = 12"));
 
             try
             {
@@ -487,32 +487,32 @@ namespace System.Data.Tests
             Row[2] = 1;
             T.Rows.Add(Row);
 
-            Assert.Equal(1, T.Select("name = 'human' + 1").Length);
+            Assert.Single(T.Select("name = 'human' + 1"));
 
             Assert.Equal("human1", T.Select("name = 'human' + 1")[0]["name"]);
-            Assert.Equal(1, T.Select("name = 'human' + '1'").Length);
+            Assert.Single(T.Select("name = 'human' + '1'"));
             Assert.Equal("human1", T.Select("name = 'human' + '1'")[0]["name"]);
-            Assert.Equal(1, T.Select("name = 'human' + 1 + 2").Length);
+            Assert.Single(T.Select("name = 'human' + 1 + 2"));
             Assert.Equal("human12", T.Select("name = 'human' + '1' + '2'")[0]["name"]);
 
-            Assert.Equal(1, T.Select("name = 'huMAn' + 1").Length);
+            Assert.Single(T.Select("name = 'huMAn' + 1"));
 
             Set.CaseSensitive = true;
-            Assert.Equal(0, T.Select("name = 'huMAn' + 1").Length);
+            Assert.Empty(T.Select("name = 'huMAn' + 1"));
 
             T.CaseSensitive = false;
-            Assert.Equal(1, T.Select("name = 'huMAn' + 1").Length);
+            Assert.Single(T.Select("name = 'huMAn' + 1"));
 
             T.CaseSensitive = true;
-            Assert.Equal(0, T.Select("name = 'huMAn' + 1").Length);
+            Assert.Empty(T.Select("name = 'huMAn' + 1"));
 
             Set.CaseSensitive = false;
-            Assert.Equal(0, T.Select("name = 'huMAn' + 1").Length);
+            Assert.Empty(T.Select("name = 'huMAn' + 1"));
 
             T.CaseSensitive = false;
-            Assert.Equal(1, T.Select("name = 'huMAn' + 1").Length);
+            Assert.Single(T.Select("name = 'huMAn' + 1"));
 
-            Assert.Equal(0, T.Select("name = 'human1*'").Length);
+            Assert.Empty(T.Select("name = 'human1*'"));
             Assert.Equal(11, T.Select("name like 'human1*'").Length);
             Assert.Equal(11, T.Select("name like 'human1%'").Length);
 
@@ -538,8 +538,8 @@ namespace System.Data.Tests
                 Assert.Equal(typeof(EvaluateException), e.GetType());
             }
 
-            Assert.Equal(0, T.Select("name like 'h[%]an'").Length);
-            Assert.Equal(1, T.Select("name like 'h[*]an'").Length);
+            Assert.Empty(T.Select("name like 'h[%]an'"));
+            Assert.Single(T.Select("name like 'h[*]an'"));
         }
 
         [Fact]
@@ -604,9 +604,9 @@ namespace System.Data.Tests
             Assert.Equal(25, T.Select("age = 5*5")[0]["age"]);
             Assert.Equal(901, T.Select("len(name) > 7").Length);
             Assert.Equal(125, T.Select("age = 5*5*5 AND len(name)>7")[0]["age"]);
-            Assert.Equal(1, T.Select("isnull(id, 'test') = 'test'").Length);
+            Assert.Single(T.Select("isnull(id, 'test') = 'test'"));
             Assert.Equal(1000, T.Select("iif(id = '56', 'test', 'false') = 'false'").Length);
-            Assert.Equal(1, T.Select("iif(id = '56', 'test', 'false') = 'test'").Length);
+            Assert.Single(T.Select("iif(id = '56', 'test', 'false') = 'test'"));
             Assert.Equal(9, T.Select("substring(id, 2, 3) = '23'").Length);
             Assert.Equal("123", T.Select("substring(id, 2, 3) = '23'")[0]["id"]);
             Assert.Equal("423", T.Select("substring(id, 2, 3) = '23'")[3]["id"]);
@@ -695,7 +695,7 @@ namespace System.Data.Tests
             DataRow[] Rows = Child.Select("name = Parent.Childname");
             Assert.Equal(6, Rows.Length);
             Rows = Child.Select("Parent.childname = 'Jack'");
-            Assert.Equal(1, Rows.Length);
+            Assert.Single(Rows);
 
             /*
 			try {
@@ -759,10 +759,10 @@ Assert.False(true);
             }
 
             Rows = Child.Select("Parent(rel).ChildName = 'Jack'");
-            Assert.Equal(1, Rows.Length);
+            Assert.Single(Rows);
 
             Rows = Child.Select("Parent(Rel2).ChildName = 'Jack'");
-            Assert.Equal(1, Rows.Length);
+            Assert.Single(Rows);
 
             try
             {
@@ -782,11 +782,11 @@ Assert.False(true);
             DataTable d = new DataTable();
             d.Columns.Add(new DataColumn("aaa"));
             DataRow[] rows = d.Select(null, null, DataViewRowState.Deleted);
-            Assert.Equal(0, rows.Length);
+            Assert.Empty(rows);
             d.Rows.Add(new object[] { "bbb" });
             d.Rows.Add(new object[] { "bbb" });
             rows = d.Select(null, null, DataViewRowState.Deleted);
-            Assert.Equal(0, rows.Length);
+            Assert.Empty(rows);
         }
 
         [Fact]
@@ -814,14 +814,14 @@ Assert.False(true);
             dt.Columns.Add();
             dt.Columns.Add();
 
-            Assert.Equal(0, dt.PrimaryKey.Length);
+            Assert.Empty(dt.PrimaryKey);
 
             dt.PrimaryKey = new DataColumn[] { dt.Columns[0] };
-            Assert.Equal(1, dt.PrimaryKey.Length);
+            Assert.Single(dt.PrimaryKey);
             Assert.Equal("Column1", dt.PrimaryKey[0].ColumnName);
 
             dt.PrimaryKey = null;
-            Assert.Equal(0, dt.PrimaryKey.Length);
+            Assert.Empty(dt.PrimaryKey);
 
             Col = new DataColumn("failed");
 
@@ -852,11 +852,11 @@ Assert.False(true);
                 // Assert.Equal ("PrimaryKey columns do not belong to this table.", e.Message);
             }
 
-            Assert.Equal(0, dt.Constraints.Count);
+            Assert.Empty(dt.Constraints);
 
             dt.PrimaryKey = new DataColumn[] { dt.Columns[0], dt.Columns[1] };
             Assert.Equal(2, dt.PrimaryKey.Length);
-            Assert.Equal(1, dt.Constraints.Count);
+            Assert.Single(dt.Constraints);
             Assert.True(dt.Constraints[0] is UniqueConstraint);
             Assert.Equal("Column1", dt.PrimaryKey[0].ColumnName);
             Assert.Equal("Column2", dt.PrimaryKey[1].ColumnName);
@@ -940,7 +940,7 @@ Assert.False(true);
             row.RowError = "Error#1";
             table.Rows.Add(row);
 
-            Assert.Equal(1, table.GetErrors().Length);
+            Assert.Single(table.GetErrors());
             Assert.Equal("Error#1", (table.GetErrors())[0].RowError);
         }
 
@@ -1043,12 +1043,12 @@ Assert.False(true);
             //Testing properties of clone
             DataTable cloneTable = table.Clone();
             Assert.True(cloneTable.CaseSensitive);
-            Assert.Equal(0, cloneTable.ChildRelations.Count);
-            Assert.Equal(0, cloneTable.ParentRelations.Count);
+            Assert.Empty(cloneTable.ChildRelations);
+            Assert.Empty(cloneTable.ParentRelations);
             Assert.Equal(2, cloneTable.Columns.Count);
-            Assert.Equal(1, cloneTable.Constraints.Count);
+            Assert.Single(cloneTable.Constraints);
             Assert.Equal("Id / Name + (Id * Id)", cloneTable.DisplayExpression);
-            Assert.Equal(1, cloneTable.ExtendedProperties.Count);
+            Assert.Single(cloneTable.ExtendedProperties);
             Assert.False(cloneTable.HasErrors);
             Assert.Equal(100, cloneTable.MinimumCapacity);
             Assert.Equal("Namespace#1", cloneTable.Namespace);
@@ -1060,12 +1060,12 @@ Assert.False(true);
             //Testing properties of copy
             DataTable copyTable = table.Copy();
             Assert.True(copyTable.CaseSensitive);
-            Assert.Equal(0, copyTable.ChildRelations.Count);
-            Assert.Equal(0, copyTable.ParentRelations.Count);
+            Assert.Empty(copyTable.ChildRelations);
+            Assert.Empty(copyTable.ParentRelations);
             Assert.Equal(2, copyTable.Columns.Count);
-            Assert.Equal(1, copyTable.Constraints.Count);
+            Assert.Single(copyTable.Constraints);
             Assert.Equal("Id / Name + (Id * Id)", copyTable.DisplayExpression);
-            Assert.Equal(1, copyTable.ExtendedProperties.Count);
+            Assert.Single(copyTable.ExtendedProperties);
             Assert.True(copyTable.HasErrors);
             Assert.Equal(100, copyTable.MinimumCapacity);
             Assert.Equal("Namespace#1", copyTable.Namespace);
@@ -1481,7 +1481,7 @@ Assert.False(true);
             table.Rows.Add(row);
 
             Assert.Equal(2, table.Rows.Count);
-            Assert.Equal(1, table.ChildRelations.Count);
+            Assert.Single(table.ChildRelations);
             try
             {
                 table.Reset();
@@ -1492,20 +1492,20 @@ Assert.False(true);
             }
 
             Assert.Equal(0, table.Rows.Count);
-            Assert.Equal(0, table.ChildRelations.Count);
-            Assert.Equal(0, table.ParentRelations.Count);
-            Assert.Equal(0, table.Constraints.Count);
+            Assert.Empty(table.ChildRelations);
+            Assert.Empty(table.ParentRelations);
+            Assert.Empty(table.Constraints);
 
             table1.Reset();
             Assert.Equal(0, table1.Rows.Count);
-            Assert.Equal(0, table1.Constraints.Count);
-            Assert.Equal(0, table1.ParentRelations.Count);
+            Assert.Empty(table1.Constraints);
+            Assert.Empty(table1.ParentRelations);
 
             // clear test
             table.Clear();
             Assert.Equal(0, table.Rows.Count);
-            Assert.Equal(0, table.Constraints.Count);
-            Assert.Equal(0, table.ChildRelations.Count);
+            Assert.Empty(table.Constraints);
+            Assert.Empty(table.ChildRelations);
         }
 
         [Fact]
@@ -3028,7 +3028,7 @@ Assert.False(true);
             Assert.Equal(2, Table.Columns.Count);
             Assert.Equal(0, Table.Rows.Count);
             Assert.False(Table.CaseSensitive);
-            Assert.Equal(1, Table.Constraints.Count);
+            Assert.Single(Table.Constraints);
             Assert.Equal("", Table.Prefix);
 
             Constraint cons = Table.Constraints[0];
@@ -3079,10 +3079,10 @@ Assert.False(true);
 
             Assert.Equal("second_test_table", Table2.TableName);
             Assert.Equal("", Table2.Namespace);
-            Assert.Equal(1, Table2.Columns.Count);
+            Assert.Single(Table2.Columns);
             Assert.Equal(0, Table2.Rows.Count);
             Assert.False(Table2.CaseSensitive);
-            Assert.Equal(1, Table2.Constraints.Count);
+            Assert.Single(Table2.Constraints);
             Assert.Equal("", Table2.Prefix);
 
             DataColumn column3 = Table2.Columns[0];
@@ -3905,9 +3905,9 @@ Assert.False(true);
             ds1.Tables[0].ReadXmlSchema(new MemoryStream(ms1.GetBuffer()));
             ds1.Tables[1].ReadXmlSchema(new MemoryStream(ms2.GetBuffer()));
 
-            Assert.Equal(0, ds1.Relations.Count);
-            Assert.Equal(1, ds1.Tables[0].Columns.Count);
-            Assert.Equal(1, ds1.Tables[1].Columns.Count);
+            Assert.Empty(ds1.Relations);
+            Assert.Single(ds1.Tables[0].Columns);
+            Assert.Single(ds1.Tables[1].Columns);
         }
 
         [Fact]
@@ -4107,7 +4107,7 @@ Assert.False(true);
             tbl.Locale = CultureInfo.InvariantCulture;
             string filter = string.Format("Data = '{0}'", new DateTime(2007, 7, 1).ToString(CultureInfo.InvariantCulture));
             DataRow[] rows = tbl.Select(filter);
-            Assert.Equal(1, rows.Length);
+            Assert.Single(rows);
         }
     }
 }

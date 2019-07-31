@@ -78,7 +78,7 @@ namespace System.Collections.Immutable.Tests
             var immutable2 = mutable.ToImmutable();
             Assert.NotSame(immutable1, immutable2); //, "Mutating the collection did not reset the Immutable property.");
             Assert.Same(immutable2, mutable.ToImmutable()); //, "The Immutable property getter is creating new objects without any differences.");
-            Assert.Equal(1, immutable2.Count);
+            Assert.Single(immutable2);
         }
 
         [Fact]
@@ -226,11 +226,11 @@ namespace System.Collections.Immutable.Tests
         {
             var mutable = ImmutableList.CreateRange(Enumerable.Range(1, 3)).ToBuilder();
             mutable.Clear();
-            Assert.Equal(0, mutable.Count);
+            Assert.Empty(mutable);
 
             // Do it again for good measure. :)
             mutable.Clear();
-            Assert.Equal(0, mutable.Count);
+            Assert.Empty(mutable);
         }
 
         [Fact]

@@ -78,7 +78,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms2.Decode(encodedMessage);
 
             RecipientInfoCollection recipients = ecms2.RecipientInfos;
-            Assert.Equal(1, recipients.Count);
+            Assert.Single(recipients);
             RecipientInfo recipientInfo = recipients[0];
             Assert.IsType<KeyTransRecipientInfo>(recipientInfo);
             return (KeyTransRecipientInfo)recipientInfo;

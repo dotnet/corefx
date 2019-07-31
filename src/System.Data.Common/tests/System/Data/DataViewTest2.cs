@@ -288,7 +288,7 @@ namespace System.Data.Tests
             dv.Sort = "String1";
             // Find = wrong sort, can not find
             dvArr = dv.FindRows(3);
-            Assert.Equal(0, dvArr.Length);
+            Assert.Empty(dvArr);
 
             dv.Sort = "ChildId";
 
@@ -586,7 +586,7 @@ namespace System.Data.Tests
             // Clear DataTable - should emit ListChangedType.Reset
             Assert.Equal(ListChangedType.Reset, _evProp.lstType);
             // Clear DataTable - should clear view count
-            Assert.Equal(0, dt.DefaultView.Count);
+            Assert.Empty(dt.DefaultView);
         }
 
         private void dv_ListChanged(object sender, ListChangedEventArgs e)
@@ -1152,8 +1152,8 @@ namespace System.Data.Tests
             // The rule seems to be : Copy any col property that doesent
             // involve/depend on other columns..
             // Constraints and PrimaryKey info not copied over
-            Assert.Equal(0, table.PrimaryKey.Length);
-            Assert.Equal(0, table.Constraints.Count);
+            Assert.Empty(table.PrimaryKey);
+            Assert.Empty(table.Constraints);
             // AllowDBNull state is maintained by ms.net
             Assert.False(table.Columns[0].AllowDBNull);
             Assert.True(table.Columns[2].AllowDBNull);
@@ -1220,7 +1220,7 @@ namespace System.Data.Tests
             Assert.Equal(6, newTable1.Rows.Count);
 
             newTable1 = view.ToTable(true, new string[] { "col1" });
-            Assert.Equal(1, newTable1.Columns.Count);
+            Assert.Single(newTable1.Columns);
             Assert.Equal(5, newTable1.Rows.Count);
 
             newTable1 = view.ToTable(true, new string[] { "col2", "col3" });
@@ -1231,7 +1231,7 @@ namespace System.Data.Tests
                 Assert.Equal(DataRowState.Added, newTable1.Rows[i].RowState);
 
             view = new DataView(table, "col1>1", "col1 asc, col2 desc", DataViewRowState.Added);
-            Assert.Equal(0, view.Count);
+            Assert.Empty(view);
 
             newTable1 = view.ToTable(false, new string[] { "col1", "col3" });
             Assert.Equal(0, newTable1.Rows.Count);

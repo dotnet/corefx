@@ -89,7 +89,7 @@ namespace System.Data.Tests
             arr[1] = null;
             ds.Tables.AddRange(arr);
             Assert.Equal("NewTable1", ds.Tables[0].TableName);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
         }
 
         [Fact]
@@ -208,19 +208,19 @@ namespace System.Data.Tests
         public void Count()
         {
             var ds = new DataSet();
-            Assert.Equal(0, ds.Tables.Count);
+            Assert.Empty(ds.Tables);
 
             ds.Tables.Add();
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
 
             ds.Tables.Add();
             Assert.Equal(2, ds.Tables.Count);
 
             ds.Tables.Remove("Table1");
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
 
             ds.Tables.Remove("Table2");
-            Assert.Equal(0, ds.Tables.Count);
+            Assert.Empty(ds.Tables);
         }
 
         [Fact]
@@ -354,7 +354,7 @@ namespace System.Data.Tests
             ds.Tables.Add();
             ds.Tables.Add();
             ds.Tables.Clear();
-            Assert.Equal(0, ds.Tables.Count);
+            Assert.Empty(ds.Tables);
         }
 
         [Fact]
@@ -377,10 +377,10 @@ namespace System.Data.Tests
             ds.Tables.AddRange(new DataTable[] { dt, dt1 });
 
             ds.Tables.Remove(dt);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal(dt1, ds.Tables[0]);
             ds.Tables.Remove(dt1);
-            Assert.Equal(0, ds.Tables.Count);
+            Assert.Empty(ds.Tables);
         }
 
         [Fact]
@@ -409,10 +409,10 @@ namespace System.Data.Tests
             ds.Tables.AddRange(new DataTable[] { dt, dt1 });
 
             ds.Tables.Remove("NewTable1");
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal(dt1, ds.Tables[0]);
             ds.Tables.Remove("NewTable2");
-            Assert.Equal(0, ds.Tables.Count);
+            Assert.Empty(ds.Tables);
         }
 
         [Fact]
@@ -442,7 +442,7 @@ namespace System.Data.Tests
             ds.Tables.RemoveAt(1);
             Assert.Equal(dt, ds.Tables[0]);
             ds.Tables.RemoveAt(0);
-            Assert.Equal(0, ds.Tables.Count);
+            Assert.Empty(ds.Tables);
         }
 
         [Fact]

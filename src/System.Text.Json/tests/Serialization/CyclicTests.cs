@@ -85,15 +85,15 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, rootCopy.Children.Count);
 
             Assert.Equal("parent", rootCopy.Parent.Name);
-            Assert.Equal(0, rootCopy.Parent.Children.Count);
+            Assert.Empty(rootCopy.Parent.Children);
             Assert.Null(rootCopy.Parent.Parent);
 
             Assert.Equal("child1", rootCopy.Children[0].Name);
-            Assert.Equal(0, rootCopy.Children[0].Children.Count);
+            Assert.Empty(rootCopy.Children[0].Children);
             Assert.Null(rootCopy.Children[0].Parent);
 
             Assert.Equal("child2", rootCopy.Children[1].Name);
-            Assert.Equal(0, rootCopy.Children[1].Children.Count);
+            Assert.Empty(rootCopy.Children[1].Children);
             Assert.Null(rootCopy.Children[1].Parent);
         }
 

@@ -140,7 +140,7 @@ namespace System.IO.Tests
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
-            Assert.Equal(0, (await File.ReadAllBytesAsync(path)).Length);
+            Assert.Empty((await File.ReadAllBytesAsync(path)));
         }
 
         [Theory]

@@ -165,7 +165,7 @@ namespace System.UnitTesting
                 var innerError = error.InnerException as ComposablePartException;
                 if (innerError != null)
                 {
-                    Assert.Equal(1, expectation.InnerExpectations.Length);
+                    Assert.Single(expectation.InnerExpectations);
                     AssertCore(retryCount, prefix + ".InnerException", innerError, expectation.InnerExpectations[0]);
                 }
                 else
@@ -202,7 +202,7 @@ namespace System.UnitTesting
                 var innerError = error.InnerException as ComposablePartException;
                 if (innerError != null)
                 {
-                    Assert.Equal(1, expectation.InnerExpectations.Length);
+                    Assert.Single(expectation.InnerExpectations);
                     AssertCore(retryCount, prefix + ".InnerException", innerError, expectation.InnerExpectations[0]);
                 }
                 else

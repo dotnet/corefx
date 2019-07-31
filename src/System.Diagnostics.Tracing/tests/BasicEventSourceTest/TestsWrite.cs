@@ -498,7 +498,7 @@ namespace BasicEventSourceTests
                     }
                 }
 
-                Assert.Equal(1, events.Count);
+                Assert.Single(events);
                 Event _event = events[0];
                 Assert.Equal("MyTestEvent", _event.EventName);
                 Assert.Equal(3, (int)_event.PayloadValue(0, "arg1"));

@@ -30,7 +30,7 @@ namespace System.Net.NetworkInformation.Tests
             FileUtil.NormalizeLineEndings(file, fileName);
 
             var dnsAddresses = StringParsingHelpers.ParseDnsAddressesFromResolvConfFile(fileName);
-            Assert.Equal(1, dnsAddresses.Count);
+            Assert.Single(dnsAddresses);
             Assert.Equal(IPAddress.Parse("127.0.1.1"), dnsAddresses[0]);
         }
     }

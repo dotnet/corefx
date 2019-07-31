@@ -475,7 +475,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
             ab1.Post(42);
             await Assert.ThrowsAsync<FormatException>(() => ab1.Completion);
             AggregateException e = ab1.Completion.Exception;
-            Assert.Equal(expected: 1, actual: e.InnerExceptions.Count);
+            Assert.Single(e.InnerExceptions);
             Assert.Equal(expected: "42", actual: (string)e.InnerException.Data[DataKey]);
         
             // Test case where message's ToString throws

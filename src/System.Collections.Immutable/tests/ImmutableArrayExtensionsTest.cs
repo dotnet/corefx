@@ -458,7 +458,7 @@ namespace System.Collections.Immutable.Tests
         [Fact]
         public void ToArray()
         {
-            Assert.Equal(0, ImmutableArrayExtensions.ToArray(s_empty).Length);
+            Assert.Empty(ImmutableArrayExtensions.ToArray(s_empty));
             Assert.Throws<NullReferenceException>(() => ImmutableArrayExtensions.ToArray(s_emptyDefault));
             Assert.Equal(s_manyElements.ToArray(), ImmutableArrayExtensions.ToArray(s_manyElements));
         }

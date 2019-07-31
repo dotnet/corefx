@@ -41,7 +41,7 @@ namespace System.ServiceModel.Syndication.Tests
 
             var clone = new UrlSyndicationContentSubclass(original);
             Assert.NotSame(clone.AttributeExtensions, original.AttributeExtensions);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
 
             Assert.Equal("mediaType", clone.Type);
@@ -72,7 +72,7 @@ namespace System.ServiceModel.Syndication.Tests
 
             UrlSyndicationContent clone = Assert.IsType<UrlSyndicationContent>(original.Clone());
             Assert.NotSame(clone.AttributeExtensions, original.AttributeExtensions);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
 
             Assert.Equal("mediaType", clone.Type);

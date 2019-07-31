@@ -106,14 +106,14 @@ namespace System.Composition.Convention.Tests
         private static ImportAttribute GetImportAttribute(ConventionBuilder builder)
         {
             Attribute[] list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetRuntimeProperties().Where((m) => m.Name == "IFooProperty").First());
-            Assert.Equal(1, list.Length);
+            Assert.Single(list);
             return list.OfType<ImportAttribute>().FirstOrDefault();
         }
 
         private static ImportManyAttribute GetImportManyAttribute(ConventionBuilder builder)
         {
             Attribute[] list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetRuntimeProperties().Where((m) => m.Name == "IFooProperty").First());
-            Assert.Equal(1, list.Length);
+            Assert.Single(list);
             return list.OfType<ImportManyAttribute>().FirstOrDefault();
         }
 

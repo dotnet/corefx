@@ -38,7 +38,7 @@ namespace System.Collections.ObjectModel.Tests
         {
             var collection = new ReadOnlyCollection<int>(s_intArray);
             Assert.Equal(s_intArray.Length, collection.Count);
-            Assert.Equal(0, s_empty.Count);
+            Assert.Empty(s_empty);
         }
 
         [Fact]

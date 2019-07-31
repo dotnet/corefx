@@ -20,7 +20,7 @@ namespace System.Globalization.Tests
         public void OptionalCalendars_Get_InvariantInfo()
         {
             CultureInfo cultureInfo = CultureInfo.InvariantCulture;
-            Assert.Equal(1, cultureInfo.OptionalCalendars.Length);
+            Assert.Single(cultureInfo.OptionalCalendars);
             Assert.IsType<GregorianCalendar>(cultureInfo.OptionalCalendars[0]);
         }
     }

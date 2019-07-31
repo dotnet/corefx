@@ -392,7 +392,7 @@ namespace System.Data.SqlClient.Tests
             Assert.Same(item3, collection[2]);
 
             collection.Clear();
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
 
             collection.Add(item1);
             collection.Add(item3);
@@ -407,7 +407,7 @@ namespace System.Data.SqlClient.Tests
             Assert.Same(item3, collection[2]);
 
             collection.Clear();
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
 
             IList list = collection;
             list.Insert(0, item1);
@@ -446,11 +446,11 @@ namespace System.Data.SqlClient.Tests
             SqlBulkCopyColumnMappingCollection collection = CreateCollection(item1, item2);
 
             collection.Remove(item1);
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
             Assert.Same(item2, collection[0]);
 
             collection.Remove(item2);
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
 
             // The explicit implementation of IList.Remove throws ArgumentException if
             // the item isn't in the collection, but the public Remove method does not
@@ -488,11 +488,11 @@ namespace System.Data.SqlClient.Tests
             Assert.Same(item3, collection[1]);
 
             collection.RemoveAt(1);
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
             Assert.Same(item2, collection[0]);
 
             collection.RemoveAt(0);
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
 
 
             IList list = CreateCollection(item1, item2, item3);

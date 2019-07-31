@@ -115,7 +115,7 @@ namespace MonoTests.System.Configuration
             ConfigurationPropertyCollection props = p.GetProperties();
 
             Assert.NotNull(props);
-            Assert.Equal(0, props.Count);
+            Assert.Empty(props);
         }
 
         [Fact]
@@ -154,8 +154,8 @@ namespace MonoTests.System.Configuration
             ep = new ElementPoker("hi", "bye2");
             p.Add(ep);
 
-            Assert.Equal(1, p.AllKeys.Length);
-            Assert.Equal(1, p.GetAllKeys().Length);
+            Assert.Single(p.AllKeys);
+            Assert.Single(p.GetAllKeys());
         }
 
         [Fact]

@@ -1394,7 +1394,7 @@ namespace MonoTests.System.Drawing
         {
             Assert.Equal(PixelFormat.Format32bppArgb, b.PixelFormat);
             // unlike the GDI+ icon decoder the palette isn't kept
-            Assert.Equal(0, b.Palette.Entries.Length);
+            Assert.Empty(b.Palette.Entries);
             Assert.Equal(size, b.Height);
             Assert.Equal(size, b.Width);
             Assert.Equal(b.RawFormat, ImageFormat.MemoryBmp);
@@ -1493,7 +1493,7 @@ namespace MonoTests.System.Drawing
             using (Bitmap bitmap = new Bitmap(sInFile))
             {
                 Assert.Equal(PixelFormat.Format24bppRgb, bitmap.PixelFormat);
-                Assert.Equal(0, bitmap.Palette.Entries.Length);
+                Assert.Empty(bitmap.Palette.Entries);
                 Assert.Equal(183, bitmap.Height);
                 Assert.Equal(173, bitmap.Width);
                 Assert.Equal(73744, bitmap.Flags);
@@ -1505,7 +1505,7 @@ namespace MonoTests.System.Drawing
             using (Image image = Image.FromHbitmap(hbitmap))
             {
                 //Assert.Equal (PixelFormat.Format32bppRgb, image.PixelFormat);
-                Assert.Equal(0, image.Palette.Entries.Length);
+                Assert.Empty(image.Palette.Entries);
                 Assert.Equal(183, image.Height);
                 Assert.Equal(173, image.Width);
                 Assert.Equal(335888, image.Flags);
@@ -1521,7 +1521,7 @@ namespace MonoTests.System.Drawing
             using (Bitmap bitmap = new Bitmap(sInFile))
             {
                 Assert.Equal(PixelFormat.Format24bppRgb, bitmap.PixelFormat);
-                Assert.Equal(0, bitmap.Palette.Entries.Length);
+                Assert.Empty(bitmap.Palette.Entries);
                 Assert.Equal(183, bitmap.Height);
                 Assert.Equal(173, bitmap.Width);
                 Assert.Equal(73744, bitmap.Flags);
@@ -1532,7 +1532,7 @@ namespace MonoTests.System.Drawing
             using (Image image = Image.FromHbitmap(hbitmap))
             {
                 //Assert.Equal (PixelFormat.Format32bppRgb, image.PixelFormat);
-                Assert.Equal(0, image.Palette.Entries.Length);
+                Assert.Empty(image.Palette.Entries);
                 Assert.Equal(183, image.Height);
                 Assert.Equal(173, image.Width);
                 Assert.Equal(335888, image.Flags);
@@ -1541,7 +1541,7 @@ namespace MonoTests.System.Drawing
             using (Image image2 = Image.FromHbitmap(hbitmap))
             {
                 //Assert.Equal (PixelFormat.Format32bppRgb, image2.PixelFormat);
-                Assert.Equal(0, image2.Palette.Entries.Length);
+                Assert.Empty(image2.Palette.Entries);
                 Assert.Equal(183, image2.Height);
                 Assert.Equal(173, image2.Width);
                 Assert.Equal(335888, image2.Flags);

@@ -64,11 +64,11 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Null(transform.Decryptor);
 
             Type[] input = transform.InputTypes;
-            Assert.Equal(1, input.Length);
+            Assert.Single(input);
             Assert.Equal(typeof(XmlDocument), input[0]);
 
             Type[] output = transform.OutputTypes;
-            Assert.Equal(1, output.Length);
+            Assert.Single(output);
             Assert.Equal(typeof(XmlDocument), output[0]);
         }
 

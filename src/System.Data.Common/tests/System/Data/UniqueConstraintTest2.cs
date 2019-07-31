@@ -39,7 +39,7 @@ namespace System.Data.Tests
             uc = new UniqueConstraint(dtParent.Columns[0]);
 
             // Columns 1
-            Assert.Equal(1, uc.Columns.Length);
+            Assert.Single(uc.Columns);
 
             // Columns 2
             Assert.Equal(dtParent.Columns[0], uc.Columns[0]);
@@ -171,7 +171,7 @@ namespace System.Data.Tests
 
             // DataColumn.Unique = true, will add UniqueConstraint
             dtParent.Columns[0].Unique = true;
-            Assert.Equal(1, dtParent.Constraints.Count);
+            Assert.Single(dtParent.Constraints);
 
             // Check the created UniqueConstraint
             dtParent.Columns[0].Unique = true;
@@ -197,14 +197,14 @@ namespace System.Data.Tests
             Assert.False(uc == null);
 
             // primary key 1
-            Assert.Equal(0, dtParent.PrimaryKey.Length);
+            Assert.Empty(dtParent.PrimaryKey);
 
             dtParent.Constraints.Remove(uc);
             uc = new UniqueConstraint(dtParent.Columns[0], true);
             dtParent.Constraints.Add(uc);
 
             // primary key 2
-            Assert.Equal(1, dtParent.PrimaryKey.Length);
+            Assert.Single(dtParent.PrimaryKey);
         }
 
         [Fact]
@@ -252,14 +252,14 @@ namespace System.Data.Tests
             Assert.False(uc == null);
 
             // primary key 1
-            Assert.Equal(0, dtParent.PrimaryKey.Length);
+            Assert.Empty(dtParent.PrimaryKey);
 
             dtParent.Constraints.Remove(uc);
             uc = new UniqueConstraint(dtParent.Columns[0], true);
             dtParent.Constraints.Add(uc);
 
             // primary key 2
-            Assert.Equal(1, dtParent.PrimaryKey.Length);
+            Assert.Single(dtParent.PrimaryKey);
         }
 
         [Fact]
@@ -290,7 +290,7 @@ namespace System.Data.Tests
             Assert.False(uc == null);
 
             // primary key 1
-            Assert.Equal(0, dtParent.PrimaryKey.Length);
+            Assert.Empty(dtParent.PrimaryKey);
 
             // Ctor name 1
             Assert.Equal("myConstraint", uc.ConstraintName);
@@ -300,7 +300,7 @@ namespace System.Data.Tests
             dtParent.Constraints.Add(uc);
 
             // primary key 2
-            Assert.Equal(1, dtParent.PrimaryKey.Length);
+            Assert.Single(dtParent.PrimaryKey);
 
             // Ctor name 2
             Assert.Equal("myConstraint", uc.ConstraintName);
@@ -334,7 +334,7 @@ namespace System.Data.Tests
             Assert.False(uc == null);
 
             // primary key 1
-            Assert.Equal(0, dtParent.PrimaryKey.Length);
+            Assert.Empty(dtParent.PrimaryKey);
 
             // Ctor name 1
             Assert.Equal("myConstraint", uc.ConstraintName);
@@ -344,7 +344,7 @@ namespace System.Data.Tests
             dtParent.Constraints.Add(uc);
 
             // primary key 2
-            Assert.Equal(1, dtParent.PrimaryKey.Length);
+            Assert.Single(dtParent.PrimaryKey);
 
             // Ctor name 2
             Assert.Equal("myConstraint", uc.ConstraintName);
@@ -363,7 +363,7 @@ namespace System.Data.Tests
             Assert.True(pc != null);
 
             // Checking ExtendedProperties count 
-            Assert.Equal(0, pc.Count);
+            Assert.Empty(pc);
         }
     }
 }

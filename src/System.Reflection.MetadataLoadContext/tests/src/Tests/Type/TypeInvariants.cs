@@ -99,7 +99,7 @@ namespace System.Reflection.Tests
 
             Type[] gps = type.GetTypeInfo().GenericTypeParameters;
             Assert.NotNull(gps);
-            Assert.NotEqual(0, gps.Length);
+            Assert.NotEmpty(gps);
             Type[] gps2 = type.GetTypeInfo().GenericTypeParameters;
             Assert.NotSame(gps, gps2);
             Assert.Equal<Type>(gps, gps2);
@@ -140,13 +140,13 @@ namespace System.Reflection.Tests
             BindingFlags bf = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
             MemberInfo[] mems;
             mems = type.GetEvents(bf);
-            Assert.Equal(0, mems.Length);
+            Assert.Empty(mems);
             mems = type.GetFields(bf);
-            Assert.Equal(0, mems.Length);
+            Assert.Empty(mems);
             mems = type.GetProperties(bf);
-            Assert.Equal(0, mems.Length);
+            Assert.Empty(mems);
             mems = type.GetNestedTypes(bf);
-            Assert.Equal(0, mems.Length);
+            Assert.Empty(mems);
         }
 
         internal static void TestSzArrayInvariants(this Type type)
@@ -217,12 +217,12 @@ namespace System.Reflection.Tests
 
             // No base type, interfaces
             Assert.Null(type.BaseType);
-            Assert.Equal(0, type.GetInterfaces().Length);
+            Assert.Empty(type.GetInterfaces());
 
             // No members
             BindingFlags bf = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
             MemberInfo[] members = type.GetMembers(bf);
-            Assert.Equal(0, members.Length);
+            Assert.Empty(members);
         }
 
         internal static void TestPointerInvariants(this Type type)
@@ -244,12 +244,12 @@ namespace System.Reflection.Tests
 
             // No base type, interfaces
             Assert.Null(type.BaseType);
-            Assert.Equal(0, type.GetInterfaces().Length);
+            Assert.Empty(type.GetInterfaces());
 
             // No members
             BindingFlags bf = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
             MemberInfo[] members = type.GetMembers(bf);
-            Assert.Equal(0, members.Length);
+            Assert.Empty(members);
         }
 
         internal static void TestConstructedGenericTypeInvariants(this Type type)
@@ -266,7 +266,7 @@ namespace System.Reflection.Tests
             // No members
             BindingFlags bf = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
             MemberInfo[] members = type.GetMembers(bf);
-            Assert.Equal(0, members.Length);
+            Assert.Empty(members);
         }
 
         internal static void TestGenericTypeParameterInvariants(this Type type)
@@ -413,7 +413,7 @@ namespace System.Reflection.Tests
             if (!type.IsTypeDefinition())
             {
                 Assert.False(type.IsGenericTypeDefinition);
-                Assert.Equal(0, type.GetTypeInfo().GenericTypeParameters.Length);
+                Assert.Empty(type.GetTypeInfo().GenericTypeParameters);
             }
 
             if (!type.IsGenericTypeDefinition)
@@ -442,7 +442,7 @@ namespace System.Reflection.Tests
 
             if (!type.IsConstructedGenericType)
             {
-                Assert.Equal(0, type.GenericTypeArguments.Length);
+                Assert.Empty(type.GenericTypeArguments);
                 if (!type.IsGenericTypeDefinition)
                 {
                     Assert.Throws<InvalidOperationException>(() => type.GetGenericTypeDefinition());
@@ -575,7 +575,7 @@ namespace System.Reflection.Tests
 
             Type[] gas = type.GenericTypeArguments;
             Assert.NotNull(gas);
-            Assert.NotEqual(0, gas.Length);
+            Assert.NotEmpty(gas);
             Type[] gas2 = type.GenericTypeArguments;
             Assert.NotSame(gas, gas2);
             Assert.Equal<Type>(gas, gas2);
@@ -615,7 +615,7 @@ namespace System.Reflection.Tests
             // No members
             BindingFlags bf = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
             MemberInfo[] members = type.GetMembers(bf);
-            Assert.Equal(0, members.Length);
+            Assert.Empty(members);
         }
     }
 }

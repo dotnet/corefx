@@ -20,7 +20,7 @@ namespace System.Security.Claims
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
-            Assert.Equal(0, id.Claims.Count());
+            Assert.Empty(id.Claims);
             Assert.False(id.IsAuthenticated);
             Assert.Null(id.Label);
             Assert.Null(id.Name);
@@ -36,7 +36,7 @@ namespace System.Security.Claims
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
-            Assert.Equal(0, id.Claims.Count());
+            Assert.Empty(id.Claims);
             Assert.False(id.IsAuthenticated);
             Assert.Null(id.Label);
             Assert.Null(id.Name);
@@ -52,7 +52,7 @@ namespace System.Security.Claims
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
-            Assert.Equal(0, id.Claims.Count());
+            Assert.Empty(id.Claims);
             Assert.False(id.IsAuthenticated);
             Assert.Null(id.Label);
             Assert.Null(id.Name);
@@ -68,7 +68,7 @@ namespace System.Security.Claims
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
-            Assert.Equal(0, id.Claims.Count());
+            Assert.Empty(id.Claims);
             Assert.True(id.IsAuthenticated);
             Assert.Null(id.Label);
             Assert.Null(id.Name);
@@ -84,7 +84,7 @@ namespace System.Security.Claims
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
-            Assert.Equal(0, id.Claims.Count());
+            Assert.Empty(id.Claims);
             Assert.False(id.IsAuthenticated);
             Assert.Null(id.Label);
             Assert.Null(id.Name);
@@ -100,7 +100,7 @@ namespace System.Security.Claims
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
-            Assert.Equal(0, id.Claims.Count());
+            Assert.Empty(id.Claims);
             Assert.False(id.IsAuthenticated);
             Assert.Null(id.Label);
             Assert.Null(id.Name);
@@ -177,7 +177,7 @@ namespace System.Security.Claims
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
-            Assert.Equal(0, id.Claims.Count());
+            Assert.Empty(id.Claims);
             Assert.False(id.IsAuthenticated);
             Assert.Null(id.Label);
             Assert.Null(id.Name);
@@ -193,7 +193,7 @@ namespace System.Security.Claims
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
-            Assert.Equal(0, id.Claims.Count());
+            Assert.Empty(id.Claims);
             Assert.False(id.IsAuthenticated);
             Assert.Null(id.Label);
             Assert.Null(id.Name);
@@ -251,7 +251,7 @@ namespace System.Security.Claims
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
-            Assert.Equal(0, id.Claims.Count());
+            Assert.Empty(id.Claims);
             Assert.False(id.IsAuthenticated);
             Assert.Null(id.Label);
             Assert.Null(id.Name);
@@ -267,7 +267,7 @@ namespace System.Security.Claims
             Assert.Null(id.Actor);
             Assert.Null(id.BootstrapContext);
             Assert.NotNull(id.Claims);
-            Assert.Equal(0, id.Claims.Count());
+            Assert.Empty(id.Claims);
             Assert.False(id.IsAuthenticated);
             Assert.Null(id.Label);
             Assert.Null(id.Name);

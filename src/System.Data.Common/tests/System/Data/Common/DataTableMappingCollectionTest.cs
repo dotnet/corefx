@@ -57,7 +57,7 @@ namespace System.Data.Tests.Common
             Assert.Equal(0, t);
             bool eq1 = _tabs[0].Equals(_tableMapCollection[0]);
             Assert.True(eq1);
-            Assert.Equal(1, _tableMapCollection.Count);
+            Assert.Single(_tableMapCollection);
             DataTableMapping tab2;
             tab2 = _tableMapCollection.Add("sourceEmployees", "dataSetEmployees");
             bool eq2 = tab2.Equals(_tableMapCollection[1]);
@@ -79,7 +79,7 @@ namespace System.Data.Tests.Common
         public void AddRange()
         {
             _tableMapCollection.Add(new DataTableMapping("sourceFactory", "dataSetFactory"));
-            Assert.Equal(1, _tableMapCollection.Count);
+            Assert.Single(_tableMapCollection);
             _tableMapCollection.AddRange(_tabs);
             Assert.Equal(6, _tableMapCollection.Count);
             bool eq;
@@ -98,13 +98,13 @@ namespace System.Data.Tests.Common
         {
             DataTableMapping tab1 = new DataTableMapping("sourceSuppliers", "dataSetSuppliers");
             _tableMapCollection.Add(tab1);
-            Assert.Equal(1, _tableMapCollection.Count);
+            Assert.Single(_tableMapCollection);
             _tableMapCollection.Clear();
-            Assert.Equal(0, _tableMapCollection.Count);
+            Assert.Empty(_tableMapCollection);
             _tableMapCollection.AddRange(_tabs);
             Assert.Equal(5, _tableMapCollection.Count);
             _tableMapCollection.Clear();
-            Assert.Equal(0, _tableMapCollection.Count);
+            Assert.Empty(_tableMapCollection);
         }
 
         [Fact]

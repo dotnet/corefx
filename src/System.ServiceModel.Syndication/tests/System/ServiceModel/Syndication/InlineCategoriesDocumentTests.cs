@@ -82,7 +82,7 @@ namespace System.ServiceModel.Syndication.Tests
         {
             Collection<SyndicationCategory> collection = new InlineCategoriesDocument().Categories;
             collection.Add(new SyndicationCategory());
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
         }
 
         [Fact]

@@ -43,7 +43,7 @@ namespace System.Reflection.Tests
             if (addMethod != null)
             {
                 Assert.Equal("add_" + name, addMethod.Name);
-                Assert.Equal(1, addMethod.GetParameters().Length);
+                Assert.Single(addMethod.GetParameters());
                 Assert.Equal(typeof(void), addMethod.ReturnParameter.ParameterType);
             }
         }
@@ -63,7 +63,7 @@ namespace System.Reflection.Tests
             if (removeMethod != null)
             {
                 Assert.Equal("remove_" + name, removeMethod.Name);
-                Assert.Equal(1, removeMethod.GetParameters().Length);
+                Assert.Single(removeMethod.GetParameters());
                 Assert.Equal(typeof(void), removeMethod.ReturnParameter.ParameterType);
             }
         }

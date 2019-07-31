@@ -46,7 +46,7 @@ namespace BasicEventSourceTests
                     listener.Dispose();
 
                     // Confirm that we get exactly one event from this whole process, that has the error message we expect.  
-                    Assert.Equal(1, events.Count);
+                    Assert.Single(events);
                     Event _event = events[0];
                     Assert.Equal("EventSourceMessage", _event.EventName);
 
@@ -119,7 +119,7 @@ namespace BasicEventSourceTests
             listener.Dispose();
 
             // Confirm that we get exactly one event from this whole process, that has the error message we expect.  
-            Assert.Equal(1, events.Count);
+            Assert.Single(events);
             Event _event = events[0];
             Assert.Equal("EventSourceMessage", _event.EventName);
             string message = _event.PayloadString(0, "message");

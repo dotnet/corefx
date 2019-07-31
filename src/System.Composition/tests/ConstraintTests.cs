@@ -49,7 +49,7 @@ namespace System.Composition.UnitTests
             var carHandlers = container.GetExports<IHandler<ICar>>();
             var handlerTypes = carHandlers.Select(h => h.GetType());
 
-            Assert.Equal(1, carHandlers.Count());
+            Assert.Single(carHandlers);
             Assert.Contains<Type>(typeof(ThingHandler<ICar>), handlerTypes);
         }
 
@@ -74,7 +74,7 @@ namespace System.Composition.UnitTests
             var exports = container.GetExports<IUnrelatedThings<IBook, ICar>>();
             var types = exports.Select(h => h.GetType());
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             Assert.Contains(typeof(UnrelatedThings<IBook, ICar>), types);
         }
 
@@ -87,7 +87,7 @@ namespace System.Composition.UnitTests
             var exports = container.GetExports<IInheritedThings<IBook, IThing>>();
             var types = exports.Select(h => h.GetType());
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             Assert.Contains(typeof(InheritedThings<IBook, IThing>), types);
         }
     }

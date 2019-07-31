@@ -540,7 +540,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             X509Certificate2Collection cc2 = new X509Certificate2Collection();
             Assert.ThrowsAny<CryptographicException>(() => cc2.Import(TestData.StoreSavedAsSerializedCerData));
-            Assert.Equal(0, cc2.Count);
+            Assert.Empty(cc2);
         }
 
         [Theory]
@@ -575,7 +575,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             X509Certificate2Collection cc2 = new X509Certificate2Collection();
             Assert.ThrowsAny<CryptographicException>(() => cc2.Import(TestData.StoreSavedAsSerializedStoreData));
-            Assert.Equal(0, cc2.Count);
+            Assert.Empty(cc2);
         }
 
         [Fact]
@@ -974,11 +974,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 X509CertificateCollection cc = new X509CertificateCollection(new X509Certificate[] { c1, c2 });
 
                 cc.Remove(c1);
-                Assert.Equal(1, cc.Count);
+                Assert.Single(cc);
                 Assert.Same(c2, cc[0]);
 
                 cc.Remove(c2);
-                Assert.Equal(0, cc.Count);
+                Assert.Empty(cc);
 
                 AssertExtensions.Throws<ArgumentException>(null, () => cc.Remove(c2));
 
@@ -1010,11 +1010,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Same(c3, cc[1]);
 
                 cc.RemoveAt(1);
-                Assert.Equal(1, cc.Count);
+                Assert.Single(cc);
                 Assert.Same(c2, cc[0]);
 
                 cc.RemoveAt(0);
-                Assert.Equal(0, cc.Count);
+                Assert.Empty(cc);
 
 
                 IList il = new X509CertificateCollection(new X509Certificate[] { c1, c2, c3 });
@@ -1044,15 +1044,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 X509Certificate2Collection cc = new X509Certificate2Collection(array);
                 cc.RemoveRange(array);
-                Assert.Equal(0, cc.Count);
+                Assert.Empty(cc);
 
                 cc = new X509Certificate2Collection(array);
                 cc.RemoveRange(new X509Certificate2[] { c2, c1 });
-                Assert.Equal(0, cc.Count);
+                Assert.Empty(cc);
 
                 cc = new X509Certificate2Collection(array);
                 cc.RemoveRange(new X509Certificate2[] { c1 });
-                Assert.Equal(1, cc.Count);
+                Assert.Single(cc);
                 Assert.Same(c2, cc[0]);
 
                 cc = new X509Certificate2Collection(array);
@@ -1091,15 +1091,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 X509Certificate2Collection cc = new X509Certificate2Collection(array);
                 cc.RemoveRange(new X509Certificate2Collection { c1, c2 });
-                Assert.Equal(0, cc.Count);
+                Assert.Empty(cc);
 
                 cc = new X509Certificate2Collection(array);
                 cc.RemoveRange(new X509Certificate2Collection { c2, c1 });
-                Assert.Equal(0, cc.Count);
+                Assert.Empty(cc);
 
                 cc = new X509Certificate2Collection(array);
                 cc.RemoveRange(new X509Certificate2Collection { c1 });
-                Assert.Equal(1, cc.Count);
+                Assert.Single(cc);
                 Assert.Same(c2, cc[0]);
 
                 cc = new X509Certificate2Collection(array);
@@ -1207,7 +1207,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Same(c3, cc[2]);
 
                 cc.Clear();
-                Assert.Equal(0, cc.Count);
+                Assert.Empty(cc);
 
                 cc.Add(c1);
                 cc.Add(c3);
@@ -1222,7 +1222,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Same(c3, cc[2]);
 
                 cc.Clear();
-                Assert.Equal(0, cc.Count);
+                Assert.Empty(cc);
 
                 IList il = cc;
                 il.Insert(0, c1);

@@ -108,7 +108,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     X509EnhancedKeyUsageExtension rich = (X509EnhancedKeyUsageExtension)eku;
 
                     OidCollection usages = rich.EnhancedKeyUsages;
-                    Assert.Equal(1, usages.Count);
+                    Assert.Single(usages);
 
                     Oid oid = usages[0];
                     // Code Signing
@@ -295,7 +295,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Null(rawData);
 
             OidCollection usages = e.EnhancedKeyUsages;
-            Assert.Equal(0, usages.Count);
+            Assert.Empty(usages);
         }
 
         [Fact]
@@ -337,11 +337,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Oid oid1 = new Oid("1.3.6.1.5.5.7.3.1");
             OidCollection usages = new OidCollection();
             X509EnhancedKeyUsageExtension e = new X509EnhancedKeyUsageExtension(usages, false);
-            Assert.Equal(0, e.EnhancedKeyUsages.Count);
+            Assert.Empty(e.EnhancedKeyUsages);
             usages.Add(oid1);
-            Assert.Equal(0, e.EnhancedKeyUsages.Count);
+            Assert.Empty(e.EnhancedKeyUsages);
             e.EnhancedKeyUsages.Add(oid1);
-            Assert.Equal(0, e.EnhancedKeyUsages.Count);
+            Assert.Empty(e.EnhancedKeyUsages);
             Assert.NotSame(e.EnhancedKeyUsages, e.EnhancedKeyUsages);
         }
 

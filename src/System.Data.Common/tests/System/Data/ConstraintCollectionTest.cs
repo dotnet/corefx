@@ -238,9 +238,9 @@ namespace System.Data.Tests
             //try
             //{
             _table.Constraints.Clear(); //Clear all constraints
-            Assert.Equal(0, _table.Constraints.Count);
+            Assert.Empty(_table.Constraints);
             _table2.Constraints.Clear();
-            Assert.Equal(0, _table2.Constraints.Count);
+            Assert.Empty(_table2.Constraints);
             //}
             //catch (Exception e)
             //{

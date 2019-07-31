@@ -68,7 +68,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var validationResults = new List<ValidationResult>();
             Assert.False(
                 Validator.TryValidateObject(objectToBeValidated, validationContext, validationResults, true));
-            Assert.Equal(1, validationResults.Count);
+            Assert.Single(validationResults);
             Assert.Equal("ValidValueStringPropertyAttribute.IsValid failed for value Invalid Value", validationResults[0].ErrorMessage);
         }
 
@@ -105,7 +105,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var validationResults = new List<ValidationResult>();
             Assert.True(
                 Validator.TryValidateObject(objectToBeValidated, validationContext, validationResults, false));
-            Assert.Equal(0, validationResults.Count);
+            Assert.Empty(validationResults);
         }
 
         [Fact]
@@ -119,7 +119,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var validationResults = new List<ValidationResult>();
             Assert.False(
                 Validator.TryValidateObject(objectToBeValidated, validationContext, validationResults, true));
-            Assert.Equal(1, validationResults.Count);
+            Assert.Single(validationResults);
             // cannot check error message - not defined on ret builds
         }
 
@@ -134,7 +134,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var validationResults = new List<ValidationResult>();
             Assert.True(
                 Validator.TryValidateObject(objectToBeValidated, validationContext, validationResults, true));
-            Assert.Equal(0, validationResults.Count);
+            Assert.Empty(validationResults);
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var validationResults = new List<ValidationResult>();
             Assert.False(
                 Validator.TryValidateObject(objectToBeValidated, validationContext, validationResults, true));
-            Assert.Equal(1, validationResults.Count);
+            Assert.Single(validationResults);
             Assert.Equal("ValidClassAttribute.IsValid failed for class of type " + typeof(InvalidToBeValidated).FullName, validationResults[0].ErrorMessage);
         }
 
@@ -199,7 +199,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             var results = new List<ValidationResult>();
             Assert.True(Validator.TryValidateObject(instance, context, results));
-            Assert.Equal(0, results.Count);
+            Assert.Empty(results);
         }
 
         public class ValidatableNull : IValidatableObject
@@ -479,7 +479,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var validationResults = new List<ValidationResult>();
             Assert.False(
                 Validator.TryValidateProperty("Invalid Value", validationContext, validationResults));
-            Assert.Equal(1, validationResults.Count);
+            Assert.Single(validationResults);
             Assert.Equal("ValidValueStringPropertyAttribute.IsValid failed for value Invalid Value", validationResults[0].ErrorMessage);
         }
 
@@ -494,7 +494,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var validationResults = new List<ValidationResult>();
             Assert.False(
                 Validator.TryValidateProperty(null, validationContext, validationResults));
-            Assert.Equal(1, validationResults.Count);
+            Assert.Single(validationResults);
             // cannot check error message - not defined on ret builds
         }
 
@@ -519,7 +519,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var validationResults = new List<ValidationResult>();
             Assert.True(
                 Validator.TryValidateProperty("Valid Value", validationContext, validationResults));
-            Assert.Equal(0, validationResults.Count);
+            Assert.Empty(validationResults);
         }
 
         #endregion TryValidateProperty
@@ -696,7 +696,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             var validationResults = new List<ValidationResult>();
             Assert.False(Validator.TryValidateValue(null, validationContext, validationResults, attributesToValidate));
-            Assert.Equal(1, validationResults.Count);
+            Assert.Single(validationResults);
             // cannot check error message - not defined on ret builds
         }
 
@@ -710,7 +710,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             var validationResults = new List<ValidationResult>();
             Assert.False(Validator.TryValidateValue("Invalid Value", validationContext, validationResults, attributesToValidate));
-            Assert.Equal(1, validationResults.Count);
+            Assert.Single(validationResults);
             Assert.Equal("ValidValueStringPropertyAttribute.IsValid failed for value Invalid Value", validationResults[0].ErrorMessage);
         }
 
@@ -737,7 +737,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             var validationResults = new List<ValidationResult>();
             Assert.True(Validator.TryValidateValue("Valid Value", validationContext, validationResults, attributesToValidate));
-            Assert.Equal(0, validationResults.Count);
+            Assert.Empty(validationResults);
         }
 
         [Fact]
@@ -750,7 +750,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             var validationResults = new List<ValidationResult>();
             Assert.False(Validator.TryValidateValue("Invalid Value", validationContext, validationResults, attributesToValidate));
-            Assert.Equal(1, validationResults.Count);
+            Assert.Single(validationResults);
             Assert.Equal("ValidValueStringPropertyAttribute.IsValid failed for value Invalid Value", validationResults[0].ErrorMessage);
         }
 
@@ -764,7 +764,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             var validationResults = new List<ValidationResult>();
             Assert.True(Validator.TryValidateValue("Valid Value", validationContext, validationResults, attributesToValidate));
-            Assert.Equal(0, validationResults.Count);
+            Assert.Empty(validationResults);
         }
 
         #endregion TryValidateValue

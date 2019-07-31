@@ -45,7 +45,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 parameter, "Contract", (string)null, null, ImportCardinality.ZeroOrMore, CreationPolicy.NonShared, null, null);
 
             Assert.NotNull(definition.RequiredMetadata);
-            Assert.Equal(0, definition.RequiredMetadata.Count());
+            Assert.Empty(definition.RequiredMetadata);
         }
 
         [Fact]

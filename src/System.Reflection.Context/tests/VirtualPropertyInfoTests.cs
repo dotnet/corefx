@@ -166,11 +166,11 @@ namespace System.Reflection.Context.Tests
             Assert.Equal(ProjectionConstants.VirtualPropertyInfoSetter, virtualAccessors[1].GetType().FullName);
 
             virtualAccessors = _noGetterVirtualProperty.GetAccessors(false);
-            Assert.Equal(1, virtualAccessors.Length);
+            Assert.Single(virtualAccessors);
             Assert.Equal(ProjectionConstants.VirtualPropertyInfoSetter, virtualAccessors[0].GetType().FullName);
 
             virtualAccessors = _noSetterVirtualProperty.GetAccessors(false);
-            Assert.Equal(1, virtualAccessors.Length);
+            Assert.Single(virtualAccessors);
             Assert.Equal(ProjectionConstants.VirtualPropertyInfoGetter, virtualAccessors[0].GetType().FullName);
         }
 

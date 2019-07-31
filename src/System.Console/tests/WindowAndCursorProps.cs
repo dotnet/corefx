@@ -199,7 +199,7 @@ public class WindowAndCursorProps
     {
         Helpers.RunInRedirectedOutput((data) => {
             Console.CursorVisible = value;
-            Assert.Equal(0, data.ToArray().Length);
+            Assert.Empty(data.ToArray());
         });
     }
 

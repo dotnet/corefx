@@ -18,7 +18,7 @@ namespace System.Collections.Tests
         public void Ctor_Empty()
         {
             var sortList = new SortedList();
-            Assert.Equal(0, sortList.Count);
+            Assert.Empty(sortList);
             Assert.Equal(0, sortList.Capacity);
 
             Assert.False(sortList.IsFixedSize);
@@ -34,7 +34,7 @@ namespace System.Collections.Tests
         public void Ctor_Int(int initialCapacity)
         {
             var sortList = new SortedList(initialCapacity);
-            Assert.Equal(0, sortList.Count);
+            Assert.Empty(sortList);
             Assert.Equal(initialCapacity, sortList.Capacity);
 
             Assert.False(sortList.IsFixedSize);
@@ -56,7 +56,7 @@ namespace System.Collections.Tests
         public void Ctor_IComparer_Int(int initialCapacity)
         {
             var sortList = new SortedList(new CustomComparer(), initialCapacity);
-            Assert.Equal(0, sortList.Count);
+            Assert.Empty(sortList);
             Assert.Equal(initialCapacity, sortList.Capacity);
 
             Assert.False(sortList.IsFixedSize);
@@ -74,7 +74,7 @@ namespace System.Collections.Tests
         public void Ctor_IComparer()
         {
             var sortList = new SortedList(new CustomComparer());
-            Assert.Equal(0, sortList.Count);
+            Assert.Empty(sortList);
 
             Assert.False(sortList.IsFixedSize);
             Assert.False(sortList.IsReadOnly);
@@ -85,7 +85,7 @@ namespace System.Collections.Tests
         public void Ctor_IComparer_Null()
         {
             var sortList = new SortedList((IComparer)null);
-            Assert.Equal(0, sortList.Count);
+            Assert.Empty(sortList);
 
             Assert.False(sortList.IsFixedSize);
             Assert.False(sortList.IsReadOnly);
@@ -199,7 +199,7 @@ namespace System.Collections.Tests
         public void Ctor_IDictionary_IComparer_Null()
         {
             var sortList = new SortedList(new Hashtable(), null);
-            Assert.Equal(0, sortList.Count);
+            Assert.Empty(sortList);
 
             Assert.False(sortList.IsFixedSize);
             Assert.False(sortList.IsReadOnly);
@@ -318,10 +318,10 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
                 sortList2.Clear();
-                Assert.Equal(0, sortList2.Count);
+                Assert.Empty(sortList2);
 
                 sortList2.Clear();
-                Assert.Equal(0, sortList2.Count);
+                Assert.Empty(sortList2);
             });
         }
 

@@ -400,7 +400,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
         public void GetDirectories_Directory()
         {
             var DirectoryList = FileIO.FileSystem.GetDirectories(TestDirectory);
-            Assert.Equal(0, DirectoryList.Count);
+            Assert.Empty(DirectoryList);
             for (int i = 0; i < 6; i++)
             {
                 System.IO.Directory.CreateDirectory(System.IO.Path.Combine(TestDirectory, $"GetDirectories_DirectoryNewSubDirectory{i}"));
@@ -420,7 +420,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
         public void GetDirectories_Directory_SearchOption()
         {
             var DirectoryList = FileIO.FileSystem.GetDirectories(TestDirectory, SearchOption.SearchTopLevelOnly);
-            Assert.Equal(0, DirectoryList.Count);
+            Assert.Empty(DirectoryList);
             for (int i = 0; i < 6; i++)
             {
                 System.IO.Directory.CreateDirectory(System.IO.Path.Combine(TestDirectory, $"GetDirectories_Directory_SearchOptionNewSubDirectory{i}"));
@@ -442,7 +442,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
         public void GetDirectories_Directory_SearchOption_Wildcards()
         {
             var DirectoryList = FileIO.FileSystem.GetDirectories(TestDirectory, SearchOption.SearchTopLevelOnly, "*");
-            Assert.Equal(0, DirectoryList.Count);
+            Assert.Empty(DirectoryList);
             var CreatedDirectories = new List<string>();
             for (int i = 0; i < 6; i++)
             {
@@ -457,7 +457,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
             }
             System.IO.Directory.CreateDirectory(System.IO.Path.Combine(TestDirectory, $"NewSubDirectory000", $"NewSubSubDirectory000"));
             DirectoryList = FileIO.FileSystem.GetDirectories(TestDirectory, SearchOption.SearchTopLevelOnly, "*000");
-            Assert.Equal(1, DirectoryList.Count);
+            Assert.Single(DirectoryList);
             DirectoryList = FileIO.FileSystem.GetDirectories(TestDirectory, SearchOption.SearchAllSubDirectories, "*000");
             Assert.Equal(2, DirectoryList.Count);
         }
@@ -517,7 +517,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
         public void GetFiles_Directory()
         {
             var FileList = FileIO.FileSystem.GetFiles(TestDirectory);
-            Assert.Equal(0, FileList.Count);
+            Assert.Empty(FileList);
             for (int i = 0; i < 6; i++)
             {
                 CreateTestFile(SourceData, PathFromBase: null, TestFileName: $"NewFile{i}");
@@ -541,7 +541,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
             System.IO.Directory.CreateDirectory(NewSubDirectoryPath);
             CreateTestFile(SourceData, PathFromBase: "GetFiles_Directory_SearchOptionNewSubDirectory", TestFileName: "NewFile");
             var FileList = FileIO.FileSystem.GetFiles(TestDirectory);
-            Assert.Equal(0, FileList.Count);
+            Assert.Empty(FileList);
             for (int i = 0; i < 6; i++)
             {
                 CreateTestFile(SourceData, PathFromBase: null, TestFileName: $"NewFile{i}");
@@ -565,7 +565,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
         public void GetFiles_Directory_SearchOption_Wildcards()
         {
             var FileList = FileIO.FileSystem.GetFiles(TestDirectory);
-            Assert.Equal(0, FileList.Count);
+            Assert.Empty(FileList);
             var TestFileList = new List<string>();
             for (int i = 0; i < 6; i++)
             {
@@ -622,7 +622,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
             FileIO.FileSystem.MoveDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, showUI: UIOption.AllDialogs, onUserCancel: UICancelOption.ThrowException);
             string[] RemainingSourceFilesWithPath = System.IO.Directory.GetFiles(FullPathToSourceDirectory);
             // We couldn't move one file
-            Assert.Equal(1, RemainingSourceFilesWithPath.Length);
+            Assert.Single(RemainingSourceFilesWithPath);
             // Ensure the file left has correct data
             Assert.True(HasExpectedData(RemainingSourceFilesWithPath[0], SourceData));
 
@@ -682,7 +682,7 @@ namespace Microsoft.VisualBasic.FileIO.Tests
             Assert.Throws<System.IO.IOException>(() => FileIO.FileSystem.MoveDirectory(FullPathToSourceDirectory, FullPathToTargetDirectory, overwrite: false));
             string[] RemainingSourceFilesWithPath = System.IO.Directory.GetFiles(FullPathToSourceDirectory);
             // We couldn't move one file
-            Assert.Equal(1, RemainingSourceFilesWithPath.Length);
+            Assert.Single(RemainingSourceFilesWithPath);
             // Ensure the file left has correct data
             Assert.True(HasExpectedData(RemainingSourceFilesWithPath[0], SourceData));
 

@@ -113,15 +113,15 @@ namespace System.Data.Common
 
             DataTableMapping dataTableMapping = new DataTableMapping("MyCustomSourceTable", "MyCustomDataSetTable");
             Assert.NotNull(dataTableMapping.ColumnMappings);
-            Assert.Equal(0, dataTableMapping.ColumnMappings.Count);
+            Assert.Empty(dataTableMapping.ColumnMappings);
 
             dataTableMapping = new DataTableMapping("MyCustomSourceTable", "MyCustomDataSetTable", null);
             Assert.NotNull(dataTableMapping.ColumnMappings);
-            Assert.Equal(0, dataTableMapping.ColumnMappings.Count);
+            Assert.Empty(dataTableMapping.ColumnMappings);
 
             dataTableMapping = new DataTableMapping();
             Assert.NotNull(dataTableMapping.ColumnMappings);
-            Assert.Equal(0, dataTableMapping.ColumnMappings.Count);
+            Assert.Empty(dataTableMapping.ColumnMappings);
         }
 
         [Fact]

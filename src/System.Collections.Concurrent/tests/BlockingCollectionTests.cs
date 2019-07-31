@@ -348,7 +348,7 @@ namespace System.Collections.Concurrent.Tests
 
             mre.Set();
             Task.WaitAll(threads);
-            Assert.Equal(0, blockingCollection.Count);
+            Assert.Empty(blockingCollection);
 
             int[] arrayOfRemovedElementsFromAllThreads = (int[])(removedElementsFromAllThreads.ToArray());
             List<int> sortedElementsInCollection = new List<int>(arrayOfRemovedElementsFromAllThreads);
@@ -490,7 +490,7 @@ namespace System.Collections.Concurrent.Tests
                 resultOfEnumOfBlockingCollection.Add(i);
             }
 
-            Assert.Equal(0, blockingCollection.Count);
+            Assert.Empty(blockingCollection);
 
             List<int> resultOfEnumOfBlockingCollectionMirror = new List<int>();
             while (blockingCollectionMirror.Count != 0)
@@ -518,7 +518,7 @@ namespace System.Collections.Concurrent.Tests
             blockingCollection.CompleteAdding();
 
             Assert.Throws<InvalidOperationException>(() => blockingCollection.Add(1));
-            Assert.Equal(1, blockingCollection.Count);
+            Assert.Single(blockingCollection);
 
             blockingCollection.Take();
             Assert.Throws<InvalidOperationException>(() => blockingCollection.Take());
@@ -630,16 +630,16 @@ namespace System.Collections.Concurrent.Tests
         public static void Test10_Count()
         {
             BlockingCollection<int> blockingCollection = ConstructBlockingCollection<int>(1);
-            Assert.Equal(0, blockingCollection.Count);
+            Assert.Empty(blockingCollection);
 
             blockingCollection.Add(1);
-            Assert.Equal(1, blockingCollection.Count);
+            Assert.Single(blockingCollection);
 
             blockingCollection.TryAdd(1);
-            Assert.Equal(1, blockingCollection.Count);
+            Assert.Single(blockingCollection);
 
             blockingCollection.Take();
-            Assert.Equal(0, blockingCollection.Count);
+            Assert.Empty(blockingCollection);
         }
 
         /// <summary>Validates BlockingCollection.BoundedCapacity.</summary>

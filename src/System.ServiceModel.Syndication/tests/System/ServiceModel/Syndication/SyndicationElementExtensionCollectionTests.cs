@@ -72,10 +72,10 @@ namespace System.ServiceModel.Syndication.Tests
             elementExtensions.Add(new ExtensionObject { Value = 10 });
 
             elementExtensions.Clear();
-            Assert.Equal(0, elementExtensions.Count);
+            Assert.Empty(elementExtensions);
 
             elementExtensions.Clear();
-            Assert.Equal(0, elementExtensions.Count);
+            Assert.Empty(elementExtensions);
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace System.ServiceModel.Syndication.Tests
             elementExtensions.Add(extension);
 
             elementExtensions.RemoveAt(0);
-            Assert.Equal(0, elementExtensions.Count);
+            Assert.Empty(elementExtensions);
         }
 
         [Fact]
@@ -222,10 +222,10 @@ namespace System.ServiceModel.Syndication.Tests
             elementExtensions.Add(new ExtensionObject { Value = 10 });
 
             SyndicationElementExtensionCollection clone = category.Clone().ElementExtensions;
-            Assert.Equal(1, clone.Count);
+            Assert.Single(clone);
 
             elementExtensions.Clear();
-            Assert.Equal(1, clone.Count);
+            Assert.Single(clone);
         }
 
         [DataContract]

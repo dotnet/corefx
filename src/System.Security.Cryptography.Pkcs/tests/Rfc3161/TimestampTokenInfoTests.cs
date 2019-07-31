@@ -100,7 +100,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             {
                 Assert.False(tokenInfo.HasExtensions, "tokenInfo.HasExtensions");
                 Assert.NotNull(tokenInfo.GetExtensions());
-                Assert.Equal(0, tokenInfo.GetExtensions().Count);
+                Assert.Empty(tokenInfo.GetExtensions());
 
                 // GetExtensions always returns a new collection.
                 Assert.NotSame(tokenInfo.GetExtensions(), tokenInfo.GetExtensions());
@@ -303,7 +303,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.True(tokenInfo.HasExtensions);
             X509ExtensionCollection extensions = tokenInfo.GetExtensions();
 
-            Assert.Equal(1, extensions.Count);
+            Assert.Single(extensions);
             X509Extension extension = extensions[0];
             Assert.NotNull(extension);
             Assert.Equal("0.0.0", extension.Oid.Value);
@@ -484,7 +484,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             {
                 Assert.False(tokenInfo.HasExtensions, "tokenInfo.HasExtensions");
                 Assert.NotNull(tokenInfo.GetExtensions());
-                Assert.Equal(0, tokenInfo.GetExtensions().Count);
+                Assert.Empty(tokenInfo.GetExtensions());
 
                 // GetExtensions always returns a new collection.
                 Assert.NotSame(tokenInfo.GetExtensions(), tokenInfo.GetExtensions());

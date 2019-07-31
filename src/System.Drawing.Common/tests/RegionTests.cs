@@ -1176,7 +1176,7 @@ namespace System.Drawing.Tests
                 Assert.False(clipRegion.IsInfinite(s_graphic));
 
                 RectangleF[] rects = clipRegion.GetRegionScans(matrix);
-                Assert.Equal(1, rects.Length);
+                Assert.Single(rects);
                 Assert.Equal(new RectangleF(-5, -5, 10, 10), rects[0]);
             }
         }

@@ -58,7 +58,7 @@ namespace System.Collections.Tests
 
             // Succeeds when list has elements and is added as collection.
             list.Add(default);
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             list.AddRange(list);
             Assert.Equal(2, list.Count);
             list.AddRange(list);

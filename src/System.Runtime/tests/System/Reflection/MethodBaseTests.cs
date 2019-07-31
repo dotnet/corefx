@@ -31,7 +31,7 @@ namespace System.Reflection.Tests
             Assert.Equal("MethodBaseTests", m.ReflectedType.Name);
             Assert.True(m.IsGenericMethod);
             Assert.True(m.IsGenericMethodDefinition);
-            Assert.Equal(1, m.GetGenericArguments().Length);
+            Assert.Single(m.GetGenericArguments());
             Assert.Equal("T", m.GetGenericArguments()[0].Name);
         }
 

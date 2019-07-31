@@ -816,7 +816,7 @@ namespace System.Dynamic.Runtime.Tests
         {
             dynamic mc = new MemberClass();
             List<Test> list = new List<Test>() { new Test() { _myclass = mc.Method_ReturnMyClass(11) } };
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             Assert.Equal(11, list[0]._myclass.Field);
         }
 

@@ -22,7 +22,7 @@ namespace System.IO.Tests
 
             Assert.NotNull(segment.Array);
             Assert.Equal(0, segment.Offset);
-            Assert.Equal(0, segment.Count);
+            Assert.Empty(segment);
         }
 
         [Fact]
@@ -36,7 +36,7 @@ namespace System.IO.Tests
 
             Assert.Equal(512, segment.Array.Length);
             Assert.Equal(0, segment.Offset);
-            Assert.Equal(0, segment.Count);
+            Assert.Empty(segment);
         }
 
         [Fact]
@@ -212,7 +212,7 @@ namespace System.IO.Tests
             ArraySegment<byte> result;
             Assert.True(stream.TryGetBuffer(out result));
 
-            Assert.Equal(0, result.Count);
+            Assert.Empty(result);
         }
 
         [Theory]

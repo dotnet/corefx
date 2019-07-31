@@ -81,7 +81,7 @@ namespace System.Net.Security.Tests
                     // Validate that client options are unchanged
                     Assert.Equal(clientAllowRenegotiation, clientOptions.AllowRenegotiation);
                     Assert.Same(clientAppProtocols, clientOptions.ApplicationProtocols);
-                    Assert.Equal(1, clientOptions.ApplicationProtocols.Count);
+                    Assert.Single(clientOptions.ApplicationProtocols);
                     Assert.Equal(clientRevocation, clientOptions.CertificateRevocationCheckMode);
                     Assert.Same(clientCertificates, clientOptions.ClientCertificates);
                     Assert.Contains(clientCert, clientOptions.ClientCertificates.Cast<X509Certificate2>());

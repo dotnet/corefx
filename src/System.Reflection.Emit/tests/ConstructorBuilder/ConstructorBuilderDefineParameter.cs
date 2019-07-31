@@ -65,7 +65,7 @@ namespace System.Reflection.Emit.Tests
                 type.CreateTypeInfo().AsType();
 
                 ParameterInfo[] definedParams = constructor.GetParameters();
-                Assert.Equal(1, definedParams.Length);
+                Assert.Single(definedParams);
             }
         }
 
@@ -89,7 +89,7 @@ namespace System.Reflection.Emit.Tests
                 type.CreateTypeInfo().AsType();
 
                 ParameterInfo[] definedParams = constructor.GetParameters();
-                Assert.Equal(1, definedParams.Length);
+                Assert.Single(definedParams);
             }
         }
 

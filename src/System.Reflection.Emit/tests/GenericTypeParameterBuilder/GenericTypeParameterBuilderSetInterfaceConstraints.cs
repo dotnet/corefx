@@ -19,7 +19,7 @@ namespace System.Reflection.Emit.Tests
             Type resultType = type.CreateTypeInfo().AsType();
             Type[] genericTypeParams = resultType.GetGenericArguments();
 
-            Assert.Equal(1, genericTypeParams.Length);
+            Assert.Single(genericTypeParams);
             Assert.Equal(new Type[] { typeof(EmptyNonGenericInterface1) }, genericTypeParams[0].GetTypeInfo().GetGenericParameterConstraints());
         }
 
@@ -34,7 +34,7 @@ namespace System.Reflection.Emit.Tests
             Type resultType = type.CreateTypeInfo().AsType();
             Type[] genericTypeParams = resultType.GetGenericArguments();
 
-            Assert.Equal(1, genericTypeParams.Length);
+            Assert.Single(genericTypeParams);
             Assert.Equal(new Type[0], genericTypeParams[0].GetTypeInfo().GetGenericParameterConstraints());
         }
 
@@ -49,7 +49,7 @@ namespace System.Reflection.Emit.Tests
             Type resultType = type.CreateTypeInfo().AsType();
             Type[] genericTypeParams = resultType.GetGenericArguments();
 
-            Assert.Equal(1, genericTypeParams.Length);
+            Assert.Single(genericTypeParams);
             Assert.Equal(new Type[] { typeof(EmptyNonGenericInterface1), typeof(EmptyNonGenericInterface2) }, genericTypeParams[0].GetTypeInfo().GetGenericParameterConstraints());
         }
     }

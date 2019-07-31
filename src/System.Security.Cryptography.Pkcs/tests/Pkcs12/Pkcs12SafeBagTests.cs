@@ -80,10 +80,10 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             CryptographicAttributeObjectCollection firstCall = safeBag.Attributes;
             Assert.Same(firstCall, safeBag.Attributes);
 
-            Assert.Equal(0, firstCall.Count);
+            Assert.Empty(firstCall);
             firstCall.Add(new Pkcs9DocumentDescription("Description"));
 
-            Assert.Equal(1, safeBag.Attributes.Count);
+            Assert.Single(safeBag.Attributes);
             Assert.Same(firstCall, safeBag.Attributes);
         }
 

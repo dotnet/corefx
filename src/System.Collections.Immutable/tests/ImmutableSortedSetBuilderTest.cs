@@ -134,7 +134,7 @@ namespace System.Collections.Immutable.Tests
             var set = ImmutableSortedSet<int>.Empty.Add(1);
             var builder = set.ToBuilder();
             builder.Clear();
-            Assert.Equal(0, builder.Count);
+            Assert.Empty(builder);
         }
 
         [Fact]
@@ -160,12 +160,12 @@ namespace System.Collections.Immutable.Tests
         {
             var builder = ImmutableSortedSet.Create("a", "A").ToBuilder();
             builder.KeyComparer = StringComparer.OrdinalIgnoreCase;
-            Assert.Equal(1, builder.Count);
+            Assert.Single(builder);
             Assert.True(builder.Contains("a"));
 
             var set = builder.ToImmutable();
             Assert.Same(StringComparer.OrdinalIgnoreCase, set.KeyComparer);
-            Assert.Equal(1, set.Count);
+            Assert.Single(set);
             Assert.True(set.Contains("a"));
         }
 
@@ -346,7 +346,7 @@ namespace System.Collections.Immutable.Tests
             Assert.True(builder.IsProperSubsetOf(new[] { null, "a", "b" }));
 
             builder.IntersectWith(new[] { default(string) });
-            Assert.Equal(1, builder.Count);
+            Assert.Single(builder);
 
             builder.ExceptWith(new[] { default(string) });
             Assert.False(builder.Remove(null));

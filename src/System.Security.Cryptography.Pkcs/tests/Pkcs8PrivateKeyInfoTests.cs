@@ -26,7 +26,7 @@ D9fVWpuVzYpEDfZm");
                 out int bytesRead);
 
             Assert.Equal(windowsEcdsaKey.Length, bytesRead);
-            Assert.Equal(1, pkcs8Info.Attributes.Count);
+            Assert.Single(pkcs8Info.Attributes);
             Assert.Equal("2.5.29.15", pkcs8Info.Attributes[0].Oid.Value);
 
             var ku = new X509KeyUsageExtension(pkcs8Info.Attributes[0].Values[0], false);
@@ -59,7 +59,7 @@ D9fVWpuVzYpEDfZm");
                 pkcs8Info.PrivateKeyBytes.ByteArrayToHex(),
                 pkcs8Info2.PrivateKeyBytes.ByteArrayToHex());
 
-            Assert.Equal(1, pkcs8Info2.Attributes.Count);
+            Assert.Single(pkcs8Info2.Attributes);
 
             Pkcs9DocumentDescription descAttr =
                 Assert.IsType<Pkcs9DocumentDescription>(pkcs8Info2.Attributes[0].Values[0]);

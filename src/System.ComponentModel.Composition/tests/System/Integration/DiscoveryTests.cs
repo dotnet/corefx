@@ -175,10 +175,10 @@ namespace Tests.Integration
                 typeof(DerivedWithOverrideExport));
 
             var exports1 = container.GetExportedValues<BaseWithVirtualExport>();
-            Assert.Equal(1, exports1.Count());
+            Assert.Single(exports1);
 
             var exports2 = container.GetExportedValues<IFoo>();
-            Assert.Equal(1, exports2.Count());
+            Assert.Single(exports2);
         }
 
         public interface IDocument { }
@@ -290,7 +290,7 @@ namespace Tests.Integration
         private void VerifyValidPlugin(CompositionContainer container, int version, string location)
         {
             var plugins = container.GetExports<Plugin>();
-            Assert.Equal(1, plugins.Count());
+            Assert.Single(plugins);
 
             var plugin = plugins.Single().Value;
 
@@ -459,7 +459,7 @@ namespace Tests.Integration
             Assert.Equal("MyToolbarPlugin", export.Name);
 
             var pluginNames = container.GetExportedValues<string>("ApplicationPluginNames");
-            Assert.Equal(1, pluginNames.Count());
+            Assert.Single(pluginNames);
         }
 
         public class ImportOnVirtualProperty
@@ -765,7 +765,7 @@ namespace Tests.Integration
 
             var foos = container.GetExports<object, IDictionary<string, object>>("Foo").ToArray();
 
-            Assert.Equal(1, foos.Length);
+            Assert.Single(foos);
             Assert.Equal("FooWithOneFoo", foos[0].Metadata["Name"]);
         }
 
@@ -792,7 +792,7 @@ namespace Tests.Integration
 
             var foos = container.GetExports<object, IDictionary<string, object>>("Foo").ToArray();
 
-            Assert.Equal(1, foos.Length);
+            Assert.Single(foos);
 
             Assert.Equal("FooWithOneFoo", foos[0].Metadata["Name"]);
         }
@@ -808,7 +808,7 @@ namespace Tests.Integration
 
             var foos = container.GetExports<object, IDictionary<string, object>>("Foo").ToArray();
 
-            Assert.Equal(1, foos.Length);
+            Assert.Single(foos);
 
             Assert.Equal("FooWithInheritedOnSelf", foos[0].Metadata["Name"]);
         }
@@ -842,13 +842,13 @@ namespace Tests.Integration
 
             var foos = container.GetExports<object, IDictionary<string, object>>("Foo").ToArray();
 
-            Assert.Equal(1, foos.Length);
+            Assert.Single(foos);
 
             Assert.Equal("IFoo1", foos[0].Metadata["Name"]);
 
             var foo2s = container.GetExports<object, IDictionary<string, object>>("Foo2").ToArray();
 
-            Assert.Equal(1, foo2s.Length);
+            Assert.Single(foo2s);
 
             Assert.Equal("FooWithMultipleInheritedExports", foo2s[0].Metadata["Name"]);
         }

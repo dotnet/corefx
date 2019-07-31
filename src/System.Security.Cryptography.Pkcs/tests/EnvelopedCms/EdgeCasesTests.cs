@@ -80,7 +80,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             string password = certLoader.Password;
             X509Certificate2Collection collection = new X509Certificate2Collection();
             collection.Import(pfxData, password, X509KeyStorageFlags.DefaultKeySet);
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
             return collection[0];
         }
 
@@ -215,7 +215,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms.Decode(encodedMessage);
 
             RecipientInfoCollection recipients = ecms.RecipientInfos;
-            Assert.Equal(1, recipients.Count);
+            Assert.Single(recipients);
             RecipientInfo recipientInfo = recipients[0];
             KeyTransRecipientInfo recipient = recipientInfo as KeyTransRecipientInfo;
             Assert.NotNull(recipientInfo);
@@ -251,7 +251,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms.Decode(encodedMessage);
 
             RecipientInfoCollection recipients = ecms.RecipientInfos;
-            Assert.Equal(1, recipients.Count);
+            Assert.Single(recipients);
             RecipientInfo recipientInfo = recipients[0];
             KeyTransRecipientInfo recipient = recipientInfo as KeyTransRecipientInfo;
             Assert.NotNull(recipientInfo);
@@ -492,7 +492,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Oid oid = new Oid(Oids.DocumentDescription);
             CryptographicAttributeObject cao = new CryptographicAttributeObject(oid);
             Assert.Equal(oid.Value, cao.Oid.Value);
-            Assert.Equal(0, cao.Values.Count);
+            Assert.Empty(cao.Values);
         }
 
         [Fact]
@@ -502,7 +502,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             // This is legal and equivalent to passing a zero-length AsnEncodedDataCollection.
             CryptographicAttributeObject cao = new CryptographicAttributeObject(oid, null);
             Assert.Equal(oid.Value, cao.Oid.Value);
-            Assert.Equal(0, cao.Values.Count);
+            Assert.Empty(cao.Values);
         }
 
         [Fact]

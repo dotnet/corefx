@@ -154,7 +154,7 @@ namespace System.Collections.Tests
             q.Enqueue("6");
             Assert.Equal(4, q.Count);
             q.Clear();
-            Assert.Equal(0, q.Count);
+            Assert.Empty(q);
             Assert.False(q.GetEnumerator().MoveNext());
         }
 

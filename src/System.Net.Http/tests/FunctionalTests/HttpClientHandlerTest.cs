@@ -1984,7 +1984,7 @@ namespace System.Net.Http.Functional.Tests
                     // Verify status code.
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     // Verify Cookie header.
-                    Assert.Equal(1, response.Headers.GetValues("Cookie").Count());
+                    Assert.Single(response.Headers.GetValues("Cookie"));
                     Assert.Equal(CookieHeaderExpected, response.Headers.GetValues("Cookie").First().ToString());
                     // Verify Set-Cookie header.
                     Assert.Equal(containerCookiesCount, handler.CookieContainer.Count);

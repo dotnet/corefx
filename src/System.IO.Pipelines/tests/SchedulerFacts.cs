@@ -76,7 +76,7 @@ namespace System.IO.Pipelines.Tests
                 await buffer.FlushAsync().ConfigureAwait(false);
 
                 // Nothing posted to the sync context
-                Assert.Equal(0, sc.Callbacks.Count);
+                Assert.Empty(sc.Callbacks);
 
                 pipe.Writer.Complete();
 
@@ -119,7 +119,7 @@ namespace System.IO.Pipelines.Tests
                 // are scheduled on the sync context
                 await buffer.FlushAsync().ConfigureAwait(false);
 
-                Assert.Equal(1, sc.Callbacks.Count);
+                Assert.Single(sc.Callbacks);
                 sc.Callbacks[0].Item1(sc.Callbacks[0].Item2);
 
                 pipe.Writer.Complete();
@@ -167,7 +167,7 @@ namespace System.IO.Pipelines.Tests
                 await buffer.FlushAsync().ConfigureAwait(false);
 
                 // Nothing posted to the sync context
-                Assert.Equal(0, sc.Callbacks.Count);
+                Assert.Empty(sc.Callbacks);
 
                 pipe.Writer.Complete();
 
@@ -290,7 +290,7 @@ namespace System.IO.Pipelines.Tests
                     pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
 
                     // Nothing scheduled on the sync context
-                    Assert.Equal(0, sc.Callbacks.Count);
+                    Assert.Empty(sc.Callbacks);
 
                     pipe.Reader.Complete();
 
@@ -343,7 +343,7 @@ namespace System.IO.Pipelines.Tests
 
                     pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
 
-                    Assert.Equal(1, sc.Callbacks.Count);
+                    Assert.Single(sc.Callbacks);
                     sc.Callbacks[0].Item1(sc.Callbacks[0].Item2);
 
                     pipe.Reader.Complete();
@@ -397,7 +397,7 @@ namespace System.IO.Pipelines.Tests
 
                     pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
 
-                    Assert.Equal(0, sc.Callbacks.Count);
+                    Assert.Empty(sc.Callbacks);
 
                     pipe.Reader.Complete();
 

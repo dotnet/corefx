@@ -29,8 +29,8 @@ namespace System.Diagnostics.Tests
             Assert.Equal(TimeSpan.Zero, activity.Duration);
             Assert.Null(activity.Parent);
             Assert.Null(activity.ParentId);
-            Assert.Equal(0, activity.Baggage.ToList().Count);
-            Assert.Equal(0, activity.Tags.ToList().Count);
+            Assert.Empty(activity.Baggage.ToList());
+            Assert.Empty(activity.Tags.ToList());
         }
 
         /// <summary>
@@ -1038,7 +1038,7 @@ namespace System.Diagnostics.Tests
 
             //no tags from parent
             var childTags = child.Tags.ToList();
-            Assert.Equal(0, childTags.Count);
+            Assert.Empty(childTags);
 
             child.Stop();
             Assert.Equal(parent, Activity.Current);

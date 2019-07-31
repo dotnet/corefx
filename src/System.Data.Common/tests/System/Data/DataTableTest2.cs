@@ -144,13 +144,13 @@ namespace System.Data.Tests
             // Checking ChildRelations - default value
             //Check default
             drlCollection = dtParent.ChildRelations;
-            Assert.Equal(0, drlCollection.Count);
+            Assert.Empty(drlCollection);
 
             ds.Relations.Add(drl);
             drlCollection = dtParent.ChildRelations;
 
             // Checking ChildRelations Count
-            Assert.Equal(1, drlCollection.Count);
+            Assert.Single(drlCollection);
 
             // Checking ChildRelations Value
             Assert.Equal(drl, drlCollection[0]);
@@ -322,12 +322,12 @@ namespace System.Data.Tests
             Assert.NotNull(consColl);
 
             // Checking Constraints Count
-            Assert.Equal(0, consColl.Count);
+            Assert.Empty(consColl);
 
             // Checking Constraints Count
             //Add primary key
             dtParent.PrimaryKey = new DataColumn[] { dtParent.Columns[0] };
-            Assert.Equal(1, consColl.Count);
+            Assert.Single(consColl);
         }
 
         [Fact]
@@ -1000,13 +1000,13 @@ namespace System.Data.Tests
             // Checking ParentRelations - default value
             //Check default
             drlCollection = dtChild.ParentRelations;
-            Assert.Equal(0, drlCollection.Count);
+            Assert.Empty(drlCollection);
 
             ds.Relations.Add(drl);
             drlCollection = dtChild.ParentRelations;
 
             // Checking ParentRelations Count
-            Assert.Equal(1, drlCollection.Count);
+            Assert.Single(drlCollection);
 
             // Checking ParentRelations Value
             Assert.Equal(drl, drlCollection[0]);
@@ -1069,13 +1069,13 @@ namespace System.Data.Tests
             dt2.Reset();
 
             // Reset - ParentRelations
-            Assert.Equal(0, dt2.ParentRelations.Count);
+            Assert.Empty(dt2.ParentRelations);
             // Reset - Constraints
-            Assert.Equal(0, dt2.Constraints.Count);
+            Assert.Empty(dt2.Constraints);
             // Reset - Rows
             Assert.Equal(0, dt2.Rows.Count);
             // Reset - Columns
-            Assert.Equal(0, dt2.Columns.Count);
+            Assert.Empty(dt2.Columns);
         }
 
         [Fact]
@@ -1604,7 +1604,7 @@ namespace System.Data.Tests
             Assert.NotNull(pc);
 
             // Checking ExtendedProperties count
-            Assert.Equal(0, pc.Count);
+            Assert.Empty(pc);
         }
 
         [Fact]
@@ -1832,14 +1832,14 @@ namespace System.Data.Tests
             DataColumn col = table.Columns.Add("col", typeof(int));
             table.PrimaryKey = new DataColumn[] { col };
             table.AcceptChanges();
-            Assert.Equal(1, table.PrimaryKey.Length);
+            Assert.Single(table.PrimaryKey);
 
             table.BeginInit();
             DataColumn col2 = new DataColumn("col2", typeof(int));
             table.Columns.AddRange(new DataColumn[] { col2 });
             table.PrimaryKey = new DataColumn[] { col2 };
             table.EndInit();
-            Assert.Equal(1, table.PrimaryKey.Length);
+            Assert.Single(table.PrimaryKey);
             Assert.Equal("col2", table.PrimaryKey[0].ColumnName);
         }
 
@@ -1930,7 +1930,7 @@ namespace System.Data.Tests
             // no exception shud be thrown
             table.EndInit();
 
-            Assert.Equal(1, table.Constraints.Count);
+            Assert.Single(table.Constraints);
         }
 
         [Fact]
@@ -2104,7 +2104,7 @@ namespace System.Data.Tests
             table.Columns.Add("col1", typeof(int));
 
             DataRow[] row = table.Select("col1*10");
-            Assert.Equal(0, row.Length);
+            Assert.Empty(row);
 
             // No exception shud be thrown 
             // The filter created earlier (if cached), will raise an EvaluateException
@@ -2159,7 +2159,7 @@ namespace System.Data.Tests
             //col2 is a boolean expression, and a null value translates to
             //false.
             result = table.Select("col2");
-            Assert.Equal(0, result.Length);
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -2204,22 +2204,22 @@ namespace System.Data.Tests
             Assert.Equal(2, table3.Columns.Count);
             table3 = table1.Clone();
             table3.Merge(table2, false, MissingSchemaAction.Ignore);
-            Assert.Equal(1, table3.Columns.Count);
+            Assert.Single(table3.Columns);
 
             // source constraints are ignored
             table2.Constraints.Add("uc", table2.Columns[0], false);
             table3 = table1.Clone();
             table3.Merge(table2);
-            Assert.Equal(0, table3.Constraints.Count);
+            Assert.Empty(table3.Constraints);
 
             // source PK is merged depending on MissingSchemaAction
             table2.PrimaryKey = new DataColumn[] { table2.Columns[0] };
             table3 = table1.Clone();
             table3.Merge(table2);
-            Assert.Equal(1, table3.Constraints.Count);
+            Assert.Single(table3.Constraints);
             table3 = table1.Clone();
             table3.Merge(table2, false, MissingSchemaAction.Ignore);
-            Assert.Equal(0, table3.Constraints.Count);
+            Assert.Empty(table3.Constraints);
 
             //FIXME : If both source and target have PK, then 
             // shud be the exception raised when schema is merged? 

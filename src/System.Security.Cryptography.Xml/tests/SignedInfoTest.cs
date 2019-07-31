@@ -34,7 +34,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Equal("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", info.CanonicalizationMethod);
             Assert.Null(info.Id);
             Assert.NotNull(info.References);
-            Assert.Equal(0, info.References.Count);
+            Assert.Empty(info.References);
             Assert.Null(info.SignatureLength);
             Assert.Null(info.SignatureMethod);
             Assert.Equal("System.Security.Cryptography.Xml.SignedInfo", info.ToString());
@@ -62,7 +62,7 @@ namespace System.Security.Cryptography.Xml.Tests
             r1.Uri = "http://www.go-mono.com/";
             r1.AddTransform(new XmlDsigBase64Transform());
             info.AddReference(r1);
-            Assert.Equal(1, info.References.Count);
+            Assert.Single(info.References);
 
             Reference r2 = new Reference("http://www.motus.com/");
             r2.AddTransform(new XmlDsigBase64Transform());
@@ -82,7 +82,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Equal(xml, (info.GetXml().OuterXml));
             Assert.Equal("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", info.CanonicalizationMethod);
             Assert.Equal("http://www.w3.org/2000/09/xmldsig#rsa-sha1", info.SignatureMethod);
-            Assert.Equal(1, info.References.Count);
+            Assert.Single(info.References);
         }
 
         // there are many (documented) not supported methods in SignedInfo

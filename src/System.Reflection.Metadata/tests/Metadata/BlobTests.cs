@@ -144,7 +144,7 @@ namespace System.Reflection.Metadata.Tests
             builder.Clear();
 
             blobs = builder.GetBlobs().ToArray();
-            Assert.Equal(1, blobs.Length);
+            Assert.Single(blobs);
             Assert.Equal(0, blobs[0].Length);
 
             // Clear uses the first buffer:
@@ -637,7 +637,7 @@ namespace System.Reflection.Metadata.Tests
             writer.WriteBytes(1, 17);
 
             var blobs = builder.GetBlobs().ToArray();
-            Assert.Equal(1, blobs.Length);
+            Assert.Single(blobs);
             AssertEx.Equal(new byte[]
             {
                 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,

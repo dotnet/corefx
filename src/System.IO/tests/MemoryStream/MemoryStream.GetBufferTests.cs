@@ -13,7 +13,7 @@ namespace System.IO.Tests
         {
             MemoryStream ms = new MemoryStream();
             byte[] buffer = ms.GetBuffer();
-            Assert.Equal(0, buffer.Length);
+            Assert.Empty(buffer);
         }
 
         [Fact]

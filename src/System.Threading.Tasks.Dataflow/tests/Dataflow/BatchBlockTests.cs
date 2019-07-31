@@ -188,26 +188,26 @@ namespace System.Threading.Tasks.Dataflow.Tests
                             IList<int[]> items;
                             Assert.True(bb.TryReceiveAll(out items));
                             Assert.Equal(expected: 1, actual: items.Count);
-                            Assert.Equal(expected: 1, actual: items[0].Length);
+                            Assert.Single(items[0]);
                             Assert.Equal(expected: i - 1, actual: items[0][0]);
                             break;
 
                         case 1:
                             Assert.True(bb.TryReceive(f => true, out item));
-                            Assert.Equal(expected: 1, actual: item.Length);
+                            Assert.Single(item);
                             Assert.Equal(expected: i - 1, actual: item[0]);
                             break;
 
                         case 2:
                             Assert.False(bb.TryReceive(f => f.Length == 1 && f[0] == i, out item));
                             Assert.True(bb.TryReceive(f => f.Length == 1 && f[0] == i - 1, out item));
-                            Assert.Equal(expected: 1, actual: item.Length);
+                            Assert.Single(item);
                             Assert.Equal(expected: i - 1, actual: item[0]);
                             break;
 
                         case 3:
                             item = await bb.ReceiveAsync();
-                            Assert.Equal(expected: 1, actual: item.Length);
+                            Assert.Single(item);
                             Assert.Equal(expected: i - 1, actual: item[0]);
                             break;
                     }
@@ -215,7 +215,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
 
                 // Receive remaining item
                 item = await bb.ReceiveAsync();
-                Assert.Equal(expected: 1, actual: item.Length);
+                Assert.Single(item);
                 Assert.Equal(expected: sends, actual: item[0]);
 
                 bb.Complete();

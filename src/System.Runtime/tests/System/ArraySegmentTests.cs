@@ -69,13 +69,13 @@ namespace System.Tests
             var segment = new ArraySegment<T>();
             Assert.Null(segment.Array);
             Assert.Equal(0, segment.Offset);
-            Assert.Equal(0, segment.Count);
+            Assert.Empty(segment);
 
             T[] array = new T[10];
             segment = new ArraySegment<T>(array, 10, 0);
             Assert.Same(array, segment.Array);
             Assert.Equal(10, segment.Offset);
-            Assert.Equal(0, segment.Count);
+            Assert.Empty(segment);
         }
 
         [Fact]

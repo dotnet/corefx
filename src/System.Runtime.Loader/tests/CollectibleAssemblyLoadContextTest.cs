@@ -441,7 +441,7 @@ namespace System.Runtime.Loader.Tests
 
             // Expecting two exceptions:
             //  Collectible type 'System.Runtime.Loader.Tests.TestClassNotSupported_FixedAddressValueType' has unsupported FixedAddressValueTypeAttribute applied to a field
-            Assert.Equal(1, exception.LoaderExceptions.Length);
+            Assert.Single(exception.LoaderExceptions);
             Assert.True(exception.LoaderExceptions.All(exp => exp is TypeLoadException));
         }
 

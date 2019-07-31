@@ -558,7 +558,7 @@ namespace System.Linq.Tests
 
             var result = elements.GroupBy(e => e, (e, f) => new { Key = e, Element = f });
 
-            Assert.Equal(1, result.Count());
+            Assert.Single(result);
 
             var grouping = result.First();
 
@@ -832,7 +832,7 @@ namespace System.Linq.Tests
         [Fact]
         public void EmptyGroupingCount()
         {
-            Assert.Equal(0, Enumerable.Empty<int>().GroupBy(i => i).Count());
+            Assert.Empty(Enumerable.Empty<int>().GroupBy(i => i));
         }
 
         [Fact]
@@ -850,7 +850,7 @@ namespace System.Linq.Tests
         [Fact]
         public void EmptyGroupingWithResultCount()
         {
-            Assert.Equal(0, Enumerable.Empty<int>().GroupBy(i => i, (x, y) => x + y.Count()).Count());
+            Assert.Empty(Enumerable.Empty<int>().GroupBy(i => i, (x, y) => x + y.Count()));
         }
 
         [Fact]

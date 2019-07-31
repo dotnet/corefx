@@ -84,7 +84,7 @@ namespace System.Collections.Immutable.Tests
             var immutable2 = mutable.ToImmutable();
             Assert.NotSame(immutable1, immutable2); // "Mutating the collection did not reset the Immutable property."
             Assert.Same(immutable2, mutable.ToImmutable()); // "The Immutable property getter is creating new objects without any differences."
-            Assert.Equal(1, immutable2.Count);
+            Assert.Single(immutable2);
         }
 
         [Fact]
@@ -149,7 +149,7 @@ namespace System.Collections.Immutable.Tests
                                    .ToBuilder();
             Assert.Equal(3, builder.Count);
             builder.RemoveRange(new[] { "a", "b" });
-            Assert.Equal(1, builder.Count);
+            Assert.Single(builder);
             Assert.Equal(3, builder["c"]);
         }
 
@@ -158,9 +158,9 @@ namespace System.Collections.Immutable.Tests
         {
             var builder = ImmutableDictionary.Create<string, int>().ToBuilder();
             builder.Add("five", 5);
-            Assert.Equal(1, builder.Count);
+            Assert.Single(builder);
             builder.Clear();
-            Assert.Equal(0, builder.Count);
+            Assert.Empty(builder);
         }
 
         [Fact]
@@ -202,12 +202,12 @@ namespace System.Collections.Immutable.Tests
             var builder = ImmutableDictionary.Create<string, string>()
                 .Add("a", "1").Add("A", "1").ToBuilder();
             builder.KeyComparer = StringComparer.OrdinalIgnoreCase;
-            Assert.Equal(1, builder.Count);
+            Assert.Single(builder);
             Assert.True(builder.ContainsKey("a"));
 
             var set = builder.ToImmutable();
             Assert.Same(StringComparer.OrdinalIgnoreCase, set.KeyComparer);
-            Assert.Equal(1, set.Count);
+            Assert.Single(set);
             Assert.True(set.ContainsKey("a"));
 
             // Now check where collisions have conflicting values.

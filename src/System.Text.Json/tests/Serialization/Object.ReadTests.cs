@@ -94,7 +94,7 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadArrayInObjectArray()
         {
             object[] array = JsonSerializer.Deserialize<object[]>(@"[[]]");
-            Assert.Equal(1, array.Length);
+            Assert.Single(array);
             Assert.IsType<JsonElement>(array[0]);
             Assert.Equal(JsonValueKind.Array, ((JsonElement)array[0]).ValueKind);
         }
@@ -103,7 +103,7 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadObjectInObjectArray()
         {
             object[] array = JsonSerializer.Deserialize<object[]>(@"[{}]");
-            Assert.Equal(1, array.Length);
+            Assert.Single(array);
             Assert.IsType<JsonElement>(array[0]);
             Assert.Equal(JsonValueKind.Object, ((JsonElement)array[0]).ValueKind);
 

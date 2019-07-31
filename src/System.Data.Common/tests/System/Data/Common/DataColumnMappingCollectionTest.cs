@@ -60,7 +60,7 @@ namespace System.Data.Tests.Common
             Assert.Equal(0, t);
             bool eq1 = col1.Equals(_columnMapCollection[0]);
             Assert.True(eq1);
-            Assert.Equal(1, _columnMapCollection.Count);
+            Assert.Single(_columnMapCollection);
             DataColumnMapping col2;
             col2 = _columnMapCollection.Add("sourceID", "dataSetID");
             bool eq2 = col2.Equals(_columnMapCollection[1]);
@@ -82,7 +82,7 @@ namespace System.Data.Tests.Common
         public void AddRange()
         {
             _columnMapCollection.Add(new DataColumnMapping("sourceAge", "dataSetAge"));
-            Assert.Equal(1, _columnMapCollection.Count);
+            Assert.Single(_columnMapCollection);
             _columnMapCollection.AddRange(_cols);
             Assert.Equal(6, _columnMapCollection.Count);
             bool eq;
@@ -102,13 +102,13 @@ namespace System.Data.Tests.Common
         {
             DataColumnMapping col1 = new DataColumnMapping("sourceName", "dataSetName");
             _columnMapCollection.Add(col1);
-            Assert.Equal(1, _columnMapCollection.Count);
+            Assert.Single(_columnMapCollection);
             _columnMapCollection.Clear();
-            Assert.Equal(0, _columnMapCollection.Count);
+            Assert.Empty(_columnMapCollection);
             _columnMapCollection.AddRange(_cols);
             Assert.Equal(5, _columnMapCollection.Count);
             _columnMapCollection.Clear();
-            Assert.Equal(0, _columnMapCollection.Count);
+            Assert.Empty(_columnMapCollection);
         }
 
         [Fact]
@@ -351,11 +351,11 @@ namespace System.Data.Tests.Common
             {
                 dataColumnMapping
             };
-            Assert.Equal(1, dataColumnMappingCollection.Count);
+            Assert.Single(dataColumnMappingCollection);
 
             dataColumnMappingCollection.Remove(dataColumnMapping);
 
-            Assert.Equal(0, dataColumnMappingCollection.Count);
+            Assert.Empty(dataColumnMappingCollection);
         }
 
         [Fact]
@@ -520,11 +520,11 @@ namespace System.Data.Tests.Common
         public void Insert_Int_Object_Success()
         {
             DataColumnMappingCollection dataColumnMappingCollection = new DataColumnMappingCollection();
-            Assert.Equal(0, dataColumnMappingCollection.Count);
+            Assert.Empty(dataColumnMappingCollection);
 
             dataColumnMappingCollection.Insert(0, (object)new DataColumnMapping("sourcePIN", "dataSetPIN"));
 
-            Assert.Equal(1, dataColumnMappingCollection.Count);
+            Assert.Single(dataColumnMappingCollection);
             Assert.Equal("dataSetPIN", dataColumnMappingCollection["sourcePIN"].DataSetColumn);
         }
 
@@ -534,11 +534,11 @@ namespace System.Data.Tests.Common
             DataColumnMapping dataColumnMapping = new DataColumnMapping("sourcePIN", "dataSetPIN");
             DataColumnMappingCollection dataColumnMappingCollection = new DataColumnMappingCollection();
             dataColumnMappingCollection.Add(dataColumnMapping);
-            Assert.Equal(1, dataColumnMappingCollection.Count);
+            Assert.Single(dataColumnMappingCollection);
 
             dataColumnMappingCollection.Remove((object)dataColumnMapping);
 
-            Assert.Equal(0, dataColumnMappingCollection.Count);
+            Assert.Empty(dataColumnMappingCollection);
         }
 
         [Fact]

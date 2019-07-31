@@ -44,7 +44,7 @@ namespace System.ComponentModel.Design.Tests
         {
             ICollection collection = new DesignerCollection(new TestDesignerHost[1]);
             Assert.Equal(1, collection.Count);
-            Assert.Equal(1, collection.Cast<IDesignerHost>().Count());
+            Assert.Single(collection.Cast<IDesignerHost>());
 
             Assert.Null(collection.SyncRoot);
             Assert.False(collection.IsSynchronized);

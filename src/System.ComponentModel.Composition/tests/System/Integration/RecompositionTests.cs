@@ -299,8 +299,8 @@ namespace Tests.Integration
             Assert.Equal("Blake", me.Name);
             Assert.Null(me.Job);
             Assert.Equal(3, me.Friends.Length);
-            Assert.Equal(1, me.Relatives.Length);
-            Assert.Equal(0, me.Children.Length);
+            Assert.Single(me.Relatives);
+            Assert.Empty(me.Children);
 
             // Can only have one name
             Assert.Throws<ChangeRejectedException>(() =>
@@ -333,13 +333,13 @@ namespace Tests.Integration
             Assert.Throws<ChangeRejectedException>(() =>
                 container.ComposeParts(new Spouse("Cameron")));
 
-            Assert.Equal(1, me.Relatives.Length);
+            Assert.Single(me.Relatives);
 
             batch = new CompositionBatch();
             batch.AddPart(new Friend("Graham"));
             container.Compose(batch);
             Assert.Equal(4, me.Friends.Length);
-            Assert.Equal(1, me.Relatives.Length);
+            Assert.Single(me.Relatives);
         }
 
         public class FooWithOptionalImport
@@ -472,7 +472,7 @@ namespace Tests.Integration
 
             catalog.Catalogs.Remove(changingParts);
 
-            Assert.Equal(0, root.Imports.Length);
+            Assert.Empty(root.Imports);
 
             catalog.Catalogs.Add(changingParts);
 
@@ -517,10 +517,10 @@ namespace Tests.Integration
         {
             var container = new CompositionContainer(new TypeCatalog(typeof(NonDisposableImportsDisposable), typeof(PartImporter<NonDisposableImportsDisposable>)));
             var exports = container.GetExports<PartImporter<NonDisposableImportsDisposable>>();
-            Assert.Equal(0, exports.Count());
+            Assert.Empty(exports);
             container.ComposeParts(new DisposablePart());
             exports = container.GetExports<PartImporter<NonDisposableImportsDisposable>>();
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
         }
 
         [Export]

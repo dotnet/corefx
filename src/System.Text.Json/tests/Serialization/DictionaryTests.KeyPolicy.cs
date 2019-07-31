@@ -126,7 +126,7 @@ namespace System.Text.Json.Serialization.Tests
             // We don't use policy on deserialize, so we populate dictionary.
             Dictionary<string, int> obj = JsonSerializer.Deserialize<Dictionary<string, int>>(@"{""onlyKey"": 1}", options);
 
-            Assert.Equal(1, obj.Count);
+            Assert.Single(obj);
             Assert.Equal(1, obj["onlyKey"]);
         }
 

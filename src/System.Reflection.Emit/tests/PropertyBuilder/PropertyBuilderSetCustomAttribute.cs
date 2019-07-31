@@ -38,7 +38,7 @@ namespace System.Reflection.Emit.Tests
             PropertyInfo createdProperty = createdType.GetProperty("TestProperty", bindingFlags);
             object[] attributes = createdProperty.GetCustomAttributes(false).ToArray();
 
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             Assert.True(attributes[0] is IntPropertyAttribute);
             Assert.Equal(expectedValue, (attributes[0] as IntPropertyAttribute).Value);
         }
@@ -100,7 +100,7 @@ namespace System.Reflection.Emit.Tests
             PropertyInfo createdProperty = createdType.GetProperty("TestProperty", bindingFlags);
             object[] attributes = createdProperty.GetCustomAttributes(false).ToArray();
 
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             Assert.True(attributes[0] is IntPropertyAttribute);
             Assert.Equal(expectedValue, (attributes[0] as IntPropertyAttribute).Value);
         }

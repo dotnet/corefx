@@ -140,7 +140,7 @@ namespace System.Data.Tests
 
                DataRelation Relation = new DataRelation("Rel", _mom.Columns[1], _child.Columns[1], true);
                _set.Relations.Add(Relation);
-               Assert.Equal(1, _set.Relations.Count);
+               Assert.Single(_set.Relations);
 
                _child.Columns[1].DataType = Type.GetType("System.Double");
            });
@@ -150,24 +150,24 @@ namespace System.Data.Tests
         public void DataSetRelations()
         {
             DataRelation Relation;
-            Assert.Equal(0, _set.Relations.Count);
-            Assert.Equal(0, _mom.ParentRelations.Count);
-            Assert.Equal(0, _mom.ChildRelations.Count);
-            Assert.Equal(0, _child.ParentRelations.Count);
-            Assert.Equal(0, _child.ChildRelations.Count);
+            Assert.Empty(_set.Relations);
+            Assert.Empty(_mom.ParentRelations);
+            Assert.Empty(_mom.ChildRelations);
+            Assert.Empty(_child.ParentRelations);
+            Assert.Empty(_child.ChildRelations);
 
             Relation = new DataRelation("Rel", _mom.Columns[1], _child.Columns[0]);
             _set.Relations.Add(Relation);
 
-            Assert.Equal(1, _set.Relations.Count);
-            Assert.Equal(0, _mom.ParentRelations.Count);
-            Assert.Equal(1, _mom.ChildRelations.Count);
-            Assert.Equal(1, _child.ParentRelations.Count);
-            Assert.Equal(0, _child.ChildRelations.Count);
+            Assert.Single(_set.Relations);
+            Assert.Empty(_mom.ParentRelations);
+            Assert.Single(_mom.ChildRelations);
+            Assert.Single(_child.ParentRelations);
+            Assert.Empty(_child.ChildRelations);
 
             Relation = _set.Relations[0];
-            Assert.Equal(1, Relation.ParentColumns.Length);
-            Assert.Equal(1, Relation.ChildColumns.Length);
+            Assert.Single(Relation.ParentColumns);
+            Assert.Single(Relation.ChildColumns);
             Assert.Equal("Rel", Relation.ChildKeyConstraint.ConstraintName);
             Assert.Equal("Constraint1", Relation.ParentKeyConstraint.ConstraintName);
         }
@@ -175,14 +175,14 @@ namespace System.Data.Tests
         [Fact]
         public void Constraints()
         {
-            Assert.Equal(0, _mom.Constraints.Count);
-            Assert.Equal(0, _child.Constraints.Count);
+            Assert.Empty(_mom.Constraints);
+            Assert.Empty(_child.Constraints);
 
             DataRelation Relation = new DataRelation("Rel", _mom.Columns[1], _child.Columns[0]);
             _set.Relations.Add(Relation);
 
-            Assert.Equal(1, _mom.Constraints.Count);
-            Assert.Equal(1, _child.Constraints.Count);
+            Assert.Single(_mom.Constraints);
+            Assert.Single(_child.Constraints);
             Assert.IsType<ForeignKeyConstraint>(_child.Constraints[0]);
             Assert.IsType<UniqueConstraint>(_mom.Constraints[0]);
         }
@@ -193,23 +193,23 @@ namespace System.Data.Tests
             DataRelation Relation = new DataRelation("Rel", _mom.Columns[1], _child.Columns[0]);
             _set.Relations.Add(Relation);
             DataRelation Test = null;
-            Assert.Equal(1, _mom.ChildRelations.Count);
-            Assert.Equal(0, _child.ChildRelations.Count);
-            Assert.Equal(0, _mom.ParentRelations.Count);
-            Assert.Equal(1, _child.ParentRelations.Count);
+            Assert.Single(_mom.ChildRelations);
+            Assert.Empty(_child.ChildRelations);
+            Assert.Empty(_mom.ParentRelations);
+            Assert.Single(_child.ParentRelations);
 
             Test = _child.ParentRelations[0];
             Assert.Equal("Rel", Test.ToString());
             Assert.Equal("Rel", Test.RelationName);
             Assert.Equal("Mom", Test.ParentTable.TableName);
-            Assert.Equal(1, Test.ParentKeyConstraint.Columns.Length);
+            Assert.Single(Test.ParentKeyConstraint.Columns);
             Assert.False(Test.ParentKeyConstraint.IsPrimaryKey);
-            Assert.Equal(1, Test.ParentColumns.Length);
+            Assert.Single(Test.ParentColumns);
             Assert.False(Test.Nested);
-            Assert.Equal(0, Test.ExtendedProperties.Count);
+            Assert.Empty(Test.ExtendedProperties);
             Assert.Equal("Child", Test.ChildTable.TableName);
             Assert.Equal("Rel", Test.ChildKeyConstraint.ConstraintName);
-            Assert.Equal(1, Test.ChildColumns.Length);
+            Assert.Single(Test.ChildColumns);
         }
 
         [Fact]
@@ -256,10 +256,10 @@ namespace System.Data.Tests
 
             Set.Relations.Add(new DataRelation("Rel", Parents, Childs));
 
-            Assert.Equal(1, Mom2.ChildRelations.Count);
-            Assert.Equal(0, Child2.ChildRelations.Count);
-            Assert.Equal(0, Mom2.ParentRelations.Count);
-            Assert.Equal(1, Child2.ParentRelations.Count);
+            Assert.Single(Mom2.ChildRelations);
+            Assert.Empty(Child2.ChildRelations);
+            Assert.Empty(Mom2.ParentRelations);
+            Assert.Single(Child2.ParentRelations);
 
             DataRelation Test = Child2.ParentRelations[0];
             Assert.Equal("Rel", Test.ToString());
@@ -269,14 +269,14 @@ namespace System.Data.Tests
             Assert.False(Test.ParentKeyConstraint.IsPrimaryKey);
             Assert.Equal(2, Test.ParentColumns.Length);
             Assert.False(Test.Nested);
-            Assert.Equal(0, Test.ExtendedProperties.Count);
+            Assert.Empty(Test.ExtendedProperties);
             Assert.Equal("Child", Test.ChildTable.TableName);
             Assert.Equal("Rel", Test.ChildKeyConstraint.ConstraintName);
             Assert.Equal(2, Test.ChildColumns.Length);
-            Assert.Equal(1, Mom2.Constraints.Count);
+            Assert.Single(Mom2.Constraints);
             Assert.Equal("Constraint1", Mom2.Constraints[0].ToString());
-            Assert.Equal(1, Child2.Constraints.Count);
-            Assert.Equal(0, Hubby.Constraints.Count);
+            Assert.Single(Child2.Constraints);
+            Assert.Empty(Hubby.Constraints);
         }
 
         [Fact]
@@ -286,10 +286,10 @@ namespace System.Data.Tests
             _set.Relations.Add(Relation);
             DataRelation Test = null;
 
-            Assert.Equal(1, _mom.ChildRelations.Count);
-            Assert.Equal(0, _child.ChildRelations.Count);
-            Assert.Equal(0, _mom.ParentRelations.Count);
-            Assert.Equal(1, _child.ParentRelations.Count);
+            Assert.Single(_mom.ChildRelations);
+            Assert.Empty(_child.ChildRelations);
+            Assert.Empty(_mom.ParentRelations);
+            Assert.Single(_child.ParentRelations);
 
             Test = _child.ParentRelations[0];
 
@@ -300,15 +300,15 @@ namespace System.Data.Tests
             Assert.Null(Test.ParentKeyConstraint);
             Assert.Null(Test.ParentKeyConstraint);
 
-            Assert.Equal(1, Test.ParentColumns.Length);
+            Assert.Single(Test.ParentColumns);
             Assert.False(Test.Nested);
-            Assert.Equal(0, Test.ExtendedProperties.Count);
+            Assert.Empty(Test.ExtendedProperties);
             Assert.Equal("Child", Test.ChildTable.TableName);
 
             Assert.Null(Test.ChildKeyConstraint);
-            Assert.Equal(1, Test.ChildColumns.Length);
-            Assert.Equal(0, _mom.Constraints.Count);
-            Assert.Equal(0, _child.Constraints.Count);
+            Assert.Single(Test.ChildColumns);
+            Assert.Empty(_mom.Constraints);
+            Assert.Empty(_child.Constraints);
         }
 
         [Fact]
@@ -326,10 +326,10 @@ namespace System.Data.Tests
             _set.EndInit();
 
             DataRelation Test = null;
-            Assert.Equal(1, _mom.ChildRelations.Count);
-            Assert.Equal(0, _child.ChildRelations.Count);
-            Assert.Equal(0, _mom.ParentRelations.Count);
-            Assert.Equal(1, _child.ParentRelations.Count);
+            Assert.Single(_mom.ChildRelations);
+            Assert.Empty(_child.ChildRelations);
+            Assert.Empty(_mom.ParentRelations);
+            Assert.Single(_child.ParentRelations);
 
             Test = _child.ParentRelations[0];
             Assert.Equal("Rel", Test.ToString());
@@ -338,12 +338,12 @@ namespace System.Data.Tests
 
             Assert.Null(Test.ParentKeyConstraint);
 
-            Assert.Equal(1, Test.ParentColumns.Length);
+            Assert.Single(Test.ParentColumns);
             Assert.True(Test.Nested);
-            Assert.Equal(0, Test.ExtendedProperties.Count);
+            Assert.Empty(Test.ExtendedProperties);
             Assert.Equal("Child", Test.ChildTable.TableName);
             Assert.Null(Test.ChildKeyConstraint);
-            Assert.Equal(1, Test.ChildColumns.Length);
+            Assert.Single(Test.ChildColumns);
         }
 
         [Fact]
@@ -354,23 +354,23 @@ namespace System.Data.Tests
             DataTable Table = Set.Tables[0];
 
             Assert.False(Table.CaseSensitive);
-            Assert.Equal(1, Table.ChildRelations.Count);
-            Assert.Equal(0, Table.ParentRelations.Count);
-            Assert.Equal(1, Table.Constraints.Count);
-            Assert.Equal(1, Table.PrimaryKey.Length);
+            Assert.Single(Table.ChildRelations);
+            Assert.Empty(Table.ParentRelations);
+            Assert.Single(Table.Constraints);
+            Assert.Single(Table.PrimaryKey);
             Assert.Equal(0, Table.Rows.Count);
             Assert.Equal("bookstore", Table.TableName);
-            Assert.Equal(1, Table.Columns.Count);
+            Assert.Single(Table.Columns);
 
             DataRelation Relation = Table.ChildRelations[0];
-            Assert.Equal(1, Relation.ChildColumns.Length);
+            Assert.Single(Relation.ChildColumns);
             Assert.Equal("bookstore_book", Relation.ChildKeyConstraint.ConstraintName);
-            Assert.Equal(1, Relation.ChildKeyConstraint.Columns.Length);
+            Assert.Single(Relation.ChildKeyConstraint.Columns);
             Assert.Equal("book", Relation.ChildTable.TableName);
             Assert.Equal("NewDataSet", Relation.DataSet.DataSetName);
-            Assert.Equal(0, Relation.ExtendedProperties.Count);
+            Assert.Empty(Relation.ExtendedProperties);
             Assert.True(Relation.Nested);
-            Assert.Equal(1, Relation.ParentColumns.Length);
+            Assert.Single(Relation.ParentColumns);
             Assert.Equal("Constraint1", Relation.ParentKeyConstraint.ConstraintName);
             Assert.Equal("bookstore", Relation.ParentTable.TableName);
             Assert.Equal("bookstore_book", Relation.RelationName);
@@ -378,33 +378,33 @@ namespace System.Data.Tests
             Table = Set.Tables[1];
 
             Assert.False(Table.CaseSensitive);
-            Assert.Equal(1, Table.ChildRelations.Count);
-            Assert.Equal(1, Table.ParentRelations.Count);
+            Assert.Single(Table.ChildRelations);
+            Assert.Single(Table.ParentRelations);
             Assert.Equal(2, Table.Constraints.Count);
-            Assert.Equal(1, Table.PrimaryKey.Length);
+            Assert.Single(Table.PrimaryKey);
             Assert.Equal(0, Table.Rows.Count);
             Assert.Equal("book", Table.TableName);
             Assert.Equal(5, Table.Columns.Count);
 
             Relation = Table.ChildRelations[0];
-            Assert.Equal(1, Relation.ChildColumns.Length);
+            Assert.Single(Relation.ChildColumns);
             Assert.Equal("book_author", Relation.ChildKeyConstraint.ConstraintName);
-            Assert.Equal(1, Relation.ChildKeyConstraint.Columns.Length);
+            Assert.Single(Relation.ChildKeyConstraint.Columns);
             Assert.Equal("author", Relation.ChildTable.TableName);
             Assert.Equal("NewDataSet", Relation.DataSet.DataSetName);
-            Assert.Equal(0, Relation.ExtendedProperties.Count);
+            Assert.Empty(Relation.ExtendedProperties);
             Assert.True(Relation.Nested);
-            Assert.Equal(1, Relation.ParentColumns.Length);
+            Assert.Single(Relation.ParentColumns);
             Assert.Equal("Constraint1", Relation.ParentKeyConstraint.ConstraintName);
             Assert.Equal("book", Relation.ParentTable.TableName);
             Assert.Equal("book_author", Relation.RelationName);
 
             Table = Set.Tables[2];
             Assert.False(Table.CaseSensitive);
-            Assert.Equal(0, Table.ChildRelations.Count);
-            Assert.Equal(1, Table.ParentRelations.Count);
-            Assert.Equal(1, Table.Constraints.Count);
-            Assert.Equal(0, Table.PrimaryKey.Length);
+            Assert.Empty(Table.ChildRelations);
+            Assert.Single(Table.ParentRelations);
+            Assert.Single(Table.Constraints);
+            Assert.Empty(Table.PrimaryKey);
             Assert.Equal(0, Table.Rows.Count);
             Assert.Equal("author", Table.TableName);
             Assert.Equal(3, Table.Columns.Count);

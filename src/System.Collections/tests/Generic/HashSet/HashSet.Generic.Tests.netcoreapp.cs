@@ -14,7 +14,7 @@ namespace System.Collections.Tests
         public void HashSet_Generic_Constructor_int(int capacity)
         {
             HashSet<T> set = new HashSet<T>(capacity);
-            Assert.Equal(0, set.Count);
+            Assert.Empty(set);
         }
 
         [Theory]
@@ -55,7 +55,7 @@ namespace System.Collections.Tests
         {
             IEqualityComparer<T> comparer = GetIEqualityComparer();
             HashSet<T> set = new HashSet<T>(capacity, comparer);
-            Assert.Equal(0, set.Count);
+            Assert.Empty(set);
             if (comparer == null)
                 Assert.Equal(EqualityComparer<T>.Default, set.Comparer);
             else

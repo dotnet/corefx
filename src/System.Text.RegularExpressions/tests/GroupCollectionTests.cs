@@ -68,7 +68,7 @@ namespace System.Text.RegularExpressions.Tests
             Assert.Same(string.Empty, group.Value);
             Assert.Equal(0, group.Index);
             Assert.Equal(0, group.Length);
-            Assert.Equal(0, group.Captures.Count);
+            Assert.Empty(group.Captures);
         }
 
         [Fact]

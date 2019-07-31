@@ -40,7 +40,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
 
             using (coll)
             {
-                Assert.Equal(0, coll.Collection.Count);
+                Assert.Empty(coll.Collection);
             }
         }
 
@@ -68,7 +68,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
 
             using (coll)
             {
-                Assert.Equal(1, coll.Collection.Count);
+                Assert.Single(coll.Collection);
                 Assert.Equal(rawData, coll.Collection[0].RawData);
                 Assert.False(coll.Collection[0].HasPrivateKey, "coll.Collection[0].HasPrivateKey");
             }
@@ -102,7 +102,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
 
             using (coll)
             {
-                Assert.Equal(1, coll.Collection.Count);
+                Assert.Single(coll.Collection);
                 Assert.Equal(rawData, coll.Collection[0].RawData);
                 Assert.False(coll.Collection[0].HasPrivateKey, "coll.Collection[0].HasPrivateKey");
             }
@@ -146,7 +146,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
 
             using (coll)
             {
-                Assert.Equal(1, coll.Collection.Count);
+                Assert.Single(coll.Collection);
                 Assert.Equal(rawData, coll.Collection[0].RawData);
                 Assert.True(coll.Collection[0].HasPrivateKey, "coll.Collection[0].HasPrivateKey");
             }
@@ -199,7 +199,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
 
             using (coll)
             {
-                Assert.Equal(1, coll.Collection.Count);
+                Assert.Single(coll.Collection);
                 Assert.Equal(rawData, coll.Collection[0].RawData);
                 Assert.True(coll.Collection[0].HasPrivateKey, "coll.Collection[0].HasPrivateKey");
             }

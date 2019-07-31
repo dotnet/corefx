@@ -85,7 +85,7 @@ namespace System.Reflection.Emit.Tests
             Type createdType = type.CreateTypeInfo().AsType();
             
             object[] attributes = createdType.GetMethod("TestMethod").GetCustomAttributes(false).ToArray();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
 
             MethodBuilderCustomIntAttribute obj = (MethodBuilderCustomIntAttribute)attributes[0];
             Assert.Equal("hello", obj.Field12345);

@@ -252,7 +252,7 @@ namespace System.Data.Tests
             rowC.SetParentRow(_row, dr);
             DataRow[] rows = rowC.GetParentRows(dr);
 
-            Assert.Equal(1, rows.Length);
+            Assert.Single(rows);
             Assert.Equal(tableP.Rows[0], rows[0]);
 
             try
@@ -312,7 +312,7 @@ namespace System.Data.Tests
 
             DataRow[] rows = (_table.Rows[0]).GetChildRows(dr);
 
-            Assert.Equal(1, rows.Length);
+            Assert.Single(rows);
             Assert.Equal(tableC.Rows[0], rows[0]);
         }
 
@@ -346,7 +346,7 @@ namespace System.Data.Tests
             rowC.SetParentRow(_row, dr);
             DataRow[] rows = _row.GetChildRows(dr);
 
-            Assert.Equal(1, rows.Length);
+            Assert.Single(rows);
             Assert.Equal(tableC.Rows[0], rows[0]);
 
             try

@@ -78,7 +78,7 @@ namespace System.Reflection.Tests
             Type t = typeof(TestClass);
 
             MemberInfo[] members = t.GetMember("My*", MemberTypes.Event, BindingFlags.Public | BindingFlags.Instance);
-            Assert.Equal(1, members.Length);
+            Assert.Single(members);
             Assert.Equal("MyEvent", members[0].Name);
         }
 
@@ -88,7 +88,7 @@ namespace System.Reflection.Tests
             Type t = typeof(TestClass);
 
             MemberInfo[] members = t.GetMember("My*", MemberTypes.Field, BindingFlags.Public | BindingFlags.Instance);
-            Assert.Equal(1, members.Length);
+            Assert.Single(members);
             Assert.Equal("MyField", members[0].Name);
         }
 
@@ -98,7 +98,7 @@ namespace System.Reflection.Tests
             Type t = typeof(TestClass);
 
             MemberInfo[] members = t.GetMember("My*", MemberTypes.Method, BindingFlags.Public | BindingFlags.Instance);
-            Assert.Equal(1, members.Length);
+            Assert.Single(members);
             Assert.Equal("MyMethod", members[0].Name);
         }
 
@@ -108,7 +108,7 @@ namespace System.Reflection.Tests
             Type t = typeof(TestClass);
 
             MemberInfo[] members = t.GetMember("My*", MemberTypes.NestedType, BindingFlags.Public | BindingFlags.Instance);
-            Assert.Equal(1, members.Length);
+            Assert.Single(members);
             Assert.Equal("MyNestedType", members[0].Name);
         }
 
@@ -118,7 +118,7 @@ namespace System.Reflection.Tests
             Type t = typeof(TestClass);
 
             MemberInfo[] members = t.GetMember("My*", MemberTypes.Property, BindingFlags.Public | BindingFlags.Instance);
-            Assert.Equal(1, members.Length);
+            Assert.Single(members);
             Assert.Equal("MyProperty", members[0].Name);
         }
 
@@ -277,10 +277,10 @@ namespace System.Reflection.Tests
             // Hiding members suppress results even if the hiding member itself is filtered out by the binding flags.
             Type derived = typeof(Derived);
             EventInfo[] events = derived.GetEvents(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
-            Assert.Equal(0, events.Length);
+            Assert.Empty(events);
 
             PropertyInfo[] properties = derived.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
-            Assert.Equal(0, properties.Length);
+            Assert.Empty(properties);
         }
 
         [Fact]
@@ -289,12 +289,12 @@ namespace System.Reflection.Tests
             // Hiding members won't suppress results if the hiding member is filtered out due to being a private member in a base class.
             Type derived2= typeof(Derived2);
             EventInfo[] events = derived2.GetEvents(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-            Assert.Equal(1, events.Length);
+            Assert.Single(events);
             Assert.Equal(typeof(Base), events[0].DeclaringType);
             Assert.Equal(nameof(Base.MyEvent), events[0].Name);
 
             PropertyInfo[] properties = derived2.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-            Assert.Equal(1, properties.Length);
+            Assert.Single(properties);
             Assert.Equal(typeof(Base), properties[0].DeclaringType);
             Assert.Equal(nameof(Base.MyProp), properties[0].Name);
         }
@@ -306,7 +306,7 @@ namespace System.Reflection.Tests
             //  (that check is actually just another bindingflags check.)
             Type staticDerived2 = typeof(StaticDerived2);
             EventInfo[] events = staticDerived2.GetEvents(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-            Assert.Equal(0, events.Length);
+            Assert.Empty(events);
         }
 
         private abstract class Base

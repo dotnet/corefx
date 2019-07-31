@@ -651,7 +651,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public void ImportDefinitions_ImportWithCustomAttributeImports()
         {
             var part = CreatePart(typeof(ImportWithCustomImport));
-            Assert.Equal(1, part.ImportDefinitions.Count());
+            Assert.Single(part.ImportDefinitions);
             ContractBasedImportDefinition import = part.ImportDefinitions.First() as ContractBasedImportDefinition;
             Assert.NotNull(import);
 
@@ -663,7 +663,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public void ImportDefinitions_ImportWithCustomImportInvalidTarget_ShouldbeIgnored()
         {
             var part = CreatePart(typeof(ImportWithCustomImportInvalidTarget));
-            Assert.Equal(0, part.ImportDefinitions.Count());
+            Assert.Empty(part.ImportDefinitions);
         }
 
         [PartNotDiscoverable]
@@ -684,7 +684,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public void ImportDefinitions_ImportManyWithCustomAttributeImportManys()
         {
             var part = CreatePart(typeof(ImportManyWithCustomImportMany));
-            Assert.Equal(1, part.ImportDefinitions.Count());
+            Assert.Single(part.ImportDefinitions);
             ContractBasedImportDefinition import = part.ImportDefinitions.First() as ContractBasedImportDefinition;
             Assert.NotNull(import);
 
@@ -696,7 +696,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public void ImportDefinitions_ImportManyWithCustomImportManyInvalidTarget_ShouldbeIgnored()
         {
             var part = CreatePart(typeof(ImportManyWithCustomImportManyInvalidTarget));
-            Assert.Equal(0, part.ImportDefinitions.Count());
+            Assert.Empty(part.ImportDefinitions);
         }
 
         [AttributeUsage(AttributeTargets.Constructor, AllowMultiple = false, Inherited = false)]
@@ -752,7 +752,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public void ImportDefinitions_ImportingConstructorWithCustomAttributeImportingConstructors()
         {
             var part = CreatePart(typeof(ImportingConstructorWithCustomImportingConstructor));
-            Assert.Equal(1, part.ImportDefinitions.Count());
+            Assert.Single(part.ImportDefinitions);
             ContractBasedImportDefinition import = part.ImportDefinitions.First() as ContractBasedImportDefinition;
             Assert.NotNull(import);
 
@@ -765,7 +765,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             var part = CreatePart(typeof(ImportingConstructorWithCustomImportingConstructorAllowMultiple));
 
-            Assert.Equal(1, part.ImportDefinitions.Count());
+            Assert.Single(part.ImportDefinitions);
             ContractBasedImportDefinition import = part.ImportDefinitions.First() as ContractBasedImportDefinition;
             Assert.NotNull(import);
 
@@ -777,7 +777,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public void ImportDefinitions_ImportingConstructorWithCustomImportingConstructorInvalidTarget_ShouldbeIgnored()
         {
             var part = CreatePart(typeof(ImportingConstructorWithCustomImportingConstructorInvalidTarget));
-            Assert.Equal(0, part.ImportDefinitions.Count());
+            Assert.Empty(part.ImportDefinitions);
         }
 
         private Export[] CreateSimpleExports(object value)

@@ -253,7 +253,7 @@ namespace System.Text.Json.Serialization.Tests
         {
             {
                 Dictionary<string, object> obj = JsonSerializer.Deserialize<Dictionary<string, object>>(@"{""Key1"":1}");
-                Assert.Equal(1, obj.Count);
+                Assert.Single(obj);
                 JsonElement element = (JsonElement)obj["Key1"];
                 Assert.Equal(JsonValueKind.Number, element.ValueKind);
                 Assert.Equal(1, element.GetInt32());
@@ -372,7 +372,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(@"{""key"":{""Id"":10}}", json);
 
             dictionary = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             JsonElement element = (JsonElement)dictionary["key"];
             Assert.Equal(@"{""Id"":10}", element.ToString());
         }
@@ -924,7 +924,7 @@ namespace System.Text.Json.Serialization.Tests
             // We don't attempt to deserialize into dictionaries without a setter.
             string json = @"{""MyDictionary"":{""Key1"":""Value1"", ""Key2"":""Value2""}}";
             ClassWithPopulatedDictionaryAndNoSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedDictionaryAndNoSetter>(json);
-            Assert.Equal(1, obj.MyDictionary.Count);
+            Assert.Single(obj.MyDictionary);
         }
 
         [Fact]
@@ -933,7 +933,7 @@ namespace System.Text.Json.Serialization.Tests
             // We don't attempt to deserialize into dictionaries without a setter.
             string json = @"{""MyImmutableDictionary"":{""Key1"":""Value1"", ""Key2"":""Value2""}}";
             ClassWithPopulatedDictionaryAndNoSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedDictionaryAndNoSetter>(json);
-            Assert.Equal(1, obj.MyImmutableDictionary.Count);
+            Assert.Single(obj.MyImmutableDictionary);
         }
 
         public class ClassWithPopulatedDictionaryAndSetter

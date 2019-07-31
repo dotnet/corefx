@@ -20,7 +20,7 @@ namespace System.ConfigurationTests
                 Assert.Equal("appSettings", configSection.SectionInformation.Name);
                 KeyValueConfigurationElement myAdminKeyVal = new KeyValueConfigurationElement("myAdminTool", "admin.aspx");
                 KeyValueConfigurationCollection configSettings = config.AppSettings.Settings;
-                Assert.Equal(0, configSettings.AllKeys.Length);
+                Assert.Empty(configSettings.AllKeys);
                 config.AppSettings.Settings.Add(myAdminKeyVal);
                 Assert.False(configSection.SectionInformation.IsLocked);
                 config.Save();
@@ -59,7 +59,7 @@ namespace System.ConfigurationTests
         [Fact]
         public void EmptyAllKeys()
         {
-            Assert.Equal(0, new KeyValueConfigurationCollection().AllKeys.Length);
+            Assert.Empty(new KeyValueConfigurationCollection().AllKeys);
         }
 
         [Fact]

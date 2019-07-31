@@ -87,7 +87,7 @@ namespace System.IO.Compression.Tests
             string tempDir = GetTestFilePath();
             ZipFile.ExtractToDirectory(compat(zipName) + ".zip", tempDir);
             string[] results = Directory.GetFiles(tempDir, "*", SearchOption.AllDirectories);
-            Assert.Equal(1, results.Length);
+            Assert.Single(results);
             Assert.Equal(fileName, Path.GetFileName(results[0]));
         }
 
@@ -116,7 +116,7 @@ namespace System.IO.Compression.Tests
             string tempDir = GetTestFilePath();
             ZipFile.ExtractToDirectory(compat(zipName) + ".zip", tempDir);
             string[] results = Directory.GetFiles(tempDir, "*", SearchOption.AllDirectories);
-            Assert.Equal(1, results.Length);
+            Assert.Single(results);
             Assert.Equal(fileName, Path.GetFileName(results[0]));
         }
     }

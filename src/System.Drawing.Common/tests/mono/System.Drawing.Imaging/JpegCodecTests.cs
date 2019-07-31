@@ -203,7 +203,7 @@ namespace MonoTests.System.Drawing.Imaging
                 /* note: under MS flags aren't constant between executions in this case (no palette) */
                 // Assert.Equal(77960, bmp.Flags);
 
-                Assert.Equal(0, bmp.Palette.Entries.Length);
+                Assert.Empty(bmp.Palette.Entries);
             }
         }
 

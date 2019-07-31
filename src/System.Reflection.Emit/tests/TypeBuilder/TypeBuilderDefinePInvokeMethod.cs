@@ -223,7 +223,7 @@ namespace System.Reflection.Emit.Tests
             {
                 foreach (ParameterInfo pi in method.GetParameters())
                 {
-                    Assert.Equal(0, pi.GetOptionalCustomModifiers().Length);
+                    Assert.Empty(pi.GetOptionalCustomModifiers());
                 }
             }
             else
@@ -240,7 +240,7 @@ namespace System.Reflection.Emit.Tests
             {
                 foreach (ParameterInfo pi in method.GetParameters())
                 {
-                    Assert.Equal(0, pi.GetRequiredCustomModifiers().Length);
+                    Assert.Empty(pi.GetRequiredCustomModifiers());
                 }
             }
             else

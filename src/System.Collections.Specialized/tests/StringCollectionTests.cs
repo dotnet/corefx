@@ -108,7 +108,7 @@ namespace System.Collections.Specialized.Tests
         public static void Constructor_DefaultTest()
         {
             StringCollection sc = new StringCollection();
-            Assert.Equal(0, sc.Count);
+            Assert.Empty(sc);
             Assert.False(sc.Contains(null));
             Assert.False(sc.Contains(""));
         }
@@ -174,7 +174,7 @@ namespace System.Collections.Specialized.Tests
         {
             Assert.Equal(data.Length, collection.Count);
             collection.Clear();
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
         }
 
         [Theory]
@@ -255,9 +255,9 @@ namespace System.Collections.Specialized.Tests
         {
             Assert.Equal(data.Length, collection.Count);
             collection.Clear();
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
             collection.Add("one");
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
             collection.AddRange(data);
             Assert.Equal(1 + data.Length, collection.Count);
         }
@@ -519,7 +519,7 @@ namespace System.Collections.Specialized.Tests
                 Assert.False(collection.Contains(element));
                 Assert.False(((IList)collection).Contains(element));
             });
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
         }
 
         [Theory]
@@ -534,7 +534,7 @@ namespace System.Collections.Specialized.Tests
                 Assert.False(collection.Contains(element));
                 Assert.False(((IList)collection).Contains(element));
             });
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
         }
 
         [Theory]
@@ -573,7 +573,7 @@ namespace System.Collections.Specialized.Tests
                 Assert.Equal(stillPresent, collection.Contains(element));
                 Assert.Equal(stillPresent, ((IList)collection).Contains(element));
             }
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
         }
 
         [Theory]
@@ -629,7 +629,7 @@ namespace System.Collections.Specialized.Tests
                 Assert.Equal(stillPresent, collection.Contains(element));
                 Assert.Equal(stillPresent, ((IList)collection).Contains(element));
             }
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
         }
 
         [Theory]

@@ -325,7 +325,7 @@ namespace System.Reflection.Tests
 
             Type[] tpConstraints = defparams[1].GetTypeInfo().GetGenericParameterConstraints();
 
-            Assert.Equal(0, tpConstraints.Length);
+            Assert.Empty(tpConstraints);
         }
 
 

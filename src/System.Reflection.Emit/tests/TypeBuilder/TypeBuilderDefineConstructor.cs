@@ -82,7 +82,7 @@ namespace System.Reflection.Emit.Tests
             constructor.GetILGenerator().Emit(OpCodes.Ret);
 
             Type createdType = type.CreateTypeInfo().AsType();
-            Assert.Equal(1, createdType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic).Length);
+            Assert.Single(createdType.GetConstructors(BindingFlags.Static | BindingFlags.NonPublic));
         }
 
         [Fact]

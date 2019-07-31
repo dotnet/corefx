@@ -27,7 +27,7 @@ namespace System.ConfigurationTests
 
             SettingsPropertyValueCollection propertyValues = localFileSettingsProvider.GetPropertyValues(_testContext, properties);
 
-            Assert.Equal(1, propertyValues.Count);
+            Assert.Single(propertyValues);
             Assert.Null(propertyValues["PropertyName"].PropertyValue);
         }
 
@@ -45,7 +45,7 @@ namespace System.ConfigurationTests
 
             SettingsPropertyValueCollection propertyValues = localFileSettingsProvider.GetPropertyValues(_testContext, properties);
 
-            Assert.Equal(1, propertyValues.Count);
+            Assert.Single(propertyValues);
             Assert.Equal(string.Empty, propertyValues["PropertyName"].PropertyValue);
         }
     }

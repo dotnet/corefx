@@ -76,7 +76,7 @@ namespace System.IO.Compression.Tests
 
                 using (ZipArchive archive = ZipFile.OpenRead(archivePath))
                 {
-                    Assert.Equal(1, archive.Entries.Count);
+                    Assert.Single(archive.Entries);
                     Assert.StartsWith("empty1", archive.Entries[0].FullName);
                 }
             }
@@ -95,7 +95,7 @@ namespace System.IO.Compression.Tests
 
                 using (ZipArchive archive = ZipFile.OpenRead(archivePath))
                 {
-                    Assert.Equal(1, archive.Entries.Count);
+                    Assert.Single(archive.Entries);
                 }
             }
         }

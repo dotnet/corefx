@@ -57,7 +57,7 @@ namespace System.Collections.ObjectModel.Tests
 
             // Avoid using the List<T> type so that we don't have to depend on the System.Collections contract
             Type type = il.GetType();
-            Assert.Equal(1, type.GenericTypeArguments.Length);
+            Assert.Single(type.GenericTypeArguments);
             Assert.Equal(typeof(int), type.GenericTypeArguments[0]);
             Assert.Equal("System.Collections.Generic.List`1", string.Format("{0}.{1}", type.Namespace, type.Name));
         }
@@ -181,7 +181,7 @@ namespace System.Collections.ObjectModel.Tests
         {
             var collection = new ModifiableCollection<int>(s_intArray);
             collection.Clear();
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
         }
 
         [Fact]

@@ -271,7 +271,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", document.AttributeExtensions[new XmlQualifiedName("inlinecategories_name4", "xmlns")]);
                 Assert.Equal(new Uri("http://inlinecategories_url.com/"), document.BaseUri);
                 Assert.Equal(2, document.Categories.Count);
-                Assert.Equal(1, document.ElementExtensions.Count);
+                Assert.Single(document.ElementExtensions);
                 Assert.Equal(10, document.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.True(document.IsFixed);
                 Assert.Equal("inlinecategories_Language", document.Language);
@@ -290,7 +290,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", secondCategory.AttributeExtensions[new XmlQualifiedName("category_name2", "category_namespace")]);
                 Assert.Equal("category_value", secondCategory.AttributeExtensions[new XmlQualifiedName("category_name3", "category_namespace")]);
                 Assert.Equal("", secondCategory.AttributeExtensions[new XmlQualifiedName("category_name4", "xmlns")]);
-                Assert.Equal(1, secondCategory.ElementExtensions.Count);
+                Assert.Single(secondCategory.ElementExtensions);
                 Assert.Equal(10, secondCategory.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.Equal("category_name", secondCategory.Name);
                 Assert.Equal("category_scheme", secondCategory.Scheme);
@@ -360,7 +360,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("referencecategories_value", document.AttributeExtensions[new XmlQualifiedName("referencecategories_name3", "referencecategories_namespace")]);
                 Assert.Equal("", document.AttributeExtensions[new XmlQualifiedName("referencecategories_name4", "xmlns")]);
                 Assert.Equal(new Uri("http://referencecategories_url.com/"), document.BaseUri);
-                Assert.Equal(1, document.ElementExtensions.Count);
+                Assert.Single(document.ElementExtensions);
                 Assert.Equal(10, document.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.Equal("referencecategories_language", document.Language);
                 Assert.Equal(new Uri("http://referencecategories_link.com"), document.Link);

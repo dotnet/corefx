@@ -288,7 +288,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             KeyAgreeRecipientInfo r = (KeyAgreeRecipientInfo)(envelopedCms.RecipientInfos[0]);
             CryptographicAttributeObject attribute = r.OtherKeyAttribute;
             Assert.Equal(Oids.Pkcs7Data, attribute.Oid.Value);
-            Assert.Equal(1, attribute.Values.Count);
+            Assert.Single(attribute.Values);
             AsnEncodedData asnData = attribute.Values[0];
             byte[] expectedAsnData = "0403424d58".HexToByteArray();
             Assert.Equal<byte>(expectedAsnData, asnData.RawData);
@@ -369,7 +369,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms2.Decode(encodedMessage);
 
             RecipientInfoCollection recipients = ecms2.RecipientInfos;
-            Assert.Equal(1, recipients.Count);
+            Assert.Single(recipients);
             RecipientInfo recipientInfo = recipients[0];
             Assert.True(recipientInfo is KeyAgreeRecipientInfo);
             return (KeyAgreeRecipientInfo)recipientInfo;
@@ -396,7 +396,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms.Decode(encodedMessage);
 
             RecipientInfoCollection recipients = ecms.RecipientInfos;
-            Assert.Equal(1, recipients.Count);
+            Assert.Single(recipients);
             RecipientInfo recipientInfo = recipients[0];
             Assert.True(recipientInfo is KeyAgreeRecipientInfo);
             return (KeyAgreeRecipientInfo)recipientInfo;

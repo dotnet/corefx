@@ -66,7 +66,7 @@ namespace System.ComponentModel.Composition.Registration.Tests
 
             var list = new List<Attribute>();
             builder.BuildAttributes(typeof(FooImpl), ref list);
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             var att = list[0] as InheritedExportAttribute;
             Assert.NotNull(att);
         }
@@ -97,7 +97,7 @@ namespace System.ComponentModel.Composition.Registration.Tests
         {
             var list = new List<Attribute>();
             builder.BuildAttributes(typeof(FooImpl), ref list);
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
 
             return list[0] as ExportAttribute;
         }

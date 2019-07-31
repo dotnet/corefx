@@ -96,7 +96,7 @@ namespace System.Reflection.PortableExecutable.Tests
             using (var pinned = new PinnedBlob(bytes))
             {
                 var actual = PEReader.ReadDebugDirectoryEntries(pinned.CreateReader(0, DebugDirectoryEntry.Size));
-                Assert.Equal(1, actual.Length);
+                Assert.Single(actual);
                 Assert.Equal(id.Stamp, actual[0].Stamp);
                 Assert.Equal(0, actual[0].MajorVersion);
                 Assert.Equal(0, actual[0].MinorVersion);
@@ -155,7 +155,7 @@ namespace System.Reflection.PortableExecutable.Tests
             using (var pinned = new PinnedBlob(bytes))
             {
                 var actual = PEReader.ReadDebugDirectoryEntries(pinned.CreateReader(0, DebugDirectoryEntry.Size));
-                Assert.Equal(1, actual.Length);
+                Assert.Single(actual);
                 Assert.Equal(id.Stamp, actual[0].Stamp);
                 Assert.Equal(0xABCD, actual[0].MajorVersion);
                 Assert.Equal(0x504d, actual[0].MinorVersion);
@@ -191,7 +191,7 @@ namespace System.Reflection.PortableExecutable.Tests
             using (var pinned = new PinnedBlob(bytes))
             {
                 var actual = PEReader.ReadDebugDirectoryEntries(pinned.CreateReader(0, DebugDirectoryEntry.Size));
-                Assert.Equal(1, actual.Length);
+                Assert.Single(actual);
                 Assert.Equal(0u, actual[0].Stamp);
                 Assert.Equal(0, actual[0].MajorVersion);
                 Assert.Equal(0, actual[0].MinorVersion);
@@ -296,7 +296,7 @@ namespace System.Reflection.PortableExecutable.Tests
             using (var pinned = new PinnedBlob(bytes))
             {
                 var actual = PEReader.ReadDebugDirectoryEntries(pinned.CreateReader(0, DebugDirectoryEntry.Size));
-                Assert.Equal(1, actual.Length);
+                Assert.Single(actual);
                 Assert.Equal(0u, actual[0].Stamp);
                 Assert.Equal(0x0100, actual[0].MajorVersion);
                 Assert.Equal(0x0100, actual[0].MinorVersion);

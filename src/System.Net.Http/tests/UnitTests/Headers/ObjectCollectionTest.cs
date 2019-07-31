@@ -42,7 +42,7 @@ namespace System.Net.Http.Tests
             Assert.Throws<InvalidOperationException>(() => { c.Add(null); });
             Assert.Throws<InvalidOperationException>(() => { c[0] = null; });
 
-            Assert.Equal(1, c.Count);
+            Assert.Single(c);
             Assert.Equal("value2", c[0]);
         }
     }

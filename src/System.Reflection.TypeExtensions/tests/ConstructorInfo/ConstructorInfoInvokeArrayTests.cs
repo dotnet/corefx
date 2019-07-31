@@ -13,7 +13,7 @@ namespace System.Reflection.Tests
         {
             Type type = Type.GetType("System.Object[]");
             ConstructorInfo[] constructors = type.GetConstructors();
-            Assert.Equal(1, constructors.Length);
+            Assert.Single(constructors);
 
             ConstructorInfo constructor = constructors[0];
             int[] blength = new int[] { -100, -9, -1 };
@@ -277,7 +277,7 @@ namespace System.Reflection.Tests
 
                                 if (validLengths1[j] == 0)
                                 {
-                                    Assert.Equal(0, arr.Length);
+                                    Assert.Empty(arr);
                                 }
                                 else
                                 {

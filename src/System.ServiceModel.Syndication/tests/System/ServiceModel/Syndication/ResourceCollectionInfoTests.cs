@@ -151,7 +151,7 @@ namespace System.ServiceModel.Syndication.Tests
         {
             Collection<string> collection = new ResourceCollectionInfo().Accepts;
             collection.Add("value");
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
         }
 
         [Fact]
@@ -185,7 +185,7 @@ namespace System.ServiceModel.Syndication.Tests
         {
             Collection<CategoriesDocument> collection = new ResourceCollectionInfo().Categories;
             collection.Add(new InlineCategoriesDocument());
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
         }
 
         [Fact]

@@ -196,8 +196,8 @@ namespace System.ComponentModel.Composition
             var filterExports = new FilterExports();
             container.ComposeParts(filterExports);
 
-            Assert.Equal(1, filterExports.OnlineOnly.Count);
-            Assert.Equal(1, filterExports.OnlineOnly2.Count);
+            Assert.Single(filterExports.OnlineOnly);
+            Assert.Single(filterExports.OnlineOnly2);
         }
 
         public interface IOrderMetadata
@@ -350,7 +350,7 @@ namespace System.ComponentModel.Composition
 
             container.ComposeParts(dynamicExports);
 
-            Assert.Equal(1, dynamicExports.DynamicCollection.Count);
+            Assert.Single(dynamicExports.DynamicCollection);
 
             dynamicExports.DynamicCollection.IncludeDynamic = true;
 
@@ -392,7 +392,7 @@ namespace System.ComponentModel.Composition
 
             container.ComposeParts(dynamicExports);
 
-            Assert.Equal(1, dynamicExports.DynamicCollection.Count);
+            Assert.Single(dynamicExports.DynamicCollection);
 
             dynamicExports.IncludeDynamic = true;
 

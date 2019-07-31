@@ -57,7 +57,7 @@ namespace System.ConfigurationTests
             {
                 var config = ConfigurationManager.OpenExeConfiguration(temp.ExePath);
                 UriSection uriSection = (UriSection)config.GetSection("uri");
-                Assert.Equal(1, uriSection.SchemeSettings.Count);
+                Assert.Single(uriSection.SchemeSettings);
                 SchemeSettingElement schemeSettingElement = uriSection.SchemeSettings[0];
                 Assert.Equal("ftp", schemeSettingElement.Name);
                 Assert.Equal(GenericUriParserOptions.DontCompressPath, schemeSettingElement.GenericUriParserOptions);

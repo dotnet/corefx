@@ -13,7 +13,7 @@ namespace System.ComponentModel.Design.Tests
         public void Ctor_Default()
         {
             var collection = new DesignerVerbCollection();
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
             Assert.Empty(collection);
         }
 
@@ -76,7 +76,7 @@ namespace System.ComponentModel.Design.Tests
             var collection = new DesignerVerbCollection { new DesignerVerb("Text", null) };
             collection[0] = verb;
 
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
             Assert.Same(verb, collection[0]);
 
             collection[0] = null;

@@ -503,7 +503,7 @@ namespace DispatchProxyTests
             {
                 Assert.True(mi.IsGenericMethod);
                 Assert.False(mi.IsGenericMethodDefinition);
-                Assert.Equal(1, mi.GetParameters().Length);
+                Assert.Single(mi.GetParameters());
                 Assert.Equal(typeof(T), mi.GetParameters()[0].ParameterType);
                 Assert.Equal(typeof(T), mi.ReturnType);
                 return a[0];

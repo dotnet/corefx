@@ -886,7 +886,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.indexer.genclas
                 }
             };
 
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             Assert.Null(list[0]._field);
             Assert.Equal(1, MemberClassWithClassConstraint<string>.t_status);
         }

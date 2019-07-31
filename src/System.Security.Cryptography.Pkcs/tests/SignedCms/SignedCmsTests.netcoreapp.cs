@@ -55,7 +55,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
                 cms.ComputeSignature(cmsSigner);
                 cms.CheckSignature(true);
-                Assert.Equal(1, cms.SignerInfos.Count);
+                Assert.Single(cms.SignerInfos);
                 Assert.Equal(pubCert, cms.SignerInfos[0].Certificate);
             }
         }
@@ -344,7 +344,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             cms.AddCertificate(signerCert);
             cms.CheckSignature(true);
 
-            Assert.Equal(1, cms.Certificates.Count);
+            Assert.Single(cms.Certificates);
         }
 
         [Fact]
@@ -493,7 +493,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 cms.ComputeSignature(signer);
                 cms.CheckSignature(true);
 
-                Assert.Equal(1, cms.SignerInfos.Count);
+                Assert.Single(cms.SignerInfos);
                 Assert.Equal(pubCert, cms.SignerInfos[0].Certificate);
             }
         }
@@ -524,13 +524,13 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 };
 
                 cms.ComputeSignature(cmsSigner);
-                Assert.Equal(1, cms.SignerInfos.Count);
+                Assert.Single(cms.SignerInfos);
                 Assert.Equal(pubCert, cms.SignerInfos[0].Certificate);
 
                 cms.SignerInfos[0].ComputeCounterSignature(cmsCounterSigner);
                 cms.CheckSignature(true);
 
-                Assert.Equal(1, cms.SignerInfos[0].CounterSignerInfos.Count);
+                Assert.Single(cms.SignerInfos[0].CounterSignerInfos);
                 Assert.Equal(counterSignerPubCert, cms.SignerInfos[0].CounterSignerInfos[0].Certificate);
             }
         }

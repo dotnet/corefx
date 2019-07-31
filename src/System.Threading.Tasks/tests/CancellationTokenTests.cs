@@ -275,7 +275,7 @@ namespace System.Threading.Tasks.Tests
             reg4.Dispose();
             tokenSource.Cancel();
 
-            Assert.Equal(1, output.Count);
+            Assert.Single(output);
             Assert.Equal("action1", output[0]);
 
             // and prove this is what normal events do...
@@ -291,7 +291,7 @@ namespace System.Threading.Tasks.Tests
             AddAndRemoveDelegates_TestEvent -= handler2;
             AddAndRemoveDelegates_TestEvent -= handler1;
             AddAndRemoveDelegates_TestEvent(null, EventArgs.Empty);
-            Assert.Equal(1, output.Count);
+            Assert.Single(output);
             Assert.Equal("handler1", output[0]);
         }
 
@@ -1102,7 +1102,7 @@ namespace System.Threading.Tasks.Tests
             Assert.True(testContext.DidSendOccur,
                "EnlistWithSyncContext_BeforeCancel_ThrowingExceptionInSyncContextDelegate:  the delegate should have been called via Send to SyncContext.");
             Assert.NotNull(caughtException);
-            Assert.Equal(1, caughtException.InnerExceptions.Count);
+            Assert.Single(caughtException.InnerExceptions);
             Assert.True(caughtException.InnerExceptions[0] is ArgumentException,
                "EnlistWithSyncContext_BeforeCancel_ThrowingExceptionInSyncContextDelegate:  The inner exception should be an ArgumentException.");
 
@@ -1196,7 +1196,7 @@ namespace System.Threading.Tasks.Tests
                 caughtEx2 = (AggregateException)ex;
             }
             Assert.NotNull(caughtEx2);
-            Assert.Equal(1, caughtEx2.InnerExceptions.Count);
+            Assert.Single(caughtEx2.InnerExceptions);
 
             // clean up
             SetSynchronizationContext(prevailingSyncCtx);

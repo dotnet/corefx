@@ -49,7 +49,7 @@ namespace System.ComponentModel.Composition
 
             var batch = new CompositionBatch(null, partsToRemove);
 
-            Assert.Equal(0, batch.PartsToAdd.Count);
+            Assert.Empty(batch.PartsToAdd);
             Assert.Equal(partsToRemove.Length, batch.PartsToRemove.Count);
         }
 
@@ -61,7 +61,7 @@ namespace System.ComponentModel.Composition
             var batch = new CompositionBatch(partsToAdd, null);
 
             Assert.Equal(partsToAdd.Length, batch.PartsToAdd.Count);
-            Assert.Equal(0, batch.PartsToRemove.Count);
+            Assert.Empty(batch.PartsToRemove);
         }
 
         [Fact]
@@ -96,7 +96,7 @@ namespace System.ComponentModel.Composition
 
             batch.AddPart(part);
 
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
             Assert.Same(part, batch.PartsToAdd[0]);
 
             Assert.Empty(batch.PartsToRemove);
@@ -121,7 +121,7 @@ namespace System.ComponentModel.Composition
 
             batch.RemovePart(part);
 
-            Assert.Equal(1, batch.PartsToRemove.Count);
+            Assert.Single(batch.PartsToRemove);
             Assert.Same(part, batch.PartsToRemove[0]);
 
             Assert.Empty(batch.PartsToAdd);
@@ -151,7 +151,7 @@ namespace System.ComponentModel.Composition
             ReadOnlyCollection<ComposablePart> partsToAddBeforeCopy = batch.PartsToAdd;
             Assert.Same(partsToAddBeforeCopy, batch.PartsToAdd);
 
-            Assert.Equal(1, partsToAddBeforeCopy.Count);
+            Assert.Single(partsToAddBeforeCopy);
             Assert.True(partsToAddBeforeCopy.Contains(part1));
 
             batch.AddPart(part2);
@@ -178,7 +178,7 @@ namespace System.ComponentModel.Composition
             ReadOnlyCollection<ComposablePart> partsToRemoveBeforeCopy = batch.PartsToRemove;
             Assert.Same(partsToRemoveBeforeCopy, batch.PartsToRemove);
 
-            Assert.Equal(1, partsToRemoveBeforeCopy.Count);
+            Assert.Single(partsToRemoveBeforeCopy);
             Assert.True(partsToRemoveBeforeCopy.Contains(part1));
 
             batch.RemovePart(part2);
@@ -232,7 +232,7 @@ namespace System.ComponentModel.Composition
             var export = ExportFactory.Create("Contract", (object)null);
 
             batch.AddExport(export);
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             var result = this.GetSingleExport(batch.PartsToAdd[0], "Contract");
 
@@ -247,7 +247,7 @@ namespace System.ComponentModel.Composition
 
             batch.AddExportedValue<string>((string)null);
 
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
             var result = this.GetSingleLazy<string>(batch.PartsToAdd[0]);
 
             Assert.NotNull(result);
@@ -261,7 +261,7 @@ namespace System.ComponentModel.Composition
 
             batch.AddExportedValue("Contract", (string)null);
 
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
             var result = this.GetSingleExport(batch.PartsToAdd[0], "Contract");
 
             Assert.NotNull(result);
@@ -277,7 +277,7 @@ namespace System.ComponentModel.Composition
             Assert.Equal(0, export.Metadata.Count);
 
             batch.AddExport(export);
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             var result = this.GetSingleExport(batch.PartsToAdd[0], "Contract");
 
@@ -290,7 +290,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             batch.AddExportedValue<string>("Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             var result = this.GetSingleLazy<string>(batch.PartsToAdd[0]);
 
@@ -303,7 +303,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             batch.AddExportedValue("Contract", "Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             var result = this.GetSingleExport(batch.PartsToAdd[0], "Contract");
 
@@ -317,7 +317,7 @@ namespace System.ComponentModel.Composition
 
             var export = ExportFactory.Create("Contract", "Value");
             var part = batch.AddExport(export);
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Equal("Value", this.GetSingleExport(batch.PartsToAdd[0], "Contract").Value);
             Assert.True(batch.PartsToAdd.Contains(part));
@@ -329,7 +329,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue<string>("Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Equal("Value", this.GetSingleLazy<string>(batch.PartsToAdd[0]).Value);
             Assert.True(batch.PartsToAdd.Contains(part));
@@ -341,7 +341,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue("Contract", "Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Equal("Value", this.GetSingleExport(batch.PartsToAdd[0], "Contract").Value);
             Assert.True(batch.PartsToAdd.Contains(part));
@@ -354,7 +354,7 @@ namespace System.ComponentModel.Composition
             var export = ExportFactory.Create("Contract", "Value");
 
             batch.AddExportedValue<object>(export);
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Same(export, this.GetSingleLazy<object>(batch.PartsToAdd[0]).Value);
         }
@@ -366,7 +366,7 @@ namespace System.ComponentModel.Composition
             var export = ExportFactory.Create("Contract", "Value");
 
             batch.AddExportedValue(export);
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Same(export, this.GetSingleLazy<Export>(batch.PartsToAdd[0]).Value);
         }
@@ -378,7 +378,7 @@ namespace System.ComponentModel.Composition
             var export = ExportFactory.Create("Contract", "Value");
 
             var part = batch.AddExport(export);
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("definition", () =>
             {
@@ -394,7 +394,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddExport(export);
             var definition = ExportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentException>("definition", () =>
             {
@@ -409,7 +409,7 @@ namespace System.ComponentModel.Composition
             var export = ExportFactory.Create("Contract", "Value");
 
             var part = batch.AddExport(export);
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("definition", () =>
             {
@@ -425,7 +425,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddExport(export);
             var definition = ImportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("exports", () =>
             {
@@ -441,7 +441,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddExport(export);
             var definition = ImportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentException>("exports", () =>
             {
@@ -457,7 +457,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddExport(export);
             var definition = ImportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentException>("definition", () =>
             {
@@ -475,7 +475,7 @@ namespace System.ComponentModel.Composition
             var export = ExportFactory.Create("Contract", "Value", metadata);
 
             var part = batch.AddExport(export);
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             var definition = part.ExportDefinitions.Single();
 
@@ -490,9 +490,9 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue<string>("Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
-            Assert.Equal(0, part.ImportDefinitions.Count());
+            Assert.Empty(part.ImportDefinitions);
         }
 
         [Fact]
@@ -501,7 +501,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue<string>("Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Equal(0, part.Metadata.Count);
         }
@@ -512,7 +512,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue<string>("Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("definition", () =>
             {
@@ -527,7 +527,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddExportedValue<string>("Value");
             var definition = ExportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentException>("definition", () =>
             {
@@ -541,7 +541,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue<string>("Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("definition", () =>
             {
@@ -556,7 +556,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddExportedValue<string>("Value");
             var definition = ImportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("exports", () =>
             {
@@ -585,7 +585,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddExportedValue<string>("Value");
             var definition = ImportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentException>("definition", () =>
             {
@@ -599,7 +599,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue<string>("Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             var definition = part.ExportDefinitions.Single();
 
@@ -614,9 +614,9 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue("Contract", "Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
-            Assert.Equal(0, part.ImportDefinitions.Count());
+            Assert.Empty(part.ImportDefinitions);
         }
 
         [Fact]
@@ -625,7 +625,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue("Contract", "Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Equal(0, part.Metadata.Count);
         }
@@ -636,7 +636,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue("Contract", "Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("definition", () =>
             {
@@ -651,7 +651,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddExportedValue("Contract", "Value");
             var definition = ExportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentException>("definition", () =>
             {
@@ -665,7 +665,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue("Contract", "Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("definition", () =>
             {
@@ -680,7 +680,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddExportedValue("Contract", "Value");
             var definition = ImportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("exports", () =>
             {
@@ -695,7 +695,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddExportedValue("Contract", "Value");
             var definition = ImportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentException>("exports", () =>
             {
@@ -710,7 +710,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddExportedValue("Contract", "Value");
             var definition = ImportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentException>("definition", () =>
             {
@@ -724,7 +724,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddExportedValue("Contract", "Value");
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             var definition = part.ExportDefinitions.Single();
 
@@ -750,7 +750,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddPart(new Int32Importer());
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("definition", () =>
             {
@@ -765,7 +765,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddPart(new Int32Importer());
             var definition = ExportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentException>("definition", () =>
             {
@@ -779,7 +779,7 @@ namespace System.ComponentModel.Composition
             CompositionBatch batch = new CompositionBatch();
 
             var part = batch.AddPart(new Int32Importer());
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("definition", () =>
             {
@@ -794,7 +794,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddPart(new Int32Importer());
             var definition = ImportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentNullException>("exports", () =>
             {
@@ -809,7 +809,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddPart(new Int32Importer());
             var definition = part.ImportDefinitions.First();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentException>("exports", () =>
             {
@@ -824,7 +824,7 @@ namespace System.ComponentModel.Composition
 
             var part = batch.AddPart(new Int32Importer());
             var definition = ImportDefinitionFactory.Create();
-            Assert.Equal(1, batch.PartsToAdd.Count);
+            Assert.Single(batch.PartsToAdd);
 
             Assert.Throws<ArgumentException>("definition", () =>
             {
@@ -841,8 +841,8 @@ namespace System.ComponentModel.Composition
         {
             Assert.NotNull(part);
             Assert.Equal(0, part.Metadata.Count);
-            Assert.Equal(1, part.ExportDefinitions.Count());
-            Assert.Equal(0, part.ImportDefinitions.Count());
+            Assert.Single(part.ExportDefinitions);
+            Assert.Empty(part.ImportDefinitions);
             ExportDefinition exportDefinition = part.ExportDefinitions.First();
             Assert.Equal(contractName, exportDefinition.ContractName);
 

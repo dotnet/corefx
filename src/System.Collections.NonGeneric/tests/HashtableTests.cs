@@ -49,10 +49,10 @@ namespace System.Collections.Tests
         {
             // No exception
             var hash1 = new ComparableHashtable(new Hashtable());
-            Assert.Equal(0, hash1.Count);
+            Assert.Empty(hash1);
 
             hash1 = new ComparableHashtable(new Hashtable(new Hashtable(new Hashtable(new Hashtable(new Hashtable())))));
-            Assert.Equal(0, hash1.Count);
+            Assert.Empty(hash1);
 
             Hashtable hash2 = Helpers.CreateIntHashtable(100);
             hash1 = new ComparableHashtable(hash2);
@@ -71,10 +71,10 @@ namespace System.Collections.Tests
         {
             // No exception
             var hash1 = new ComparableHashtable(new Hashtable(), CaseInsensitiveHashCodeProvider.DefaultInvariant, StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(0, hash1.Count);
+            Assert.Empty(hash1);
 
             hash1 = new ComparableHashtable(new Hashtable(new Hashtable(new Hashtable(new Hashtable(new Hashtable())))), CaseInsensitiveHashCodeProvider.DefaultInvariant, StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(0, hash1.Count);
+            Assert.Empty(hash1);
 
             Hashtable hash2 = Helpers.CreateIntHashtable(100);
             hash1 = new ComparableHashtable(hash2, CaseInsensitiveHashCodeProvider.DefaultInvariant, StringComparer.OrdinalIgnoreCase);
@@ -138,11 +138,11 @@ namespace System.Collections.Tests
         {
             // No exception
             var hash1 = new ComparableHashtable(new Hashtable(), 1f, CaseInsensitiveHashCodeProvider.DefaultInvariant, StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(0, hash1.Count);
+            Assert.Empty(hash1);
 
             hash1 = new ComparableHashtable(new Hashtable(new Hashtable(new Hashtable(new Hashtable(new Hashtable(), 1f), 1f), 1f), 1f), 1f,
                 CaseInsensitiveHashCodeProvider.DefaultInvariant, StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(0, hash1.Count);
+            Assert.Empty(hash1);
 
             Hashtable hash2 = Helpers.CreateIntHashtable(100);
             hash1 = new ComparableHashtable(hash2, 1f, CaseInsensitiveHashCodeProvider.DefaultInvariant, StringComparer.OrdinalIgnoreCase);
@@ -168,10 +168,10 @@ namespace System.Collections.Tests
         {
             // No exception
             var hash1 = new ComparableHashtable(new Hashtable(), 1f);
-            Assert.Equal(0, hash1.Count);
+            Assert.Empty(hash1);
 
             hash1 = new ComparableHashtable(new Hashtable(new Hashtable(new Hashtable(new Hashtable(new Hashtable(), 1f), 1f), 1f), 1f), 1f);
-            Assert.Equal(0, hash1.Count);
+            Assert.Empty(hash1);
 
             Hashtable hash2 = Helpers.CreateIntHashtable(100);
             hash1 = new ComparableHashtable(hash2, 1f);
@@ -186,10 +186,10 @@ namespace System.Collections.Tests
             {
                 // No exception
                 var hash1 = new ComparableHashtable(new Hashtable(), null);
-                Assert.Equal(0, hash1.Count);
+                Assert.Empty(hash1);
 
                 hash1 = new ComparableHashtable(new Hashtable(new Hashtable(new Hashtable(new Hashtable(new Hashtable(), null), null), null), null), null);
-                Assert.Equal(0, hash1.Count);
+                Assert.Empty(hash1);
 
                 // Null comparer
                 Hashtable hash2 = Helpers.CreateIntHashtable(100);
@@ -304,11 +304,11 @@ namespace System.Collections.Tests
             RemoteExecutor.Invoke(() => {
                 // No exception
                 var hash1 = new ComparableHashtable(new Hashtable(), 1f, null);
-                Assert.Equal(0, hash1.Count);
+                Assert.Empty(hash1);
 
                 hash1 = new ComparableHashtable(new Hashtable(new Hashtable(
                     new Hashtable(new Hashtable(new Hashtable(), 1f, null), 1f, null), 1f, null), 1f, null), 1f, null);
-                Assert.Equal(0, hash1.Count);
+                Assert.Empty(hash1);
 
                 // Null comparer
                 Hashtable hash2 = Helpers.CreateIntHashtable(100);
@@ -472,7 +472,7 @@ namespace System.Collections.Tests
                 hash.Remove(number);
             }
 
-            Assert.Equal(0, hash.Count);
+            Assert.Empty(hash);
         }
 
         [Fact]
@@ -893,7 +893,7 @@ namespace System.Collections.Tests
         {
             if (hash2 == null)
             {
-                Assert.Equal(0, hash1.Count);
+                Assert.Empty(hash1);
             }
             else
             {
@@ -1174,7 +1174,7 @@ namespace System.Collections.Tests
 
             Task.WaitAll(workers);
 
-            Assert.Equal(0, _hash2.Count);
+            Assert.Empty(_hash2);
         }
 
         private void AddElements(string strName)

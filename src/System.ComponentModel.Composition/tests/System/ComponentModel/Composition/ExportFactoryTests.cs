@@ -93,8 +93,8 @@ namespace Tests.Integration
                     VerifyExportFactory(this.IdCreatorsTMProperty[0])
                 };
 
-                Assert.Equal(1, this.IdCreatorsTProperty.Length);
-                Assert.Equal(1, this.IdCreatorsTMProperty.Length);
+                Assert.Single(this.IdCreatorsTProperty);
+                Assert.Single(this.IdCreatorsTMProperty);
 
                 Assert.Equal(ids.Count(), new HashSet<int>(ids).Count());
             }
@@ -192,7 +192,7 @@ namespace Tests.Integration
 
             var fooFactories = container.GetExportedValue<ManyExportFactoryImporter>();
 
-            Assert.Equal(1, fooFactories.FooFactories.Length);
+            Assert.Single(fooFactories.FooFactories);
 
             aggCat.Catalogs.Add(new TypeCatalog(typeof(Foo)));
 
@@ -236,9 +236,9 @@ namespace Tests.Integration
             Assert.NotNull(part.FooCreatorNonShared);
             Assert.NotNull(part.FooCreatorShared);
 
-            Assert.Equal(1, part.FooCreatorManyAny.Length);
-            Assert.Equal(1, part.FooCreatorManyNonShared.Length);
-            Assert.Equal(1, part.FooCreatorManyShared.Length);
+            Assert.Single(part.FooCreatorManyAny);
+            Assert.Single(part.FooCreatorManyNonShared);
+            Assert.Single(part.FooCreatorManyShared);
         }
 
         public class ExportFactoryImportRequiredMetadata
@@ -259,8 +259,8 @@ namespace Tests.Integration
 
             container.SatisfyImportsOnce(part);
 
-            Assert.Equal(1, part.FooCreator.Length);
-            Assert.Equal(0, part.FooCreatorWithMetadata.Length);
+            Assert.Single(part.FooCreator);
+            Assert.Empty(part.FooCreatorWithMetadata);
         }
 
         [Export(typeof(Foo))]
@@ -281,7 +281,7 @@ namespace Tests.Integration
 
             container.SatisfyImportsOnce(part);
 
-            Assert.Equal(0, part.FooCreator.Length);
+            Assert.Empty(part.FooCreator);
         }
 
         [Fact]
@@ -345,12 +345,12 @@ namespace Tests.Integration
             var aggCatalog = new AggregateCatalog(importTypeCat);
             var container = new CompositionContainer(aggCatalog);
             var exports = container.GetExports<PartImporter<SimpleExport>>();
-            Assert.Equal(0, exports.Count());
+            Assert.Empty(exports);
 
             aggCatalog.Catalogs.Add(new TypeCatalog(typeof(SimpleExport)));
 
             exports = container.GetExports<PartImporter<SimpleExport>>();
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
         }
 
         private static CompositionContainer CreateWithAttributedCatalog(params Type[] types)

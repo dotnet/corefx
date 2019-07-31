@@ -48,7 +48,7 @@ namespace System.Collections.Specialized.Tests
             if (count == 0)
             {
                 collection.CopyTo(arr, count);
-                Assert.Equal(0, arr.Length);
+                Assert.Empty(arr);
                 return;
             }
 

@@ -29,7 +29,7 @@ namespace System.Globalization.Tests
         {
             ChineseLunisolarCalendar cal3 = new ChineseLunisolarCalendar();
             int[] eras = cal3.Eras;
-            Assert.Equal(1, eras.Length);
+            Assert.Single(eras);
         }
 
         [Fact]
@@ -57,14 +57,14 @@ namespace System.Globalization.Tests
         public static void KoreanLunisolarTest()
         {
             KoreanLunisolarCalendar kls = new KoreanLunisolarCalendar();
-            Assert.Equal(1, kls.Eras.Length);
+            Assert.Single(kls.Eras);
         }
 
         [Fact]
         public static void TaiwanLunisolarTest()
         {
             TaiwanLunisolarCalendar tc = new TaiwanLunisolarCalendar();
-            Assert.Equal(1, tc.Eras.Length);
+            Assert.Single(tc.Eras);
         }
 
         public static IEnumerable<object[]> Calendars_TestData()

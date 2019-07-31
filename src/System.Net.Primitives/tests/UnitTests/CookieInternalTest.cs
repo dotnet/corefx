@@ -25,7 +25,7 @@ namespace NetPrimitivesUnitTests
             container.Add(uri, cookie);
 
             var cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
             Assert.True(cookies[CookieName].DomainImplicit);
         }
 
@@ -38,7 +38,7 @@ namespace NetPrimitivesUnitTests
             container.Add(uri, cookie1);
 
             var cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
             Assert.False(cookies[CookieName].DomainImplicit);
         }
 

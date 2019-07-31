@@ -69,7 +69,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             result = JsonSerializer.Deserialize<ImmutableArray<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -136,7 +136,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             result = JsonSerializer.Deserialize<IImmutableList<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
 
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIImmutableListWrapper>(@"[""1"",""2""]"));
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIImmutableListWrapper>(@"[]"));
@@ -203,7 +203,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             result = JsonSerializer.Deserialize<IImmutableStack<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
 
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIImmutableStackWrapper>(@"[""1"",""2""]"));
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIImmutableStackWrapper>(@"[]"));
@@ -266,7 +266,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             result = JsonSerializer.Deserialize<IImmutableQueue<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
 
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIImmutableQueueWrapper>(@"[""1"",""2""]"));
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIImmutableQueueWrapper>(@"[]"));
@@ -286,7 +286,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            Assert.Equal(0, expected.Count);
+            Assert.Empty(expected);
         }
 
         [Fact]
@@ -303,7 +303,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            Assert.Equal(0, expected.Count);
+            Assert.Empty(expected);
         }
 
         [Fact]
@@ -320,7 +320,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            Assert.Equal(0, expected.Count);
+            Assert.Empty(expected);
         }
 
         [Fact]
@@ -334,10 +334,10 @@ namespace System.Text.Json.Serialization.Tests
                 expected.Remove(i);
             }
 
-            Assert.Equal(0, expected.Count);
+            Assert.Empty(expected);
 
             result = JsonSerializer.Deserialize<IImmutableSet<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
 
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIImmutableSetWrapper>(@"[""1"",""2""]"));
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringIImmutableSetWrapper>(@"[]"));
@@ -357,7 +357,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            Assert.Equal(0, expected.Count);
+            Assert.Empty(expected);
         }
 
         [Fact]
@@ -374,7 +374,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            Assert.Equal(0, expected.Count);
+            Assert.Empty(expected);
         }
 
         [Fact]
@@ -391,7 +391,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
-            Assert.Equal(0, expected.Count);
+            Assert.Empty(expected);
         }
 
         [Fact]
@@ -405,10 +405,10 @@ namespace System.Text.Json.Serialization.Tests
                 expected.Remove(i);
             }
 
-            Assert.Equal(0, expected.Count);
+            Assert.Empty(expected);
 
             result = JsonSerializer.Deserialize<ImmutableHashSet<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -468,7 +468,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             result = JsonSerializer.Deserialize<ImmutableList<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -532,7 +532,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             result = JsonSerializer.Deserialize<ImmutableStack<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -592,7 +592,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             result = JsonSerializer.Deserialize<ImmutableQueue<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -622,7 +622,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             result = JsonSerializer.Deserialize<ImmutableSortedSet<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]

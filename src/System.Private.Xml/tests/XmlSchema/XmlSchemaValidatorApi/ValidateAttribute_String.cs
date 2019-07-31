@@ -151,7 +151,7 @@ namespace System.Xml.Tests
 
             atts.Clear();
             val.GetUnspecifiedDefaultAttributes(atts);
-            Assert.Equal(0, atts.Count);
+            Assert.Empty(atts);
 
             return;
         }

@@ -75,7 +75,7 @@ namespace System.Collections.Tests
         {
             IEqualityComparer<TKey> comparer = GetKeyIEqualityComparer();
             Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>(count, comparer);
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
             Assert.Equal(comparer, dictionary.Comparer);
         }
 

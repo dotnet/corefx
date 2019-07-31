@@ -81,7 +81,7 @@ namespace System.Net.NameResolution.Tests
             IAsyncResult asyncObject = Dns.BeginGetHostAddresses("0.0.1.1", null, null);
             IPAddress[] results = Dns.EndGetHostAddresses(asyncObject);
 
-            Assert.Equal(1, results.Length);
+            Assert.Single(results);
             Assert.Equal(IPAddress.Parse("0.0.1.1"), results[0]);
         }
 
@@ -98,7 +98,7 @@ namespace System.Net.NameResolution.Tests
         public void DnsGetHostAddresses_IPv4String_ReturnsSameIP()
         {
             IPAddress[] addresses = Dns.GetHostAddresses(IPAddress.Loopback.ToString());
-            Assert.Equal(1, addresses.Length);
+            Assert.Single(addresses);
             Assert.Equal(IPAddress.Loopback, addresses[0]);
         }
 
@@ -106,7 +106,7 @@ namespace System.Net.NameResolution.Tests
         public void DnsGetHostAddresses_IPv6String_ReturnsSameIP()
         {
             IPAddress[] addresses = Dns.GetHostAddresses(IPAddress.IPv6Loopback.ToString());
-            Assert.Equal(1, addresses.Length);
+            Assert.Single(addresses);
             Assert.Equal(IPAddress.IPv6Loopback, addresses[0]);
         }
 

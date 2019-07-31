@@ -48,9 +48,9 @@ namespace System.ComponentModel.Composition.AttributedModel
             batch.AddParts(new object());
             container.Compose(batch);
 
-            Assert.Equal(1, entrypoint.LowerCaseStrings.Count);
+            Assert.Single(entrypoint.LowerCaseStrings);
             Assert.Equal(1, entrypoint.ImportCompletedCallCount);
-            Assert.Equal(1, entrypoint.UpperCaseStrings.Count);
+            Assert.Single(entrypoint.UpperCaseStrings);
             Assert.Equal("abc", entrypoint.LowerCaseStrings[0].Value.String);
             Assert.Equal("ABC", entrypoint.UpperCaseStrings[0]);
         }
@@ -65,9 +65,9 @@ namespace System.ComponentModel.Composition.AttributedModel
             batch.AddParts(new LowerCaseString("abc"), entrypoint);
             container.Compose(batch);
 
-            Assert.Equal(1, entrypoint.LowerCaseStrings.Count);
+            Assert.Single(entrypoint.LowerCaseStrings);
             Assert.Equal(1, entrypoint.ImportCompletedCallCount);
-            Assert.Equal(1, entrypoint.UpperCaseStrings.Count);
+            Assert.Single(entrypoint.UpperCaseStrings);
             Assert.Equal("abc", entrypoint.LowerCaseStrings[0].Value.String);
             Assert.Equal("ABC", entrypoint.UpperCaseStrings[0]);
 
@@ -106,9 +106,9 @@ namespace System.ComponentModel.Composition.AttributedModel
             container.Compose(batch);
             container.SatisfyImportsOnce(entrypointPart);
 
-            Assert.Equal(1, entrypoint.LowerCaseStrings.Count);
+            Assert.Single(entrypoint.LowerCaseStrings);
             Assert.Equal(1, entrypoint.ImportCompletedCallCount);
-            Assert.Equal(1, entrypoint.UpperCaseStrings.Count);
+            Assert.Single(entrypoint.UpperCaseStrings);
             Assert.Equal("abc", entrypoint.LowerCaseStrings[0].Value.String);
             Assert.Equal("ABC", entrypoint.UpperCaseStrings[0]);
 
@@ -117,9 +117,9 @@ namespace System.ComponentModel.Composition.AttributedModel
             container.Compose(batch);
             container.SatisfyImportsOnce(entrypointPart);
 
-            Assert.Equal(1, entrypoint.LowerCaseStrings.Count);
+            Assert.Single(entrypoint.LowerCaseStrings);
             Assert.Equal(1, entrypoint.ImportCompletedCallCount);
-            Assert.Equal(1, entrypoint.UpperCaseStrings.Count);
+            Assert.Single(entrypoint.UpperCaseStrings);
             Assert.Equal("abc", entrypoint.LowerCaseStrings[0].Value.String);
             Assert.Equal("ABC", entrypoint.UpperCaseStrings[0]);
 
@@ -318,7 +318,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             Assert.True(notifyee.NeedRefresh);
             Assert.Equal(3, notifyee.Imports.Count);
             Assert.Equal(0, NotifyImportExportee.InstanceCount);
-            Assert.Equal(0, notifyee.realImports.Count);
+            Assert.Empty(notifyee.realImports);
             Assert.Equal(2, notifyee.RealImports.Count);
             Assert.Equal(1, notifyee.RealImports[0].Id);
             Assert.Equal(3, notifyee.RealImports[1].Id);

@@ -427,7 +427,7 @@ namespace System.Collections.Concurrent.Tests
                 mre.WaitOne();
             }
 
-            Assert.Equal(0, dict.Count);
+            Assert.Empty(dict);
 
             for (int i = 0; i < removesPerThread; i++)
             {
@@ -463,8 +463,8 @@ namespace System.Collections.Concurrent.Tests
             Assert.False(col.Remove(new KeyValuePair<int, int>(99, -99)), "Should not remove the key/value pair which has been removed");
 
             // And that the dictionary is empty. We will check the count in a few different ways:
-            Assert.Equal(0, dict.Count);
-            Assert.Equal(0, dict.ToArray().Length);
+            Assert.Empty(dict);
+            Assert.Empty(dict.ToArray());
         }
 
         [Fact]
@@ -928,7 +928,7 @@ namespace System.Collections.Concurrent.Tests
             Assert.Equal(10, dictionary.Count);
 
             dictionary.Clear();
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
 
             int item;
             Assert.False(dictionary.TryRemove(1, out item), "TestClear: FAILED.  TryRemove succeeded after Clear");

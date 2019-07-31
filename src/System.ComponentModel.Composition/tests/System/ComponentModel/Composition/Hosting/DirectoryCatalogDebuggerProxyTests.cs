@@ -123,7 +123,7 @@ namespace System.ComponentModel.Composition.Primitives
             var cat = CreateDirectoryCatalog(directoryPath);
             var proxy = new DirectoryCatalog.DirectoryCatalogDebuggerProxy(cat);
 
-            Assert.Equal(0, proxy.LoadedFiles.Count);
+            Assert.Empty(proxy.LoadedFiles);
         }
 
         [Fact]

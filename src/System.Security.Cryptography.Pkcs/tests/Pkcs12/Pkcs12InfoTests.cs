@@ -35,7 +35,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             Assert.False(info.VerifyMac((new char[1]).AsSpan(0, 0)), "zero-sliced array");
 
             ReadOnlyCollection<Pkcs12SafeContents> safes = info.AuthenticatedSafe;
-            Assert.Equal(0, safes.Count);
+            Assert.Empty(safes);
         }
 
         [Fact]
@@ -64,8 +64,8 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             Pkcs12SafeBag[] firstContents = firstSafe.GetBags().ToArray();
             Pkcs12SafeBag[] secondContents = secondSafe.GetBags().ToArray();
 
-            Assert.Equal(1, firstContents.Length);
-            Assert.Equal(1, secondContents.Length);
+            Assert.Single(firstContents);
+            Assert.Single(secondContents);
 
             Pkcs12KeyBag keyBag = Assert.IsType<Pkcs12KeyBag>(firstContents[0]);
             Pkcs12CertBag certBag = Assert.IsType<Pkcs12CertBag>(secondContents[0]);
@@ -77,9 +77,9 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             Assert.Equal(2, certBagAttrs.Count);
 
             Assert.Equal(Oids.FriendlyName, keyBagAttrs[0].Oid.Value);
-            Assert.Equal(1, keyBagAttrs[0].Values.Count);
+            Assert.Single(keyBagAttrs[0].Values);
             Assert.Equal(Oids.LocalKeyId, keyBagAttrs[1].Oid.Value);
-            Assert.Equal(1, keyBagAttrs[1].Values.Count);
+            Assert.Single(keyBagAttrs[1].Values);
 
             Pkcs9AttributeObject keyFriendlyName =
                 Assert.IsAssignableFrom<Pkcs9AttributeObject>(keyBagAttrs[0].Values[0]);
@@ -87,9 +87,9 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             Pkcs9LocalKeyId keyKeyId = Assert.IsType<Pkcs9LocalKeyId>(keyBagAttrs[1].Values[0]);
 
             Assert.Equal(Oids.FriendlyName, certBagAttrs[0].Oid.Value);
-            Assert.Equal(1, certBagAttrs[0].Values.Count);
+            Assert.Single(certBagAttrs[0].Values);
             Assert.Equal(Oids.LocalKeyId, certBagAttrs[1].Oid.Value);
-            Assert.Equal(1, certBagAttrs[1].Values.Count);
+            Assert.Single(certBagAttrs[1].Values);
 
             Pkcs9AttributeObject certFriendlyName =
                 Assert.IsAssignableFrom<Pkcs9AttributeObject>(certBagAttrs[0].Values[0]);
@@ -131,7 +131,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             Assert.True(info.VerifyMac(Pkcs12Documents.OracleWalletPassword), "VerifyMac(correct password)");
 
             ReadOnlyCollection<Pkcs12SafeContents> authSafes = info.AuthenticatedSafe;
-            Assert.Equal(1, authSafes.Count);
+            Assert.Single(authSafes);
 
             Pkcs12SafeContents authSafe = authSafes[0];
             Assert.Equal(Pkcs12ConfidentialityMode.Password, authSafe.ConfidentialityMode);
@@ -182,10 +182,10 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
                 secretBag.SecretValue.ByteArrayToHex());
 
             CryptographicAttributeObjectCollection attrs = secretBag.Attributes;
-            Assert.Equal(1, attrs.Count);
+            Assert.Single(attrs);
             CryptographicAttributeObject firstAttr = attrs[0];
             Assert.Equal(Oids.LocalKeyId, firstAttr.Oid.Value);
-            Assert.Equal(1, firstAttr.Values.Count);
+            Assert.Single(firstAttr.Values);
             Pkcs9LocalKeyId localKeyId = Assert.IsType<Pkcs9LocalKeyId>(firstAttr.Values[0]);
             Assert.Equal(keyId, localKeyId.KeyId.ByteArrayToHex());
         }

@@ -16,9 +16,9 @@ namespace System.Reflection.Tests
             ReflectionTypeLoadException rtle = new ReflectionTypeLoadException(types, exceptions, "Null elements in Exceptions array");
             Assert.NotNull(rtle.ToString());
             Assert.NotNull(rtle.Message);
-            Assert.Equal(1, rtle.LoaderExceptions.Length);
+            Assert.Single(rtle.LoaderExceptions);
             Assert.Null(rtle.LoaderExceptions[0]);
-            Assert.Equal(1, rtle.Types.Length);
+            Assert.Single(rtle.Types);
             Assert.Null(rtle.Types[0]);
         }
 

@@ -760,7 +760,7 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Contains("chunked", response.Headers.GetValues("Transfer-Encoding"));
 
                         Assert.NotNull(response.TrailingHeaders);
-                        Assert.Equal(0, response.TrailingHeaders.Count());
+                        Assert.Empty(response.TrailingHeaders);
                         Assert.Same(response.TrailingHeaders, response.TrailingHeaders);
                     }
                 }
@@ -796,7 +796,7 @@ namespace System.Net.Http.Functional.Tests
                 HttpResponseMessage response = await sendTask;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.NotNull(response.TrailingHeaders);
-                Assert.Equal(0, response.TrailingHeaders.Count());
+                Assert.Empty(response.TrailingHeaders);
             }
         }
 

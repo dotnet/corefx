@@ -16,7 +16,7 @@ namespace System.Reflection.Tests
             using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly[] loadedAssemblies = lc.GetAssemblies().ToArray();
-                Assert.Equal(1, loadedAssemblies.Length);
+                Assert.Single(loadedAssemblies);
             }
         }
 
@@ -26,7 +26,7 @@ namespace System.Reflection.Tests
             using (MetadataLoadContext lc = new MetadataLoadContext(new EmptyCoreMetadataAssemblyResolver()))
             {
                 Assembly[] loadedAssemblies = lc.GetAssemblies().ToArray();
-                Assert.Equal(1, loadedAssemblies.Length);
+                Assert.Single(loadedAssemblies);
 
                 // EmptyCoreMetadataAssemblyResolver already loaded s_SimpleNameOnlyImage
                 Assembly a1 = lc.LoadFromByteArray(TestData.s_SimpleAssemblyImage);
@@ -59,7 +59,7 @@ namespace System.Reflection.Tests
                 IEnumerable<Assembly> loadedAssembliesSnapshot = lc.GetAssemblies();
                 Assembly a2 = lc.LoadFromByteArray(TestData.s_SimpleNameOnlyImage);
                 Assembly[] loadedAssemblies = loadedAssembliesSnapshot.ToArray();
-                Assert.Equal(1, loadedAssemblies.Length);
+                Assert.Single(loadedAssemblies);
                 Assert.Equal(a1, loadedAssemblies[0]);
             }
         }

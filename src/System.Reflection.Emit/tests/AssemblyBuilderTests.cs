@@ -302,7 +302,7 @@ namespace System.Reflection.Emit.Tests
 
             Assert.Equal(attributes?.Count() ?? 0, assembly.CustomAttributes.Count());
 
-            Assert.Equal(1, assembly.Modules.Count());
+            Assert.Single(assembly.Modules);
             Module module = assembly.Modules.First();
             Assert.NotEmpty(module.Name);
             Assert.Equal(assembly.Modules, assembly.GetModules());

@@ -78,7 +78,7 @@ namespace System.Runtime.CompilerServices.Tests
 
             cwt.Clear();
 
-            Assert.Equal(0, ((IEnumerable<KeyValuePair<object, object>>)cwt).Count());
+            Assert.Empty(((IEnumerable<KeyValuePair<object, object>>)cwt));
 
             GC.KeepAlive(keys);
             GC.KeepAlive(values);
@@ -89,7 +89,7 @@ namespace System.Runtime.CompilerServices.Tests
         {
             var cwt = new ConditionalWeakTable<object, object>();
             var enumerable = (IEnumerable<KeyValuePair<object, object>>)cwt;
-            Assert.Equal(0, enumerable.Count());
+            Assert.Empty(enumerable);
         }
 
         [Fact]
@@ -103,11 +103,11 @@ namespace System.Runtime.CompilerServices.Tests
             for (int i = 0; i < 20; i++) // adding and removing multiple times, across internal container boundary
             {
                 cwt.Add(key1, value1);
-                Assert.Equal(1, enumerable.Count());
+                Assert.Single(enumerable);
                 Assert.Equal(new KeyValuePair<object, object>(key1, value1), enumerable.First());
 
                 Assert.True(cwt.Remove(key1));
-                Assert.Equal(0, enumerable.Count());
+                Assert.Empty(enumerable);
             }
 
             GC.KeepAlive(key1);
@@ -127,7 +127,7 @@ namespace System.Runtime.CompilerServices.Tests
 
             for (int i = 0; i < 10; i++) addItem(cwt);
             GC.Collect();
-            Assert.Equal(0, enumerable.Count());
+            Assert.Empty(enumerable);
         }
 
         [Fact]
@@ -179,7 +179,7 @@ namespace System.Runtime.CompilerServices.Tests
                     enumerable);
                 cwt.Remove(keys[i]);
             }
-            Assert.Equal(0, enumerable.Count());
+            Assert.Empty(enumerable);
 
             GC.KeepAlive(keys);
             GC.KeepAlive(values);

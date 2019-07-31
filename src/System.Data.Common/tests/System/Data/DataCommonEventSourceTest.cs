@@ -34,7 +34,7 @@ namespace System.Data.Tests
                         dt.Rows.Add("Jane", 120);
 
                         DataRow[] results = dt.Select("Weight < 140");
-                        Assert.Equal(1, results.Length);
+                        Assert.Single(results);
                     });
                     Assert.InRange(events.Count, 1, int.MaxValue);
                 }

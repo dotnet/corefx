@@ -212,7 +212,7 @@ namespace System.Net.Mail.Tests
             Smtp.Send("mono@novell.com", "everyone@novell.com", "introduction", "hello");
 
             string[] files = Directory.GetFiles(TempFolder, "*");
-            Assert.Equal(1, files.Length);
+            Assert.Single(files);
             Assert.Equal(".eml", Path.GetExtension(files[0]));
         }
 

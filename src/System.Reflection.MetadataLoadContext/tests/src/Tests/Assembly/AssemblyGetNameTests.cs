@@ -39,7 +39,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(string.Empty, cultureName);
 
                 byte[] publicKey = an.GetPublicKey();
-                Assert.Equal(0, publicKey.Length);
+                Assert.Empty(publicKey);
 
                 Assert.Equal(AssemblyContentType.Default, an.ContentType);
                 Assert.Equal(AssemblyHashAlgorithm.SHA1, an.HashAlgorithm);

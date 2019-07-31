@@ -134,7 +134,7 @@ namespace System.Net.Sockets.Tests
                     var readList = new List<Socket>(readPairs.Select(p => p.Key).ToArray());
                     Socket.Select(readList, null, null, FailTimeoutMicroseconds);
 
-                    Assert.Equal(1, readList.Count);
+                    Assert.Single(readList);
                     Assert.Same(readPairs[next].Key, readList[0]);
 
                     readPairs.RemoveAt(next);
@@ -163,7 +163,7 @@ namespace System.Net.Sockets.Tests
                     var errorList = new List<Socket>(errorPairs.Select(p => p.Key).ToArray());
                     Socket.Select(null, null, errorList, FailTimeoutMicroseconds);
 
-                    Assert.Equal(1, errorList.Count);
+                    Assert.Single(errorList);
                     Assert.Same(errorPairs[next].Key, errorList[0]);
 
                     errorPairs.RemoveAt(next);

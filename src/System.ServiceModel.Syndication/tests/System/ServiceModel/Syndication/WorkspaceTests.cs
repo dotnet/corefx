@@ -83,7 +83,7 @@ namespace System.ServiceModel.Syndication.Tests
         {
             Collection<ResourceCollectionInfo> collection = new Workspace().Collections;
             collection.Add(new ResourceCollectionInfo());
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
         }
 
         [Fact]

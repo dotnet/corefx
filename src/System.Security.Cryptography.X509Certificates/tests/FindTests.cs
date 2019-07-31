@@ -51,7 +51,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     using (new ImportedCollection(col2))
                     {
-                        Assert.Equal(0, col2.Count);
+                        Assert.Empty(col2);
                     }
                 });
         }
@@ -85,7 +85,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             using (new ImportedCollection(col2))
             {
-                Assert.Equal(1, col2.Count);
+                Assert.Single(col2);
 
                 byte[] serialNumber;
 
@@ -428,7 +428,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     using (new ImportedCollection(col2))
                     {
-                        Assert.Equal(0, col2.Count);
+                        Assert.Empty(col2);
                     }
                 });
         }
@@ -448,7 +448,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     using (new ImportedCollection(col2))
                     {
-                        Assert.Equal(0, col2.Count);
+                        Assert.Empty(col2);
                     }
                 });
         }
@@ -477,7 +477,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     using (new ImportedCollection(col2))
                     {
-                        Assert.Equal(0, col2.Count);
+                        Assert.Empty(col2);
                     }
                 });
         }
@@ -521,7 +521,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     using (new ImportedCollection(col2))
                     {
-                        Assert.Equal(1, col2.Count);
+                        Assert.Single(col2);
                     }
                 });
         }
@@ -551,7 +551,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     using (new ImportedCollection(col2))
                     {
-                        Assert.Equal(0, col2.Count);
+                        Assert.Empty(col2);
                     }
                 });
         }
@@ -581,7 +581,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     using (new ImportedCollection(col2))
                     {
-                        Assert.Equal(1, col2.Count);
+                        Assert.Single(col2);
                     }
                 });
         }
@@ -611,7 +611,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     using (new ImportedCollection(col2))
                     {
-                        Assert.Equal(0, col2.Count);
+                        Assert.Empty(col2);
                     }
                 });
         }
@@ -849,7 +849,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     using (new ImportedCollection(results))
                     {
-                        Assert.Equal(0, results.Count);
+                        Assert.Empty(results);
                     }
                 });
         }
@@ -891,7 +891,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 using (new ImportedCollection(results))
                 {
-                    Assert.Equal(0, results.Count);
+                    Assert.Empty(results);
                 }
             }
         }
@@ -933,7 +933,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 using (new ImportedCollection(results))
                 {
-                    Assert.Equal(0, results.Count);
+                    Assert.Empty(results);
                 }
             }
         }

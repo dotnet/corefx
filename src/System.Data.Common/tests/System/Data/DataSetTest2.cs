@@ -413,16 +413,16 @@ namespace System.Data.Tests
             table2.Constraints.AddRange(new Constraint[] { fkey });
 
             // The tables/relations shud not get added to the DataSet yet
-            Assert.Equal(0, ds.Tables.Count);
-            Assert.Equal(0, ds.Relations.Count);
-            Assert.Equal(0, table1.Constraints.Count);
-            Assert.Equal(0, table2.Constraints.Count);
+            Assert.Empty(ds.Tables);
+            Assert.Empty(ds.Relations);
+            Assert.Empty(table1.Constraints);
+            Assert.Empty(table2.Constraints);
             ds.EndInit();
 
             Assert.Equal(2, ds.Tables.Count);
-            Assert.Equal(1, ds.Relations.Count);
-            Assert.Equal(1, ds.Tables[0].Constraints.Count);
-            Assert.Equal(1, ds.Tables[1].Constraints.Count);
+            Assert.Single(ds.Relations);
+            Assert.Single(ds.Tables[0].Constraints);
+            Assert.Single(ds.Tables[1].Constraints);
 
             // Table shud still be in BeginInit .. 
             DataColumn col3 = new DataColumn("col2");
@@ -431,8 +431,8 @@ namespace System.Data.Tests
             table1.Columns.AddRange(new DataColumn[] { col3 });
             table1.Constraints.AddRange(new Constraint[] { uc });
 
-            Assert.Equal(1, table1.Columns.Count);
-            Assert.Equal(1, table1.Constraints.Count);
+            Assert.Single(table1.Columns);
+            Assert.Single(table1.Constraints);
 
             table1.EndInit();
             Assert.Equal(2, table1.Columns.Count);
@@ -703,7 +703,7 @@ namespace System.Data.Tests
             ds.InferXmlSchema(myStream, null);
             Assert.Equal("DocumentElement", ds.DataSetName);
             Assert.Equal("Element1", ds.Tables[0].TableName);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal("attr1", ds.Tables[0].Columns["attr1"].ColumnName);
             Assert.Equal("Element1_Text", ds.Tables[0].Columns["Element1_Text"].ColumnName);
         }
@@ -728,7 +728,7 @@ namespace System.Data.Tests
             ds.InferXmlSchema(myStream, null);
             Assert.Equal("DocumentElement", ds.DataSetName);
             Assert.Equal("Element1", ds.Tables[0].TableName);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal("ChildElement1", ds.Tables[0].Columns["ChildElement1"].ColumnName);
         }
 
@@ -753,7 +753,7 @@ namespace System.Data.Tests
             ds.InferXmlSchema(myStream, null);
             Assert.Equal("NewDataSet", ds.DataSetName);
             Assert.Equal("DocumentElement", ds.Tables[0].TableName);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal("Element1", ds.Tables[0].Columns["Element1"].ColumnName);
             Assert.Equal("Element2", ds.Tables[0].Columns["Element2"].ColumnName);
         }
@@ -778,7 +778,7 @@ namespace System.Data.Tests
             ds.InferXmlSchema(myStream, null);
             Assert.Equal("DocumentElement", ds.DataSetName);
             Assert.Equal("Element1", ds.Tables[0].TableName);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal("attr1", ds.Tables[0].Columns["attr1"].ColumnName);
             Assert.Equal("attr2", ds.Tables[0].Columns["attr2"].ColumnName);
         }
@@ -802,7 +802,7 @@ namespace System.Data.Tests
             ds.InferXmlSchema(myStream, null);
             Assert.Equal("DocumentElement", ds.DataSetName);
             Assert.Equal("Element1", ds.Tables[0].TableName);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal("Element1_Text", ds.Tables[0].Columns["Element1_Text"].ColumnName);
         }
         #endregion
@@ -823,7 +823,7 @@ namespace System.Data.Tests
             ds.InferXmlSchema(myStream, null);
             Assert.Equal("DocumentElement", ds.DataSetName);
             Assert.Equal("Element1", ds.Tables[0].TableName);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal("attr1", ds.Tables[0].Columns["attr1"].ColumnName);
             Assert.Equal("attr2", ds.Tables[0].Columns["attr2"].ColumnName);
             Assert.Equal(MappingType.Attribute, ds.Tables[0].Columns["attr1"].ColumnMapping);
@@ -854,7 +854,7 @@ namespace System.Data.Tests
             ds.InferXmlSchema(myStream, null);
             Assert.Equal("DocumentElement", ds.DataSetName);
             Assert.Equal("Element1", ds.Tables[0].TableName);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal("ChildElement1", ds.Tables[0].Columns["ChildElement1"].ColumnName);
             Assert.Equal("ChildElement2", ds.Tables[0].Columns["ChildElement2"].ColumnName);
             Assert.Equal(MappingType.Element, ds.Tables[0].Columns["ChildElement1"].ColumnMapping);
@@ -948,7 +948,7 @@ namespace System.Data.Tests
 
             Assert.Equal("DocumentElement", ds.DataSetName);
             Assert.Equal("Element1", ds.Tables[0].TableName);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
 
             Assert.Equal("attr1", ds.Tables["Element1"].Columns["attr1"].ColumnName);
             Assert.Equal(MappingType.Attribute, ds.Tables["Element1"].Columns["attr1"].ColumnMapping);
@@ -980,12 +980,12 @@ namespace System.Data.Tests
 
             Assert.Equal("DocumentElement", ds.DataSetName);
             Assert.Equal("Element1", ds.Tables[0].TableName);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
 
             Assert.Equal("ChildElement1", ds.Tables["Element1"].Columns["ChildElement1"].ColumnName);
             Assert.Equal(MappingType.Element, ds.Tables["Element1"].Columns["ChildElement1"].ColumnMapping);
             Assert.Equal(typeof(string), ds.Tables["Element1"].Columns["ChildElement1"].DataType);
-            Assert.Equal(1, ds.Tables["Element1"].Columns.Count);
+            Assert.Single(ds.Tables["Element1"].Columns);
         }
 
         #endregion
@@ -1088,10 +1088,10 @@ namespace System.Data.Tests
             Assert.Equal("NewValue", dsTarget.Tables["Table1"].Select("ParentId=1")[0][1]);
 
             // Merge added row
-            Assert.Equal(1, dsTarget.Tables["Table1"].Select("ParentId=99").Length);
+            Assert.Single(dsTarget.Tables["Table1"].Select("ParentId=99"));
 
             // Merge deleted row
-            Assert.Equal(0, dsTarget.Tables["Table1"].Select("ParentId=2").Length);
+            Assert.Empty(dsTarget.Tables["Table1"].Select("ParentId=2"));
         }
 
         [Fact]
@@ -1135,7 +1135,7 @@ namespace System.Data.Tests
             Assert.Equal(OldValue, dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
 
             // Merge true,Ignore - added values
-            Assert.Equal(1, dsTarget1.Tables["Table1"].Select("ParentId=99").Length);
+            Assert.Single(dsTarget1.Tables["Table1"].Select("ParentId=99"));
 
             // Merge true,Ignore - deleted row
             Assert.True(dsTarget1.Tables["Table1"].Select("ParentId=2").Length > 0);
@@ -1151,10 +1151,10 @@ namespace System.Data.Tests
             Assert.Equal("NewValue", dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
 
             // Merge true,Ignore - added values
-            Assert.Equal(1, dsTarget1.Tables["Table1"].Select("ParentId=99").Length);
+            Assert.Single(dsTarget1.Tables["Table1"].Select("ParentId=99"));
 
             // Merge true,Ignore - deleted row
-            Assert.Equal(0, dsTarget1.Tables["Table1"].Select("ParentId=2").Length);
+            Assert.Empty(dsTarget1.Tables["Table1"].Select("ParentId=2"));
             #endregion
 
             #region "Merge(drArr,true,MissingSchemaAction.Add )"
@@ -1167,7 +1167,7 @@ namespace System.Data.Tests
             Assert.Equal(OldValue, dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
 
             // Merge true,Ignore - added values
-            Assert.Equal(1, dsTarget1.Tables["Table1"].Select("ParentId=99").Length);
+            Assert.Single(dsTarget1.Tables["Table1"].Select("ParentId=99"));
 
             // Merge true,Ignore - deleted row
             Assert.True(dsTarget1.Tables["Table1"].Select("ParentId=2").Length > 0);
@@ -1183,10 +1183,10 @@ namespace System.Data.Tests
             Assert.Equal("NewValue", dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
 
             // Merge true,Ignore - added values
-            Assert.Equal(1, dsTarget1.Tables["Table1"].Select("ParentId=99").Length);
+            Assert.Single(dsTarget1.Tables["Table1"].Select("ParentId=99"));
 
             // Merge true,Ignore - deleted row
-            Assert.Equal(0, dsTarget1.Tables["Table1"].Select("ParentId=2").Length);
+            Assert.Empty(dsTarget1.Tables["Table1"].Select("ParentId=2"));
             #endregion
         }
 
@@ -1236,7 +1236,7 @@ namespace System.Data.Tests
             Assert.Equal(arrAddedRow, dsTarget.Tables["Table2"].Select("ParentId=99")[0].ItemArray);
 
             // Merge - deleted row
-            Assert.Equal(0, dsTarget.Tables["Table2"].Select("ParentId=2").Length);
+            Assert.Empty(dsTarget.Tables["Table2"].Select("ParentId=2"));
 
             //Table1 rows count should be double (no primary key)
             // Merge - Unchanged table 1
@@ -1305,7 +1305,7 @@ namespace System.Data.Tests
             Assert.Equal(arrAddedRow, dsTarget2.Tables["Table2"].Select("ParentId=99")[0].ItemArray);
 
             // Merge - deleted row
-            Assert.Equal(0, dsTarget2.Tables["Table2"].Select("ParentId=2").Length);
+            Assert.Empty(dsTarget2.Tables["Table2"].Select("ParentId=2"));
             #endregion
         }
 
@@ -1468,9 +1468,9 @@ namespace System.Data.Tests
                                 ds1.Tables[1].Columns[0], false);
 
             ds.Merge(ds1);
-            Assert.Equal(1, ds.Relations.Count);
-            Assert.Equal(0, ds.Tables[0].Constraints.Count);
-            Assert.Equal(0, ds.Tables[1].Constraints.Count);
+            Assert.Single(ds.Relations);
+            Assert.Empty(ds.Tables[0].Constraints);
+            Assert.Empty(ds.Tables[1].Constraints);
         }
 
         [Fact]
@@ -1492,7 +1492,7 @@ namespace System.Data.Tests
 
             // No Exceptions shud be thrown
             ds.Merge(ds1);
-            Assert.Equal(1, table2.Constraints.Count);
+            Assert.Single(table2.Constraints);
         }
 
         [Fact]
@@ -1535,14 +1535,14 @@ namespace System.Data.Tests
             DataSet ds1 = ds.Copy();
             DataSet ds2 = ds.Clone();
 
-            Assert.Equal(1, ds1.Relations.Count);
-            Assert.Equal(1, ds2.Relations.Count);
+            Assert.Single(ds1.Relations);
+            Assert.Single(ds2.Relations);
 
-            Assert.Equal(0, ds1.Tables[0].Constraints.Count);
-            Assert.Equal(0, ds1.Tables[1].Constraints.Count);
+            Assert.Empty(ds1.Tables[0].Constraints);
+            Assert.Empty(ds1.Tables[1].Constraints);
 
-            Assert.Equal(0, ds2.Tables[0].Constraints.Count);
-            Assert.Equal(0, ds2.Tables[1].Constraints.Count);
+            Assert.Empty(ds2.Tables[0].Constraints);
+            Assert.Empty(ds2.Tables[1].Constraints);
         }
 
         [Fact]
@@ -1890,7 +1890,7 @@ namespace System.Data.Tests
             Assert.Equal(arrAddedRow, dsTarget.Tables["Table2"].Select("ParentId=99")[0].ItemArray);
 
             // Merge - deleted row
-            Assert.Equal(0, dsTarget.Tables["Table2"].Select("ParentId=2").Length);
+            Assert.Empty(dsTarget.Tables["Table2"].Select("ParentId=2"));
 
             //when merging a DataTable with TableName=null, GH throw null reference exception.
             ds = new DataSet();
@@ -1900,7 +1900,7 @@ namespace System.Data.Tests
 
             // Merge - add a table with no name
             ds.Merge(dt);
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
 
             // Merge - add a table with no name - check Rows.Count
             Assert.Equal(dt.Rows.Count, ds.Tables[0].Rows.Count);
@@ -1960,7 +1960,7 @@ namespace System.Data.Tests
             Assert.Equal(arrAddedRow, dsTarget1.Tables["Table1"].Select("ParentId=99")[0].ItemArray);
 
             // Merge true,Ignore - deleted row
-            Assert.Equal(0, dsTarget1.Tables["Table1"].Select("ParentId=2").Length);
+            Assert.Empty(dsTarget1.Tables["Table1"].Select("ParentId=2"));
             #endregion
 
             #region "Merge(dt,true,MissingSchemaAction.Add  )"
@@ -1973,7 +1973,7 @@ namespace System.Data.Tests
             Assert.Equal(OldValue, dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
 
             // Merge true,Add - added values
-            Assert.Equal(1, dsTarget1.Tables["Table1"].Select("ParentId=99").Length);
+            Assert.Single(dsTarget1.Tables["Table1"].Select("ParentId=99"));
 
             // Merge true,Add - deleted row
             Assert.True(dsTarget1.Tables["Table1"].Select("ParentId=2").Length > 0);
@@ -1989,10 +1989,10 @@ namespace System.Data.Tests
             Assert.Equal("NewValue", dsTarget1.Tables["Table1"].Select("ParentId=1")[0][1]);
 
             // Merge true,Add - added values
-            Assert.Equal(1, dsTarget1.Tables["Table1"].Select("ParentId=99").Length);
+            Assert.Single(dsTarget1.Tables["Table1"].Select("ParentId=99"));
 
             // Merge true,Add - deleted row
-            Assert.Equal(0, dsTarget1.Tables["Table1"].Select("ParentId=2").Length);
+            Assert.Empty(dsTarget1.Tables["Table1"].Select("ParentId=2"));
             #endregion
         }
 
@@ -2247,22 +2247,22 @@ namespace System.Data.Tests
             Assert.Equal("Stock_Price", ds.Tables[0].ChildRelations[1].RelationName);
 
             // Tables[1] ChildRelations count
-            Assert.Equal(0, ds.Tables[1].ChildRelations.Count);
+            Assert.Empty(ds.Tables[1].ChildRelations);
 
             // Tables[2] ChildRelations count
-            Assert.Equal(0, ds.Tables[2].ChildRelations.Count);
+            Assert.Empty(ds.Tables[2].ChildRelations);
 
             // Tables[0] ParentRelations count
-            Assert.Equal(0, ds.Tables[0].ParentRelations.Count);
+            Assert.Empty(ds.Tables[0].ParentRelations);
 
             // Tables[1] ParentRelations count
-            Assert.Equal(1, ds.Tables[1].ParentRelations.Count);
+            Assert.Single(ds.Tables[1].ParentRelations);
 
             // Tables[1] ParentRelations[0] name
             Assert.Equal("Stock_Company", ds.Tables[1].ParentRelations[0].RelationName);
 
             // Tables[2] ParentRelations count
-            Assert.Equal(1, ds.Tables[2].ParentRelations.Count);
+            Assert.Single(ds.Tables[2].ParentRelations);
 
             // Tables[2] ParentRelations[0] name
             Assert.Equal("Stock_Price", ds.Tables[2].ParentRelations[0].RelationName);
@@ -2830,12 +2830,12 @@ namespace System.Data.Tests
 
             // Checking Relations - default value
             //Check default
-            Assert.Equal(0, ds.Relations.Count);
+            Assert.Empty(ds.Relations);
 
             ds.Relations.Add(drl);
 
             // Checking Relations Count
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
 
             // Checking Relations Value
             Assert.Equal(drl, ds.Relations[0]);
@@ -2869,9 +2869,9 @@ namespace System.Data.Tests
             ds.Reset();
 
             // Reset - Relations
-            Assert.Equal(0, ds.Relations.Count);
+            Assert.Empty(ds.Relations);
             // Reset - Tables
-            Assert.Equal(0, ds.Tables.Count);
+            Assert.Empty(ds.Tables);
         }
 
         [Fact]
@@ -2923,7 +2923,7 @@ namespace System.Data.Tests
 
             // Checking Tables - default value
             //Check default
-            Assert.Equal(0, ds.Tables.Count);
+            Assert.Empty(ds.Tables);
 
             ds.Tables.Add(dt1);
             ds.Tables.Add(dt2);
@@ -2976,7 +2976,7 @@ namespace System.Data.Tests
                 oDataset = new DataSet("DataSetOut");
 
                 oDataset.ReadXml(sr);
-                Assert.Equal(0, oDataset.Tables.Count);
+                Assert.Empty(oDataset.Tables);
             }
             finally
             {
@@ -3019,7 +3019,7 @@ namespace System.Data.Tests
             Assert.True(pc != null);
 
             // Checking ExtendedProperties count
-            Assert.Equal(0, pc.Count);
+            Assert.Empty(pc);
         }
 
         [Fact]
@@ -3229,9 +3229,9 @@ namespace System.Data.Tests
 
             // no new relation, and <table>_Id columns, should get created when 
             // Relation.Nested = true
-            Assert.Equal(1, ds1.Relations.Count);
-            Assert.Equal(1, ds1.Tables[0].Columns.Count);
-            Assert.Equal(1, ds1.Tables[1].Columns.Count);
+            Assert.Single(ds1.Relations);
+            Assert.Single(ds1.Tables[0].Columns);
+            Assert.Single(ds1.Tables[1].Columns);
         }
 
         [Fact]
@@ -3358,7 +3358,7 @@ namespace System.Data.Tests
             ds1.ReadXml(new MemoryStream(ms.GetBuffer()), XmlReadMode.DiffGram);
 
             Assert.Equal(2, ds1.Tables[0].Rows.Count);
-            Assert.Equal(1, ds1.Tables[0].Columns.Count);
+            Assert.Single(ds1.Tables[0].Columns);
             Assert.Equal("a", ds1.Tables[0].Rows[0][0]);
             Assert.Equal("a", ds1.Tables[0].Rows[1][0]);
         }
@@ -3427,8 +3427,8 @@ namespace System.Data.Tests
             ds.Merge(dataSet, true, MissingSchemaAction.Ignore);
 
             Assert.Equal("Table1", ds.Tables[0].TableName);
-            Assert.Equal(1, ds.Tables.Count);
-            Assert.Equal(1, ds.Tables[0].Columns.Count);
+            Assert.Single(ds.Tables);
+            Assert.Single(ds.Tables[0].Columns);
             Assert.Equal(typeof(string), ds.Tables[0].Columns[0].DataType);
         }
 
@@ -3442,7 +3442,7 @@ namespace System.Data.Tests
             dataTable.Rows.Add("Test");
             dataSet.Tables.Add(dataTable);
             dataSet.Merge(dataTable);
-            Assert.Equal(1, dataSet.Tables.Count);
+            Assert.Single(dataSet.Tables);
         }
 
         [Fact]

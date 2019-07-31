@@ -14,7 +14,7 @@ namespace System.Tests
             DFoo dfoo = new C().Foo;
             Delegate[] delegates = dfoo.GetInvocationList();
             Assert.NotNull(delegates);
-            Assert.Equal(1, delegates.Length);
+            Assert.Single(delegates);
             Assert.True(dfoo.Equals(delegates[0]));
         }
 
@@ -189,7 +189,7 @@ namespace System.Tests
         {
             Assert.True(expected.Equals(actual));
             Delegate[] invokeList = actual.GetInvocationList();
-            Assert.Equal(1, invokeList.Length);
+            Assert.Single(invokeList);
             bool b = actual.Equals(invokeList[0]);
             Assert.True(b);
 

@@ -45,7 +45,7 @@ namespace System.Collections.Concurrent.Tests
                 // Make sure we got the expected number of items, then clear, and make sure it's empty
                 Assert.Equal((ItemsPerThread * otherThreads) + (addToLocalThread ? ItemsPerThread : 0), bag.Count);
                 bag.Clear();
-                Assert.Equal(0, bag.Count);
+                Assert.Empty(bag);
             }
         }
 

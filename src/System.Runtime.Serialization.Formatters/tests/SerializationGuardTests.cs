@@ -43,7 +43,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
 
             Assert.NotNull(trackerMethod);
 
-            Assert.Equal(1, trackerMethod.GetParameters().Length);
+            Assert.Single(trackerMethod.GetParameters());
             object[] args = new object[1];
             args[0] = Enum.ToObject(typeof(Thread).Assembly.GetType("System.Threading.StackCrawlMark"), 0);
 

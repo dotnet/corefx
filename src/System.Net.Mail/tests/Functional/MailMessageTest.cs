@@ -53,16 +53,16 @@ namespace System.Net.Mail.Tests
         [Fact]
         public void AlternateViewTest()
         {
-            Assert.Equal(1, messageWithSubjectAndBody.AlternateViews.Count);
+            Assert.Single(messageWithSubjectAndBody.AlternateViews);
             AlternateView av = messageWithSubjectAndBody.AlternateViews[0];
-            Assert.Equal(0, av.LinkedResources.Count);
+            Assert.Empty(av.LinkedResources);
             Assert.Equal("text/html; charset=us-ascii", av.ContentType.ToString());
         }
 
         [Fact]
         public void AttachmentTest()
         {
-            Assert.Equal(1, messageWithSubjectAndBody.Attachments.Count);
+            Assert.Single(messageWithSubjectAndBody.Attachments);
             Attachment at = messageWithSubjectAndBody.Attachments[0];
             Assert.Equal("text/plain", at.ContentType.MediaType);
         }
@@ -106,7 +106,7 @@ namespace System.Net.Mail.Tests
         [Fact]
         public void ToTest()
         {
-            Assert.Equal(1, messageWithSubjectAndBody.To.Count);
+            Assert.Single(messageWithSubjectAndBody.To);
             Assert.Equal("to@example.com", messageWithSubjectAndBody.To[0].Address);
 
             messageWithSubjectAndBody = new MailMessage();

@@ -25,7 +25,7 @@ namespace System.Linq.Tests
 
             // Validate proxy properties
             IEnumerable<PropertyInfo> properties = DebuggerAttributes.GetDebuggerVisibleProperties(proxyObject.GetType());
-            Assert.Equal(1, properties.Count());
+            Assert.Single(properties);
 
             // Groupings
             PropertyInfo groupingsProperty = properties.Single(property => property.Name == "Groupings");

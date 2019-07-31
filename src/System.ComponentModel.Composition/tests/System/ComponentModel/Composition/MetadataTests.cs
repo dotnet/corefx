@@ -480,7 +480,7 @@ namespace System.ComponentModel.Composition
 
             var exports = child.GetExports(CreateImportDefinition(typeof(IMyExporter), "Foo"));
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
         }
 
         [Fact]
@@ -497,7 +497,7 @@ namespace System.ComponentModel.Composition
 
             var exports = child.GetExports(CreateImportDefinition(typeof(IMyExporter), "Foo"));
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
         }
 
         [Fact]
@@ -651,7 +651,7 @@ namespace System.ComponentModel.Composition
 
             // IMyOption2 actually contains all the correct properties but just the wrong types. This should cause us to not match the exports by metadata
             var exports = container.GetExports<ExportMultiple, IMyOption2>();
-            Assert.Equal(0, exports.Count());
+            Assert.Empty(exports);
         }
 
         [Fact]
@@ -659,7 +659,7 @@ namespace System.ComponentModel.Composition
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(OptionalFooIsInt));
             var exports = container.GetExports<OptionalFooIsInt, IMetadataView>();
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             var export = exports.Single();
             Assert.Null(export.Metadata.OptionalFoo);
         }

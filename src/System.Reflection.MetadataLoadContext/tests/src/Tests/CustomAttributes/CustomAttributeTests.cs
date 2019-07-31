@@ -206,7 +206,7 @@ namespace System.Reflection.Tests
             {
                 Type t = typeof(AttributeHolder1.N1).Project();
                 CustomAttributeData[] cads = t.CustomAttributes.ToArray();
-                Assert.Equal(1, cads.Length);
+                Assert.Single(cads);
                 CustomAttributeData cad = cads[0];
                 Type attributeType = cad.CallUsingReflection<Type>("get_AttributeType");
                 Assert.Equal(typeof(SampleCustomAttribute).Project(), attributeType);
@@ -215,7 +215,7 @@ namespace System.Reflection.Tests
             {
                 Type t = typeof(HoldsAttributeDefinedInAnotherAssembly).Project();
                 CustomAttributeData[] cads = t.CustomAttributes.ToArray();
-                Assert.Equal(1, cads.Length);
+                Assert.Single(cads);
                 CustomAttributeData cad = cads[0];
                 Type attributeType = cad.CallUsingReflection<Type>("get_AttributeType");
                 Assert.Equal(typeof(GuidAttribute).Project(), attributeType);

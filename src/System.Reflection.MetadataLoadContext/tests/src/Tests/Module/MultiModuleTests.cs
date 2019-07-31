@@ -513,13 +513,13 @@ namespace System.Reflection.Tests
 
                 {
                     Module[] loadedModules = a.GetLoadedModules(getResourceModules: true);
-                    Assert.Equal(1, loadedModules.Length);
+                    Assert.Single(loadedModules);
                     Assert.Equal(a.ManifestModule, loadedModules[0]);
                 }
 
                 {
                     Module[] loadedModules = a.GetLoadedModules(getResourceModules: false);
-                    Assert.Equal(1, loadedModules.Length);
+                    Assert.Single(loadedModules);
                     Assert.Equal(a.ManifestModule, loadedModules[0]);
                 }
 
@@ -570,7 +570,7 @@ namespace System.Reflection.Tests
 
                     {
                         Module[] modules = a.GetLoadedModules(getResourceModules: false);
-                        Assert.Equal(1, modules.Length);
+                        Assert.Single(modules);
                         Assert.Equal(a.ManifestModule, modules[0]);
                     }
                 }

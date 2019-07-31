@@ -105,7 +105,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Same(empty, empty.Clear());
             Assert.Same(empty, ((IImmutableList<GenericParameterHelper>)empty).Clear());
             Assert.True(empty.IsEmpty);
-            Assert.Equal(0, empty.Count);
+            Assert.Empty(empty);
             Assert.Equal(-1, empty.IndexOf(new GenericParameterHelper()));
             Assert.Equal(-1, empty.IndexOf(null));
         }
@@ -319,13 +319,13 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(-1, list.IndexOf(null));
 
             list = list.Add((GenericParameterHelper)null);
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             Assert.Null(list[0]);
             Assert.True(list.Contains(null));
             Assert.Equal(0, list.IndexOf(null));
 
             list = list.Remove((GenericParameterHelper)null);
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
             Assert.True(list.IsEmpty);
             Assert.False(list.Contains(null));
             Assert.Equal(-1, list.IndexOf(null));
@@ -582,10 +582,10 @@ namespace System.Collections.Immutable.Tests
             var comparer = StringComparer.OrdinalIgnoreCase;
 
             ImmutableList<string> list = ImmutableList.Create<string>();
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
 
             list = ImmutableList.Create("a");
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
 
             list = ImmutableList.Create("a", "b");
             Assert.Equal(2, list.Count);
@@ -651,7 +651,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(new[] { 1, 3 }, removed2);
 
             ImmutableList<int> removed13 = list.RemoveRange(new[] { 1, 3, 5 });
-            Assert.Equal(1, removed13.Count);
+            Assert.Single(removed13);
             Assert.Equal(new[] { 2 }, removed13);
             Assert.Equal(new[] { 2 }, ((IImmutableList<int>)list).RemoveRange(new[] { 1, 3, 5 }));
 

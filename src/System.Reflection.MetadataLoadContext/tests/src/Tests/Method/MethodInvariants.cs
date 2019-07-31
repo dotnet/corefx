@@ -121,7 +121,7 @@ namespace System.Reflection.Tests
         {
             m.TestMethodInfoCommonInvariants();
 
-            Assert.Equal(0, m.GetGenericArguments().Length);
+            Assert.Empty(m.GetGenericArguments());
             Assert.Throws<InvalidOperationException>(() => m.GetGenericMethodDefinition());
         }
 
@@ -132,7 +132,7 @@ namespace System.Reflection.Tests
             if (!m.IsImplementedByRuntime())
                 Assert.Equal(m, m.GetGenericMethodDefinition());
 
-            Assert.NotEqual(0, m.GetGenericArguments().Length);
+            Assert.NotEmpty(m.GetGenericArguments());
 
             Type[] genericParameters = m.GetGenericArguments();
             for (int i = 0; i < genericParameters.Length; i++)
@@ -156,7 +156,7 @@ namespace System.Reflection.Tests
         {
             m.TestMethodInfoCommonInvariants();
 
-            Assert.NotEqual(0, m.GetGenericArguments().Length);
+            Assert.NotEmpty(m.GetGenericArguments());
             MethodInfo gm = m.GetGenericMethodDefinition();
             Assert.Equal(gm.Module, m.Module);
             Assert.Equal(gm.DeclaringType, m.DeclaringType);

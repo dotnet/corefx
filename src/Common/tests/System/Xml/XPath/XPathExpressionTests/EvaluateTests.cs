@@ -206,7 +206,7 @@ namespace XPathTests.XPathExpressionTests
         {
             XElement element = XElement.Parse("<element>Text.</element>");
             IEnumerable result = (IEnumerable)element.XPathEvaluate("/text()");
-            Assert.Equal(1, result.Cast<XText>().Count());
+            Assert.Single(result.Cast<XText>());
             Assert.Equal("Text.", result.Cast<XText>().First().ToString());
         }
 
@@ -215,7 +215,7 @@ namespace XPathTests.XPathExpressionTests
         {
             XElement element = XElement.Parse("<root>1<element></element>2</root>");
             IEnumerable result = (IEnumerable)element.XPathEvaluate("/text()[1]");
-            Assert.Equal(1, result.Cast<XText>().Count());
+            Assert.Single(result.Cast<XText>());
             Assert.Equal("1", result.Cast<XText>().First().ToString());
         }
 
@@ -224,7 +224,7 @@ namespace XPathTests.XPathExpressionTests
         {
             XElement element = XElement.Parse("<root>1<element></element>2</root>");
             IEnumerable result = (IEnumerable)element.XPathEvaluate("/text()[2]");
-            Assert.Equal(1, result.Cast<XText>().Count());
+            Assert.Single(result.Cast<XText>());
             Assert.Equal("2", result.Cast<XText>().First().ToString());
         }
 

@@ -51,7 +51,7 @@ namespace System.Collections.Concurrent.Tests
             s.Clear();
 
             Assert.True(s.IsEmpty);
-            Assert.Equal(0, s.Count);
+            Assert.Empty(s);
         }
 
         [Fact]

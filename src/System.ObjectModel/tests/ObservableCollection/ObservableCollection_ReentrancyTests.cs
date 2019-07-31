@@ -51,7 +51,7 @@ namespace System.Collections.ObjectModel.Tests
 
             Assert.True(handler1Called);
             Assert.True(handler2Called);
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
             Assert.Equal(1, collection[0]);
         }
 

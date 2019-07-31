@@ -149,7 +149,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
             Assert.NotNull(definition);
             Assert.NotNull(definition.ExportDefinitions);
-            Assert.Equal(0, definition.ExportDefinitions.Count());
+            Assert.Empty(definition.ExportDefinitions);
         }
 
         [Fact]
@@ -173,7 +173,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
             Assert.NotNull(definition);
             Assert.NotNull(definition.ExportDefinitions);
-            Assert.Equal(0, definition.ExportDefinitions.Count());
+            Assert.Empty(definition.ExportDefinitions);
         }
 
         [Fact]
@@ -224,7 +224,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
             Assert.NotNull(definition);
             Assert.NotNull(definition.ImportDefinitions);
-            Assert.Equal(0, definition.ImportDefinitions.Count());
+            Assert.Empty(definition.ImportDefinitions);
         }
 
         [Fact]
@@ -248,7 +248,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             ReflectionComposablePartDefinition definition = partDefinition as ReflectionComposablePartDefinition;
             Assert.NotNull(definition);
             Assert.NotNull(definition.ImportDefinitions);
-            Assert.Equal(0, definition.ImportDefinitions.Count());
+            Assert.Empty(definition.ImportDefinitions);
         }
 
         [Fact]

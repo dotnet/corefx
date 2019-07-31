@@ -63,8 +63,8 @@ namespace System.Data.Tests
             {
                 dt.Constraints.Clear();
             }
-            Assert.Equal(0, ds.Tables[0].Constraints.Count);
-            Assert.Equal(0, ds.Tables[0].Constraints.Count);
+            Assert.Empty(ds.Tables[0].Constraints);
+            Assert.Empty(ds.Tables[0].Constraints);
         }
 
         [Fact]
@@ -122,7 +122,7 @@ namespace System.Data.Tests
         public void Count()
         {
             DataTable dt = DataProvider.CreateUniqueConstraint();
-            Assert.Equal(1, dt.Constraints.Count);
+            Assert.Single(dt.Constraints);
 
             //Add
 
@@ -132,7 +132,7 @@ namespace System.Data.Tests
             //Remove
 
             dt.Constraints.Remove("constraint2");
-            Assert.Equal(1, dt.Constraints.Count);
+            Assert.Single(dt.Constraints);
         }
 
         [Fact]
@@ -232,8 +232,8 @@ namespace System.Data.Tests
             // Should not throw DataException 
             ds.Relations.Add("fk_rel", pcol, ccol);
 
-            Assert.Equal(1, table2.Constraints.Count);
-            Assert.Equal(1, table1.Constraints.Count);
+            Assert.Single(table2.Constraints);
+            Assert.Single(table1.Constraints);
             Assert.Equal("fk_cons", table2.Constraints[0].ConstraintName);
             Assert.Equal("Constraint1", table1.Constraints[0].ConstraintName);
         }
@@ -257,7 +257,7 @@ namespace System.Data.Tests
         {
             DataTable dt = DataProvider.CreateUniqueConstraint();
             dt.Constraints.Remove(dt.Constraints[0]);
-            Assert.Equal(0, dt.Constraints.Count);
+            Assert.Empty(dt.Constraints);
         }
 
         [Fact]
@@ -285,7 +285,7 @@ namespace System.Data.Tests
             DataTable dt = DataProvider.CreateUniqueConstraint();
             dt.Constraints[0].ConstraintName = "constraint1";
             dt.Constraints.Remove("constraint1");
-            Assert.Equal(0, dt.Constraints.Count);
+            Assert.Empty(dt.Constraints);
         }
 
         [Fact]
@@ -297,7 +297,7 @@ namespace System.Data.Tests
             dt.Constraints.Add(con);
             dt.Constraints.Remove(con);
 
-            Assert.Equal(1, dt.Constraints.Count);
+            Assert.Single(dt.Constraints);
             Assert.Equal("constraint1", dt.Constraints[0].ConstraintName);
         }
 
@@ -351,8 +351,8 @@ namespace System.Data.Tests
             table1.Constraints.Remove(c2);
             table2.Constraints.Remove(c3);
 
-            Assert.Equal(0, table1.Constraints.Count);
-            Assert.Equal(0, table2.Constraints.Count);
+            Assert.Empty(table1.Constraints);
+            Assert.Empty(table2.Constraints);
 
             DataSet ds = new DataSet();
             ds.Tables.Add(table1);
@@ -367,14 +367,14 @@ namespace System.Data.Tests
             Assert.Equal(2, table1.Constraints.Count);
 
             table1.Constraints.Remove(c2);
-            Assert.Equal(1, table1.Constraints.Count);
+            Assert.Single(table1.Constraints);
 
             table2.Constraints.Remove(c3);
-            Assert.Equal(1, table1.Constraints.Count);
-            Assert.Equal(0, table2.Constraints.Count);
+            Assert.Single(table1.Constraints);
+            Assert.Empty(table2.Constraints);
 
             table1.Constraints.Remove(c1);
-            Assert.Equal(0, table1.Constraints.Count);
+            Assert.Empty(table1.Constraints);
         }
 
         public delegate void testExceptionMethodCallback();
@@ -383,12 +383,12 @@ namespace System.Data.Tests
         public void Add_Constraint()
         {
             DataTable dt = DataProvider.CreateUniqueConstraint();
-            Assert.Equal(1, dt.Constraints.Count);
+            Assert.Single(dt.Constraints);
             Assert.Equal("Constraint1", dt.Constraints[0].ConstraintName);
 
             DataSet ds = DataProvider.CreateForeignConstraint();
-            Assert.Equal(1, ds.Tables[1].Constraints.Count);
-            Assert.Equal(1, ds.Tables[0].Constraints.Count);
+            Assert.Single(ds.Tables[1].Constraints);
+            Assert.Single(ds.Tables[0].Constraints);
 
             var arr = new ArrayList(1);
             arr.Add(new ConstraintException());
@@ -422,7 +422,7 @@ namespace System.Data.Tests
         {
             DataTable dt = DataProvider.CreateParentDataTable();
             dt.Constraints.Add("UniqueConstraint", dt.Columns["ParentId"], false);
-            Assert.Equal(1, dt.Constraints.Count);
+            Assert.Single(dt.Constraints);
             Assert.Equal("UniqueConstraint", dt.Constraints[0].ConstraintName);
         }
 
@@ -458,8 +458,8 @@ namespace System.Data.Tests
 
             child.Constraints.Add("ForigenConstraint", parent.Columns[0], child.Columns[0]);
 
-            Assert.Equal(1, parent.Constraints.Count);
-            Assert.Equal(1, child.Constraints.Count);
+            Assert.Single(parent.Constraints);
+            Assert.Single(child.Constraints);
             Assert.Equal("ForigenConstraint", child.Constraints[0].ConstraintName);
 
             parent = DataProvider.CreateParentDataTable();
@@ -471,8 +471,8 @@ namespace System.Data.Tests
             arr.Add(new InvalidConstraintException());
             TestException(new testExceptionMethodCallback(DataProvider.TryToBreakForigenConstraint), arr);
 
-            Assert.Equal(1, parent.Constraints.Count);
-            Assert.Equal(1, child.Constraints.Count);
+            Assert.Single(parent.Constraints);
+            Assert.Single(child.Constraints);
         }
 
         [Fact]
@@ -480,7 +480,7 @@ namespace System.Data.Tests
         {
             DataTable dt = new DataTable();
             dt.Constraints.AddRange(null);
-            Assert.Equal(0, dt.Constraints.Count);
+            Assert.Empty(dt.Constraints);
         }
 
         [Fact]
@@ -491,7 +491,7 @@ namespace System.Data.Tests
             ds.Tables.Add(DataProvider.CreateChildDataTable());
             ds.Tables[1].Constraints.AddRange(GetConstraintArray(ds)); //Cuz foreign key belongs to child table
             Assert.Equal(2, ds.Tables[1].Constraints.Count);
-            Assert.Equal(1, ds.Tables[0].Constraints.Count);
+            Assert.Single(ds.Tables[0].Constraints);
         }
 
         [Fact]
@@ -548,7 +548,7 @@ namespace System.Data.Tests
         {
             DataTable dt = DataProvider.CreateUniqueConstraint();
             dt.Constraints.RemoveAt(0);
-            Assert.Equal(0, dt.Constraints.Count);
+            Assert.Empty(dt.Constraints);
 
             dt = DataProvider.CreateUniqueConstraint();
             Constraint con = new UniqueConstraint(dt.Columns["String1"], false);
@@ -556,7 +556,7 @@ namespace System.Data.Tests
             con.ConstraintName = "constraint2";
             dt.Constraints.Add(con);
             dt.Constraints.RemoveAt(0);
-            Assert.Equal(1, dt.Constraints.Count);
+            Assert.Single(dt.Constraints);
             Assert.Equal("constraint2", dt.Constraints[0].ConstraintName);
 
             dt = DataProvider.CreateUniqueConstraint();
@@ -589,11 +589,11 @@ namespace System.Data.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => table.Constraints.Remove("sdfs"));
 
             table.Constraints.Remove(c);
-            Assert.Equal(0, table.Constraints.Count);
+            Assert.Empty(table.Constraints);
 
             // No exception shud be raised
             table.Constraints.Add(c);
-            Assert.Equal(1, table.Constraints.Count);
+            Assert.Single(table.Constraints);
         }
     }
 }

@@ -69,7 +69,7 @@ namespace System.ConfigurationTests
                 ? (SimpleSettings)SettingsBase.Synchronized(new SimpleSettings())
                 : new SimpleSettings();
 
-            Assert.Equal(1, settings.Providers.Count);
+            Assert.Single(settings.Providers);
             Assert.NotNull(settings.Providers[typeof(LocalFileSettingsProvider).Name]);
         }
 
@@ -193,7 +193,7 @@ namespace System.ConfigurationTests
         {
             SettingsWithAttributes settings = new SettingsWithAttributes();
 
-            Assert.Equal(1, settings.Properties.Count);
+            Assert.Single(settings.Properties);
             SettingsProperty property = settings.Properties["StringProperty"];
             Assert.Equal(typeof(TestProvider), property.Provider.GetType());
             Assert.Equal(SettingsSerializeAs.Binary, property.SerializeAs);

@@ -1116,7 +1116,7 @@ namespace System.Linq.Tests
             Assert.Equal(3, new List<int> { 1, 2, 3, 4 }.Select(i => i * 2).Take(3).Count());
             Assert.Equal(4, new List<int> { 1, 2, 3, 4 }.Select(i => i * 2).Take(9).Count());
             Assert.Equal(2, new List<int> { 1, 2, 3, 4 }.Select(i => i * 2).Skip(2).Count());
-            Assert.Equal(0, new List<int> { 1, 2, 3, 4 }.Select(i => i * 2).Skip(8).Count());
+            Assert.Empty(new List<int> { 1, 2, 3, 4 }.Select(i => i * 2).Skip(8));
         }
 
         [Fact]

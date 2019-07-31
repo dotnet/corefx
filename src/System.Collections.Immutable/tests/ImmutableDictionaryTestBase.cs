@@ -230,9 +230,9 @@ namespace System.Collections.Immutable.Tests
         {
             Assert.Same(empty, empty.Clear());
             Assert.Equal(0, empty.Count);
-            Assert.Equal(0, empty.Count());
-            Assert.Equal(0, empty.Keys.Count());
-            Assert.Equal(0, empty.Values.Count());
+            Assert.Empty(empty);
+            Assert.Empty(empty.Keys);
+            Assert.Empty(empty.Values);
             Assert.Same(EqualityComparer<V>.Default, GetValueComparer(empty));
             Assert.False(empty.ContainsKey(someKey));
             Assert.False(empty.Contains(new KeyValuePair<K, V>(someKey, default(V))));

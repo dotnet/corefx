@@ -45,19 +45,19 @@ namespace System.Net.Primitives.Functional.Tests
 
             uri = new Uri(SchemePrefix + "www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
 
             uri = new Uri(SchemePrefix + "x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
 
             uri = new Uri(SchemePrefix + "y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
 
             uri = new Uri(SchemePrefix + "z.y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
         }
 
         [Fact]
@@ -72,24 +72,24 @@ namespace System.Net.Primitives.Functional.Tests
 
             var uri = new Uri(SchemePrefix + OriginalDomain);
             var cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
             Assert.Equal(OriginalDomain, cookies[CookieName1].Domain);
 
             uri = new Uri(SchemePrefix + "www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
 
             uri = new Uri(SchemePrefix + "x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
 
             uri = new Uri(SchemePrefix + "y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
 
             uri = new Uri(SchemePrefix + "z.y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
         }
 
         [Fact]
@@ -105,24 +105,24 @@ namespace System.Net.Primitives.Functional.Tests
 
             var uri = new Uri(SchemePrefix + OriginalDomain);
             var cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
             Assert.Equal(OriginalDomainWithLeadingDot, cookies[CookieName1].Domain);
 
             uri = new Uri(SchemePrefix + "www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
 
             uri = new Uri(SchemePrefix + "x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
 
             uri = new Uri(SchemePrefix + "y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
 
             uri = new Uri(SchemePrefix + "z.y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
         }
     }
 }

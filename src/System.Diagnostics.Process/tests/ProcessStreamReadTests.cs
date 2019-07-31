@@ -144,7 +144,7 @@ namespace System.Diagnostics.Tests
                     // Wait child process close to be sure that output buffer has been flushed
                     Assert.True(p.WaitForExit(WaitInMS), "Child process didn't close");
 
-                    Assert.Equal(1, dataReceived.Count);
+                    Assert.Single(dataReceived);
                     Assert.Equal(1, dataReceived[0]);
                 }
             }

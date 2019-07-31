@@ -20,7 +20,7 @@ namespace System.Collections.Immutable.Tests
             {
                 ImmutableList<int> list = null;
                 Assert.True(func(ref list, l => { Assert.Null(l); return ImmutableList.Create(1); }));
-                Assert.Equal(1, list.Count);
+                Assert.Single(list);
                 Assert.Equal(1, list[0]);
             });
         }
@@ -131,7 +131,7 @@ namespace System.Collections.Immutable.Tests
                                     break;
                                 case 2:
                                     Assert.True(s.Contains(1));
-                                    Assert.Equal(1, s.Count);
+                                    Assert.Single(s);
                                     break;
                             }
 

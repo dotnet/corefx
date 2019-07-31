@@ -42,13 +42,13 @@ namespace System.Collections.Immutable.Tests
         private void PushAndCountTestHelper<T>() where T : new()
         {
             var actual0 = ImmutableStack<T>.Empty;
-            Assert.Equal(0, actual0.Count());
+            Assert.Empty(actual0);
             var actual1 = actual0.Push(new T());
-            Assert.Equal(1, actual1.Count());
-            Assert.Equal(0, actual0.Count());
+            Assert.Single(actual1);
+            Assert.Empty(actual0);
             var actual2 = actual1.Push(new T());
             Assert.Equal(2, actual2.Count());
-            Assert.Equal(0, actual0.Count());
+            Assert.Empty(actual0);
         }
 
         private void PopTestHelper<T>(params T[] values)

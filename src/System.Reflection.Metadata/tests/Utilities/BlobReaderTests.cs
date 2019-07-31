@@ -245,7 +245,7 @@ namespace System.Reflection.Metadata.Tests
                 Assert.Equal(4, reader.Offset);
 
                 reader.Offset = 4;
-                Assert.Equal(0, reader.ReadBytes(0).Length);
+                Assert.Empty(reader.ReadBytes(0));
 
                 reader.Offset = 4;
                 int value;

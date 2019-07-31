@@ -882,7 +882,7 @@ namespace System.ComponentModel.Composition
 
             var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrOne);
 
-            Assert.Equal(0, container.GetExports(definition).Count());
+            Assert.Empty(container.GetExports(definition));
         }
 
         [Fact]
@@ -1027,7 +1027,7 @@ namespace System.ComponentModel.Composition
 
             var definition = ImportDefinitionFactory.Create(import => true, ImportCardinality.ZeroOrOne);
 
-            Assert.Equal(0, container.GetExports(definition).Count());
+            Assert.Empty(container.GetExports(definition));
         }
 
         [Fact]
@@ -1103,7 +1103,7 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports(typeof(string), (Type)null, "Contract");
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
 
             var export = exports.ElementAt(0);
 
@@ -1120,7 +1120,7 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports<string>();
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
 
             var export = exports.ElementAt(0);
 
@@ -1137,7 +1137,7 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports<string>("Contract");
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
 
             var export = exports.ElementAt(0);
 
@@ -1154,7 +1154,7 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports<string, object>();
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
 
             var export = exports.ElementAt(0);
 
@@ -1171,7 +1171,7 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports<string, object>("Contract");
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
 
             var export = exports.ElementAt(0);
 
@@ -1716,7 +1716,7 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports(definition);
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
 
             var export = exports.First();
 
@@ -1738,7 +1738,7 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports(typeof(string), typeof(IMetadataView), "Contract");
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
 
             var export = exports.First();
             IMetadataView exportMetadata = export.Metadata as IMetadataView;
@@ -1765,7 +1765,7 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports<string, IMetadataView>();
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
 
             var export = (Lazy<string, IMetadataView>)exports.First();
 
@@ -1789,7 +1789,7 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports<string, IMetadataView>("Contract");
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
 
             var export = (Lazy<string, IMetadataView>)exports.First();
 
@@ -2891,7 +2891,7 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => true, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             Assert.Equal(expectedContractName, exports.Single().Definition.ContractName);
         }
 
@@ -2903,7 +2903,7 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => true, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             Assert.Equal(1, exports.Single().Metadata.Count);  // contains type identity
         }
 
@@ -2927,7 +2927,7 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => true, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.Equal(1, exports.Count());  // we only get one if the import was not discovered since the import is not satisfied
+            Assert.Single(exports);  // we only get one if the import was not discovered since the import is not satisfied
         }
 
         [Fact]
@@ -2979,7 +2979,7 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => true, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             Assert.Equal(expectedContractName, exports.Single().Definition.ContractName);
         }
 
@@ -2993,7 +2993,7 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => ed.ContractName == expectedContractName, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             Assert.Equal(1, exports.Single().Metadata.Count); // contains type identity
         }
 
@@ -3007,7 +3007,7 @@ namespace System.ComponentModel.Composition
 
             var importDefinition = new ImportDefinition(ed => true, null, ImportCardinality.ZeroOrMore, false, false);
             var exports = container.GetExports(importDefinition);
-            Assert.Equal(1, exports.Count());  // we only get one if the import was not discovered since the import is not satisfied
+            Assert.Single(exports);  // we only get one if the import was not discovered since the import is not satisfied
         }
 
         [Fact]

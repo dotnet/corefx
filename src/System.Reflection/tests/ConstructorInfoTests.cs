@@ -64,7 +64,7 @@ namespace System.Reflection.Tests
         public void Invoke_StaticConstructor_NullObject_NullParameters()
         {
             ConstructorInfo[] constructors = GetConstructors(typeof(ClassWithStaticConstructor));
-            Assert.Equal(1, constructors.Length);
+            Assert.Single(constructors);
             object obj = constructors[0].Invoke(null, new object[] { });
             Assert.Null(obj);
         }
@@ -73,7 +73,7 @@ namespace System.Reflection.Tests
         public void Invoke_StaticConstructor_ThrowsMemberAccessException()
         {
             ConstructorInfo[] constructors = GetConstructors(typeof(ClassWithStaticConstructor));
-            Assert.Equal(1, constructors.Length);
+            Assert.Single(constructors);
             Assert.Throws<MemberAccessException>(() => constructors[0].Invoke(new object[0]));
         }
 

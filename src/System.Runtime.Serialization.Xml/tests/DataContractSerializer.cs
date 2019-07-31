@@ -4015,7 +4015,7 @@ public static partial class DataContractSerializerTests
         Assert.NotNull(actual);
         Assert.Equal(value.DateTimeOffset, actual.DateTimeOffset);
         Assert.NotNull(actual.AnIntList);
-        Assert.Equal(0, actual.AnIntList.Count);
+        Assert.Empty(actual.AnIntList);
     }
 
     [Fact]

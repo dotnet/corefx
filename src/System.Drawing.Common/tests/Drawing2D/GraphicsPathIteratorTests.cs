@@ -276,8 +276,8 @@ namespace System.Drawing.Drawing2D.Tests
             using (GraphicsPathIterator gpi = new GraphicsPathIterator(gp))
             {
                 Assert.Equal(0, gpi.Enumerate(ref points, ref types));
-                Assert.Equal(0, points.Length);
-                Assert.Equal(0, types.Length);
+                Assert.Empty(points);
+                Assert.Empty(types);
             }
         }
 

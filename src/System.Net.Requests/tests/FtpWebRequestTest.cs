@@ -36,7 +36,7 @@ namespace System.Net.Tests
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create("ftp://foo.com/bar");
             Assert.Equal(request.CachePolicy, WebRequest.DefaultCachePolicy);
             Assert.NotNull(request.ClientCertificates);
-            Assert.Equal(0, request.ClientCertificates.Count);
+            Assert.Empty(request.ClientCertificates);
             Assert.False(request.EnableSsl);
             Assert.NotNull(request.Headers);
             Assert.Equal(0, request.Headers.Count);
@@ -312,7 +312,7 @@ namespace System.Net.Tests
             byte[] responseBody = Do(mode, method, uri, requestBody);
 
             // Should be no response
-            Assert.Equal(0, responseBody.Length);
+            Assert.Empty(responseBody);
         }
 
         private static void DoCommand(FtpExecutionMode mode, string method, string uri, string renameTo = null)
@@ -320,7 +320,7 @@ namespace System.Net.Tests
             byte[] responseBody = Do(mode, method, uri, null, renameTo);
 
             // Should be no response
-            Assert.Equal(0, responseBody.Length);
+            Assert.Empty(responseBody);
         }
 
         public static List<object[]> Modes = new List<object[]>

@@ -2499,7 +2499,7 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.Read))
                     {
                         XDocument xd = XDocument.Load(partStream);
-                        Assert.Equal(0, xd.DescendantNodes().Count());
+                        Assert.Empty(xd.DescendantNodes());
                     }
                 });
 
@@ -2509,7 +2509,7 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = mainPart.GetStream(FileMode.Create, FileAccess.ReadWrite))
                     {
                         XDocument xd = XDocument.Load(partStream);
-                        Assert.Equal(0, xd.DescendantNodes().Count());
+                        Assert.Empty(xd.DescendantNodes());
                     }
                 });
 
@@ -2749,7 +2749,7 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = mainPart.GetStream(FileMode.OpenOrCreate, FileAccess.Read))
                     {
                         XDocument xd = XDocument.Load(partStream);
-                        Assert.Equal(0, xd.DescendantNodes().Count());
+                        Assert.Empty(xd.DescendantNodes());
                     }
                 });
             }
@@ -3187,7 +3187,7 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = packagePartDocument.GetStream(FileMode.Create, FileAccess.Read))
                     {
                         XDocument xd = XDocument.Load(partStream);
-                        Assert.Equal(0, xd.DescendantNodes().Count());
+                        Assert.Empty(xd.DescendantNodes());
                     }
                 });
             }

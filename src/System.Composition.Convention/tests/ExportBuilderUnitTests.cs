@@ -22,7 +22,7 @@ namespace System.Composition.Convention.Tests
             builder.ForType<CFoo>().Export<IFoo>();
 
             IEnumerable<ExportAttribute> exports = builder.GetDeclaredAttributes(typeof(CFoo), typeof(CFoo).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             Assert.Equal(typeof(IFoo), exports.First().ContractType);
         }
 
@@ -33,7 +33,7 @@ namespace System.Composition.Convention.Tests
             builder.ForType(typeof(CFoo)).Export((c) => c.AsContractType(typeof(IFoo)));
 
             IEnumerable<ExportAttribute> exports = builder.GetDeclaredAttributes(typeof(CFoo), typeof(CFoo).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             Assert.Equal(typeof(IFoo), exports.First().ContractType);
         }
 

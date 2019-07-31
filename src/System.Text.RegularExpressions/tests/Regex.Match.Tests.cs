@@ -741,7 +741,7 @@ namespace System.Text.RegularExpressions.Tests
             Assert.Equal(expected[0].Index, match.Index);
             Assert.Equal(expected[0].Length, match.Length);
 
-            Assert.Equal(1, match.Captures.Count);
+            Assert.Single(match.Captures);
             Assert.Equal(expected[0].Value, match.Captures[0].Value);
             Assert.Equal(expected[0].Index, match.Captures[0].Index);
             Assert.Equal(expected[0].Length, match.Captures[0].Length);

@@ -34,7 +34,7 @@ namespace Microsoft.Framework.WebEncoders
         public void Ctor_Parameterless_CreatesEmptyFilter()
         {
             var filter = new TextEncoderSettings();
-            Assert.Equal(0, filter.GetAllowedCodePoints().Count());
+            Assert.Empty(filter.GetAllowedCodePoints());
         }
 
         [Fact]

@@ -196,7 +196,7 @@ namespace System.Linq.Tests
         {
             Assert.Equal(2, NumberRangeGuaranteedNotCollectionType(0, 3).Take(2).Count());
             Assert.Equal(2, new[] { 1, 2, 3 }.Take(2).Count());
-            Assert.Equal(0, NumberRangeGuaranteedNotCollectionType(0, 3).Take(0).Count());
+            Assert.Empty(NumberRangeGuaranteedNotCollectionType(0, 3).Take(0));
         }
 
         [Fact]

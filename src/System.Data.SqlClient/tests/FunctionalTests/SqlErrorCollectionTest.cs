@@ -145,7 +145,7 @@ namespace System.Data.SqlClient.Tests
                 catch (SqlException ex)
                 {
                     Assert.NotNull(ex.Errors);
-                    Assert.Equal(1, ex.Errors.Count);
+                    Assert.Single(ex.Errors);
 
                     return ex.Errors;
                 }

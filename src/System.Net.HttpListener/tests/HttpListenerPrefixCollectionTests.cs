@@ -174,7 +174,7 @@ namespace System.Net.Tests
             var listener = new HttpListener();
             listener.Prefixes.Add(uriPrefix);
 
-            Assert.Equal(1, listener.Prefixes.Count);
+            Assert.Single(listener.Prefixes);
             Assert.True(listener.Prefixes.Contains(uriPrefix));
 
             Assert.All(listener.DefaultServiceNames.Cast<string>(), serviceNames => Assert.StartsWith("HTTP/", serviceNames));
@@ -365,7 +365,7 @@ namespace System.Net.Tests
             var listener = new HttpListener();
             listener.Prefixes.Add(uriPrefix);
 
-            Assert.Equal(1, listener.Prefixes.Count);
+            Assert.Single(listener.Prefixes);
             Assert.True(listener.Prefixes.Contains(uriPrefix));
             Assert.Throws<HttpListenerException>(() => listener.Start());
         }
@@ -420,7 +420,7 @@ namespace System.Net.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("hostName", () => listener.Prefixes.Add(longPrefix));
 
             // Ouch: even though adding the prefix threw an exception, the prefix was still added.
-            Assert.Equal(1, listener.Prefixes.Count);
+            Assert.Single(listener.Prefixes);
             Assert.True(listener.Prefixes.Contains(longPrefix));
             Assert.Empty(listener.DefaultServiceNames);
 
@@ -466,7 +466,7 @@ namespace System.Net.Tests
 
             Assert.True(listener.Prefixes.Remove("http://localhost:9200/"));
             Assert.False(listener.Prefixes.Contains("http://localhost:9200/"));
-            Assert.Equal(0, listener.Prefixes.Count);
+            Assert.Empty(listener.Prefixes);
         }
 
         [Fact]
@@ -479,7 +479,7 @@ namespace System.Net.Tests
 
                 Assert.True(listener.Prefixes.Remove(uriPrefix));
                 Assert.False(listener.Prefixes.Contains(uriPrefix));
-                Assert.Equal(0, listener.Prefixes.Count);
+                Assert.Empty(listener.Prefixes);
 
                 // Even though the listener has no prefixes, it should still be listening.
                 Assert.True(listener.IsListening);
@@ -524,7 +524,7 @@ namespace System.Net.Tests
 
             listener.Prefixes.Clear();
             Assert.False(listener.Prefixes.Contains("http://localhost:9200/"));
-            Assert.Equal(0, listener.Prefixes.Count);
+            Assert.Empty(listener.Prefixes);
         }
 
         [Fact]

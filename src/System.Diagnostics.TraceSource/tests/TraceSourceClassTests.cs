@@ -22,7 +22,7 @@ namespace System.Diagnostics.TraceSourceTests
         public void DefaultListenerTest()
         {
             var trace = new TraceSource("TestTraceSource");
-            Assert.Equal(1, trace.Listeners.Count);
+            Assert.Single(trace.Listeners);
             Assert.IsType<DefaultTraceListener>(trace.Listeners[0]);
         }
 

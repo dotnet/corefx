@@ -63,9 +63,9 @@ namespace System.Collections.Specialized.Tests
             NameValueCollection nameValueCollection = new NameValueCollection();
             string value = "value";
             nameValueCollection.Add(null, value);
-            Assert.Equal(1, nameValueCollection.Count);
-            Assert.Equal(1, nameValueCollection.AllKeys.Length);
-            Assert.Equal(1, nameValueCollection.Keys.Count);
+            Assert.Single(nameValueCollection);
+            Assert.Single(nameValueCollection.AllKeys);
+            Assert.Single(nameValueCollection.Keys);
 
             Assert.Contains(null, nameValueCollection.AllKeys);
             Assert.Contains(null, nameValueCollection.Keys.Cast<string>());
@@ -89,9 +89,9 @@ namespace System.Collections.Specialized.Tests
             NameValueCollection nameValueCollection = new NameValueCollection();
             string name = "name";
             nameValueCollection.Add(name, null);
-            Assert.Equal(1, nameValueCollection.Count);
-            Assert.Equal(1, nameValueCollection.AllKeys.Length);
-            Assert.Equal(1, nameValueCollection.Keys.Count);
+            Assert.Single(nameValueCollection);
+            Assert.Single(nameValueCollection.AllKeys);
+            Assert.Single(nameValueCollection.Keys);
 
             Assert.Contains(name, nameValueCollection.AllKeys);
             Assert.Contains(name, nameValueCollection.Keys.Cast<string>());
@@ -118,9 +118,9 @@ namespace System.Collections.Specialized.Tests
             nameValueCollection.Add(name, "value2");
             nameValueCollection.Add(name, null);
 
-            Assert.Equal(1, nameValueCollection.Count);
-            Assert.Equal(1, nameValueCollection.AllKeys.Length);
-            Assert.Equal(1, nameValueCollection.Keys.Count);
+            Assert.Single(nameValueCollection);
+            Assert.Single(nameValueCollection.AllKeys);
+            Assert.Single(nameValueCollection.Keys);
 
             Assert.Contains(name, nameValueCollection.AllKeys);
             Assert.Contains(name, nameValueCollection.Keys.Cast<string>());

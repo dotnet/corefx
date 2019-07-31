@@ -756,7 +756,7 @@ namespace System.ComponentModel.Composition
         {
             var container = ContainerFactory.CreateWithAttributedCatalog(typeof(ExportsValidListOfExportOfString), typeof(ImportsListOfExportOfString));
             var importer = container.GetExportedValue<ImportsListOfExportOfString>();
-            Assert.Equal(0, importer.ExportedList.Count);
+            Assert.Empty(importer.ExportedList);
         }
     }
 }

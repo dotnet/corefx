@@ -61,8 +61,8 @@ namespace System.Collections.Tests
         public void Stack_Generic_Constructor_InitialValues()
         {
             var stack = new Stack<T>();
-            Assert.Equal(0, stack.Count);
-            Assert.Equal(0, stack.ToArray().Length);
+            Assert.Empty(stack);
+            Assert.Empty(stack.ToArray());
             Assert.NotNull(((ICollection)stack).SyncRoot);
         }
 
@@ -212,7 +212,7 @@ namespace System.Collections.Tests
                 stack.TrimExcess();
                 stack.Clear();
                 stack.TrimExcess();
-                Assert.Equal(0, stack.Count);
+                Assert.Empty(stack);
 
                 AddToCollection(stack, count / 10);
                 stack.TrimExcess();
@@ -230,7 +230,7 @@ namespace System.Collections.Tests
                 stack.TrimExcess();
                 stack.Clear();
                 stack.TrimExcess();
-                Assert.Equal(0, stack.Count);
+                Assert.Empty(stack);
 
                 AddToCollection(stack, count);
                 stack.TrimExcess();

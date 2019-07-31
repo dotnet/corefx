@@ -83,7 +83,7 @@ namespace System.Reflection.Emit.Tests
 
             Type createdType = type.CreateTypeInfo().AsType();
             EventInfo[] events = createdType.GetEvents();
-            Assert.Equal(1, events.Length);
+            Assert.Single(events);
             Assert.Equal("EventName", events[0].Name);
         }
 

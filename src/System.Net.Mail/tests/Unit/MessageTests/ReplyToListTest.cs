@@ -13,7 +13,7 @@ namespace System.Net.Mail.Tests
         [Fact]
         public void ReplyToList_WithNoReplyToSet_ShouldReturnEmptyList()
         {
-            Assert.Equal(0, _message.ReplyToList.Count);
+            Assert.Empty(_message.ReplyToList);
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace System.Net.Mail.Tests
             Assert.Equal(2, _message.ReplyToList.Count);
 
             string[] s = _message.Headers.GetValues("Reply-To");
-            Assert.Equal(1, s.Length);
+            Assert.Single(s);
 
             Assert.DoesNotContain("test@example.com", s[0]);
             Assert.DoesNotContain("test2@example.com", s[0]);
@@ -66,7 +66,7 @@ namespace System.Net.Mail.Tests
             Assert.Equal(3, _message.ReplyToList.Count);
 
             string[] s = _message.Headers.GetValues("Reply-To");
-            Assert.Equal(1, s.Length);
+            Assert.Single(s);
 
             Assert.Contains("test@example.com", s[0]);
             Assert.Contains("test2@example.com", s[0]);
@@ -95,7 +95,7 @@ namespace System.Net.Mail.Tests
             Assert.True(_message.ReplyToList.Count == 3, "ReplyToList did not contain all email addresses");
 
             string[] s = _message.Headers.GetValues("Reply-To");
-            Assert.Equal(1, s.Length);
+            Assert.Single(s);
 
             Assert.Contains("test@example.com", s[0]);
             Assert.Contains("test2@example.com", s[0]);

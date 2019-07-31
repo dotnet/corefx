@@ -14,7 +14,7 @@ namespace System.Data.Tests
             dataTable.Columns.Add("Name", typeof(string));
             dataTable.Rows.Add(new object[] { "Mike   " });
             DataRow[] selectedRows = dataTable.Select("Name = 'Mike'");
-            Assert.Equal(1, selectedRows.Length);
+            Assert.Single(selectedRows);
         }
     }
 }

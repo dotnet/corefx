@@ -61,8 +61,8 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts);
 
-            Assert.Equal(0, typeAtts.Count());
-            Assert.Equal(0, configuredMembers.Count);
+            Assert.Empty(typeAtts);
+            Assert.Empty(configuredMembers);
         }
 
         [Fact]
@@ -75,8 +75,8 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts);
 
-            Assert.Equal(1, typeAtts.Count());
-            Assert.Equal(0, configuredMembers.Count);
+            Assert.Single(typeAtts);
+            Assert.Empty(configuredMembers);
             Assert.Same(typeof(ExportAttribute), typeAtts.ElementAt(0).GetType());
             Assert.Null((typeAtts.ElementAt(0) as ExportAttribute).ContractType);
             Assert.Null((typeAtts.ElementAt(0) as ExportAttribute).ContractName);
@@ -92,8 +92,8 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts);
 
-            Assert.Equal(1, typeAtts.Count());
-            Assert.Equal(0, configuredMembers.Count);
+            Assert.Single(typeAtts);
+            Assert.Empty(configuredMembers);
             Assert.Same(typeof(ExportAttribute), typeAtts.ElementAt(0).GetType());
             Assert.Equal(typeof(IFoo), (typeAtts.ElementAt(0) as ExportAttribute).ContractType);
             Assert.Null((typeAtts.ElementAt(0) as ExportAttribute).ContractName);
@@ -110,7 +110,7 @@ namespace System.ComponentModel.Composition.Registration.Tests
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts);
 
             Assert.Equal(2, typeAtts.Count());
-            Assert.Equal(0, configuredMembers.Count);
+            Assert.Empty(configuredMembers);
             Assert.Same(typeof(ExportAttribute), typeAtts.ElementAt(0).GetType());
             Assert.True(typeAtts.ElementAt(0) is ExportAttribute);
             Assert.True(typeAtts.ElementAt(1) is PartMetadataAttribute);
@@ -131,7 +131,7 @@ namespace System.ComponentModel.Composition.Registration.Tests
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts);
 
             Assert.Equal(2, typeAtts.Count());
-            Assert.Equal(0, configuredMembers.Count);
+            Assert.Empty(configuredMembers);
             Assert.Same(typeof(ExportAttribute), typeAtts.ElementAt(0).GetType());
             Assert.True(typeAtts.ElementAt(0) is ExportAttribute);
             Assert.True(typeAtts.ElementAt(1) is PartMetadataAttribute);
@@ -152,14 +152,14 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts);
 
-            Assert.Equal(1, typeAtts.Count());
-            Assert.Equal(1, configuredMembers.Count);
+            Assert.Single(typeAtts);
+            Assert.Single(configuredMembers);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0];
             Assert.Equal(typeof(FooImpl).GetProperty("P1"), tuple.Item1);
 
             List<Attribute> atts = tuple.Item2;
-            Assert.Equal(1, atts.Count);
+            Assert.Single(atts);
 
             var expAtt = atts[0] as ExportAttribute;
             Assert.Null(expAtt.ContractName);
@@ -177,14 +177,14 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts);
 
-            Assert.Equal(1, typeAtts.Count());
-            Assert.Equal(1, configuredMembers.Count);
+            Assert.Single(typeAtts);
+            Assert.Single(configuredMembers);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0];
             Assert.Equal(typeof(FooImpl).GetProperty("P2"), tuple.Item1);
 
             List<Attribute> atts = tuple.Item2;
-            Assert.Equal(1, atts.Count);
+            Assert.Single(atts);
 
             var importAttribute = atts[0] as ImportAttribute;
             Assert.NotNull(importAttribute);
@@ -203,14 +203,14 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts);
 
-            Assert.Equal(1, typeAtts.Count());
-            Assert.Equal(1, configuredMembers.Count);
+            Assert.Single(typeAtts);
+            Assert.Single(configuredMembers);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0];
             Assert.Equal(typeof(FooImpl).GetProperty("P3"), tuple.Item1);
 
             List<Attribute> atts = tuple.Item2;
-            Assert.Equal(1, atts.Count);
+            Assert.Single(atts);
 
             var importManyAttribute = atts[0] as ImportManyAttribute;
             Assert.NotNull(importManyAttribute);
@@ -229,14 +229,14 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts);
 
-            Assert.Equal(1, typeAtts.Count());
-            Assert.Equal(1, configuredMembers.Count);
+            Assert.Single(typeAtts);
+            Assert.Single(configuredMembers);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0];
             Assert.Equal(typeof(FooImpl).GetProperty("P1"), tuple.Item1);
 
             List<Attribute> atts = tuple.Item2;
-            Assert.Equal(1, atts.Count);
+            Assert.Single(atts);
 
             var expAtt = atts[0] as ExportAttribute;
             Assert.Equal("hey", expAtt.ContractName);
@@ -254,14 +254,14 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts);
 
-            Assert.Equal(1, typeAtts.Count());
-            Assert.Equal(1, configuredMembers.Count);
+            Assert.Single(typeAtts);
+            Assert.Single(configuredMembers);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0];
             Assert.Equal(typeof(FooImpl).GetProperty("P1"), tuple.Item1);
 
             List<Attribute> atts = tuple.Item2;
-            Assert.Equal(1, atts.Count);
+            Assert.Single(atts);
 
             var expAtt = atts[0] as ExportAttribute;
             Assert.Null(expAtt.ContractName);
@@ -279,7 +279,7 @@ namespace System.ComponentModel.Composition.Registration.Tests
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts);
 
             Assert.Equal(2, typeAtts.Count());
-            Assert.Equal(0, configuredMembers.Count);
+            Assert.Empty(configuredMembers);
 
             var partCPAtt = (PartCreationPolicyAttribute)typeAtts.ElementAt(1);
             Assert.Equal(CreationPolicy.NonShared, partCPAtt.CreationPolicy);
@@ -295,26 +295,26 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts, typeof(FooImplWithConstructors));
 
-            Assert.Equal(1, typeAtts.Count());
+            Assert.Single(typeAtts);
             Assert.Equal(3, configuredMembers.Count);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0]; // Constructor
             ConstructorInfo ci = typeof(FooImplWithConstructors).GetConstructors()[2];
             Assert.True(tuple.Item1 is ConstructorInfo);
             Assert.Same(ci, tuple.Item1);
-            Assert.Equal(1, tuple.Item2.Count);
+            Assert.Single(tuple.Item2);
             Assert.True(tuple.Item2[0] is ImportingConstructorAttribute);
 
             tuple = configuredMembers[1]; // Parameter 1
             Assert.True(tuple.Item1 is ParameterInfo);
             Assert.Same(ci.GetParameters()[0], tuple.Item1);
-            Assert.Equal(1, tuple.Item2.Count);
+            Assert.Single(tuple.Item2);
             Assert.True(tuple.Item2[0] is ImportAttribute);
 
             tuple = configuredMembers[2]; // Parameter 2
             Assert.True(tuple.Item1 is ParameterInfo);
             Assert.Same(ci.GetParameters()[1], tuple.Item1);
-            Assert.Equal(1, tuple.Item2.Count);
+            Assert.Single(tuple.Item2);
             Assert.True(tuple.Item2[0] is ImportAttribute);
         }
 
@@ -328,20 +328,20 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts, typeof(FooImplWithConstructors));
 
-            Assert.Equal(1, typeAtts.Count());
+            Assert.Single(typeAtts);
             Assert.Equal(2, configuredMembers.Count);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0]; // Constructor
             ConstructorInfo ci = typeof(FooImplWithConstructors).GetConstructors()[1];
             Assert.True(tuple.Item1 is ConstructorInfo);
             Assert.Same(ci, tuple.Item1);
-            Assert.Equal(1, tuple.Item2.Count);
+            Assert.Single(tuple.Item2);
             Assert.True(tuple.Item2[0] is ImportingConstructorAttribute);
 
             tuple = configuredMembers[1]; // Parameter 1
             Assert.True(tuple.Item1 is ParameterInfo);
             Assert.Same(ci.GetParameters()[0], tuple.Item1);
-            Assert.Equal(1, tuple.Item2.Count);
+            Assert.Single(tuple.Item2);
         }
 
         [Fact]
@@ -354,7 +354,7 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts, typeof(FooImplWithConstructors));
 
-            Assert.Equal(1, typeAtts.Count());
+            Assert.Single(typeAtts);
             Assert.Equal(2, configuredMembers.Count);
 
             ConstructorInfo ci = typeof(FooImplWithConstructors).GetConstructors()[1];
@@ -362,7 +362,7 @@ namespace System.ComponentModel.Composition.Registration.Tests
             Tuple<object, List<Attribute>> tuple = configuredMembers[1]; // Parameter 1
             Assert.True(tuple.Item1 is ParameterInfo);
             Assert.Same(ci.GetParameters()[0], tuple.Item1);
-            Assert.Equal(1, tuple.Item2.Count);
+            Assert.Single(tuple.Item2);
             Assert.Equal(typeof(ImportManyAttribute), tuple.Item2[0].GetType());
         }
 

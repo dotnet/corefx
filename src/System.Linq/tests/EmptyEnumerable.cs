@@ -28,7 +28,7 @@ namespace System.Linq.Tests
         private void TestEmptyEmpty<T>()
         {
             Assert.Equal(new T[0], Enumerable.Empty<T>());
-            Assert.Equal(0, Enumerable.Empty<T>().Count());
+            Assert.Empty(Enumerable.Empty<T>());
             Assert.Same(Enumerable.Empty<T>().GetEnumerator(), Enumerable.Empty<T>().GetEnumerator());
         }
 

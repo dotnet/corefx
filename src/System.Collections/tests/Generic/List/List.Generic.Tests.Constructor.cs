@@ -18,7 +18,7 @@ namespace System.Collections.Tests
         {
             List<T> list = new List<T>();
             Assert.Equal(0, list.Capacity); //"Expected capacity of list to be the same as given."
-            Assert.Equal(0, list.Count); //"Do not expect anything to be in the list."
+            Assert.Empty(list); //"Do not expect anything to be in the list."
             Assert.False(((IList<T>)list).IsReadOnly); //"List should not be readonly"
         }
 
@@ -33,7 +33,7 @@ namespace System.Collections.Tests
         {
             List<T> list = new List<T>(capacity);
             Assert.Equal(capacity, list.Capacity); //"Expected capacity of list to be the same as given."
-            Assert.Equal(0, list.Count); //"Do not expect anything to be in the list."
+            Assert.Empty(list); //"Do not expect anything to be in the list."
             Assert.False(((IList<T>)list).IsReadOnly); //"List should not be readonly"
         }
 

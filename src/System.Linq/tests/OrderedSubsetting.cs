@@ -331,7 +331,7 @@ namespace System.Linq.Tests
         public void Count()
         {
             Assert.Equal(20, Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Skip(10).Take(20).Count());
-            Assert.Equal(1, Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Take(2).Skip(1).Count());
+            Assert.Single(Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Take(2).Skip(1));
         }
 
         [Fact]
@@ -358,8 +358,8 @@ namespace System.Linq.Tests
         [Fact]
         public void EmptyCount()
         {
-            Assert.Equal(0, Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Skip(100).Count());
-            Assert.Equal(0, Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Take(0).Count());
+            Assert.Empty(Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Skip(100));
+            Assert.Empty(Enumerable.Range(0, 100).Shuffle().OrderBy(i => i).Take(0));
         }
 
         [Fact]
@@ -395,7 +395,7 @@ namespace System.Linq.Tests
         [Fact]
         public void SingleElementCount()
         {
-            Assert.Equal(1, Enumerable.Range(0, 20).Shuffle().OrderBy(i => i).Skip(10).Take(1).Count());
+            Assert.Single(Enumerable.Range(0, 20).Shuffle().OrderBy(i => i).Skip(10).Take(1));
         }
 
         [Fact]
@@ -487,7 +487,7 @@ namespace System.Linq.Tests
             Assert.Equal(93, source.RunOnce().OrderBy(i => i).ElementAt(93));
             Assert.Equal(42, source.RunOnce().OrderBy(i => i).ElementAtOrDefault(42));
             Assert.Equal(20, source.RunOnce().OrderBy(i => i).Skip(10).Take(20).Count());
-            Assert.Equal(1, source.RunOnce().OrderBy(i => i).Take(2).Skip(1).Count());
+            Assert.Single(source.RunOnce().OrderBy(i => i).Take(2).Skip(1));
         }
     }
 }

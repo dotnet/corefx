@@ -19,7 +19,7 @@ namespace System.Reflection.Tests
         public void GetModulesTest()
         {
             Assembly executingAssembly = GetType().GetTypeInfo().Assembly;
-            Assert.Equal(1, executingAssembly.GetModules().Length);
+            Assert.Single(executingAssembly.GetModules());
         }
 
         [Fact]

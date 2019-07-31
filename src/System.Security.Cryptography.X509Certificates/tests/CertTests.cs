@@ -353,7 +353,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     {
                         X509Certificate2Collection fromPfx = ic.Collection;
 
-                        Assert.Equal(1, fromPfx.Count);
+                        Assert.Single(fromPfx);
                         Assert.Equal(publicOnly, fromPfx[0]);
                     }
                 }

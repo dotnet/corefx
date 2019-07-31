@@ -51,7 +51,7 @@ namespace System.Reflection.Emit.Tests
             ConstructorInfo createdConstructor = createdType.GetConstructor(new Type[0]);
             Attribute[] customAttributes = (Attribute[])CustomAttributeExtensions.GetCustomAttributes(createdConstructor, true).ToArray();
 
-            Assert.Equal(1, customAttributes.Length);
+            Assert.Single(customAttributes);
             Assert.Equal(2, ((IntAllAttribute)customAttributes[0])._i);
         }
 

@@ -52,7 +52,7 @@ namespace System.Linq.Tests
                 resultDictionary =>
                 {
                     Assert.NotNull(resultDictionary);
-                    Assert.Equal(0, resultDictionary.Count);
+                    Assert.Empty(resultDictionary);
                 });
         }
 
@@ -332,7 +332,7 @@ namespace System.Linq.Tests
                     dict.Remove(key);
                 }
                 Assert.False(ke.MoveNext());
-                Assert.Equal(0, dict.Count());
+                Assert.Empty(dict);
             }
         }
 

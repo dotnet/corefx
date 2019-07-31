@@ -373,7 +373,7 @@ namespace System.Data.Tests
             dcArr = dr.GetColumnsInError();
 
             // GetColumnsInError 1
-            Assert.Equal(0, dcArr.Length);
+            Assert.Empty(dcArr);
 
             dr.SetColumnError(0, sColErr);
             dr.SetColumnError(2, sColErr);
@@ -936,7 +936,7 @@ namespace System.Data.Tests
             Assert.Same(personB, dr[dc1]);
 
             dr = dt.Rows[0];
-            Assert.Equal(0, _eventsFired.Count);
+            Assert.Empty(_eventsFired);
             dr[dc0] = addressC;
             Assert.Equal(2, _eventsFired.Count);
             Assert.Equal(addressC, dr[dc0]);
@@ -1144,7 +1144,7 @@ namespace System.Data.Tests
                 Assert.Equal("column", ex.ParamName);
             }
 
-            Assert.Equal(0, _eventsFired.Count);
+            Assert.Empty(_eventsFired);
         }
 
         [Fact] // Object this [DataColumn]
@@ -1197,12 +1197,12 @@ namespace System.Data.Tests
                 Assert.Matches(@"\b" + "DBNull" + @"\b", ex.Message);
             }
 
-            Assert.Equal(1, _eventsFired.Count);
+            Assert.Single(_eventsFired);
             Assert.Equal(addressA, dr[dc0]);
             Assert.False(dr.IsNull(dc0));
             Assert.Same(personA, dr[dc1]);
             Assert.False(dr.IsNull(dc1));
-            Assert.Equal(1, _eventsFired.Count);
+            Assert.Single(_eventsFired);
 
             dr[dc1] = null;
 

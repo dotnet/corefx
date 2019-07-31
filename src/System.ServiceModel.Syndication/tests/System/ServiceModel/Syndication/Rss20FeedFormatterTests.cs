@@ -756,7 +756,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", secondAuthor.AttributeExtensions[new XmlQualifiedName("feedauthor_name2", "feedauthor_namespace")]);
                 Assert.Equal("feedauthor_value", secondAuthor.AttributeExtensions[new XmlQualifiedName("feedauthor_name3", "feedauthor_namespace")]);
                 Assert.Equal("", secondAuthor.AttributeExtensions[new XmlQualifiedName("feedauthor_name4", "xmlns")]);
-                Assert.Equal(1, secondAuthor.ElementExtensions.Count());
+                Assert.Single(secondAuthor.ElementExtensions);
                 Assert.Equal("feedauthor_email", secondAuthor.Email);
                 Assert.Equal("feedauthor_name", secondAuthor.Name);
                 Assert.Equal("feedauthor_uri", secondAuthor.Uri);
@@ -805,7 +805,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", secondContributor.AttributeExtensions[new XmlQualifiedName("feedauthor__name2", "feedauthor__namespace")]);
                 Assert.Equal("feedauthor__value", secondContributor.AttributeExtensions[new XmlQualifiedName("feedauthor__name3", "feedauthor__namespace")]);
                 Assert.Equal("", secondContributor.AttributeExtensions[new XmlQualifiedName("feedauthor__name4", "xmlns")]);
-                Assert.Equal(1, secondContributor.ElementExtensions.Count());
+                Assert.Single(secondContributor.ElementExtensions);
                 Assert.Equal("feedauthor__email", secondContributor.Email);
                 Assert.Equal("feedauthor__name", secondContributor.Name);
                 Assert.Equal("feedauthor__uri", secondContributor.Uri);
@@ -818,7 +818,7 @@ namespace System.ServiceModel.Syndication.Tests
 
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, feed.ElementExtensions.Count());
+                    Assert.Single(feed.ElementExtensions);
                 }
                 else
                 {
@@ -849,7 +849,7 @@ namespace System.ServiceModel.Syndication.Tests
                 }
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, item.ElementExtensions.Count());
+                    Assert.Single(item.ElementExtensions);
                 }
                 else
                 {
@@ -873,7 +873,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", itemSecondAuthor.AttributeExtensions[new XmlQualifiedName("author_name2", "author_namespace")]);
                 Assert.Equal("author_value", itemSecondAuthor.AttributeExtensions[new XmlQualifiedName("author_name3", "author_namespace")]);
                 Assert.Equal("", itemSecondAuthor.AttributeExtensions[new XmlQualifiedName("author_name4", "xmlns")]);
-                Assert.Equal(1, itemSecondAuthor.ElementExtensions.Count());
+                Assert.Single(itemSecondAuthor.ElementExtensions);
                 Assert.Equal("author_email", itemSecondAuthor.Email);
                 Assert.Equal("author_name", itemSecondAuthor.Name);
                 Assert.Equal("author_uri", itemSecondAuthor.Uri);
@@ -968,7 +968,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", itemSecondContributor.AttributeExtensions[new XmlQualifiedName("contributor_name2", "contributor_namespace")]);
                 Assert.Equal("contributor_value", itemSecondContributor.AttributeExtensions[new XmlQualifiedName("contributor_name3", "contributor_namespace")]);
                 Assert.Equal("", itemSecondContributor.AttributeExtensions[new XmlQualifiedName("contributor_name4", "xmlns")]);
-                Assert.Equal(1, itemSecondContributor.ElementExtensions.Count());
+                Assert.Single(itemSecondContributor.ElementExtensions);
                 Assert.Equal("contributor_email", itemSecondContributor.Email);
                 Assert.Equal("contributor_name", itemSecondContributor.Name);
                 Assert.Equal("contributor_uri", itemSecondContributor.Uri);
@@ -983,7 +983,7 @@ namespace System.ServiceModel.Syndication.Tests
 
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, item.ElementExtensions.Count());
+                    Assert.Single(item.ElementExtensions);
                 }
                 else
                 {
@@ -1011,7 +1011,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", itemSecondLink.AttributeExtensions[new XmlQualifiedName("link_name2", "link_namespace")]);
                 Assert.Equal("link_value", itemSecondLink.AttributeExtensions[new XmlQualifiedName("link_name3", "link_namespace")]);
                 Assert.Equal("", itemSecondLink.AttributeExtensions[new XmlQualifiedName("link_name4", "xmlns")]);
-                Assert.Equal(1, itemSecondLink.ElementExtensions.Count());
+                Assert.Single(itemSecondLink.ElementExtensions);
                 Assert.Equal(new Uri("http://link_url.com"), itemSecondLink.BaseUri);
                 Assert.Equal(10, itemSecondLink.Length);
                 Assert.Equal("link_mediaType", itemSecondLink.MediaType);
@@ -1060,7 +1060,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", secondLink.AttributeExtensions[new XmlQualifiedName("syndicationlink_name2", "syndicationlink_namespace")]);
                 Assert.Equal("syndicationlink_value", secondLink.AttributeExtensions[new XmlQualifiedName("syndicationlink_name3", "syndicationlink_namespace")]);
                 Assert.Equal("", secondLink.AttributeExtensions[new XmlQualifiedName("syndicationlink_name4", "xmlns")]);
-                Assert.Equal(1, secondLink.ElementExtensions.Count());
+                Assert.Single(secondLink.ElementExtensions);
                 Assert.Equal(new Uri("http://syndicationlink_url.com/"), secondLink.BaseUri);
                 Assert.Equal(10, secondLink.Length);
                 Assert.Equal("syndicationlink_mediaType", secondLink.MediaType);

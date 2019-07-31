@@ -28,21 +28,21 @@ namespace System.Net.Mail.Tests
         [Fact]
         public void InitialCount()
         {
-            Assert.Equal(0, lrc.Count);
+            Assert.Empty(lrc);
         }
 
         [Fact]
         public void AddCount()
         {
             lrc.Add(lr);
-            Assert.Equal(1, lrc.Count);
+            Assert.Single(lrc);
         }
 
         [Fact]
         public void RemoveCount()
         {
             lrc.Remove(lr);
-            Assert.Equal(0, lrc.Count);
+            Assert.Empty(lrc);
         }
     }
 }

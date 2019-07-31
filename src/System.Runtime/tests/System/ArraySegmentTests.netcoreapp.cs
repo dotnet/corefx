@@ -39,9 +39,9 @@ namespace System.Tests
             // Check that two Empty invocations return ArraySegments with a cached empty array.
             // An empty array is necessary to ensure that someone doesn't use the indexer to store data in the array Empty refers to.
             Assert.Same(empty.Array, ArraySegment<T>.Empty.Array);
-            Assert.Equal(0, empty.Array.Length);
+            Assert.Empty(empty.Array);
             Assert.Equal(0, empty.Offset);
-            Assert.Equal(0, empty.Count);
+            Assert.Empty(empty);
         }
 
         [Fact]
@@ -105,7 +105,7 @@ namespace System.Tests
             ArraySegment<T> fromNull = null;
             Assert.Null(fromNull.Array);
             Assert.Equal(0, fromNull.Offset);
-            Assert.Equal(0, fromNull.Count);
+            Assert.Empty(fromNull);
 
             Assert.True(default(ArraySegment<T>) == null);
             Assert.True(new ArraySegment<T>(Array.Empty<T>()) != null);

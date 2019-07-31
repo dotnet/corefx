@@ -50,11 +50,11 @@ namespace Tests.Integration
 
             var importer = container.GetExportedValue<MyImporter>();
 
-            Assert.Equal(0, importer.Extensions.Length);
+            Assert.Empty(importer.Extensions);
 
             container.ComposeExportedValue<int>("IExtension.IdValue", 10);
 
-            Assert.Equal(1, importer.Extensions.Length);
+            Assert.Single(importer.Extensions);
             Assert.Equal(10, importer.Extensions[0].Id);
 
             container.ComposeExportedValue<int>("IExtension.IdValue2", 20);
@@ -88,15 +88,15 @@ namespace Tests.Integration
 
             var importer = container.GetExportedValue<MyImporter>();
 
-            Assert.Equal(0, importer.Extensions.Length);
+            Assert.Empty(importer.Extensions);
 
             catalog.Catalogs.Add(ext1Cat);
 
-            Assert.Equal(0, importer.Extensions.Length);
+            Assert.Empty(importer.Extensions);
 
             catalog.Catalogs.Add(ext2Cat);
 
-            Assert.Equal(0, importer.Extensions.Length);
+            Assert.Empty(importer.Extensions);
 
             catalog.Catalogs.Add(valueCat);
 
@@ -147,12 +147,12 @@ namespace Tests.Integration
 
             var exports1 = container.GetExportedValues<Needy>();
 
-            Assert.Equal(0, exports1.Count());
+            Assert.Empty(exports1);
 
             container.ComposeParts(new NoImportPart());
 
             var exports2 = container.GetExportedValues<Needy>();
-            Assert.Equal(1, exports2.Count());
+            Assert.Single(exports2);
         }
 
         [Fact]
@@ -340,8 +340,8 @@ namespace Tests.Integration
             var exportsB = container.GetExportedValues<ILoopB>();
 
             // These assertions would prove solution one
-            Assert.Equal(0, exportsA.Count());
-            Assert.Equal(0, exportsB.Count());
+            Assert.Empty(exportsA);
+            Assert.Empty(exportsB);
 
             // These assertions would prove solution two
             //Assert.Equal(1, exportsA.Count);
@@ -383,11 +383,11 @@ namespace Tests.Integration
 
             var workItems = container.GetExportedValue<AllWorkItems>();
 
-            Assert.Equal(0, workItems.WorkItems.Length);
+            Assert.Empty(workItems.WorkItems);
 
             container.ComposeParts(new WorkItem());
 
-            Assert.Equal(1, workItems.WorkItems.Length);
+            Assert.Single(workItems.WorkItems);
             Assert.Equal("A", workItems.WorkItems[0].Value.Id);
         }
 
@@ -411,7 +411,7 @@ namespace Tests.Integration
 
             var workItems = container.GetExportedValue<AllWorkItems>();
 
-            Assert.Equal(1, workItems.WorkItems.Length);
+            Assert.Single(workItems.WorkItems);
 
             var batch = new CompositionBatch();
 

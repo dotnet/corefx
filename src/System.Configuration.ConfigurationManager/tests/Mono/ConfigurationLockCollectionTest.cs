@@ -45,7 +45,7 @@ namespace MonoTests.System.Configuration
             ConfigurationLockCollection col;
 
             col = cfg.AppSettings.LockAttributes;
-            Assert.Equal(0, col.Count);
+            Assert.Empty(col);
             Assert.False(col.Contains("file"), "A2");
             Assert.False(col.HasParentElements, "A4");
             Assert.False(col.IsModified, "A5");
@@ -53,21 +53,21 @@ namespace MonoTests.System.Configuration
             Assert.Equal(col, col.SyncRoot);
 
             col = cfg.AppSettings.LockElements;
-            Assert.Equal(0, col.Count);
+            Assert.Empty(col);
             Assert.False(col.HasParentElements, "A11");
             Assert.False(col.IsModified, "A12");
             Assert.False(col.IsSynchronized, "A13");
             Assert.Equal(col, col.SyncRoot);
 
             col = cfg.ConnectionStrings.LockAttributes;
-            Assert.Equal(0, col.Count);
+            Assert.Empty(col);
             Assert.False(col.HasParentElements, "A11");
             Assert.False(col.IsModified, "A12");
             Assert.False(col.IsSynchronized, "A13");
             Assert.Equal(col, col.SyncRoot);
 
             col = cfg.ConnectionStrings.LockElements;
-            Assert.Equal(0, col.Count);
+            Assert.Empty(col);
             Assert.False(col.HasParentElements, "A11");
             Assert.False(col.IsModified, "A12");
             Assert.False(col.IsSynchronized, "A13");
@@ -93,7 +93,7 @@ namespace MonoTests.System.Configuration
 
             col.Add("file");
 
-            Assert.Equal(1, col.Count);
+            Assert.Single(col);
             Assert.False(col.HasParentElements, "A2");
             Assert.True(col.IsModified, "A3");
             Assert.True(col.Contains("file"), "A4");
@@ -129,14 +129,14 @@ namespace MonoTests.System.Configuration
             ConfigurationLockCollection col = cfg.AppSettings.LockAttributes;
 
             col.SetFromList("file");
-            Assert.Equal(1, col.Count);
+            Assert.Single(col);
             Assert.True(col.Contains("file"), "A2");
 
             col.Clear();
-            Assert.Equal(0, col.Count);
+            Assert.Empty(col);
 
             col.SetFromList(" file ");
-            Assert.Equal(1, col.Count);
+            Assert.Single(col);
             Assert.True(col.Contains("file"), "A2");
         }
 
@@ -152,7 +152,7 @@ namespace MonoTests.System.Configuration
             app.LockAttributes.Add("file");
             app.LockAttributes.Add("file");
 
-            Assert.Equal(1, app.LockAttributes.Count);
+            Assert.Single(app.LockAttributes);
         }
 
         [Fact]

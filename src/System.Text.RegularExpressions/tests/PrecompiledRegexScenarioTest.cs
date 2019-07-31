@@ -19,8 +19,8 @@ namespace System.Text.RegularExpressionsTests
             string text = "asdf134success1245something";
             RegexTestClass testClass = new RegexTestClass();
 
-            Assert.Equal(1, testClass.Matches(text).Count);
-            Assert.Equal(1, testClass.Match(text).Groups[0].Captures.Count);
+            Assert.Single(testClass.Matches(text));
+            Assert.Single(testClass.Match(text).Groups[0].Captures);
             Assert.Equal(text, testClass.Match(text).Groups[0].Value);
             Assert.Equal(new int[] { 0, 1, 2}, testClass.GetGroupNumbers());
             Assert.Equal(new string[] { "0", "1", "output" }, testClass.GetGroupNames());

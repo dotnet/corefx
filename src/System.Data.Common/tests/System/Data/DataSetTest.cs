@@ -74,7 +74,7 @@ namespace System.Data.Tests
             Assert.Equal(2, Table.Columns.Count);
             Assert.Equal(0, Table.Rows.Count);
             Assert.False(Table.CaseSensitive);
-            Assert.Equal(1, Table.Constraints.Count);
+            Assert.Single(Table.Constraints);
             Assert.Equal("", Table.Prefix);
 
             Constraint cons = Table.Constraints[0];
@@ -122,10 +122,10 @@ namespace System.Data.Tests
             DataTable Table2 = ds.Tables[1];
             Assert.Equal("second_test_table", Table2.TableName);
             Assert.Equal("", Table2.Namespace);
-            Assert.Equal(1, Table2.Columns.Count);
+            Assert.Single(Table2.Columns);
             Assert.Equal(0, Table2.Rows.Count);
             Assert.False(Table2.CaseSensitive);
-            Assert.Equal(1, Table2.Constraints.Count);
+            Assert.Single(Table2.Constraints);
             Assert.Equal("", Table2.Prefix);
 
             DataColumn column3 = Table2.Columns[0];
@@ -916,39 +916,39 @@ namespace System.Data.Tests
             ds.Tables["Files"].Constraints.Add(fk);
             ds.EnforceConstraints = true;
 
-            Assert.Equal(1, ds.Tables["Directories"].Constraints.Count);
-            Assert.Equal(1, ds.Tables["Files"].Constraints.Count);
+            Assert.Single(ds.Tables["Directories"].Constraints);
+            Assert.Single(ds.Tables["Files"].Constraints);
 
             // check clone works fine
             DataSet cloned_ds = ds.Clone();
-            Assert.Equal(1, cloned_ds.Tables["Directories"].Constraints.Count);
-            Assert.Equal(1, cloned_ds.Tables["Files"].Constraints.Count);
+            Assert.Single(cloned_ds.Tables["Directories"].Constraints);
+            Assert.Single(cloned_ds.Tables["Files"].Constraints);
 
             ForeignKeyConstraint clonedFk = (ForeignKeyConstraint)cloned_ds.Tables["Files"].Constraints[0];
             Assert.Equal("FK_Test", clonedFk.ConstraintName);
-            Assert.Equal(1, clonedFk.Columns.Length);
+            Assert.Single(clonedFk.Columns);
             Assert.Equal("DirectoryID", clonedFk.Columns[0].ColumnName);
 
             UniqueConstraint clonedUc = (UniqueConstraint)cloned_ds.Tables["Directories"].Constraints[0];
             UniqueConstraint origUc = (UniqueConstraint)ds.Tables["Directories"].Constraints[0];
             Assert.Equal(origUc.ConstraintName, clonedUc.ConstraintName);
-            Assert.Equal(1, clonedUc.Columns.Length);
+            Assert.Single(clonedUc.Columns);
             Assert.Equal("UID", clonedUc.Columns[0].ColumnName);
 
             // check copy works fine
             DataSet copy_ds = ds.Copy();
-            Assert.Equal(1, copy_ds.Tables["Directories"].Constraints.Count);
-            Assert.Equal(1, copy_ds.Tables["Files"].Constraints.Count);
+            Assert.Single(copy_ds.Tables["Directories"].Constraints);
+            Assert.Single(copy_ds.Tables["Files"].Constraints);
 
             ForeignKeyConstraint copyFk = (ForeignKeyConstraint)copy_ds.Tables["Files"].Constraints[0];
             Assert.Equal("FK_Test", copyFk.ConstraintName);
-            Assert.Equal(1, copyFk.Columns.Length);
+            Assert.Single(copyFk.Columns);
             Assert.Equal("DirectoryID", copyFk.Columns[0].ColumnName);
 
             UniqueConstraint copyUc = (UniqueConstraint)copy_ds.Tables["Directories"].Constraints[0];
             origUc = (UniqueConstraint)ds.Tables["Directories"].Constraints[0];
             Assert.Equal(origUc.ConstraintName, copyUc.ConstraintName);
-            Assert.Equal(1, copyUc.Columns.Length);
+            Assert.Single(copyUc.Columns);
             Assert.Equal("UID", copyUc.Columns[0].ColumnName);
         }
 
@@ -2102,10 +2102,10 @@ namespace System.Data.Tests
             Assert.Equal(4, dsLoad.Tables.Count);
             Assert.Equal("First", dsLoad.Tables[0].TableName);
             Assert.Equal(0, dsLoad.Tables[0].Rows.Count);
-            Assert.Equal(0, dsLoad.Tables[0].Columns.Count);
+            Assert.Empty(dsLoad.Tables[0].Columns);
             Assert.Equal("Second", dsLoad.Tables[1].TableName);
             Assert.Equal(0, dsLoad.Tables[1].Rows.Count);
-            Assert.Equal(0, dsLoad.Tables[1].Columns.Count);
+            Assert.Empty(dsLoad.Tables[1].Columns);
             Assert.Equal("Third", dsLoad.Tables[2].TableName);
             Assert.Equal(3, dsLoad.Tables[2].Rows.Count);
             Assert.Equal(2, dsLoad.Tables[2].Columns.Count);
@@ -2136,7 +2136,7 @@ namespace System.Data.Tests
             Assert.Equal(4, dsLoad.Tables[0].Columns.Count);
             Assert.Equal("Second", dsLoad.Tables[1].TableName);
             Assert.Equal(2, dsLoad.Tables[1].Rows.Count);
-            Assert.Equal(1, dsLoad.Tables[1].Columns.Count);
+            Assert.Single(dsLoad.Tables[1].Columns);
             Assert.Equal("Third", dsLoad.Tables[2].TableName);
             Assert.Equal(3, dsLoad.Tables[2].Rows.Count);
             Assert.Equal(2, dsLoad.Tables[2].Columns.Count);

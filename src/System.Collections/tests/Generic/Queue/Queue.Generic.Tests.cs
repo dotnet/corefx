@@ -121,7 +121,7 @@ namespace System.Collections.Tests
         {
             int seed = 53134;
             var q = new Queue<T>(capacity);
-            Assert.Equal(0, q.Count);
+            Assert.Empty(q);
 
             // Enqueue some values and make sure the count is correct
             List<T> source = (List<T>)CreateEnumerable(EnumerableType.List, null, items, 0, 0);
@@ -246,7 +246,7 @@ namespace System.Collections.Tests
                 queue.TrimExcess();
                 queue.Clear();
                 queue.TrimExcess();
-                Assert.Equal(0, queue.Count);
+                Assert.Empty(queue);
 
                 AddToCollection(queue, count / 10);
                 queue.TrimExcess();
@@ -264,7 +264,7 @@ namespace System.Collections.Tests
                 queue.TrimExcess();
                 queue.Clear();
                 queue.TrimExcess();
-                Assert.Equal(0, queue.Count);
+                Assert.Empty(queue);
 
                 AddToCollection(queue, count);
                 queue.TrimExcess();

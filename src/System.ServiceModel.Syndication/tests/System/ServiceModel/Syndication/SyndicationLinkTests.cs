@@ -117,13 +117,13 @@ namespace System.ServiceModel.Syndication.Tests
 
             var clone = new SyndicationLinkSubclass(original);
             Assert.NotSame(clone.AttributeExtensions, original.AttributeExtensions);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
 
             Assert.Equal(new Uri("http://baseuri.com"), clone.BaseUri);
 
             Assert.NotSame(clone.ElementExtensions, original.ElementExtensions);
-            Assert.Equal(1, clone.ElementExtensions.Count);
+            Assert.Single(clone.ElementExtensions);
             Assert.Equal(10, clone.ElementExtensions[0].GetObject<ExtensionObject>().Value);
 
             Assert.Equal(10, clone.Length);
@@ -185,13 +185,13 @@ namespace System.ServiceModel.Syndication.Tests
 
             SyndicationLink clone = original.Clone();
             Assert.NotSame(clone.AttributeExtensions, original.AttributeExtensions);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
 
             Assert.Equal(new Uri("http://baseuri.com"), clone.BaseUri);
 
             Assert.NotSame(clone.ElementExtensions, original.ElementExtensions);
-            Assert.Equal(1, clone.ElementExtensions.Count);
+            Assert.Single(clone.ElementExtensions);
             Assert.Equal(10, clone.ElementExtensions[0].GetObject<ExtensionObject>().Value);
 
             Assert.Equal(10, clone.Length);

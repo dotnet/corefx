@@ -65,7 +65,7 @@ namespace System.ServiceModel.Syndication.Tests
         {
             Collection<Workspace> collection = new ServiceDocument().Workspaces;
             collection.Add(new Workspace());
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
         }
 
         [Fact]

@@ -30,7 +30,7 @@ namespace System.Reflection.Emit.Tests
             ParameterInfo createdParameter = createdMethod.GetParameters()[0];
 
             object[] attributes = createdParameter.GetCustomAttributes(false).ToArray();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
 
             ParameterBuilderCustomAttribute obj = (ParameterBuilderCustomAttribute)attributes[0];
             Assert.Equal("hello", obj.Field12345);
@@ -52,7 +52,7 @@ namespace System.Reflection.Emit.Tests
             ParameterInfo createdParameter = createdMethod.GetParameters()[0];
 
             object[] attributes = createdParameter.GetCustomAttributes(false).Select(a => (object)a).ToArray();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
 
             ParameterBuilderCustomAttribute obj = (ParameterBuilderCustomAttribute)attributes[0];
             Assert.True(obj.booleanValue);

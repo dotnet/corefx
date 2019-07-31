@@ -539,7 +539,7 @@ namespace System.Globalization.Tests
             Assert.Equal(ci.Name == "" ? 0x7F : 0x1000, ci.LCID);
             Assert.Equal(cultureName, ci.Name);
             Assert.Equal(CultureInfo.InvariantCulture.NativeName, ci.NativeName);
-            Assert.Equal(1, ci.OptionalCalendars.Length);
+            Assert.Single(ci.OptionalCalendars);
             Assert.True(ci.OptionalCalendars[0] is GregorianCalendar);
             Assert.Equal(CultureInfo.InvariantCulture.Parent, ci.Parent);
             Assert.Equal(CultureInfo.InvariantCulture.ThreeLetterISOLanguageName, ci.ThreeLetterISOLanguageName);

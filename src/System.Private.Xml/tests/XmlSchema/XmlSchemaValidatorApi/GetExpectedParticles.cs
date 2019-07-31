@@ -312,7 +312,7 @@ namespace System.Xml.Tests
             {
                 result = val.GetExpectedParticles();
 
-                Assert.Equal(1, result.Length);
+                Assert.Single(result);
                 Assert.True(result[0] is XmlSchemaAny);
                 Assert.Equal("uri:tempuri", (result[0] as XmlSchemaAny).Namespace);
                 Assert.Equal(XmlSchemaContentProcessing.Strict, (result[0] as XmlSchemaAny).ProcessContents);
@@ -588,7 +588,7 @@ namespace System.Xml.Tests
 
             result = val.GetExpectedParticles();
 
-            Assert.Equal(1, result.Length);
+            Assert.Single(result);
 
             Assert.True(result[0] is XmlSchemaAny);
             Assert.Null((result[0] as XmlSchemaAny).Namespace);

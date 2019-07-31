@@ -293,7 +293,7 @@ namespace System.Reflection.Tests
         public void GetTypes()
         {
             List<Type> types = TestModule.GetTypes().ToList();
-            Assert.Equal(1, types.Count);
+            Assert.Single(types);
             Assert.Equal("System.Reflection.TestModule.Dummy, System.Reflection.TestModule, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", types[0].AssemblyQualifiedName);
         }
     }

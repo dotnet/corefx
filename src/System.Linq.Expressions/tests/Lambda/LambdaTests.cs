@@ -299,7 +299,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal(new[] { delType }, exp.GetType().GetGenericArguments());
             delMethod = delType.GetMethod("Invoke");
             Assert.Equal(typeof(long), delMethod.ReturnType);
-            Assert.Equal(1, delMethod.GetParameters().Length);
+            Assert.Single(delMethod.GetParameters());
             Assert.Equal(typeof(int).MakeByRefType(), delMethod.GetParameters()[0].ParameterType);
             Assert.Same(delType, Expression.Lambda(Expression.Constant(3L), Expression.Parameter(typeof(int).MakeByRefType())).Type);
 #endif //FEATURE_COMPILE

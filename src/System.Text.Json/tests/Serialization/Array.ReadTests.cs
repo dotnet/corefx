@@ -38,7 +38,7 @@ namespace System.Text.Json.Serialization.Tests
         {
             string json = @"""""";
             byte[] arr = JsonSerializer.Deserialize<byte[]>(json);
-            Assert.Equal(0, arr.Length);
+            Assert.Empty(arr);
         }
 
         [Fact]
@@ -96,7 +96,7 @@ namespace System.Text.Json.Serialization.Tests
         {
             // https://github.com/dotnet/corefx/issues/36167
             object[] data = JsonSerializer.Deserialize<object[]>("[1]");
-            Assert.Equal(1, data.Length);
+            Assert.Single(data);
             Assert.IsType<JsonElement>(data[0]);
             Assert.Equal(1, ((JsonElement)data[0]).GetInt32());
         }
@@ -105,7 +105,7 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadEmptyObjectArray()
         {
             SimpleTestClass[] data = JsonSerializer.Deserialize<SimpleTestClass[]>("[{}]");
-            Assert.Equal(1, data.Length);
+            Assert.Single(data);
             Assert.NotNull(data[0]);
         }
 
@@ -151,10 +151,10 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadEmpty()
         {
             SimpleTestClass[] arr = JsonSerializer.Deserialize<SimpleTestClass[]>("[]");
-            Assert.Equal(0, arr.Length);
+            Assert.Empty(arr);
 
             List<SimpleTestClass> list = JsonSerializer.Deserialize<List<SimpleTestClass>>("[]");
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
         }
 
         [Fact]
@@ -165,7 +165,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, i[1]);
 
             i = JsonSerializer.Deserialize<int[]>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, i.Length);
+            Assert.Empty(i);
         }
 
         [Fact]
@@ -422,7 +422,7 @@ namespace System.Text.Json.Serialization.Tests
             // We replace the contents of this collection; we don't attempt to add items to the existing collection instance.
             string json = @"{""MyList"":[1,2]}";
             ClassWithPopulatedListAndNoSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedListAndNoSetter>(json);
-            Assert.Equal(1, obj.MyList.Count);
+            Assert.Single(obj.MyList);
         }
 
         public class ClassWithPopulatedListAndSetter

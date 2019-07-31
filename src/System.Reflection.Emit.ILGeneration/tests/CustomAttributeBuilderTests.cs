@@ -239,7 +239,7 @@ namespace System.Reflection.Emit.Tests
             assembly.SetCustomAttribute(builder);
 
             object[] customAttributes = assembly.GetCustomAttributes().ToArray();
-            Assert.Equal(1, customAttributes.Length);
+            Assert.Single(customAttributes);
 
             object customAttribute = customAttributes[0];
             for (int i = 0; i < fieldNames.Length; ++i)
@@ -303,7 +303,7 @@ namespace System.Reflection.Emit.Tests
             assembly.SetCustomAttribute(attributeBuilder);
 
             object[] customAttributes = assembly.GetCustomAttributes().ToArray();
-            Assert.Equal(1, customAttributes.Length);
+            Assert.Single(customAttributes);
 
             Primitives attribute = (Primitives)customAttributes[0];
 
@@ -827,7 +827,7 @@ namespace System.Reflection.Emit.Tests
             TestAttribute customAttribute = (TestAttribute)assembly.GetCustomAttributes().First();
             Array objectField = (Array)customAttribute.ObjectField;
             Assert.IsType<int[]>(objectField);
-            Assert.Equal(0, objectField.Length);
+            Assert.Empty(objectField);
         }
 
         [Theory]
@@ -989,7 +989,7 @@ namespace System.Reflection.Emit.Tests
             TestAttribute customAttribute = (TestAttribute)assembly.GetCustomAttributes().First();
             Array objectProperty = (Array)customAttribute.ObjectProperty;
             Assert.IsType<int[]>(objectProperty);
-            Assert.Equal(0, objectProperty.Length);
+            Assert.Empty(objectProperty);
         }
 
         [Theory]

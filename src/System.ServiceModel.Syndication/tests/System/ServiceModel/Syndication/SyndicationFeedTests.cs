@@ -123,23 +123,23 @@ namespace System.ServiceModel.Syndication.Tests
 
             var clone = new SyndicationFeedSubclass(original, cloneItems);
             Assert.NotSame(clone.AttributeExtensions, original.AttributeExtensions);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
 
             Assert.NotSame(clone.Authors, original.Authors);
-            Assert.Equal(1, clone.Authors.Count);
+            Assert.Single(clone.Authors);
             Assert.NotSame(original.Authors[0], clone.Authors[0]);
             Assert.Equal("author", clone.Authors[0].Name);
 
             Assert.Equal(new Uri("http://feed_baseuri.com/"), clone.BaseUri);
 
             Assert.NotSame(clone.Categories, original.Categories);
-            Assert.Equal(1, clone.Categories.Count);
+            Assert.Single(clone.Categories);
             Assert.NotSame(original.Categories[0], clone.Categories[0]);
             Assert.Equal("category", clone.Categories[0].Name);
 
             Assert.NotSame(clone.Contributors, original.Contributors);
-            Assert.Equal(1, clone.Contributors.Count);
+            Assert.Single(clone.Contributors);
             Assert.NotSame(original.Contributors[0], clone.Contributors[0]);
             Assert.Equal("contributor", clone.Contributors[0].Name);
 
@@ -150,7 +150,7 @@ namespace System.ServiceModel.Syndication.Tests
             Assert.Equal("description", clone.Description.Text);
 
             Assert.NotSame(clone.ElementExtensions, original.ElementExtensions);
-            Assert.Equal(1, clone.ElementExtensions.Count);
+            Assert.Single(clone.ElementExtensions);
             Assert.Equal(10, clone.ElementExtensions[0].GetObject<ExtensionObject>().Value);
 
             Assert.Equal("generator", original.Generator);
@@ -160,7 +160,7 @@ namespace System.ServiceModel.Syndication.Tests
             Assert.Equal(new Uri("http://imageurl.com"), original.ImageUrl);
 
             Assert.NotSame(clone.Contributors, original.Items);
-            Assert.Equal(1, clone.Items.Count());
+            Assert.Single(clone.Items);
             if (cloneItems)
             {
                 Assert.NotSame(((IList<SyndicationItem>)original.Items)[0], ((IList<SyndicationItem>)clone.Items)[0]);
@@ -176,7 +176,7 @@ namespace System.ServiceModel.Syndication.Tests
             Assert.Equal(DateTimeOffset.MinValue.AddTicks(10), original.LastUpdatedTime);
 
             Assert.NotSame(clone.Links, original.Links);
-            Assert.Equal(1, clone.Links.Count);
+            Assert.Single(clone.Links);
             Assert.NotSame(original.Links[0], clone.Links[0]);
             Assert.Equal(new Uri("http://microsoft.com"), clone.Links[0].Uri);
 

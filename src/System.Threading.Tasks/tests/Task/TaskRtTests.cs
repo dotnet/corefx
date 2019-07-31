@@ -450,7 +450,7 @@ namespace System.Threading.Tasks.Tests
                 for (int i = 0; i < tasks.Length; i++)
                 {
                     Assert.NotNull(tasks[i].Exception);
-                    Assert.Equal(1, tasks[i].Exception.InnerExceptions.Count);
+                    Assert.Single(tasks[i].Exception.InnerExceptions);
                     Assert.Equal(exceptions[i], tasks[i].Exception.InnerException);
                 }
 

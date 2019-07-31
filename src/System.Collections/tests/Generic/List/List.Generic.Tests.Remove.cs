@@ -23,7 +23,7 @@ namespace System.Collections.Tests
             List<T> beforeList = list.ToList();
             int removedCount = list.RemoveAll((value) => { return true; });
             Assert.Equal(count, removedCount);
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
         }
 
         [Theory]

@@ -70,7 +70,7 @@ namespace System.Linq.Tests
                 resultArray =>
                 {
                     Assert.NotNull(resultArray);
-                    Assert.Equal(0, resultArray.Length);
+                    Assert.Empty(resultArray);
                 });
         }
 

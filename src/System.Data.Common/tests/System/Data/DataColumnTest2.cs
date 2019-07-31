@@ -217,7 +217,7 @@ namespace System.Data.Tests
             Assert.True(pc != null);
 
             // Checking ExtendedProperties count 
-            Assert.Equal(0, pc.Count);
+            Assert.Empty(pc);
         }
 
         [Fact]

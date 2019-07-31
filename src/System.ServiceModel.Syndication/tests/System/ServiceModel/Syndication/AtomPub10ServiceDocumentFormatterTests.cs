@@ -386,7 +386,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("document_value", document.AttributeExtensions[new XmlQualifiedName("document_name3", "document_namespace")]);
                 Assert.Equal("", document.AttributeExtensions[new XmlQualifiedName("document_name4", "xmlns")]);
                 Assert.Equal(new Uri("http://document_url.com"), document.BaseUri);
-                Assert.Equal(1, document.ElementExtensions.Count);
+                Assert.Single(document.ElementExtensions);
                 Assert.Equal(10, document.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.Equal("document_language", document.Language);
                 Assert.Equal(3, document.Workspaces.Count);
@@ -406,7 +406,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", secondWorkspace.AttributeExtensions[new XmlQualifiedName("workspace_name4", "xmlns")]);
                 Assert.Equal(new Uri("http://workspace_url.com"), secondWorkspace.BaseUri);
                 Assert.Equal(2, secondWorkspace.Collections.Count);
-                Assert.Equal(1, secondWorkspace.ElementExtensions.Count);
+                Assert.Single(secondWorkspace.ElementExtensions);
                 Assert.Equal(10, secondWorkspace.ElementExtensions[0].GetObject<ExtensionObject>().Value);
 
                 TextSyndicationContent workspaceTitle = secondWorkspace.Title;
@@ -436,7 +436,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", secondCollection.AttributeExtensions[new XmlQualifiedName("resourcecollectioninfo_name4", "xmlns")]);
                 Assert.Equal(new Uri("http://resourcecollectioninfo_url.com"), secondCollection.BaseUri);
                 Assert.Equal(6, secondCollection.Categories.Count);
-                Assert.Equal(1, secondCollection.ElementExtensions.Count);
+                Assert.Single(secondCollection.ElementExtensions);
                 Assert.Equal(10, secondCollection.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.Equal(new Uri("http://resourcecollectioninfo_link.com"), secondCollection.Link);
 
@@ -466,7 +466,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", secondDocument.AttributeExtensions[new XmlQualifiedName("inlinecategories_name4", "xmlns")]);
                 Assert.Equal(new Uri("http://inlinecategories_url.com/"), secondDocument.BaseUri);
                 Assert.Equal(2, secondDocument.Categories.Count);
-                Assert.Equal(1, secondDocument.ElementExtensions.Count);
+                Assert.Single(secondDocument.ElementExtensions);
                 Assert.Equal(10, secondDocument.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.True(secondDocument.IsFixed);
                 Assert.Equal("inlinecategories_Language", secondDocument.Language);
@@ -485,7 +485,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("", secondDocumentSecondCategory.AttributeExtensions[new XmlQualifiedName("category_name2", "category_namespace")]);
                 Assert.Equal("category_value", secondDocumentSecondCategory.AttributeExtensions[new XmlQualifiedName("category_name3", "category_namespace")]);
                 Assert.Equal("", secondDocumentSecondCategory.AttributeExtensions[new XmlQualifiedName("category_name4", "xmlns")]);
-                Assert.Equal(1, secondDocumentSecondCategory.ElementExtensions.Count);
+                Assert.Single(secondDocumentSecondCategory.ElementExtensions);
                 Assert.Equal(10, secondDocumentSecondCategory.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.Equal("category_name", secondDocumentSecondCategory.Name);
                 Assert.Equal("category_scheme", secondDocumentSecondCategory.Scheme);
@@ -505,7 +505,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("referencecategories_value", fourthDocument.AttributeExtensions[new XmlQualifiedName("referencecategories_name3", "referencecategories_namespace")]);
                 Assert.Equal("", fourthDocument.AttributeExtensions[new XmlQualifiedName("referencecategories_name4", "xmlns")]);
                 Assert.Equal(new Uri("http://referencecategories_url.com/"), fourthDocument.BaseUri);
-                Assert.Equal(1, fourthDocument.ElementExtensions.Count);
+                Assert.Single(fourthDocument.ElementExtensions);
                 Assert.Equal(10, fourthDocument.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 Assert.Equal("referencecategories_language", fourthDocument.Language);
                 Assert.Equal(new Uri("http://referencecategories_link.com"), fourthDocument.Link);

@@ -16,7 +16,7 @@ namespace System.Collections.Tests
         public static void Ctor_Empty()
         {
             var stack = new Stack();
-            Assert.Equal(0, stack.Count);
+            Assert.Empty(stack);
             Assert.False(stack.IsSynchronized);
         }
 
@@ -29,7 +29,7 @@ namespace System.Collections.Tests
         public static void Ctor_Int(int initialCapacity)
         {
             var stack = new Stack(initialCapacity);
-            Assert.Equal(0, stack.Count);
+            Assert.Empty(stack);
             Assert.False(stack.IsSynchronized);
         }
 
@@ -111,10 +111,10 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllStackWrappers(stack1, stack2 =>
             {
                 stack2.Clear();
-                Assert.Equal(0, stack2.Count);
+                Assert.Empty(stack2);
 
                 stack2.Clear();
-                Assert.Equal(0, stack2.Count);
+                Assert.Empty(stack2);
             });
         }
 

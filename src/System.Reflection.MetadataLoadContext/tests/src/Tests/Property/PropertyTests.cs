@@ -29,7 +29,7 @@ namespace System.Reflection.Tests
                 Assert.Equal(t, getter.ReflectedType);
                 Assert.Null(p.SetMethod);
                 Assert.Null(p.GetSetMethod(nonPublic: true));
-                Assert.Equal(0, p.GetIndexParameters().Length);
+                Assert.Empty(p.GetIndexParameters());
                 Assert.Equal(typeof(int).Project(), p.PropertyType);
             }
 
@@ -54,7 +54,7 @@ namespace System.Reflection.Tests
                 MethodInfo[] accessors = p.GetAccessors(nonPublic: false);
                 Assert.Equal<MethodInfo>(new MethodInfo[] { getter, setter }, accessors);
 
-                Assert.Equal(0, p.GetIndexParameters().Length);
+                Assert.Empty(p.GetIndexParameters());
                 Assert.Equal(theT, p.PropertyType);
             }
 
@@ -87,7 +87,7 @@ namespace System.Reflection.Tests
                 accessors = p.GetAccessors(nonPublic: false);
                 Assert.Equal<MethodInfo>(new MethodInfo[] { getter }, accessors);
 
-                Assert.Equal(0, p.GetIndexParameters().Length);
+                Assert.Empty(p.GetIndexParameters());
 
                 Assert.Equal(typeof(GenericClass1<>).Project().MakeGenericType(theT), p.PropertyType);
             }
@@ -113,7 +113,7 @@ namespace System.Reflection.Tests
                 MethodInfo[] accessors = p.GetAccessors(nonPublic: true);
                 Assert.Equal<MethodInfo>(new MethodInfo[] { getter }, accessors);
 
-                Assert.Equal(0, p.GetIndexParameters().Length);
+                Assert.Empty(p.GetIndexParameters());
 
                 Assert.Equal(typeof(GenericClass1<>).Project().MakeGenericType(theT), p.PropertyType);
             }
@@ -147,7 +147,7 @@ namespace System.Reflection.Tests
                 accessors = p.GetAccessors(nonPublic: false);
                 Assert.Equal<MethodInfo>(new MethodInfo[] { getter }, accessors);
 
-                Assert.Equal(0, p.GetIndexParameters().Length);
+                Assert.Empty(p.GetIndexParameters());
 
                 Assert.Equal(typeof(int).Project(), p.PropertyType);
             }
@@ -181,7 +181,7 @@ namespace System.Reflection.Tests
                 accessors = p.GetAccessors(nonPublic: false);
                 Assert.Equal<MethodInfo>(new MethodInfo[] { getter }, accessors);
 
-                Assert.Equal(0, p.GetIndexParameters().Length);
+                Assert.Empty(p.GetIndexParameters());
 
                 Assert.Equal(typeof(int).Project(), p.PropertyType);
             }

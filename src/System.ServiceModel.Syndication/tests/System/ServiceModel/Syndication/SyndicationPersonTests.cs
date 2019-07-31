@@ -60,11 +60,11 @@ namespace System.ServiceModel.Syndication.Tests
 
             var clone = new SyndicationPersonSubclass(original);
             Assert.NotSame(clone.AttributeExtensions, original.AttributeExtensions);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
 
             Assert.NotSame(clone.ElementExtensions, original.ElementExtensions);
-            Assert.Equal(1, clone.ElementExtensions.Count);
+            Assert.Single(clone.ElementExtensions);
             Assert.Equal(10, clone.ElementExtensions[0].GetObject<ExtensionObject>().Value);
 
             Assert.Equal("email", clone.Email);
@@ -99,11 +99,11 @@ namespace System.ServiceModel.Syndication.Tests
 
             SyndicationPerson clone = original.Clone();
             Assert.NotSame(clone.AttributeExtensions, original.AttributeExtensions);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
 
             Assert.NotSame(clone.ElementExtensions, original.ElementExtensions);
-            Assert.Equal(1, clone.ElementExtensions.Count);
+            Assert.Single(clone.ElementExtensions);
             Assert.Equal(10, clone.ElementExtensions[0].GetObject<ExtensionObject>().Value);
 
             Assert.Equal("email", clone.Email);

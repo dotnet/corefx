@@ -13,7 +13,7 @@ namespace System.Reflection.Emit.Tests
         {
             ModuleBuilder module = Helpers.DynamicModule();
             SignatureHelper helper = SignatureHelper.GetFieldSigHelper(module);
-            Assert.Equal(1, helper.GetSignature().Length);
+            Assert.Single(helper.GetSignature());
         }
     }
 }

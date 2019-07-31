@@ -33,14 +33,14 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts, typeof(DerClass));
 
-            Assert.Equal(0, typeAtts.Count());
-            Assert.Equal(1, configuredMembers.Count);
+            Assert.Empty(typeAtts);
+            Assert.Single(configuredMembers);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0];
             Assert.Equal(typeof(BaseClass).GetProperty("P2"), tuple.Item1);
 
             List<Attribute> atts = tuple.Item2;
-            Assert.Equal(1, atts.Count);
+            Assert.Single(atts);
 
             var importAttribute = atts[0] as ImportAttribute;
             Assert.NotNull(importAttribute);
@@ -58,14 +58,14 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts, typeof(DerClass));
 
-            Assert.Equal(0, typeAtts.Count());
-            Assert.Equal(1, configuredMembers.Count);
+            Assert.Empty(typeAtts);
+            Assert.Single(configuredMembers);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0];
             Assert.Equal(typeof(BaseClass).GetProperty("P3"), tuple.Item1);
 
             List<Attribute> atts = tuple.Item2;
-            Assert.Equal(1, atts.Count);
+            Assert.Single(atts);
 
             var importManyAttribute = atts[0] as ImportManyAttribute;
             Assert.NotNull(importManyAttribute);
@@ -83,14 +83,14 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts, typeof(DerClass));
 
-            Assert.Equal(0, typeAtts.Count());
-            Assert.Equal(1, configuredMembers.Count);
+            Assert.Empty(typeAtts);
+            Assert.Single(configuredMembers);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0];
             Assert.Equal(typeof(DerClass).GetProperty("P4"), tuple.Item1);
 
             List<Attribute> atts = tuple.Item2;
-            Assert.Equal(1, atts.Count);
+            Assert.Single(atts);
 
             var importAttribute = atts[0] as ImportAttribute;
             Assert.NotNull(importAttribute);
@@ -108,14 +108,14 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts, typeof(DerClass));
 
-            Assert.Equal(0, typeAtts.Count());
-            Assert.Equal(1, configuredMembers.Count);
+            Assert.Empty(typeAtts);
+            Assert.Single(configuredMembers);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0];
             Assert.Equal(typeof(DerClass).GetProperty("P4"), tuple.Item1);
 
             List<Attribute> atts = tuple.Item2;
-            Assert.Equal(1, atts.Count);
+            Assert.Single(atts);
 
             var exportAttribute = atts[0] as ExportAttribute;
             Assert.NotNull(exportAttribute);
@@ -133,14 +133,14 @@ namespace System.ComponentModel.Composition.Registration.Tests
             List<Tuple<object, List<Attribute>>> configuredMembers;
             GetConfiguredMembers(builder, out configuredMembers, out typeAtts, typeof(DerClass));
 
-            Assert.Equal(0, typeAtts.Count());
-            Assert.Equal(1, configuredMembers.Count);
+            Assert.Empty(typeAtts);
+            Assert.Single(configuredMembers);
 
             Tuple<object, List<Attribute>> tuple = configuredMembers[0];
             Assert.Equal(typeof(BaseClass).GetProperty("P2"), tuple.Item1);
 
             List<Attribute> atts = tuple.Item2;
-            Assert.Equal(1, atts.Count);
+            Assert.Single(atts);
 
             var exportAttribute = atts[0] as ExportAttribute;
             Assert.NotNull(exportAttribute);

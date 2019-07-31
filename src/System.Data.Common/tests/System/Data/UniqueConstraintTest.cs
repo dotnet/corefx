@@ -101,7 +101,7 @@ namespace System.Data.Tests
 
             Assert.True(cst.IsPrimaryKey);
 
-            Assert.Equal(1, _table.PrimaryKey.Length);
+            Assert.Single(_table.PrimaryKey);
             Assert.True(_table.PrimaryKey[0].Unique);
         }
 

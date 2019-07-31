@@ -15,15 +15,15 @@ namespace System.Threading.Tasks.Tests
         public static void ConstructorBasic()
         {
             AggregateException ex = new AggregateException();
-            Assert.Equal(0, ex.InnerExceptions.Count);
+            Assert.Empty(ex.InnerExceptions);
             Assert.True(ex.Message != null, "RunAggregateException_Constructor:  FAILED. Message property is null when the default constructor is used, expected a default message");
 
             ex = new AggregateException("message");
-            Assert.Equal(0, ex.InnerExceptions.Count);
+            Assert.Empty(ex.InnerExceptions);
             Assert.True(ex.Message != null, "RunAggregateException_Constructor:  FAILED. Message property is  null when the default constructor(string) is used");
 
             ex = new AggregateException("message", new Exception());
-            Assert.Equal(1, ex.InnerExceptions.Count);
+            Assert.Single(ex.InnerExceptions);
             Assert.True(ex.Message != null, "RunAggregateException_Constructor:  FAILED. Message property is  null when the default constructor(string, Exception) is used");
         }
 

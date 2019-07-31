@@ -91,7 +91,7 @@ namespace System.ComponentModel.Composition
 
             exports = provider.GetExports<object>("Export");
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace System.ComponentModel.Composition
             catalog.RemoveDefinition(definition1);
 
             exports = provider.GetExports<object>("Export");
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
 
             catalog.AddDefinition(definition1);
 
@@ -163,8 +163,8 @@ namespace System.ComponentModel.Composition
             var testNameNonComponent = AttributedModelServices.GetContractName(typeof(CatalogComponentTestNonComponentPart));
             var testInterfaceName = AttributedModelServices.GetContractName(typeof(ICatalogComponentTest));
 
-            Assert.Equal(1, catalogExportProvider.GetExports(ImportFromContract(testName)).Count());
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContract(testNameNonComponent)).Count());
+            Assert.Single(catalogExportProvider.GetExports(ImportFromContract(testName)));
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContract(testNameNonComponent)));
 
             var exports = catalogExportProvider.GetExports(ImportFromContract(testInterfaceName));
             Assert.Equal(2, exports.Count());
@@ -183,13 +183,13 @@ namespace System.ComponentModel.Composition
             var catalogExportProvider = new CatalogExportProvider(catalog);
             catalogExportProvider.SourceProvider = catalogExportProvider;
 
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(object) })).Count());
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(object) })));
 
-            Assert.Equal(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(object) })).Count());
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(object), typeof(object) })).Count());
+            Assert.Single(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(object) })));
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(object), typeof(object) })));
 
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(object) })).Count());
-            Assert.Equal(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(object) })).Count());
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(object) })));
+            Assert.Single(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(object) })));
         }
 
         [Fact]
@@ -201,13 +201,13 @@ namespace System.ComponentModel.Composition
             var catalogExportProvider = new CatalogExportProvider(catalog);
             catalogExportProvider.SourceProvider = catalogExportProvider;
 
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(string) })));
 
-            Assert.Equal(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(string), typeof(string) })).Count());
+            Assert.Single(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(string) })));
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(string), typeof(string) })));
 
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
-            Assert.Equal(1, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(string) })).Count());
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(string) })));
+            Assert.Single(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(string) })));
         }
 
         [Fact]
@@ -219,13 +219,13 @@ namespace System.ComponentModel.Composition
             var catalogExportProvider = new CatalogExportProvider(catalog);
             catalogExportProvider.SourceProvider = catalogExportProvider;
 
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(int) })));
 
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(int), typeof(int) })).Count());
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(int) })));
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo", "Bar" }, new Type[] { typeof(int), typeof(int) })));
 
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
-            Assert.Equal(0, catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(int) })).Count());
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithNoFoo", new string[] { "Foo" }, new Type[] { typeof(int) })));
+            Assert.Empty(catalogExportProvider.GetExports(ImportFromContractAndMetadata("MyExporterWithFoo", new string[] { "Foo" }, new Type[] { typeof(int) })));
         }
 
         [Fact]
@@ -238,7 +238,7 @@ namespace System.ComponentModel.Composition
             catalogExportProvider.SourceProvider = catalogExportProvider;
 
             var exports = catalogExportProvider.GetExports(ImportFromContract("StaticString"));
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             Assert.Equal("StaticString", exports.First().Value);
         }
 
@@ -253,7 +253,7 @@ namespace System.ComponentModel.Composition
 
             var exports = catalogExportProvider.GetExports(ImportFromContract(AttributedModelServices.GetContractName(typeof(MyExporterWithValidMetadata))));
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
 
             var export = exports.First();
             Assert.Equal("world", export.Metadata["hello"]);
@@ -455,7 +455,7 @@ namespace System.ComponentModel.Composition
             Assert.Equal(2, root.Imports.Length);
 
             catalog.Catalogs.Remove(changingParts);
-            Assert.Equal(0, root.Imports.Length);
+            Assert.Empty(root.Imports);
 
             catalog.Catalogs.Add(changingParts);
             Assert.Equal(2, root.Imports.Length);

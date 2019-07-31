@@ -292,7 +292,7 @@ namespace System.Reflection.Tests
                 {
                     Assert.True(t.IsConstructedGenericType);
                     Assert.Equal(genericTypeDefinition, t.GetGenericTypeDefinition());
-                    Assert.Equal(1, t.GenericTypeArguments.Length);
+                    Assert.Single(t.GenericTypeArguments);
 
                     Type et = t.GenericTypeArguments[0];
                     Assert.True(et.IsSignatureType);
@@ -542,8 +542,8 @@ namespace System.Reflection.Tests
             if (!type.IsConstructedGenericType)
             {
                 Assert.Throws<InvalidOperationException>(() => type.GetGenericTypeDefinition());
-                Assert.Equal(0, type.GetGenericArguments().Length);
-                Assert.Equal(0, type.GenericTypeArguments.Length);
+                Assert.Empty(type.GetGenericArguments());
+                Assert.Empty(type.GenericTypeArguments);
                 Assert.False(type.IsGenericType);
                 Assert.False(type.IsByRefLike);
             }

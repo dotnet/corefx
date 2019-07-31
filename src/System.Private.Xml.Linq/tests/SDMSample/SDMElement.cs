@@ -697,7 +697,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(2, e3.Attributes().Count());
 
             e3.SetAttributeValue("a3", null);
-            Assert.Equal(1, e3.Attributes().Count());
+            Assert.Single(e3.Attributes());
 
             e3.SetAttributeValue("a1", null);
             Assert.Empty(e3.Attributes());
@@ -722,12 +722,12 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(2, e.Attributes().Count());
 
             e.RemoveAll();
-            Assert.Equal(1, e.DescendantNodesAndSelf().Count());
+            Assert.Single(e.DescendantNodesAndSelf());
             Assert.Empty(e.Attributes());
 
             // Removing all from an already empty one.
             e.RemoveAll();
-            Assert.Equal(1, e.DescendantNodesAndSelf().Count());
+            Assert.Single(e.DescendantNodesAndSelf());
             Assert.Empty(e.Attributes());
         }
 

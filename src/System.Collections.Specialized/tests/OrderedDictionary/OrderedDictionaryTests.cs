@@ -78,7 +78,7 @@ namespace System.Collections.Specialized.Tests
         public void CountTests()
         {
             var d = new OrderedDictionary();
-            Assert.Equal(0, d.Count);
+            Assert.Empty(d);
 
             for (int i = 0; i < 1000; i++)
             {
@@ -352,20 +352,20 @@ namespace System.Collections.Specialized.Tests
         {
             var d = new OrderedDictionary();
             d.Clear();
-            Assert.Equal(0, d.Count);
+            Assert.Empty(d);
             for (int i = 0; i < 1000; i++)
             {
                 d.Add(i, i);
             }
             d.Clear();
-            Assert.Equal(0, d.Count);
+            Assert.Empty(d);
             d.Clear();
-            Assert.Equal(0, d.Count);
+            Assert.Empty(d);
             for (int i = 0; i < 1000; i++)
             {
                 d.Add("foo", "bar");
                 d.Clear();
-                Assert.Equal(0, d.Count);
+                Assert.Empty(d);
             }
         }
 

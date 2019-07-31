@@ -392,7 +392,7 @@ namespace System.Linq.Expressions.Tests
             // 1 type arg Func
             Type type = Expression.GetFuncType(new Type[] { typeof(int) });
             Assert.True(type.IsGenericType);
-            Assert.Equal(1, type.GetGenericArguments().Length);
+            Assert.Single(type.GetGenericArguments());
             Assert.Equal(typeof(int), type.GetGenericArguments()[0]);
 
             // 2 type arg Func
@@ -1909,7 +1909,7 @@ namespace System.Linq.Expressions.Tests
             Expression<Func<Foo[]>> f = () => new Foo[] { foo };
             Func<Foo[]> d = f.Compile(useInterpreter);
             Foo[] v = d();
-            Assert.Equal(1, v.Length);
+            Assert.Single(v);
             Assert.Equal(foo, v[0]);
         }
 
@@ -2084,7 +2084,7 @@ namespace System.Linq.Expressions.Tests
             Expression<Func<int, List<ClassY>>> f = x => new List<ClassY> { new ClassY { B = x } };
             Func<int, List<ClassY>> d = f.Compile(useInterpreter);
             List<ClassY> list = d(5);
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             Assert.Equal(5, list[0].B);
         }
 
@@ -2124,7 +2124,7 @@ namespace System.Linq.Expressions.Tests
             ClassX x = d(5);
             Assert.Equal(5, x.A);
             Assert.Equal(6, x.B);
-            Assert.Equal(1, x.Ys.Count);
+            Assert.Single(x.Ys);
             Assert.Equal(7, x.Ys[0].B);
         }
 
@@ -2138,7 +2138,7 @@ namespace System.Linq.Expressions.Tests
             ClassX x = d(5);
             Assert.Equal(5, x.A);
             Assert.Equal(6, x.B);
-            Assert.Equal(1, x.SYs.Count);
+            Assert.Single(x.SYs);
             Assert.Equal(7, x.SYs[0].B);
         }
 
@@ -2165,7 +2165,7 @@ namespace System.Linq.Expressions.Tests
             StructX x = d(5);
             Assert.Equal(5, x.A);
             Assert.Equal(6, x.B);
-            Assert.Equal(1, x.Ys.Count);
+            Assert.Single(x.Ys);
             Assert.Equal(7, x.Ys[0].B);
         }
 
@@ -2250,7 +2250,7 @@ namespace System.Linq.Expressions.Tests
                     select v;
 
             List<int> list = q.ToList();
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
         }
 
         [Fact]

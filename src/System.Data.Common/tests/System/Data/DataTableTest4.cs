@@ -336,8 +336,8 @@ namespace System.Data.Tests
             Assert.Equal(2, table.PrimaryKey.Length);
             Assert.Equal("id", table.PrimaryKey[0].ToString());
             Assert.Equal("DepartmentID", table.PrimaryKey[1].ToString());
-            Assert.Equal(0, table.ParentRelations.Count);
-            Assert.Equal(0, table.ChildRelations.Count);
+            Assert.Empty(table.ParentRelations);
+            Assert.Empty(table.ChildRelations);
 
             //Check properties of each column
             //First Column
@@ -434,7 +434,7 @@ namespace System.Data.Tests
             Assert.Equal(2, table.PrimaryKey.Length);
             Assert.Equal("id", table.PrimaryKey[0].ToString());
             Assert.Equal("DepartmentID", table.PrimaryKey[1].ToString());
-            Assert.Equal(0, table.ParentRelations.Count);
+            Assert.Empty(table.ParentRelations);
             Assert.Equal(2, table.ChildRelations.Count);
 
             //Check properties of each column
@@ -735,10 +735,10 @@ namespace System.Data.Tests
             Assert.Equal(2, firstChildTable.Constraints.Count);
             Assert.Equal("Constraint1", firstChildTable.Constraints[0].ToString());
             Assert.Equal("ParentChild_Relation1", firstChildTable.Constraints[1].ToString());
-            Assert.Equal(1, firstChildTable.ParentRelations.Count);
+            Assert.Single(firstChildTable.ParentRelations);
             Assert.Equal("ParentTable", firstChildTable.ParentRelations[0].ParentTable.TableName);
-            Assert.Equal(0, firstChildTable.ChildRelations.Count);
-            Assert.Equal(0, firstChildTable.PrimaryKey.Length);
+            Assert.Empty(firstChildTable.ChildRelations);
+            Assert.Empty(firstChildTable.PrimaryKey);
 
             //Check Properties of Second Child Table
             DataTable secondChildTable = table.ChildRelations[0].ChildTable;
@@ -756,10 +756,10 @@ namespace System.Data.Tests
             Assert.Equal(2, secondChildTable.Constraints.Count);
             Assert.Equal("Constraint1", secondChildTable.Constraints[0].ToString());
             Assert.Equal("ParentChild_Relation2", secondChildTable.Constraints[1].ToString());
-            Assert.Equal(1, secondChildTable.ParentRelations.Count);
+            Assert.Single(secondChildTable.ParentRelations);
             Assert.Equal("ParentTable", secondChildTable.ParentRelations[0].ParentTable.TableName);
-            Assert.Equal(0, secondChildTable.ChildRelations.Count);
-            Assert.Equal(0, secondChildTable.PrimaryKey.Length);
+            Assert.Empty(secondChildTable.ChildRelations);
+            Assert.Empty(secondChildTable.PrimaryKey);
         }
 
         [Fact]
@@ -789,12 +789,12 @@ namespace System.Data.Tests
             Assert.False(table.CaseSensitive);
             Assert.Equal("ChildTable", table.TableName);
             Assert.Equal(string.Empty, table.Prefix);
-            Assert.Equal(1, table.Constraints.Count);
+            Assert.Single(table.Constraints);
             Assert.Equal("Constraint1", table.Constraints[0].ToString());
             Assert.Equal(typeof(UniqueConstraint), table.Constraints[0].GetType());
-            Assert.Equal(0, table.PrimaryKey.Length);
-            Assert.Equal(0, table.ParentRelations.Count);
-            Assert.Equal(0, table.ChildRelations.Count);
+            Assert.Empty(table.PrimaryKey);
+            Assert.Empty(table.ParentRelations);
+            Assert.Empty(table.ChildRelations);
 
 
             //Check properties of each column
@@ -906,7 +906,7 @@ namespace System.Data.Tests
             DataSet ds = new DataSet();
             ds.ReadXml(_tempFile);
 
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal("ParentTable", ds.Tables[0].TableName);
             DataTable table = ds.Tables[0];
 
@@ -1305,7 +1305,7 @@ namespace System.Data.Tests
             Assert.Equal(XmlReadMode.IgnoreSchema, mode);
             Assert.Equal(string.Empty, table.TableName);
             Assert.Equal(0, table.Rows.Count);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal(typeof(int), table.Columns[0].DataType);
             Assert.Null(table.DataSet);
         }
@@ -1333,7 +1333,7 @@ namespace System.Data.Tests
             Assert.Equal(XmlReadMode.IgnoreSchema, mode);
             Assert.Equal("Table1", table.TableName);
             Assert.Equal(0, table.Rows.Count);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal(typeof(int), table.Columns[0].DataType);
             Assert.Null(table.DataSet);
         }
@@ -1360,7 +1360,7 @@ namespace System.Data.Tests
             Assert.Equal(XmlReadMode.IgnoreSchema, mode);
             Assert.Equal("ParentTable", table.TableName);
             Assert.Equal(3, table.Rows.Count);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal(typeof(string), table.Columns[0].DataType);
             Assert.Null(table.DataSet);
 
@@ -1399,7 +1399,7 @@ namespace System.Data.Tests
             Assert.Equal(XmlReadMode.IgnoreSchema, mode);
             Assert.Equal("ParentTable", table.TableName);
             Assert.Equal(3, table.Rows.Count);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal("sid", table.Columns[0].ColumnName);
             Assert.Equal(typeof(string), table.Columns[0].DataType);
             Assert.Null(table.DataSet);
@@ -1494,7 +1494,7 @@ namespace System.Data.Tests
             Assert.Equal(XmlReadMode.ReadSchema, mode);
             Assert.Equal(string.Empty, table.TableName);
             Assert.Equal(0, table.Rows.Count);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal(typeof(int), table.Columns[0].DataType);
             Assert.Null(table.DataSet);
         }
@@ -1604,7 +1604,7 @@ namespace System.Data.Tests
             Assert.Equal(XmlReadMode.IgnoreSchema, mode);
             Assert.Equal("Table1", table.TableName);
             Assert.Equal(0, table.Rows.Count);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal(typeof(int), table.Columns[0].DataType);
             Assert.Equal("System.Data.DataSet", table.DataSet.ToString());
             Assert.Equal("NewDataSet", table.DataSet.DataSetName);
@@ -1635,7 +1635,7 @@ namespace System.Data.Tests
             Assert.Equal(XmlReadMode.IgnoreSchema, mode);
             Assert.Equal("HelloWorldTable", table.TableName);
             Assert.Equal(0, table.Rows.Count);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal(typeof(int), table.Columns[0].DataType);
             Assert.Equal("System.Data.DataSet", table.DataSet.ToString());
             Assert.Equal("NewDataSet", table.DataSet.DataSetName);
@@ -1665,7 +1665,7 @@ namespace System.Data.Tests
             Assert.Equal(XmlReadMode.IgnoreSchema, mode);
             Assert.Equal("ParentTable", table.TableName);
             Assert.Equal(3, table.Rows.Count);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal(typeof(int), table.Columns[0].DataType);
             Assert.Equal("System.Data.DataSet", table.DataSet.ToString());
             Assert.Equal("NewDataSet", table.DataSet.DataSetName);
@@ -1817,7 +1817,7 @@ namespace System.Data.Tests
             }
 
             Assert.Equal(string.Empty, table.TableName);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal(0, table.Rows.Count);
             Assert.Equal(XmlReadMode.DiffGram, mode);
         }
@@ -1846,7 +1846,7 @@ namespace System.Data.Tests
 
             Assert.Equal(XmlReadMode.DiffGram, mode);
             Assert.Null(table.DataSet);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal(typeof(string), table.Columns[0].DataType);
             Assert.Equal(3, table.Rows.Count);
 
@@ -1943,7 +1943,7 @@ namespace System.Data.Tests
             Assert.Equal(XmlReadMode.DiffGram, mode);
             Assert.Null(table.DataSet);
             Assert.Equal("DummyTable", table.TableName);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal(typeof(string), table.Columns[0].DataType);
 
             Assert.Equal(3, table.Rows.Count);
@@ -1979,7 +1979,7 @@ namespace System.Data.Tests
             Assert.Equal(typeof(int), table1.Columns[0].DataType);
             Assert.Equal(typeof(string), table1.Columns[1].DataType);
             Assert.Equal(typeof(int), table1.Columns[2].DataType);
-            Assert.Equal(0, table1.ChildRelations.Count);
+            Assert.Empty(table1.ChildRelations);
 
             Assert.Equal(3, table1.Rows.Count);
             //Check the row
@@ -2020,7 +2020,7 @@ namespace System.Data.Tests
             table.ReadXml(_tempFile);
 
             Assert.Equal("HelloWorldDataSet", table.DataSet.DataSetName);
-            Assert.Equal(1, table.Columns.Count);
+            Assert.Single(table.Columns);
             Assert.Equal(typeof(string), table.Columns[0].DataType);
             Assert.Equal(3, table.Rows.Count);
 
@@ -2098,9 +2098,9 @@ namespace System.Data.Tests
             Assert.Equal(2, table.Rows.Count);
             Assert.Equal(typeof(int), table.Columns[0].DataType);
             Assert.Equal(typeof(string), table.Columns[1].DataType);
-            Assert.Equal(1, table.Constraints.Count);
+            Assert.Single(table.Constraints);
             Assert.Equal(typeof(UniqueConstraint), table.Constraints[0].GetType());
-            Assert.Equal(1, table.ChildRelations.Count);
+            Assert.Single(table.ChildRelations);
             Assert.Equal("Relation1", table.ChildRelations[0].RelationName);
             Assert.Equal("Parent", table.ChildRelations[0].ParentTable.TableName);
             Assert.Equal("Child1", table.ChildRelations[0].ChildTable.TableName);
@@ -2116,8 +2116,8 @@ namespace System.Data.Tests
             Assert.Equal(2, table1.Constraints.Count);
             Assert.Equal(typeof(UniqueConstraint), table1.Constraints[0].GetType());
             Assert.Equal(typeof(ForeignKeyConstraint), table1.Constraints[1].GetType());
-            Assert.Equal(1, table1.ParentRelations.Count);
-            Assert.Equal(1, table1.ChildRelations.Count);
+            Assert.Single(table1.ParentRelations);
+            Assert.Single(table1.ChildRelations);
             Assert.Equal("Relation1", table1.ParentRelations[0].RelationName);
             Assert.Equal("Relation2", table1.ChildRelations[0].RelationName);
             Assert.Equal("Parent", table1.ParentRelations[0].ParentTable.TableName);
@@ -2130,10 +2130,10 @@ namespace System.Data.Tests
             Assert.Equal(8, table1.Rows.Count);
             Assert.Equal(typeof(int), table1.Columns[0].DataType);
             Assert.Equal(typeof(string), table1.Columns[1].DataType);
-            Assert.Equal(1, table1.Constraints.Count);
+            Assert.Single(table1.Constraints);
             Assert.Equal(typeof(ForeignKeyConstraint), table1.Constraints[0].GetType());
-            Assert.Equal(1, table1.ParentRelations.Count);
-            Assert.Equal(0, table1.ChildRelations.Count);
+            Assert.Single(table1.ParentRelations);
+            Assert.Empty(table1.ChildRelations);
             Assert.Equal("Relation2", table1.ParentRelations[0].RelationName);
             Assert.Equal("Child1", table1.ParentRelations[0].ParentTable.TableName);
         }

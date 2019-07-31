@@ -178,7 +178,7 @@ namespace System.Reflection.Tests
             theN.TestGenericMethodParameterInvariants();
 
             ParameterInfo[] ps = m.GetParameters();
-            Assert.Equal(1, ps.Length);
+            Assert.Single(ps);
             ParameterInfo p = ps[0];
             Type actual = p.ParameterType;
 
@@ -228,7 +228,7 @@ namespace System.Reflection.Tests
             Assert.Equal(typeof(string).Project(), theN);
 
             ParameterInfo[] ps = m.GetParameters();
-            Assert.Equal(1, ps.Length);
+            Assert.Single(ps);
             ParameterInfo p = ps[0];
             Type actual = p.ParameterType;
 

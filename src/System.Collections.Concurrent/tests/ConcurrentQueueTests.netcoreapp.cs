@@ -23,7 +23,7 @@ namespace System.Collections.Concurrent.Tests
 
             // Clear initial items
             q.Clear();
-            Assert.Equal(0, q.Count);
+            Assert.Empty(q);
             Assert.True(q.IsEmpty);
             Assert.Equal(Enumerable.Empty<int>(), q);
 
@@ -38,7 +38,7 @@ namespace System.Collections.Concurrent.Tests
             }
             Assert.Equal(Enumerable.Range(0, count), q);
             q.Clear();
-            Assert.Equal(0, q.Count);
+            Assert.Empty(q);
             Assert.True(q.IsEmpty);
             Assert.Equal(Enumerable.Empty<int>(), q);
 
@@ -46,9 +46,9 @@ namespace System.Collections.Concurrent.Tests
             for (int i = 0; i < count; i++)
             {
                 q.Enqueue(i);
-                Assert.Equal(1, q.Count);
+                Assert.Single(q);
                 q.Clear();
-                Assert.Equal(0, q.Count);
+                Assert.Empty(q);
             }
         }
 

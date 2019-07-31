@@ -49,7 +49,7 @@ namespace System.Text.Encodings.Tests
         {
             UTF8Encoding defaultEncoding = Encoding.Default as UTF8Encoding;
             Assert.True(defaultEncoding != null);
-            Assert.Equal(0, defaultEncoding.GetPreamble().Length);
+            Assert.Empty(defaultEncoding.GetPreamble());
         }
 
         [Fact]

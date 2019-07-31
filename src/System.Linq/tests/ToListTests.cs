@@ -42,7 +42,7 @@ namespace System.Linq.Tests
                 resultList =>
                 {
                     Assert.NotNull(resultList);
-                    Assert.Equal(0, resultList.Count);
+                    Assert.Empty(resultList);
                 });
         }
 

@@ -42,7 +42,7 @@ namespace System.Net.Http.Tests
             value2.CharSet = "iso-8859-1";
             value2.Quality = 0.3868;
 
-            Assert.Equal(0, headers.Accept.Count);
+            Assert.Empty(headers.Accept);
 
             headers.Accept.Add(value1);
             headers.Accept.Add(value2);
@@ -52,7 +52,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(value2, headers.Accept.ElementAt(1));
 
             headers.Accept.Clear();
-            Assert.Equal(0, headers.Accept.Count);
+            Assert.Empty(headers.Accept);
         }
 
         [Fact]
@@ -60,12 +60,12 @@ namespace System.Net.Http.Tests
         {
             HttpRequestMessage request = new HttpRequestMessage();
 
-            Assert.Equal(0, request.Headers.Accept.Count);
+            Assert.Empty(request.Headers.Accept);
             // Copy to another list
             List<MediaTypeWithQualityHeaderValue> accepts = request.Headers.Accept.ToList();
-            Assert.Equal(0, accepts.Count);
+            Assert.Empty(accepts);
             accepts = new List<MediaTypeWithQualityHeaderValue>(request.Headers.Accept);
-            Assert.Equal(0, accepts.Count);
+            Assert.Empty(accepts);
         }
 
         [Fact]
@@ -98,15 +98,15 @@ namespace System.Net.Http.Tests
             headers.Clear();
             headers.TryAddWithoutValidation("Accept", "text/plain application/xml"); // no separator
 
-            Assert.Equal(0, headers.Accept.Count);
-            Assert.Equal(1, headers.GetValues("Accept").Count());
+            Assert.Empty(headers.Accept);
+            Assert.Single(headers.GetValues("Accept"));
             Assert.Equal("text/plain application/xml", headers.GetValues("Accept").First());
         }
 
         [Fact]
         public void AcceptCharset_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.AcceptCharset.Count);
+            Assert.Empty(headers.AcceptCharset);
 
             headers.AcceptCharset.Add(new StringWithQualityHeaderValue("iso-8859-5"));
             headers.AcceptCharset.Add(new StringWithQualityHeaderValue("unicode-1-1", 0.8));
@@ -116,7 +116,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(new StringWithQualityHeaderValue("unicode-1-1", 0.8), headers.AcceptCharset.ElementAt(1));
 
             headers.AcceptCharset.Clear();
-            Assert.Equal(0, headers.AcceptCharset.Count);
+            Assert.Empty(headers.AcceptCharset);
         }
 
         [Fact]
@@ -134,14 +134,14 @@ namespace System.Net.Http.Tests
         public void AcceptCharset_UseAddMethodWithInvalidValue_InvalidValueRecognized()
         {
             headers.TryAddWithoutValidation("Accept-Charset", "iso-8859-5 utf-8"); // no separator
-            Assert.Equal(0, headers.AcceptCharset.Count);
-            Assert.Equal(1, headers.GetValues("Accept-Charset").Count());
+            Assert.Empty(headers.AcceptCharset);
+            Assert.Single(headers.GetValues("Accept-Charset"));
             Assert.Equal("iso-8859-5 utf-8", headers.GetValues("Accept-Charset").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("Accept-Charset", "utf-8; q=1; q=0.3");
-            Assert.Equal(0, headers.AcceptCharset.Count);
-            Assert.Equal(1, headers.GetValues("Accept-Charset").Count());
+            Assert.Empty(headers.AcceptCharset);
+            Assert.Single(headers.GetValues("Accept-Charset"));
             Assert.Equal("utf-8; q=1; q=0.3", headers.GetValues("Accept-Charset").First());
         }
 
@@ -162,7 +162,7 @@ namespace System.Net.Http.Tests
         [Fact]
         public void AcceptEncoding_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.AcceptEncoding.Count);
+            Assert.Empty(headers.AcceptEncoding);
 
             headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("compress", 0.9));
             headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
@@ -172,7 +172,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(new StringWithQualityHeaderValue("gzip"), headers.AcceptEncoding.ElementAt(1));
 
             headers.AcceptEncoding.Clear();
-            Assert.Equal(0, headers.AcceptEncoding.Count);
+            Assert.Empty(headers.AcceptEncoding);
         }
 
         [Fact]
@@ -189,7 +189,7 @@ namespace System.Net.Http.Tests
 
             headers.AcceptEncoding.Clear();
             headers.TryAddWithoutValidation("Accept-Encoding", "");
-            Assert.Equal(0, headers.AcceptEncoding.Count);
+            Assert.Empty(headers.AcceptEncoding);
             Assert.False(headers.Contains("Accept-Encoding"));
         }
 
@@ -197,21 +197,21 @@ namespace System.Net.Http.Tests
         public void AcceptEncoding_UseAddMethodWithInvalidValue_InvalidValueRecognized()
         {
             headers.TryAddWithoutValidation("Accept-Encoding", "gzip deflate"); // no separator
-            Assert.Equal(0, headers.AcceptEncoding.Count);
-            Assert.Equal(1, headers.GetValues("Accept-Encoding").Count());
+            Assert.Empty(headers.AcceptEncoding);
+            Assert.Single(headers.GetValues("Accept-Encoding"));
             Assert.Equal("gzip deflate", headers.GetValues("Accept-Encoding").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("Accept-Encoding", "compress; q=1; gzip");
-            Assert.Equal(0, headers.AcceptEncoding.Count);
-            Assert.Equal(1, headers.GetValues("Accept-Encoding").Count());
+            Assert.Empty(headers.AcceptEncoding);
+            Assert.Single(headers.GetValues("Accept-Encoding"));
             Assert.Equal("compress; q=1; gzip", headers.GetValues("Accept-Encoding").First());
         }
 
         [Fact]
         public void AcceptLanguage_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.AcceptLanguage.Count);
+            Assert.Empty(headers.AcceptLanguage);
 
             headers.AcceptLanguage.Add(new StringWithQualityHeaderValue("da"));
             headers.AcceptLanguage.Add(new StringWithQualityHeaderValue("en-GB", 0.8));
@@ -223,7 +223,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(new StringWithQualityHeaderValue("en", 0.7), headers.AcceptLanguage.ElementAt(2));
 
             headers.AcceptLanguage.Clear();
-            Assert.Equal(0, headers.AcceptLanguage.Count);
+            Assert.Empty(headers.AcceptLanguage);
         }
 
         [Fact]
@@ -240,7 +240,7 @@ namespace System.Net.Http.Tests
 
             headers.AcceptLanguage.Clear();
             headers.TryAddWithoutValidation("Accept-Language", "");
-            Assert.Equal(0, headers.AcceptLanguage.Count);
+            Assert.Empty(headers.AcceptLanguage);
             Assert.False(headers.Contains("Accept-Language"));
         }
 
@@ -248,14 +248,14 @@ namespace System.Net.Http.Tests
         public void AcceptLanguage_UseAddMethodWithInvalidValue_InvalidValueRecognized()
         {
             headers.TryAddWithoutValidation("Accept-Language", "de -DE"); // no separator
-            Assert.Equal(0, headers.AcceptLanguage.Count);
-            Assert.Equal(1, headers.GetValues("Accept-Language").Count());
+            Assert.Empty(headers.AcceptLanguage);
+            Assert.Single(headers.GetValues("Accept-Language"));
             Assert.Equal("de -DE", headers.GetValues("Accept-Language").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("Accept-Language", "en; q=0.4,[");
-            Assert.Equal(0, headers.AcceptLanguage.Count);
-            Assert.Equal(1, headers.GetValues("Accept-Language").Count());
+            Assert.Empty(headers.AcceptLanguage);
+            Assert.Single(headers.GetValues("Accept-Language"));
             Assert.Equal("en; q=0.4,[", headers.GetValues("Accept-Language").First());
         }
 
@@ -265,13 +265,13 @@ namespace System.Net.Http.Tests
             // use non-default casing to make sure we do case-insensitive comparison.
             headers.Expect.Add(new NameValueWithParametersHeaderValue("100-CONTINUE"));
             Assert.True(headers.ExpectContinue == true);
-            Assert.Equal(1, headers.Expect.Count);
+            Assert.Single(headers.Expect);
         }
 
         [Fact]
         public void Expect_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.Expect.Count);
+            Assert.Empty(headers.Expect);
             Assert.Null(headers.ExpectContinue);
 
             headers.Expect.Add(new NameValueWithParametersHeaderValue("custom1"));
@@ -295,14 +295,14 @@ namespace System.Net.Http.Tests
             headers.ExpectContinue = true;
             headers.Expect.Clear();
             Assert.True(headers.ExpectContinue == false, "ExpectContinue should be modified by Expect.Clear().");
-            Assert.Equal(0, headers.Expect.Count);
+            Assert.Empty(headers.Expect);
             IEnumerable<string> dummyArray;
             Assert.False(headers.TryGetValues("Expect", out dummyArray), "Expect header count after Expect.Clear().");
 
             // Remove '100-continue' value from store. Since there are no other 'Expect' values, remove whole header.
             headers.ExpectContinue = false;
             Assert.True(headers.ExpectContinue == false, "ExpectContinue == false");
-            Assert.Equal(0, headers.Expect.Count);
+            Assert.Empty(headers.Expect);
             Assert.False(headers.Contains("Expect"));
 
             headers.ExpectContinue = null;
@@ -336,7 +336,7 @@ namespace System.Net.Http.Tests
 
             headers.Expect.Clear();
             Assert.Null(headers.ExpectContinue);
-            Assert.Equal(0, headers.Expect.Count);
+            Assert.Empty(headers.Expect);
             IEnumerable<string> dummyArray;
             Assert.False(headers.TryGetValues("Expect", out dummyArray), "Expect header count after Expect.Clear().");
         }
@@ -346,8 +346,8 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("Expect", "100-continue other"); // no separator
 
-            Assert.Equal(0, headers.Expect.Count);
-            Assert.Equal(1, headers.GetValues("Expect").Count());
+            Assert.Empty(headers.Expect);
+            Assert.Single(headers.GetValues("Expect"));
             Assert.Equal("100-continue other", headers.GetValues("Expect").First());
         }
 
@@ -378,7 +378,7 @@ namespace System.Net.Http.Tests
         [Fact]
         public void IfMatch_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.IfMatch.Count);
+            Assert.Empty(headers.IfMatch);
 
             headers.IfMatch.Add(new EntityTagHeaderValue("\"custom1\""));
             headers.IfMatch.Add(new EntityTagHeaderValue("\"custom2\"", true));
@@ -389,7 +389,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(new EntityTagHeaderValue("\"custom2\"", true), headers.IfMatch.ElementAt(1));
 
             headers.IfMatch.Clear();
-            Assert.Equal(0, headers.IfMatch.Count);
+            Assert.Empty(headers.IfMatch);
             Assert.False(headers.Contains("If-Match"), "Header store should not contain 'If-Match'");
         }
 
@@ -407,7 +407,7 @@ namespace System.Net.Http.Tests
 
             headers.IfMatch.Clear();
             headers.Add("If-Match", "*");
-            Assert.Equal(1, headers.IfMatch.Count);
+            Assert.Single(headers.IfMatch);
             Assert.Same(EntityTagHeaderValue.Any, headers.IfMatch.ElementAt(0));
         }
 
@@ -415,14 +415,14 @@ namespace System.Net.Http.Tests
         public void IfMatch_UseAddMethodWithInvalidInput_PropertyNotUpdated()
         {
             headers.TryAddWithoutValidation("If-Match", "W/\"tag1\" \"tag2\""); // no separator
-            Assert.Equal(0, headers.IfMatch.Count);
-            Assert.Equal(1, headers.GetValues("If-Match").Count());
+            Assert.Empty(headers.IfMatch);
+            Assert.Single(headers.GetValues("If-Match"));
         }
 
         [Fact]
         public void IfNoneMatch_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.IfNoneMatch.Count);
+            Assert.Empty(headers.IfNoneMatch);
 
             headers.IfNoneMatch.Add(new EntityTagHeaderValue("\"custom1\""));
             headers.IfNoneMatch.Add(new EntityTagHeaderValue("\"custom2\"", true));
@@ -433,7 +433,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(new EntityTagHeaderValue("\"custom2\"", true), headers.IfNoneMatch.ElementAt(1));
 
             headers.IfNoneMatch.Clear();
-            Assert.Equal(0, headers.IfNoneMatch.Count);
+            Assert.Empty(headers.IfNoneMatch);
             Assert.False(headers.Contains("If-None-Match"), "Header store should not contain 'If-None-Match'");
         }
 
@@ -451,7 +451,7 @@ namespace System.Net.Http.Tests
 
             headers.IfNoneMatch.Clear();
             headers.Add("If-None-Match", "*");
-            Assert.Equal(1, headers.IfNoneMatch.Count);
+            Assert.Single(headers.IfNoneMatch);
             Assert.Same(EntityTagHeaderValue.Any, headers.IfNoneMatch.ElementAt(0));
         }
 
@@ -464,7 +464,7 @@ namespace System.Net.Http.Tests
             TransferCodingWithQualityHeaderValue value2 = new TransferCodingWithQualityHeaderValue("custom");
             value2.Quality = 0.3868;
 
-            Assert.Equal(0, headers.TE.Count);
+            Assert.Empty(headers.TE);
 
             headers.TE.Add(value1);
             headers.TE.Add(value2);
@@ -474,7 +474,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(value2, headers.TE.ElementAt(1));
 
             headers.TE.Clear();
-            Assert.Equal(0, headers.TE.Count);
+            Assert.Empty(headers.TE);
         }
 
         [Fact]
@@ -573,7 +573,7 @@ namespace System.Net.Http.Tests
         [Fact]
         public void UserAgent_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.UserAgent.Count);
+            Assert.Empty(headers.UserAgent);
 
             headers.UserAgent.Add(new ProductInfoHeaderValue("(custom1)"));
             headers.UserAgent.Add(new ProductInfoHeaderValue("custom2", "1.1"));
@@ -584,12 +584,12 @@ namespace System.Net.Http.Tests
             Assert.Equal(new ProductInfoHeaderValue("custom2", "1.1"), headers.UserAgent.ElementAt(1));
 
             headers.UserAgent.Clear();
-            Assert.Equal(0, headers.UserAgent.Count);
+            Assert.Empty(headers.UserAgent);
             Assert.False(headers.Contains("User-Agent"), "User-Agent header should be removed after calling Clear().");
 
             headers.UserAgent.Add(new ProductInfoHeaderValue("(comment)"));
             headers.UserAgent.Remove(new ProductInfoHeaderValue("(comment)"));
-            Assert.Equal(0, headers.UserAgent.Count);
+            Assert.Empty(headers.UserAgent);
             Assert.False(headers.Contains("User-Agent"), "User-Agent header should be removed after removing last value.");
         }
 
@@ -607,7 +607,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(new ProductInfoHeaderValue("Version", "10.63"), headers.UserAgent.ElementAt(3));
 
             headers.UserAgent.Clear();
-            Assert.Equal(0, headers.UserAgent.Count);
+            Assert.Empty(headers.UserAgent);
             Assert.False(headers.Contains("User-Agent"), "User-Agent header should be removed after calling Clear().");
         }
 
@@ -617,7 +617,7 @@ namespace System.Net.Http.Tests
             string malformedUserAgent = "Mozilla/4.0 (compatible (compatible; MSIE 8.0; Windows NT 6.1; Trident/7.0)";
             headers.TryAddWithoutValidation("User-Agent", malformedUserAgent);
             Assert.True(headers.TryGetValues("User-Agent", out IEnumerable<string> ua));
-            Assert.Equal(1, ua.Count());
+            Assert.Single(ua);
             Assert.Equal(malformedUserAgent, ua.First());
             Assert.Equal(malformedUserAgent, headers.GetValues("User-Agent").First());
         }
@@ -627,26 +627,26 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("User-Agent", "custom\u4F1A");
             Assert.Null(headers.GetParsedValues(KnownHeaders.UserAgent.Descriptor));
-            Assert.Equal(1, headers.GetValues("User-Agent").Count());
+            Assert.Single(headers.GetValues("User-Agent"));
             Assert.Equal("custom\u4F1A", headers.GetValues("User-Agent").First());
 
             headers.Clear();
             // Note that "User-Agent" uses whitespace as separators, so the following is an invalid value
             headers.TryAddWithoutValidation("User-Agent", "custom1, custom2");
             Assert.Null(headers.GetParsedValues(KnownHeaders.UserAgent.Descriptor));
-            Assert.Equal(1, headers.GetValues("User-Agent").Count());
+            Assert.Single(headers.GetValues("User-Agent"));
             Assert.Equal("custom1, custom2", headers.GetValues("User-Agent").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("User-Agent", "custom1, ");
             Assert.Null(headers.GetParsedValues(KnownHeaders.UserAgent.Descriptor));
-            Assert.Equal(1, headers.GetValues("User-Agent").Count());
+            Assert.Single(headers.GetValues("User-Agent"));
             Assert.Equal("custom1, ", headers.GetValues("User-Agent").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("User-Agent", ",custom1");
             Assert.Null(headers.GetParsedValues(KnownHeaders.UserAgent.Descriptor));
-            Assert.Equal(1, headers.GetValues("User-Agent").Count());
+            Assert.Single(headers.GetValues("User-Agent"));
             Assert.Equal(",custom1", headers.GetValues("User-Agent").First());
         }
 
@@ -671,7 +671,7 @@ namespace System.Net.Http.Tests
 
             headers.IfRange = new RangeConditionHeaderValue("\"x\"");
 
-            Assert.Equal(1, headers.GetValues("If-Range").Count());
+            Assert.Single(headers.GetValues("If-Range"));
             Assert.Equal(new RangeConditionHeaderValue("\"x\""), headers.IfRange);
 
             headers.IfRange = null;
@@ -686,7 +686,7 @@ namespace System.Net.Http.Tests
 
             Assert.Equal(new RangeConditionHeaderValue(new EntityTagHeaderValue("\"tag\"", true)),
                 headers.IfRange);
-            Assert.Equal(1, headers.GetValues("If-Range").Count());
+            Assert.Single(headers.GetValues("If-Range"));
 
             headers.IfRange = null;
             Assert.Null(headers.IfRange);
@@ -698,13 +698,13 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("If-Range", "\"tag\"\u4F1A");
             Assert.Null(headers.GetParsedValues(KnownHeaders.IfRange.Descriptor));
-            Assert.Equal(1, headers.GetValues("If-Range").Count());
+            Assert.Single(headers.GetValues("If-Range"));
             Assert.Equal("\"tag\"\u4F1A", headers.GetValues("If-Range").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("If-Range", " \"tag\", ");
             Assert.Null(headers.GetParsedValues(KnownHeaders.IfRange.Descriptor));
-            Assert.Equal(1, headers.GetValues("If-Range").Count());
+            Assert.Single(headers.GetValues("If-Range"));
             Assert.Equal(" \"tag\", ", headers.GetValues("If-Range").First());
         }
 
@@ -742,13 +742,13 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("From", " info@example.com ,");
             Assert.Null(headers.GetParsedValues(KnownHeaders.From.Descriptor));
-            Assert.Equal(1, headers.GetValues("From").Count());
+            Assert.Single(headers.GetValues("From"));
             Assert.Equal(" info@example.com ,", headers.GetValues("From").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("From", "info@");
             Assert.Null(headers.GetParsedValues(KnownHeaders.From.Descriptor));
-            Assert.Equal(1, headers.GetValues("From").Count());
+            Assert.Single(headers.GetValues("From"));
             Assert.Equal("info@", headers.GetValues("From").First());
         }
 
@@ -783,13 +783,13 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("If-Modified-Since", " Sun, 06 Nov 1994 08:49:37 GMT ,");
             Assert.Null(headers.GetParsedValues(KnownHeaders.IfModifiedSince.Descriptor));
-            Assert.Equal(1, headers.GetValues("If-Modified-Since").Count());
+            Assert.Single(headers.GetValues("If-Modified-Since"));
             Assert.Equal(" Sun, 06 Nov 1994 08:49:37 GMT ,", headers.GetValues("If-Modified-Since").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("If-Modified-Since", " Sun, 06 Nov ");
             Assert.Null(headers.GetParsedValues(KnownHeaders.IfModifiedSince.Descriptor));
-            Assert.Equal(1, headers.GetValues("If-Modified-Since").Count());
+            Assert.Single(headers.GetValues("If-Modified-Since"));
             Assert.Equal(" Sun, 06 Nov ", headers.GetValues("If-Modified-Since").First());
         }
 
@@ -824,13 +824,13 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("If-Unmodified-Since", " Sun, 06 Nov 1994 08:49:37 GMT ,");
             Assert.Null(headers.GetParsedValues(KnownHeaders.IfUnmodifiedSince.Descriptor));
-            Assert.Equal(1, headers.GetValues("If-Unmodified-Since").Count());
+            Assert.Single(headers.GetValues("If-Unmodified-Since"));
             Assert.Equal(" Sun, 06 Nov 1994 08:49:37 GMT ,", headers.GetValues("If-Unmodified-Since").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("If-Unmodified-Since", " Sun, 06 Nov ");
             Assert.Null(headers.GetParsedValues(KnownHeaders.IfUnmodifiedSince.Descriptor));
-            Assert.Equal(1, headers.GetValues("If-Unmodified-Since").Count());
+            Assert.Single(headers.GetValues("If-Unmodified-Since"));
             Assert.Equal(" Sun, 06 Nov ", headers.GetValues("If-Unmodified-Since").First());
         }
 
@@ -865,13 +865,13 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("Referer", " http://example.com http://other");
             Assert.Null(headers.GetParsedValues(KnownHeaders.Referer.Descriptor));
-            Assert.Equal(1, headers.GetValues("Referer").Count());
+            Assert.Single(headers.GetValues("Referer"));
             Assert.Equal(" http://example.com http://other", headers.GetValues("Referer").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("Referer", "http://host /other");
             Assert.Null(headers.GetParsedValues(KnownHeaders.Referer.Descriptor));
-            Assert.Equal(1, headers.GetValues("Referer").Count());
+            Assert.Single(headers.GetValues("Referer"));
             Assert.Equal("http://host /other", headers.GetValues("Referer").First());
         }
 
@@ -909,13 +909,13 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("Max-Forwards", "15,");
             Assert.Null(headers.GetParsedValues(KnownHeaders.MaxForwards.Descriptor));
-            Assert.Equal(1, headers.GetValues("Max-Forwards").Count());
+            Assert.Single(headers.GetValues("Max-Forwards"));
             Assert.Equal("15,", headers.GetValues("Max-Forwards").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("Max-Forwards", "1.0");
             Assert.Null(headers.GetParsedValues(KnownHeaders.MaxForwards.Descriptor));
-            Assert.Equal(1, headers.GetValues("Max-Forwards").Count());
+            Assert.Single(headers.GetValues("Max-Forwards"));
             Assert.Equal("1.0", headers.GetValues("Max-Forwards").First());
         }
 
@@ -1030,13 +1030,13 @@ namespace System.Net.Http.Tests
         {
             headers.Connection.Add("CLOSE"); // use non-default casing to make sure we do case-insensitive comparison.
             Assert.True(headers.ConnectionClose == true);
-            Assert.Equal(1, headers.Connection.Count);
+            Assert.Single(headers.Connection);
         }
 
         [Fact]
         public void Connection_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.Connection.Count);
+            Assert.Empty(headers.Connection);
             Assert.Null(headers.ConnectionClose);
 
             headers.Connection.Add("custom1");
@@ -1062,7 +1062,7 @@ namespace System.Net.Http.Tests
             headers.Connection.Clear();
             Assert.True(headers.ConnectionClose == false,
                 "ConnectionClose should be modified by Connection.Clear().");
-            Assert.Equal(0, headers.Connection.Count);
+            Assert.Empty(headers.Connection);
             IEnumerable<string> dummyArray;
             Assert.False(headers.TryGetValues("Connection", out dummyArray),
                 "Connection header count after Connection.Clear().");
@@ -1070,7 +1070,7 @@ namespace System.Net.Http.Tests
             // Remove 'close' value from store. Since there are no other 'Connection' values, remove whole header.
             headers.ConnectionClose = false;
             Assert.True(headers.ConnectionClose == false, "ConnectionClose == false");
-            Assert.Equal(0, headers.Connection.Count);
+            Assert.Empty(headers.Connection);
             Assert.False(headers.Contains("Connection"));
 
             headers.ConnectionClose = null;
@@ -1094,7 +1094,7 @@ namespace System.Net.Http.Tests
 
             headers.Connection.Clear();
             Assert.Null(headers.ConnectionClose);
-            Assert.Equal(0, headers.Connection.Count);
+            Assert.Empty(headers.Connection);
             IEnumerable<string> dummyArray;
             Assert.False(headers.TryGetValues("Connection", out dummyArray),
                 "Connection header count after Connection.Clear().");
@@ -1112,13 +1112,13 @@ namespace System.Net.Http.Tests
             // use non-default casing to make sure we do case-insensitive comparison.
             headers.TransferEncoding.Add(new TransferCodingHeaderValue("CHUNKED"));
             Assert.True(headers.TransferEncodingChunked == true);
-            Assert.Equal(1, headers.TransferEncoding.Count);
+            Assert.Single(headers.TransferEncoding);
         }
 
         [Fact]
         public void TransferEncoding_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.TransferEncoding.Count);
+            Assert.Empty(headers.TransferEncoding);
             Assert.Null(headers.TransferEncodingChunked);
 
             headers.TransferEncoding.Add(new TransferCodingHeaderValue("custom1"));
@@ -1145,14 +1145,14 @@ namespace System.Net.Http.Tests
             headers.TransferEncoding.Clear();
             Assert.True(headers.TransferEncodingChunked == false,
                 "TransferEncodingChunked should be modified by TransferEncoding.Clear().");
-            Assert.Equal(0, headers.TransferEncoding.Count);
+            Assert.Empty(headers.TransferEncoding);
             Assert.False(headers.Contains("Transfer-Encoding"));
 
             // Remove 'chunked' value from store. Since there are no other 'Transfer-Encoding' values, remove whole
             // header.
             headers.TransferEncodingChunked = false;
             Assert.True(headers.TransferEncodingChunked == false, "TransferEncodingChunked == false");
-            Assert.Equal(0, headers.TransferEncoding.Count);
+            Assert.Empty(headers.TransferEncoding);
             Assert.False(headers.Contains("Transfer-Encoding"));
 
             headers.TransferEncodingChunked = null;
@@ -1175,7 +1175,7 @@ namespace System.Net.Http.Tests
 
             headers.TransferEncoding.Clear();
             Assert.Null(headers.TransferEncodingChunked);
-            Assert.Equal(0, headers.TransferEncoding.Count);
+            Assert.Empty(headers.TransferEncoding);
             Assert.False(headers.Contains("Transfer-Encoding"),
                 "Transfer-Encoding header after TransferEncoding.Clear().");
         }
@@ -1185,13 +1185,13 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("Transfer-Encoding", "custom\u4F1A");
             Assert.Null(headers.GetParsedValues(KnownHeaders.TransferEncoding.Descriptor));
-            Assert.Equal(1, headers.GetValues("Transfer-Encoding").Count());
+            Assert.Single(headers.GetValues("Transfer-Encoding"));
             Assert.Equal("custom\u4F1A", headers.GetValues("Transfer-Encoding").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("Transfer-Encoding", "custom1 custom2");
             Assert.Null(headers.GetParsedValues(KnownHeaders.TransferEncoding.Descriptor));
-            Assert.Equal(1, headers.GetValues("Transfer-Encoding").Count());
+            Assert.Single(headers.GetValues("Transfer-Encoding"));
             Assert.Equal("custom1 custom2", headers.GetValues("Transfer-Encoding").First());
 
             headers.Clear();
@@ -1202,7 +1202,7 @@ namespace System.Net.Http.Tests
         [Fact]
         public void Upgrade_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.Upgrade.Count);
+            Assert.Empty(headers.Upgrade);
 
             headers.Upgrade.Add(new ProductHeaderValue("custom1"));
             headers.Upgrade.Add(new ProductHeaderValue("custom2", "1.1"));
@@ -1213,7 +1213,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(new ProductHeaderValue("custom2", "1.1"), headers.Upgrade.ElementAt(1));
 
             headers.Upgrade.Clear();
-            Assert.Equal(0, headers.Upgrade.Count);
+            Assert.Empty(headers.Upgrade);
             Assert.False(headers.Contains("Upgrade"), "Upgrade header should be removed after calling Clear().");
         }
 
@@ -1230,7 +1230,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(new ProductHeaderValue("custom3", "2.0"), headers.Upgrade.ElementAt(2));
 
             headers.Upgrade.Clear();
-            Assert.Equal(0, headers.Upgrade.Count);
+            Assert.Empty(headers.Upgrade);
             Assert.False(headers.Contains("Upgrade"), "Upgrade header should be removed after calling Clear().");
         }
 
@@ -1239,13 +1239,13 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("Upgrade", "custom\u4F1A");
             Assert.Null(headers.GetParsedValues(KnownHeaders.Upgrade.Descriptor));
-            Assert.Equal(1, headers.GetValues("Upgrade").Count());
+            Assert.Single(headers.GetValues("Upgrade"));
             Assert.Equal("custom\u4F1A", headers.GetValues("Upgrade").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("Upgrade", "custom1 custom2");
             Assert.Null(headers.GetParsedValues(KnownHeaders.Upgrade.Descriptor));
-            Assert.Equal(1, headers.GetValues("Upgrade").Count());
+            Assert.Single(headers.GetValues("Upgrade"));
             Assert.Equal("custom1 custom2", headers.GetValues("Upgrade").First());
         }
 
@@ -1284,20 +1284,20 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("Date", " Sun, 06 Nov 1994 08:49:37 GMT ,");
             Assert.Null(headers.GetParsedValues(KnownHeaders.Date.Descriptor));
-            Assert.Equal(1, headers.GetValues("Date").Count());
+            Assert.Single(headers.GetValues("Date"));
             Assert.Equal(" Sun, 06 Nov 1994 08:49:37 GMT ,", headers.GetValues("Date").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("Date", " Sun, 06 Nov ");
             Assert.Null(headers.GetParsedValues(KnownHeaders.Date.Descriptor));
-            Assert.Equal(1, headers.GetValues("Date").Count());
+            Assert.Single(headers.GetValues("Date"));
             Assert.Equal(" Sun, 06 Nov ", headers.GetValues("Date").First());
         }
 
         [Fact]
         public void Via_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.Via.Count);
+            Assert.Empty(headers.Via);
 
             headers.Via.Add(new ViaHeaderValue("x11", "host"));
             headers.Via.Add(new ViaHeaderValue("1.1", "example.com:8080", "HTTP", "(comment)"));
@@ -1308,7 +1308,7 @@ namespace System.Net.Http.Tests
                 headers.Via.ElementAt(1));
 
             headers.Via.Clear();
-            Assert.Equal(0, headers.Via.Count);
+            Assert.Empty(headers.Via);
         }
 
         [Fact]
@@ -1322,7 +1322,7 @@ namespace System.Net.Http.Tests
 
             headers.Via.Clear();
             headers.TryAddWithoutValidation("Via", "");
-            Assert.Equal(0, headers.Via.Count);
+            Assert.Empty(headers.Via);
             Assert.False(headers.Contains("Via"));
         }
 
@@ -1330,21 +1330,21 @@ namespace System.Net.Http.Tests
         public void Via_UseAddMethodWithInvalidValue_InvalidValueRecognized()
         {
             headers.TryAddWithoutValidation("Via", "1.1 host1 1.1 host2"); // no separator
-            Assert.Equal(0, headers.Via.Count);
-            Assert.Equal(1, headers.GetValues("Via").Count());
+            Assert.Empty(headers.Via);
+            Assert.Single(headers.GetValues("Via"));
             Assert.Equal("1.1 host1 1.1 host2", headers.GetValues("Via").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("Via", "X/11 host/1");
-            Assert.Equal(0, headers.Via.Count);
-            Assert.Equal(1, headers.GetValues("Via").Count());
+            Assert.Empty(headers.Via);
+            Assert.Single(headers.GetValues("Via"));
             Assert.Equal("X/11 host/1", headers.GetValues("Via").First());
         }
 
         [Fact]
         public void Warning_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.Warning.Count);
+            Assert.Empty(headers.Warning);
 
             headers.Warning.Add(new WarningHeaderValue(199, "microsoft.com", "\"Miscellaneous warning\""));
             headers.Warning.Add(new WarningHeaderValue(113, "example.com", "\"Heuristic expiration\""));
@@ -1356,7 +1356,7 @@ namespace System.Net.Http.Tests
                 headers.Warning.ElementAt(1));
 
             headers.Warning.Clear();
-            Assert.Equal(0, headers.Warning.Count);
+            Assert.Empty(headers.Warning);
         }
 
         [Fact]
@@ -1372,7 +1372,7 @@ namespace System.Net.Http.Tests
 
             headers.Warning.Clear();
             headers.TryAddWithoutValidation("Warning", "");
-            Assert.Equal(0, headers.Warning.Count);
+            Assert.Empty(headers.Warning);
             Assert.False(headers.Contains("Warning"));
         }
 
@@ -1380,14 +1380,14 @@ namespace System.Net.Http.Tests
         public void Warning_UseAddMethodWithInvalidValue_InvalidValueRecognized()
         {
             headers.TryAddWithoutValidation("Warning", "123 host1 \"\" 456 host2 \"\""); // no separator
-            Assert.Equal(0, headers.Warning.Count);
-            Assert.Equal(1, headers.GetValues("Warning").Count());
+            Assert.Empty(headers.Warning);
+            Assert.Single(headers.GetValues("Warning"));
             Assert.Equal("123 host1 \"\" 456 host2 \"\"", headers.GetValues("Warning").First());
 
             headers.Clear();
             headers.TryAddWithoutValidation("Warning", "123 host1\"text\"");
-            Assert.Equal(0, headers.Warning.Count);
-            Assert.Equal(1, headers.GetValues("Warning").Count());
+            Assert.Empty(headers.Warning);
+            Assert.Single(headers.GetValues("Warning"));
             Assert.Equal("123 host1\"text\"", headers.GetValues("Warning").First());
         }
 
@@ -1433,7 +1433,7 @@ namespace System.Net.Http.Tests
         [Fact]
         public void Trailer_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.Trailer.Count);
+            Assert.Empty(headers.Trailer);
 
             headers.Trailer.Add("custom1");
             headers.Trailer.Add("custom2");
@@ -1445,7 +1445,7 @@ namespace System.Net.Http.Tests
             Assert.Equal("custom2", headers.Trailer.ElementAt(1));
 
             headers.Trailer.Clear();
-            Assert.Equal(0, headers.Trailer.Count);
+            Assert.Empty(headers.Trailer);
             Assert.False(headers.Contains("Trailer"),
                 "There should be no Trailer header after calling Clear().");
         }
@@ -1463,7 +1463,7 @@ namespace System.Net.Http.Tests
             Assert.Equal("custom3", headers.Trailer.ElementAt(2));
 
             headers.Trailer.Clear();
-            Assert.Equal(0, headers.Trailer.Count);
+            Assert.Empty(headers.Trailer);
             Assert.False(headers.Contains("Trailer"),
                 "There should be no Trailer header after calling Clear().");
         }
@@ -1473,15 +1473,15 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("Trailer", "custom1 custom2"); // no separator
 
-            Assert.Equal(0, headers.Trailer.Count);
-            Assert.Equal(1, headers.GetValues("Trailer").Count());
+            Assert.Empty(headers.Trailer);
+            Assert.Single(headers.GetValues("Trailer"));
             Assert.Equal("custom1 custom2", headers.GetValues("Trailer").First());
         }
 
         [Fact]
         public void Pragma_ReadAndWriteProperty_ValueMatchesPriorSetValue()
         {
-            Assert.Equal(0, headers.Pragma.Count);
+            Assert.Empty(headers.Pragma);
 
             headers.Pragma.Add(new NameValueHeaderValue("custom1", "value1"));
             headers.Pragma.Add(new NameValueHeaderValue("custom2"));
@@ -1493,7 +1493,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(new NameValueHeaderValue("custom2"), headers.Pragma.ElementAt(1));
 
             headers.Pragma.Clear();
-            Assert.Equal(0, headers.Pragma.Count);
+            Assert.Empty(headers.Pragma);
             Assert.False(headers.Contains("Pragma"),
                 "There should be no Pragma header after calling Clear().");
         }
@@ -1511,7 +1511,7 @@ namespace System.Net.Http.Tests
             Assert.Equal(new NameValueHeaderValue("custom3", "value3"), headers.Pragma.ElementAt(2));
 
             headers.Pragma.Clear();
-            Assert.Equal(0, headers.Pragma.Count);
+            Assert.Empty(headers.Pragma);
             Assert.False(headers.Contains("Pragma"),
                 "There should be no Pragma header after calling Clear().");
         }
@@ -1521,8 +1521,8 @@ namespace System.Net.Http.Tests
         {
             headers.TryAddWithoutValidation("Pragma", "custom1, custom2=");
 
-            Assert.Equal(0, headers.Pragma.Count());
-            Assert.Equal(1, headers.GetValues("Pragma").Count());
+            Assert.Empty(headers.Pragma);
+            Assert.Single(headers.GetValues("Pragma"));
             Assert.Equal("custom1, custom2=", headers.GetValues("Pragma").First());
         }
 

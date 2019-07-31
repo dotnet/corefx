@@ -23,7 +23,7 @@ namespace System.Reflection.Emit.Tests
             type.CreateTypeInfo().AsType();
             
             object[] attributes = type.GetCustomAttributes(false).ToArray();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
 
             TypeBuilderIntAttribute obj = (TypeBuilderIntAttribute)attributes[0];
             Assert.Equal("hello", obj.Field12345);
@@ -48,7 +48,7 @@ namespace System.Reflection.Emit.Tests
             type.CreateTypeInfo().AsType();
             
             object[] attributes = type.GetCustomAttributes(false).ToArray();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             Assert.True(attributes[0] is TypeBuilderStringAttribute);
             Assert.Equal("hello", ((TypeBuilderStringAttribute)attributes[0]).Creator);
         }

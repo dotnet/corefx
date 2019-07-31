@@ -152,7 +152,7 @@ namespace System.Net.Http.Functional.Tests
 
                 HttpResponseMessage response = await sendTask;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.Equal(0, (await response.Content.ReadAsByteArrayAsync()).Length);
+                Assert.Empty((await response.Content.ReadAsByteArrayAsync()));
             }
         }
 
@@ -176,7 +176,7 @@ namespace System.Net.Http.Functional.Tests
 
                 HttpResponseMessage response = await sendTask;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.Equal(0, (await response.Content.ReadAsByteArrayAsync()).Length);
+                Assert.Empty((await response.Content.ReadAsByteArrayAsync()));
             }
         }
 
@@ -1030,7 +1030,7 @@ namespace System.Net.Http.Functional.Tests
                     using (HttpResponseMessage response = await client.GetAsync(server.Address))
                     {
                         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        Assert.Equal(0, (await response.Content.ReadAsByteArrayAsync()).Length);
+                        Assert.Empty((await response.Content.ReadAsByteArrayAsync()));
                     }
                 }),
                 Task.Run(async () =>

@@ -16,9 +16,9 @@ namespace System.Collections.Specialized.Tests
             MyNameObjectCollection coll = new MyNameObjectCollection(CaseInsensitiveHashCodeProvider.Default, CaseInsensitiveComparer.Default);
 #pragma warning restore CS0618 // Type or member is obsolete
             coll.Add(null, null);
-            Assert.Equal(1, coll.Count);
+            Assert.Single(coll);
             coll.Remove(null);
-            Assert.Equal(0, coll.Count);
+            Assert.Empty(coll);
         }
 
         [Fact]

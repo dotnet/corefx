@@ -203,23 +203,23 @@ namespace System.Collections.Immutable.Tests
 
         protected void KeysTestHelper<TKey, TValue>(IImmutableDictionary<TKey, TValue> map, TKey key)
         {
-            Assert.Equal(0, map.Keys.Count());
-            Assert.Equal(0, map.ToReadOnlyDictionary().Keys.Count());
+            Assert.Empty(map.Keys);
+            Assert.Empty(map.ToReadOnlyDictionary().Keys);
 
             var nonEmpty = map.Add(key, default(TValue));
-            Assert.Equal(1, nonEmpty.Keys.Count());
-            Assert.Equal(1, nonEmpty.ToReadOnlyDictionary().Keys.Count());
+            Assert.Single(nonEmpty.Keys);
+            Assert.Single(nonEmpty.ToReadOnlyDictionary().Keys);
             KeysOrValuesTestHelper(((IDictionary<TKey, TValue>)nonEmpty).Keys, key);
         }
 
         protected void ValuesTestHelper<TKey, TValue>(IImmutableDictionary<TKey, TValue> map, TKey key)
         {
-            Assert.Equal(0, map.Values.Count());
-            Assert.Equal(0, map.ToReadOnlyDictionary().Values.Count());
+            Assert.Empty(map.Values);
+            Assert.Empty(map.ToReadOnlyDictionary().Values);
 
             var nonEmpty = map.Add(key, default(TValue));
-            Assert.Equal(1, nonEmpty.Values.Count());
-            Assert.Equal(1, nonEmpty.ToReadOnlyDictionary().Values.Count());
+            Assert.Single(nonEmpty.Values);
+            Assert.Single(nonEmpty.ToReadOnlyDictionary().Values);
             KeysOrValuesTestHelper(((IDictionary<TKey, TValue>)nonEmpty).Values, default(TValue));
         }
 

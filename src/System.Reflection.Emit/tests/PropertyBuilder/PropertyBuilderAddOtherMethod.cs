@@ -30,7 +30,7 @@ namespace System.Reflection.Emit.Tests
             PropertyInfo createdProperty = createdType.GetProperty("TestProperty", bindingFlags);
 
             MethodInfo[] actualMethods = createdProperty.GetAccessors(true);
-            Assert.Equal(1, actualMethods.Length);
+            Assert.Single(actualMethods);
             Assert.Equal(method.Name, actualMethods[0].Name);
         }
 

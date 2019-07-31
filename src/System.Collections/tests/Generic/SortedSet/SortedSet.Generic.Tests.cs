@@ -193,7 +193,7 @@ namespace System.Collections.Tests
             Assert.Equal(2, set.Count);
 
             SortedSet<T> view = set.GetViewBetween(secondElement, nextToLastElement);
-            Assert.Equal(0, view.Count);
+            Assert.Empty(view);
 
             Assert.Equal(default(T), view.Min);
             Assert.Equal(default(T), view.Max);

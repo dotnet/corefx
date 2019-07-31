@@ -107,7 +107,7 @@ namespace System.ComponentModel.Composition.Hosting
             CompositionScopeDefinition scope = new CompositionScopeDefinition(catalog, null);
 
             Assert.NotNull(scope.Children);
-            Assert.Equal(0, scope.Children.Count());
+            Assert.Empty(scope.Children);
         }
 
         [Fact]

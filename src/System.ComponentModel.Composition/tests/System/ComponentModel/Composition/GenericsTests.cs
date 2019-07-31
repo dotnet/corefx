@@ -557,12 +557,12 @@ namespace System.ComponentModel.Composition
             SingletonExportExportCount.Count = 0;
 
             var exports = container.GetExportedValues<IExport<IFoo, IBar>>();
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             // only one instance of the SingletonExport<,> is created
             Assert.Equal(1, SingletonExportExportCount.Count);
 
             exports = container.GetExportedValues<IExport<IFoo, IBar>>();
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             // still only one instance of the SingletonExport<,> is created
             Assert.Equal(1, SingletonExportExportCount.Count);
 
@@ -589,13 +589,13 @@ namespace System.ComponentModel.Composition
             CompositionContainer container = new CompositionContainer(catalog);
 
             // IFoo should work
-            Assert.Equal(1, container.GetExportedValues<IExport<IFoo>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<IFoo>>());
 
             // IFoo2 should work
-            Assert.Equal(1, container.GetExportedValues<IExport<IFoo2>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<IFoo2>>());
 
             // IBar shouldn't
-            Assert.Equal(0, container.GetExportedValues<IExport<IBar>>().Count());
+            Assert.Empty(container.GetExportedValues<IExport<IBar>>());
         }
 
         [Fact]
@@ -605,13 +605,13 @@ namespace System.ComponentModel.Composition
             CompositionContainer container = new CompositionContainer(catalog);
 
             // bar should work
-            Assert.Equal(1, container.GetExportedValues<IExport<Bar>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<Bar>>());
 
             // bar2 should work
-            Assert.Equal(1, container.GetExportedValues<IExport<Bar2>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<Bar2>>());
 
             // IFoo shouldn't
-            Assert.Equal(0, container.GetExportedValues<IExport<IFoo>>().Count());
+            Assert.Empty(container.GetExportedValues<IExport<IFoo>>());
         }
 
         [Fact]
@@ -621,16 +621,16 @@ namespace System.ComponentModel.Composition
             CompositionContainer container = new CompositionContainer(catalog);
 
             // IFoo should work
-            Assert.Equal(1, container.GetExportedValues<IExport<IFoo>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<IFoo>>());
 
             // Bar should work
-            Assert.Equal(1, container.GetExportedValues<IExport<Bar>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<Bar>>());
 
             // int shouldn't
-            Assert.Equal(0, container.GetExportedValues<IExport<int>>().Count());
+            Assert.Empty(container.GetExportedValues<IExport<int>>());
 
             // FooStruct shouldn't
-            Assert.Equal(0, container.GetExportedValues<IExport<FooStruct>>().Count());
+            Assert.Empty(container.GetExportedValues<IExport<FooStruct>>());
         }
 
         [Fact]
@@ -640,16 +640,16 @@ namespace System.ComponentModel.Composition
             CompositionContainer container = new CompositionContainer(catalog);
 
             // int should work
-            Assert.Equal(1, container.GetExportedValues<IExport<int>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<int>>());
 
             // FooStruct should work
-            Assert.Equal(1, container.GetExportedValues<IExport<FooStruct>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<FooStruct>>());
 
             // IFoo shouldn't
-            Assert.Equal(0, container.GetExportedValues<IExport<IFoo>>().Count());
+            Assert.Empty(container.GetExportedValues<IExport<IFoo>>());
 
             // Bar shouldn't
-            Assert.Equal(0, container.GetExportedValues<IExport<Bar>>().Count());
+            Assert.Empty(container.GetExportedValues<IExport<Bar>>());
 
         }
 
@@ -660,16 +660,16 @@ namespace System.ComponentModel.Composition
             CompositionContainer container = new CompositionContainer(catalog);
 
             // int should work
-            Assert.Equal(1, container.GetExportedValues<IExport<int>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<int>>());
 
             // FooStruct should work
-            Assert.Equal(1, container.GetExportedValues<IExport<FooStruct>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<FooStruct>>());
 
             // IFoo shouldn't
-            Assert.Equal(0, container.GetExportedValues<IExport<IFoo>>().Count());
+            Assert.Empty(container.GetExportedValues<IExport<IFoo>>());
 
             // Bar should
-            Assert.Equal(1, container.GetExportedValues<IExport<Bar>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<Bar>>());
 
         }
 
@@ -680,16 +680,16 @@ namespace System.ComponentModel.Composition
             CompositionContainer container = new CompositionContainer(catalog);
 
             // int, Dictionary<string, int> should work
-            Assert.Equal(1, container.GetExportedValues<IExport<int, Dictionary<string, int>>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<int, Dictionary<string, int>>>());
 
             // int, Dictionary<string, string> should not work
-            Assert.Equal(0, container.GetExportedValues<IExport<int, Dictionary<string, string>>>().Count());
+            Assert.Empty(container.GetExportedValues<IExport<int, Dictionary<string, string>>>());
 
             // FooStruct, FooStruct[] should work
-            Assert.Equal(1, container.GetExportedValues<IExport<FooStruct, Dictionary<string, FooStruct>>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<FooStruct, Dictionary<string, FooStruct>>>());
 
             // FooStruct, IFoo should not
-            Assert.Equal(0, container.GetExportedValues<IExport<FooStruct, IFoo>>().Count());
+            Assert.Empty(container.GetExportedValues<IExport<FooStruct, IFoo>>());
 
         }
 
@@ -700,10 +700,10 @@ namespace System.ComponentModel.Composition
             CompositionContainer container = new CompositionContainer(catalog);
 
             // Bar, Bar2 should work
-            Assert.Equal(1, container.GetExportedValues<IExport<Bar, Bar2>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<Bar, Bar2>>());
 
             // Bar2, Bar should not work
-            Assert.Equal(0, container.GetExportedValues<IExport<Bar2, Bar>>().Count());
+            Assert.Empty(container.GetExportedValues<IExport<Bar2, Bar>>());
         }
 
         [Fact]
@@ -712,7 +712,7 @@ namespace System.ComponentModel.Composition
             TypeCatalog catalog = new TypeCatalog(typeof(PropertyExportWithChangedParameterOrder<,>));
             CompositionContainer container = new CompositionContainer(catalog);
 
-            Assert.Equal(1, container.GetExportedValues<IExport<string, int>>().Count());
+            Assert.Single(container.GetExportedValues<IExport<string, int>>());
         }
 
         public interface IA<T> { }

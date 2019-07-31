@@ -471,7 +471,7 @@ namespace System.Linq.Tests
             var range = NumberRangeGuaranteedNotCollectionType(1, 100);
             var skipped = range.Skip(50).Skip(int.MaxValue); // Could cause an integer overflow.
             Assert.Empty(skipped);
-            Assert.Equal(0, skipped.Count());
+            Assert.Empty(skipped);
             Assert.Empty(skipped.ToArray());
             Assert.Empty(skipped.ToList());
         }

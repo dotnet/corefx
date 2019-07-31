@@ -19,7 +19,7 @@ namespace System.Reflection.Tests
             AssertExtensions.Throws<ArgumentNullException>("type", () => default(Type).GetRuntimeEvents());
 
             List<EventInfo> events = typeof(TestType).GetRuntimeEvents().ToList();
-            Assert.Equal(1, events.Count);
+            Assert.Single(events);
             Assert.Equal("StuffHappened", events[0].Name);
         }
 
@@ -305,8 +305,8 @@ namespace System.Reflection.Tests
             InterfaceMapping map = typeof(TestType).GetTypeInfo().GetRuntimeInterfaceMap(typeof(IDisposable));
             Assert.Same(typeof(TestType), map.TargetType);
             Assert.Same(typeof(IDisposable), map.InterfaceType);
-            Assert.Equal(1, map.InterfaceMethods.Length);
-            Assert.Equal(1, map.TargetMethods.Length);
+            Assert.Single(map.InterfaceMethods);
+            Assert.Single(map.TargetMethods);
             MethodInfo ifaceDispose = map.InterfaceMethods[0];
             MethodInfo targetDispose = map.TargetMethods[0];
             Assert.Equal(ifaceDispose.CallingConvention, targetDispose.CallingConvention);

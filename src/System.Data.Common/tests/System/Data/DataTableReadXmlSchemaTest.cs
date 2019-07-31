@@ -421,9 +421,9 @@ namespace System.Data.Tests
             ds.Tables.Add(new DataTable());
             ds.Tables[0].ReadXmlSchema(new StringReader(Schema));
             ds.Tables[1].ReadXmlSchema(new StringReader(Schema));
-            Assert.Equal(0, ds.Relations.Count);
-            Assert.Equal(1, ds.Tables[0].Constraints.Count);
-            Assert.Equal(0, ds.Tables[1].Constraints.Count);
+            Assert.Empty(ds.Relations);
+            Assert.Single(ds.Tables[0].Constraints);
+            Assert.Empty(ds.Tables[1].Constraints);
             Assert.Equal("Constraint1", ds.Tables[0].Constraints[0].ConstraintName);
         }
 

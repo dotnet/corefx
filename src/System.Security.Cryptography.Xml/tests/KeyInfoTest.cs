@@ -327,7 +327,7 @@ namespace System.Security.Cryptography.Xml.Tests
                     pathsCovered |= 1 << 4;
 
                     var x509data = clause as KeyInfoX509Data;
-                    Assert.Equal(1, x509data.Certificates.Count);
+                    Assert.Single(x509data.Certificates);
                     X509Certificate cert = x509data.Certificates[0] as X509Certificate;
                     Assert.NotNull(cert);
                     Assert.Equal(Convert.FromBase64String(x509cert), cert.GetRawCertData());

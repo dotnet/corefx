@@ -352,8 +352,8 @@ namespace System.Data.Tests
             // Do some simple checks to see if the main dataset was created
             // and if there are relationships present.
             Assert.Equal("MyDataSet", multiTable.DataSet.DataSetName);
-            Assert.Equal(1, multiTable.ChildRelations.Count);
-            Assert.Equal(1, multiTable.Constraints.Count);
+            Assert.Single(multiTable.ChildRelations);
+            Assert.Single(multiTable.Constraints);
             // Write the table back out and check to see that the XML is
             // the same as before.
             sw.GetStringBuilder().Length = 0;

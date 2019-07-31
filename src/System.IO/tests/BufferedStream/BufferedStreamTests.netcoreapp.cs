@@ -97,7 +97,7 @@ namespace System.IO.Tests
             await bs.DisposeAsync();
             Assert.True(bs.DisposeAsync().IsCompletedSuccessfully);
             Assert.Throws<ObjectDisposedException>(() => ms.Position);
-            Assert.Equal(1, ms.ToArray().Length);
+            Assert.Single(ms.ToArray());
         }
     }
 }

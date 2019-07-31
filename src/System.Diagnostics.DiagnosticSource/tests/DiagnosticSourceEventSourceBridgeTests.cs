@@ -145,7 +145,7 @@ namespace System.Diagnostics.Tests
                     Assert.Equal(1, eventSourceListener.EventCount); // Exactly one more event has been emitted.
                     Assert.Equal("LinuxNewLineConventionsSource", eventSourceListener.LastEvent.SourceName);
                     Assert.Equal("TestEvent1", eventSourceListener.LastEvent.EventName);
-                    Assert.Equal(1, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Single(eventSourceListener.LastEvent.Arguments);
                     Assert.Equal("3", eventSourceListener.LastEvent.Arguments["cls_Point_X"]);
                     eventSourceListener.ResetEventCountAndLastEvent();
 
@@ -157,7 +157,7 @@ namespace System.Diagnostics.Tests
                     Assert.Equal(1, eventSourceListener.EventCount); // Exactly one more event has been emitted.  
                     Assert.Equal("LinuxNewLineConventionsSource", eventSourceListener.LastEvent.SourceName);
                     Assert.Equal("TestEvent2", eventSourceListener.LastEvent.EventName);
-                    Assert.Equal(1, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Single(eventSourceListener.LastEvent.Arguments);
                     Assert.Equal("MyUrl", eventSourceListener.LastEvent.Arguments["cls_Url"]);
                     eventSourceListener.ResetEventCountAndLastEvent();
 
@@ -351,7 +351,7 @@ namespace System.Diagnostics.Tests
                     Assert.Equal(1, eventSourceListener.EventCount); // Exactly one more event has been emitted.
                     Assert.Equal("TestNullsTestSource", eventSourceListener.LastEvent.SourceName);
                     Assert.Equal("TestEvent1", eventSourceListener.LastEvent.EventName);
-                    Assert.Equal(0, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Empty(eventSourceListener.LastEvent.Arguments);
                     eventSourceListener.ResetEventCountAndLastEvent();
 
                     /***************************************************************************************/
@@ -531,7 +531,7 @@ namespace System.Diagnostics.Tests
                     Assert.Equal("Activity1Start", eventSourceListener.LastEvent.EventSourceEventName);
                     Assert.Equal("TestActivitiesSource", eventSourceListener.LastEvent.SourceName);
                     Assert.Equal("TestActivity1Start", eventSourceListener.LastEvent.EventName);
-                    Assert.Equal(1, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Single(eventSourceListener.LastEvent.Arguments);
                     Assert.Equal("start", eventSourceListener.LastEvent.Arguments["propStr"]);
                     eventSourceListener.ResetEventCountAndLastEvent();
 
@@ -541,7 +541,7 @@ namespace System.Diagnostics.Tests
                     Assert.Equal("Activity2Start", eventSourceListener.LastEvent.EventSourceEventName);
                     Assert.Equal("TestActivitiesSource", eventSourceListener.LastEvent.SourceName);
                     Assert.Equal("TestActivity2Start", eventSourceListener.LastEvent.EventName);
-                    Assert.Equal(1, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Single(eventSourceListener.LastEvent.Arguments);
                     Assert.Equal("start", eventSourceListener.LastEvent.Arguments["propStr"]);
                     eventSourceListener.ResetEventCountAndLastEvent();
 
@@ -551,7 +551,7 @@ namespace System.Diagnostics.Tests
                     Assert.Equal("Event", eventSourceListener.LastEvent.EventSourceEventName);
                     Assert.Equal("TestActivitiesSource", eventSourceListener.LastEvent.SourceName);
                     Assert.Equal("TestEvent", eventSourceListener.LastEvent.EventName);
-                    Assert.Equal(1, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Single(eventSourceListener.LastEvent.Arguments);
                     Assert.Equal("event", eventSourceListener.LastEvent.Arguments["propStr"]);
                     eventSourceListener.ResetEventCountAndLastEvent();
 
@@ -561,7 +561,7 @@ namespace System.Diagnostics.Tests
                     Assert.Equal("Activity2Stop", eventSourceListener.LastEvent.EventSourceEventName);
                     Assert.Equal("TestActivitiesSource", eventSourceListener.LastEvent.SourceName);
                     Assert.Equal("TestActivity2Stop", eventSourceListener.LastEvent.EventName);
-                    Assert.Equal(1, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Single(eventSourceListener.LastEvent.Arguments);
                     Assert.Equal("stop", eventSourceListener.LastEvent.Arguments["propStr"]);
                     eventSourceListener.ResetEventCountAndLastEvent();
 
@@ -571,7 +571,7 @@ namespace System.Diagnostics.Tests
                     Assert.Equal("Activity1Stop", eventSourceListener.LastEvent.EventSourceEventName);
                     Assert.Equal("TestActivitiesSource", eventSourceListener.LastEvent.SourceName);
                     Assert.Equal("TestActivity1Stop", eventSourceListener.LastEvent.EventName);
-                    Assert.Equal(1, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Single(eventSourceListener.LastEvent.Arguments);
                     Assert.Equal("stop", eventSourceListener.LastEvent.Arguments["propStr"]);
                     eventSourceListener.ResetEventCountAndLastEvent();
                 }

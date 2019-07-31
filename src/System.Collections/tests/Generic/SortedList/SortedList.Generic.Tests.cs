@@ -94,7 +94,7 @@ namespace System.Collections.Tests
         public void SortedList_Generic_Constructor_int(int count)
         {
             SortedList<TKey, TValue> dictionary = new SortedList<TKey, TValue>(count);
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
             Assert.Equal(count, dictionary.Capacity);
         }
 
@@ -116,7 +116,7 @@ namespace System.Collections.Tests
         {
             IComparer<TKey> comparer = GetKeyIComparer();
             SortedList<TKey, TValue> dictionary = new SortedList<TKey, TValue>(count, comparer);
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
             Assert.Equal(comparer, dictionary.Comparer);
             Assert.Equal(count, dictionary.Capacity);
         }
@@ -499,7 +499,7 @@ namespace System.Collections.Tests
                 dictionary.TrimExcess();
                 dictionary.Clear();
                 dictionary.TrimExcess();
-                Assert.Equal(0, dictionary.Count);
+                Assert.Empty(dictionary);
 
                 AddToCollection(dictionary, dictionaryLength / 10);
                 dictionary.TrimExcess();
@@ -517,7 +517,7 @@ namespace System.Collections.Tests
                 dictionary.TrimExcess();
                 dictionary.Clear();
                 dictionary.TrimExcess();
-                Assert.Equal(0, dictionary.Count);
+                Assert.Empty(dictionary);
 
                 AddToCollection(dictionary, dictionaryLength);
                 dictionary.TrimExcess();

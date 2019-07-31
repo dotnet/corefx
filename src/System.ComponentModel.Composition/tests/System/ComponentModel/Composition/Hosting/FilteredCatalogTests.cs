@@ -76,7 +76,7 @@ namespace System.ComponentModel.Composition.Hosting
                 Assert.Equal(2, parts1.Count());
 
                 var parts2 = catalog.GetExports<IContract2>();
-                Assert.Equal(0, parts2.Count());
+                Assert.Empty(parts2);
             }
         }
 
@@ -87,12 +87,12 @@ namespace System.ComponentModel.Composition.Hosting
             using (FilteredCatalog catalog = new FilteredCatalog(originalCatalog, p => p.Exports<IContract1>()).IncludeDependents())
             {
                 var parts1 = catalog.GetExports<IContract1>();
-                Assert.Equal(1, parts1.Count());
+                Assert.Single(parts1);
 
                 using (var container = new CompositionContainer(catalog))
                 {
                     var results = container.GetExports<IGenericContract<string, string>>();
-                    Assert.Equal(1, results.Count());
+                    Assert.Single(results);
                 }
             }
         }
@@ -123,7 +123,7 @@ namespace System.ComponentModel.Composition.Hosting
                 Assert.Equal(2, parts1.Count());
 
                 var parts2 = c.GetExports<IContract1>();
-                Assert.Equal(0, parts2.Count());
+                Assert.Empty(parts2);
             }
         }
 
@@ -238,7 +238,7 @@ namespace System.ComponentModel.Composition.Hosting
             Assert.False(filter2Ed);
 
             Assert.Equal(2, edArgs.AddedDefinitions.Count());
-            Assert.Equal(0, edArgs.RemovedDefinitions.Count());
+            Assert.Empty(edArgs.RemovedDefinitions);
             Assert.Equal(0, filter2.Parts.Count());
             Assert.Equal(2, filter1.Parts.Count());
 
@@ -260,7 +260,7 @@ namespace System.ComponentModel.Composition.Hosting
             Assert.False(filter1Ed);
 
             Assert.Equal(2, edArgs.AddedDefinitions.Count());
-            Assert.Equal(0, edArgs.RemovedDefinitions.Count());
+            Assert.Empty(edArgs.RemovedDefinitions);
             Assert.Equal(2, filter2.Parts.Count());
             Assert.Equal(2, filter1.Parts.Count());
 
@@ -281,7 +281,7 @@ namespace System.ComponentModel.Composition.Hosting
             Assert.False(filter1Ing);
             Assert.False(filter1Ed);
 
-            Assert.Equal(0, edArgs.AddedDefinitions.Count());
+            Assert.Empty(edArgs.AddedDefinitions);
             Assert.Equal(2, edArgs.RemovedDefinitions.Count());
             Assert.Equal(0, filter2.Parts.Count());
             Assert.Equal(2, filter1.Parts.Count());
@@ -303,7 +303,7 @@ namespace System.ComponentModel.Composition.Hosting
             Assert.False(filter2Ing);
             Assert.False(filter2Ed);
 
-            Assert.Equal(0, edArgs.AddedDefinitions.Count());
+            Assert.Empty(edArgs.AddedDefinitions);
             Assert.Equal(2, edArgs.RemovedDefinitions.Count());
             Assert.Equal(0, filter2.Parts.Count());
             Assert.Equal(0, filter1.Parts.Count());

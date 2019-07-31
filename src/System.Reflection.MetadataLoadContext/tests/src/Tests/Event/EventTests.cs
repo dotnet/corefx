@@ -36,8 +36,8 @@ namespace System.Reflection.Tests
 
             Assert.Null(e.RaiseMethod);
 
-            Assert.Equal(0, e.GetOtherMethods(nonPublic: true).Length);
-            Assert.Equal(0, e.GetOtherMethods(nonPublic: false).Length);
+            Assert.Empty(e.GetOtherMethods(nonPublic: true));
+            Assert.Empty(e.GetOtherMethods(nonPublic: false));
         }
     }
 }

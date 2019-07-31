@@ -25,7 +25,7 @@ namespace System.Reflection.Tests
                     Assert.False(c.IsStatic);
                     Assert.Equal(typeof(MyAttribute), c.DeclaringType);
                     ParameterInfo[] p = c.GetParameters();
-                    Assert.Equal(0, p.Length);
+                    Assert.Empty(p);
                     return;
                 }
             }
@@ -46,7 +46,7 @@ namespace System.Reflection.Tests
                     Assert.False(c.IsStatic);
                     Assert.Equal(typeof(MyAttribute), c.DeclaringType);
                     ParameterInfo[] p = c.GetParameters();
-                    Assert.Equal(1, p.Length);
+                    Assert.Single(p);
                     Assert.Equal(typeof(int), p[0].ParameterType);
                     return;
                 }
@@ -66,7 +66,7 @@ namespace System.Reflection.Tests
                     Assert.False(c.IsStatic);
                     Assert.Equal(typeof(FlagsAttribute), c.DeclaringType);
                     ParameterInfo[] p = c.GetParameters();
-                    Assert.Equal(0, p.Length);
+                    Assert.Empty(p);
                     return;
                 }
             }
@@ -87,7 +87,7 @@ namespace System.Reflection.Tests
                     Assert.False(c.IsStatic);
                     Assert.Equal(typeof(ComVisibleAttribute), c.DeclaringType);
                     ParameterInfo[] p = c.GetParameters();
-                    Assert.Equal(1, p.Length);
+                    Assert.Single(p);
                     Assert.Equal(typeof(bool), p[0].ParameterType);
                     return;
                 }
@@ -108,7 +108,7 @@ namespace System.Reflection.Tests
                     Assert.False(c.IsStatic);
                     Assert.Equal(typeof(FieldOffsetAttribute), c.DeclaringType);
                     ParameterInfo[] p = c.GetParameters();
-                    Assert.Equal(1, p.Length);
+                    Assert.Single(p);
                     Assert.Equal(typeof(int), p[0].ParameterType);
                     return;
                 }
@@ -120,7 +120,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void Test_EqualsMethod()
         {
-            Assert.Equal(1, typeof(MyEnum).CustomAttributes.Count());
+            Assert.Single(typeof(MyEnum).CustomAttributes);
             CustomAttributeData cad1 = typeof(MyEnum).CustomAttributes.First();
             CustomAttributeData cad2 = typeof(MyEnum).CustomAttributes.First();
             Assert.True(cad1.Equals(cad1));

@@ -25,7 +25,7 @@ namespace System.Xml.Linq.Tests
             XDocument xDoc = TestData.GetDocumentWithContacts();
             XElement xElement = xDoc.Root.Element(null);
             IEnumerable<XNode> xNodeList = xDoc.Root.Elements(null);
-            Assert.Equal(0, xNodeList.Count());
+            Assert.Empty(xNodeList);
         }
     }
 
@@ -44,7 +44,7 @@ namespace System.Xml.Linq.Tests
         {
             XDocument xDoc = TestData.GetDocumentWithContacts();
             IEnumerable<XAttribute> xAttrib = xDoc.Root.Attributes(null);
-            Assert.Equal(0, xAttrib.Count());
+            Assert.Empty(xAttrib);
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace System.Xml.Linq.Tests
         public static void NullXNameTest()
         {
             XDocument xDoc = TestData.GetDocumentWithContacts();
-            Assert.Equal(0, xDoc.Root.Elements().Attributes(null).Count());
+            Assert.Empty(xDoc.Root.Elements().Attributes(null));
         }
     }
 }

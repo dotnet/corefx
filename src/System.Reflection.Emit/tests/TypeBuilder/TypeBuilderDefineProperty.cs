@@ -206,7 +206,7 @@ namespace System.Reflection.Emit.Tests
 
             Type createdType = type.CreateTypeInfo().AsType();
             PropertyInfo[] properties = createdType.GetProperties(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            Assert.Equal(1, properties.Length);
+            Assert.Single(properties);
             Assert.Equal("PropertyName", properties[0].Name);
         }
 

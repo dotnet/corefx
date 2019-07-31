@@ -15,7 +15,7 @@ namespace System.Reflection.Tests
         {
             Type theT = typeof(GenericClassWithNoConstraint<>).Project().GetTypeInfo().GenericTypeParameters[0];
             Assert.Equal(GenericParameterAttributes.None, theT.GenericParameterAttributes);
-            Assert.Equal(0, theT.GetGenericParameterConstraints().Length);
+            Assert.Empty(theT.GetGenericParameterConstraints());
             Assert.Equal(typeof(object).Project(), theT.BaseType);
         }
 
@@ -24,7 +24,7 @@ namespace System.Reflection.Tests
         {
             Type theT = typeof(GenericClassWithClassConstraint<>).Project().GetTypeInfo().GenericTypeParameters[0];
             Assert.Equal(GenericParameterAttributes.ReferenceTypeConstraint, theT.GenericParameterAttributes);
-            Assert.Equal(0, theT.GetGenericParameterConstraints().Length);
+            Assert.Empty(theT.GetGenericParameterConstraints());
             Assert.Equal(typeof(object).Project(), theT.BaseType);
         }
 
@@ -34,7 +34,7 @@ namespace System.Reflection.Tests
             Type theT = typeof(GenericClassWithStructConstraint<>).Project().GetTypeInfo().GenericTypeParameters[0];
             Assert.Equal(GenericParameterAttributes.NotNullableValueTypeConstraint | GenericParameterAttributes.DefaultConstructorConstraint, theT.GenericParameterAttributes);
             Type[] constraints = theT.GetGenericParameterConstraints();
-            Assert.Equal(1, constraints.Length);
+            Assert.Single(constraints);
             Assert.Equal(typeof(ValueType).Project(), constraints[0]);
             Assert.Equal(typeof(ValueType).Project(), theT.BaseType);
         }
@@ -44,7 +44,7 @@ namespace System.Reflection.Tests
         {
             Type theT = typeof(GenericClassWithNewConstraint<>).Project().GetTypeInfo().GenericTypeParameters[0];
             Assert.Equal(GenericParameterAttributes.DefaultConstructorConstraint, theT.GenericParameterAttributes);
-            Assert.Equal(0, theT.GetGenericParameterConstraints().Length);
+            Assert.Empty(theT.GetGenericParameterConstraints());
             Assert.Equal(typeof(object).Project(), theT.BaseType);
         }
 
@@ -82,7 +82,7 @@ namespace System.Reflection.Tests
             Type theU = typeof(GenericClassWithQuirkyConstraints1<,>).Project().GetTypeInfo().GenericTypeParameters[1];
             Assert.Equal(GenericParameterAttributes.None, theT.GenericParameterAttributes);
             Type[] constraints = theT.GetGenericParameterConstraints();
-            Assert.Equal(1, constraints.Length);
+            Assert.Single(constraints);
             Assert.Equal(theU, constraints[0]);
 
             // You'd expect the BaseType to be "U" but due to a compat quirk, it reports as "System.Object"
@@ -96,7 +96,7 @@ namespace System.Reflection.Tests
             Type theU = typeof(GenericClassWithQuirkyConstraints2<,>).Project().GetTypeInfo().GenericTypeParameters[1];
             Assert.Equal(GenericParameterAttributes.None, theT.GenericParameterAttributes);
             Type[] constraints = theT.GetGenericParameterConstraints();
-            Assert.Equal(1, constraints.Length);
+            Assert.Single(constraints);
             Assert.Equal(theU, constraints[0]);
 
             // This one reports the BaseType to be "U" as expected. The "fix" was that U had a "class" constraint.
@@ -123,13 +123,13 @@ namespace System.Reflection.Tests
 
             {
                 Type[] constraints = theM.GetGenericParameterConstraints();
-                Assert.Equal(1, constraints.Length);
+                Assert.Single(constraints);
                 Assert.Equal(typeof(IConstrained2<>).Project().MakeGenericType(theN), constraints[0]);
             }
 
             {
                 Type[] constraints = theN.GetGenericParameterConstraints();
-                Assert.Equal(1, constraints.Length);
+                Assert.Single(constraints);
                 Assert.Equal(typeof(IConstrained2<>).Project().MakeGenericType(theT), constraints[0]);
             }
         }

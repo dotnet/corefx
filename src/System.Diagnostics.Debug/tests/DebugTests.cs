@@ -18,7 +18,7 @@ namespace System.Diagnostics.Tests
             FieldInfo fieldInfo = typeof(Debug).GetField("s_provider", BindingFlags.Static | BindingFlags.NonPublic);
             _debugOnlyProvider = (DebugProvider)fieldInfo.GetValue(null);
             // Triggers code to wire up TraceListeners with Debug
-            Assert.Equal(1, Trace.Listeners.Count);
+            Assert.Single(Trace.Listeners);
             _debugTraceProvider = (DebugProvider)fieldInfo.GetValue(null);
             Assert.NotEqual(_debugOnlyProvider.GetType(), _debugTraceProvider.GetType());
         }

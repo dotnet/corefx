@@ -81,7 +81,7 @@ namespace System.Diagnostics.TraceSourceTests
             list.Add(item);
             Assert.Equal(item, list[0]);
             Assert.Throws<ArgumentNullException>(() => list.Add(null));
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
         }
 
         [Fact]
@@ -172,9 +172,9 @@ namespace System.Diagnostics.TraceSourceTests
             var list = Create();
             var item = new TestTraceListener("Test1");
             list.Add(item);
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             list.Remove(item);
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
         }
 
         [Fact]
@@ -194,11 +194,11 @@ namespace System.Diagnostics.TraceSourceTests
             var list = Create();
             var item = new TestTraceListener("Test1");
             list.Add(item);
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             list.Remove("NO_EXIST");
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             list.Remove("Test1");
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
         }
     }
 

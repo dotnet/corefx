@@ -14,9 +14,9 @@ namespace System.Collections.Specialized.Tests
         public void Ctor_Empty()
         {
             NameValueCollection nameValueCollection = new NameValueCollection();
-            Assert.Equal(0, nameValueCollection.Count);
-            Assert.Equal(0, nameValueCollection.Keys.Count);
-            Assert.Equal(0, nameValueCollection.AllKeys.Length);
+            Assert.Empty(nameValueCollection);
+            Assert.Empty(nameValueCollection.Keys);
+            Assert.Empty(nameValueCollection.AllKeys);
 
             Assert.False(((ICollection)nameValueCollection).IsSynchronized);
         }
@@ -27,9 +27,9 @@ namespace System.Collections.Specialized.Tests
 #pragma warning disable CS0618 // Type or member is obsolete
             NameValueCollection nameValueCollection = new NameValueCollection(CaseInsensitiveHashCodeProvider.Default, CaseInsensitiveComparer.Default);
 #pragma warning restore CS0618 // Type or member is obsolete
-            Assert.Equal(0, nameValueCollection.Count);
-            Assert.Equal(0, nameValueCollection.Keys.Count);
-            Assert.Equal(0, nameValueCollection.AllKeys.Length);
+            Assert.Empty(nameValueCollection);
+            Assert.Empty(nameValueCollection.Keys);
+            Assert.Empty(nameValueCollection.AllKeys);
 
             Assert.False(((ICollection)nameValueCollection).IsSynchronized);
         }
@@ -40,9 +40,9 @@ namespace System.Collections.Specialized.Tests
 #pragma warning disable CS0618 // Type or member is obsolete
             NameValueCollection nameValueCollection = new NameValueCollection(5, CaseInsensitiveHashCodeProvider.Default, CaseInsensitiveComparer.Default);
 #pragma warning restore CS0618 // Type or member is obsolete
-            Assert.Equal(0, nameValueCollection.Count);
-            Assert.Equal(0, nameValueCollection.Keys.Count);
-            Assert.Equal(0, nameValueCollection.AllKeys.Length);
+            Assert.Empty(nameValueCollection);
+            Assert.Empty(nameValueCollection.Keys);
+            Assert.Empty(nameValueCollection.AllKeys);
 
             Assert.False(((ICollection)nameValueCollection).IsSynchronized);
         }
@@ -53,9 +53,9 @@ namespace System.Collections.Specialized.Tests
         public void Ctor_Int(int capacity)
         {
             NameValueCollection nameValueCollection = new NameValueCollection(capacity);
-            Assert.Equal(0, nameValueCollection.Count);
-            Assert.Equal(0, nameValueCollection.Keys.Count);
-            Assert.Equal(0, nameValueCollection.AllKeys.Length);
+            Assert.Empty(nameValueCollection);
+            Assert.Empty(nameValueCollection.Keys);
+            Assert.Empty(nameValueCollection.AllKeys);
 
             Assert.False(((ICollection)nameValueCollection).IsSynchronized);
 
@@ -180,9 +180,9 @@ namespace System.Collections.Specialized.Tests
         
         private static void VerifyCtor_IEqualityComparer(NameValueCollection nameValueCollection, IEqualityComparer equalityComparer, int newCount)
         {
-            Assert.Equal(0, nameValueCollection.Count);
-            Assert.Equal(0, nameValueCollection.Keys.Count);
-            Assert.Equal(0, nameValueCollection.AllKeys.Length);
+            Assert.Empty(nameValueCollection);
+            Assert.Empty(nameValueCollection.Keys);
+            Assert.Empty(nameValueCollection.AllKeys);
 
             Assert.False(((ICollection)nameValueCollection).IsSynchronized);
             
@@ -195,13 +195,13 @@ namespace System.Collections.Specialized.Tests
             }
             if (equalityComparer?.GetType() == typeof(IdiotComparer))
             {
-                Assert.Equal(1, nameValueCollection.Count);
+                Assert.Single(nameValueCollection);
                 string expectedValues = string.Join(",", values);
                 Assert.Equal(expectedValues, nameValueCollection["Name_1"]);
                 Assert.Equal(expectedValues, nameValueCollection["any-name"]);
 
                 nameValueCollection.Remove("any-name");
-                Assert.Equal(0, nameValueCollection.Count);
+                Assert.Empty(nameValueCollection);
             }
             else
             {

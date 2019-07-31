@@ -119,16 +119,16 @@ namespace System.Composition.Convention.Tests
             builder.ForType<FooImpl>();
 
             Attribute[] attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
         [Fact]
@@ -138,17 +138,17 @@ namespace System.Composition.Convention.Tests
             builder.ForType<FooImpl>().Export();
 
             Attribute[] attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.Equal(1, attributes.Count());
+            Assert.Single(attributes);
             Assert.NotNull(attributes[0] as ExportAttribute);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
         [Fact]
@@ -159,7 +159,7 @@ namespace System.Composition.Convention.Tests
 
             Attribute[] attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
 
-            Assert.Equal(1, attributes.Count());
+            Assert.Single(attributes);
 
             var exportAttribute = attributes[0] as ExportAttribute;
             Assert.NotNull(exportAttribute);
@@ -168,13 +168,13 @@ namespace System.Composition.Convention.Tests
 
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
         [Fact]
@@ -195,13 +195,13 @@ namespace System.Composition.Convention.Tests
             Assert.Equal("value", mdAttribute.Value);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
         [Fact]
@@ -222,13 +222,13 @@ namespace System.Composition.Convention.Tests
             Assert.Equal(typeof(FooImpl).Name, mdAttribute.Value);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
 
@@ -239,20 +239,20 @@ namespace System.Composition.Convention.Tests
             builder.ForType<FooImpl>().ExportProperty(p => p.P1);
 
             Attribute[] attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.Equal(1, attributes.Count());
+            Assert.Single(attributes);
 
             var exportAttribute = attributes.First((t) => t.GetType() == typeof(ExportAttribute)) as ExportAttribute;
             Assert.Null(exportAttribute.ContractName);
             Assert.Null(exportAttribute.ContractType);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
         [Fact]
@@ -262,19 +262,19 @@ namespace System.Composition.Convention.Tests
             builder.ForType<FooImpl>().ImportProperty(p => p.P1);
 
             Attribute[] attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.Equal(1, attributes.Count());
+            Assert.Single(attributes);
 
             var importAttribute = attributes.First((t) => t.GetType() == typeof(ImportAttribute)) as ImportAttribute;
             Assert.Null(importAttribute.ContractName);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
         [Fact]
@@ -284,16 +284,16 @@ namespace System.Composition.Convention.Tests
             builder.ForType<FooImpl>().ImportProperty(p => p.P3);
 
             Attribute[] attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.Equal(1, attributes.Count());
+            Assert.Single(attributes);
 
             var importAttribute = attributes.First((t) => t.GetType() == typeof(ImportManyAttribute)) as ImportManyAttribute;
             Assert.Null(importAttribute.ContractName);
@@ -306,20 +306,20 @@ namespace System.Composition.Convention.Tests
             builder.ForType<FooImpl>().ExportProperty(p => p.P1, c => c.AsContractName("hey").AsContractType<IFoo>());
 
             Attribute[] attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.Equal(1, attributes.Count());
+            Assert.Single(attributes);
 
             var exportAttribute = attributes.First((t) => t.GetType() == typeof(ExportAttribute)) as ExportAttribute;
             Assert.Same("hey", exportAttribute.ContractName);
             Assert.Same(typeof(IFoo), exportAttribute.ContractType);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
         [Fact]
@@ -329,20 +329,20 @@ namespace System.Composition.Convention.Tests
             builder.ForType<FooImpl>().ExportProperty(p => p.P1, c => c.AsContractName("hey").AsContractType<IFoo>());
 
             Attribute[] attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P1");
-            Assert.Equal(1, attributes.Count());
+            Assert.Single(attributes);
 
             var exportAttribute = attributes.First((t) => t.GetType() == typeof(ExportAttribute)) as ExportAttribute;
             Assert.Same("hey", exportAttribute.ContractName);
             Assert.Same(typeof(IFoo), exportAttribute.ContractType);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P2");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImpl), "P3");
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
         [Fact]
@@ -357,7 +357,7 @@ namespace System.Composition.Convention.Tests
 
 
             Attribute[] attributes = GetAttributesFromMember(builder, typeof(FooImpl), null);
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
         [Fact]
@@ -368,17 +368,17 @@ namespace System.Composition.Convention.Tests
 
             ConstructorInfo selectedConstructor = GetSelectedConstructor(builder, typeof(FooImplWithConstructors));
             Assert.NotNull(selectedConstructor);
-            Assert.Equal(1, selectedConstructor.GetParameters().Length);     // Should select public FooImplWithConstructors(IEnumerable<IFoo>) { }
+            Assert.Single(selectedConstructor.GetParameters());     // Should select public FooImplWithConstructors(IEnumerable<IFoo>) { }
 
             ParameterInfo pi = selectedConstructor.GetParameters()[0];
             Assert.Equal(typeof(int), pi.ParameterType);
 
             Attribute[] attributes = builder.GetDeclaredAttributes(typeof(FooImplWithConstructors), pi);
-            Assert.Equal(1, attributes.Count());
+            Assert.Single(attributes);
             Assert.NotNull(attributes[0] as ImportAttribute);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImplWithConstructors), null);
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
         [Fact]
@@ -389,17 +389,17 @@ namespace System.Composition.Convention.Tests
 
             ConstructorInfo selectedConstructor = GetSelectedConstructor(builder, typeof(FooImplWithConstructors));
             Assert.NotNull(selectedConstructor);
-            Assert.Equal(1, selectedConstructor.GetParameters().Length);     // Should select public FooImplWithConstructors(IEnumerable<IFoo>) { }
+            Assert.Single(selectedConstructor.GetParameters());     // Should select public FooImplWithConstructors(IEnumerable<IFoo>) { }
 
             ParameterInfo pi = selectedConstructor.GetParameters()[0];
             Assert.Equal(typeof(IEnumerable<IFoo>), pi.ParameterType);
 
             Attribute[] attributes = builder.GetDeclaredAttributes(typeof(FooImplWithConstructors), pi);
-            Assert.Equal(1, attributes.Count());
+            Assert.Single(attributes);
             Assert.NotNull(attributes[0] as ImportManyAttribute);
 
             attributes = GetAttributesFromMember(builder, typeof(FooImplWithConstructors), null);
-            Assert.Equal(0, attributes.Count());
+            Assert.Empty(attributes);
         }
 
         [Fact]

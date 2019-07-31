@@ -571,7 +571,7 @@ namespace System.Reflection.PortableExecutable.Tests
             builder.WriteBytes(1, 5);
             var snFixup = builder.ReserveBytes(5);
             builder.WriteBytes(2, 6);
-            Assert.Equal(1, builder.GetBlobs().Count());
+            Assert.Single(builder.GetBlobs());
 
             AssertEx.Equal(
                 new[]

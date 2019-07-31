@@ -773,7 +773,7 @@ namespace System.ServiceModel.Syndication.Tests
                 }
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, thirdAuthor.ElementExtensions.Count);
+                    Assert.Single(thirdAuthor.ElementExtensions);
                     Assert.Equal(10, thirdAuthor.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 }
                 else
@@ -823,7 +823,7 @@ namespace System.ServiceModel.Syndication.Tests
                 }
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, fourthCategory.ElementExtensions.Count);
+                    Assert.Single(fourthCategory.ElementExtensions);
                     Assert.Equal(10, fourthCategory.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 }
                 else
@@ -864,7 +864,7 @@ namespace System.ServiceModel.Syndication.Tests
                 }
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, thirdContributor.ElementExtensions.Count);
+                    Assert.Single(thirdContributor.ElementExtensions);
                     Assert.Equal(10, thirdContributor.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 }
                 else
@@ -894,7 +894,7 @@ namespace System.ServiceModel.Syndication.Tests
 
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, feed.ElementExtensions.Count);
+                    Assert.Single(feed.ElementExtensions);
                     Assert.Equal(10, feed.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 }
                 else
@@ -954,7 +954,7 @@ namespace System.ServiceModel.Syndication.Tests
                 }
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, itemThirdAuthor.ElementExtensions.Count);
+                    Assert.Single(itemThirdAuthor.ElementExtensions);
                     Assert.Equal(10, itemThirdAuthor.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 }
                 else
@@ -1004,7 +1004,7 @@ namespace System.ServiceModel.Syndication.Tests
                 }
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, itemFourthCategory.ElementExtensions.Count);
+                    Assert.Single(itemFourthCategory.ElementExtensions);
                     Assert.Equal(10, itemFourthCategory.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 }
                 else
@@ -1062,7 +1062,7 @@ namespace System.ServiceModel.Syndication.Tests
                 }
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, itemThirdContributor.ElementExtensions.Count);
+                    Assert.Single(itemThirdContributor.ElementExtensions);
                     Assert.Equal(10, itemThirdContributor.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 }
                 else
@@ -1090,7 +1090,7 @@ namespace System.ServiceModel.Syndication.Tests
 
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, item.ElementExtensions.Count);
+                    Assert.Single(item.ElementExtensions);
                     Assert.Equal(10, item.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 }
                 else
@@ -1146,7 +1146,7 @@ namespace System.ServiceModel.Syndication.Tests
                 }
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, itemFourthLink.ElementExtensions.Count);
+                    Assert.Single(itemFourthLink.ElementExtensions);
                     Assert.Equal(10, item.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 }
                 else
@@ -1241,7 +1241,7 @@ namespace System.ServiceModel.Syndication.Tests
                 }
                 if (preserveElementExtensions)
                 {
-                    Assert.Equal(1, fourthLink.ElementExtensions.Count);
+                    Assert.Single(fourthLink.ElementExtensions);
                     Assert.Equal(10, item.ElementExtensions[0].GetObject<ExtensionObject>().Value);
                 }
                 else

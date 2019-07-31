@@ -30,7 +30,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms2.Decode(encodedMessage);
 
             RecipientInfoCollection recipients = ecms2.RecipientInfos;
-            Assert.Equal(1, recipients.Count);
+            Assert.Single(recipients);
             KeyTransRecipientInfo recipient = Assert.IsType<KeyTransRecipientInfo>(recipients[0]);
             Assert.Equal(Oids.RsaOaep, recipient.KeyEncryptionAlgorithm.Oid.Value);
             Assert.Equal(s_rsaOaepSha1Parameters, recipient.KeyEncryptionAlgorithm.Parameters);
@@ -52,7 +52,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms2.Decode(encodedMessage);
 
             RecipientInfoCollection recipients = ecms2.RecipientInfos;
-            Assert.Equal(1, recipients.Count);
+            Assert.Single(recipients);
             KeyTransRecipientInfo recipient = Assert.IsType<KeyTransRecipientInfo>(recipients[0]);
             Assert.Equal(Oids.RsaOaep, recipient.KeyEncryptionAlgorithm.Oid.Value);
             Assert.Equal(s_rsaOaepSha256Parameters, recipient.KeyEncryptionAlgorithm.Parameters);

@@ -212,7 +212,7 @@ namespace System.ComponentModel.Tests
                 Assert.Equal(ListChangedType.ItemDeleted, e.ListChangedType);
 
                 // The event is raised after the removal.
-                Assert.Equal(0, bindingList.Count);
+                Assert.Empty(bindingList);
             };
             bindingList.RemoveAt(0);
 
@@ -342,7 +342,7 @@ namespace System.ComponentModel.Tests
             Assert.True(calledAddingNew);
             Assert.NotNull(newValue);
 
-            Assert.Equal(1, bindingList.Count);
+            Assert.Single(bindingList);
             Assert.Equal(0, bindingList.IndexOf(newValue));
             Assert.True(calledListChanged);
             Assert.Equal(ListChangedType.ItemAdded, listChangedType);
@@ -350,7 +350,7 @@ namespace System.ComponentModel.Tests
 
             calledListChanged = false;
             bindingList.CancelNew(0);
-            Assert.Equal(0, bindingList.Count);
+            Assert.Empty(bindingList);
             Assert.True(calledListChanged);
             Assert.Equal(ListChangedType.ItemDeleted, listChangedType);
             Assert.Equal(0, listChangedIndex);
@@ -432,7 +432,7 @@ namespace System.ComponentModel.Tests
             Assert.True(calledAddNew);
             Assert.NotNull(newValue);
 
-            Assert.Equal(1, bindingList.Count);
+            Assert.Single(bindingList);
             Assert.Equal(0, bindingList.IndexOf(newValue));
             Assert.True(calledListChanged);
             Assert.Equal(ListChangedType.ItemAdded, listChangedType);
@@ -441,7 +441,7 @@ namespace System.ComponentModel.Tests
             // EndNew does not change the list.
             calledListChanged = false;
             bindingList.EndNew(0);
-            Assert.Equal(1, bindingList.Count);
+            Assert.Single(bindingList);
             Assert.False(calledListChanged);
         }
 
@@ -472,7 +472,7 @@ namespace System.ComponentModel.Tests
             Assert.True(calledAddingNew);
             Assert.NotNull(newValue);
 
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             Assert.Equal(0, list.IndexOf(newValue));
             Assert.True(calledListChanged);
             Assert.Equal(ListChangedType.ItemAdded, listChangedType);
@@ -481,12 +481,12 @@ namespace System.ComponentModel.Tests
             // Calling CancelNew on an invalid index does not change the list.
             calledListChanged = false;
             list.CancelNew(2);
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             Assert.False(calledListChanged);
 
             // Calling EndNew does not change the list.
             list.EndNew(0);
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
             Assert.False(calledListChanged);
         }
 
@@ -517,7 +517,7 @@ namespace System.ComponentModel.Tests
             Assert.True(calledAddingNew);
             Assert.NotNull(newValue);
 
-            Assert.Equal(1, bindingList.Count);
+            Assert.Single(bindingList);
             Assert.Equal(0, bindingList.IndexOf(newValue));
             Assert.True(calledListChanged);
             Assert.Equal(ListChangedType.ItemAdded, listChangedType);
@@ -526,7 +526,7 @@ namespace System.ComponentModel.Tests
             // EndNew with an invalid index does not change the list.
             calledListChanged = false;
             bindingList.EndNew(2);
-            Assert.Equal(1, bindingList.Count);
+            Assert.Single(bindingList);
             Assert.False(calledListChanged);
 
             // CancelNew with a valid index changes the list.
@@ -664,8 +664,8 @@ namespace System.ComponentModel.Tests
             var item2 = new Item();
             var list = new List<Item> { item1, item2, null };
             var bindingList = new BindingList<Item>(list);
-            Assert.Equal(1, item1.InvocationList.Length);
-            Assert.Equal(1, item2.InvocationList.Length);
+            Assert.Single(item1.InvocationList);
+            Assert.Single(item2.InvocationList);
 
             bool calledListChanged = false;
             bindingList.ListChanged += (object sender, ListChangedEventArgs e) =>
@@ -688,7 +688,7 @@ namespace System.ComponentModel.Tests
         {
             var item = new Item();
             var bindingList = new BindingList<Item> { item };
-            Assert.Equal(1, item.InvocationList.Length);
+            Assert.Single(item.InvocationList);
 
             bool calledListChanged = false;
             bindingList.ListChanged += (object sender, ListChangedEventArgs e) =>
@@ -728,7 +728,7 @@ namespace System.ComponentModel.Tests
             var item1 = new Item();
             var item2 = new Item();
             var bindingList = new BindingList<Item> { item1 };
-            Assert.Equal(1, item1.InvocationList.Length);
+            Assert.Single(item1.InvocationList);
 
             bool calledListChanged = false;
             bindingList.ListChanged += (object sender, ListChangedEventArgs e) =>
@@ -742,7 +742,7 @@ namespace System.ComponentModel.Tests
             Assert.True(calledListChanged);
             Assert.Equal(item2, bindingList[0]);
             Assert.Null(item1.InvocationList);
-            Assert.Equal(1, item2.InvocationList.Length);
+            Assert.Single(item2.InvocationList);
         }
 
         [Fact]
@@ -930,7 +930,7 @@ namespace System.ComponentModel.Tests
 
             Assert.Equal(ListChangedType.ItemAdded, listChangedType);
             Assert.Equal(0, listChangedIndex);
-            Assert.Equal(1, poker.Count);
+            Assert.Single(poker);
         }
 
         private class Item : INotifyPropertyChanged
@@ -970,7 +970,7 @@ namespace System.ComponentModel.Tests
             var list = new BindingList<Item>();
             list.Insert(0, null);
 
-            Assert.Equal(1, list.Count);
+            Assert.Single(list);
         }
 
         [Fact]

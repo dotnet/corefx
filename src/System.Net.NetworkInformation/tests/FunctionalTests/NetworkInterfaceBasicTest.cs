@@ -23,7 +23,7 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public void BasicTest_GetNetworkInterfaces_AtLeastOne()
         {
-            Assert.NotEqual<int>(0, NetworkInterface.GetAllNetworkInterfaces().Length);
+            Assert.NotEmpty(NetworkInterface.GetAllNetworkInterfaces());
         }
 
         [Fact]

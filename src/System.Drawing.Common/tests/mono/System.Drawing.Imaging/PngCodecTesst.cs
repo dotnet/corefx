@@ -290,7 +290,7 @@ namespace MonoTests.System.Drawing.Imaging
 
                 // MS returns a random Flags value (not a good sign)
                 //Assert.Equal (0, bmp.Palette.Flags);
-                Assert.Equal(0, bmp.Palette.Entries.Length);
+                Assert.Empty(bmp.Palette.Entries);
 
                 Assert.Equal(100, bmp.Width);
                 Assert.Equal(100, bmp.Height);

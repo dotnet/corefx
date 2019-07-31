@@ -57,7 +57,7 @@ namespace System.Data.Tests
                 Assert.Equal(DBNull.Value, c.DefaultValue);
                 Assert.False(c.DesignMode);
                 Assert.Equal("", c.Expression);
-                Assert.Equal(0, c.ExtendedProperties.Count);
+                Assert.Empty(c.ExtendedProperties);
                 Assert.Equal(-1, c.MaxLength);
                 Assert.Equal("", c.Namespace);
                 Assert.Equal(i, c.Ordinal);
@@ -85,7 +85,7 @@ namespace System.Data.Tests
             Assert.Equal(DBNull.Value, c.DefaultValue);
             Assert.False(c.DesignMode);
             Assert.Equal("", c.Expression);
-            Assert.Equal(0, c.ExtendedProperties.Count);
+            Assert.Empty(c.ExtendedProperties);
             Assert.Equal(-1, c.MaxLength);
             Assert.Equal("", c.Namespace);
             Assert.Equal(2, c.Ordinal);
@@ -109,7 +109,7 @@ namespace System.Data.Tests
             Assert.Equal(DBNull.Value, c.DefaultValue);
             Assert.False(c.DesignMode);
             Assert.Equal("Column1 + Column2", c.Expression);
-            Assert.Equal(0, c.ExtendedProperties.Count);
+            Assert.Empty(c.ExtendedProperties);
             Assert.Equal(-1, c.MaxLength);
             Assert.Equal("", c.Namespace);
             Assert.Equal(3, c.Ordinal);
@@ -136,7 +136,7 @@ namespace System.Data.Tests
             Assert.Equal(DBNull.Value, c.DefaultValue);
             Assert.False(c.DesignMode);
             Assert.Equal("", c.Expression);
-            Assert.Equal(0, c.ExtendedProperties.Count);
+            Assert.Empty(c.ExtendedProperties);
             Assert.Equal(-1, c.MaxLength);
             Assert.Equal("", c.Namespace);
             Assert.Equal(4, c.Ordinal);
@@ -156,7 +156,7 @@ namespace System.Data.Tests
             DataColumn col;
 
             col = cols.Add(string.Empty);
-            Assert.Equal(1, cols.Count);
+            Assert.Single(cols);
             Assert.Equal("Column1", col.ColumnName);
             Assert.Same(table, col.Table);
 
@@ -175,7 +175,7 @@ namespace System.Data.Tests
             cols.Clear();
 
             col = cols.Add(string.Empty);
-            Assert.Equal(1, cols.Count);
+            Assert.Single(cols);
             Assert.Equal("Column1", col.ColumnName);
             Assert.Same(table, col.Table);
         }
@@ -188,7 +188,7 @@ namespace System.Data.Tests
             DataColumn col;
 
             col = cols.Add((string)null);
-            Assert.Equal(1, cols.Count);
+            Assert.Single(cols);
             Assert.Equal("Column1", col.ColumnName);
             Assert.Same(table, col.Table);
 
@@ -207,7 +207,7 @@ namespace System.Data.Tests
             cols.Clear();
 
             col = cols.Add((string)null);
-            Assert.Equal(1, cols.Count);
+            Assert.Single(cols);
             Assert.Equal("Column1", col.ColumnName);
             Assert.Same(table, col.Table);
         }
@@ -313,7 +313,7 @@ namespace System.Data.Tests
             Assert.Equal(DBNull.Value, C.DefaultValue);
             Assert.False(C.DesignMode);
             Assert.Equal("", C.Expression);
-            Assert.Equal(0, C.ExtendedProperties.Count);
+            Assert.Empty(C.ExtendedProperties);
             Assert.Equal(-1, C.MaxLength);
             Assert.Equal("", C.Namespace);
             Assert.Equal(0, C.Ordinal);
@@ -337,7 +337,7 @@ namespace System.Data.Tests
             Assert.Equal(DBNull.Value, C.DefaultValue);
             Assert.False(C.DesignMode);
             Assert.Equal("", C.Expression);
-            Assert.Equal(0, C.ExtendedProperties.Count);
+            Assert.Empty(C.ExtendedProperties);
             Assert.Equal(-1, C.MaxLength);
             Assert.Equal("", C.Namespace);
             Assert.Equal(1, C.Ordinal);
@@ -402,7 +402,7 @@ namespace System.Data.Tests
             Cols.Add("testi");
 
             Cols.Clear();
-            Assert.Equal(0, Cols.Count);
+            Assert.Empty(Cols);
 
             Cols.Add();
             Cols.Add("testi");
@@ -433,7 +433,7 @@ namespace System.Data.Tests
 
             //shudnt throw an exception.
             table.Columns.Clear();
-            Assert.Equal(0, table.Columns.Count);
+            Assert.Empty(table.Columns);
         }
 
         [Fact]

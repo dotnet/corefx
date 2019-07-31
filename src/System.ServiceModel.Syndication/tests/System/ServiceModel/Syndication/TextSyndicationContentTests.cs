@@ -49,7 +49,7 @@ namespace System.ServiceModel.Syndication.Tests
 
             var clone = new TextSyndicationContentSubclass(original);
             Assert.NotSame(clone.AttributeExtensions, original.AttributeExtensions);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
 
             Assert.Equal("content", clone.Text);
@@ -80,7 +80,7 @@ namespace System.ServiceModel.Syndication.Tests
 
             TextSyndicationContent clone = Assert.IsType<TextSyndicationContent>(original.Clone());
             Assert.NotSame(clone.AttributeExtensions, original.AttributeExtensions);
-            Assert.Equal(1, clone.AttributeExtensions.Count);
+            Assert.Single(clone.AttributeExtensions);
             Assert.Equal("value", clone.AttributeExtensions[new XmlQualifiedName("name")]);
 
             Assert.Equal("content", clone.Text);

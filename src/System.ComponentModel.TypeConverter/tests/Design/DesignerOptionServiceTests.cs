@@ -19,14 +19,14 @@ namespace System.ComponentModel.Design.Tests
             var service = new TestDesignerOptionService();
 
             DesignerOptionService.DesignerOptionCollection options1 = service.DoCreateOptionCollection(service.Options, "name", "value");
-            Assert.Equal(0, options1.Count);
+            Assert.Empty(options1);
             Assert.NotEmpty(options1.Properties);
             Assert.Same(options1.Properties, options1.Properties);
             Assert.Same(service.Options, options1.Parent);
 
             DesignerOptionService.DesignerOptionCollection options2 = service.DoCreateOptionCollection(service.Options, "name", "value");
             Assert.Equal(2, service.Options.Count);
-            Assert.Equal(0, options2.Count);
+            Assert.Empty(options2);
             Assert.NotEmpty(options2.Properties);
             Assert.Same(options2.Properties, options2.Properties);
             Assert.Same(service.Options, options2.Parent);
@@ -62,7 +62,7 @@ namespace System.ComponentModel.Design.Tests
             DesignerOptionService.DesignerOptionCollection options = service.Options;
             Assert.Same(options, service.Options);
 
-            Assert.Equal(0, options.Count);
+            Assert.Empty(options);
             Assert.Empty(options.Properties);
             Assert.Same(options.Properties, options.Properties);
             Assert.Null(options.Parent);

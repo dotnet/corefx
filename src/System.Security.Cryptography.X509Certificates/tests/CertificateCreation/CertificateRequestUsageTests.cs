@@ -161,13 +161,13 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 
                 Assert.Equal("CN=localhost", newCert.Subject);
                 Assert.Equal(expectedKeyOid, newCert.GetKeyAlgorithm());
-                Assert.Equal(1, newCert.Extensions.Count);
+                Assert.Single(newCert.Extensions);
 
                 X509Extension extension = newCert.Extensions["2.5.29.37"];
                 Assert.NotNull(extension);
 
                 X509EnhancedKeyUsageExtension ekuExtension = (X509EnhancedKeyUsageExtension)extension;
-                Assert.Equal(1, ekuExtension.EnhancedKeyUsages.Count);
+                Assert.Single(ekuExtension.EnhancedKeyUsages);
                 Assert.Equal("1.3.6.1.5.5.7.3.1", ekuExtension.EnhancedKeyUsages[0].Value);
 
                 // Ideally the serial number is 8 bytes.  But maybe it accidentally started with 0x00 (1/256),
@@ -349,7 +349,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                 using (X509Certificate2 cert = request.CreateSelfSigned(now, now.AddHours(1)))
                 {
                     Assert.Equal(3, cert.Version);
-                    Assert.Equal(0, cert.Extensions.Count);
+                    Assert.Empty(cert.Extensions);
                 }
 
                 request.CertificateExtensions.Clear();
@@ -362,7 +362,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                 using (X509Certificate2 cert = request.CreateSelfSigned(now, now.AddHours(1)))
                 {
                     Assert.Equal(3, cert.Version);
-                    Assert.Equal(1, cert.Extensions.Count);
+                    Assert.Single(cert.Extensions);
                 }
             }
         }

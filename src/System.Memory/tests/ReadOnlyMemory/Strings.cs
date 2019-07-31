@@ -90,7 +90,7 @@ namespace System.MemoryTests
             Assert.False(MemoryMarshal.TryGetArray(m, out ArraySegment<char> array));
             Assert.Null(array.Array);
             Assert.Equal(0, array.Offset);
-            Assert.Equal(0, array.Count);
+            Assert.Empty(array);
         }
 
         [Fact]

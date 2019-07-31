@@ -82,7 +82,7 @@ namespace System.Collections.Specialized.Tests
             nameValueCollection["name"] = "value1";
             nameValueCollection["Name"] = "value2";
             nameValueCollection["NAME"] = "value3";
-            Assert.Equal(1, nameValueCollection.Count);
+            Assert.Single(nameValueCollection);
             Assert.Equal("value3", nameValueCollection["name"]);
         }
     }

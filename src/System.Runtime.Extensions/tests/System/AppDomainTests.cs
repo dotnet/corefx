@@ -381,7 +381,7 @@ namespace System.Tests
         [Fact]
         public void ReflectionOnlyGetAssemblies()
         {
-            Assert.Equal(0, AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies().Length);
+            Assert.Empty(AppDomain.CurrentDomain.ReflectionOnlyGetAssemblies());
         }
 
         [Fact]

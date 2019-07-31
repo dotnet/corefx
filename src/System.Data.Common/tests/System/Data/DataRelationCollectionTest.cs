@@ -72,7 +72,7 @@ namespace System.Data.Tests
             drcol.Clear();
 
             drcol.Add(parentCol, childCol);
-            Assert.Equal(1, drcol.Count);
+            Assert.Single(drcol);
             drcol.Clear();
 
             drcol.Add("NewRelation", parentCol, childCol);
@@ -80,11 +80,11 @@ namespace System.Data.Tests
             drcol.Clear();
 
             drcol.Add("NewRelation", parentCol, childCol, false);
-            Assert.Equal(1, drcol.Count);
+            Assert.Single(drcol);
             drcol.Clear();
 
             drcol.Add("NewRelation", parentCol, childCol, true);
-            Assert.Equal(1, drcol.Count);
+            Assert.Single(drcol);
             drcol.Clear();
         }
 
@@ -163,7 +163,7 @@ namespace System.Data.Tests
             drcol.Add("ItemOrder", _dataset.Tables["Item"].Columns["itemid"]
                                  , _dataset.Tables["Order"].Columns["itemid"]);
             drcol.Clear();
-            Assert.Equal(0, drcol.Count);
+            Assert.Empty(drcol);
         }
 
         [Fact]

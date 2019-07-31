@@ -56,7 +56,7 @@ namespace System.Composition.UnitTests
         {
             var cc = CreateContainer(typeof(SomeSetting), typeof(ManySettingUser));
             var ssu = cc.GetExport<ManySettingUser>();
-            Assert.Equal(1, ssu.Settings.Count());
+            Assert.Single(ssu.Settings);
         }
 
         [Export, ExportMetadata("SettingName", "TheName")]

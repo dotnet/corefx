@@ -79,10 +79,10 @@ namespace System.Data.Tests
             DataSet ds = getDataSet();
             ds.Relations.Add(ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"]);
 
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
 
-            Assert.Equal(1, ds.Tables[0].ChildRelations.Count);
-            Assert.Equal(1, ds.Tables[1].ParentRelations.Count);
+            Assert.Single(ds.Tables[0].ChildRelations);
+            Assert.Single(ds.Tables[1].ParentRelations);
 
             Assert.Equal(typeof(UniqueConstraint), ds.Tables[0].Constraints[0].GetType());
             Assert.Equal(typeof(ForeignKeyConstraint), ds.Tables[1].Constraints[0].GetType());
@@ -94,10 +94,10 @@ namespace System.Data.Tests
             DataSet ds = getDataSet();
             ds.Relations.Add("rel1", ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"]);
 
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
 
-            Assert.Equal(1, ds.Tables[0].ChildRelations.Count);
-            Assert.Equal(1, ds.Tables[1].ParentRelations.Count);
+            Assert.Single(ds.Tables[0].ChildRelations);
+            Assert.Single(ds.Tables[1].ParentRelations);
 
             Assert.Equal(typeof(UniqueConstraint), ds.Tables[0].Constraints[0].GetType());
             Assert.Equal(typeof(ForeignKeyConstraint), ds.Tables[1].Constraints[0].GetType());
@@ -113,10 +113,10 @@ namespace System.Data.Tests
             DataSet ds = getDataSet();
             ds.Relations.Add("rel1", ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"], true);
 
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
 
-            Assert.Equal(1, ds.Tables[0].ChildRelations.Count); //When adding a relation);
-            Assert.Equal(1, ds.Tables[1].ParentRelations.Count);
+            Assert.Single(ds.Tables[0].ChildRelations);
+            Assert.Single(ds.Tables[1].ParentRelations);
 
             Assert.Equal(typeof(UniqueConstraint), ds.Tables[0].Constraints[0].GetType());
             Assert.Equal(typeof(ForeignKeyConstraint), ds.Tables[1].Constraints[0].GetType());
@@ -131,13 +131,13 @@ namespace System.Data.Tests
             DataSet ds = getDataSet();
             ds.Relations.Add("rel1", ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"], false);
 
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
 
-            Assert.Equal(1, ds.Tables[0].ChildRelations.Count); //When adding a relation);
-            Assert.Equal(1, ds.Tables[1].ParentRelations.Count);
+            Assert.Single(ds.Tables[0].ChildRelations);
+            Assert.Single(ds.Tables[1].ParentRelations);
 
-            Assert.Equal(0, ds.Tables[0].Constraints.Count);
-            Assert.Equal(0, ds.Tables[1].Constraints.Count);
+            Assert.Empty(ds.Tables[0].Constraints);
+            Assert.Empty(ds.Tables[1].Constraints);
 
             Assert.Equal("rel1", ds.Relations[0].RelationName);
             Assert.Equal("rel1", ds.Tables[0].ChildRelations[0].RelationName);
@@ -174,7 +174,7 @@ namespace System.Data.Tests
             ds.Relations.Add(ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"]);
             ds.Relations.CollectionChanged += new CollectionChangeEventHandler(Relations_CollectionChanged);
             ds.Relations.Clear();
-            Assert.Equal(0, ds.Relations.Count);
+            Assert.Empty(ds.Relations);
             Assert.Equal(1, _changesCounter);
         }
 
@@ -231,15 +231,15 @@ namespace System.Data.Tests
         public void Count()
         {
             DataSet ds = getDataSet();
-            Assert.Equal(0, ds.Relations.Count);
+            Assert.Empty(ds.Relations);
             ds.Relations.Add("rel1", ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"]);
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
             ds.Relations.Add("rel2", ds.Tables[0].Columns["String1"], ds.Tables[1].Columns["String1"]);
             Assert.Equal(2, ds.Relations.Count);
             ds.Relations.Remove("rel2");
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
             ds.Relations.Remove("rel1");
-            Assert.Equal(0, ds.Relations.Count);
+            Assert.Empty(ds.Relations);
         }
 
         [Fact]
@@ -327,8 +327,8 @@ namespace System.Data.Tests
 
             Assert.Equal(originalRelationsCount + 1, ds.Relations.Count);
 
-            Assert.Equal(1, ds.Tables[0].ChildRelations.Count);
-            Assert.Equal(1, ds.Tables[1].ParentRelations.Count);
+            Assert.Single(ds.Tables[0].ChildRelations);
+            Assert.Single(ds.Tables[1].ParentRelations);
 
             Assert.Equal(typeof(UniqueConstraint), ds.Tables[0].Constraints[0].GetType());
             Assert.Equal(typeof(ForeignKeyConstraint), ds.Tables[1].Constraints[0].GetType());
@@ -350,9 +350,9 @@ namespace System.Data.Tests
 
             dt1.ChildRelations.Add(new DataRelation("rel1", dt1.Columns["ParentId"], dt2.Columns["ParentId"]));
 
-            Assert.Equal(1, dt1.ChildRelations.Count);
-            Assert.Equal(1, dt2.ParentRelations.Count);
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(dt1.ChildRelations);
+            Assert.Single(dt2.ParentRelations);
+            Assert.Single(ds.Relations);
         }
 
         [Fact]
@@ -362,9 +362,9 @@ namespace System.Data.Tests
 
             ds.Tables[1].ParentRelations.Add(new DataRelation("rel1", ds.Tables[0].Columns["ParentId"], ds.Tables[1].Columns["ParentId"]));
 
-            Assert.Equal(1, ds.Tables[0].ChildRelations.Count);
-            Assert.Equal(1, ds.Tables[1].ParentRelations.Count);
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Tables[0].ChildRelations);
+            Assert.Single(ds.Tables[1].ParentRelations);
+            Assert.Single(ds.Relations);
         }
 
         [Fact]
@@ -413,10 +413,10 @@ namespace System.Data.Tests
             //Perform remove
 
             ds.Relations.Remove(rel1);
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
             Assert.Equal("rel2", ds.Relations[0].RelationName);
             ds.Relations.Remove(rel2);
-            Assert.Equal(0, ds.Relations.Count);
+            Assert.Empty(ds.Relations);
             Assert.Equal(2, _changesCounter);
             ds.Relations.Remove((DataRelation)null);
 
@@ -444,10 +444,10 @@ namespace System.Data.Tests
             //Perform remove
 
             ds.Relations.Remove("rel1");
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
             Assert.Equal("rel2", ds.Relations[0].RelationName);
             ds.Relations.Remove("rel2");
-            Assert.Equal(0, ds.Relations.Count);
+            Assert.Empty(ds.Relations);
             Assert.Equal(2, _changesCounter);
 
             AssertExtensions.Throws<ArgumentException>(null, () =>
@@ -477,10 +477,10 @@ namespace System.Data.Tests
             //Perform remove
 
             ds.Relations.RemoveAt(0);
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
             Assert.Equal("rel2", ds.Relations[0].RelationName);
             ds.Relations.RemoveAt(0);
-            Assert.Equal(0, ds.Relations.Count);
+            Assert.Empty(ds.Relations);
             Assert.Equal(2, _changesCounter);
 
 

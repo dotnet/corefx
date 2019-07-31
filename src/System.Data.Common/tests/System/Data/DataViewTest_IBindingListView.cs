@@ -83,11 +83,11 @@ namespace System.Data.Tests
 
             ((DataView)view).Sort = "";
             col = view.SortDescriptions;
-            Assert.Equal(0, col.Count);
+            Assert.Empty(col);
 
             ((DataView)view).Sort = null;
             col = view.SortDescriptions;
-            Assert.Equal(0, col.Count);
+            Assert.Empty(col);
 
             ((DataView)view).Sort = "col1 DESC, col2 ASC";
             col = view.SortDescriptions;

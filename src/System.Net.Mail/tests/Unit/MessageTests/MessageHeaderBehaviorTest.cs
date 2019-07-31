@@ -51,8 +51,8 @@ namespace System.Net.Mail.Tests
             _message.EncodeHeaders(_message.EnvelopeHeaders, false);
             _message.EncodeHeaders(_message.Headers, false);
 
-            Assert.Equal(1, _message.EnvelopeHeaders.GetValues("X-Receiver").Length);
-            Assert.Equal(1, _message.Headers.GetValues("X-Receiver").Length);
+            Assert.Single(_message.EnvelopeHeaders.GetValues("X-Receiver"));
+            Assert.Single(_message.Headers.GetValues("X-Receiver"));
         }
 
         [Fact]
@@ -109,12 +109,12 @@ namespace System.Net.Mail.Tests
             string[] replyToHeaders = _message.Headers.GetValues("Reply-To");
 
             //all headers supplied by the user should be gone
-            Assert.Equal(1, fromHeaders.Length);
-            Assert.Equal(1, toHeaders.Length);
-            Assert.Equal(1, ccHeaders.Length);
+            Assert.Single(fromHeaders);
+            Assert.Single(toHeaders);
+            Assert.Single(ccHeaders);
             //there should be no bcc header
             Assert.Null(bccHeaders);
-            Assert.Equal(1, replyToHeaders.Length);
+            Assert.Single(replyToHeaders);
 
             //all headers that were set via properties should remain
             Assert.Contains(validFrom, fromHeaders[0]);

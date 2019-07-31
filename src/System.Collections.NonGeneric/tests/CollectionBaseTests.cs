@@ -89,7 +89,7 @@ namespace System.Collections.Tests
                 collBase.Remove(value);
                 Assert.False(collBase.Contains(value));
             }
-            Assert.Equal(0, collBase.Count);
+            Assert.Empty(collBase);
         }
 
         [Fact]
@@ -153,7 +153,7 @@ namespace System.Collections.Tests
         {
             MyCollection collBase = CreateCollection(100);
             collBase.Clear();
-            Assert.Equal(0, collBase.Count);
+            Assert.Empty(collBase);
         }
 
         [Fact]
@@ -363,21 +363,21 @@ namespace System.Collections.Tests
             collBase.OnValidateThrow = true;
 
             Assert.Throws<Exception>(() => collBase.Add(f));
-            Assert.Equal(0, collBase.Count);
+            Assert.Empty(collBase);
 
             // Throw OnInsert
             collBase = new OnMethodCalledCollectionBase();
             collBase.OnInsertThrow = true;
 
             Assert.Throws<Exception>(() => collBase.Add(f));
-            Assert.Equal(0, collBase.Count);
+            Assert.Empty(collBase);
 
             // Throw OnInsertComplete
             collBase = new OnMethodCalledCollectionBase();
             collBase.OnInsertCompleteThrow = true;
 
             Assert.Throws<Exception>(() => collBase.Add(f));
-            Assert.Equal(0, collBase.Count);
+            Assert.Empty(collBase);
         }
 
         [Fact]
@@ -404,21 +404,21 @@ namespace System.Collections.Tests
             collBase.OnValidateThrow = true;
 
             Assert.Throws<Exception>(() => collBase.Insert(0, f));
-            Assert.Equal(0, collBase.Count);
+            Assert.Empty(collBase);
 
             // Throw OnInsert
             collBase = new OnMethodCalledCollectionBase();
             collBase.OnInsertThrow = true;
 
             Assert.Throws<Exception>(() => collBase.Insert(0, f));
-            Assert.Equal(0, collBase.Count);
+            Assert.Empty(collBase);
 
             // Throw OnInsertComplete
             collBase = new OnMethodCalledCollectionBase();
             collBase.OnInsertCompleteThrow = true;
 
             Assert.Throws<Exception>(() => collBase.Insert(0, f));
-            Assert.Equal(0, collBase.Count);
+            Assert.Empty(collBase);
         }
 
         [Fact]
@@ -449,7 +449,7 @@ namespace System.Collections.Tests
             collBase.OnValidateThrow = true;
 
             Assert.Throws<Exception>(() => collBase.Remove(f));
-            Assert.Equal(1, collBase.Count);
+            Assert.Single(collBase);
 
             // Throw OnRemove
             collBase = new OnMethodCalledCollectionBase();
@@ -457,7 +457,7 @@ namespace System.Collections.Tests
             collBase.OnRemoveThrow = true;
 
             Assert.Throws<Exception>(() => collBase.Remove(f));
-            Assert.Equal(1, collBase.Count);
+            Assert.Single(collBase);
 
             // Throw OnRemoveComplete
             collBase = new OnMethodCalledCollectionBase();
@@ -465,7 +465,7 @@ namespace System.Collections.Tests
             collBase.OnRemoveCompleteThrow = true;
 
             Assert.Throws<Exception>(() => collBase.Remove(f));
-            Assert.Equal(1, collBase.Count);
+            Assert.Single(collBase);
         }
 
         [Fact]
@@ -496,7 +496,7 @@ namespace System.Collections.Tests
             collBase.OnValidateThrow = true;
 
             Assert.Throws<Exception>(() => collBase.RemoveAt(0));
-            Assert.Equal(1, collBase.Count);
+            Assert.Single(collBase);
 
             // Throw OnRemove
             collBase = new OnMethodCalledCollectionBase();
@@ -504,7 +504,7 @@ namespace System.Collections.Tests
             collBase.OnRemoveThrow = true;
 
             Assert.Throws<Exception>(() => collBase.RemoveAt(0));
-            Assert.Equal(1, collBase.Count);
+            Assert.Single(collBase);
 
             // Throw OnRemoveComplete
             collBase = new OnMethodCalledCollectionBase();
@@ -512,7 +512,7 @@ namespace System.Collections.Tests
             collBase.OnRemoveCompleteThrow = true;
 
             Assert.Throws<Exception>(() => collBase.RemoveAt(0));
-            Assert.Equal(1, collBase.Count);
+            Assert.Single(collBase);
         }
 
         [Fact]
@@ -526,7 +526,7 @@ namespace System.Collections.Tests
             Assert.True(collBase.OnClearCalled);
             Assert.True(collBase.OnClearCompleteCalled);
 
-            Assert.Equal(0, collBase.Count);
+            Assert.Empty(collBase);
         }
 
         [Fact]
@@ -540,7 +540,7 @@ namespace System.Collections.Tests
             collBase.OnValidateThrow = true;
 
             collBase.Clear();
-            Assert.Equal(0, collBase.Count);
+            Assert.Empty(collBase);
 
             // Throw OnClear
             collBase = new OnMethodCalledCollectionBase();
@@ -548,7 +548,7 @@ namespace System.Collections.Tests
             collBase.OnClearThrow = true;
 
             Assert.Throws<Exception>(() => collBase.Clear());
-            Assert.Equal(1, collBase.Count);
+            Assert.Single(collBase);
 
             // Throw OnClearComplete
             collBase = new OnMethodCalledCollectionBase();
@@ -556,7 +556,7 @@ namespace System.Collections.Tests
             collBase.OnClearCompleteThrow = true;
 
             Assert.Throws<Exception>(() => collBase.Clear());
-            Assert.Equal(0, collBase.Count);
+            Assert.Empty(collBase);
         }
 
         [Fact]
@@ -790,7 +790,7 @@ namespace System.Collections.Tests
             {
                 Assert.True(OnClearCalled);
                 Assert.Equal(0, Count);
-                Assert.Equal(0, InnerList.Count);
+                Assert.Empty(InnerList);
 
                 OnClearCompleteCalled = true;
 

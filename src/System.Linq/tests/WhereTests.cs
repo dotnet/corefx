@@ -196,7 +196,7 @@ namespace System.Linq.Tests
 
             IEnumerable<int> result = source.Where(falsePredicate);
 
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -235,7 +235,7 @@ namespace System.Linq.Tests
 
             IEnumerable<int> result = source.Where(falsePredicate);
 
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -274,7 +274,7 @@ namespace System.Linq.Tests
 
             IEnumerable<int> result = source.Where(falsePredicate);
 
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -313,7 +313,7 @@ namespace System.Linq.Tests
 
             IEnumerable<int> result = source.Where(falsePredicate);
 
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -352,7 +352,7 @@ namespace System.Linq.Tests
 
             IEnumerable<int> result = source.Where(falsePredicate);
 
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -376,7 +376,7 @@ namespace System.Linq.Tests
 
             IEnumerable<int> result = source.Where(value => { wasSelectorCalled = true; return true; });
             
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
             Assert.False(wasSelectorCalled);
         }
 

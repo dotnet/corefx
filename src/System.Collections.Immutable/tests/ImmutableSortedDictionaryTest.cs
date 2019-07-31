@@ -122,7 +122,7 @@ namespace System.Collections.Immutable.Tests
             Assert.True(map.ContainsKey("Johnny"));
             Assert.False(map.ContainsKey("johnny"));
             var newMap = map.ToImmutableSortedDictionary(StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(1, newMap.Count);
+            Assert.Single(newMap);
             Assert.True(newMap.ContainsKey("Johnny"));
             Assert.True(newMap.ContainsKey("johnny")); // because it's case insensitive
         }
@@ -182,32 +182,32 @@ namespace System.Collections.Immutable.Tests
             var valueComparer = StringComparer.CurrentCulture;
 
             var dictionary = ImmutableSortedDictionary.Create<string, string>();
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
             Assert.Same(Comparer<string>.Default, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = ImmutableSortedDictionary.Create<string, string>(keyComparer);
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = ImmutableSortedDictionary.Create(keyComparer, valueComparer);
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(valueComparer, dictionary.ValueComparer);
 
             dictionary = ImmutableSortedDictionary.CreateRange(pairs);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(Comparer<string>.Default, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = ImmutableSortedDictionary.CreateRange(keyComparer, pairs);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = ImmutableSortedDictionary.CreateRange(keyComparer, valueComparer, pairs);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(valueComparer, dictionary.ValueComparer);
         }
@@ -220,36 +220,36 @@ namespace System.Collections.Immutable.Tests
             var valueComparer = StringComparer.CurrentCulture;
 
             ImmutableSortedDictionary<string, string> dictionary = pairs.ToImmutableSortedDictionary();
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(Comparer<string>.Default, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = pairs.ToImmutableSortedDictionary(keyComparer);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = pairs.ToImmutableSortedDictionary(keyComparer, valueComparer);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(valueComparer, dictionary.ValueComparer);
 
             dictionary = pairs.ToImmutableSortedDictionary(p => p.Key.ToUpperInvariant(), p => p.Value.ToLowerInvariant());
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Equal("A", dictionary.Keys.Single());
             Assert.Equal("b", dictionary.Values.Single());
             Assert.Same(Comparer<string>.Default, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = pairs.ToImmutableSortedDictionary(p => p.Key.ToUpperInvariant(), p => p.Value.ToLowerInvariant(), keyComparer);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Equal("A", dictionary.Keys.Single());
             Assert.Equal("b", dictionary.Values.Single());
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = pairs.ToImmutableSortedDictionary(p => p.Key.ToUpperInvariant(), p => p.Value.ToLowerInvariant(), keyComparer, valueComparer);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Equal("A", dictionary.Keys.Single());
             Assert.Equal("b", dictionary.Values.Single());
             Assert.Same(keyComparer, dictionary.KeyComparer);
@@ -289,7 +289,7 @@ namespace System.Collections.Immutable.Tests
                 .Add("a", "1").Add("A", "1");
             map = map.WithComparers(StringComparer.OrdinalIgnoreCase);
             Assert.Same(StringComparer.OrdinalIgnoreCase, map.KeyComparer);
-            Assert.Equal(1, map.Count);
+            Assert.Single(map);
             Assert.True(map.ContainsKey("a"));
             Assert.Equal("1", map["a"]);
 
@@ -360,7 +360,7 @@ namespace System.Collections.Immutable.Tests
             {
                 { 1, "a" }
             }.ToImmutableSortedDictionary();
-            Assert.Equal(0, dictionary.Remove(1).Count);
+            Assert.Empty(dictionary.Remove(1));
         }
 
         [Fact]
@@ -371,7 +371,7 @@ namespace System.Collections.Immutable.Tests
                 { 1, "a" },
                 { 2, "b" }
             }.ToImmutableSortedDictionary();
-            Assert.Equal(1, dictionary.Remove(1).Count);
+            Assert.Single(dictionary.Remove(1));
         }
 
         [Fact]
@@ -382,7 +382,7 @@ namespace System.Collections.Immutable.Tests
                 { 1, "a" },
                 { 2, "b" }
             }.ToImmutableSortedDictionary();
-            Assert.Equal(1, dictionary.Remove(2).Count);
+            Assert.Single(dictionary.Remove(2));
         }
 
         [Fact]
@@ -392,15 +392,15 @@ namespace System.Collections.Immutable.Tests
             {
                 { 1, "a" }
             }.ToImmutableSortedDictionary();
-            Assert.Equal(1, dictionary.Remove(2).Count);
-            Assert.Equal(1, dictionary.Remove(-1).Count);
+            Assert.Single(dictionary.Remove(2));
+            Assert.Single(dictionary.Remove(-1));
         }
 
         [Fact]
         public void Remove_EmptyDictionary_DoesNothing()
         {
             ImmutableSortedDictionary<int, string> dictionary = ImmutableSortedDictionary<int, string>.Empty;
-            Assert.Equal(0, dictionary.Remove(2).Count);
+            Assert.Empty(dictionary.Remove(2));
         }
 
         [Fact]

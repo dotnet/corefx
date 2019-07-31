@@ -163,7 +163,7 @@ namespace System.Reflection.Tests
         public void GetFiles()
         {
             Assert.NotNull(typeof(AssemblyTests).Assembly.GetFiles());
-            Assert.Equal(1, typeof(AssemblyTests).Assembly.GetFiles().Length);
+            Assert.Single(typeof(AssemblyTests).Assembly.GetFiles());
             Assert.Equal(typeof(AssemblyTests).Assembly.GetFiles()[0].Name, typeof(AssemblyTests).Assembly.Location);
         }
 

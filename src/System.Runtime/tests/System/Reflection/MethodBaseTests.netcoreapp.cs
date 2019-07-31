@@ -19,7 +19,7 @@ namespace System.Reflection.Tests
             Assert.True(m.IsGenericMethod);
             Assert.False(m.IsGenericMethodDefinition);
             Assert.True(m.IsConstructedGenericMethod);
-            Assert.Equal(1, m.GetGenericArguments().Length);
+            Assert.Single(m.GetGenericArguments());
             Assert.Equal(typeof(byte), m.GetGenericArguments()[0]);
         }
 
@@ -33,7 +33,7 @@ namespace System.Reflection.Tests
             Assert.True(m.IsGenericMethod);
             Assert.True(m.IsGenericMethodDefinition);
             Assert.False(m.IsConstructedGenericMethod);
-            Assert.Equal(1, m.GetGenericArguments().Length);
+            Assert.Single(m.GetGenericArguments());
             Assert.Equal("T", m.GetGenericArguments()[0].Name);
         }
 

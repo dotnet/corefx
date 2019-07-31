@@ -273,7 +273,7 @@ namespace System.Threading.Tasks.Tests
         private static void VerifyAggregateException(AggregateException aggregatEx, Exception userException)
         {
             Assert.True(aggregatEx.InnerExceptions.Contains(userException));
-            Assert.Equal(1, aggregatEx.Flatten().InnerExceptions.Count);
+            Assert.Single(aggregatEx.Flatten().InnerExceptions);
         }
 
         #endregion

@@ -60,12 +60,12 @@ namespace System.ServiceModel.Syndication.Tests
             Assert.Equal(new Uri("http://value-ChannelBase-kind-relativeorabsolute-localName-channel-ns--end"), feed.BaseUri);
             Assert.Equal(new Uri("http://value-ImageUrl-kind-relativeorabsolute-localName-url-ns--end"), feed.ImageUrl);
             Assert.NotNull(feed.Links);
-            Assert.Equal(1, feed.Links.Count);
+            Assert.Single(feed.Links);
             Assert.Equal(new Uri("http://value-FeedLink-kind-relativeorabsolute-localName-link-ns--end"), feed.Links.First().Uri);
 
             Assert.True(feed.Items != null, "res.Items was null.");
-            Assert.Equal(1, feed.Items.Count());
-            Assert.Equal(1, feed.Items.First().Links.Count);
+            Assert.Single(feed.Items);
+            Assert.Single(feed.Items.First().Links);
             Assert.Equal(new Uri("http://value-itemlink-kind-relativeorabsolute-localName-link-ns--end"), feed.Items.First().Links.First().Uri);
         }
 
@@ -95,7 +95,7 @@ namespace System.ServiceModel.Syndication.Tests
             Assert.Equal(dto, feed.LastUpdatedTime);
 
             Assert.True(feed.Items != null, "res.Items was null.");
-            Assert.Equal(1, feed.Items.Count());
+            Assert.Single(feed.Items);
             Assert.Equal(dto, feed.Items.First().LastUpdatedTime);
         }
 
@@ -124,9 +124,9 @@ namespace System.ServiceModel.Syndication.Tests
             Assert.Equal(new Uri("http://value-FeedLogo-kind-relativeorabsolute-localName-logo-ns-http//www.w3.org/2005/Atom-end"), feed.ImageUrl);
 
             Assert.True(feed.Items != null, "res.Items was null.");
-            Assert.Equal(1, feed.Items.Count());
+            Assert.Single(feed.Items);
             Assert.NotNull(feed.Items.First().Links);
-            Assert.Equal(1, feed.Items.First().Links.Count);
+            Assert.Single(feed.Items.First().Links);
             Assert.Equal(new Uri("http://value-EntryLinkHref-kind-relativeorabsolute-localName-link-ns-http//www.w3.org/2005/Atom-end"), feed.Items.First().Links.First().Uri);
             Assert.Equal(new Uri("http://value-EntryContentSrc-kind-relativeorabsolute-localName-content-ns-http://www.w3.org/2005/Atom-end"), ((UrlSyndicationContent)feed.Items.First().Content).Url);
         }

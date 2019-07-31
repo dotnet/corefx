@@ -80,7 +80,7 @@ namespace System.Collections.ObjectModel.Tests
             ObservableCollection<string> col = new ObservableCollection<string>(anArray);
 
             col.Clear();
-            Assert.Equal(0, col.Count);
+            Assert.Empty(col);
             Assert.Empty(col);
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => col[1]);
@@ -555,7 +555,7 @@ namespace System.Collections.ObjectModel.Tests
             ExpectedOldStartingIndex = -1;
 
             collection.Clear();
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
             Assert.Equal(ExpectedCollectionChangedFired, NumCollectionChangedFired);
 
             foreach (var item in _expectedPropertyChanged)

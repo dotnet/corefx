@@ -17,7 +17,7 @@ namespace System.Reflection.Emit.Tests
             module.SetCustomAttribute(attributeConstructor, new byte[] { 01, 00, 05, 00, 00, 00 });
 
             object[] attributes = module.GetCustomAttributes().ToArray();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             Assert.True(attributes[0] is IntAllAttribute);
             Assert.Equal(5, ((IntAllAttribute)attributes[0])._i);
         }
@@ -46,7 +46,7 @@ namespace System.Reflection.Emit.Tests
             module.SetCustomAttribute(attributeBuilder);
 
             object[] attributes = module.GetCustomAttributes().ToArray();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             Assert.True(attributes[0] is IntAllAttribute);
             Assert.Equal(5, ((IntAllAttribute)attributes[0])._i);
         }

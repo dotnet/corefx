@@ -163,7 +163,7 @@ namespace System.Collections.Specialized.Tests
                 comparer.AssertCompared(originalSize, () => ld.Remove(element.Key));
                 Assert.False(ld.Contains(element.Key));
             });
-            Assert.Equal(0, ld.Count);
+            Assert.Empty(ld);
         }
         
         private static void Add(this ListDictionary ld, bool addViaSet, object key, object value)

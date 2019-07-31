@@ -25,7 +25,7 @@ namespace System.Net.NameResolution.Tests
             IPHostEntry entry = Dns.EndResolve(asyncObject);
 
             Assert.Equal("0.0.1.1", entry.HostName);
-            Assert.Equal(1, entry.AddressList.Length);
+            Assert.Single(entry.AddressList);
             Assert.Equal(IPAddress.Parse("0.0.1.1"), entry.AddressList[0]);
         }
 
@@ -52,7 +52,7 @@ namespace System.Net.NameResolution.Tests
             IPHostEntry entry = Dns.Resolve("0.0.1.1");
 
             Assert.Equal("0.0.1.1", entry.HostName);
-            Assert.Equal(1, entry.AddressList.Length);
+            Assert.Single(entry.AddressList);
             Assert.Equal(IPAddress.Parse("0.0.1.1"), entry.AddressList[0]);
         }
     }

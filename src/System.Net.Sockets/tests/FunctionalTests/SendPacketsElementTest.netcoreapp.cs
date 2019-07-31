@@ -15,7 +15,7 @@ namespace System.Net.Sockets.Tests
             // Elements with empty Buffers are ignored on Send
             SendPacketsElement element = new SendPacketsElement(new byte[0]);
             Assert.NotNull(element.Buffer);
-            Assert.Equal(0, element.Buffer.Length);
+            Assert.Empty(element.Buffer);
             Assert.Equal(0, element.Offset);
             Assert.Equal(0, element.Count);
             Assert.Equal(0, element.OffsetLong);
@@ -72,7 +72,7 @@ namespace System.Net.Sockets.Tests
             // Elements with empty Buffers are ignored on Send
             SendPacketsElement element = new SendPacketsElement(new byte[0], 0, 0);
             Assert.NotNull(element.Buffer);
-            Assert.Equal(0, element.Buffer.Length);
+            Assert.Empty(element.Buffer);
             Assert.Equal(0, element.Offset);
             Assert.Equal(0, element.Count);
             Assert.Equal(0, element.OffsetLong);

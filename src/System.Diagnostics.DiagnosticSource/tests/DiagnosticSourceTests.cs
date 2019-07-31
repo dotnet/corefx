@@ -31,14 +31,14 @@ namespace System.Diagnostics.Tests
                 using (listener.Subscribe(new ObserverToList<TelemData>(result)))
                 {
                     listener.Write("IntPayload", 5);
-                    Assert.Equal(1, result.Count);
+                    Assert.Single(result);
                     Assert.Equal("IntPayload", result[0].Key);
                     Assert.Equal(5, result[0].Value);
                 }   // unsubscribe
 
                 // Make sure that after unsubscribing, we don't get more events. 
                 source.Write("IntPayload", 5);
-                Assert.Equal(1, result.Count);
+                Assert.Single(result);
             }
         }
 
@@ -55,7 +55,7 @@ namespace System.Diagnostics.Tests
                 using (listener.Subscribe(new ObserverToList<TelemData>(result)))
                 {
                     source.Write("StructPayload", new Payload() { Name = "Hi", Id = 67 });
-                    Assert.Equal(1, result.Count);
+                    Assert.Single(result);
                     Assert.Equal("StructPayload", result[0].Key);
                     var payload = (Payload)result[0].Value;
 
@@ -64,7 +64,7 @@ namespace System.Diagnostics.Tests
                 }
 
                 source.Write("StructPayload", new Payload() { Name = "Hi", Id = 67 });
-                Assert.Equal(1, result.Count);
+                Assert.Single(result);
             }
         }
 
@@ -80,7 +80,7 @@ namespace System.Diagnostics.Tests
             var subscription = listener.Subscribe(observer);
 
             listener.Write("IntPayload", 5);
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             Assert.Equal("IntPayload", result[0].Key);
             Assert.Equal(5, result[0].Value);
             Assert.False(observer.Completed);
@@ -96,7 +96,7 @@ namespace System.Diagnostics.Tests
             subscription = listener.Subscribe(observer);
 
             listener.Write("IntPayload", 5);
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
         }
 
         /// <summary>
@@ -194,8 +194,8 @@ namespace System.Diagnostics.Tests
                         if (listener.IsEnabled("DataToFilterOut"))
                             listener.Write("DataToFilterOut", -1);
 
-                        Assert.Equal(0, subscriber1Result.Count);
-                        Assert.Equal(0, subscriber2Result.Count);
+                        Assert.Empty(subscriber1Result);
+                        Assert.Empty(subscriber2Result);
 
                         /****************************************************/
                         // If a Source does not use the IsEnabled, then every subscriber gets it.  
@@ -203,11 +203,11 @@ namespace System.Diagnostics.Tests
                         subscriber2Result.Clear();
                         listener.Write("UnfilteredData", 3);
 
-                        Assert.Equal(1, subscriber1Result.Count);
+                        Assert.Single(subscriber1Result);
                         Assert.Equal("UnfilteredData", subscriber1Result[0].Key);
                         Assert.Equal(3, (int)subscriber1Result[0].Value);
 
-                        Assert.Equal(1, subscriber2Result.Count);
+                        Assert.Single(subscriber2Result);
                         Assert.Equal("UnfilteredData", subscriber2Result[0].Key);
                         Assert.Equal(3, (int)subscriber2Result[0].Value);
 
@@ -219,12 +219,12 @@ namespace System.Diagnostics.Tests
                         if (listener.IsEnabled("DataForSubscriber1"))
                             listener.Write("DataForSubscriber1", 1);
 
-                        Assert.Equal(1, subscriber1Result.Count);
+                        Assert.Single(subscriber1Result);
                         Assert.Equal("DataForSubscriber1", subscriber1Result[0].Key);
                         Assert.Equal(1, (int)subscriber1Result[0].Value);
 
                         // Subscriber 2 happens to get it 
-                        Assert.Equal(1, subscriber2Result.Count);
+                        Assert.Single(subscriber2Result);
                         Assert.Equal("DataForSubscriber1", subscriber2Result[0].Key);
                         Assert.Equal(1, (int)subscriber2Result[0].Value);
 
@@ -235,11 +235,11 @@ namespace System.Diagnostics.Tests
                             listener.Write("DataForSubscriber2", 2);
 
                         // Subscriber 1 happens to get it 
-                        Assert.Equal(1, subscriber1Result.Count);
+                        Assert.Single(subscriber1Result);
                         Assert.Equal("DataForSubscriber2", subscriber1Result[0].Key);
                         Assert.Equal(2, (int)subscriber1Result[0].Value);
 
-                        Assert.Equal(1, subscriber2Result.Count);
+                        Assert.Single(subscriber2Result);
                         Assert.Equal("DataForSubscriber2", subscriber2Result[0].Key);
                         Assert.Equal(2, (int)subscriber2Result[0].Value);
                     }   // subscriber2 drops out
@@ -254,20 +254,20 @@ namespace System.Diagnostics.Tests
                     if (listener.IsEnabled("DataToFilterOut"))
                         listener.Write("DataToFilterOut", -1);
 
-                    Assert.Equal(0, subscriber1Result.Count);
-                    Assert.Equal(0, subscriber2Result.Count);
+                    Assert.Empty(subscriber1Result);
+                    Assert.Empty(subscriber2Result);
 
                     /****************************************************/
                     // If a Source does not use the IsEnabled, then every subscriber gets it.  
                     subscriber1Result.Clear();
                     listener.Write("UnfilteredData", 3);
 
-                    Assert.Equal(1, subscriber1Result.Count);
+                    Assert.Single(subscriber1Result);
                     Assert.Equal("UnfilteredData", subscriber1Result[0].Key);
                     Assert.Equal(3, (int)subscriber1Result[0].Value);
 
                     // Subscriber 2 has dropped out.
-                    Assert.Equal(0, subscriber2Result.Count);
+                    Assert.Empty(subscriber2Result);
 
                     /****************************************************/
                     // Filters not filter out everything, they are just a performance optimization.  
@@ -276,12 +276,12 @@ namespace System.Diagnostics.Tests
                     if (listener.IsEnabled("DataForSubscriber1"))
                         listener.Write("DataForSubscriber1", 1);
 
-                    Assert.Equal(1, subscriber1Result.Count);
+                    Assert.Single(subscriber1Result);
                     Assert.Equal("DataForSubscriber1", subscriber1Result[0].Key);
                     Assert.Equal(1, (int)subscriber1Result[0].Value);
 
                     // Subscriber 2 has dropped out.
-                    Assert.Equal(0, subscriber2Result.Count);
+                    Assert.Empty(subscriber2Result);
 
                     /****************************************************/
                     subscriber1Result.Clear();
@@ -289,9 +289,9 @@ namespace System.Diagnostics.Tests
                         listener.Write("DataForSubscriber2", 2);
 
                     // Subscriber 1 filters
-                    Assert.Equal(0, subscriber1Result.Count);
+                    Assert.Empty(subscriber1Result);
                     // Subscriber 2 has dropped out
-                    Assert.Equal(0, subscriber2Result.Count);
+                    Assert.Empty(subscriber2Result);
                 } // subscriber1 drops out  
 
                 /*********************************************************************/
@@ -304,8 +304,8 @@ namespace System.Diagnostics.Tests
                 if (listener.IsEnabled("DataToFilterOut"))
                     listener.Write("DataToFilterOut", -1);
 
-                Assert.Equal(0, subscriber1Result.Count);
-                Assert.Equal(0, subscriber2Result.Count);
+                Assert.Empty(subscriber1Result);
+                Assert.Empty(subscriber2Result);
 
                 /****************************************************/
                 // If a Source does not use the IsEnabled, then every subscriber gets it.  
@@ -313,8 +313,8 @@ namespace System.Diagnostics.Tests
                 listener.Write("UnfilteredData", 3);
 
                 // No one subscribing
-                Assert.Equal(0, subscriber1Result.Count);
-                Assert.Equal(0, subscriber2Result.Count);
+                Assert.Empty(subscriber1Result);
+                Assert.Empty(subscriber2Result);
 
                 /****************************************************/
                 // Filters not filter out everything, they are just a performance optimization.  
@@ -323,16 +323,16 @@ namespace System.Diagnostics.Tests
                     listener.Write("DataForSubscriber1", 1);
 
                 // No one subscribing
-                Assert.Equal(0, subscriber1Result.Count);
-                Assert.Equal(0, subscriber2Result.Count);
+                Assert.Empty(subscriber1Result);
+                Assert.Empty(subscriber2Result);
 
                 /****************************************************/
                 if (listener.IsEnabled("DataForSubscriber2"))
                     listener.Write("DataForSubscriber2", 2);
 
                 // No one subscribing
-                Assert.Equal(0, subscriber1Result.Count);
-                Assert.Equal(0, subscriber2Result.Count);
+                Assert.Empty(subscriber1Result);
+                Assert.Empty(subscriber2Result);
             }
         }
 
@@ -373,7 +373,7 @@ namespace System.Diagnostics.Tests
                             {
                                 source.Write(taskName, taskNum);
 
-                                Assert.Equal(1, result.Count);
+                                Assert.Single(result);
                                 Assert.Equal(taskName, result[0].Key);
                                 Assert.Equal(taskNum, result[0].Value);
 
@@ -386,7 +386,7 @@ namespace System.Diagnostics.Tests
 
                             // Send the notification again, to see if it now does NOT come through (count remains unchanged). 
                             source.Write(taskName, -1);
-                            Assert.Equal(1, result.Count);
+                            Assert.Single(result);
                         }, i);
                     }
                     Task.WaitAll(tasks);
@@ -510,7 +510,7 @@ namespace System.Diagnostics.Tests
         public void AllSubscriberStress(int numThreads, int numListenersPerThread)
         {
             // No listeners have been created yet
-            Assert.Equal(0, GetActiveListenersWithPrefix(nameof(AllSubscriberStress)).Count);
+            Assert.Empty(GetActiveListenersWithPrefix(nameof(AllSubscriberStress)));
 
             // Run lots of threads to add/remove listeners
             Task.WaitAll(Enumerable.Range(0, numThreads).Select(i => Task.Factory.StartNew(delegate
@@ -539,7 +539,7 @@ namespace System.Diagnostics.Tests
             }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
 
             // None of the created listeners should remain
-            Assert.Equal(0, GetActiveListenersWithPrefix(nameof(AllSubscriberStress)).Count);
+            Assert.Empty(GetActiveListenersWithPrefix(nameof(AllSubscriberStress)));
         }
 
         [Fact]
@@ -672,7 +672,7 @@ namespace System.Diagnostics.Tests
                         listener.Write("IntPayload", 5);
 
                     Assert.True(seenPredicate);
-                    Assert.Equal(1, result.Count);
+                    Assert.Single(result);
                     Assert.Equal("IntPayload", result[0].Key);
                     Assert.Equal(5, result[0].Value);
 

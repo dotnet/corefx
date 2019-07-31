@@ -46,7 +46,7 @@ namespace System.Collections.Specialized.Tests
 
         private static void VerifyCtor(HybridDictionary hybridDictionary, bool caseInsensitive)
         {
-            Assert.Equal(0, hybridDictionary.Count);
+            Assert.Empty(hybridDictionary);
             Assert.Equal(0, hybridDictionary.Keys.Count);
             Assert.Equal(0, hybridDictionary.Values.Count);
 

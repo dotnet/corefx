@@ -19,7 +19,7 @@ namespace System.Collections.Tests
             const int DefaultCapactiy = 32;
             var queue = new Queue();
 
-            Assert.Equal(0, queue.Count);
+            Assert.Empty(queue);
 
             for (int i = 0; i <= DefaultCapactiy; i++)
             {
@@ -137,7 +137,7 @@ namespace System.Collections.Tests
             {
                 queue2.Enqueue(1);
                 queue2.Clear();
-                Assert.Equal(0, queue2.Count);
+                Assert.Empty(queue2);
             });
         }
 
@@ -151,10 +151,10 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllQueueWrappers(queue1, queue2 =>
             {
                 queue2.Clear();
-                Assert.Equal(0, queue2.Count);
+                Assert.Empty(queue2);
 
                 queue2.Clear();
-                Assert.Equal(0, queue2.Count);
+                Assert.Empty(queue2);
             });
         }
         [Fact]
@@ -198,7 +198,7 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllQueueWrappers(queue1, queue2 =>
             {
                 Queue clone = (Queue)queue2.Clone();
-                Assert.Equal(0, clone.Count);
+                Assert.Empty(clone);
 
                 // Can change the clone queue
                 clone.Enqueue(500);
@@ -215,7 +215,7 @@ namespace System.Collections.Tests
                 queue2.Clear();
 
                 Queue clone = (Queue)queue2.Clone();
-                Assert.Equal(0, clone.Count);
+                Assert.Empty(clone);
 
                 // Can change clone queue
                 clone.Enqueue(500);
@@ -235,7 +235,7 @@ namespace System.Collections.Tests
                 }
 
                 Queue clone = (Queue)queue2.Clone();
-                Assert.Equal(0, queue2.Count);
+                Assert.Empty(queue2);
 
                 // Can change clone the queue
                 clone.Enqueue(500);
@@ -458,7 +458,7 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllQueueWrappers(queue1, queue2 =>
             {
                 queue2.Enqueue(null);
-                Assert.Equal(1, queue2.Count);
+                Assert.Single(queue2);
             });
         }
 
@@ -683,7 +683,7 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllQueueWrappers(queue1, queue2 =>
             {
                 object[] arr = queue2.ToArray();
-                Assert.Equal(1, arr.Length);
+                Assert.Single(arr);
                 Assert.Equal(1, arr[0]);
             });
         }
@@ -737,7 +737,7 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllQueueWrappers(queue1, queue2 =>
             {
                 object[] arr = queue2.ToArray();
-                Assert.Equal(0, arr.Length);
+                Assert.Empty(arr);
             });
         }
         
@@ -785,7 +785,7 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllQueueWrappers(queue1, queue2 =>
             {
                 queue2.TrimToSize();
-                Assert.Equal(0, queue2.Count);
+                Assert.Empty(queue2);
 
                 // Can change the queue after trimming
                 queue2.Enqueue(1);

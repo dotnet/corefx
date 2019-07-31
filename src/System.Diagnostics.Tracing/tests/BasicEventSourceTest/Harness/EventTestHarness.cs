@@ -78,7 +78,7 @@ namespace BasicEventSourceTests
                         else
                         {
                             // we only expect exactly one reply
-                            Assert.Equal(1, replies.Count);
+                            Assert.Single(replies);
                             currentTest.EventValidator(replies[0]);
                         }
                     }

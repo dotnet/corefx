@@ -68,7 +68,7 @@ namespace System.ConfigurationTests
         public void LockAttributesCollectionIsCorrectType()
         {
             var lockCollection = new SimpleElement().LockAttributes;
-            Assert.Equal(0, lockCollection.Count);
+            Assert.Empty(lockCollection);
             Assert.Equal("LockedAttributes", LockType.GetValue(lockCollection).ToString());
         }
 
@@ -76,7 +76,7 @@ namespace System.ConfigurationTests
         public void LockAllAttributesExceptCollectionIsCorrectType()
         {
             var lockCollection = new SimpleElement().LockAllAttributesExcept;
-            Assert.Equal(0, lockCollection.Count);
+            Assert.Empty(lockCollection);
             Assert.Equal("LockedExceptionList", LockType.GetValue(lockCollection).ToString());
         }
 
@@ -84,7 +84,7 @@ namespace System.ConfigurationTests
         public void LockElementsCollectionIsCorrectType()
         {
             var lockCollection = new SimpleElement().LockElements;
-            Assert.Equal(0, lockCollection.Count);
+            Assert.Empty(lockCollection);
             Assert.Equal("LockedElements", LockType.GetValue(lockCollection).ToString());
         }
 
@@ -92,7 +92,7 @@ namespace System.ConfigurationTests
         public void LockAllElementsExceptCollectionIsCorrectType()
         {
             var lockCollection = new SimpleElement().LockAllElementsExcept;
-            Assert.Equal(0, lockCollection.Count);
+            Assert.Empty(lockCollection);
             Assert.Equal("LockedElementsExceptionList", LockType.GetValue(lockCollection).ToString());
         }
 

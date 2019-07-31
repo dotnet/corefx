@@ -158,7 +158,7 @@ KoZIhvcNAwcECJ01qtX2EKx6oIAEEM7op+R2U3GQbYwlEj5X+h0AAAAAAAAAAAAA
 
             RecipientInfoCollection recipientInfos = cms.RecipientInfos;
 
-            Assert.Equal(1, recipientInfos.Count);
+            Assert.Single(recipientInfos);
             Assert.Equal(
                 SubjectIdentifierType.IssuerAndSerialNumber,
                 recipientInfos[0].RecipientIdentifier.Type);

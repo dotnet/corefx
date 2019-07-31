@@ -88,7 +88,7 @@ namespace System.Json.Tests
             JsonValue value = new JsonPrimitive(true);
             obj[key] = value;
 
-            Assert.Equal(1, obj.Count);
+            Assert.Single(obj);
             Assert.Same(value, obj[key]);
         }
 
@@ -116,7 +116,7 @@ namespace System.Json.Tests
             KeyValuePair<string, JsonValue> item = new KeyValuePair<string, JsonValue>("key", new JsonPrimitive(true));
             obj.Add(item);
 
-            Assert.Equal(1, obj.Count);
+            Assert.Single(obj);
             Assert.Equal(item.Key, obj.Keys.First());
             Assert.Equal(item.Value.ToString(), obj.Values.First().ToString());
         }
@@ -177,10 +177,10 @@ namespace System.Json.Tests
         {
             JsonObject obj = new JsonObject(new KeyValuePair<string, JsonValue>("key", new JsonPrimitive(true)));
             obj.Clear();
-            Assert.Equal(0, obj.Count);
+            Assert.Empty(obj);
 
             obj.Clear();
-            Assert.Equal(0, obj.Count);
+            Assert.Empty(obj);
         }
 
         [Fact]
@@ -231,11 +231,11 @@ namespace System.Json.Tests
             JsonObject obj = new JsonObject(item);
 
             obj.Remove(item.Key);
-            Assert.Equal(0, obj.Count);
+            Assert.Empty(obj);
             Assert.False(obj.ContainsKey(item.Key));
 
             obj.Remove(item.Key);
-            Assert.Equal(0, obj.Count);
+            Assert.Empty(obj);
         }
 
         [Fact]
@@ -253,11 +253,11 @@ namespace System.Json.Tests
             ICollection<KeyValuePair<string, JsonValue>> iCollection = obj;
 
             iCollection.Remove(item);
-            Assert.Equal(0, obj.Count);
+            Assert.Empty(obj);
             Assert.False(obj.ContainsKey(item.Key));
 
             iCollection.Remove(item);
-            Assert.Equal(0, obj.Count);
+            Assert.Empty(obj);
         }
 
         [Fact]

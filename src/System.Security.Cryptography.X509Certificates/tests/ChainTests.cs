@@ -184,17 +184,17 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 valid = chain.Build(sampleCert);
                 Assert.True(valid, "Chain built validly");
 
-                Assert.Equal(1, chain.ChainElements.Count);
+                Assert.Single(chain.ChainElements);
                 chainHolder.DisposeChainElements();
 
                 chain.Reset();
-                Assert.Equal(0, chain.ChainElements.Count);
+                Assert.Empty(chain.ChainElements);
 
                 // ChainPolicy did not reset (for desktop compat)
                 Assert.Equal(X509VerificationFlags.AllowUnknownCertificateAuthority, chain.ChainPolicy.VerificationFlags);
 
                 valid = chain.Build(sampleCert);
-                Assert.Equal(1, chain.ChainElements.Count);
+                Assert.Single(chain.ChainElements);
                 // This succeeds because ChainPolicy did not reset
                 Assert.True(valid, "Chain built validly after reset");
             }
@@ -642,8 +642,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // Since the network was enabled, we should get the whole chain.
                 Assert.Equal(3, onlineChain.ChainElements.Count);
 
-                Assert.Equal(0, onlineChain.ChainElements[0].ChainElementStatus.Length);
-                Assert.Equal(0, onlineChain.ChainElements[1].ChainElementStatus.Length);
+                Assert.Empty(onlineChain.ChainElements[0].ChainElementStatus);
+                Assert.Empty(onlineChain.ChainElements[1].ChainElementStatus);
 
                 // The root CA is not expected to be installed on everyone's machines,
                 // so allow for it to report UntrustedRoot, but nothing else..
@@ -651,7 +651,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 
                 if (rootElementStatus.Length != 0)
                 {
-                    Assert.Equal(1, rootElementStatus.Length);
+                    Assert.Single(rootElementStatus);
                     Assert.Equal(X509ChainStatusFlags.UntrustedRoot, rootElementStatus[0].Status);
                 }
 
@@ -887,7 +887,7 @@ tHP28fj0LUop/QFojSZPsaPAW6JvoQ0t4hd6WoyX6z7FsA==
                         // and PartialChain + AllowUnknownCertificateAuthority == pass.
                         Assert.True(valid, $"Chain is valid on execution {iter}");
 
-                        Assert.Equal(1, chain.ChainElements.Count);
+                        Assert.Single(chain.ChainElements);
 
                         Assert.Equal(
                             X509ChainStatusFlags.PartialChain,

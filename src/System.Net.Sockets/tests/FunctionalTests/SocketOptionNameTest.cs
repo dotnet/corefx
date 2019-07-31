@@ -263,7 +263,7 @@ namespace System.Net.Sockets.Tests
                 const int FailedTimeout = 10 * 1000 * 1000; // 10 seconds
                 var errorList = new List<Socket> { client };
                 Socket.Select(null, null, errorList, FailedTimeout);
-                Assert.Equal(1, errorList.Count);
+                Assert.Single(errorList);
 
                 // Get the last error and validate it's what's expected
                 int errorCode;

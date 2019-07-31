@@ -369,19 +369,19 @@ namespace System.Data.Tests
             string xs = string.Format(xsbase, constraints, string.Empty, string.Empty);
             var ds = new DataSet();
             ds.ReadXmlSchema(new StringReader(xs));
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
 
             // Constraints on another global element - just ignored
             xs = string.Format(xsbase, string.Empty, constraints, string.Empty);
             ds = new DataSet();
             ds.ReadXmlSchema(new StringReader(xs));
-            Assert.Equal(0, ds.Relations.Count);
+            Assert.Empty(ds.Relations);
 
             // Constraints on local element - just ignored
             xs = string.Format(xsbase, string.Empty, string.Empty, constraints);
             ds = new DataSet();
             ds.ReadXmlSchema(new StringReader(xs));
-            Assert.Equal(0, ds.Relations.Count);
+            Assert.Empty(ds.Relations);
         }
 
         [Fact]
@@ -901,9 +901,9 @@ namespace System.Data.Tests
                   </xs:element>
                 </xs:schema>"));
 
-            Assert.Equal(0, ds.Relations.Count);
-            Assert.Equal(1, ds.Tables[0].Constraints.Count);
-            Assert.Equal(1, ds.Tables[1].Constraints.Count);
+            Assert.Empty(ds.Relations);
+            Assert.Single(ds.Tables[0].Constraints);
+            Assert.Single(ds.Tables[1].Constraints);
             Assert.Equal("fk1", ds.Tables[1].Constraints[0].ConstraintName);
         }
 
@@ -943,12 +943,12 @@ namespace System.Data.Tests
                   </xs:annotation>
                 </xs:schema>"));
 
-            Assert.Equal(1, ds.Relations.Count);
+            Assert.Single(ds.Relations);
             Assert.Equal("rel", ds.Relations[0].RelationName);
             Assert.Equal(2, ds.Relations[0].ParentColumns.Length);
             Assert.Equal(2, ds.Relations[0].ChildColumns.Length);
-            Assert.Equal(0, ds.Tables[0].Constraints.Count);
-            Assert.Equal(0, ds.Tables[1].Constraints.Count);
+            Assert.Empty(ds.Tables[0].Constraints);
+            Assert.Empty(ds.Tables[1].Constraints);
 
             DataSetAssertion.AssertDataRelation("TestRel", ds.Relations[0], "rel", false, new string[] { "col 1", "col2" },
                     new string[] { "col1", "col  2" }, false, false);

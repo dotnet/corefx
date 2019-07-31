@@ -78,24 +78,24 @@ namespace System.Linq.Expressions.Tests
             var rocb = new ReadOnlyCollectionBuilder<int>();
 
             Assert.Equal(0, rocb.Capacity);
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => rocb.Capacity = -1);
 
             rocb.Capacity = 0;
 
             Assert.Equal(0, rocb.Capacity);
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
 
             rocb.Capacity = 1;
 
             Assert.Equal(1, rocb.Capacity);
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
 
             rocb.Capacity = 2;
 
             Assert.Equal(2, rocb.Capacity);
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace System.Linq.Expressions.Tests
             var rocb = new ReadOnlyCollectionBuilder<int>(new[] { 1 });
 
             Assert.Equal(1, rocb.Capacity);
-            Assert.Equal(1, rocb.Count);
+            Assert.Single(rocb);
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => { rocb.Capacity = 0; });
             AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => { rocb.Capacity = -1; });
@@ -112,12 +112,12 @@ namespace System.Linq.Expressions.Tests
             rocb.Capacity = 1;
 
             Assert.Equal(1, rocb.Capacity);
-            Assert.Equal(1, rocb.Count);
+            Assert.Single(rocb);
 
             rocb.Capacity = 2;
 
             Assert.Equal(2, rocb.Capacity);
-            Assert.Equal(1, rocb.Count);
+            Assert.Single(rocb);
         }
 
         [Fact]
@@ -126,17 +126,17 @@ namespace System.Linq.Expressions.Tests
             var rocb = new ReadOnlyCollectionBuilder<int>(new[] { 1 });
 
             Assert.Equal(1, rocb.Capacity);
-            Assert.Equal(1, rocb.Count);
+            Assert.Single(rocb);
 
             rocb.RemoveAt(0);
 
             Assert.Equal(1, rocb.Capacity);
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
 
             rocb.Capacity = 0;
 
             Assert.Equal(0, rocb.Capacity);
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
         }
 
         [Fact]
@@ -244,7 +244,7 @@ namespace System.Linq.Expressions.Tests
         {
             var rocb = new ReadOnlyCollectionBuilder<int>();
 
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => rocb.Insert(-1, 1));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => rocb.Insert(1, 1));
@@ -331,7 +331,7 @@ namespace System.Linq.Expressions.Tests
 
             rocb.RemoveAt(0);
 
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => rocb.RemoveAt(0));
         }
 
@@ -360,7 +360,7 @@ namespace System.Linq.Expressions.Tests
 
             Assert.True(rocb.Remove(2));
 
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
         }
 
         [Fact]
@@ -506,7 +506,7 @@ namespace System.Linq.Expressions.Tests
 
             rocb.Clear();
 
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
         }
 
         [Fact]
@@ -516,7 +516,7 @@ namespace System.Linq.Expressions.Tests
 
             rocb.Clear();
 
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
         }
 
         [Fact]
@@ -860,7 +860,7 @@ namespace System.Linq.Expressions.Tests
 
         private static void AssertEmpty<T>(ReadOnlyCollectionBuilder<T> rocb)
         {
-            Assert.Equal(0, rocb.Count);
+            Assert.Empty(rocb);
 
             Assert.False(rocb.Contains(default(T)));
             Assert.False(rocb.Remove(default(T)));

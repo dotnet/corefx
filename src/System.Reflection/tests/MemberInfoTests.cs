@@ -168,7 +168,7 @@ namespace System.Reflection.Tests
         public void GetCustomAttributesData()
         {
             MemberInfo[] m = typeof(MemberInfoTests).GetMember("SampleClass");
-            Assert.Equal(1, m.Count());
+            Assert.Single(m);
             foreach(CustomAttributeData cad in m[0].GetCustomAttributesData())
             {
                 if (cad.AttributeType == typeof(ComVisibleAttribute))
@@ -177,7 +177,7 @@ namespace System.Reflection.Tests
                     Assert.False(c.IsStatic);
                     Assert.Equal(typeof(ComVisibleAttribute), c.DeclaringType);
                     ParameterInfo[] p = c.GetParameters();
-                    Assert.Equal(1, p.Length);
+                    Assert.Single(p);
                     Assert.Equal(typeof(bool), p[0].ParameterType);
                     return;
                 }

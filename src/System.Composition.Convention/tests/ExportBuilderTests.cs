@@ -22,7 +22,7 @@ namespace System.Composition.Convention.Tests
             builder.ForType<FooImpl>().Export<IFoo>();
 
             Collections.Generic.IEnumerable<ExportAttribute> exports = builder.GetCustomAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             Assert.Equal(typeof(IFoo), exports.First().ContractType);
         }
 
@@ -33,7 +33,7 @@ namespace System.Composition.Convention.Tests
             builder.ForType(typeof(FooImpl)).Export((c) => c.AsContractType(typeof(IFoo)));
 
             Collections.Generic.IEnumerable<ExportAttribute> exports = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo()).Where<Attribute>(e => e is ExportAttribute).Cast<ExportAttribute>();
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
             Assert.Equal(typeof(IFoo), exports.First().ContractType);
         }
 
@@ -118,7 +118,7 @@ namespace System.Composition.Convention.Tests
         private static ExportAttribute GetExportAttribute(ConventionBuilder builder)
         {
             Attribute[] list = builder.GetDeclaredAttributes(typeof(FooImpl), typeof(FooImpl).GetTypeInfo());
-            Assert.Equal(1, list.Length);
+            Assert.Single(list);
             return list[0] as ExportAttribute;
         }
 

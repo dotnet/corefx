@@ -70,7 +70,7 @@ namespace System.Reflection.Metadata.Decoding.Tests
                             Assert.Equal(typeof(SByteEnum).FullName + "[]", value.NamedArguments[2].Type);
 
                             var array = (ImmutableArray<CustomAttributeTypedArgument<string>>)(value.NamedArguments[2].Value);
-                            Assert.Equal(1, array.Length);
+                            Assert.Single(array);
                             Assert.Equal(typeof(SByteEnum).FullName, array[0].Type);
                             Assert.Equal((sbyte)SByteEnum.Value, array[0].Value);
                             break;

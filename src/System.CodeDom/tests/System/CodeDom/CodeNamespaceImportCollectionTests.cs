@@ -109,7 +109,7 @@ namespace System.CodeDom.Tests
             collection.Add(value1);
 
             collection[0] = value2;
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
             Assert.Same(value2, collection[0]);
         }
 

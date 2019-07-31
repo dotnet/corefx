@@ -39,11 +39,11 @@ namespace System.Text.RegularExpressions.Tests
                     }
                     else if (i == 2)
                     {
-                        Assert.Equal(1, match.Groups[i].Captures.Count);
+                        Assert.Single(match.Groups[i].Captures);
                         Assert.Equal("cad", match.Groups[i].Captures[0].Value);
                     }
                 }
-                Assert.Equal(1, match.Captures.Count);
+                Assert.Single(match.Captures);
                 Assert.Equal("abracadabra", match.Captures[0].Value);
                 match = match.NextMatch();
             }
@@ -192,7 +192,7 @@ namespace System.Text.RegularExpressions.Tests
             Assert.Equal(expected.Index, match.Groups[0].Index);
             Assert.Equal(expected.Length, match.Groups[0].Length);
 
-            Assert.Equal(1, match.Captures.Count);
+            Assert.Single(match.Captures);
             Assert.Equal(expected.Value, match.Captures[0].Value);
             Assert.Equal(expected.Index, match.Captures[0].Index);
             Assert.Equal(expected.Length, match.Captures[0].Length);

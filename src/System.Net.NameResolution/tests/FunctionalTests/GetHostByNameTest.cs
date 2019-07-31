@@ -25,7 +25,7 @@ namespace System.Net.NameResolution.Tests
             IPHostEntry entry = Dns.EndGetHostByName(asyncObject);
 
             Assert.Equal(IPAddress.Loopback.ToString(), entry.HostName);
-            Assert.Equal(1, entry.AddressList.Length);
+            Assert.Single(entry.AddressList);
             Assert.Equal(IPAddress.Loopback, entry.AddressList[0]);
         }
 
@@ -88,7 +88,7 @@ namespace System.Net.NameResolution.Tests
             IPHostEntry entry = Dns.GetHostByName(IPAddress.Loopback.ToString());
 
             Assert.Equal(IPAddress.Loopback.ToString(), entry.HostName);
-            Assert.Equal(1, entry.AddressList.Length);
+            Assert.Single(entry.AddressList);
             Assert.Equal(IPAddress.Loopback, entry.AddressList[0]);
         }
 
@@ -98,7 +98,7 @@ namespace System.Net.NameResolution.Tests
             IPHostEntry entry = Dns.GetHostByName(IPAddress.IPv6Loopback.ToString());
 
             Assert.Equal(IPAddress.IPv6Loopback.ToString(), entry.HostName);
-            Assert.Equal(1, entry.AddressList.Length);
+            Assert.Single(entry.AddressList);
             Assert.Equal(IPAddress.IPv6Loopback, entry.AddressList[0]);
         }
 

@@ -291,7 +291,7 @@ namespace MonoTests.System.Configuration
             Assert.NotNull(my);
             Assert.False(my.IsModified, label.Get());
             Assert.NotNull(my.List);
-            Assert.Equal(0, my.List.Collection.Count);
+            Assert.Empty(my.List.Collection);
             Assert.False(my.List.IsModified, label.Get());
             label.LeaveScope();
         }
@@ -664,7 +664,7 @@ namespace MonoTests.System.Configuration
 
                 Assert.NotNull(my2.Test);
                 Assert.NotNull(my2.Test.DefaultCollection);
-                Assert.Equal(0, my2.Test.DefaultCollection.Count);
+                Assert.Empty(my2.Test.DefaultCollection);
                 label.LeaveScope();
 
                 my2.Test.DefaultCollection.AddElement();
@@ -721,7 +721,7 @@ namespace MonoTests.System.Configuration
 
                 Assert.NotNull(my2.Test);
                 Assert.NotNull(my2.Test.DefaultCollection);
-                Assert.Equal(0, my2.Test.DefaultCollection.Count);
+                Assert.Empty(my2.Test.DefaultCollection);
                 label.LeaveScope();
 
                 var element = my2.Test.DefaultCollection.AddElement();

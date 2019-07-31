@@ -88,7 +88,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             // RecipientInfo returns empty collection by fiat.
             EnvelopedCms ecms = new EnvelopedCms();
             RecipientInfoCollection recipients = ecms.RecipientInfos;
-            Assert.Equal(0, recipients.Count);
+            Assert.Empty(recipients);
         }
 
         [Fact]

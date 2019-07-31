@@ -51,9 +51,9 @@ namespace System.Linq.Tests
             var array = Enumerable.Range(1, 0).ToArray();
             var array2 = Enumerable.Range(int.MinValue, 0).ToArray();
             var array3 = Enumerable.Range(int.MaxValue, 0).ToArray();
-            Assert.Equal(0, array.Length);
-            Assert.Equal(0, array2.Length);
-            Assert.Equal(0, array3.Length);
+            Assert.Empty(array);
+            Assert.Empty(array2);
+            Assert.Empty(array3);
         }
 
         [Fact]

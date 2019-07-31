@@ -76,7 +76,7 @@ namespace System.ComponentModel.Composition
         {
             get 
             {
-                Assert.Equal(1, _importValues.Count);
+                Assert.Single(_importValues);
 
                 return _importValues.Values.First();
             }

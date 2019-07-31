@@ -83,7 +83,7 @@ namespace System.Collections.Specialized.Tests
             nameValueCollection.Set("name", "value1");
             nameValueCollection.Set("Name", "value2");
             nameValueCollection.Set("NAME", "value3");
-            Assert.Equal(1, nameValueCollection.Count);
+            Assert.Single(nameValueCollection);
             Assert.Equal("value3", nameValueCollection.Get("name"));
         }
     }

@@ -111,20 +111,20 @@ namespace System.Net.Http.Tests
         {
             _headers.TryAddWithoutValidation("Content-Type", "text/plain; charset=utf-8; custom=value, other/type");
             Assert.Null(_headers.ContentType);
-            Assert.Equal(1, _headers.GetValues("Content-Type").Count());
+            Assert.Single(_headers.GetValues("Content-Type"));
             Assert.Equal("text/plain; charset=utf-8; custom=value, other/type",
                 _headers.GetValues("Content-Type").First());
 
             _headers.Clear();
             _headers.TryAddWithoutValidation("Content-Type", ",text/plain"); // leading separator
             Assert.Null(_headers.ContentType);
-            Assert.Equal(1, _headers.GetValues("Content-Type").Count());
+            Assert.Single(_headers.GetValues("Content-Type"));
             Assert.Equal(",text/plain", _headers.GetValues("Content-Type").First());
 
             _headers.Clear();
             _headers.TryAddWithoutValidation("Content-Type", "text/plain,"); // trailing separator
             Assert.Null(_headers.ContentType);
-            Assert.Equal(1, _headers.GetValues("Content-Type").Count());
+            Assert.Single(_headers.GetValues("Content-Type"));
             Assert.Equal("text/plain,", _headers.GetValues("Content-Type").First());
         }
 
@@ -182,13 +182,13 @@ namespace System.Net.Http.Tests
         {
             _headers.TryAddWithoutValidation("Content-Location", " http://example.com http://other");
             Assert.Null(_headers.GetParsedValues(KnownHeaders.ContentLocation.Descriptor));
-            Assert.Equal(1, _headers.GetValues("Content-Location").Count());
+            Assert.Single(_headers.GetValues("Content-Location"));
             Assert.Equal(" http://example.com http://other", _headers.GetValues("Content-Location").First());
 
             _headers.Clear();
             _headers.TryAddWithoutValidation("Content-Location", "http://host /other");
             Assert.Null(_headers.GetParsedValues(KnownHeaders.ContentLocation.Descriptor));
-            Assert.Equal(1, _headers.GetValues("Content-Location").Count());
+            Assert.Single(_headers.GetValues("Content-Location"));
             Assert.Equal("http://host /other", _headers.GetValues("Content-Location").First());
         }
 
@@ -234,7 +234,7 @@ namespace System.Net.Http.Tests
             _headers.TryAddWithoutValidation("Content-Encoding", "custom1 custom2"); // no separator
 
             Assert.Equal(0, _headers.ContentEncoding.Count);
-            Assert.Equal(1, _headers.GetValues("Content-Encoding").Count());
+            Assert.Single(_headers.GetValues("Content-Encoding"));
             Assert.Equal("custom1 custom2", _headers.GetValues("Content-Encoding").First());
         }
 
@@ -283,7 +283,7 @@ namespace System.Net.Http.Tests
             _headers.TryAddWithoutValidation("Content-Language", "custom1 custom2"); // no separator
 
             Assert.Equal(0, _headers.ContentLanguage.Count);
-            Assert.Equal(1, _headers.GetValues("Content-Language").Count());
+            Assert.Single(_headers.GetValues("Content-Language"));
             Assert.Equal("custom1 custom2", _headers.GetValues("Content-Language").First());
         }
 
@@ -320,13 +320,13 @@ namespace System.Net.Http.Tests
         {
             _headers.TryAddWithoutValidation("Content-MD5", "AQ--");
             Assert.Null(_headers.GetParsedValues(KnownHeaders.ContentMD5.Descriptor));
-            Assert.Equal(1, _headers.GetValues("Content-MD5").Count());
+            Assert.Single(_headers.GetValues("Content-MD5"));
             Assert.Equal("AQ--", _headers.GetValues("Content-MD5").First());
 
             _headers.Clear();
             _headers.TryAddWithoutValidation("Content-MD5", "AQ==, CD");
             Assert.Null(_headers.GetParsedValues(KnownHeaders.ContentMD5.Descriptor));
-            Assert.Equal(1, _headers.GetValues("Content-MD5").Count());
+            Assert.Single(_headers.GetValues("Content-MD5"));
             Assert.Equal("AQ==, CD", _headers.GetValues("Content-MD5").First());
         }
 
@@ -372,7 +372,7 @@ namespace System.Net.Http.Tests
             _headers.TryAddWithoutValidation("Allow", "custom1 custom2"); // no separator
 
             Assert.Equal(0, _headers.Allow.Count);
-            Assert.Equal(1, _headers.GetValues("Allow").Count());
+            Assert.Single(_headers.GetValues("Allow"));
             Assert.Equal("custom1 custom2", _headers.GetValues("Allow").First());
         }
 
@@ -406,13 +406,13 @@ namespace System.Net.Http.Tests
         {
             _headers.TryAddWithoutValidation("Expires", " Sun, 06 Nov 1994 08:49:37 GMT ,");
             Assert.Null(_headers.GetParsedValues(KnownHeaders.Expires.Descriptor));
-            Assert.Equal(1, _headers.GetValues("Expires").Count());
+            Assert.Single(_headers.GetValues("Expires"));
             Assert.Equal(" Sun, 06 Nov 1994 08:49:37 GMT ,", _headers.GetValues("Expires").First());
 
             _headers.Clear();
             _headers.TryAddWithoutValidation("Expires", " Sun, 06 Nov ");
             Assert.Null(_headers.GetParsedValues(KnownHeaders.Expires.Descriptor));
-            Assert.Equal(1, _headers.GetValues("Expires").Count());
+            Assert.Single(_headers.GetValues("Expires"));
             Assert.Equal(" Sun, 06 Nov ", _headers.GetValues("Expires").First());
         }
 
@@ -446,13 +446,13 @@ namespace System.Net.Http.Tests
         {
             _headers.TryAddWithoutValidation("Last-Modified", " Sun, 06 Nov 1994 08:49:37 GMT ,");
             Assert.Null(_headers.GetParsedValues(KnownHeaders.LastModified.Descriptor));
-            Assert.Equal(1, _headers.GetValues("Last-Modified").Count());
+            Assert.Single(_headers.GetValues("Last-Modified"));
             Assert.Equal(" Sun, 06 Nov 1994 08:49:37 GMT ,", _headers.GetValues("Last-Modified").First());
 
             _headers.Clear();
             _headers.TryAddWithoutValidation("Last-Modified", " Sun, 06 Nov ");
             Assert.Null(_headers.GetParsedValues(KnownHeaders.LastModified.Descriptor));
-            Assert.Equal(1, _headers.GetValues("Last-Modified").Count());
+            Assert.Single(_headers.GetValues("Last-Modified"));
             Assert.Equal(" Sun, 06 Nov ", _headers.GetValues("Last-Modified").First());
         }
 

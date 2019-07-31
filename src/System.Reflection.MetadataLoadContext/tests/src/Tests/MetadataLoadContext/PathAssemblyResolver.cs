@@ -86,7 +86,7 @@ namespace System.Reflection.Tests
 
                 using (MetadataLoadContext lc = new MetadataLoadContext(resolver, TestData.s_PhonyCoreAssemblySimpleName))
                 {
-                    Assert.Equal(1, lc.GetAssemblies().Count());
+                    Assert.Single(lc.GetAssemblies());
 
                     Assembly assembly = lc.LoadFromAssemblyName(TestData.s_SimpleVersionedShortName);
                     Assert.NotNull(assembly);
@@ -190,7 +190,7 @@ namespace System.Reflection.Tests
 
                 using (var lc = new MetadataLoadContext(resolver, TestData.s_PhonyCoreAssemblyFullName))
                 {
-                    Assert.Equal(1, lc.GetAssemblies().Count());
+                    Assert.Single(lc.GetAssemblies());
 
                     Assembly a1 = lc.LoadFromAssemblyName(TestData.s_SimpleVersionedShortName);
                     Assembly a2 = lc.LoadFromAssemblyName(TestData.s_SimpleSignedVersioned100FullName);
@@ -213,7 +213,7 @@ namespace System.Reflection.Tests
 
                 using (var lc = new MetadataLoadContext(resolver, TestData.s_PhonyCoreAssemblyFullName))
                 {
-                    Assert.Equal(1, lc.GetAssemblies().Count());
+                    Assert.Single(lc.GetAssemblies());
 
                     // Using simple name will find first assembly that matches.
                     Assembly a1 = lc.LoadFromAssemblyName(TestData.s_SimpleVersionedShortName);
@@ -257,7 +257,7 @@ namespace System.Reflection.Tests
                 var resolver = new PathAssemblyResolver(new string[] { core.Path, tf1.Path, tf2.Path });
                 using (var lc = new MetadataLoadContext(resolver, TestData.s_PhonyCoreAssemblyFullName))
                 {
-                    Assert.Equal(1, lc.GetAssemblies().Count());
+                    Assert.Single(lc.GetAssemblies());
 
                     Assembly a1 = lc.LoadFromAssemblyName(TestData.s_SimpleVersionedShortName);
                     Assert.Equal(3, lc.GetAssemblies().Count());
@@ -313,7 +313,7 @@ namespace System.Reflection.Tests
 
                 using (var lc = new MetadataLoadContext(resolver, TestData.s_PhonyCoreAssemblyFullName))
                 {
-                    Assert.Equal(1, lc.GetAssemblies().Count());
+                    Assert.Single(lc.GetAssemblies());
 
                     // These are treated as different since one contains a PublicKeyToken and one does not.
                     Assembly a1 = lc.LoadFromAssemblyName(TestData.s_SimpleUnsignedVersioned100FullName);

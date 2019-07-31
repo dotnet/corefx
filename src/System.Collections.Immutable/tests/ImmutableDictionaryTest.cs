@@ -35,7 +35,7 @@ namespace System.Collections.Immutable.Tests
             Assert.True(map.ContainsKey("Johnny"));
             Assert.False(map.ContainsKey("johnny"));
             var newMap = map.WithComparers(StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(1, newMap.Count);
+            Assert.Single(newMap);
             Assert.True(newMap.ContainsKey("Johnny"));
             Assert.True(newMap.ContainsKey("johnny")); // because it's case insensitive
         }
@@ -104,32 +104,32 @@ namespace System.Collections.Immutable.Tests
             var valueComparer = StringComparer.CurrentCulture;
 
             var dictionary = ImmutableDictionary.Create<string, string>();
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
             Assert.Same(EqualityComparer<string>.Default, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = ImmutableDictionary.Create<string, string>(keyComparer);
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = ImmutableDictionary.Create(keyComparer, valueComparer);
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(valueComparer, dictionary.ValueComparer);
 
             dictionary = ImmutableDictionary.CreateRange(pairs);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(EqualityComparer<string>.Default, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = ImmutableDictionary.CreateRange(keyComparer, pairs);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = ImmutableDictionary.CreateRange(keyComparer, valueComparer, pairs);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(valueComparer, dictionary.ValueComparer);
         }
@@ -142,36 +142,36 @@ namespace System.Collections.Immutable.Tests
             var valueComparer = StringComparer.CurrentCulture;
 
             ImmutableDictionary<string, string> dictionary = pairs.ToImmutableDictionary();
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(EqualityComparer<string>.Default, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = pairs.ToImmutableDictionary(keyComparer);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = pairs.ToImmutableDictionary(keyComparer, valueComparer);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(valueComparer, dictionary.ValueComparer);
 
             dictionary = pairs.ToImmutableDictionary(p => p.Key.ToUpperInvariant(), p => p.Value.ToLowerInvariant());
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Equal("A", dictionary.Keys.Single());
             Assert.Equal("b", dictionary.Values.Single());
             Assert.Same(EqualityComparer<string>.Default, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = pairs.ToImmutableDictionary(p => p.Key.ToUpperInvariant(), p => p.Value.ToLowerInvariant(), keyComparer);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Equal("A", dictionary.Keys.Single());
             Assert.Equal("b", dictionary.Values.Single());
             Assert.Same(keyComparer, dictionary.KeyComparer);
             Assert.Same(EqualityComparer<string>.Default, dictionary.ValueComparer);
 
             dictionary = pairs.ToImmutableDictionary(p => p.Key.ToUpperInvariant(), p => p.Value.ToLowerInvariant(), keyComparer, valueComparer);
-            Assert.Equal(1, dictionary.Count);
+            Assert.Single(dictionary);
             Assert.Equal("A", dictionary.Keys.Single());
             Assert.Equal("b", dictionary.Values.Single());
             Assert.Same(keyComparer, dictionary.KeyComparer);
@@ -243,7 +243,7 @@ namespace System.Collections.Immutable.Tests
                 .Add("a", "1").Add("A", "1");
             map = map.WithComparers(StringComparer.OrdinalIgnoreCase);
             Assert.Same(StringComparer.OrdinalIgnoreCase, map.KeyComparer);
-            Assert.Equal(1, map.Count);
+            Assert.Single(map);
             Assert.True(map.ContainsKey("a"));
             Assert.Equal("1", map["a"]);
 

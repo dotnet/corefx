@@ -58,7 +58,7 @@ namespace System.IO.Compression.Tests
             using (Stream stream = await StreamHelpers.CreateTempCopyStream(compat(zipName)))
             using (ZipArchive archive = new ZipArchive(stream))
             {
-                Assert.Equal(1, archive.Entries.Count);
+                Assert.Single(archive.Entries);
                 ZipArchiveEntry entry = archive.Entries[0];
                 Assert.Equal(fileName, entry.Name);
             }

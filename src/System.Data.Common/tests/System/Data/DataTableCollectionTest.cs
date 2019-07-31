@@ -144,7 +144,7 @@ namespace System.Data.Tests
         {
             DataTableCollection tbcol = _dataset[0].Tables;
             tbcol.Add(_tables[0]);
-            Assert.Equal(1, tbcol.Count);
+            Assert.Single(tbcol);
             tbcol.Add(_tables[1]);
             Assert.Equal(2, tbcol.Count);
         }
@@ -227,11 +227,11 @@ namespace System.Data.Tests
             DataTableCollection tbcol = _dataset[0].Tables;
             tbcol.Add(_tables[0]);
             tbcol.Clear();
-            Assert.Equal(0, tbcol.Count);
+            Assert.Empty(tbcol);
 
             tbcol.AddRange(new DataTable[] { _tables[0], _tables[1] });
             tbcol.Clear();
-            Assert.Equal(0, tbcol.Count);
+            Assert.Empty(tbcol);
         }
         [Fact]
         public void Contains()
@@ -341,9 +341,9 @@ namespace System.Data.Tests
             {
             }
             tbcol.RemoveAt(1);
-            Assert.Equal(1, tbcol.Count);
+            Assert.Single(tbcol);
             tbcol.RemoveAt(0);
-            Assert.Equal(0, tbcol.Count);
+            Assert.Empty(tbcol);
         }
 
         [Fact]

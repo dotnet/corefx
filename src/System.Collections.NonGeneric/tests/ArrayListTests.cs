@@ -16,7 +16,7 @@ namespace System.Collections.Tests
         public static void Ctor_Empty()
         {
             var arrList = new ArrayList();
-            Assert.Equal(0, arrList.Count);
+            Assert.Empty(arrList);
             Assert.Equal(0, arrList.Capacity);
 
             Assert.False(arrList.IsFixedSize);
@@ -66,7 +66,7 @@ namespace System.Collections.Tests
             ICollection arrListCollection = new ArrayList();
             ArrayList arrList = new ArrayList(arrListCollection);
 
-            Assert.Equal(0, arrList.Count);
+            Assert.Empty(arrList);
 
             Assert.False(arrList.IsFixedSize);
             Assert.False(arrList.IsReadOnly);
@@ -159,7 +159,7 @@ namespace System.Collections.Tests
             ArrayList arrList = Helpers.CreateIntArrayList(100);
             ArrayList adapter = ArrayList.Adapter(arrList);
             arrList.Clear();
-            Assert.Equal(0, adapter.Count);
+            Assert.Empty(adapter);
         }
 
         [Fact]
@@ -418,7 +418,7 @@ namespace System.Collections.Tests
                 {
                     arrList2.RemoveAt(0);
                 }
-                Assert.Equal(0, arrList2.Count);
+                Assert.Empty(arrList2);
             });
         }
 
@@ -800,7 +800,7 @@ namespace System.Collections.Tests
             {
                 var arrCopy = new string[0];
                 arrList2.CopyTo(arrCopy, 0);
-                Assert.Equal(0, arrCopy.Length);
+                Assert.Empty(arrCopy);
             });
         }
 
@@ -1315,7 +1315,7 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllArrayListWrappers(arrList1, arrList2 =>
             {
                 ArrayList range = arrList2.GetRange(0, 0);
-                Assert.Equal(0, range.Count);
+                Assert.Empty(range);
             });
         }
 
@@ -2035,7 +2035,7 @@ namespace System.Collections.Tests
             arrList.Remove(null);
             arrList.Remove(null);
 
-            Assert.Equal(0, arrList.Count);
+            Assert.Empty(arrList);
         }
 
         [Fact]
@@ -2062,7 +2062,7 @@ namespace System.Collections.Tests
         public static void Repeat_ZeroCount()
         {
             ArrayList arrList = ArrayList.Repeat(5, 0);
-            Assert.Equal(0, arrList.Count);
+            Assert.Empty(arrList);
         }
 
         [Fact]
@@ -2106,7 +2106,7 @@ namespace System.Collections.Tests
                 }
 
                 arrList2.Reverse();
-                Assert.Equal(0, arrList2.Count);
+                Assert.Empty(arrList2);
             });
         }
 
@@ -2126,7 +2126,7 @@ namespace System.Collections.Tests
                 arrList2.Reverse();
 
                 Assert.Equal(0, arrList2[0]);
-                Assert.Equal(1, arrList2.Count);
+                Assert.Single(arrList2);
             });
         }
 
@@ -2228,7 +2228,7 @@ namespace System.Collections.Tests
                 }
 
                 arrList2.Sort();
-                Assert.Equal(0, arrList2.Count);
+                Assert.Empty(arrList2);
             });
         }
 
@@ -2245,7 +2245,7 @@ namespace System.Collections.Tests
                 }
 
                 arrList2.Sort();
-                Assert.Equal(1, arrList2.Count);
+                Assert.Single(arrList2);
             });
         }
 
@@ -2434,10 +2434,10 @@ namespace System.Collections.Tests
             Helpers.PerformActionOnAllArrayListWrappers(arrList1, arrList2 =>
             {
                 object[] arr1 = arrList2.ToArray();
-                Assert.Equal(0, arr1.Length);
+                Assert.Empty(arr1);
 
                 Array arr2 = arrList2.ToArray(typeof(object));
-                Assert.Equal(0, arr2.Length);
+                Assert.Empty(arr2);
             });
         }
 

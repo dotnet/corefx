@@ -60,7 +60,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
 
             Assert.True(info.VerifyMac(password));
             ReadOnlyCollection<Pkcs12SafeContents> authSafe = info.AuthenticatedSafe;
-            Assert.Equal(1, authSafe.Count);
+            Assert.Single(authSafe);
 
             Pkcs12SafeContents readContents = authSafe[0];
 
@@ -96,7 +96,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
                 readContents.ConfidentialityMode);
 
             List<Pkcs12SafeBag> bags = readContents.GetBags().ToList();
-            Assert.Equal(1, bags.Count);
+            Assert.Single(bags);
             Pkcs12SecretBag secretBag = Assert.IsType<Pkcs12SecretBag>(bags[0]);
 
             Assert.Equal(s_zeroOid.Value, secretBag.GetSecretType().Value);
@@ -252,7 +252,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             byte[] encoded1 = builder1.Encode();
             Pkcs12Info info = Pkcs12Info.Decode(encoded1, out _, skipCopy: true);
             Assert.Equal(Pkcs12IntegrityMode.None, info.IntegrityMode);
-            Assert.Equal(1, info.AuthenticatedSafe.Count);
+            Assert.Single(info.AuthenticatedSafe);
 
             builder2.AddSafeContentsUnencrypted(info.AuthenticatedSafe[0]);
             builder2.SealWithoutIntegrity();
@@ -276,7 +276,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             byte[] encoded = builder1.Encode();
             Pkcs12Info info = Pkcs12Info.Decode(encoded, out _, skipCopy: true);
             Assert.Equal(Pkcs12IntegrityMode.None, info.IntegrityMode);
-            Assert.Equal(1, info.AuthenticatedSafe.Count);
+            Assert.Single(info.AuthenticatedSafe);
 
             AssertExtensions.Throws<ArgumentException>(
                 "safeContents",
@@ -408,7 +408,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             {
                 X509Certificate2Collection collection = new X509Certificate2Collection();
                 collection.Import(encoded, password, X509KeyStorageFlags.DefaultKeySet);
-                Assert.Equal(0, collection.Count);
+                Assert.Empty(collection);
             }
         }
 
@@ -463,7 +463,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             {
                 X509Certificate2Collection collection = new X509Certificate2Collection();
                 collection.Import(encoded, password, X509KeyStorageFlags.DefaultKeySet);
-                Assert.Equal(0, collection.Count);
+                Assert.Empty(collection);
             }
         }
 

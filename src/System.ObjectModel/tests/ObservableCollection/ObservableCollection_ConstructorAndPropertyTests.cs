@@ -22,7 +22,7 @@ namespace System.Collections.ObjectModel.Tests
         public static void ParameterlessConstructorTest()
         {
             var col = new ObservableCollection<string>();
-            Assert.Equal(0, col.Count);
+            Assert.Empty(col);
             Assert.Empty(col);
         }
 
@@ -69,7 +69,7 @@ namespace System.Collections.ObjectModel.Tests
         public static void IEnumerableConstructorTest_Empty()
         {
             var col = new ObservableCollection<string>(new string[] { });
-            Assert.Equal(0, col.Count);
+            Assert.Empty(col);
             Assert.Empty(col);
         }
 

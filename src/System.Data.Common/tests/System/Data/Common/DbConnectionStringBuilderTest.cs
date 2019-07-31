@@ -131,13 +131,13 @@ namespace System.Data.Tests.Common
             sb.ConnectionString = "A=B";
             Assert.True(sb.ContainsKey("A"));
             Assert.Equal("a=B", sb.ConnectionString);
-            Assert.Equal(1, sb.Count);
+            Assert.Single(sb);
             Assert.Equal(1, sb.Keys.Count);
 
             sb.ConnectionString = null;
             Assert.False(sb.ContainsKey("A"));
             Assert.Equal(string.Empty, sb.ConnectionString);
-            Assert.Equal(0, sb.Count);
+            Assert.Empty(sb);
             Assert.Equal(0, sb.Keys.Count);
 
             sb = new DbConnectionStringBuilder();
@@ -145,7 +145,7 @@ namespace System.Data.Tests.Common
             sb.ConnectionString = string.Empty;
             Assert.False(sb.ContainsKey("A"));
             Assert.Equal(string.Empty, sb.ConnectionString);
-            Assert.Equal(0, sb.Count);
+            Assert.Empty(sb);
             Assert.Equal(0, sb.Keys.Count);
 
             sb = new DbConnectionStringBuilder();
@@ -153,7 +153,7 @@ namespace System.Data.Tests.Common
             sb.ConnectionString = "\r ";
             Assert.False(sb.ContainsKey("A"));
             Assert.Equal(string.Empty, sb.ConnectionString);
-            Assert.Equal(0, sb.Count);
+            Assert.Empty(sb);
             Assert.Equal(0, sb.Keys.Count);
         }
 
@@ -171,7 +171,7 @@ namespace System.Data.Tests.Common
                 sb.ConnectionString = "A=";
                 Assert.False(sb.ContainsKey("A"));
                 Assert.Equal(string.Empty, sb.ConnectionString);
-                Assert.Equal(0, sb.Count);
+                Assert.Empty(sb);
             }
         }
 
@@ -194,7 +194,7 @@ namespace System.Data.Tests.Common
                 Assert.False(sb.ContainsKey("Dbq"));
                 Assert.False(sb.ContainsKey("Driver"));
                 Assert.False(sb.ContainsKey("Port"));
-                Assert.Equal(0, sb.Count);
+                Assert.Empty(sb);
                 Assert.Equal(0, sb.Keys.Count);
                 Assert.Equal(0, sb.Values.Count);
             }

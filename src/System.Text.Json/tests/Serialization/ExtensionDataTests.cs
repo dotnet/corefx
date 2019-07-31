@@ -352,7 +352,7 @@ namespace System.Text.Json.Serialization.Tests
 
             ClassWithReference obj = JsonSerializer.Deserialize<ClassWithReference>(json);
             Assert.IsType<JsonElement>(obj.MyOverflow["MyIntMissing"]);
-            Assert.Equal(1, obj.MyOverflow.Count);
+            Assert.Single(obj.MyOverflow);
             Assert.Equal(2, obj.MyOverflow["MyIntMissing"].GetInt32());
 
             ClassWithExtensionProperty child = obj.MyReference;

@@ -44,13 +44,13 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             Assert.Equal(Pkcs12IntegrityMode.None, info.IntegrityMode);
 
             ReadOnlyCollection<Pkcs12SafeContents> allContents = info.AuthenticatedSafe;
-            Assert.Equal(1, allContents.Count);
+            Assert.Single(allContents);
 
             Pkcs12SafeContents contents = allContents[0];
             Assert.Equal(Pkcs12ConfidentialityMode.None, contents.ConfidentialityMode);
 
             List<Pkcs12SafeBag> bags = contents.GetBags().ToList();
-            Assert.Equal(1, bags.Count);
+            Assert.Single(bags);
 
             Pkcs12SafeBag bag = bags[0];
             Assert.IsNotType<Pkcs12CertBag>(bag);

@@ -531,7 +531,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     Assert.Equal(e.Message, e.InnerException.Message);
                 }
 
-                Assert.Equal(0, store.Certificates.Count);
+                Assert.Empty(store.Certificates);
             }
         }
 #if Unix

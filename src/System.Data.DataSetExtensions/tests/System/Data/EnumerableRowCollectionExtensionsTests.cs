@@ -46,7 +46,7 @@ namespace System.Data
             var filtered = source.Where(row => "two".Equals(row.ItemArray[0]));
 
             // Check that only one row matches predicate condition
-            Assert.Equal(1, filtered.Count());
+            Assert.Single(filtered);
 
             // Check that matching row is the same object as the second data row
             Assert.Same(two, filtered.First());

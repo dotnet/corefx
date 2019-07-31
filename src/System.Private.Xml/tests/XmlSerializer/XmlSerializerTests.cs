@@ -1444,7 +1444,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         {
             var derivedClassInstance = (DerivedClass1)xmlSerializer.Deserialize(reader);
             Assert.NotNull(derivedClassInstance.Prop);
-            Assert.Equal(1, derivedClassInstance.Prop.Count<DateTime>());
+            Assert.Single(derivedClassInstance.Prop);
             Assert.Equal(dateTime, derivedClassInstance.Prop.ElementAt(0));
         }
     }

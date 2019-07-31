@@ -322,7 +322,7 @@ namespace System.ComponentModel.Composition
         {
                 var cat = new DirectoryCatalog(TemporaryFileCopier.GetTemporaryDirectory());
 
-                Assert.Equal(0, cat.LoadedFiles.Count);
+                Assert.Empty(cat.LoadedFiles);
         }
 
         [Fact]

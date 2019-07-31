@@ -46,7 +46,7 @@ namespace System.UnitTesting
                 Assert.True(removed);
             }
 
-            Assert.Equal(0, actualList.Count);
+            Assert.Empty(actualList);
         }
         
         public static void AreEqual<TKey, TValue>(IDictionary<TKey, TValue> expected, IDictionary<TKey, TValue> actual)

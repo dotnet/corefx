@@ -20,7 +20,7 @@ namespace System.Security.Cryptography.Encoding.Tests
         public void TestOidCollection()
         {
             var c = new OidCollection();
-            Assert.Equal(0, c.Count);
+            Assert.Empty(c);
 
             var o0 = new Oid(Sha1Oid, Sha1Name);
             Assert.Equal(0, c.Add(o0));

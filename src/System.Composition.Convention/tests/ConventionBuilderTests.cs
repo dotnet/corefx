@@ -66,12 +66,12 @@ namespace System.Composition.Convention.Tests
             ConstructorInfo constructor2 = fooImplWithConstructorsTypeInfo.DeclaredConstructors.Where(c => c.GetParameters().Length == 1).Single();
             ConstructorInfo constructor3 = fooImplWithConstructorsTypeInfo.DeclaredConstructors.Where(c => c.GetParameters().Length == 2).Single();
 
-            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1).Count());
-            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor2).Count());
+            Assert.Empty(builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1));
+            Assert.Empty(builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor2));
 
             ConstructorInfo ci = constructor3;
             IEnumerable<Attribute> attrs = builder.GetCustomAttributes(typeof(FooImplWithConstructors), ci);
-            Assert.Equal(1, attrs.Count());
+            Assert.Single(attrs);
             Assert.Equal(typeof(ImportingConstructorAttribute), attrs.FirstOrDefault().GetType());
         }
 
@@ -94,12 +94,12 @@ namespace System.Composition.Convention.Tests
             ConstructorInfo constructor3 = fooImplWithConstructors.DeclaredConstructors.Where(c => c.GetParameters().Length == 2).Single();
 
             // necessary as BuildConventionConstructorAttributes is only called for type level query for attributes
-            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1).Count());
-            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor3).Count());
+            Assert.Empty(builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1));
+            Assert.Empty(builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor3));
 
             ConstructorInfo ci = constructor2;
             IEnumerable<Attribute> attrs = builder.GetCustomAttributes(typeof(FooImplWithConstructors), ci);
-            Assert.Equal(1, attrs.Count());
+            Assert.Single(attrs);
             Assert.Equal(typeof(ImportingConstructorAttribute), attrs.FirstOrDefault().GetType());
         }
 
@@ -122,12 +122,12 @@ namespace System.Composition.Convention.Tests
             ConstructorInfo constructor3 = fooImplWithConstructors.DeclaredConstructors.Where(c => c.GetParameters().Length == 2).Single();
 
             // necessary as BuildConventionConstructorAttributes is only called for type level query for attributes
-            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1).Count());
-            Assert.Equal(0, builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor3).Count());
+            Assert.Empty(builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor1));
+            Assert.Empty(builder.GetCustomAttributes(typeof(FooImplWithConstructors), constructor3));
 
             ConstructorInfo ci = constructor2;
             IEnumerable<Attribute> attrs = builder.GetCustomAttributes(typeof(FooImplWithConstructors), ci);
-            Assert.Equal(1, attrs.Count());
+            Assert.Single(attrs);
             Assert.Equal(typeof(ImportingConstructorAttribute), attrs.FirstOrDefault().GetType());
         }
     }

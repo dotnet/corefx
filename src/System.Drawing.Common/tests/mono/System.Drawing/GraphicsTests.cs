@@ -163,7 +163,7 @@ namespace MonoTests.System.Drawing
                 g.Clip = new Region(new Rectangle(50, 40, 210, 220));
                 rects = g.Clip.GetRegionScans(new Matrix());
 
-                Assert.Equal(1, rects.Length);
+                Assert.Single(rects);
                 Assert.Equal(50, rects[0].X);
                 Assert.Equal(40, rects[0].Y);
                 Assert.Equal(210, rects[0].Width);
@@ -223,7 +223,7 @@ namespace MonoTests.System.Drawing
                 g.IntersectClip(new Rectangle(290, 40, 60, 80));
                 rects = g.Clip.GetRegionScans(new Matrix());
 
-                Assert.Equal(1, rects.Length);
+                Assert.Single(rects);
 
                 Assert.Equal(290, rects[0].X);
                 Assert.Equal(40, rects[0].Y);
@@ -243,7 +243,7 @@ namespace MonoTests.System.Drawing
                 g.ResetClip();
                 rects = g.Clip.GetRegionScans(new Matrix());
 
-                Assert.Equal(1, rects.Length);
+                Assert.Single(rects);
 
                 Assert.Equal(-4194304, rects[0].X);
                 Assert.Equal(-4194304, rects[0].Y);
@@ -263,7 +263,7 @@ namespace MonoTests.System.Drawing
                     // Region
                     g.SetClip(new Region(new Rectangle(50, 40, 210, 220)), CombineMode.Replace);
                     rects = g.Clip.GetRegionScans(new Matrix());
-                    Assert.Equal(1, rects.Length);
+                    Assert.Single(rects);
                     Assert.Equal(50, rects[0].X);
                     Assert.Equal(40, rects[0].Y);
                     Assert.Equal(210, rects[0].Width);
@@ -275,7 +275,7 @@ namespace MonoTests.System.Drawing
                 {
                     g.SetClip(new RectangleF(50, 40, 210, 220));
                     rects = g.Clip.GetRegionScans(new Matrix());
-                    Assert.Equal(1, rects.Length);
+                    Assert.Single(rects);
                     Assert.Equal(50, rects[0].X);
                     Assert.Equal(40, rects[0].Y);
                     Assert.Equal(210, rects[0].Width);
@@ -287,7 +287,7 @@ namespace MonoTests.System.Drawing
                 {
                     g.SetClip(new Rectangle(50, 40, 210, 220));
                     rects = g.Clip.GetRegionScans(new Matrix());
-                    Assert.Equal(1, rects.Length);
+                    Assert.Single(rects);
                     Assert.Equal(50, rects[0].X);
                     Assert.Equal(40, rects[0].Y);
                     Assert.Equal(210, rects[0].Width);
@@ -1984,14 +1984,14 @@ namespace MonoTests.System.Drawing
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 Region[] regions = g.MeasureCharacterRanges(null, font, new RectangleF(), null);
-                Assert.Equal(0, regions.Length);
+                Assert.Empty(regions);
                 regions = g.MeasureCharacterRanges(string.Empty, font, new RectangleF(), null);
-                Assert.Equal(0, regions.Length);
+                Assert.Empty(regions);
                 // null font is ok with null or empty string
                 regions = g.MeasureCharacterRanges(null, null, new RectangleF(), null);
-                Assert.Equal(0, regions.Length);
+                Assert.Empty(regions);
                 regions = g.MeasureCharacterRanges(string.Empty, null, new RectangleF(), null);
-                Assert.Equal(0, regions.Length);
+                Assert.Empty(regions);
             }
         }
 
@@ -2003,7 +2003,7 @@ namespace MonoTests.System.Drawing
             {
                 // string format without character ranges
                 Region[] regions = g.MeasureCharacterRanges("Mono", font, new RectangleF(), new StringFormat());
-                Assert.Equal(0, regions.Length);
+                Assert.Empty(regions);
             }
         }
 

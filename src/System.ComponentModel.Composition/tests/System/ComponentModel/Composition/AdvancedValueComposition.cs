@@ -204,7 +204,7 @@ namespace System.ComponentModel.Composition
 
             var exports = container.GetExports<StaticExport, object>();
 
-            Assert.Equal(1, exports.Count());
+            Assert.Single(exports);
         }
 
         [Fact]

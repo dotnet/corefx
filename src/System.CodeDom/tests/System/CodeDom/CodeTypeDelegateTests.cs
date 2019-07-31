@@ -15,7 +15,7 @@ namespace System.CodeDom.Tests
 			var typeDelegate = new CodeTypeDelegate();
 			Assert.Empty(typeDelegate.Name);
 
-			Assert.Equal(1, typeDelegate.BaseTypes.Count);
+			Assert.Single(typeDelegate.BaseTypes);
 			Assert.Equal(typeof(Delegate).FullName, typeDelegate.BaseTypes[0].BaseType);
 
 			Assert.True(typeDelegate.IsClass);
@@ -31,7 +31,7 @@ namespace System.CodeDom.Tests
 			var typeDelegate = new CodeTypeDelegate(name);
 			Assert.Equal(name ?? string.Empty, typeDelegate.Name);
 
-			Assert.Equal(1, typeDelegate.BaseTypes.Count);
+			Assert.Single(typeDelegate.BaseTypes);
 			Assert.Equal(typeof(Delegate).FullName, typeDelegate.BaseTypes[0].BaseType);
 
 			Assert.True(typeDelegate.IsClass);

@@ -402,7 +402,7 @@ namespace System.IO.Pipelines.Tests
 
                 if (useSynchronizationContext)
                 {
-                    Assert.Equal(1, sc.Callbacks.Count);
+                    Assert.Single(sc.Callbacks);
                     sc.Callbacks[0].Item1(sc.Callbacks[0].Item2);
                 }
 
@@ -456,7 +456,7 @@ namespace System.IO.Pipelines.Tests
 
                 if (useSynchronizationContext)
                 {
-                    Assert.Equal(1, sc.Callbacks.Count);
+                    Assert.Single(sc.Callbacks);
                     sc.Callbacks[0].Item1(sc.Callbacks[0].Item2);
                 }
 

@@ -217,7 +217,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             cms2.Decode(cms.Encode());
 
             RecipientInfoCollection recipients = cms2.RecipientInfos;
-            Assert.Equal(1, recipients.Count);
+            Assert.Single(recipients);
 
             RecipientInfo recipientInfo = recipients[0];
             Assert.Equal(SubjectIdentifierType.IssuerAndSerialNumber, recipientInfo.RecipientIdentifier.Type);

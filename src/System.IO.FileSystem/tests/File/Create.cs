@@ -210,7 +210,7 @@ namespace System.IO.Tests
             string testFile = Path.Combine(testDir.FullName, GetTestFileName());
             File.Create(testFile + "AAAA").Dispose();
             File.Create(testFile.ToLowerInvariant() + "aAAa").Dispose();
-            Assert.Equal(1, Directory.GetFiles(testDir.FullName).Length);
+            Assert.Single(Directory.GetFiles(testDir.FullName));
         }
 
         [Fact]

@@ -259,8 +259,10 @@ namespace System.Collections.Immutable.Tests
         {
             Assert.NotNull(emptySet);
 
-            Assert.Equal(0, emptySet.Count); //, "Empty set should have a Count of 0");
-            Assert.Equal(0, emptySet.Count()); //, "Enumeration of an empty set yielded elements.");
+#pragma warning disable xUnit2013 // Do not use Assert.Equal() to check for collection size.
+            Assert.Equal(0, emptySet.Count); // Empty set should have a Count of 0
+            Assert.Equal(0, emptySet.Count()); // Enumeration of an empty set yielded elements
+#pragma warning restore xUnit2013
             Assert.Same(emptySet, emptySet.Clear());
         }
 

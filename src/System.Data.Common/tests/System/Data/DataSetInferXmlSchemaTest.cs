@@ -318,7 +318,7 @@ namespace System.Data.Tests
             DataTable dt = ds.Tables[0];
             DataSetAssertion.AssertDataTable("dt", dt, "root", 1, 0, 0, 0, 0, 0);
             DataSetAssertion.AssertDataColumn("element", dt.Columns[0], "child_after_significant_space", true, false, 0, 1, "child_after_significant_space", MappingType.Element, typeof(string), DBNull.Value, string.Empty, -1, string.Empty, 0, string.Empty, false, false);
-            Assert.Equal(1, dt.Columns.Count);
+            Assert.Single(dt.Columns);
         }
 
         [Fact]

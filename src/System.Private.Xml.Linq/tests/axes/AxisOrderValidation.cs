@@ -17,9 +17,9 @@ namespace System.Xml.Linq.Tests
             XText aText = new XText("a"), bText = new XText("b");
             XElement a = new XElement("A", aText, bText);
             IEnumerable<XNode> nodes = aText.NodesAfterSelf();
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             bText.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -28,9 +28,9 @@ namespace System.Xml.Linq.Tests
             XText aText = new XText("a"), bText = new XText("b");
             XElement a = new XElement("A", aText, bText);
             IEnumerable<XNode> nodes = bText.NodesBeforeSelf();
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             aText.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace System.Xml.Linq.Tests
             Assert.Equal(2, nodes.Count());
             bText.Remove();
             a.Add(bText);
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
         }
 
         [Fact]
@@ -53,9 +53,9 @@ namespace System.Xml.Linq.Tests
             XElement a = new XElement("A", aText), b = new XElement("B", bText);
             a.Add(b);
             IEnumerable<XElement> nodes = bText.Ancestors("B");
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             bText.Remove(); a.Add(bText);
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -65,9 +65,9 @@ namespace System.Xml.Linq.Tests
             XElement a = new XElement("A", aText), b = new XElement("B", bText);
             a.Add(b);
             IEnumerable<XElement> nodes = aText.ElementsAfterSelf();
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             b.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -77,9 +77,9 @@ namespace System.Xml.Linq.Tests
             XElement a = new XElement("A", aText), b = new XElement("B", bText);
             a.Add(b);
             IEnumerable<XElement> nodes = aText.ElementsAfterSelf("B");
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             b.ReplaceWith(a);
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -89,9 +89,9 @@ namespace System.Xml.Linq.Tests
             XElement a = new XElement("A", aText), b = new XElement("B", bText);
             aText.AddBeforeSelf(b);
             IEnumerable<XElement> nodes = aText.ElementsBeforeSelf();
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             b.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -101,9 +101,9 @@ namespace System.Xml.Linq.Tests
             XElement a = new XElement("A", aText), b = new XElement("B", bText);
             aText.AddBeforeSelf(b);
             IEnumerable<XElement> nodes = aText.ElementsBeforeSelf("B");
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             b.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -113,9 +113,9 @@ namespace System.Xml.Linq.Tests
             XElement a = new XElement("A", aText, bText);
             XDocument xDoc = new XDocument(a);
             IEnumerable<XNode> nodes = xDoc.Nodes();
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             a.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -127,7 +127,7 @@ namespace System.Xml.Linq.Tests
             IEnumerable<XNode> nodes = xDoc.DescendantNodes();
             Assert.Equal(4, nodes.Count());
             a.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -137,9 +137,9 @@ namespace System.Xml.Linq.Tests
             a.Add(b);
             XDocument xDoc = new XDocument(a);
             IEnumerable<XElement> nodes = xDoc.Elements();
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             a.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -149,9 +149,9 @@ namespace System.Xml.Linq.Tests
             a.Add(b);
             XDocument xDoc = new XDocument(a);
             IEnumerable<XElement> nodes = xDoc.Elements("A");
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             a.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -161,9 +161,9 @@ namespace System.Xml.Linq.Tests
             a.Add(b);
             XDocument xDoc = new XDocument(a);
             IEnumerable<XElement> nodes = xDoc.Descendants("B");
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             b.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -175,7 +175,7 @@ namespace System.Xml.Linq.Tests
             IEnumerable<XElement> nodes = xDoc.Descendants("B");
             Assert.Equal(4, nodes.Count());
             b.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -186,7 +186,7 @@ namespace System.Xml.Linq.Tests
             IEnumerable<XNode> nodes = a.Nodes();
             Assert.Equal(2, nodes.Count());
             b.Remove();
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
         }
 
         [Fact]
@@ -205,7 +205,7 @@ namespace System.Xml.Linq.Tests
         {
             XElement a = new XElement("A", "a"), b = new XElement("B", "b");
             IEnumerable<XElement> nodes = a.Elements();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
             a.Add(b, b, b, b);
             Assert.Equal(4, nodes.Count());
         }
@@ -215,7 +215,7 @@ namespace System.Xml.Linq.Tests
         {
             XElement a = new XElement("A", "a"), b = new XElement("B", "b");
             IEnumerable<XElement> nodes = a.Elements("B");
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
             a.Add(b, b, b, b);
             Assert.Equal(4, nodes.Count());
         }
@@ -226,9 +226,9 @@ namespace System.Xml.Linq.Tests
             XElement a = new XElement("A", "a"), b = new XElement("B", "b");
             a.Add(b);
             IEnumerable<XElement> nodes = a.Descendants();
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             b.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -237,9 +237,9 @@ namespace System.Xml.Linq.Tests
             XElement a = new XElement("A", "a"), b = new XElement("B", "b");
             a.Add(b);
             IEnumerable<XElement> nodes = a.Descendants("B");
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             b.Remove();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
         }
 
         [Fact]
@@ -270,7 +270,7 @@ namespace System.Xml.Linq.Tests
             XElement a = new XElement("A", "a"), b = new XElement("B", "b");
             a.Add(b);
             IEnumerable<XElement> nodes = a.DescendantsAndSelf("A");
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             b.ReplaceWith(a);
             Assert.Equal(2, nodes.Count());
         }
@@ -292,7 +292,7 @@ namespace System.Xml.Linq.Tests
             XElement a = new XElement("A", "a"), b = new XElement("B", "b");
             a.Add(b);
             IEnumerable<XElement> nodes = b.AncestorsAndSelf("A");
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
             XElement c = new XElement("A", "a", a);
             Assert.Equal(2, nodes.Count());
         }
@@ -302,7 +302,7 @@ namespace System.Xml.Linq.Tests
         {
             XElement a = new XElement("A", "a");
             IEnumerable<XAttribute> nodes = a.Attributes();
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
             a.Add(new XAttribute("name", "a"), new XAttribute("type", "alphabet"));
             Assert.Equal(2, nodes.Count());
         }
@@ -312,9 +312,9 @@ namespace System.Xml.Linq.Tests
         {
             XElement a = new XElement("A", "a");
             IEnumerable<XAttribute> nodes = a.Attributes("name");
-            Assert.Equal(0, nodes.Count());
+            Assert.Empty(nodes);
             a.Add(new XAttribute("name", "a"), new XAttribute("type", "alphabet"));
-            Assert.Equal(1, nodes.Count());
+            Assert.Single(nodes);
         }
 
         [Fact]

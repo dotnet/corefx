@@ -54,7 +54,7 @@ namespace System.Collections.Tests
                 dictBase.Remove(key);
                 Assert.False(dictBase.Contains(key));
             }
-            Assert.Equal(0, dictBase.Count);
+            Assert.Empty(dictBase);
             dictBase.Remove(new FooKey()); // Doesn't exist, but doesn't throw
         }
 
@@ -146,7 +146,7 @@ namespace System.Collections.Tests
         {
             MyDictionary dictBase = CreateDictionary(100);
             dictBase.Clear();
-            Assert.Equal(0, dictBase.Count);
+            Assert.Empty(dictBase);
         }
 
         [Fact]
@@ -331,21 +331,21 @@ namespace System.Collections.Tests
             dictBase.OnValidateThrow = true;
 
             Assert.Throws<Exception>(() => dictBase.Add(f, ""));
-            Assert.Equal(0, dictBase.Count);
+            Assert.Empty(dictBase);
 
             // Throw OnInsert
             dictBase = new OnMethodCalledDictionary();
             dictBase.OnInsertThrow = true;
 
             Assert.Throws<Exception>(() => dictBase.Add(f, ""));
-            Assert.Equal(0, dictBase.Count);
+            Assert.Empty(dictBase);
 
             // Throw OnInsertComplete
             dictBase = new OnMethodCalledDictionary();
             dictBase.OnInsertCompleteThrow = true;
 
             Assert.Throws<Exception>(() => dictBase.Add(f, ""));
-            Assert.Equal(0, dictBase.Count);
+            Assert.Empty(dictBase);
         }
 
         [Fact]
@@ -376,7 +376,7 @@ namespace System.Collections.Tests
             dictBase.OnValidateThrow = true;
 
             Assert.Throws<Exception>(() => dictBase.Remove(f));
-            Assert.Equal(1, dictBase.Count);
+            Assert.Single(dictBase);
 
             // Throw OnRemove
             dictBase = new OnMethodCalledDictionary();
@@ -384,7 +384,7 @@ namespace System.Collections.Tests
             dictBase.OnRemoveThrow = true;
 
             Assert.Throws<Exception>(() => dictBase.Remove(f));
-            Assert.Equal(1, dictBase.Count);
+            Assert.Single(dictBase);
 
             // Throw OnRemoveComplete
             dictBase = new OnMethodCalledDictionary();
@@ -392,7 +392,7 @@ namespace System.Collections.Tests
             dictBase.OnRemoveCompleteThrow = true;
 
             Assert.Throws<Exception>(() => dictBase.Remove(f));
-            Assert.Equal(1, dictBase.Count);
+            Assert.Single(dictBase);
         }
 
         [Fact]
@@ -406,7 +406,7 @@ namespace System.Collections.Tests
             Assert.True(dictBase.OnClearCalled);
             Assert.True(dictBase.OnClearCompleteCalled);
 
-            Assert.Equal(0, dictBase.Count);
+            Assert.Empty(dictBase);
         }
 
         [Fact]
@@ -420,7 +420,7 @@ namespace System.Collections.Tests
             dictBase.OnValidateThrow = true;
 
             dictBase.Clear();
-            Assert.Equal(0, dictBase.Count);
+            Assert.Empty(dictBase);
 
             // Throw OnClear
             dictBase = new OnMethodCalledDictionary();
@@ -428,7 +428,7 @@ namespace System.Collections.Tests
             dictBase.OnClearThrow = true;
 
             Assert.Throws<Exception>(() => dictBase.Clear());
-            Assert.Equal(1, dictBase.Count);
+            Assert.Single(dictBase);
 
             // Throw OnClearComplete
             dictBase = new OnMethodCalledDictionary();
@@ -436,7 +436,7 @@ namespace System.Collections.Tests
             dictBase.OnClearCompleteThrow = true;
 
             Assert.Throws<Exception>(() => dictBase.Clear());
-            Assert.Equal(0, dictBase.Count);
+            Assert.Empty(dictBase);
         }
 
         [Fact]
@@ -453,7 +453,7 @@ namespace System.Collections.Tests
             Assert.True(dictBase.OnSetCalled);
             Assert.True(dictBase.OnSetCompleteCalled);
 
-            Assert.Equal(1, dictBase.Count);
+            Assert.Single(dictBase);
             Assert.Equal("hello", dictBase[f]);
         }
 
@@ -467,21 +467,21 @@ namespace System.Collections.Tests
             dictBase.OnValidateThrow = true;
 
             Assert.Throws<Exception>(() => dictBase[f] = "hello");
-            Assert.Equal(0, dictBase.Count);
+            Assert.Empty(dictBase);
 
             // Throw OnSet
             dictBase = new OnMethodCalledDictionary();
             dictBase.OnSetThrow = true;
 
             Assert.Throws<Exception>(() => dictBase[f] = "hello");
-            Assert.Equal(0, dictBase.Count);
+            Assert.Empty(dictBase);
 
             // Throw OnSetComplete
             dictBase = new OnMethodCalledDictionary();
             dictBase.OnSetCompleteThrow = true;
 
             Assert.Throws<Exception>(() => dictBase[f] = "hello");
-            Assert.Equal(0, dictBase.Count);
+            Assert.Empty(dictBase);
         }
 
         [Fact]

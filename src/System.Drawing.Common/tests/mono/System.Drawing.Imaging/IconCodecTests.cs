@@ -55,7 +55,7 @@ namespace MonoTests.System.Drawing.Imaging
                     Assert.True(bmp.RawFormat.Equals(ImageFormat.MemoryBmp));
                     Assert.Equal(PixelFormat.Format32bppArgb, bmp.PixelFormat);
                     Assert.Equal(2, bmp.Flags);
-                    Assert.Equal(0, bmp.Palette.Entries.Length);
+                    Assert.Empty(bmp.Palette.Entries);
                 }
             }
         }
@@ -80,7 +80,7 @@ namespace MonoTests.System.Drawing.Imaging
             using (Image image = Image.FromFile(sInFile))
             {
                 // The values are inconsistent across Windows & Unix: GDI+ returns 0, libgdiplus returns 16.
-                Assert.Equal(0, image.Palette.Entries.Length);
+                Assert.Empty(image.Palette.Entries);
             }
         }
 
@@ -99,9 +99,9 @@ namespace MonoTests.System.Drawing.Imaging
                 Assert.Equal(PixelFormat.Format32bppArgb, bmp.PixelFormat);
                 Assert.Equal(73746, bmp.Flags);
 
-                Assert.Equal(1, bmp.FrameDimensionsList.Length);
-                Assert.Equal(0, bmp.PropertyIdList.Length);
-                Assert.Equal(0, bmp.PropertyItems.Length);
+                Assert.Single(bmp.FrameDimensionsList);
+                Assert.Empty(bmp.PropertyIdList);
+                Assert.Empty(bmp.PropertyItems);
                 Assert.Null(bmp.Tag);
                 Assert.Equal(96.0f, bmp.HorizontalResolution);
                 Assert.Equal(96.0f, bmp.VerticalResolution);
@@ -154,7 +154,7 @@ namespace MonoTests.System.Drawing.Imaging
             using (Bitmap bmp = new Bitmap(sInFile))
             {
                 // These values are inconsistent accross Windows & Unix: 0 on Windows, 16 on Unix
-                Assert.Equal(0, bmp.Palette.Entries.Length);
+                Assert.Empty(bmp.Palette.Entries);
             }
         }
 
@@ -285,9 +285,9 @@ namespace MonoTests.System.Drawing.Imaging
                 Assert.Equal(PixelFormat.Format32bppArgb, bmp.PixelFormat);
                 Assert.Equal(73746, bmp.Flags);
 
-                Assert.Equal(1, bmp.FrameDimensionsList.Length);
-                Assert.Equal(0, bmp.PropertyIdList.Length);
-                Assert.Equal(0, bmp.PropertyItems.Length);
+                Assert.Single(bmp.FrameDimensionsList);
+                Assert.Empty(bmp.PropertyIdList);
+                Assert.Empty(bmp.PropertyItems);
                 Assert.Null(bmp.Tag);
                 Assert.Equal(96.0f, bmp.HorizontalResolution);
                 Assert.Equal(96.0f, bmp.VerticalResolution);
@@ -341,7 +341,7 @@ namespace MonoTests.System.Drawing.Imaging
             using (Bitmap bmp = new Bitmap(sInFile))
             {
                 // These values areinconsistent accross Windows & Unix: 0 on Windows, 16 on Unix
-                Assert.Equal(0, bmp.Palette.Entries.Length);
+                Assert.Empty(bmp.Palette.Entries);
             }
         }
 
@@ -529,9 +529,9 @@ namespace MonoTests.System.Drawing.Imaging
                 Assert.Equal(PixelFormat.Format32bppArgb, bmp.PixelFormat);
                 Assert.Equal(73746, bmp.Flags);
 
-                Assert.Equal(1, bmp.FrameDimensionsList.Length);
-                Assert.Equal(0, bmp.PropertyIdList.Length);
-                Assert.Equal(0, bmp.PropertyItems.Length);
+                Assert.Single(bmp.FrameDimensionsList);
+                Assert.Empty(bmp.PropertyIdList);
+                Assert.Empty(bmp.PropertyItems);
                 Assert.Null(bmp.Tag);
                 Assert.Equal(96.0f, bmp.HorizontalResolution);
                 Assert.Equal(96.0f, bmp.VerticalResolution);
@@ -570,7 +570,7 @@ namespace MonoTests.System.Drawing.Imaging
             using (Bitmap bmp = new Bitmap(sInFile))
             {
                 // These values are inconsistent accross Windows & Unix: 0 on Windows, 16 on Unix
-                Assert.Equal(0, bmp.Palette.Entries.Length);
+                Assert.Empty(bmp.Palette.Entries);
             }
         }
 
@@ -775,9 +775,9 @@ namespace MonoTests.System.Drawing.Imaging
                 Assert.Equal(PixelFormat.Format32bppArgb, bmp.PixelFormat);
                 Assert.Equal(73746, bmp.Flags);
 
-                Assert.Equal(1, bmp.FrameDimensionsList.Length);
-                Assert.Equal(0, bmp.PropertyIdList.Length);
-                Assert.Equal(0, bmp.PropertyItems.Length);
+                Assert.Single(bmp.FrameDimensionsList);
+                Assert.Empty(bmp.PropertyIdList);
+                Assert.Empty(bmp.PropertyItems);
                 Assert.Null(bmp.Tag);
                 Assert.Equal(96.0f, bmp.HorizontalResolution);
                 Assert.Equal(96.0f, bmp.VerticalResolution);
@@ -814,7 +814,7 @@ namespace MonoTests.System.Drawing.Imaging
             using (Bitmap bmp = new Bitmap(sInFile))
             {
                 // This value is inconsistent accross Windows & Unix: 0 on Windows, 256 on Unix
-                Assert.Equal(0, bmp.Palette.Entries.Length);
+                Assert.Empty(bmp.Palette.Entries);
             }
         }
 
@@ -1055,9 +1055,9 @@ namespace MonoTests.System.Drawing.Imaging
                 Assert.Equal(PixelFormat.Format32bppArgb, bmp.PixelFormat);
                 Assert.Equal(73746, bmp.Flags);
 
-                Assert.Equal(1, bmp.FrameDimensionsList.Length);
-                Assert.Equal(0, bmp.PropertyIdList.Length);
-                Assert.Equal(0, bmp.PropertyItems.Length);
+                Assert.Single(bmp.FrameDimensionsList);
+                Assert.Empty(bmp.PropertyIdList);
+                Assert.Empty(bmp.PropertyItems);
                 Assert.Null(bmp.Tag);
                 Assert.Equal(96.0f, bmp.HorizontalResolution);
                 Assert.Equal(96.0f, bmp.VerticalResolution);
@@ -1094,7 +1094,7 @@ namespace MonoTests.System.Drawing.Imaging
             using (Bitmap bmp = new Bitmap(sInFile))
             {
                 // This value is inconsistent accross Unix and Windows.
-                Assert.Equal(0, bmp.Palette.Entries.Length);
+                Assert.Empty(bmp.Palette.Entries);
             }
         }
 
@@ -2010,10 +2010,10 @@ namespace MonoTests.System.Drawing.Imaging
                 // note that image is "promoted" to 32bits
                 Assert.Equal(PixelFormat.Format32bppArgb, bmp.PixelFormat);
                 Assert.Equal(73746, bmp.Flags);
-                Assert.Equal(0, bmp.Palette.Entries.Length);
-                Assert.Equal(1, bmp.FrameDimensionsList.Length);
-                Assert.Equal(0, bmp.PropertyIdList.Length);
-                Assert.Equal(0, bmp.PropertyItems.Length);
+                Assert.Empty(bmp.Palette.Entries);
+                Assert.Single(bmp.FrameDimensionsList);
+                Assert.Empty(bmp.PropertyIdList);
+                Assert.Empty(bmp.PropertyItems);
                 Assert.Null(bmp.Tag);
                 Assert.Equal(96.0f, bmp.HorizontalResolution);
                 Assert.Equal(96.0f, bmp.VerticalResolution);

@@ -15,14 +15,14 @@ namespace System.Collections.Specialized.Tests
         {
             NameValueCollection nameValueCollection = Helpers.CreateNameValueCollection(10);
             nameValueCollection.Clear();
-            Assert.Equal(0, nameValueCollection.Count);
-            Assert.Equal(0, nameValueCollection.AllKeys.Length);
-            Assert.Equal(0, nameValueCollection.Keys.Count);
+            Assert.Empty(nameValueCollection);
+            Assert.Empty(nameValueCollection.AllKeys);
+            Assert.Empty(nameValueCollection.Keys);
 
             nameValueCollection.Clear();
-            Assert.Equal(0, nameValueCollection.Count);
-            Assert.Equal(0, nameValueCollection.AllKeys.Length);
-            Assert.Equal(0, nameValueCollection.Keys.Count);
+            Assert.Empty(nameValueCollection);
+            Assert.Empty(nameValueCollection.AllKeys);
+            Assert.Empty(nameValueCollection.Keys);
         }
     }
 }

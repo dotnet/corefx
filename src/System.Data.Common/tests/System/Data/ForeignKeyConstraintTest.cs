@@ -62,21 +62,21 @@ namespace System.Data.Tests
         {
             DataTable Table = _ds.Tables[0];
 
-            Assert.Equal(0, Table.Constraints.Count);
+            Assert.Empty(Table.Constraints);
             Table = _ds.Tables[1];
-            Assert.Equal(0, Table.Constraints.Count);
+            Assert.Empty(Table.Constraints);
 
             // ctor (string, DataColumn, DataColumn
             ForeignKeyConstraint Constraint = new ForeignKeyConstraint("test", _ds.Tables[0].Columns[2], _ds.Tables[1].Columns[0]);
             Table = _ds.Tables[1];
             Table.Constraints.Add(Constraint);
 
-            Assert.Equal(1, Table.Constraints.Count);
+            Assert.Single(Table.Constraints);
             Assert.Equal("test", Table.Constraints[0].ConstraintName);
             Assert.Equal(typeof(ForeignKeyConstraint), Table.Constraints[0].GetType());
 
             Table = _ds.Tables[0];
-            Assert.Equal(1, Table.Constraints.Count);
+            Assert.Single(Table.Constraints);
             Assert.Equal("Constraint1", Table.Constraints[0].ConstraintName);
             Assert.Equal(typeof(UniqueConstraint), Table.Constraints[0].GetType());
         }
@@ -87,21 +87,21 @@ namespace System.Data.Tests
         {
             DataTable Table = _ds.Tables[0];
 
-            Assert.Equal(0, Table.Constraints.Count);
+            Assert.Empty(Table.Constraints);
             Table = _ds.Tables[1];
-            Assert.Equal(0, Table.Constraints.Count);
+            Assert.Empty(Table.Constraints);
 
             // ctor (string, DataColumn, DataColumn
             ForeignKeyConstraint Constraint = new ForeignKeyConstraint(_ds.Tables[0].Columns[2], _ds.Tables[1].Columns[0]);
             Table = _ds.Tables[1];
             Table.Constraints.Add(Constraint);
 
-            Assert.Equal(1, Table.Constraints.Count);
+            Assert.Single(Table.Constraints);
             Assert.Equal("Constraint1", Table.Constraints[0].ConstraintName);
             Assert.Equal(typeof(ForeignKeyConstraint), Table.Constraints[0].GetType());
 
             Table = _ds.Tables[0];
-            Assert.Equal(1, Table.Constraints.Count);
+            Assert.Single(Table.Constraints);
             Assert.Equal("Constraint1", Table.Constraints[0].ConstraintName);
             Assert.Equal(typeof(UniqueConstraint), Table.Constraints[0].GetType());
         }
@@ -112,9 +112,9 @@ namespace System.Data.Tests
         {
             DataTable Table = _ds.Tables[0];
 
-            Assert.Equal(0, Table.Constraints.Count);
+            Assert.Empty(Table.Constraints);
             Table = _ds.Tables[1];
-            Assert.Equal(0, Table.Constraints.Count);
+            Assert.Empty(Table.Constraints);
 
             DataColumn[] Cols1 = new DataColumn[2];
             Cols1[0] = _ds.Tables[0].Columns[1];
@@ -128,12 +128,12 @@ namespace System.Data.Tests
             Table = _ds.Tables[1];
             Table.Constraints.Add(Constraint);
 
-            Assert.Equal(1, Table.Constraints.Count);
+            Assert.Single(Table.Constraints);
             Assert.Equal("Constraint1", Table.Constraints[0].ConstraintName);
             Assert.Equal(typeof(ForeignKeyConstraint), Table.Constraints[0].GetType());
 
             Table = _ds.Tables[0];
-            Assert.Equal(1, Table.Constraints.Count);
+            Assert.Single(Table.Constraints);
             Assert.Equal("Constraint1", Table.Constraints[0].ConstraintName);
             Assert.Equal(typeof(UniqueConstraint), Table.Constraints[0].GetType());
         }
@@ -144,9 +144,9 @@ namespace System.Data.Tests
         {
             DataTable Table = _ds.Tables[0];
 
-            Assert.Equal(0, Table.Constraints.Count);
+            Assert.Empty(Table.Constraints);
             Table = _ds.Tables[1];
-            Assert.Equal(0, Table.Constraints.Count);
+            Assert.Empty(Table.Constraints);
 
             DataColumn[] Cols1 = new DataColumn[2];
             Cols1[0] = _ds.Tables[0].Columns[1];
@@ -160,12 +160,12 @@ namespace System.Data.Tests
             Table = _ds.Tables[1];
             Table.Constraints.Add(Constraint);
 
-            Assert.Equal(1, Table.Constraints.Count);
+            Assert.Single(Table.Constraints);
             Assert.Equal("Test", Table.Constraints[0].ConstraintName);
             Assert.Equal(typeof(ForeignKeyConstraint), Table.Constraints[0].GetType());
 
             Table = _ds.Tables[0];
-            Assert.Equal(1, Table.Constraints.Count);
+            Assert.Single(Table.Constraints);
             Assert.Equal("Constraint1", Table.Constraints[0].ConstraintName);
             Assert.Equal(typeof(UniqueConstraint), Table.Constraints[0].GetType());
         }
@@ -268,9 +268,9 @@ namespace System.Data.Tests
         {
             DataTable Table = _ds.Tables[0];
 
-            Assert.Equal(0, Table.Constraints.Count);
+            Assert.Empty(Table.Constraints);
             Table = _ds.Tables[1];
-            Assert.Equal(0, Table.Constraints.Count);
+            Assert.Empty(Table.Constraints);
 
 
             ForeignKeyConstraint Constraint = new ForeignKeyConstraint("Test", _ds.Tables[0].Columns[0], _ds.Tables[0].Columns[2]);

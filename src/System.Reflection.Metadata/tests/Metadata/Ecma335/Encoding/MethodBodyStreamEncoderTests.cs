@@ -124,7 +124,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
 
             var segment = body.Instructions.GetBytes();
             Assert.Equal(1, segment.Offset); // +1 byte for the header
-            Assert.Equal(0, segment.Count);
+            Assert.Empty(segment);
 
             Assert.Null(body.ExceptionRegions.Builder);
 
@@ -283,7 +283,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             {
                 var body = MethodBodyBlock.Create(new BlobReader(bodyPtr, bodyBytes.Length));
 
-                Assert.Equal(0, body.ExceptionRegions.Length);
+                Assert.Empty(body.ExceptionRegions);
                 Assert.Equal(default, body.LocalSignature);
                 Assert.False(body.LocalVariablesInitialized);
                 Assert.Equal(8, body.MaxStack);
@@ -353,7 +353,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             {
                 var body = MethodBodyBlock.Create(new BlobReader(bodyPtr, bodyBytes.Length));
 
-                Assert.Equal(0, body.ExceptionRegions.Length);
+                Assert.Empty(body.ExceptionRegions);
                 Assert.Equal(default, body.LocalSignature);
                 Assert.False(body.LocalVariablesInitialized);
                 Assert.Equal(2, body.MaxStack);
@@ -460,7 +460,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             {
                 var body = MethodBodyBlock.Create(new BlobReader(bodyPtr, bodyBytes.Length));
 
-                Assert.Equal(0, body.ExceptionRegions.Length);
+                Assert.Empty(body.ExceptionRegions);
                 Assert.Equal(default, body.LocalSignature);
                 Assert.Equal(2, body.MaxStack);
                 Assert.True(body.LocalVariablesInitialized);

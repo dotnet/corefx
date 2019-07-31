@@ -160,7 +160,7 @@ namespace System.Reflection.Tests
             Assert.Equal(t, m.DeclaringType);
             Assert.Equal(et, m.ReturnType);
             ParameterInfo[] p = m.GetParameters();
-            Assert.Equal(1, p.Length);
+            Assert.Single(p);
 
             Assert.Equal(ParameterAttributes.None, p[0].Attributes);
             Assert.Equal(typeof(int).Project(), p[0].ParameterType);
@@ -223,7 +223,7 @@ namespace System.Reflection.Tests
             Assert.Equal(t, m.DeclaringType);
             Assert.Equal(et.MakeByRefType(), m.ReturnType);
             ParameterInfo[] p = m.GetParameters();
-            Assert.Equal(1, p.Length);
+            Assert.Single(p);
 
             Assert.Equal(ParameterAttributes.None, p[0].Attributes);
             Assert.Equal(typeof(int).Project(), p[0].ParameterType);
@@ -245,13 +245,13 @@ namespace System.Reflection.Tests
             Type t = typeof(long[]).Project(); ;
             TypeInfo ti = t.GetTypeInfo();
             ConstructorInfo[] ctors = ti.DeclaredConstructors.ToArray();
-            Assert.Equal(1, ctors.Length);
+            Assert.Single(ctors);
             ConstructorInfo m = ctors[0];
             Assert.Equal(MethodAttributes.Public | MethodAttributes.PrivateScope | MethodAttributes.RTSpecialName, m.Attributes);
             Assert.Equal(CallingConventions.Standard | CallingConventions.HasThis, m.CallingConvention);
             Assert.Equal(t, m.DeclaringType);
             ParameterInfo[] p = m.GetParameters();
-            Assert.Equal(1, p.Length);
+            Assert.Single(p);
 
             Assert.Equal(ParameterAttributes.None, p[0].Attributes);
             Assert.Equal(typeof(int).Project(), p[0].ParameterType);
@@ -554,7 +554,7 @@ namespace System.Reflection.Tests
         {
             Type t = typeof(ClassWithDefaultMember1<>).Project().GetTypeInfo().GenericTypeParameters[0];
             MemberInfo[] mems = t.GetDefaultMembers().OrderBy(m => m.Name).ToArray();
-            Assert.Equal(1, mems.Length);
+            Assert.Single(mems);
             MemberInfo mem = mems[0];
             Assert.Equal("Yes", mem.Name);
             Assert.Equal(typeof(ClassWithDefaultMember1<>).Project().MakeGenericType(t), mem.DeclaringType);
@@ -566,7 +566,7 @@ namespace System.Reflection.Tests
         {
             Type t = typeof(TopLevelType).Project();
             MemberInfo[] mems = t.GetDefaultMembers();
-            Assert.Equal(0, mems.Length);
+            Assert.Empty(mems);
         }
 
         [Fact]
@@ -577,7 +577,7 @@ namespace System.Reflection.Tests
             {
                 Assembly a = lc.LoadFromByteArray(TestData.s_TypeWithStrangeCharacters);
                 Type[] types = a.GetTypes();
-                Assert.Equal(1, types.Length);
+                Assert.Single(types);
                 Type t = types[0];
                 string name = t.Name;
                 Assert.Equal(TestData.s_NameOfTypeWithStrangeCharacters, name);

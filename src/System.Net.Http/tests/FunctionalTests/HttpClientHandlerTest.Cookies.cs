@@ -355,13 +355,13 @@ namespace System.Net.Http.Functional.Tests
 
                     if (useCookies)
                     {
-                        Assert.Equal(1, collection.Count);
+                        Assert.Single(collection);
                         Assert.Equal(cookieName, collection[0].Name);
                         Assert.Equal(cookieValue, collection[0].Value);
                     }
                     else
                     {
-                        Assert.Equal(0, collection.Count);
+                        Assert.Empty(collection);
                     }
                 }
             });
@@ -422,7 +422,7 @@ namespace System.Net.Http.Functional.Tests
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
                     CookieCollection collection = handler.CookieContainer.GetCookies(url);
-                    Assert.Equal(1, collection.Count);
+                    Assert.Single(collection);
                     Assert.Equal(s_cookieName, collection[0].Name);
                     Assert.Equal(newCookieValue, collection[0].Value);
                 }
@@ -448,7 +448,7 @@ namespace System.Net.Http.Functional.Tests
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
                     CookieCollection collection = handler.CookieContainer.GetCookies(url);
-                    Assert.Equal(0, collection.Count);
+                    Assert.Empty(collection);
                 }
             });
         }

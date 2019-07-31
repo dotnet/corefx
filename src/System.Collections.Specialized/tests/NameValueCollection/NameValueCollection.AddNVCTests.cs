@@ -57,7 +57,7 @@ namespace System.Collections.Specialized.Tests
             nameValueCollection2.Add(name, value2);
 
             nameValueCollection2.Add(nameValueCollection1);
-            Assert.Equal(1, nameValueCollection2.Count);
+            Assert.Single(nameValueCollection2);
             Assert.Equal(value2 + "," + value1, nameValueCollection2[name]);
             Assert.Equal(new string[] { value2, value1 }, nameValueCollection2.GetValues(name));
         }
@@ -75,7 +75,7 @@ namespace System.Collections.Specialized.Tests
             nameValueCollection1.Add(name, value2);
 
             nameValueCollection2.Add(nameValueCollection1);
-            Assert.Equal(1, nameValueCollection2.Count);
+            Assert.Single(nameValueCollection2);
             Assert.Equal(value1 + "," + value2, nameValueCollection2[name]);
             Assert.Equal(new string[] { value1, value2 }, nameValueCollection2.GetValues(name));
 
@@ -96,7 +96,7 @@ namespace System.Collections.Specialized.Tests
 
             nameValueCollection3.Add(nameValueCollection1);
 
-            Assert.Equal(1, nameValueCollection2.Count);
+            Assert.Single(nameValueCollection2);
             Assert.Contains(null, nameValueCollection3.AllKeys);
             Assert.Equal(nullKeyValue1, nameValueCollection3[null]);
 
@@ -115,7 +115,7 @@ namespace System.Collections.Specialized.Tests
             nameValueCollection1.Add(nullValueName, null);
             nameValueCollection2.Add(nameValueCollection1);
 
-            Assert.Equal(1, nameValueCollection2.Count);
+            Assert.Single(nameValueCollection2);
             Assert.Contains(nullValueName, nameValueCollection2.AllKeys);
             Assert.Null(nameValueCollection2[nullValueName]);
         }

@@ -77,7 +77,7 @@ namespace System.Net.Primitives.Unit.Tests
         public void GetCookies_NonExistent_NoResults()
         {
             CookieContainer cc = CreateCount11Container();
-            Assert.Equal(0, cc.GetCookies(new Uri("http://non.existent.uri.com")).Count);
+            Assert.Empty(cc.GetCookies(new Uri("http://non.existent.uri.com")));
         }
 
         public static IEnumerable<object[]> GetCookieHeaderData()
@@ -396,19 +396,19 @@ namespace System.Net.Primitives.Unit.Tests
 
             uri = new Uri(SchemePrefix + "www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
 
             uri = new Uri(SchemePrefix + "x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
 
             uri = new Uri(SchemePrefix + "y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
 
             uri = new Uri(SchemePrefix + "z.y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
         }
 
         [Fact]
@@ -423,24 +423,24 @@ namespace System.Net.Primitives.Unit.Tests
 
             var uri = new Uri(SchemePrefix + OriginalDomain);
             CookieCollection cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
             Assert.Equal(OriginalDomain, cookies[CookieName1].Domain);
 
             uri = new Uri(SchemePrefix + "www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
 
             uri = new Uri(SchemePrefix + "x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
 
             uri = new Uri(SchemePrefix + "y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
 
             uri = new Uri(SchemePrefix + "z.y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
         }
 
         [Fact]
@@ -456,24 +456,24 @@ namespace System.Net.Primitives.Unit.Tests
 
             var uri = new Uri(SchemePrefix + OriginalDomain);
             CookieCollection cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
             Assert.Equal(OriginalDomainWithLeadingDot, cookies[CookieName1].Domain);
 
             uri = new Uri(SchemePrefix + "www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(1, cookies.Count);
+            Assert.Single(cookies);
 
             uri = new Uri(SchemePrefix + "x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
 
             uri = new Uri(SchemePrefix + "y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
 
             uri = new Uri(SchemePrefix + "z.y.x.www." + OriginalDomain);
             cookies = container.GetCookies(uri);
-            Assert.Equal(0, cookies.Count);
+            Assert.Empty(cookies);
         }
 
         [Fact]
@@ -557,7 +557,7 @@ namespace System.Net.Primitives.Unit.Tests
 
             await Task.Delay(2000); // Sleep for 2 seconds to wait for the cookie to expire
             cc.Add(c3);
-            Assert.Equal(0, cc.GetCookies(new Uri("http://domain1.com")).Count);
+            Assert.Empty(cc.GetCookies(new Uri("http://domain1.com")));
             Assert.Equal(c3, cc.GetCookies(new Uri("http://domain3.com"))[0]);
         }
 
@@ -690,7 +690,7 @@ namespace System.Net.Primitives.Unit.Tests
             cc.Add(c2);
 
             await Task.Delay(2000); // Sleep for 2 seconds to wait for the cookie to expire
-            Assert.Equal(0, cc.GetCookies(new Uri("http://url1.com")).Count); // There should no longer be such a cookie
+            Assert.Empty(cc.GetCookies(new Uri("http://url1.com"))); // There should no longer be such a cookie
         }
 
         public static IEnumerable<object[]> InvalidCookies()

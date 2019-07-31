@@ -18,10 +18,10 @@ namespace System.Security.Claims
             var cp = new ClaimsPrincipal();
 
             Assert.NotNull(cp.Identities);
-            Assert.Equal(0, cp.Identities.Count());
+            Assert.Empty(cp.Identities);
 
             Assert.NotNull(cp.Claims);
-            Assert.Equal(0, cp.Claims.Count());
+            Assert.Empty(cp.Claims);
 
             Assert.Null(cp.Identity);
         }
@@ -35,14 +35,14 @@ namespace System.Security.Claims
             var cp = new ClaimsPrincipal(id);
 
             Assert.NotNull(cp.Identities);
-            Assert.Equal(1, cp.Identities.Count());
+            Assert.Single(cp.Identities);
 
             Assert.Same(id, cp.Identities.First());
 
             Assert.Same(id, cp.Identity);
 
             Assert.NotNull(cp.Claims);
-            Assert.Equal(1, cp.Claims.Count());
+            Assert.Single(cp.Claims);
             Assert.Contains(cp.Claims, claim => claim.Type == "claim_type" && claim.Value == "claim_value");
         }
 
@@ -53,14 +53,14 @@ namespace System.Security.Claims
             var cp = new ClaimsPrincipal(id);
 
             Assert.NotNull(cp.Identities);
-            Assert.Equal(1, cp.Identities.Count());
+            Assert.Single(cp.Identities);
 
             Assert.NotSame(id, cp.Identities.First());
             Assert.NotSame(id, cp.Identity);
             Assert.Equal(id.Name, cp.Identity.Name);
 
             Assert.NotNull(cp.Claims);
-            Assert.Equal(1, cp.Claims.Count());
+            Assert.Single(cp.Claims);
             Assert.Contains(cp.Claims, claim => claim.Type == ClaimsIdentity.DefaultNameClaimType && claim.Value == "NonClaimsIdentity_Name");
         }
 
@@ -76,14 +76,14 @@ namespace System.Security.Claims
             var cp = new ClaimsPrincipal(basePrincipal);
 
             Assert.NotNull(cp.Identities);
-            Assert.Equal(1, cp.Identities.Count());
+            Assert.Single(cp.Identities);
 
             Assert.Same(baseId, cp.Identities.First());
 
             Assert.Same(baseId, cp.Identity);
 
             Assert.NotNull(cp.Claims);
-            Assert.Equal(1, cp.Claims.Count());
+            Assert.Single(cp.Claims);
             Assert.Contains(cp.Claims, claim => claim.Type == "claim_type" && claim.Value == "claim_value");
         }
 
@@ -95,14 +95,14 @@ namespace System.Security.Claims
             var cp = new ClaimsPrincipal(basePrincipal);
 
             Assert.NotNull(cp.Identities);
-            Assert.Equal(1, cp.Identities.Count());
+            Assert.Single(cp.Identities);
 
             Assert.NotSame(id, cp.Identities.First());
             Assert.NotSame(id, cp.Identity);
             Assert.Equal(id.Name, cp.Identity.Name);
 
             Assert.NotNull(cp.Claims);
-            Assert.Equal(1, cp.Claims.Count());
+            Assert.Single(cp.Claims);
             Assert.Contains(cp.Claims, claim => claim.Type == ClaimsIdentity.DefaultNameClaimType && claim.Value == "NonClaimsIdentity_Name");
         }
 
@@ -111,10 +111,10 @@ namespace System.Security.Claims
         {
             var p = new ClaimsPrincipal(new NonClaimsPrincipal());
             Assert.NotNull(p.Identities);
-            Assert.Equal(1, p.Identities.Count());
+            Assert.Single(p.Identities);
 
             Assert.NotNull(p.Claims);
-            Assert.Equal(0, p.Claims.Count());
+            Assert.Empty(p.Claims);
 
             Assert.NotNull(p.Identity);
             Assert.False(p.Identity.IsAuthenticated);
@@ -125,10 +125,10 @@ namespace System.Security.Claims
         {
             var cp = new ClaimsPrincipal(new ClaimsPrincipal());
             Assert.NotNull(cp.Identities);
-            Assert.Equal(0, cp.Identities.Count());
+            Assert.Empty(cp.Identities);
 
             Assert.NotNull(cp.Claims);
-            Assert.Equal(0, cp.Claims.Count());
+            Assert.Empty(cp.Claims);
 
             Assert.Null(cp.Identity);
         }
@@ -149,7 +149,7 @@ namespace System.Security.Claims
             Assert.Equal(3, cp.Identities.Count());
 
             Assert.NotNull(cp.Claims);
-            Assert.Equal(1, cp.Claims.Count());
+            Assert.Single(cp.Claims);
 
             Assert.Equal(baseId1, cp.Identity);
 
@@ -163,9 +163,9 @@ namespace System.Security.Claims
         {
             var cp = new ClaimsPrincipal(new ClaimsIdentity[0]);
             Assert.NotNull(cp.Identities);
-            Assert.Equal(0, cp.Identities.Count());
+            Assert.Empty(cp.Identities);
             Assert.NotNull(cp.Claims);
-            Assert.Equal(0, cp.Claims.Count());
+            Assert.Empty(cp.Claims);
             Assert.Null(cp.Identity);
         }
 

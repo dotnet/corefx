@@ -113,7 +113,7 @@ namespace System.Security.Cryptography.Xml.Tests
         public void Constructor_X509Certificate_X509IncludeOption()
         {
             KeyInfoX509Data data = new KeyInfoX509Data(new X509Certificate(cert), X509IncludeOption.EndCertOnly);
-            Assert.Equal(1, data.Certificates.Count);
+            Assert.Single(data.Certificates);
             Assert.Null(data.CRL);
             Assert.Null(data.IssuerSerials);
             Assert.Null(data.SubjectKeyIds);
@@ -176,7 +176,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Null(data.Certificates);
             Assert.Null(data.CRL);
             Assert.Null(data.IssuerSerials);
-            Assert.Equal(1, data.SubjectKeyIds.Count);
+            Assert.Single(data.SubjectKeyIds);
             Assert.Null(data.SubjectNames);
             
             //Comment from https://github.com/peterwurzinger
@@ -201,7 +201,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Null(data.Certificates);
             Assert.Null(data.CRL);
             Assert.Null(data.IssuerSerials);
-            Assert.Equal(1, data.SubjectKeyIds.Count);
+            Assert.Single(data.SubjectKeyIds);
             Assert.Null(data.SubjectNames);
         }
 
@@ -214,7 +214,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Null(data.CRL);
             Assert.Null(data.IssuerSerials);
             Assert.Null(data.SubjectKeyIds);
-            Assert.Equal(1, data.SubjectNames.Count);
+            Assert.Single(data.SubjectNames);
             Assert.Null(data.SubjectNames[0]);
             Assert.Equal("<X509Data xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><X509SubjectName></X509SubjectName></X509Data>", data.GetXml().OuterXml);
         }

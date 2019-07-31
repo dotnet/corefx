@@ -2334,7 +2334,7 @@ namespace System.Reflection.Metadata.Tests
 
             var attributes2 = reader.GetCustomAttributes(MetadataTokens.EntityHandle(0x02000000));
             AssertEx.Equal(new int[0], attributes2.Select(a => a.RowId));
-            Assert.Equal(0, attributes2.Count);
+            Assert.Empty(attributes2);
         }
 
         /// <summary>
@@ -2579,7 +2579,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(0, reader.TypeDefTable.GetMethodStart(3));
 
             var methods = typeDef.GetMethods();
-            Assert.Equal(0, methods.Count);
+            Assert.Empty(methods);
             var e = methods.GetEnumerator();
             Assert.True(e.Current.IsNil);
             Assert.False(e.MoveNext());
@@ -2599,14 +2599,14 @@ namespace System.Reflection.Metadata.Tests
             var genericParams = typeDef.GetGenericParameters();
 
             Assert.Equal("<Module>", name);
-            Assert.Equal(0, genericParams.Count);
+            Assert.Empty(genericParams);
 
             typeDef = reader.GetTypeDefinition(reader.TypeDefinitions.Skip(1).First());
             name = reader.GetString(typeDef.Name);
             genericParams = typeDef.GetGenericParameters();
 
             Assert.Equal("Class1", name);
-            Assert.Equal(0, genericParams.Count);
+            Assert.Empty(genericParams);
         }
 
         [Fact]
@@ -2668,11 +2668,11 @@ namespace System.Reflection.Metadata.Tests
                 var reader = provider.GetMetadataReader();
                 var cdi1 = reader.GetCustomAttributes(MetadataTokens.EntityHandle(0x30000001));
                 AssertEx.Equal(new int[0], cdi1.Select(a => a.RowId));
-                Assert.Equal(0, cdi1.Count);
+                Assert.Empty(cdi1);
 
                 var cdi2 = reader.GetCustomAttributes(MetadataTokens.EntityHandle(0x03000000));
                 AssertEx.Equal(new int[0], cdi2.Select(a => a.RowId));
-                Assert.Equal(0, cdi2.Count);
+                Assert.Empty(cdi2);
             }
         }
 

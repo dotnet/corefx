@@ -100,12 +100,12 @@ namespace System.ComponentModel.Composition.Registration.Tests
             ConstructorInfo constructor2 = projectedType2.GetConstructors().Where(c => c.GetParameters().Length == 1).Single();
             ConstructorInfo constructor3 = projectedType2.GetConstructors().Where(c => c.GetParameters().Length == 2).Single();
 
-            Assert.Equal(0, constructor1.GetCustomAttributes(false).Length);
-            Assert.Equal(0, constructor2.GetCustomAttributes(false).Length);
+            Assert.Empty(constructor1.GetCustomAttributes(false));
+            Assert.Empty(constructor2.GetCustomAttributes(false));
 
             ConstructorInfo ci = constructor3;
             var attrs = ci.GetCustomAttributes(false);
-            Assert.Equal(1, attrs.Length);
+            Assert.Single(attrs);
             Assert.Equal(typeof(ImportingConstructorAttribute), attrs[0].GetType());
         }
 
@@ -130,12 +130,12 @@ namespace System.ComponentModel.Composition.Registration.Tests
             // necessary as BuildConventionConstructorAttributes is only called for type level query for attributes
             var typeLevelAttrs = projectedType2.GetCustomAttributes(false);
 
-            Assert.Equal(0, constructor1.GetCustomAttributes(false).Length);
-            Assert.Equal(0, constructor3.GetCustomAttributes(false).Length);
+            Assert.Empty(constructor1.GetCustomAttributes(false));
+            Assert.Empty(constructor3.GetCustomAttributes(false));
 
             ConstructorInfo ci = constructor2;
             var attrs = ci.GetCustomAttributes(false);
-            Assert.Equal(1, attrs.Length);
+            Assert.Single(attrs);
             Assert.IsType<ImportingConstructorAttribute>(attrs[0]);
         }
 
@@ -160,12 +160,12 @@ namespace System.ComponentModel.Composition.Registration.Tests
             // necessary as BuildConventionConstructorAttributes is only called for type level query for attributes
             var typeLevelAttrs = projectedType2.GetCustomAttributes(false);
 
-            Assert.Equal(0, constructor1.GetCustomAttributes(false).Length);
-            Assert.Equal(0, constructor3.GetCustomAttributes(false).Length);
+            Assert.Empty(constructor1.GetCustomAttributes(false));
+            Assert.Empty(constructor3.GetCustomAttributes(false));
 
             ConstructorInfo ci = constructor2;
             var attrs = ci.GetCustomAttributes(false);
-            Assert.Equal(1, attrs.Length);
+            Assert.Single(attrs);
             Assert.IsType<ImportingConstructorAttribute>(attrs[0]);
         }
 

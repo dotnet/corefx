@@ -213,7 +213,7 @@ namespace System.Collections.Tests
                 set.TrimExcess();
                 set.Clear();
                 set.TrimExcess();
-                Assert.Equal(0, set.Count);
+                Assert.Empty(set);
 
                 AddToCollection(set, setLength / 10);
                 set.TrimExcess();
@@ -231,7 +231,7 @@ namespace System.Collections.Tests
                 set.TrimExcess();
                 set.Clear();
                 set.TrimExcess();
-                Assert.Equal(0, set.Count);
+                Assert.Empty(set);
 
                 AddToCollection(set, setLength);
                 set.TrimExcess();

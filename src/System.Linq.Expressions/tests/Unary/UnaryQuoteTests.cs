@@ -56,7 +56,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)();
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
             Assert.Equal(ExpressionType.Call, quote.Body.NodeType);
 
             var call = (MethodCallExpression)quote.Body;
@@ -72,7 +72,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)();
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
             Assert.Equal(ExpressionType.Call, quote.Body.NodeType);
 
             var call = (MethodCallExpression)quote.Body;
@@ -86,7 +86,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)();
 
-            Assert.Equal(1, quote.Parameters.Count);
+            Assert.Single(quote.Parameters);
             Assert.Same(quote.Body, quote.Parameters[0]);
         }
 
@@ -97,7 +97,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)(42);
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
             AssertIsBox(quote.Body, 42, useInterpreter);
         }
 
@@ -109,7 +109,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)(1)(2);
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
 
             Assert.Equal(ExpressionType.Add, quote.Body.NodeType);
 
@@ -130,7 +130,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)();
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
             Assert.Same(expr, quote.Body);
         }
 
@@ -150,7 +150,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)();
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
             Assert.Same(expr, quote.Body);
         }
 
@@ -170,7 +170,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)(43);
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
             Assert.Same(expr, quote.Body);
         }
 
@@ -188,12 +188,12 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)(42);
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
 
             var block = quote.Body as BlockExpression;
             Assert.NotNull(block);
-            Assert.Equal(0, block.Variables.Count);
-            Assert.Equal(1, block.Expressions.Count);
+            Assert.Empty(block.Variables);
+            Assert.Single(block.Expressions);
 
             AssertIsBox(block.Expressions[0], 42, useInterpreter);
         }
@@ -218,12 +218,12 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)(1);
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
 
             var block = quote.Body as BlockExpression;
             Assert.NotNull(block);
 
-            Assert.Equal(1, block.Variables.Count);
+            Assert.Single(block.Variables);
             Assert.Same(y, block.Variables[0]);
 
             Assert.Equal(2, block.Expressions.Count);
@@ -256,7 +256,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)();
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
             Assert.Same(expr, quote.Body);
         }
 
@@ -279,7 +279,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)(42);
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
 
             var @try = quote.Body as TryExpression;
             Assert.NotNull(@try);
@@ -289,7 +289,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Null(@try.Finally);
 
             Assert.NotNull(@try.Handlers);
-            Assert.Equal(1, @try.Handlers.Count);
+            Assert.Single(@try.Handlers);
 
             var handler = @try.Handlers[0];
             Assert.Same(expr.Handlers[0], handler);
@@ -314,7 +314,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)(42);
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
 
             var @try = quote.Body as TryExpression;
             Assert.NotNull(@try);
@@ -324,7 +324,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Null(@try.Finally);
 
             Assert.NotNull(@try.Handlers);
-            Assert.Equal(1, @try.Handlers.Count);
+            Assert.Single(@try.Handlers);
 
             var handler = @try.Handlers[0];
             Assert.Null(handler.Filter);
@@ -350,7 +350,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)(42);
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
 
             var @try = quote.Body as TryExpression;
             Assert.NotNull(@try);
@@ -360,7 +360,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Null(@try.Finally);
 
             Assert.NotNull(@try.Handlers);
-            Assert.Equal(1, @try.Handlers.Count);
+            Assert.Single(@try.Handlers);
 
             var handler = @try.Handlers[0];
             Assert.Same(expr.Handlers[0], handler);
@@ -384,7 +384,7 @@ namespace System.Linq.Expressions.Tests
 
             var quote = f.Compile(useInterpreter)(42);
 
-            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Empty(quote.Parameters);
 
             var @try = quote.Body as TryExpression;
             Assert.NotNull(@try);
@@ -394,7 +394,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Null(@try.Finally);
 
             Assert.NotNull(@try.Handlers);
-            Assert.Equal(1, @try.Handlers.Count);
+            Assert.Single(@try.Handlers);
 
             var handler = @try.Handlers[0];
             Assert.Null(handler.Filter);

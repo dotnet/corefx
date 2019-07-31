@@ -159,8 +159,8 @@ namespace System.Drawing.Drawing2D.Tests
         {
             using (GraphicsPath gp = new GraphicsPath())
             {
-                Assert.Equal(0, gp.PathData.Points.Length);
-                Assert.Equal(0, gp.PathData.Types.Length);
+                Assert.Empty(gp.PathData.Points);
+                Assert.Empty(gp.PathData.Types);
             }
         }
 
@@ -884,10 +884,10 @@ namespace System.Drawing.Drawing2D.Tests
             using (GraphicsPath gpf = new GraphicsPath())
             {
                 gpi.AddRectangle(new Rectangle(1, 2, width, height));
-                Assert.Equal(0, gpi.PathData.Points.Length);
+                Assert.Empty(gpi.PathData.Points);
 
                 gpf.AddRectangle(new RectangleF(1f, 2f, (float)width, (float)height));
-                Assert.Equal(0, gpf.PathData.Points.Length);
+                Assert.Empty(gpf.PathData.Points);
             }
         }
 
@@ -2428,8 +2428,8 @@ namespace System.Drawing.Drawing2D.Tests
 
         private void AssertEmptyGrahicsPath(GraphicsPath gp)
         {
-            Assert.Equal(0, gp.PathData.Points.Length);
-            Assert.Equal(0, gp.PathData.Types.Length);
+            Assert.Empty(gp.PathData.Points);
+            Assert.Empty(gp.PathData.Types);
             Assert.Equal(0, gp.PointCount);
         }
 

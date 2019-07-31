@@ -183,7 +183,7 @@ namespace System.Reflection.Tests
         public void GetInterfaces_GenericInterfaceWithTypeParameter_ReturnsExpectedToString()
         {
             Type[] interfaces = typeof(GenericClassWithInterface<>).GetInterfaces();
-            Assert.Equal(1, interfaces.Length);
+            Assert.Single(interfaces);
             Assert.Equal("System.Reflection.Tests.IGenericInterface`1[T]", interfaces[0].ToString());
         }
 

@@ -200,7 +200,7 @@ namespace System.Reflection.Tests
                     Assert.Equal(0, v.Revision);
                     Assert.Equal(string.Empty, an.CultureName);
                     Assert.Null(an.GetPublicKey());
-                    Assert.Equal(0, an.GetPublicKeyToken().Length);
+                    Assert.Empty(an.GetPublicKeyToken());
                 }
 
                 {
@@ -214,7 +214,7 @@ namespace System.Reflection.Tests
                     Assert.Equal(4, v.Revision);
                     Assert.Equal("ar-LY", an.CultureName);
                     Assert.Null(an.GetPublicKey());
-                    Assert.Equal(0, an.GetPublicKeyToken().Length);
+                    Assert.Empty(an.GetPublicKeyToken());
                 }
             }
         }
@@ -228,7 +228,7 @@ namespace System.Reflection.Tests
 
                 Assembly a = lc.LoadFromByteArray(TestData.s_AssemblyRefUsingFullPublicKeyImage);
                 AssemblyName[] ans = a.GetReferencedAssemblies();
-                Assert.Equal(1, ans.Length);
+                Assert.Single(ans);
                 AssemblyName an = ans[0];
                 Assert.Equal("mscorlib", an.Name);
                 Assert.Equal(AssemblyNameFlags.PublicKey, an.Flags);

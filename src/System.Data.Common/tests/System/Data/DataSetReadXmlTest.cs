@@ -677,7 +677,7 @@ namespace System.Data.Tests
 
             var ds = new DataSet();
             ds.ReadXml(new StringReader(xml));
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal("Table", ds.Tables[0].TableName);
             Assert.Equal(4, ds.Tables[0].Columns.Count);
             Assert.Equal("Name", ds.Tables[0].Columns[0].ColumnName);
@@ -709,7 +709,7 @@ namespace System.Data.Tests
 
             var ds = new DataSet();
             ds.ReadXml(new StringReader(xml));
-            Assert.Equal(1, ds.Tables.Count);
+            Assert.Single(ds.Tables);
             Assert.Equal("Table", ds.Tables[0].TableName);
             Assert.Equal(3, ds.Tables[0].Columns.Count);
             Assert.Equal("Name", ds.Tables[0].Columns[0].ColumnName);

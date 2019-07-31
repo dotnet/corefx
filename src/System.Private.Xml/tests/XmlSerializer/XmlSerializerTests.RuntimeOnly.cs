@@ -968,7 +968,7 @@ public static partial class XmlSerializerTests
         Xml_ListGenericRoot(serializers[1]);
 
         serializers = XmlSerializer.FromTypes(null);
-        Assert.Equal(0, serializers.Length);
+        Assert.Empty(serializers);
     }
 
     [Fact]

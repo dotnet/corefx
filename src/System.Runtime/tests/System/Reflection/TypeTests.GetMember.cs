@@ -36,7 +36,7 @@ public static class TypeTests_GetMember
     {
         Type t = typeof(Mixed);
         MemberInfo[] expectedMembers = t.GetMember("*", MemberTypes.NestedType, BindingFlags.Public | BindingFlags.Instance);
-        Assert.Equal(1, expectedMembers.Length);
+        Assert.Single(expectedMembers);
         Assert.Equal(typeof(Mixed.MyType), expectedMembers[0]);
 
         MemberInfo[] actualMembers;
@@ -149,7 +149,7 @@ public static class TypeTests_GetMember
     {
         Type t = typeof(Mixed);
         MemberInfo[] members = t.GetMember("NOSUCHMEMBER", MemberTypes.All, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        Assert.Equal(0, members.Length);
+        Assert.Empty(members);
     }
 
 
@@ -158,7 +158,7 @@ public static class TypeTests_GetMember
     {
         Type t = typeof(Mixed);
         MemberInfo[] members = t.GetMember("MyField", MemberTypes.All, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        Assert.Equal(1, members.Length);
+        Assert.Single(members);
         Assert.True(members[0] is FieldInfo);
         Assert.Equal("MyField", members[0].Name);
     }
@@ -168,7 +168,7 @@ public static class TypeTests_GetMember
     {
         Type t = typeof(Mixed);
         MemberInfo[] members = t.GetMember("MYFIELD", MemberTypes.All, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        Assert.Equal(0, members.Length);
+        Assert.Empty(members);
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public static class TypeTests_GetMember
     {
         Type t = typeof(Mixed);
         MemberInfo[] members = t.GetMember("MyField", MemberTypes.All, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.IgnoreCase);
-        Assert.Equal(1, members.Length);
+        Assert.Single(members);
         Assert.True(members[0] is FieldInfo);
         Assert.Equal("MyField", members[0].Name);
     }
@@ -186,7 +186,7 @@ public static class TypeTests_GetMember
     {
         Type t = typeof(Mixed);
         MemberInfo[] members = t.GetMember("MYfiELD", MemberTypes.All, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.IgnoreCase);
-        Assert.Equal(1, members.Length);
+        Assert.Single(members);
         Assert.True(members[0] is FieldInfo);
         Assert.Equal("MyField", members[0].Name);
     }
@@ -196,7 +196,7 @@ public static class TypeTests_GetMember
     {
         Type t = typeof(Mixed);
         MemberInfo[] members = t.GetMember("MyFi*", MemberTypes.All, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        Assert.Equal(1, members.Length);
+        Assert.Single(members);
         Assert.True(members[0] is FieldInfo);
         Assert.Equal("MyField", members[0].Name);
     }
@@ -206,7 +206,7 @@ public static class TypeTests_GetMember
     {
         Type t = typeof(Mixed);
         MemberInfo[] members = t.GetMember("MYFI*", MemberTypes.All, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        Assert.Equal(0, members.Length);
+        Assert.Empty(members);
     }
 
     [Fact]
@@ -214,7 +214,7 @@ public static class TypeTests_GetMember
     {
         Type t = typeof(Mixed);
         MemberInfo[] members = t.GetMember("MyFi*", MemberTypes.All, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.IgnoreCase);
-        Assert.Equal(1, members.Length);
+        Assert.Single(members);
         Assert.True(members[0] is FieldInfo);
         Assert.Equal("MyField", members[0].Name);
     }
@@ -224,7 +224,7 @@ public static class TypeTests_GetMember
     {
         Type t = typeof(Mixed);
         MemberInfo[] members = t.GetMember("MYFI*", MemberTypes.All, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.IgnoreCase);
-        Assert.Equal(1, members.Length);
+        Assert.Single(members);
         Assert.True(members[0] is FieldInfo);
         Assert.Equal("MyField", members[0].Name);
     }
