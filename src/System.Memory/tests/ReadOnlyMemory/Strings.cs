@@ -83,6 +83,7 @@ namespace System.MemoryTests
             Assert.Throws<ArgumentOutOfRangeException>(() => str.AsMemory(-1, -1));
         }
 
+#pragma warning disable xUnit2013 // Do not use Assert.Equal() to check for collection size.
         [Fact]
         public static void AsMemory_TryGetArray_ReturnsFalse()
         {
@@ -90,8 +91,9 @@ namespace System.MemoryTests
             Assert.False(MemoryMarshal.TryGetArray(m, out ArraySegment<char> array));
             Assert.Null(array.Array);
             Assert.Equal(0, array.Offset);
-            Assert.Empty(array);
+            Assert.Equal(0, array.Count);
         }
+#pragma warning restore xUnit2013
 
         [Fact]
         public static unsafe void AsMemory_Pin_ExpectedPointerValue()

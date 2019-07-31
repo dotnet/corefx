@@ -63,20 +63,22 @@ namespace System.Tests
 
         #endregion
 
+#pragma warning disable xUnit2013 // Do not use Assert.Equal() to check for collection size.
         [Fact]
         public void Ctor_Empty()
         {
             var segment = new ArraySegment<T>();
             Assert.Null(segment.Array);
             Assert.Equal(0, segment.Offset);
-            Assert.Empty(segment);
+            Assert.Equal(0, segment.Count);
 
             T[] array = new T[10];
             segment = new ArraySegment<T>(array, 10, 0);
             Assert.Same(array, segment.Array);
             Assert.Equal(10, segment.Offset);
-            Assert.Empty(segment);
+            Assert.Equal(0, segment.Count);
         }
+#pragma warning restore xUnit2013
 
         [Fact]
         public static void Ctor_Invalid()

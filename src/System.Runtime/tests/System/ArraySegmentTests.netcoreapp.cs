@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
+#pragma warning disable xUnit2013 // Do not use Assert.Equal() to check for collection size.
+
 namespace System.Tests
 {
     public abstract partial class ArraySegment_Tests<T>
@@ -39,9 +41,9 @@ namespace System.Tests
             // Check that two Empty invocations return ArraySegments with a cached empty array.
             // An empty array is necessary to ensure that someone doesn't use the indexer to store data in the array Empty refers to.
             Assert.Same(empty.Array, ArraySegment<T>.Empty.Array);
-            Assert.Empty(empty.Array);
+            Assert.Equal(0, empty.Array.Length);
             Assert.Equal(0, empty.Offset);
-            Assert.Empty(empty);
+            Assert.Equal(0, empty.Count);
         }
 
         [Fact]
@@ -105,7 +107,7 @@ namespace System.Tests
             ArraySegment<T> fromNull = null;
             Assert.Null(fromNull.Array);
             Assert.Equal(0, fromNull.Offset);
-            Assert.Empty(fromNull);
+            Assert.Equal(0, fromNull.Count);
 
             Assert.True(default(ArraySegment<T>) == null);
             Assert.True(new ArraySegment<T>(Array.Empty<T>()) != null);
@@ -472,3 +474,6 @@ namespace System.Tests
         }
     }
 }
+
+#pragma warning restore xUnit2013
+
