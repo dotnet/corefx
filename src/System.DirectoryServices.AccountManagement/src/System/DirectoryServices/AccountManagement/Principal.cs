@@ -744,13 +744,13 @@ namespace System.DirectoryServices.AccountManagement
 
         internal bool Loaded
         {
-            set
-            {
-                _loaded = value;
-            }
             get
             {
                 return _loaded;
+            }
+            set
+            {
+                _loaded = value;
             }
         }
 
