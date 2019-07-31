@@ -12,13 +12,13 @@
       <NotSupportedSourceFile>$(_notSupportedSourceDirectory)$(TargetName).notsupported.cs</NotSupportedSourceFile>
     </PropertyGroup>
     
-    <MakeDir Condition="'$(OfflineBuild)' != 'true'" Directories="$(_notSupportedSourceDirectory)" />
+    <MakeDir Condition="'$(DotNetBuildOffline)' != 'true'" Directories="$(_notSupportedSourceDirectory)" />
     
-    <Error Condition="'$(OfflineBuild)' == 'true' AND !Exists('$(NotSupportedSourceFile)')"
+    <Error Condition="'$(DotNetBuildOffline)' == 'true' AND !Exists('$(NotSupportedSourceFile)')"
            Text="Error NotSupportedSourceFile '$(NotSupportedSourceFile)' did not exist under DotNetSourceBuildIntermediatePath." />
     
-    <!-- OfflineBuild == true, don't use GenAPI and include source from DotNetSourceBuildIntermediatePath -->  
-    <ItemGroup Condition="'$(OfflineBuild)' == 'true'">
+    <!-- DotNetBuildOffline == true, don't use GenAPI and include source from DotNetSourceBuildIntermediatePath -->  
+    <ItemGroup Condition="'$(DotNetBuildOffline)' == 'true'">
       <Compile Include="$(NotSupportedSourceFile)" />
     </ItemGroup>
   </Target>
