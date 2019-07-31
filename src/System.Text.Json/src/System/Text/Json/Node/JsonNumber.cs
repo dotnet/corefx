@@ -20,6 +20,12 @@ namespace System.Text.Json
         ///   Initializes a new instance of the <see cref="JsonNumber"/> class representing a specified value.
         /// </summary>
         /// <param name="value">The string representation of a numeric value in a legal JSON number format.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided value is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   Provided value is not in a legal JSON number format.
+        /// </exception>
         public JsonNumber(string value) => SetFormattedValue(value);
 
         /// <summary>
@@ -396,6 +402,12 @@ namespace System.Text.Json
         ///   Changes the numeric value of this instance to represent a specified value.
         /// </summary>
         /// <param name="value">The string representation of a numeric value in a legal JSON number format.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided value is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   Provided value is not in a legal JSON number format.
+        /// </exception>
         public void SetFormattedValue(string value)
         {
             if (value == null)
