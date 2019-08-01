@@ -666,7 +666,7 @@ namespace System.Data.Tests.Common
                 Assert.Throws<ArgumentNullException>(() => DbConnectionStringBuilder.AppendKeyValuePair(sb, null, "localhost"));
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Null(ex.ParamName);
+            Assert.Equal("keyName", ex.ParamName);
         }
 
         [Fact] // AppendKeyValuePair (StringBuilder, String, String, Boolean)
@@ -1521,14 +1521,14 @@ namespace System.Data.Tests.Common
             StringBuilder sb = new StringBuilder();
 
             ArgumentException ex1 =
-                Assert.Throws<ArgumentException>(() => DbConnectionStringBuilder.AppendKeyValuePair(null, string.Empty, "localhost", true));
+                Assert.Throws<ArgumentException>(() => DbConnectionStringBuilder.AppendKeyValuePair(sb, string.Empty, "localhost", true));
             // Expecting non-empty string for 'keyName' parameter
             Assert.Null(ex1.InnerException);
             Assert.NotNull(ex1.Message);
             Assert.Null(ex1.ParamName);
 
             ArgumentException ex2 =
-                Assert.Throws<ArgumentException>(() => DbConnectionStringBuilder.AppendKeyValuePair(null, string.Empty, "localhost", false));
+                Assert.Throws<ArgumentException>(() => DbConnectionStringBuilder.AppendKeyValuePair(sb, string.Empty, "localhost", false));
             // Expecting non-empty string for 'keyName' parameter
             Assert.Null(ex2.InnerException);
             Assert.NotNull(ex2.Message);
@@ -1540,13 +1540,13 @@ namespace System.Data.Tests.Common
         {
             StringBuilder sb = new StringBuilder();
             ArgumentNullException ex1 =
-                Assert.Throws<ArgumentNullException>(() => DbConnectionStringBuilder.AppendKeyValuePair(null, null, "localhost", true));
+                Assert.Throws<ArgumentNullException>(() => DbConnectionStringBuilder.AppendKeyValuePair(sb, null, "localhost", true));
             Assert.Null(ex1.InnerException);
             Assert.NotNull(ex1.Message);
             Assert.Equal("keyName", ex1.ParamName);
 
             ArgumentNullException ex2 =
-                Assert.Throws<ArgumentNullException>(() => DbConnectionStringBuilder.AppendKeyValuePair(null, null, "localhost", false));
+                Assert.Throws<ArgumentNullException>(() => DbConnectionStringBuilder.AppendKeyValuePair(sb, null, "localhost", false));
             Assert.Null(ex2.InnerException);
             Assert.NotNull(ex2.Message);
             Assert.Equal("keyName", ex2.ParamName);
@@ -2266,7 +2266,7 @@ namespace System.Data.Tests.Common
                 {
                     if (i == j)
                         continue;
-                    Assert.Equal(tests1[i], tests1[j]);
+                    Assert.NotEqual(tests1[i], tests1[j]);
                 }
             }
 
@@ -2277,7 +2277,7 @@ namespace System.Data.Tests.Common
                 {
                     if (i == j)
                         continue;
-                    Assert.Equal(tests2[i], tests2[j]);
+                    Assert.NotEqual(tests2[i], tests2[j]);
                 }
             }
         }

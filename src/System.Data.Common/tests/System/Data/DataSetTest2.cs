@@ -1676,7 +1676,9 @@ namespace System.Data.Tests
                 ds1.Merge(ds2, true, MissingSchemaAction.Error);
             });
 
-            Assert.Throws<DataException>(() =>
+            //TODO: InvalidConstraintException at 1687 ...Add("fk"..., what are testing exactly?
+            //"This constraint cannot be added since ForeignKey doesn't belong to table table1."
+            Assert.ThrowsAny<DataException>(() =>
             {
                 DataSet ds1 = ds.Copy();
                 DataSet ds2 = ds.Copy();

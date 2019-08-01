@@ -25,7 +25,6 @@
 
 using Xunit;
 
-
 namespace System.Data.Tests
 {
     public class DataRowViewTest2

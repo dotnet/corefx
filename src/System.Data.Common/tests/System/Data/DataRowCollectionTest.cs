@@ -186,7 +186,7 @@ namespace System.Data.Tests
             //    // Never premise English.
             //    //Assert.Equal ("Column 'Column1' is constrained to be unique.  Value 'first' is already present.", e.Message);
             //}
-            Assert.Throws<NoNullAllowedException>(() => rows.Add(cols));
+            Assert.Throws<ConstraintException>(() => rows.Add(cols));
 
             column = new DataColumn("integer");
             column.DataType = typeof(short);
@@ -478,9 +478,7 @@ namespace System.Data.Tests
 
             DataRowCollection rows2 = _tbl.Rows;
 
-            Assert.True(rows2.Equals(rows1));
-            Assert.True(rows1.Equals(rows2));
-            Assert.True(rows1.Equals(rows1));
+            Assert.Same(rows2, rows1);
 
             DataTable table = new DataTable();
             table.Columns.Add();
@@ -496,10 +494,8 @@ namespace System.Data.Tests
             rows3.Add(new object[] { "6", "6", "6" });
             rows3.Add(new object[] { "7", "7", "7" });
 
-            Assert.False(rows3.Equals(rows1));
-            Assert.False(rows3.Equals(rows2));
-            Assert.False(rows1.Equals(rows3));
-            Assert.False(rows2.Equals(rows3));
+            Assert.NotSame(rows3, rows2);
+            Assert.NotSame(rows1, rows3);
         }
 
         [Fact]
@@ -888,7 +884,7 @@ namespace System.Data.Tests
             var columns = new DataColumn[] { column };
             dt.PrimaryKey = columns;
 
-            Assert.Throws<IndexOutOfRangeException>(() => dt.Rows.Find(new object[] { null }));
+            Assert.Null(dt.Rows.Find(new object[] { null }));
         }
 
         [Fact]
@@ -901,7 +897,7 @@ namespace System.Data.Tests
             var columns = new DataColumn[] { column };
             dt.PrimaryKey = columns;
 
-            Assert.Throws<IndexOutOfRangeException>(() => dt.Rows.Find((object)null));
+            Assert.Null(dt.Rows.Find((object)null));
         }
     }
 }

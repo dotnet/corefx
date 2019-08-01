@@ -783,24 +783,24 @@ namespace System.Data.Tests
 
             DataColumn col = new DataColumn();
             col.ColumnName = "Id";
-            col.DataType = Type.GetType("System.Int32");
+            col.DataType = typeof(int);
             table.Columns.Add(col);
             UniqueConstraint uc = new UniqueConstraint("UK1", table.Columns[0]);
             table.Constraints.Add(uc);
 
             col = new DataColumn();
             col.ColumnName = "Name";
-            col.DataType = Type.GetType("System.String");
+            col.DataType = typeof(string);
             table.Columns.Add(col);
 
             col = new DataColumn();
             col.ColumnName = "Id";
-            col.DataType = Type.GetType("System.Int32");
+            col.DataType = typeof(int);
             table1.Columns.Add(col);
 
             col = new DataColumn();
             col.ColumnName = "Name";
-            col.DataType = Type.GetType("System.String");
+            col.DataType = typeof(string);
             table1.Columns.Add(col);
             ForeignKeyConstraint fc = new ForeignKeyConstraint("FK1", table.Columns[0], table1.Columns[0]);
             table1.Constraints.Add(fc);
@@ -1695,14 +1695,7 @@ namespace System.Data.Tests
             child.Rows.Add(dr);
             dr.AcceptChanges();
 
-            try
-            {
-                ds.Clear(); // this should clear all the rows in parent & child tables
-            }
-            catch (Exception e)
-            {
-                throw (new Exception("Exception should not have been thrown at Clear method" + e.ToString()));
-            }
+            ds.Clear(); // this should clear all the rows in parent & child tables
             Assert.Equal(0, parent.Rows.Count);
             Assert.Equal(0, child.Rows.Count);
         }

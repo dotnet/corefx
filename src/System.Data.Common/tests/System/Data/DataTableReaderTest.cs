@@ -320,8 +320,7 @@ namespace System.Data.Tests
                 {
                     reader.Read();
                     reader.Close();
-                    int i = (int)reader[0];
-                    i++; // to suppress warning
+                    _ = (int)reader[0];
                 }
                 finally
                 {
@@ -339,8 +338,7 @@ namespace System.Data.Tests
                 DataTableReader reader = new DataTableReader(_dt);
                 try
                 {
-                    int i = (int)reader[0];
-                    i++; // to suppress warning
+                    _ = (int)reader[0];
                 }
                 finally
                 {
@@ -359,8 +357,7 @@ namespace System.Data.Tests
                 try
                 {
                     reader.Read();
-                    int i = (int)reader[90]; // kidding, ;-)
-                    i++; // to suppress warning
+                    _ = (int)reader[90]; // kidding, ;-)
                 }
                 finally
                 {
@@ -527,13 +524,8 @@ namespace System.Data.Tests
                 reader.Read(); // first row
                 reader.Read(); // second row
                 _dt.Clear();
-                try
-                {
-                    int i = (int)reader[0];
-                    i++; // suppress warning
-                    Assert.False(true);
-                }
-                catch (RowNotInTableException) { }
+                
+                Assert.Throws<RowNotInTableException>(() => (int)reader[0]);
 
                 // clear and add test
                 reader.Close();

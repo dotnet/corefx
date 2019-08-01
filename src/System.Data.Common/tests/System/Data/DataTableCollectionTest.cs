@@ -271,16 +271,9 @@ namespace System.Data.Tests
             tbcol2.Add(_tables[1]);
             tbcol3 = tbcol1;
 
-            Assert.True(tbcol1.Equals(tbcol1));
-            Assert.True(tbcol1.Equals(tbcol3));
-            Assert.True(tbcol3.Equals(tbcol1));
+            Assert.Same(tbcol1, tbcol3);
 
-            Assert.False(tbcol1.Equals(tbcol2));
-            Assert.False(tbcol2.Equals(tbcol1));
-
-            Assert.True(object.Equals(tbcol1, tbcol3));
-            Assert.True(object.Equals(tbcol1, tbcol1));
-            Assert.False(object.Equals(tbcol1, tbcol2));
+            Assert.NotSame(tbcol1, tbcol2);
         }
         [Fact]
         public void IndexOf()

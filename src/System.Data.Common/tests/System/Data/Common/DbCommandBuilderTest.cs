@@ -50,8 +50,8 @@ namespace System.Data.Tests.Common
             // The CatalogLocation enumeration value, 666, is invalid
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Contains(ex.Message, "CatalogLocation");
-            Assert.Contains(ex.Message, "666");
+            Assert.Contains("CatalogLocation", ex.Message);
+            Assert.Contains("666", ex.Message);
             Assert.Equal("CatalogLocation", ex.ParamName);
 
             Assert.Equal(CatalogLocation.End, cb.CatalogLocation);
@@ -92,8 +92,8 @@ namespace System.Data.Tests.Common
             // The ConflictOption enumeration value, 666, is invalid
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Contains(ex.Message, "ConflictOption");
-            Assert.Contains(ex.Message, "666");
+            Assert.Contains("ConflictOption", ex.Message);
+            Assert.Contains("666", ex.Message);
             Assert.Equal("ConflictOption", ex.ParamName);
 
             Assert.Equal(ConflictOption.CompareRowVersion, cb.ConflictOption);

@@ -186,13 +186,6 @@ namespace System.Data.Tests.SqlTypes
         }
 
         [Fact]
-        public void GetTypeTest()
-        {
-            SqlInt64 Test = new SqlInt64(84);
-            Assert.Equal("System.Data.SqlTypes.SqlInt64", Test.GetType().ToString());
-        }
-
-        [Fact]
         public void Greaters()
         {
             SqlInt64 test10 = new SqlInt64(10);
@@ -614,15 +607,6 @@ namespace System.Data.Tests.SqlTypes
             ReadWriteXmlTestInternal(xml1, lngtest1, "BA01");
             ReadWriteXmlTestInternal(xml2, lngtest2, "BA02");
 
-            try
-            {
-                ReadWriteXmlTestInternal(xml3, lngtest3, "BA03");
-                Assert.False(true);
-            }
-            catch (InvalidOperationException e)
-            {
-                Assert.Equal(typeof(FormatException), e.InnerException.GetType());
-            }
             InvalidOperationException ex =
                 Assert.Throws<InvalidOperationException>(() => ReadWriteXmlTestInternal(xml3, lngtest3, "#BA03"));
             Assert.Equal(typeof(FormatException), ex.InnerException.GetType());

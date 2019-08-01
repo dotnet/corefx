@@ -96,8 +96,8 @@ namespace System.Data.Tests.Common
             // The LoadOption enumeration value, 666, is invalid
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Contains(ex.Message, "LoadOption");
-            Assert.Contains(ex.Message, "666");
+            Assert.Contains("LoadOption", ex.Message);
+            Assert.Contains("666", ex.Message);
             Assert.NotNull(ex.ParamName);
             Assert.Equal("LoadOption", ex.ParamName);
         }
@@ -122,8 +122,8 @@ namespace System.Data.Tests.Common
             // The MissingMappingAction enumeration value, 666, is invalid
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Contains(ex.Message, "MissingMappingAction");
-            Assert.Contains(ex.Message, "666");
+            Assert.Contains("MissingMappingAction", ex.Message);
+            Assert.Contains("666", ex.Message);
             Assert.NotNull(ex.ParamName);
             Assert.Equal("MissingMappingAction", ex.ParamName);
 
@@ -149,8 +149,8 @@ namespace System.Data.Tests.Common
             // The MissingSchemaAction enumeration value, 666, is invalid
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Contains(ex.Message, "MissingSchemaAction");
-            Assert.Contains(ex.Message, "666");
+            Assert.Contains("MissingSchemaAction", ex.Message);
+            Assert.Contains("666", ex.Message);
             Assert.NotNull(ex.ParamName);
             Assert.Equal("MissingSchemaAction", ex.ParamName);
         }

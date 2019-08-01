@@ -282,13 +282,6 @@ namespace System.Data.Tests.SqlTypes
         }
 
         [Fact]
-        public void GetTypeTest()
-        {
-            Assert.Equal("System.Data.SqlTypes.SqlString", _test1.GetType().ToString());
-            Assert.Equal("System.String", _test1.Value.GetType().ToString());
-        }
-
-        [Fact]
         public void Greaters()
         {
             // GreateThan ()
@@ -623,7 +616,7 @@ namespace System.Data.Tests.SqlTypes
             SqlByte testByte = new SqlByte(250);
             Assert.Equal("250", ((SqlString)testByte).Value);
 
-            Assert.Throws<SqlNullValueException>(() => (SqlString)SqlByte.Null);
+            Assert.Throws<SqlNullValueException>(() => ((SqlString)SqlByte.Null).Value);
         }
 
         [Fact]
@@ -657,7 +650,7 @@ namespace System.Data.Tests.SqlTypes
 
             Assert.Equal("00004064-0000-0000-0000-000000000000", ((SqlString)testGuid).Value);
 
-            Assert.Throws<SqlNullValueException>(() => (SqlString)SqlGuid.Null);
+            Assert.Throws<SqlNullValueException>(() => ((SqlString)SqlGuid.Null).Value);
         }
 
         [Fact]
@@ -666,7 +659,7 @@ namespace System.Data.Tests.SqlTypes
             SqlInt16 testInt = new SqlInt16(20012);
             Assert.Equal("20012", ((SqlString)testInt).Value);
 
-            Assert.Throws<SqlNullValueException>(() => (SqlString)SqlInt16.Null);
+            Assert.Throws<SqlNullValueException>(() => ((SqlString)SqlInt16.Null).Value);
         }
 
         [Fact]
@@ -675,7 +668,7 @@ namespace System.Data.Tests.SqlTypes
             SqlInt32 testInt = new SqlInt32(-12456);
             Assert.Equal("-12456", ((SqlString)testInt).Value);
 
-            Assert.Throws<SqlNullValueException>(() => (SqlString)SqlInt32.Null);
+            Assert.Throws<SqlNullValueException>(() => ((SqlString)SqlInt32.Null).Value);
         }
 
         [Fact]

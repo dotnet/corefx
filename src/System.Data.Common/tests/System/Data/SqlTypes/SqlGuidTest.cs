@@ -144,13 +144,6 @@ namespace System.Data.Tests.SqlTypes
         }
 
         [Fact]
-        public void GetTypeTest()
-        {
-            Assert.Equal("System.Data.SqlTypes.SqlGuid", _test1.GetType().ToString());
-            Assert.Equal("System.Guid", _test3.Value.GetType().ToString());
-        }
-
-        [Fact]
         public void Greaters()
         {
             // GreateThan ()
@@ -193,15 +186,6 @@ namespace System.Data.Tests.SqlTypes
         {
             Assert.Throws<ArgumentNullException>(() => SqlGuid.Parse(null));
 
-            try
-            {
-                SqlGuid.Parse("not-a-number");
-                Assert.False(true);
-            }
-            catch (Exception e)
-            {
-                Assert.Equal(typeof(FormatException), e.GetType());
-            }
             Assert.Throws<FormatException>(() => SqlGuid.Parse("not-a-number"));
 
             Assert.Throws<FormatException>(() => SqlGuid.Parse("9e400"));

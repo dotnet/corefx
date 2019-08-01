@@ -310,7 +310,7 @@ namespace System.Data.Tests
             Assert.Throws<SyntaxErrorException>(() => t.Select("name = 1human "));
 
             // Cannot perform '=' operation between string and Int32
-            Assert.Throws<SyntaxErrorException>(() => t.Select("name = 1"));
+            Assert.Throws<EvaluateException>(() => t.Select("name = 1"));
 
             Assert.Equal(1, t.Select("age = '13'").Length);
         }
@@ -2285,7 +2285,7 @@ Assert.False(true);
             dtLoad.Rows.Add(new object[] { 6, "mono 6", "miss6" });
             dtLoad.AcceptChanges();
             DataTableReader dtr = _dt.CreateDataReader();
-            Assert.Throws<ArgumentException>(() => dtLoad.Load(dtr));
+            Assert.Throws<ConstraintException>(() => dtLoad.Load(dtr));
         }
 
         [Fact]
@@ -3762,7 +3762,7 @@ Assert.False(true);
         public void ReadWriteXmlSchemaExp_NoFileName()
         {
             DataTable dtw = new DataTable();
-            Assert.Throws<InvalidOperationException>(() => dtw.WriteXmlSchema(string.Empty));
+            Assert.Throws<ArgumentException>(() => dtw.WriteXmlSchema(string.Empty));
         }
 
         [Fact]

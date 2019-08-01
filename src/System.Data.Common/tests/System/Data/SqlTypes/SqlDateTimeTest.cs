@@ -192,13 +192,6 @@ namespace System.Data.Tests.SqlTypes
         }
 
         [Fact]
-        public void GetTypeTest()
-        {
-            Assert.Equal("System.Data.SqlTypes.SqlDateTime", _test1.GetType().ToString());
-            Assert.Equal("System.DateTime", _test1.Value.GetType().ToString());
-        }
-
-        [Fact]
         public void Greaters()
         {
             // GreateThan ()

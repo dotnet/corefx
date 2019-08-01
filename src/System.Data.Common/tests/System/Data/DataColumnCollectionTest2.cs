@@ -624,18 +624,11 @@ namespace System.Data.Tests
         {
             DataTable dt = DataProvider.CreateParentDataTable();
 
-            try
-            {
-                DataColumn column = dt.Columns[-1];
-                Assert.False(true);
-            }
-            catch (IndexOutOfRangeException ex)
-            {
-                // Cannot find column -1
-                Assert.Equal(typeof(IndexOutOfRangeException), ex.GetType());
-                Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-            }
+            IndexOutOfRangeException ex =
+                Assert.Throws<IndexOutOfRangeException>(() => dt.Columns[-1]);
+            // Cannot find column -1
+            Assert.Null(ex.InnerException);
+            Assert.NotNull(ex.Message);
         }
 
         [Fact] // this [Int32]

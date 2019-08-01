@@ -168,38 +168,22 @@ namespace System.Data.Tests
         {
             DataColumn dc;
             dc = new DataColumn();
-            string[] sTypeArr = { "System.Boolean", "System.Byte", "System.Char", "System.DateTime",
-                "System.Decimal", "System.Double", "System.Int16", "System.Int32",
-                "System.Int64", "System.SByte", "System.Single", "System.String",
-                "System.TimeSpan", "System.UInt16", "System.UInt32", "System.UInt64" };
+            Type[] typeArr = { typeof(bool), typeof(byte), typeof(char), typeof(DateTime),
+                typeof(decimal), typeof(double), typeof(short), typeof(int),
+                typeof(long), typeof(sbyte), typeof(float), typeof(string),
+                typeof(TimeSpan), typeof(ushort), typeof(uint), typeof(ulong) };
 
             //Checking default value (string)
             // GetType - Default
-            Assert.Equal(Type.GetType("System.String"), dc.DataType);
+            Assert.Equal(typeof(string), dc.DataType);
 
-            foreach (string sType in sTypeArr)
+            foreach (Type type in typeArr)
             {
                 //Cheking Set
-                dc.DataType = Type.GetType(sType);
+                dc.DataType = type;
                 // Checking GetType " + sType);
-                Assert.Equal(Type.GetType(sType), dc.DataType);
+                Assert.Equal(type, dc.DataType);
             }
-        }
-
-        [Fact]
-        public void Equals()
-        {
-            DataColumn dc1, dc2;
-            dc1 = new DataColumn();
-            dc2 = new DataColumn();
-            // #1
-            // Equals 1
-            Assert.False(dc1.Equals(dc2));
-
-            dc1 = dc2;
-            // #2
-            // Equals 2
-            Assert.Equal(dc2, dc1);
         }
 
         [Fact]
@@ -210,8 +194,8 @@ namespace System.Data.Tests
             dc = new DataColumn();
 
             pc = dc.ExtendedProperties;
-            // Checking ExtendedProperties default
-            Assert.True(pc != null);
+            // Checking ExtendedProperties default 
+            Assert.NotNull(pc);
 
             // Checking ExtendedProperties count
             Assert.Equal(0, pc.Count);
@@ -386,16 +370,6 @@ namespace System.Data.Tests
         }
 
         [Fact]
-        public void ctor()
-        {
-            DataColumn dc;
-            dc = new DataColumn();
-
-            // ctor
-            Assert.False(dc == null);
-        }
-
-        [Fact]
         public void ctor_ByColumnName()
         {
             DataColumn dc;
@@ -411,26 +385,24 @@ namespace System.Data.Tests
         {
             Type typTest;
             DataColumn dc = null;
-            string[] sTypeArr = { "System.Boolean", "System.Byte", "System.Char", "System.DateTime",
-                "System.Decimal", "System.Double", "System.Int16", "System.Int32",
-                "System.Int64", "System.SByte", "System.Single", "System.String",
-                "System.TimeSpan", "System.UInt16", "System.UInt32", "System.UInt64" };
+            Type[] typeArr = { typeof(bool), typeof(byte), typeof(char), typeof(DateTime),
+                typeof(decimal), typeof(double), typeof(short), typeof(int),
+                typeof(long), typeof(sbyte), typeof(float), typeof(string),
+                typeof(TimeSpan), typeof(ushort), typeof(uint), typeof(ulong) };
 
-            foreach (string sType in sTypeArr)
+            foreach (Type type in typeArr)
             {
-                typTest = Type.GetType(sType);
-                dc = new DataColumn("ColName", typTest);
+                dc = new DataColumn("ColName", type);
 
                 // ctor - ColName
-                Assert.Equal(typTest, dc.DataType);
+                Assert.Equal(type, dc.DataType);
             }
         }
 
         [Fact]
         public void ctor_ByColumnNameTypeExpression()
         {
-            DataColumn dc;
-            dc = new DataColumn("ColName", typeof(string), "Price * 1.18");
+            _ = new DataColumn("ColName", typeof(string), "Price * 1.18");
         }
 
         [Fact]
@@ -440,7 +412,6 @@ namespace System.Data.Tests
             //Cheking constructor for each Enum MappingType
             foreach (int i in Enum.GetValues(typeof(MappingType)))
             {
-                dc = null;
                 dc = new DataColumn("ColName", typeof(string), "Price * 1.18", (MappingType)i);
                 // Ctor #" + i.ToString());
             }
@@ -555,7 +526,7 @@ namespace System.Data.Tests
         {
             DataTable dt = DataProvider.CreateParentDataTable();
             //Simple expression --> not aggregate
-            DataColumn dc = new DataColumn("expr", Type.GetType("System.Decimal"));
+            DataColumn dc = new DataColumn("expr", typeof(decimal));
             dt.Columns.Add(dc);
             dt.Columns["expr"].Expression = dt.Columns[0].ColumnName + "*0.52 +" + dt.Columns[0].ColumnName;
 
@@ -589,7 +560,7 @@ namespace System.Data.Tests
         {
             DataTable dt = DataProvider.CreateParentDataTable();
             //Simple expression -->  aggregate
-            DataColumn dc = new DataColumn("expr", Type.GetType("System.Decimal"));
+            DataColumn dc = new DataColumn("expr", typeof(decimal));
             dt.Columns.Add(dc);
             dt.Columns["expr"].Expression = "sum(" + dt.Columns[0].ColumnName + ") + count(" + dt.Columns[0].ColumnName + ")";
             dt.Columns["expr"].Expression += " + avg(" + dt.Columns[0].ColumnName + ") + Min(" + dt.Columns[0].ColumnName + ")";
@@ -633,7 +604,7 @@ namespace System.Data.Tests
 
             //Create the computed columns
 
-            DataColumn dcComputedParent = new DataColumn("computedParent", Type.GetType("System.Double"));
+            DataColumn dcComputedParent = new DataColumn("computedParent", typeof(double));
             parent.Columns.Add(dcComputedParent);
             dcComputedParent.Expression = "sum(child(Relation1)." + child.Columns[1].ColumnName + ")";
 
@@ -654,7 +625,7 @@ namespace System.Data.Tests
                 }
             }
 
-            DataColumn dcComputedChild = new DataColumn("computedChild", Type.GetType("System.Double"));
+            DataColumn dcComputedChild = new DataColumn("computedChild", typeof(double));
             child.Columns.Add(dcComputedChild);
             dcComputedChild.Expression = "Parent." + parent.Columns[0].ColumnName;
 
@@ -672,7 +643,7 @@ namespace System.Data.Tests
         public void Expression_IIF()
         {
             DataTable dt = DataProvider.CreateParentDataTable();
-            DataColumn dcComputedParent = new DataColumn("computedCol", Type.GetType("System.Double"));
+            DataColumn dcComputedParent = new DataColumn("computedCol", typeof(double));
             dcComputedParent.DefaultValue = 25.5;
             dt.Columns.Add(dcComputedParent);
             dcComputedParent.Expression = "IIF(" + dt.Columns[0].ColumnName + ">3" + ",1,2)";

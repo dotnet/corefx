@@ -704,16 +704,6 @@ namespace System.Data.Tests
         }
 
         [Fact]
-        public new void GetType()
-        {
-            DataTable dt = DataProvider.CreateParentDataTable();
-            Type tmpType = typeof(DataTable);
-
-            // GetType
-            Assert.Equal(tmpType, dt.GetType());
-        }
-
-        [Fact]
         public void HasErrors()
         {
             DataTable dtParent;
@@ -2089,6 +2079,7 @@ Assert.False(true);
             table1.Columns["col_datetime"].DateTimeMode = DataSetDateTime.Local;
             table2.Columns["col_datetime"].DateTimeMode = DataSetDateTime.Unspecified;
 
+            table3 = table1.Clone();
             // <target>.col_datetime and <source>.col_datetime
             // have conflicting properties: DataType property mismatch.
             Assert.Throws<DataException>(() => table3.Merge(table2));

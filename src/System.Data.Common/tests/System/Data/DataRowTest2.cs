@@ -710,18 +710,6 @@ namespace System.Data.Tests
         }
 
         [Fact]
-        public new void GetType()
-        {
-            Type myType;
-            DataTable dt = new DataTable();
-            DataRow dr = dt.NewRow();
-            myType = typeof(DataRow);
-
-            // GetType
-            Assert.Equal(typeof(DataRow), myType);
-        }
-
-        [Fact]
         public void HasErrors()
         {
             DataTable dt = new DataTable("myTable");
@@ -1805,13 +1793,13 @@ namespace System.Data.Tests
             dt.Rows.Add(new object[] { addressA, personA });
             DataRow dr = dt.Rows[0];
 
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() => dr[dc0, (DataRowVersion)666]);
+            DataException ex = Assert.Throws<DataException>(() => dr[dc0, (DataRowVersion)666]);
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Contains(ex.Message, "Original");
-            Assert.Contains(ex.Message, "Current");
-            Assert.Contains(ex.Message, "Proposed");
-            Assert.DoesNotContain(ex.Message, "Default");
+            Assert.Contains("Original", ex.Message);
+            Assert.Contains("Current", ex.Message);
+            Assert.Contains("Proposed", ex.Message);
+            Assert.DoesNotContain("Default", ex.Message);
         }
 
         [Fact] // Object this [DataColumn, DataRowVersion]
@@ -1833,13 +1821,13 @@ namespace System.Data.Tests
             // There is no Original data to access
             Assert.Null(ex1.InnerException);
             Assert.NotNull(ex1.Message);
-            Assert.Contains(ex1.Message, "Original");
+            Assert.Contains("Original", ex1.Message);
 
             VersionNotFoundException ex2 = Assert.Throws<VersionNotFoundException>(() => dr[dc0, DataRowVersion.Proposed]);
             // There is no Proposed data to access
             Assert.Null(ex2.InnerException);
             Assert.NotNull(ex2.Message);
-            Assert.Contains(ex2.Message, "Proposed");
+            Assert.Contains("Proposed", ex2.Message);
         }
 
         [Fact]
@@ -1947,7 +1935,7 @@ namespace System.Data.Tests
 
             foreach (DataRow row in ds.Tables[0].Rows)
             {
-                Assert.True(row.IsNull("ValueListValueMember"));
+                Assert.False(row.IsNull("ValueListValueMember"));
             }
         }
 
@@ -2630,11 +2618,6 @@ namespace System.Data.Tests
             DataTable table = new DataTable();
 
             DataRow row = table.NewRow();
-            try
-            {
-                row.SetModified();
-            }
-            catch (InvalidOperationException) { }
             Assert.Throws<InvalidOperationException>(() => row.SetModified());
 
             table.Columns.Add("col1", typeof(int));

@@ -151,14 +151,6 @@ namespace System.Data.Tests.SqlTypes
         }
 
         [Fact]
-        public void GetTypeTest()
-        {
-            SqlSingle test = new SqlSingle(84);
-            Assert.Equal("System.Data.SqlTypes.SqlSingle", test.GetType().ToString());
-            Assert.Equal("System.Single", test.Value.GetType().ToString());
-        }
-
-        [Fact]
         public void Greaters()
         {
             SqlSingle test1 = new SqlSingle(1e10);
@@ -247,7 +239,7 @@ namespace System.Data.Tests.SqlTypes
             Assert.Equal(250.00000000000000M, test1.ToSqlDecimal().Value);
             Assert.Equal(0, test0.ToSqlDecimal().Value);
 
-            Assert.Throws<OverflowException>(() => test3.ToSqlDecimal());
+            Assert.Throws<OverflowException>(() => test3.ToSqlDecimal().Value);
 
             // ToSqlInt16 ()
             Assert.Equal((short)250, test1.ToSqlInt16().Value);
@@ -265,7 +257,7 @@ namespace System.Data.Tests.SqlTypes
             Assert.Equal(250, test1.ToSqlInt64().Value);
             Assert.Equal(0, test0.ToSqlInt64().Value);
 
-            Assert.Throws<OverflowException>(() => test2.ToSqlInt64());
+            Assert.Throws<OverflowException>(() => test3.ToSqlInt64());
 
             // ToSqlMoney ()
             Assert.Equal(250.0000M, test1.ToSqlMoney().Value);
@@ -412,15 +404,7 @@ namespace System.Data.Tests.SqlTypes
 
             Assert.Equal(100, ((SqlSingle)testString100).Value);
 
-            try
-            {
-                SqlSingle test = (SqlSingle)testString;
-                Assert.False(true);
-            }
-            catch (Exception e)
-            {
-                Assert.Equal(typeof(FormatException), e.GetType());
-            }
+            Assert.Throws<FormatException>(() => (SqlSingle)testString);
         }
 
         [Fact]

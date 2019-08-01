@@ -180,14 +180,14 @@ namespace System.Data.Tests
             DataRow rowC;
 
             colC = new DataColumn();
-            colC.DataType = Type.GetType("System.Int32");
+            colC.DataType = typeof(int);
             colC.ColumnName = "Id";
             colC.AutoIncrement = true;
             tableC.Columns.Add(colC);
 
 
             colC = new DataColumn();
-            colC.DataType = Type.GetType("System.String");
+            colC.DataType = typeof(string);
             colC.ColumnName = "Name";
             tableC.Columns.Add(colC);
 
@@ -230,13 +230,13 @@ namespace System.Data.Tests
             DataRow rowC;
 
             colC = new DataColumn();
-            colC.DataType = Type.GetType("System.Int32");
+            colC.DataType = typeof(int);
             colC.ColumnName = "Id";
             colC.AutoIncrement = true;
             tableP.Columns.Add(colC);
 
             colC = new DataColumn();
-            colC.DataType = Type.GetType("System.Int32");
+            colC.DataType = typeof(int);
             colC.ColumnName = "Id";
             tableC.Columns.Add(colC);
 
@@ -275,13 +275,13 @@ namespace System.Data.Tests
             DataRow rowC;
 
             colC = new DataColumn();
-            colC.DataType = Type.GetType("System.Int32");
+            colC.DataType = typeof(int);
             colC.ColumnName = "Id";
             colC.AutoIncrement = true;
             tableC.Columns.Add(colC);
 
             colC = new DataColumn();
-            colC.DataType = Type.GetType("System.String");
+            colC.DataType = typeof(string);
             colC.ColumnName = "Name";
             tableC.Columns.Add(colC);
 
@@ -312,13 +312,13 @@ namespace System.Data.Tests
             DataRow rowC;
 
             colC = new DataColumn();
-            colC.DataType = Type.GetType("System.Int32");
+            colC.DataType = typeof(System.Int32);
             colC.ColumnName = "Id";
             colC.AutoIncrement = true;
             tableP.Columns.Add(colC);
 
             colC = new DataColumn();
-            colC.DataType = Type.GetType("System.Int32");
+            colC.DataType = typeof(System.Int32);
             colC.ColumnName = "Id";
             tableC.Columns.Add(colC);
 

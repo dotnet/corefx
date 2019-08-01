@@ -209,7 +209,7 @@ namespace System.Data.Tests
             //catch (InvalidOperationException)
             //{
             //}
-            Exception ex = Assert.Throws<Exception>(() => fkc.Table);
+            Exception ex = Assert.ThrowsAny<Exception>(() => fkc.Table);
             Assert.True(ex is NullReferenceException || ex is InvalidOperationException);
 
 
@@ -260,7 +260,7 @@ namespace System.Data.Tests
             //catch (InvalidConstraintException e)
             //{ // Could not test on ms.net, as ms.net does not reach here so far.        
             //}
-            Exception ex2 = Assert.Throws<Exception>(() => table2.Constraints.AddRange(constraints));
+            Exception ex2 = Assert.ThrowsAny<Exception>(() => table2.Constraints.AddRange(constraints));
             Assert.True(ex2 is ArgumentException || ex2 is InvalidConstraintException);
 
 

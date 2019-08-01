@@ -356,14 +356,8 @@ namespace System.Data.Tests
             Assert.Equal(3, dataView[3][0]);
 
             s = "Ascending sorting 5: ";
-            try
-            {
-                dataView.Sort = "itemId \tASC";
-                Assert.True(false);
-            }
-            catch (IndexOutOfRangeException e)
-            {
-            }
+
+            Assert.Throws<IndexOutOfRangeException>(() => dataView.Sort = "itemId \tASC");
 
             s = "Descending sorting : ";
             dataView.Sort = "itemId DESC";

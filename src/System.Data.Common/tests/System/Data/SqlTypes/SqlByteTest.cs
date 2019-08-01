@@ -183,14 +183,6 @@ namespace System.Data.Tests.SqlTypes
         }
 
         [Fact]
-        public void GetTypeTest()
-        {
-            SqlByte testByte = new SqlByte(84);
-
-            Assert.Equal("System.Data.SqlTypes.SqlByte", testByte.GetType().ToString());
-        }
-
-        [Fact]
         public void GreaterThan()
         {
             SqlByte testByte10 = new SqlByte(10);
@@ -461,15 +453,6 @@ namespace System.Data.Tests.SqlTypes
 
             Assert.Equal((SqlByte)88, testByte24 + testByte64);
 
-            try
-            {
-                SqlByte result = testByte64 + testByte255;
-                Assert.False(true);
-            }
-            catch (Exception e)
-            {
-                Assert.Equal(typeof(OverflowException), e.GetType());
-            }
             Assert.Throws<OverflowException>(() => testByte64 + testByte255);
         }
 

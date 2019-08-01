@@ -228,7 +228,7 @@ namespace System.Data.Tests
             {
                 Assert.Null(constraints[2].Table);
             }
-            catch (NullReferenceException) { }
+            catch (NullReferenceException) { } 
 
             table.EndInit();
         }

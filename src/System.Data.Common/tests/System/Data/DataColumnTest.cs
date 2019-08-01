@@ -183,8 +183,8 @@ namespace System.Data.Tests
                 Assert.Throws<InvalidEnumArgumentException>(() => col.DateTimeMode = (DataSetDateTime)666);
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Contains(ex.Message, "DataSetDateTime");
-            Assert.Contains(ex.Message, "666");
+            Assert.Contains("DataSetDateTime", ex.Message);
+            Assert.Contains("666", ex.Message);
             Assert.Null(ex.ParamName);
         }
 
@@ -222,7 +222,7 @@ namespace System.Data.Tests
             tbl.Columns[0].AutoIncrement = false;
 
             //Set default value to an incompatible datatype
-            Assert.Throws<ArgumentException>(() => tbl.Columns[0].DefaultValue = "hello");
+            Assert.Throws<FormatException>(() => tbl.Columns[0].DefaultValue = "hello");
         }
 
         [Fact]

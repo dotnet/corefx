@@ -220,14 +220,8 @@ namespace System.Data.Tests
             DataRelationCollection drcol1 = newds.Relations;
             DataRelationCollection drcol2 = _dataset.Relations;
 
-            Assert.True(drcol.Equals(drcol));
-            Assert.True(drcol.Equals(drcol2));
-
-            Assert.False(drcol1.Equals(drcol));
-            Assert.False(drcol.Equals(drcol1));
-
-            Assert.True(object.Equals(drcol, drcol2));
-            Assert.False(object.Equals(drcol, drcol1));
+            Assert.Same(drcol, drcol2);
+            Assert.NotSame(drcol1, drcol);
         }
 
         [Fact]

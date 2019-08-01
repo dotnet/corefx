@@ -264,13 +264,6 @@ namespace System.Data.Tests.SqlTypes
             Assert.Equal(0, _sqlFalse.GetHashCode());
         }
 
-        // GetType
-        [Fact]
-        public void GetTypeTest()
-        {
-            Assert.Equal("System.Data.SqlTypes.SqlBoolean", _sqlTrue.GetType().ToString());
-        }
-
         // ToSqlByte
         [Fact]
         public void ToSqlByte()

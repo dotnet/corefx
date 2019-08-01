@@ -46,8 +46,8 @@ namespace System.Data.Tests.SqlTypes
         public SqlDecimalTest()
         {
             _test1 = new SqlDecimal(6464.6464m);
-            _test2 = new SqlDecimal(10000m);
-            _test3 = new SqlDecimal(10000m);
+            _test2 = new SqlDecimal(10000.00m);
+            _test3 = new SqlDecimal(10000.00m);
             _test4 = new SqlDecimal(-6m);
             _test5 = new SqlDecimal(decimal.MaxValue);
         }
@@ -238,7 +238,7 @@ namespace System.Data.Tests.SqlTypes
             Assert.False(SqlDecimal.NotEquals(_test2, _test3).Value);
             Assert.True(SqlDecimal.NotEquals(SqlDecimal.Null, _test3).IsNull);
         }
-
+        //TODO
         /* Don't do such environment-dependent test. It will never succeed under Portable.NET and MS.NET
         [Fact]
         public void GetHashCodeTest()
@@ -247,13 +247,6 @@ namespace System.Data.Tests.SqlTypes
             Assert.Equal (-1281249885, Test1.GetHashCode ());
         }
         */
-
-        [Fact]
-        public void GetTypeTest()
-        {
-            Assert.Equal("System.Data.SqlTypes.SqlDecimal", _test1.GetType().ToString());
-            Assert.Equal("System.Decimal", _test1.Value.GetType().ToString());
-        }
 
         [Fact]
         public void Greaters()
@@ -369,7 +362,7 @@ namespace System.Data.Tests.SqlTypes
             // "/"-operator => NotWorking
             //Assert.Equal ((SqlDecimal)1.54687501546m, Test2 / Test1);
 
-            Assert.Throws<OverflowException>(() => SqlDecimal.MaxValue / new SqlDecimal(0));
+            Assert.Throws<DivideByZeroException>(() => SqlDecimal.MaxValue / new SqlDecimal(0));
 
             // "*"-operator
             Assert.Equal(64646464.000000m, _test1 * _test2);
@@ -377,15 +370,6 @@ namespace System.Data.Tests.SqlTypes
             SqlDecimal Test = _test5 * (new SqlDecimal(2m));
             Assert.Equal("158456325028528675187087900670", Test.ToString());
 
-            try
-            {
-                SqlDecimal test = SqlDecimal.MaxValue * _test1;
-                Assert.False(true);
-            }
-            catch (OverflowException e)
-            {
-                Assert.Equal(typeof(OverflowException), e.GetType());
-            }
             Assert.Throws<OverflowException>(() => SqlDecimal.MaxValue * _test1);
 
             // "-"-operator

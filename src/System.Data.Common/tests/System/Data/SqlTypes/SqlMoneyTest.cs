@@ -145,12 +145,6 @@ namespace System.Data.Tests.SqlTypes
         }
 
         [Fact]
-        public void GetTypeTest()
-        {
-            Assert.Equal("System.Data.SqlTypes.SqlMoney", _test1.GetType().ToString());
-        }
-
-        [Fact]
         public void Greaters()
         {
             // GreateThan ()

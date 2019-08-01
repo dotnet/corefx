@@ -184,13 +184,6 @@ namespace System.Data.Tests.SqlTypes
         }
 
         [Fact]
-        public void GetTypeTest()
-        {
-            SqlInt16 Test = new SqlInt16(84);
-            Assert.Equal("System.Data.SqlTypes.SqlInt16", Test.GetType().ToString());
-        }
-
-        [Fact]
         public void Greaters()
         {
             SqlInt16 test10 = new SqlInt16(10);
@@ -565,26 +558,8 @@ namespace System.Data.Tests.SqlTypes
 
             Assert.Equal((short)100, ((SqlInt16)testString100).Value);
 
-            try
-            {
-                SqlInt16 test = (SqlInt16)testString1000;
-                Assert.False(true);
-            }
-            catch (OverflowException e)
-            {
-                Assert.Equal(typeof(OverflowException), e.GetType());
-            }
             Assert.Throws<OverflowException>(() => (SqlInt16)testString1000);
 
-            try
-            {
-                SqlInt16 test = (SqlInt16)testString;
-                Assert.False(true);
-            }
-            catch (FormatException e)
-            {
-                Assert.Equal(typeof(FormatException), e.GetType());
-            }
             Assert.Throws<FormatException>(() => (SqlInt16)testString);
         }
 

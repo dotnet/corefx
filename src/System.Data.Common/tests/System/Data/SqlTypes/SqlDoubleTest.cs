@@ -153,14 +153,6 @@ namespace System.Data.Tests.SqlTypes
         }
 
         [Fact]
-        public void GetTypeTest()
-        {
-            SqlDouble Test = new SqlDouble(84);
-            Assert.Equal("System.Data.SqlTypes.SqlDouble", Test.GetType().ToString());
-            Assert.Equal("System.Double", Test.Value.GetType().ToString());
-        }
-
-        [Fact]
         public void Greaters()
         {
             SqlDouble test1 = new SqlDouble(1e100);
@@ -320,15 +312,6 @@ namespace System.Data.Tests.SqlTypes
             // "-"-operator
             Assert.Equal(12e100, test1 - test3);
 
-            try
-            {
-                SqlDouble test = SqlDouble.MinValue - SqlDouble.MaxValue;
-                Assert.False(true);
-            }
-            catch (OverflowException e)
-            {
-                Assert.Equal(typeof(OverflowException), e.GetType());
-            }
             Assert.Throws<OverflowException>(() => SqlDouble.MinValue - SqlDouble.MaxValue);
         }
 
