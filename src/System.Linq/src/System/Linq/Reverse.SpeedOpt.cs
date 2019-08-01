@@ -81,6 +81,211 @@ namespace System.Linq
             }
         }
 
+        private sealed partial class ReverseListIterator<TSource> : IPartition<TSource>
+        {
+            public TSource[] ToArray()
+            {
+                int count = _source.Count;
+                if (count == 0)
+                {
+                    return Array.Empty<TSource>();
+                }
+
+                var results = _source.ToArray();
+                Array.Reverse(results);
+                return results;
+            }
+
+            public List<TSource> ToList()
+            {
+                var results = new List<TSource>(_source);
+                results.Reverse();
+                return results;
+            }
+
+            public int GetCount(bool onlyIfCheap)
+            {
+                return _source.Count;
+            }
+
+            public IPartition<TSource> Skip(int count)
+            {
+                Debug.Assert(count > 0);
+                return count >= _source.Count
+                    ? EmptyPartition<TSource>.Instance
+                    : new ReverseListPartition<TSource>(_source, 0, _source.Count - count - 1);
+            }
+
+            public IPartition<TSource> Take(int count)
+            {
+                Debug.Assert(count > 0);
+                return count >= _source.Count
+                    ? (IPartition<TSource>)this
+                    : new ReverseListPartition<TSource>(_source, _source.Count - count, int.MaxValue);
+            }
+
+            public TSource TryGetElementAt(int index, out bool found)
+            {
+                int count = _source.Count;
+                if ((uint)index < (uint)count)
+                {
+                    found = true;
+                    return _source[count - index - 1];
+                }
+
+                found = false;
+                return default(TSource);
+            }
+
+            public TSource TryGetFirst(out bool found)
+            {
+                int len = _source.Count;
+                if (len != 0)
+                {
+                    found = true;
+                    return _source[len - 1];
+                }
+
+                found = false;
+                return default(TSource);
+            }
+
+            public TSource TryGetLast(out bool found)
+            {
+                if (_source.Count != 0)
+                {
+                    found = true;
+                    return _source[0];
+                }
+
+                found = false;
+                return default(TSource);
+            }
+        }
+
+        private sealed partial class ReverseIListIterator<TSource> : IPartition<TSource>
+        {
+            public TSource[] ToArray()
+            {
+                int count = _source.Count;
+                if (count == 0)
+                {
+                    return Array.Empty<TSource>();
+                }
+
+                var results = new TSource[count];
+                _source.CopyTo(results, 0);
+                Array.Reverse(results);
+                return results;
+            }
+
+            public List<TSource> ToList()
+            {
+                var results = new List<TSource>(_source);
+                results.Reverse();
+                return results;
+            }
+
+            public int GetCount(bool onlyIfCheap)
+            {
+                return _source.Count;
+            }
+
+            public IPartition<TSource> Skip(int count)
+            {
+                Debug.Assert(count > 0);
+                return count >= _source.Count
+                    ? EmptyPartition<TSource>.Instance
+                    : new ReverseListPartition<TSource>(_source, 0, _source.Count - count - 1);
+            }
+
+            public IPartition<TSource> Take(int count)
+            {
+                Debug.Assert(count > 0);
+                return count >= _source.Count
+                    ? (IPartition<TSource>)this
+                    : new ReverseListPartition<TSource>(_source, _source.Count - count, int.MaxValue);
+            }
+
+            public TSource TryGetElementAt(int index, out bool found)
+            {
+                int count = _source.Count;
+                if ((uint)index < (uint)count)
+                {
+                    found = true;
+                    return _source[count - index - 1];
+                }
+
+                found = false;
+                return default(TSource);
+            }
+
+            public TSource TryGetFirst(out bool found)
+            {
+                int len = _source.Count;
+                if (len != 0)
+                {
+                    found = true;
+                    return _source[len - 1];
+                }
+
+                found = false;
+                return default(TSource);
+            }
+
+            public TSource TryGetLast(out bool found)
+            {
+                if (_source.Count != 0)
+                {
+                    found = true;
+                    return _source[0];
+                }
+
+                found = false;
+                return default(TSource);
+            }
+        }
+
+        private sealed partial class ReverseEnumerableIterator<TSource> : IIListProvider<TSource>
+        {
+            public TSource[] ToArray()
+            {
+                TSource[] array = _source.ToArray();
+                Array.Reverse(array);
+                return array;
+            }
+
+            public List<TSource> ToList()
+            {
+                List<TSource> list = _source.ToList();
+                list.Reverse();
+                return list;
+            }
+
+            public int GetCount(bool onlyIfCheap)
+            {
+                if (onlyIfCheap)
+                {
+                    switch (_source)
+                    {
+                        case IIListProvider<TSource> listProv:
+                            return listProv.GetCount(onlyIfCheap: true);
+
+                        case ICollection<TSource> colT:
+                            return colT.Count;
+
+                        case ICollection col:
+                            return col.Count;
+
+                        default:
+                            return -1;
+                    }
+                }
+
+                return _source.Count();
+            }
+        }
+
         private sealed partial class ReverseSelectArrayIterator<TSource, TResult> : IPartition<TResult>
         {
             public TResult[] ToArray()
@@ -167,88 +372,6 @@ namespace System.Linq
 
                 found = true;
                 return _selector(_source[0]);
-            }
-        }
-
-        private sealed partial class ReverseListIterator<TSource> : IPartition<TSource>
-        {
-            public TSource[] ToArray()
-            {
-                int count = _source.Count;
-                if (count == 0)
-                {
-                    return Array.Empty<TSource>();
-                }
-
-                var results = _source.ToArray();
-                Array.Reverse(results);
-                return results;
-            }
-
-            public List<TSource> ToList()
-            {
-                var results = new List<TSource>(_source);
-                results.Reverse();
-                return results;
-            }
-
-            public int GetCount(bool onlyIfCheap)
-            {
-                return _source.Count;
-            }
-
-            public IPartition<TSource> Skip(int count)
-            {
-                Debug.Assert(count > 0);
-                return count >= _source.Count
-                    ? EmptyPartition<TSource>.Instance
-                    : new ReverseListPartition<TSource>(_source, 0, _source.Count - count - 1);
-            }
-
-            public IPartition<TSource> Take(int count)
-            {
-                Debug.Assert(count > 0);
-                return count >= _source.Count
-                    ? (IPartition<TSource>)this
-                    : new ReverseListPartition<TSource>(_source, _source.Count - count, int.MaxValue);
-            }
-
-            public TSource TryGetElementAt(int index, out bool found)
-            {
-                int count = _source.Count;
-                if ((uint)index < (uint)count)
-                {
-                    found = true;
-                    return _source[count - index - 1];
-                }
-
-                found = false;
-                return default(TSource);
-            }
-
-            public TSource TryGetFirst(out bool found)
-            {
-                int len = _source.Count;
-                if (len != 0)
-                {
-                    found = true;
-                    return _source[len - 1];
-                }
-
-                found = false;
-                return default(TSource);
-            }
-
-            public TSource TryGetLast(out bool found)
-            {
-                if (_source.Count != 0)
-                {
-                    found = true;
-                    return _source[0];
-                }
-
-                found = false;
-                return default(TSource);
             }
         }
 
@@ -356,89 +479,6 @@ namespace System.Linq
             }
         }
 
-        private sealed partial class ReverseIListIterator<TSource> : IPartition<TSource>
-        {
-            public TSource[] ToArray()
-            {
-                int count = _source.Count;
-                if (count == 0)
-                {
-                    return Array.Empty<TSource>();
-                }
-
-                var results = new TSource[count];
-                _source.CopyTo(results, 0);
-                Array.Reverse(results);
-                return results;
-            }
-
-            public List<TSource> ToList()
-            {
-                var results = new List<TSource>(_source);
-                results.Reverse();
-                return results;
-            }
-
-            public int GetCount(bool onlyIfCheap)
-            {
-                return _source.Count;
-            }
-
-            public IPartition<TSource> Skip(int count)
-            {
-                Debug.Assert(count > 0);
-                return count >= _source.Count
-                    ? EmptyPartition<TSource>.Instance
-                    : new ReverseListPartition<TSource>(_source, 0, _source.Count - count - 1);
-            }
-
-            public IPartition<TSource> Take(int count)
-            {
-                Debug.Assert(count > 0);
-                return count >= _source.Count
-                    ? (IPartition<TSource>)this
-                    : new ReverseListPartition<TSource>(_source, _source.Count - count, int.MaxValue);
-            }
-
-            public TSource TryGetElementAt(int index, out bool found)
-            {
-                int count = _source.Count;
-                if ((uint)index < (uint)count)
-                {
-                    found = true;
-                    return _source[count - index - 1];
-                }
-
-                found = false;
-                return default(TSource);
-            }
-
-            public TSource TryGetFirst(out bool found)
-            {
-                int len = _source.Count;
-                if (len != 0)
-                {
-                    found = true;
-                    return _source[len - 1];
-                }
-
-                found = false;
-                return default(TSource);
-            }
-
-            public TSource TryGetLast(out bool found)
-            {
-                if (_source.Count != 0)
-                {
-                    found = true;
-                    return _source[0];
-                }
-
-                found = false;
-                return default(TSource);
-            }
-        }
-
         private sealed partial class ReverseSelectIListIterator<TSource, TResult> : IPartition<TResult>
         {
             public TResult[] ToArray()
@@ -543,19 +583,37 @@ namespace System.Linq
             }
         }
 
-        private sealed partial class ReverseEnumerableIterator<TSource> : IIListProvider<TSource>
+        private sealed partial class ReverseWhereArrayIterator<TSource> : IIListProvider<TSource>
         {
             public TSource[] ToArray()
             {
-                TSource[] array = _source.ToArray();
-                Array.Reverse(array);
-                return array;
+                var builder = new LargeArrayBuilder<TSource>(_source.Length);
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(item);
+                    }
+                }
+
+                return builder.ToArray();
             }
 
             public List<TSource> ToList()
             {
-                List<TSource> list = _source.ToList();
-                list.Reverse();
+                var list = new List<TSource>();
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(item);
+                    }
+                }
+
                 return list;
             }
 
@@ -563,23 +621,209 @@ namespace System.Linq
             {
                 if (onlyIfCheap)
                 {
-                    switch (_source)
+                    return -1;
+                }
+
+                int count = 0;
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
                     {
-                        case IIListProvider<TSource> listProv:
-                            return listProv.GetCount(onlyIfCheap: true);
-
-                        case ICollection<TSource> colT:
-                            return colT.Count;
-
-                        case ICollection col:
-                            return col.Count;
-
-                        default:
-                            return -1;
+                        checked
+                        {
+                            count++;
+                        }
                     }
                 }
 
-                return _source.Count();
+                return count;
+            }
+        }
+
+        private sealed partial class ReverseWhereListIterator<TSource> : IIListProvider<TSource>
+        {
+            public TSource[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TSource>(_source.Count);
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(item);
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TSource> ToList()
+            {
+                var list = new List<TSource>();
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(item);
+                    }
+                }
+
+                return list;
+            }
+
+            public int GetCount(bool onlyIfCheap)
+            {
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
+        }
+
+        private sealed partial class ReverseWhereSelectArrayIterator<TSource, TResult> : IIListProvider<TResult>
+        {
+            public TResult[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TResult>(_source.Length);
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(_selector(item));
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TResult> ToList()
+            {
+                var list = new List<TResult>();
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(_selector(item));
+                    }
+                }
+
+                return list;
+            }
+
+            public int GetCount(bool onlyIfCheap)
+            {
+                // In case someone uses Count() to force evaluation of
+                // the selector, run it provided `onlyIfCheap` is false.
+
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                for (int i = _source.Length - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        _selector(item);
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
+            }
+        }
+
+        private sealed partial class ReverseWhereSelectListIterator<TSource, TResult> : IIListProvider<TResult>
+        {
+            public TResult[] ToArray()
+            {
+                var builder = new LargeArrayBuilder<TResult>(_source.Count);
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        builder.Add(_selector(item));
+                    }
+                }
+
+                return builder.ToArray();
+            }
+
+            public List<TResult> ToList()
+            {
+                var list = new List<TResult>();
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        list.Add(_selector(item));
+                    }
+                }
+
+                return list;
+            }
+
+            public int GetCount(bool onlyIfCheap)
+            {
+                // In case someone uses Count() to force evaluation of
+                // the selector, run it provided `onlyIfCheap` is false.
+
+                if (onlyIfCheap)
+                {
+                    return -1;
+                }
+
+                int count = 0;
+
+                for (int i = _source.Count - 1; i >= 0; i--)
+                {
+                    TSource item = _source[i];
+                    if (_predicate(item))
+                    {
+                        _selector(item);
+                        checked
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count;
             }
         }
 
@@ -888,250 +1132,6 @@ namespace System.Linq
 
                     return Math.Min(count - 1, _maxIndexInclusive) - _minIndexInclusive + 1;
                 }
-            }
-        }
-
-        internal sealed partial class ReverseWhereArrayIterator<TSource> : IIListProvider<TSource>
-        {
-            public TSource[] ToArray()
-            {
-                var builder = new LargeArrayBuilder<TSource>(_source.Length);
-
-                for (int i = _source.Length - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        builder.Add(item);
-                    }
-                }
-
-                return builder.ToArray();
-            }
-
-            public List<TSource> ToList()
-            {
-                var list = new List<TSource>();
-
-                for (int i = _source.Length - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        list.Add(item);
-                    }
-                }
-
-                return list;
-            }
-
-            public int GetCount(bool onlyIfCheap)
-            {
-                if (onlyIfCheap)
-                {
-                    return -1;
-                }
-
-                int count = 0;
-
-                for (int i = _source.Length - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        checked
-                        {
-                            count++;
-                        }
-                    }
-                }
-
-                return count;
-            }
-        }
-
-        private sealed partial class ReverseWhereListIterator<TSource> : Iterator<TSource>, IIListProvider<TSource>
-        {
-            public TSource[] ToArray()
-            {
-                var builder = new LargeArrayBuilder<TSource>(_source.Count);
-
-                for (int i = _source.Count - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        builder.Add(item);
-                    }
-                }
-
-                return builder.ToArray();
-            }
-
-            public List<TSource> ToList()
-            {
-                var list = new List<TSource>();
-
-                for (int i = _source.Count - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        list.Add(item);
-                    }
-                }
-
-                return list;
-            }
-
-            public int GetCount(bool onlyIfCheap)
-            {
-                if (onlyIfCheap)
-                {
-                    return -1;
-                }
-
-                int count = 0;
-
-                for (int i = _source.Count - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        checked
-                        {
-                            count++;
-                        }
-                    }
-                }
-
-                return count;
-            }
-        }
-
-        private sealed partial class ReverseWhereSelectArrayIterator<TSource, TResult> : IIListProvider<TResult>
-        {
-            public TResult[] ToArray()
-            {
-                var builder = new LargeArrayBuilder<TResult>(_source.Length);
-
-                for (int i = _source.Length - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        builder.Add(_selector(item));
-                    }
-                }
-
-                return builder.ToArray();
-            }
-
-            public List<TResult> ToList()
-            {
-                var list = new List<TResult>();
-
-                for (int i = _source.Length - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        list.Add(_selector(item));
-                    }
-                }
-
-                return list;
-            }
-
-            public int GetCount(bool onlyIfCheap)
-            {
-                // In case someone uses Count() to force evaluation of
-                // the selector, run it provided `onlyIfCheap` is false.
-
-                if (onlyIfCheap)
-                {
-                    return -1;
-                }
-
-                int count = 0;
-
-                for (int i = _source.Length - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        _selector(item);
-                        checked
-                        {
-                            count++;
-                        }
-                    }
-                }
-
-                return count;
-            }
-        }
-
-        private sealed partial class ReverseWhereSelectListIterator<TSource, TResult> : IIListProvider<TResult>
-        {
-            public TResult[] ToArray()
-            {
-                var builder = new LargeArrayBuilder<TResult>(_source.Count);
-
-                for (int i = _source.Count - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        builder.Add(_selector(item));
-                    }
-                }
-
-                return builder.ToArray();
-            }
-
-            public List<TResult> ToList()
-            {
-                var list = new List<TResult>();
-
-                for (int i = _source.Count - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        list.Add(_selector(item));
-                    }
-                }
-
-                return list;
-            }
-
-            public int GetCount(bool onlyIfCheap)
-            {
-                // In case someone uses Count() to force evaluation of
-                // the selector, run it provided `onlyIfCheap` is false.
-
-                if (onlyIfCheap)
-                {
-                    return -1;
-                }
-
-                int count = 0;
-
-                for (int i = _source.Count - 1; i >= 0; i--)
-                {
-                    TSource item = _source[i];
-                    if (_predicate(item))
-                    {
-                        _selector(item);
-                        checked
-                        {
-                            count++;
-                        }
-                    }
-                }
-
-                return count;
             }
         }
     }

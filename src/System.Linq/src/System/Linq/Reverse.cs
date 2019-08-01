@@ -75,39 +75,6 @@ namespace System.Linq
                 new ReverseWhereArrayIterator<TSource>(_source, predicate);
         }
 
-        private sealed partial class ReverseSelectArrayIterator<TSource, TResult> : Iterator<TResult>
-        {
-            private readonly TSource[] _source;
-            private readonly Func<TSource, TResult> _selector;
-
-            public ReverseSelectArrayIterator(TSource[] source, Func<TSource, TResult> selector)
-            {
-                Debug.Assert(source != null);
-                Debug.Assert(selector != null);
-                Debug.Assert(source.Length > 0); // Caller should check this beforehand and return a cached result
-                _source = source;
-                _selector = selector;
-            }
-
-            public override Iterator<TResult> Clone() => new ReverseSelectArrayIterator<TSource, TResult>(_source, _selector);
-
-            public override bool MoveNext()
-            {
-                if (_state < 1 | _state == _source.Length + 1)
-                {
-                    Dispose();
-                    return false;
-                }
-
-                int index = _source.Length - _state++;
-                _current = _selector(_source[index]);
-                return true;
-            }
-
-            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
-                new ReverseSelectArrayIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
-        }
-
         private sealed partial class ReverseListIterator<TSource> : Iterator<TSource>
         {
             private readonly List<TSource> _source;
@@ -139,39 +106,6 @@ namespace System.Linq
 
             public override IEnumerable<TSource> Where(Func<TSource, bool> predicate) =>
                 new ReverseWhereListIterator<TSource>(_source, predicate);
-        }
-
-        private sealed partial class ReverseSelectListIterator<TSource, TResult> : Iterator<TResult>
-        {
-            private readonly List<TSource> _source;
-            private readonly Func<TSource, TResult> _selector;
-
-            public ReverseSelectListIterator(List<TSource> source, Func<TSource, TResult> selector)
-            {
-                Debug.Assert(source != null);
-                Debug.Assert(selector != null);
-                _source = source;
-                _selector = selector;
-            }
-
-            public override Iterator<TResult> Clone() => new ReverseSelectListIterator<TSource, TResult>(_source, _selector);
-
-            public override bool MoveNext()
-            {
-                int count = _source.Count;
-                if (_state < 1 | _state == count + 1)
-                {
-                    Dispose();
-                    return false;
-                }
-
-                int index = count - _state++;
-                _current = _selector(_source[index]);
-                return true;
-            }
-
-            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
-                new ReverseSelectListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
         }
 
         private sealed partial class ReverseIListIterator<TSource> : Iterator<TSource>
@@ -237,6 +171,134 @@ namespace System.Linq
 
             public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
                 new ReverseSelectIListIterator<TSource, TResult>(_source, selector);
+        }
+
+        private sealed partial class ReverseEnumerableIterator<TSource> : Iterator<TSource>
+        {
+            private readonly IEnumerable<TSource> _source;
+            private TSource[] _buffer;
+
+            public ReverseEnumerableIterator(IEnumerable<TSource> source)
+            {
+                Debug.Assert(source != null);
+                _source = source;
+            }
+
+            public override Iterator<TSource> Clone() => new ReverseEnumerableIterator<TSource>(_source);
+
+            public override bool MoveNext()
+            {
+                if (_state - 2 <= -2)
+                {
+                    // Either someone called a method and cast us to IEnumerable without calling GetEnumerator,
+                    // or we were already disposed. In either case, iteration has ended, so return false.
+                    // A comparison is made against -2 instead of _state <= 0 because we want to handle cases where
+                    // the source is really large and adding the bias causes _state to overflow.
+                    Debug.Assert(_state == -1 || _state == 0);
+                    Dispose();
+                    return false;
+                }
+
+                switch (_state)
+                {
+                    case 1:
+                        // Iteration has just started. Capture the source into an array and set _state to 2 + the count.
+                        // Having an extra field for the count would be more readable, but we save it into _state with a
+                        // bias instead to minimize field size of the iterator.
+                        Buffer<TSource> buffer = new Buffer<TSource>(_source);
+                        _buffer = buffer._items;
+                        _state = buffer._count + 2;
+                        goto default;
+                    default:
+                        // At this stage, _state starts from 2 + the count. _state - 3 represents the current index into the
+                        // buffer. It is continuously decremented until it hits 2, which means that we've run out of items to
+                        // yield and should return false.
+                        int index = _state - 3;
+                        if (index != -1)
+                        {
+                            _current = _buffer[index];
+                            --_state;
+                            return true;
+                        }
+
+                        break;
+                }
+
+                Dispose();
+                return false;
+            }
+
+            public override void Dispose()
+            {
+                _buffer = null; // Just in case this ends up being long-lived, allow the memory to be reclaimed.
+                base.Dispose();
+            }
+        }
+
+        private sealed partial class ReverseSelectArrayIterator<TSource, TResult> : Iterator<TResult>
+        {
+            private readonly TSource[] _source;
+            private readonly Func<TSource, TResult> _selector;
+
+            public ReverseSelectArrayIterator(TSource[] source, Func<TSource, TResult> selector)
+            {
+                Debug.Assert(source != null);
+                Debug.Assert(selector != null);
+                Debug.Assert(source.Length > 0); // Caller should check this beforehand and return a cached result
+                _source = source;
+                _selector = selector;
+            }
+
+            public override Iterator<TResult> Clone() => new ReverseSelectArrayIterator<TSource, TResult>(_source, _selector);
+
+            public override bool MoveNext()
+            {
+                if (_state < 1 | _state == _source.Length + 1)
+                {
+                    Dispose();
+                    return false;
+                }
+
+                int index = _source.Length - _state++;
+                _current = _selector(_source[index]);
+                return true;
+            }
+
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new ReverseSelectArrayIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
+        }
+
+        private sealed partial class ReverseSelectListIterator<TSource, TResult> : Iterator<TResult>
+        {
+            private readonly List<TSource> _source;
+            private readonly Func<TSource, TResult> _selector;
+
+            public ReverseSelectListIterator(List<TSource> source, Func<TSource, TResult> selector)
+            {
+                Debug.Assert(source != null);
+                Debug.Assert(selector != null);
+                _source = source;
+                _selector = selector;
+            }
+
+            public override Iterator<TResult> Clone() => new ReverseSelectListIterator<TSource, TResult>(_source, _selector);
+
+            public override bool MoveNext()
+            {
+                int count = _source.Count;
+                if (_state < 1 | _state == count + 1)
+                {
+                    Dispose();
+                    return false;
+                }
+
+                int index = count - _state++;
+                _current = _selector(_source[index]);
+                return true;
+            }
+
+            public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
+                new ReverseSelectListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
         }
 
         private sealed partial class ReverseSelectIListIterator<TSource, TResult> : Iterator<TResult>
@@ -307,69 +369,7 @@ namespace System.Linq
                 new ReverseSelectIListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
         }
 
-        private sealed partial class ReverseEnumerableIterator<TSource> : Iterator<TSource>
-        {
-            private readonly IEnumerable<TSource> _source;
-            private TSource[] _buffer;
-
-            public ReverseEnumerableIterator(IEnumerable<TSource> source)
-            {
-                Debug.Assert(source != null);
-                _source = source;
-            }
-
-            public override Iterator<TSource> Clone() => new ReverseEnumerableIterator<TSource>(_source);
-
-            public override bool MoveNext()
-            {
-                if (_state - 2 <= -2)
-                {
-                    // Either someone called a method and cast us to IEnumerable without calling GetEnumerator,
-                    // or we were already disposed. In either case, iteration has ended, so return false.
-                    // A comparison is made against -2 instead of _state <= 0 because we want to handle cases where
-                    // the source is really large and adding the bias causes _state to overflow.
-                    Debug.Assert(_state == -1 || _state == 0);
-                    Dispose();
-                    return false;
-                }
-
-                switch (_state)
-                {
-                    case 1:
-                        // Iteration has just started. Capture the source into an array and set _state to 2 + the count.
-                        // Having an extra field for the count would be more readable, but we save it into _state with a
-                        // bias instead to minimize field size of the iterator.
-                        Buffer<TSource> buffer = new Buffer<TSource>(_source);
-                        _buffer = buffer._items;
-                        _state = buffer._count + 2;
-                        goto default;
-                    default:
-                        // At this stage, _state starts from 2 + the count. _state - 3 represents the current index into the
-                        // buffer. It is continuously decremented until it hits 2, which means that we've run out of items to
-                        // yield and should return false.
-                        int index = _state - 3;
-                        if (index != -1)
-                        {
-                            _current = _buffer[index];
-                            --_state;
-                            return true;
-                        }
-
-                        break;
-                }
-
-                Dispose();
-                return false;
-            }
-
-            public override void Dispose()
-            {
-                _buffer = null; // Just in case this ends up being long-lived, allow the memory to be reclaimed.
-                base.Dispose();
-            }
-        }
-
-        internal sealed partial class ReverseWhereArrayIterator<TSource> : Iterator<TSource>
+        private sealed partial class ReverseWhereArrayIterator<TSource> : Iterator<TSource>
         {
             private readonly TSource[] _source;
             private readonly Func<TSource, bool> _predicate;
