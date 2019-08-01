@@ -484,7 +484,7 @@ namespace System.Diagnostics
             /// </summary>
             public FilterAndTransform(string filterAndPayloadSpec, int startIdx, int endIdx, DiagnosticSourceEventSource eventSource, FilterAndTransform next)
             {
-                Debug.Assert(filterAndPayloadSpec != null && startIdx <= endIdx && endIdx <= filterAndPayloadSpec.Length);
+                Debug.Assert(filterAndPayloadSpec != null && startIdx >= 0 && startIdx <= endIdx && endIdx <= filterAndPayloadSpec.Length);
                 Next = next;
                 _eventSource = eventSource;
 
@@ -759,7 +759,7 @@ namespace System.Diagnostics
             /// </summary>
             public TransformSpec(string transformSpec, int startIdx, int endIdx, TransformSpec next = null)
             {
-                Debug.Assert(transformSpec != null && startIdx < endIdx && endIdx <= transformSpec.Length);
+                Debug.Assert(transformSpec != null && startIdx >= 0 && startIdx < endIdx && endIdx <= transformSpec.Length);
                 Next = next;
 
                 // Pick off the Var=

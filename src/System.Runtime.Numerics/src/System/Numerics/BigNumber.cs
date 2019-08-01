@@ -760,8 +760,9 @@ namespace System.Numerics
             }
             if (value._sign < 0)
             {
-                for (int i = info.NegativeSign.Length - 1; i > -1; i--)
-                    rgch[--ichDst] = info.NegativeSign[i];
+                string negativeSign = info.NegativeSign;
+                for (int i = negativeSign.Length - 1; i > -1; i--)
+                    rgch[--ichDst] = negativeSign[i];
             }
 
             int resultLength = cchMax - ichDst;
