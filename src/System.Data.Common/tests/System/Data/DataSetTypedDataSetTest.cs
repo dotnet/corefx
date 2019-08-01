@@ -940,16 +940,14 @@ namespace System.Data.Tests
                 Orders = new OrdersDataTable();
                 Tables.Add(Orders);
                 ForeignKeyConstraint fkc;
-                fkc = new ForeignKeyConstraint("OrdersOrder_x0020_Details", new DataColumn[] {
-                                                                                                 Orders.OrderIDColumn}, new DataColumn[] {
-                                                                                                                                                       Order_Details.OrderIDColumn});
+                fkc = new ForeignKeyConstraint("OrdersOrder_x0020_Details",
+                    new DataColumn[] { Orders.OrderIDColumn}, new DataColumn[] { Order_Details.OrderIDColumn });
                 Order_Details.Constraints.Add(fkc);
                 fkc.AcceptRejectRule = AcceptRejectRule.None;
                 fkc.DeleteRule = Rule.Cascade;
                 fkc.UpdateRule = Rule.Cascade;
-                _relationOrdersOrder_x0020_Details = new DataRelation("OrdersOrder_x0020_Details", new DataColumn[] {
-                                                                                                                            Orders.OrderIDColumn}, new DataColumn[] {
-                                                                                                                                                                                  Order_Details.OrderIDColumn}, false);
+                _relationOrdersOrder_x0020_Details = new DataRelation("OrdersOrder_x0020_Details",
+                    new DataColumn[] { Orders.OrderIDColumn }, new DataColumn[] { Order_Details.OrderIDColumn }, false);
                 Relations.Add(_relationOrdersOrder_x0020_Details);
             }
 
@@ -1058,9 +1056,7 @@ namespace System.Data.Tests
 
                 public Order_DetailsRow FindByOrderIDProductID(int OrderID, int ProductID)
                 {
-                    return ((Order_DetailsRow)(Rows.Find(new object[] {
-                                                                               OrderID,
-                                                                               ProductID})));
+                    return (Order_DetailsRow)Rows.Find(new object[] { OrderID, ProductID });
                 }
 
                 public IEnumerator GetEnumerator()
