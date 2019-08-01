@@ -268,7 +268,7 @@ namespace HttpStress
                 for (int i = 0; i < _operationNames.Length; i++)
                 {
                     Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.Write("\t" + _operationNames[i].PadRight(30));
+                    Console.Write($"\t{i.ToString().PadLeft(2)}: {_operationNames[i].PadRight(26)}");
                     Console.ResetColor();
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.Write("Success: ");
@@ -305,12 +305,24 @@ namespace HttpStress
                     Console.WriteLine(failure.ErrorText);
                     Console.WriteLine();
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    foreach (KeyValuePair<int, int> operation in failure.Failures)
+                    foreach (KeyValuePair<int, int> operation in failure.Failures.OrderByDescending(x => x.Value))
                     {
-                        Console.WriteLine($"\t{_operationNames[operation.Key].PadRight(30)}: {operation.Value}");
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.Write($"\t{operation.Key.ToString().PadLeft(2)}: {_operationNames[operation.Key].PadRight(26)}");
+                        Console.ResetColor();
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Write($"Fail: ");
+                        Console.ResetColor();
+                        Console.WriteLine(operation.Value);
                     }
-                    Console.WriteLine($"\t{"TOTAL".PadRight(30)}: {failure.FailureCount}");
+                    Console.WriteLine();
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write($"\t    {"TOTAL".PadRight(26)}");
                     Console.ResetColor();
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write($"Fail: ");
+                    Console.ResetColor();
+                    Console.WriteLine(failure.FailureCount);
                     Console.WriteLine();
                 }
             }
