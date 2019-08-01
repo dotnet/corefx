@@ -286,6 +286,34 @@ namespace System.Drawing
             }
         }
 
+        public void DrawBeziers(Pen pen, PointF[] points)
+        {
+            if (pen == null)
+                throw new ArgumentNullException(nameof(pen));
+            if (points == null)
+                throw new ArgumentNullException(nameof(points));
+
+            int length = points.Length;
+            int status;
+
+            if (length < 4)
+                return;
+
+            for (int i = 0; i < length - 1; i += 3)
+            {
+                PointF p1 = points[i];
+                PointF p2 = points[i + 1];
+                PointF p3 = points[i + 2];
+                PointF p4 = points[i + 3];
+
+                status = Gdip.GdipDrawBezier(
+                                        new HandleRef(this, NativeGraphics), new HandleRef(pen, pen.NativePen),
+                                        p1.X, p1.Y, p2.X, p2.Y,
+                                        p3.X, p3.Y, p4.X, p4.Y);
+                Gdip.CheckStatus(status);
+            }
+        }
+
         public void DrawIcon(Icon icon, Rectangle targetRect)
         {
             if (icon == null)

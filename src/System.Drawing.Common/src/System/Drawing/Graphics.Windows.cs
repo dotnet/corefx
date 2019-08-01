@@ -391,6 +391,26 @@ namespace System.Drawing
                     p, points.Length));
             }
         }
+        
+        /// <summary>
+        /// Draws a series of cubic Bezier curves from an array of points.
+        /// </summary>
+        public unsafe void DrawBeziers(Pen pen, Point[] points)
+        {
+            if (pen == null)
+                throw new ArgumentNullException(nameof(pen));
+            if (points == null)
+                throw new ArgumentNullException(nameof(points));
+
+            fixed (Point* p = points)
+            {
+                CheckErrorStatus(Gdip.GdipDrawBeziersI(
+                    new HandleRef(this, NativeGraphics),
+                    new HandleRef(pen, pen.NativePen),
+                    p,
+                    points.Length));
+            }
+        }
 
         /// <summary>
         /// Fills the interior of a path.
