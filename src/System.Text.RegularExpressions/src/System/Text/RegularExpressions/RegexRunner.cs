@@ -299,8 +299,9 @@ namespace System.Text.RegularExpressions
 
             InitTrackCount();
 
-            int tracksize = runtrackcount * 8;
-            int stacksize = runtrackcount * 8;
+            int tmpmultiplicationsize = runtrackcount * 8;
+            int tracksize = tmpmultiplicationsize;
+            int stacksize = tmpmultiplicationsize;
 
             if (tracksize < 32)
                 tracksize = 32;
@@ -345,9 +346,10 @@ namespace System.Text.RegularExpressions
         /// </summary>
         protected void EnsureStorage()
         {
-            if (runstackpos < runtrackcount * 4)
+            int tmpmultiplicationsize = runtrackcount * 4;
+            if (runstackpos < tmpmultiplicationsize)
                 DoubleStack();
-            if (runtrackpos < runtrackcount * 4)
+            if (runtrackpos < tmpmultiplicationsize)
                 DoubleTrack();
         }
 
@@ -595,7 +597,6 @@ namespace System.Text.RegularExpressions
         internal virtual string TextposDescription()
         {
             var sb = new StringBuilder();
-            int remaining;
 
             sb.Append(runtextpos);
 
@@ -608,8 +609,6 @@ namespace System.Text.RegularExpressions
                 sb.Append('^');
 
             sb.Append('>');
-
-            remaining = runtextend - runtextpos;
 
             for (int i = runtextpos; i < runtextend; i++)
             {
