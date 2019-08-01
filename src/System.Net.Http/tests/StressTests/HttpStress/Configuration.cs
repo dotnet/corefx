@@ -35,6 +35,7 @@ namespace HttpStress
         public int[] OpIndices { get; set; }
         public int[] ExcludedOpIndices { get; set; }
         public TimeSpan DisplayInterval { get; set; }
+        public TimeSpan DefaultTimeout { get; set; }
         public TimeSpan? ConnectionLifetime { get; set; }
         public double CancellationProbability { get; set; }
 

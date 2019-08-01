@@ -47,7 +47,8 @@ public static class Program
         cmd.AddOption(new Option("-numParameters", "Max number of query parameters or form fields for a request.") { Argument = new Argument<int>("queryParameters", 1) });
         cmd.AddOption(new Option("-cancelRate", "Number between 0 and 1 indicating rate of client-side request cancellation attempts. Defaults to 0.1.") { Argument = new Argument<double>("probability", 0.1) });
         cmd.AddOption(new Option("-httpSys", "Use http.sys instead of Kestrel.") { Argument = new Argument<bool>("enable", false) });
-        cmd.AddOption(new Option("-displayInterval", "Client stats display interval in seconds. Defaults to 5 seconds.") { Argument = new Argument<int>("displayInterval", 5) });
+        cmd.AddOption(new Option("-displayInterval", "Client stats display interval in seconds. Defaults to 5 seconds.") { Argument = new Argument<int>("seconds", 5) });
+        cmd.AddOption(new Option("-clientTimeout", "Default HttpClient timeout in seconds. Defaults to 10 seconds.") { Argument = new Argument<int>("seconds", 10) });
 
         ParseResult cmdline = cmd.Parse(args);
         if (cmdline.Errors.Count > 0)
@@ -77,6 +78,7 @@ public static class Program
             ExcludedOpIndices = cmdline.ValueForOption<int[]>("-xops"),
             MaxParameters = cmdline.ValueForOption<int>("-numParameters"),
             DisplayInterval = TimeSpan.FromSeconds(cmdline.ValueForOption<int>("-displayInterval")),
+            DefaultTimeout = TimeSpan.FromSeconds(cmdline.ValueForOption<int>("-clientTimeout")),
             ConnectionLifetime = cmdline.ValueForOption<double?>("-connectionLifetime").Select(TimeSpan.FromMilliseconds),
             CancellationProbability = Math.Max(0, Math.Min(1, cmdline.ValueForOption<double>("-cancelRate"))),
 

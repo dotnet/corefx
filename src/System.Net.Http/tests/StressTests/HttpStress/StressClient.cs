@@ -84,7 +84,7 @@ namespace HttpStress
                 }
             };
 
-            using var client = new HttpClient(handler) { BaseAddress = _config.ServerUri };
+            using var client = new HttpClient(handler) { BaseAddress = _config.ServerUri, Timeout = _config.DefaultTimeout };
 
             async Task RunWorker(int taskNum)
             {
