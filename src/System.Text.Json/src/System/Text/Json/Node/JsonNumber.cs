@@ -5,9 +5,9 @@
 namespace System.Text.Json
 {
     /// <summary>
-    ///   Represents JSON numeric value.
+    ///   Represents a numeric JSON value.
     /// </summary>
-    public partial class JsonNumber : JsonNode, IEquatable<JsonNumber>
+    public class JsonNumber : JsonNode, IEquatable<JsonNumber>
     {
         private string _value;
 
@@ -29,73 +29,73 @@ namespace System.Text.Json
         public JsonNumber(string value) => SetFormattedValue(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a Byte value.
+        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="byte"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public JsonNumber(byte value) => SetByte(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from an Int16 value.
+        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from an <see cref="short"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public JsonNumber(short value) => SetInt16(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from an Int32 value.
+        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from an <see cref="int"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public JsonNumber(int value) => SetInt32(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from an Int16 value.
+        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from an <see cref="long"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public JsonNumber(long value) => SetInt64(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a Single value.
+        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="float"/> value.
         /// </summary>
-        /// <param name="value">A value to represent.</param>
+        /// <param name="value">A value to represent as a JSON number.</param>
         public JsonNumber(float value) => SetSingle(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a Double value.
+        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="double"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public JsonNumber(double value) => SetDouble(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a SByte value.
+        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="sbyte"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
         public JsonNumber(sbyte value) => SetSByte(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a UInt16 value.
+        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="ushort"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
         public JsonNumber(ushort value) => SetUInt16(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a UInt32 value.
+        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="uint"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
         public JsonNumber(uint value) => SetUInt32(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a UInt64 value.
+        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="ulong"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
         public JsonNumber(ulong value) => SetUInt64(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a Decimal value.
+        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="decimal"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public JsonNumber(decimal value) => SetDecimal(value);
 
         /// <summary>
@@ -105,295 +105,295 @@ namespace System.Text.Json
         public override string ToString() => _value;
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Byte equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="byte"/> equivalent.
         /// </summary>
-        /// <returns>A Byte equivalent to the number stored by this instance.</returns>
+        /// <returns>A <see cref="byte"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than MinValue or greater than MaxValue of Byte.
+        ///   <see cref="JsonNumber"/> represents a number less than <see cref="byte.MinValue"/> or greater than <see cref="byte.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with Byte.
+        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="byte"/>.
         /// </exception>
         public byte GetByte() => byte.Parse(_value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Int16 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="short"/> equivalent.
         /// </summary>
-        /// <returns>A Int16 equivalent to the number stored by this instance.</returns>
+        /// <returns>A <see cref="short"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than MinValue or greater than MaxValue of Int16.
+        ///   <see cref="JsonNumber"/> represents a number less than <see cref="short.MinValue"/> or greater than <see cref="short.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with Int16.
+        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="short"/>.
         /// </exception>
         public short GetInt16() => short.Parse(_value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Int32 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="int"/> equivalent.
         /// </summary>
-        /// <returns>A Int32 equivalent to the number stored by this instance.</returns>
+        /// <returns>A <see cref="int"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than MinValue or greater than MaxValue of Int32.
+        ///   <see cref="JsonNumber"/> represents a number less than <see cref="int.MinValue"/> or greater than <see cref="int.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with Int32.
+        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="int"/>.
         /// </exception>
         public int GetInt32() => int.Parse(_value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Int64 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="long"/> equivalent.
         /// </summary>
-        /// <returns>A Int64 equivalent to the number stored by this instance.</returns>
+        /// <returns>A <see cref="long"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than MinValue or greater than MaxValue of Int64.
+        ///   <see cref="JsonNumber"/> represents a number less than <see cref="long.MinValue"/> or greater than <see cref="long.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with Int64.
+        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="long"/>.
         /// </exception>
         public long GetInt64() => long.Parse(_value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Single equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="float"/> equivalent.
         /// </summary>
-        /// <returns>A Single equivalent to the number stored by this instance.</returns>
+        /// <returns>A <see cref="float"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than MinValue or greater than MaxValue of Single.
+        ///   <see cref="JsonNumber"/> represents a number less than <see cref="float.MinValue"/> or greater than <see cref="float.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with Single.
+        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="float"/>.
         /// </exception>
         public float GetSingle() => float.Parse(_value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Double equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="double"/> equivalent.
         /// </summary>
-        /// <returns>A Double equivalent to the number stored by this instance.</returns>
+        /// <returns>A <see cref="double"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than MinValue or greater than MaxValue of Double.
+        ///   <see cref="JsonNumber"/> represents a number less than <see cref="double.MinValue"/> or greater than <see cref="double.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with Double.
+        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="double"/>.
         /// </exception>
         public double GetDouble() => double.Parse(_value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its SByte equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="sbyte"/> equivalent.
         /// </summary>
-        /// <returns>A SByte equivalent to the number stored by this instance.</returns>
+        /// <returns>A <see cref="sbyte"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than MinValue or greater than MaxValue of SByte.
+        ///   <see cref="JsonNumber"/> represents a number less than <see cref="sbyte.MinValue"/> or greater than <see cref="sbyte.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with SByte.
+        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="sbyte"/>.
         /// </exception>
         [CLSCompliant(false)]
         public sbyte GetSByte() => sbyte.Parse(_value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its UInt16 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="ushort"/> equivalent.
         /// </summary>
-        /// <returns>A UInt16 equivalent to the number stored by this instance.</returns>
+        /// <returns>A <see cref="ushort"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than MinValue or greater than MaxValue of UInt16.
+        ///   <see cref="JsonNumber"/> represents a number less than <see cref="ushort.MinValue"/> or greater than <see cref="ushort.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with UInt16.
+        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="ushort"/>.
         /// </exception>
         [CLSCompliant(false)]
         public ushort GetUInt16() => ushort.Parse(_value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its UInt32 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="uint"/> equivalent.
         /// </summary>
-        /// <returns>A UInt32 equivalent to the number stored by this instance.</returns>
+        /// <returns>A <see cref="uint"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than MinValue or greater than MaxValue of UInt32.
+        ///   <see cref="JsonNumber"/> represents a number less than <see cref="uint.MinValue"/> or greater than <see cref="uint.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with UInt32.
+        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="uint"/>.
         /// </exception>
         [CLSCompliant(false)]
         public uint GetUInt32() => uint.Parse(_value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its UInt64 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="ulong"/> equivalent.
         /// </summary>
-        /// <returns>A UInt64 equivalent to the number stored by this instance.</returns>
+        /// <returns>A <see cref="ulong"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than MinValue or greater than MaxValue of UInt64.
+        ///   <see cref="JsonNumber"/> represents a number less than <see cref="ulong.MinValue"/> or greater than <see cref="ulong.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with UInt64.
+        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="ulong"/>.
         /// </exception>
         [CLSCompliant(false)]
         public ulong GetUInt64() => ulong.Parse(_value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Decimal equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="decimal"/> equivalent.
         /// </summary>
-        /// <returns>A Decimal equivalent to the number stored by this instance.</returns>
+        /// <returns>A <see cref="decimal"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than MinValue or greater than MaxValue of Decimal.
+        ///   <see cref="JsonNumber"/> represents a number less than <see cref="decimal.MinValue"/> or greater than <see cref="decimal.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with Decimal.
+        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="decimal"/>.
         /// </exception>
         public decimal GetDecimal() => decimal.Parse(_value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Byte equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="byte"/> equivalent.
         ///   A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">
-        ///   When this method returns, contains the Byte value equivalent of the number contained in this instance,
+        ///   When this method returns, contains the <see cref="byte"/> value equivalent of the number contained in this instance,
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  // <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetByte(out byte value) => byte.TryParse(_value, out value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Int16 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="short"/> equivalent.
         ///   A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">
-        ///   When this method returns, contains the Int16 value equivalent of the number contained in this instance,
+        ///   When this method returns, contains the <see cref="short"/> value equivalent of the number contained in this instance,
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  // <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetInt16(out short value) => short.TryParse(_value, out value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Int32 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="int"/> equivalent.
         ///   A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">
-        ///   When this method returns, contains the Int32 value equivalent of the number contained in this instance,
+        ///   When this method returns, contains the <see cref="int"/> value equivalent of the number contained in this instance,
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  // <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetInt32(out int value) => int.TryParse(_value, out value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Int64 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="long"/> equivalent.
         ///   A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">
-        ///   When this method returns, contains the Int64 value equivalent of the number contained in this instance,
+        ///   When this method returns, contains the <see cref="long"/> value equivalent of the number contained in this instance,
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  // <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetInt64(out long value) => long.TryParse(_value, out value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Single equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="float"/> equivalent.
         ///   A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">
-        ///   When this method returns, contains the Single value equivalent of the number contained in this instance,
+        ///   When this method returns, contains the <see cref="float"/> value equivalent of the number contained in this instance,
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  // <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetSingle(out float value) => float.TryParse(_value, out value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Double equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="double"/> equivalent.
         ///   A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">
-        ///   When this method returns, contains the Double value equivalent of the number contained in this instance,
+        ///   When this method returns, contains the <see cref="double"/> value equivalent of the number contained in this instance,
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  // <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetDouble(out double value) => double.TryParse(_value, out value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its SByte equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="sbyte"/> equivalent.
         ///   A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">
-        ///   When this method returns, contains the SByte value equivalent of the number contained in this instance,
+        ///   When this method returns, contains the <see cref="sbyte"/> value equivalent of the number contained in this instance,
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  // <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
         [CLSCompliant(false)]
         public bool TryGetSByte(out sbyte value) => sbyte.TryParse(_value, out value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its UInt16 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="ushort"/> equivalent.
         ///   A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">
-        ///   When this method returns, contains the UInt16 value equivalent of the number contained in this instance,
+        ///   When this method returns, contains the <see cref="ushort"/> value equivalent of the number contained in this instance,
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  // <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
         [CLSCompliant(false)]
         public bool TryGetUInt16(out ushort value) => ushort.TryParse(_value, out value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its UInt32 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="uint"/> equivalent.
         ///   A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">
-        ///   When this method returns, contains the UInt32 value equivalent of the number contained in this instance,
+        ///   When this method returns, contains the <see cref="uint"/> value equivalent of the number contained in this instance,
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  // <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
         [CLSCompliant(false)]
         public bool TryGetUInt32(out uint value) => uint.TryParse(_value, out value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its UInt64 equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="ulong"/> equivalent.
         ///   A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">
-        ///   When this method returns, contains the UInt64 value equivalent of the number contained in this instance,
+        ///   When this method returns, contains the <see cref="ulong"/> value equivalent of the number contained in this instance,
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  // <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
         [CLSCompliant(false)]
         public bool TryGetUInt64(out ulong value) => ulong.TryParse(_value, out value);
 
         /// <summary>
-        ///   Converts the numeric value of this instance to its Decimal equivalent.
+        ///   Converts the numeric value of this instance to its <see cref="decimal"/> equivalent.
         ///   A return value indicates whether the conversion succeeded.
         /// </summary>
         /// <param name="value">
-        ///   When this method returns, contains the Decimal value equivalent of the number contained in this instance,
+        ///   When this method returns, contains the <see cref="decimal"/> value equivalent of the number contained in this instance,
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  // <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetDecimal(out decimal value) => decimal.TryParse(_value, out value);
@@ -410,151 +410,155 @@ namespace System.Text.Json
         /// </exception>
         public void SetFormattedValue(string value)
         {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            if (value.Length == 0)
+            if (string.IsNullOrEmpty(value))
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
                 throw new ArgumentException("Expected number, but instead got empty string.", nameof(value));
+            }              
             
             JsonWriterHelper.ValidateNumber(Encoding.UTF8.GetBytes(value).AsSpan());
             _value = value;
         }
 
         /// <summary>
-        ///   Changes the numeric value of this instance to represent a specified Byte value.
+        ///   Changes the numeric value of this instance to represent a specified <see cref="byte"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public void SetByte(byte value) => _value = value.ToString();
 
         /// <summary>
-        ///   Changes the numeric value of this instance to represent a specified Int16 value.
+        ///   Changes the numeric value of this instance to represent a specified <see cref="short"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public void SetInt16(short value) => _value = value.ToString();
 
         /// <summary>
-        ///   Changes the numeric value of this instance to represent a specified Int32 value.
+        ///   Changes the numeric value of this instance to represent a specified <see cref="int"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public void SetInt32(int value) => _value = value.ToString();
 
         /// <summary>
-        ///   Changes the numeric value of this instance to represent a specified Int64 value.
+        ///   Changes the numeric value of this instance to represent a specified <see cref="long"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public void SetInt64(long value) => _value = value.ToString();
 
         /// <summary>
-        ///   Changes the numeric value of this instance to represent a specified Single value.
+        ///   Changes the numeric value of this instance to represent a specified <see cref="float"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public void SetSingle(float value) => _value = value.ToString();
 
         /// <summary>
-        ///   Changes the numeric value of this instance to represent a specified Double value.
+        ///   Changes the numeric value of this instance to represent a specified <see cref="double"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public void SetDouble(double value) => _value = value.ToString();
 
         /// <summary>
-        ///   Changes the numeric value of this instance to represent a specified SByte value.
+        ///   Changes the numeric value of this instance to represent a specified <see cref="sbyte"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
         public void SetSByte(sbyte value) => _value = value.ToString();
 
         /// <summary>
-        ///   Changes the numeric value of this instance to represent a specified UInt16 value.
+        ///   Changes the numeric value of this instance to represent a specified <see cref="ushort"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
         public void SetUInt16(ushort value) => _value = value.ToString();
 
         /// <summary>
-        ///   Changes the numeric value of this instance to represent a specified UInt32 value.
+        ///   Changes the numeric value of this instance to represent a specified <see cref="uint"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
         public void SetUInt32(uint value) => _value = value.ToString();
 
         /// <summary>
-        ///   Changes the numeric value of this instance to represent a specified Uint64 value.
+        ///   Changes the numeric value of this instance to represent a specified <see cref="ulong"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
         public void SetUInt64(ulong value) => _value = value.ToString();
 
         /// <summary>
-        ///   Changes the numeric value of this instance to represent a specified Decimal value.
+        ///   Changes the numeric value of this instance to represent a specified <see cref="decimal"/> value.
         /// </summary>
-        /// <param name="value">The value to represent.</param>
+        /// <param name="value">The value to represent as a JSON number.</param>
         public void SetDecimal(decimal value) => _value = value.ToString();
 
         /// <summary>
-        ///   Converts a Byte to a JSON number.
+        ///   Converts a <see cref="byte"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNumber(byte value) => new JsonNumber(value);
 
         /// <summary>
-        ///   Converts an Int16 to a JSON number.
+        ///   Converts a <see cref="short"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNumber(short value) => new JsonNumber(value);
 
         /// <summary>
-        ///   Converts an Int32 to a JSON number.
+        ///   Converts an <see cref="int"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNumber(int value) => new JsonNumber(value);
 
         /// <summary>
-        ///   Converts an Int64 to a JSON number.
+        ///   Converts a <see cref="long"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNumber(long value) => new JsonNumber(value);
 
         /// <summary>
-        ///    Converts a Single to a JSON number.
+        ///    Converts a <see cref="float"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNumber(float value) => new JsonNumber(value);
 
         /// <summary>
-        ///    Converts a Double to a JSON number.
+        ///    Converts a <see cref="double"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNumber(double value) => new JsonNumber(value);
 
         /// <summary>
-        ///    Converts a SByte to a JSON number.
+        ///    Converts a <see cref="sbyte"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
         public static implicit operator JsonNumber(sbyte value) => new JsonNumber(value);
 
         /// <summary>
-        ///    Converts a UInt16 to a JSON number.
+        ///    Converts a <see cref="ushort"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
         public static implicit operator JsonNumber(ushort value) => new JsonNumber(value);
 
         /// <summary>
-        ///    Converts a UInt32 to a JSON number.
+        ///    Converts a <see cref="uint"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
         public static implicit operator JsonNumber(uint value) => new JsonNumber(value);
 
         /// <summary>
-        ///    Converts a UInt64 to a JSON number.
+        ///    Converts a <see cref="ulong"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
         public static implicit operator JsonNumber(ulong value) => new JsonNumber(value);
 
         /// <summary>
-        ///    Converts a Decimal to a JSON number.
+        ///    Converts a <see cref="decimal"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNumber(decimal value) => new JsonNumber(value);

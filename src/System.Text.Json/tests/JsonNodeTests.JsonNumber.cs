@@ -4,46 +4,56 @@
 
 using Xunit;
 
-namespace System.Text.Json
+namespace System.Text.Json.Tests
 {
-    public static partial class WritableJsonApiTests
+    public static partial class JsonNodeTests
     {
-        [Theory]
-        [InlineData(-456)]
-        [InlineData(0)]
-        [InlineData(17)]
-        [InlineData(long.MaxValue)]
-        [InlineData(2.3)]
-        [InlineData(-17.009)]
-        [InlineData(3.14f)]
-        [InlineData(0x2A)]
-        [InlineData(0b_0110_1010)]
-        [InlineData("1e400")]
-        [InlineData("1e+100000002")]
-        [InlineData("184467440737095516150.184467440737095516150")]
-        public static void TestJsonNumberConstructor(object value)
-        {
-            // should not throw any exceptions:
-            _ = new JsonNumber(value as dynamic);
-        }
-
         [Fact]
         public static void TestDefaultCtor()
         {
             var jsonNumber = new JsonNumber();
+            Assert.Equal(0, jsonNumber.GetByte());
+            Assert.Equal(0, jsonNumber.GetInt16());
             Assert.Equal(0, jsonNumber.GetInt32());
+            Assert.Equal(0, jsonNumber.GetInt64());
+            Assert.Equal(0, jsonNumber.GetSingle());
+            Assert.Equal(0, jsonNumber.GetDouble());
+            Assert.Equal(0, jsonNumber.GetSByte());
+            Assert.Equal((ushort)0, jsonNumber.GetUInt16());
+            Assert.Equal((uint)0, jsonNumber.GetUInt32());
+            Assert.Equal((ulong)0, jsonNumber.GetUInt64());
+            Assert.Equal(0, jsonNumber.GetDecimal());
         }
 
         [Theory]
-        [InlineData(0)]
         [InlineData(17)]
-        [InlineData(255)]
+        [InlineData(byte.MinValue)]
+        [InlineData(byte.MaxValue)]
         public static void TestByte(byte value)
         {
+            // Default constructor:
             var jsonNumber = new JsonNumber();
             jsonNumber.SetByte(value);
             Assert.Equal(value, jsonNumber.GetByte());
             Assert.True(jsonNumber.TryGetByte(out byte result));
+            Assert.Equal(value, result);
+
+            // Numeric type constructor:
+            jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.GetByte());
+            Assert.True(jsonNumber.TryGetByte(out result));
+            Assert.Equal(value, result);
+
+            // Implicit cast:
+            jsonNumber = value;
+            Assert.Equal(value, jsonNumber.GetByte());
+            Assert.True(jsonNumber.TryGetByte(out result));
+            Assert.Equal(value, result);
+
+            // String constructor:
+            jsonNumber = new JsonNumber(value.ToString());
+            Assert.Equal(value, jsonNumber.GetByte());
+            Assert.True(jsonNumber.TryGetByte(out result));
             Assert.Equal(value, result);
         }
 
@@ -55,10 +65,29 @@ namespace System.Text.Json
         [InlineData(short.MaxValue)]
         public static void TestShort(short value)
         {
+            // Default constructor:
             var jsonNumber = new JsonNumber();
             jsonNumber.SetInt16(value);
             Assert.Equal(value, jsonNumber.GetInt16());
             Assert.True(jsonNumber.TryGetInt16(out short result));
+            Assert.Equal(value, result);
+
+            // Numeric type constructor:
+            jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.GetInt16());
+            Assert.True(jsonNumber.TryGetInt16(out result));
+            Assert.Equal(value, result);
+
+            // Implicit cast:
+            jsonNumber = value;
+            Assert.Equal(value, jsonNumber.GetInt16());
+            Assert.True(jsonNumber.TryGetInt16(out result));
+            Assert.Equal(value, result);
+
+            // String constructor:
+            jsonNumber = new JsonNumber(value.ToString());
+            Assert.Equal(value, jsonNumber.GetInt16());
+            Assert.True(jsonNumber.TryGetInt16(out result));
             Assert.Equal(value, result);
         }
 
@@ -66,14 +95,35 @@ namespace System.Text.Json
         [InlineData(0)]
         [InlineData(-17)]
         [InlineData(17)]
+        [InlineData(0x2A)]
+        [InlineData(0b_0110_1010)]
         [InlineData(int.MinValue)]
         [InlineData(int.MaxValue)]
         public static void TestInt(int value)
         {
+            // Default constructor:
             var jsonNumber = new JsonNumber();
             jsonNumber.SetInt32(value);
             Assert.Equal(value, jsonNumber.GetInt32());
             Assert.True(jsonNumber.TryGetInt32(out int result));
+            Assert.Equal(value, result);
+
+            // Numeric type constructor:
+            jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.GetInt32());
+            Assert.True(jsonNumber.TryGetInt32(out result));
+            Assert.Equal(value, result);
+
+            // Implicit cast:
+            jsonNumber = value;
+            Assert.Equal(value, jsonNumber.GetInt32());
+            Assert.True(jsonNumber.TryGetInt32(out result));
+            Assert.Equal(value, result);
+
+            // String constructor:
+            jsonNumber = new JsonNumber(value.ToString());
+            Assert.Equal(value, jsonNumber.GetInt32());
+            Assert.True(jsonNumber.TryGetInt32(out result));
             Assert.Equal(value, result);
         }
 
@@ -85,10 +135,29 @@ namespace System.Text.Json
         [InlineData(long.MaxValue)]
         public static void TestLong(long value)
         {
+            // Default constructor:
             var jsonNumber = new JsonNumber();
             jsonNumber.SetInt64(value);
             Assert.Equal(value, jsonNumber.GetInt64());
             Assert.True(jsonNumber.TryGetInt64(out long result));
+            Assert.Equal(value, result);
+
+            // Numeric type constructor:
+            jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.GetInt64());
+            Assert.True(jsonNumber.TryGetInt64(out result));
+            Assert.Equal(value, result);
+
+            // Implicit cast:
+            jsonNumber = value;
+            Assert.Equal(value, jsonNumber.GetInt64());
+            Assert.True(jsonNumber.TryGetInt64(out result));
+            Assert.Equal(value, result);
+
+            // String constructor:
+            jsonNumber = new JsonNumber(value.ToString());
+            Assert.Equal(value, jsonNumber.GetInt64());
+            Assert.True(jsonNumber.TryGetInt64(out result));
             Assert.Equal(value, result);
         }
 
@@ -102,10 +171,29 @@ namespace System.Text.Json
         [InlineData(float.MaxValue)]
         public static void TestFloat(float value)
         {
+            // Default constructor:
             var jsonNumber = new JsonNumber();
             jsonNumber.SetSingle(value);
             Assert.Equal(value, jsonNumber.GetSingle());
             Assert.True(jsonNumber.TryGetSingle(out float result));
+            Assert.Equal(value, result);
+
+            // Numeric type constructor:
+            jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.GetSingle());
+            Assert.True(jsonNumber.TryGetSingle(out result));
+            Assert.Equal(value, result);
+
+            // Implicit cast:
+            jsonNumber = value;
+            Assert.Equal(value, jsonNumber.GetSingle());
+            Assert.True(jsonNumber.TryGetSingle(out result));
+            Assert.Equal(value, result);
+
+            // String constructor:
+            jsonNumber = new JsonNumber(value.ToString());
+            Assert.Equal(value, jsonNumber.GetSingle());
+            Assert.True(jsonNumber.TryGetSingle(out result));
             Assert.Equal(value, result);
         }
 
@@ -119,10 +207,29 @@ namespace System.Text.Json
         [InlineData(double.MaxValue)]
         public static void TestDouble(double value)
         {
+            // Default constructor:
             var jsonNumber = new JsonNumber();
             jsonNumber.SetDouble(value);
             Assert.Equal(value, jsonNumber.GetDouble());
             Assert.True(jsonNumber.TryGetDouble(out double result));
+            Assert.Equal(value, result);
+
+            // Numeric type constructor:
+            jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.GetDouble());
+            Assert.True(jsonNumber.TryGetDouble(out result));
+            Assert.Equal(value, result);
+
+            // Implicit cast:
+            jsonNumber = value;
+            Assert.Equal(value, jsonNumber.GetDouble());
+            Assert.True(jsonNumber.TryGetDouble(out result));
+            Assert.Equal(value, result);
+
+            // String constructor:
+            jsonNumber = new JsonNumber(value.ToString());
+            Assert.Equal(value, jsonNumber.GetDouble());
+            Assert.True(jsonNumber.TryGetDouble(out result));
             Assert.Equal(value, result);
         }
 
@@ -132,12 +239,31 @@ namespace System.Text.Json
         [InlineData(-17)]
         [InlineData(sbyte.MinValue)]
         [InlineData(sbyte.MaxValue)]
-        public static void TestSbyte(sbyte value)
+        public static void TestSByte(sbyte value)
         {
+            // Default constructor:
             var jsonNumber = new JsonNumber();
             jsonNumber.SetSByte(value);
             Assert.Equal(value, jsonNumber.GetSByte());
             Assert.True(jsonNumber.TryGetSByte(out sbyte result));
+            Assert.Equal(value, result);
+
+            // Numeric type constructor:
+            jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.GetSByte());
+            Assert.True(jsonNumber.TryGetSByte(out result));
+            Assert.Equal(value, result);
+
+            // Implicit cast:
+            jsonNumber = value;
+            Assert.Equal(value, jsonNumber.GetSByte());
+            Assert.True(jsonNumber.TryGetSByte(out result));
+            Assert.Equal(value, result);
+
+            // String constructor:
+            jsonNumber = new JsonNumber(value.ToString());
+            Assert.Equal(value, jsonNumber.GetSByte());
+            Assert.True(jsonNumber.TryGetSByte(out result));
             Assert.Equal(value, result);
         }
 
@@ -147,10 +273,29 @@ namespace System.Text.Json
         [InlineData(ushort.MaxValue)]
         public static void TestUInt16(ushort value)
         {
+            // Default constructor:
             var jsonNumber = new JsonNumber();
             jsonNumber.SetUInt16(value);
             Assert.Equal(value, jsonNumber.GetUInt16());
             Assert.True(jsonNumber.TryGetUInt16(out ushort result));
+            Assert.Equal(value, result);
+
+            // Numeric type constructor:
+            jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.GetUInt16());
+            Assert.True(jsonNumber.TryGetUInt16(out result));
+            Assert.Equal(value, result);
+
+            // Implicit cast:
+            jsonNumber = value;
+            Assert.Equal(value, jsonNumber.GetUInt16());
+            Assert.True(jsonNumber.TryGetUInt16(out result));
+            Assert.Equal(value, result);
+
+            // String constructor:
+            jsonNumber = new JsonNumber(value.ToString());
+            Assert.Equal(value, jsonNumber.GetUInt16());
+            Assert.True(jsonNumber.TryGetUInt16(out result));
             Assert.Equal(value, result);
         }
 
@@ -160,10 +305,29 @@ namespace System.Text.Json
         [InlineData(uint.MaxValue)]
         public static void TestUInt32(uint value)
         {
+            // Default constructor:
             var jsonNumber = new JsonNumber();
             jsonNumber.SetUInt32(value);
             Assert.Equal(value, jsonNumber.GetUInt32());
             Assert.True(jsonNumber.TryGetUInt32(out uint result));
+            Assert.Equal(value, result);
+
+            // Numeric type constructor:
+            jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.GetUInt32());
+            Assert.True(jsonNumber.TryGetUInt32(out result));
+            Assert.Equal(value, result);
+
+            // Implicit cast:
+            jsonNumber = value;
+            Assert.Equal(value, jsonNumber.GetUInt32());
+            Assert.True(jsonNumber.TryGetUInt32(out result));
+            Assert.Equal(value, result);
+
+            // String constructor:
+            jsonNumber = new JsonNumber(value.ToString());
+            Assert.Equal(value, jsonNumber.GetUInt32());
+            Assert.True(jsonNumber.TryGetUInt32(out result));
             Assert.Equal(value, result);
         }
 
@@ -173,35 +337,80 @@ namespace System.Text.Json
         [InlineData(ulong.MaxValue)]
         public static void TestUInt64(ulong value)
         {
+            // Default constructor:
             var jsonNumber = new JsonNumber();
             jsonNumber.SetUInt64(value);
             Assert.Equal(value, jsonNumber.GetUInt64());
             Assert.True(jsonNumber.TryGetUInt64(out ulong result));
             Assert.Equal(value, result);
-        }
 
-        [Fact]
-        public static void TestDecimal()
-        {
-            var decimalValue = decimal.MaxValue;
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetDecimal(decimalValue);
-            Assert.Equal(decimalValue, jsonNumber.GetDecimal());
-            Assert.True(jsonNumber.TryGetDecimal(out decimal result));
-            Assert.Equal(decimalValue, result);
+            // Numeric type constructor:
+            jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.GetUInt64());
+            Assert.True(jsonNumber.TryGetUInt64(out result));
+            Assert.Equal(value, result);
+
+            // Implicit cast:
+            jsonNumber = value;
+            Assert.Equal(value, jsonNumber.GetUInt64());
+            Assert.True(jsonNumber.TryGetUInt64(out result));
+            Assert.Equal(value, result);
+
+            // String constructor:
+            jsonNumber = new JsonNumber(value.ToString());
+            Assert.Equal(value, jsonNumber.GetUInt64());
+            Assert.True(jsonNumber.TryGetUInt64(out result));
+            Assert.Equal(value, result);
         }
 
         [Theory]
-        [InlineData("3.14")]
-        [InlineData("-17")]
+        [InlineData(0)]
+        public static void TestDecimal(decimal value)
+        {
+            //var value = decimal.MaxValue;
+
+            // Default constructor:
+            var jsonNumber = new JsonNumber();
+            jsonNumber.SetDecimal(value);
+            Assert.Equal(value, jsonNumber.GetDecimal());
+            Assert.True(jsonNumber.TryGetDecimal(out decimal result));
+            Assert.Equal(value, result);
+
+            // Numeric type constructor:
+            jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.GetDecimal());
+            Assert.True(jsonNumber.TryGetDecimal(out result));
+            Assert.Equal(value, result);
+
+            // Implicit cast:
+            jsonNumber = value;
+            Assert.Equal(value, jsonNumber.GetDecimal());
+            Assert.True(jsonNumber.TryGetDecimal(out result));
+            Assert.Equal(value, result);
+
+            // String constructor:
+            jsonNumber = new JsonNumber(value.ToString());
+            Assert.Equal(value, jsonNumber.GetDecimal());
+            Assert.True(jsonNumber.TryGetDecimal(out result));
+            Assert.Equal(value, result);
+        }
+
+        [Theory]
         [InlineData("0")]
-        [InlineData("189")]
+        [InlineData("17")]
+        [InlineData("-456")]
+        [InlineData("2.3")]
+        [InlineData("-17.009")]
         [InlineData("1e400")]
         [InlineData("1e+100000002")]
         [InlineData("184467440737095516150.184467440737095516150")]
+        [InlineData("184467440737095516150184467440737095516150")]
         public static void TestString(string value)
         {
-            var jsonNumber = new JsonNumber();
+            var jsonNumber = new JsonNumber(value);
+            Assert.Equal(value, jsonNumber.ToString());
+
+            jsonNumber = new JsonNumber();
             jsonNumber.SetFormattedValue(value);
             Assert.Equal(value, jsonNumber.ToString());
         }
@@ -227,6 +436,10 @@ namespace System.Text.Json
         [InlineData(" 6 ")]
         [InlineData("+0")]
         [InlineData("+1")]
+        [InlineData("long.MaxValue")]
+        [InlineData("3.14f")]
+        [InlineData("0x2A")]
+        [InlineData("0b_0110_1010")]
         public static void TestInvalidString(string value)
         {
             Assert.Throws<ArgumentException>(() => new JsonNumber(value));
@@ -238,11 +451,22 @@ namespace System.Text.Json
             Assert.Throws<ArgumentNullException>(() => new JsonNumber(null));
         }
 
-        [Fact]
-        public static void TestIntFromString()
+        [Theory]
+        [InlineData("0")]
+        [InlineData("-17")]
+        [InlineData("17")]
+        [InlineData("3.14")]
+        [InlineData("1.1e1")]
+        [InlineData("-3.1415")]
+        [InlineData("1234567890")]
+        [InlineData("1e400")]
+        [InlineData("1e+100000002")]
+        [InlineData("184467440737095516150.184467440737095516150")]
+        public static void TestToString(string value)
         {
-            var jsonNumber = new JsonNumber("145");
-            Assert.Equal(145, jsonNumber.GetInt32());
+            var jsonNumber = new JsonNumber();
+            jsonNumber.SetFormattedValue(value);
+            Assert.Equal(value, jsonNumber.ToString());
         }
 
         [Fact]
@@ -368,23 +592,6 @@ namespace System.Text.Json
             Assert.Throws<FormatException>(() => jsonNumber.GetUInt64());
         }
 
-        [Theory]
-        [InlineData("0")]
-        [InlineData("-17")]
-        [InlineData("17")]
-        [InlineData("3.14")]
-        [InlineData("-3.1415")]
-        [InlineData("1234567890")]
-        [InlineData("1e400")]
-        [InlineData("1e+100000002")]
-        [InlineData("184467440737095516150.184467440737095516150")]
-        public static void TestToString(string value)
-        {
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetFormattedValue(value);
-            Assert.Equal(value, jsonNumber.ToString());
-        }
-
         [Fact]
         public static void TestChangingTypes()
         {
@@ -420,54 +627,6 @@ namespace System.Text.Json
 
             jsonNumber.SetDecimal(decimal.MaxValue);
             Assert.Equal(decimal.MaxValue, jsonNumber.GetDecimal());
-        }
-
-        [Fact]
-        public static void TestImplicitOperators()
-        {
-            byte byteValue = byte.MaxValue;
-            JsonNumber jsonNumber = byteValue;
-            Assert.Equal(byteValue, jsonNumber.GetByte());
-
-            short shortValue = short.MaxValue;
-            jsonNumber = shortValue;
-            Assert.Equal(shortValue, jsonNumber.GetInt16());
-
-            int intValue = int.MaxValue;
-            jsonNumber = intValue;
-            Assert.Equal(intValue, jsonNumber.GetInt32());
-
-            long longValue = long.MaxValue;
-            jsonNumber = longValue;
-            Assert.Equal(longValue, jsonNumber.GetInt64());
-
-            float floatValue = float.MaxValue;
-            jsonNumber = floatValue;
-            Assert.Equal(floatValue, jsonNumber.GetSingle());
-
-            double doubleValue = double.MaxValue;
-            jsonNumber = doubleValue;
-            Assert.Equal(doubleValue, jsonNumber.GetDouble());
-
-            sbyte sbyteValue = sbyte.MaxValue;
-            jsonNumber = sbyteValue;
-            Assert.Equal(sbyteValue, jsonNumber.GetSByte());
-
-            ushort ushortValue = ushort.MaxValue;
-            jsonNumber = ushortValue;
-            Assert.Equal(ushortValue, jsonNumber.GetUInt16());
-
-            uint uintValue = uint.MaxValue;
-            jsonNumber = uintValue;
-            Assert.Equal(uintValue, jsonNumber.GetUInt32());
-
-            ulong ulongValue = ulong.MaxValue;
-            jsonNumber = ulongValue;
-            Assert.Equal(ulongValue, jsonNumber.GetUInt64());
-
-            decimal decimalValue = decimal.MaxValue;
-            jsonNumber = decimalValue;
-            Assert.Equal(decimalValue, jsonNumber.GetDecimal());
         }
     }
 }

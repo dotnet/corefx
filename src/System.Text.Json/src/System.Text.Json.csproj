@@ -22,9 +22,7 @@
     <Compile Include="System\Text\Json\JsonException.cs" />
     <Compile Include="System\Text\Json\JsonHelpers.cs" />
     <Compile Include="System\Text\Json\JsonHelpers.Date.cs" />
-    <Compile Include="System\Text\Json\Node\JsonNode.cs" />
     <Compile Include="System\Text\Json\JsonTokenType.cs" />
-    <Compile Include="System\Text\Json\Node\JsonNumber.cs" />
     <Compile Include="System\Text\Json\ThrowHelper.cs" />
     <Compile Include="System\Text\Json\ThrowHelper.Serialization.cs" />
     <Compile Include="System\Text\Json\Document\JsonDocument.cs" />
@@ -40,6 +38,8 @@
     <Compile Include="System\Text\Json\Document\JsonElement.ObjectEnumerator.cs" />
     <Compile Include="System\Text\Json\Document\JsonProperty.cs" />
     <Compile Include="System\Text\Json\Document\JsonValueKind.cs" />
+    <Compile Include="System\Text\Json\Node\JsonNode.cs" />
+    <Compile Include="System\Text\Json\Node\JsonNumber.cs" />
     <Compile Include="System\Text\Json\Reader\ConsumeNumberResult.cs" />
     <Compile Include="System\Text\Json\Reader\ConsumeTokenResult.cs" />
     <Compile Include="System\Text\Json\Reader\JsonReaderHelper.cs" />

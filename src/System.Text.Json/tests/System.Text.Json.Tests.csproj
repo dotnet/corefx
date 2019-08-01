@@ -101,8 +101,10 @@
     <Compile Include="Utf8JsonReaderTests.TryGet.Date.cs" />
     <Compile Include="Utf8JsonReaderTests.ValueTextEquals.cs" />
     <Compile Include="Utf8JsonWriterTests.cs" />
+    <Compile Include="JsonNodeTests.JsonNumber.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\src\System\Text\Json\BitStack.cs" Link="BitStack.cs" />
-    <Compile Include="WritableJsonApiTests.JsonNumberUnitTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Compile Include="$(CommonPath)\System\Buffers\ArrayBufferWriter.cs">
