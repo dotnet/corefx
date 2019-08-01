@@ -23,5 +23,5 @@ build.cmd
 ```
 (or `./build.sh` on Unix), warnings-as-errors can be disabled with:
 ```
-build.cmd -warnAsError 0 /p:TreatWarningsAsErrors=false
+build.cmd -warnAsError 0
 ```
