@@ -18,7 +18,7 @@ It is a summer internship project being developed by @kasiabulat.
 The user should be able to:
 * Build up a structured in-memory representation of the JSON payload. 
 * Query the document object model.
-* Modify it. That includes, remove, add, and update. This means we want to build a modifiable JsonDocument that is not just readonly.
+* Modify it. That includes, remove, add, and update. This means we want to build a modifiable JsonDocument analogue that is not just readonly.
 
 ## TODOs
 
@@ -83,7 +83,7 @@ var person = new JsonObject
 };
 ```
 
-JSON array can be also initialized easily in various ways which might be useful in different secnarios:
+JSON array can be also initialized easily in various ways which might be useful in different scenarios:
 
 ```csharp
 string[] dishes = { "sushi", "pasta", "cucumber soup" };
@@ -204,26 +204,23 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 * Implicit operators for `JsonString`, `JsonBoolean` and `JsonNumber` as an additional feature.
 * `Sort` not implemented for `JsonArray`, beacuse there is no right way to compare `JsonObject`s. If user wants to sort `JsonArray` of `JsonNumber`s, `JsonBooleans`s or `JsonStrings` he/she now needs to do the following: convert `JsonArray` to regular array (by iterating through all elements), calling sort (and converting back to `JsonArray` if needed).
 * No support for duplicates of property names. Possibly, adding an option for user to choose from: "first value", "last value", or throw-on-duplicate.
+* No support for escaped characters when creating `JsonNumber` from string.
 * Transformation API:
-    * `DeepCopy` method in JsonElement allowing to change JsonElement and JsonDocument into JsonNode recursively transforming all of the elements
+    * `DeepCopy` method in JsonElement allowing to change JsonElement into JsonNode recursively transforming all of the elements
     * `AsJsonElement` method in JsonNode allowing to change JsonNode into JsonElement with IsImmutable property set to false
     * `IsImmutable` property informing if JsonElement is keeping JsonDocument or JsonNode underneath
     * `Parse(string)` in JsonNode to be able to parse Json string right into JsonNode if user knows he/she wants mutable version
     * `DeepCopy` in JsonNode to make a copy of the whole tree
     * `GetNode` and TryGetNode in JsonNode allowing to retrieve it from JsonElement
-
-## Implementation details
-* `JsonNumber` value is stored as a `string`.
+    * `WriteTo(Utf8JsonWriter)` in JsonNode for writing a JsonNode to a Utf8JsonWriter without having to go through JsonElement
+* `JsonValueKind` property that a caller can inspect and cast to the right concrete type
 
 ## Open questions
-API:
 * Do we want to add recursive equals on `JsonArray` and `JsonObject`?
 * Do we want to make `JsonNode`s derived types (and which) implement `IComparable`?
 * Would escaped characters be supported for creating `JsonNumber` from string? 
 * Is the API for `JsonNode` and `JsonElement` interactions sufficient? 
 * Do we want to support duplicate and order preservation/control when adding/removing values in `JsonArray`/`JsonObject`?
-* Do we want to have accelerator APIs for writing a JsonNode to a Utf8JsonWriter without having to go through JsonElement? (currently added as a `Parse` method in JsonNode)
-* Should JsonNode have a JsonValueKind property that a caller can inspect and cast to the right concrete type?
 * Let's say someone else passes a JsonNode to me, what can I do with it?
 * Should nodes track their own position in the JSON graph? Do we want to allow properties like Parent, Next and Previous?
 
@@ -231,11 +228,6 @@ API:
     |----------|:-------------|--------|
     |current API| - no additional checks need to be made | - creating recursive loop by the user may be problematic |
     |tracking nodes | - handles recursive loop problem | - when node is added to a parent, it needs to be checked <br>  if it already has a parent  and make a copy if it has |
-
-Implementation:
-* Do we want to add a copy of `JsonWriterHelper.ValidateNumber` with additional checks?
-* Do we want to change `JsonNumber`'s backing field to something different than `string`?     
-    Suggestions: `Span<byte>` or array of `Utf8String`/`Char8` (once they come online in the future) / `byte`  
 
 ## Useful links
 
