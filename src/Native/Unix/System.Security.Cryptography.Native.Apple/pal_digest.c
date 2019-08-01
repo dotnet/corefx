@@ -45,7 +45,7 @@ DigestCtx* AppleCryptoNative_DigestCreate(PAL_HashAlgorithm algorithm, int32_t* 
     switch (algorithm)
     {
         case PAL_MD5:
-	    *pcbDigest = CC_MD5_DIGEST_LENGTH;
+            *pcbDigest = CC_MD5_DIGEST_LENGTH;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations" 
             CC_MD5_Init(&digestCtx->d.md5);
