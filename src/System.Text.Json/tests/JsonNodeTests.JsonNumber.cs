@@ -8,6 +8,41 @@ namespace System.Text.Json.Tests
 {
     public static partial class JsonNodeTests
     {
+        private delegate bool TryGetValue<T>(out T result);
+
+        private static void SimpleNumberTests<T>(
+                T value,
+                Func<JsonNumber, T> ctor,
+                Action<JsonNumber, T> setter,
+                Func<T, JsonNumber> getter, TryGetValue<T> tryGetter,
+                Func<T, JsonNumber> implicitCaster)
+        {
+            JsonNumber number = new JsonNumber();
+            setter(number, value);
+            AssertValue(value, number, getter, tryGetter);
+
+            number = ctor(value);
+            AssertValue(value, number, getter, tryGetter);
+
+            number = new JsonNumber(value.ToString());
+            AssertValue(value, number, getter, tryGetter);
+
+            number = implicitCaster(value);
+            AssertValue(value, number, getter, tryGetter);
+        }
+
+        private static void AssertValue<T>(
+                T value,
+                JsonNumber number,
+                Func<T, JsonNumber> getter,
+                TryGetValue<T> tryGetter)
+        {
+            Assert.Equal(value, getter(number));
+            Assert.True(tryGetter(number, out T result));
+            Assert.Equal(value, result);
+        }
+
+
         [Fact]
         public static void TestDefaultCtor()
         {
@@ -31,30 +66,13 @@ namespace System.Text.Json.Tests
         [InlineData(byte.MaxValue)]
         public static void TestByte(byte value)
         {
-            // Default constructor:
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetByte(value);
-            Assert.Equal(value, jsonNumber.GetByte());
-            Assert.True(jsonNumber.TryGetByte(out byte result));
-            Assert.Equal(value, result);
-
-            // Numeric type constructor:
-            jsonNumber = new JsonNumber(value);
-            Assert.Equal(value, jsonNumber.GetByte());
-            Assert.True(jsonNumber.TryGetByte(out result));
-            Assert.Equal(value, result);
-
-            // Implicit cast:
-            jsonNumber = value;
-            Assert.Equal(value, jsonNumber.GetByte());
-            Assert.True(jsonNumber.TryGetByte(out result));
-            Assert.Equal(value, result);
-
-            // String constructor:
-            jsonNumber = new JsonNumber(value.ToString());
-            Assert.Equal(value, jsonNumber.GetByte());
-            Assert.True(jsonNumber.TryGetByte(out result));
-            Assert.Equal(value, result);
+            SimpleNumberTests(
+                value,
+                v => new JsonNumber(v),
+                (number, v) => number.SetInt16(v),
+                number => number.GetInt16(),
+                (number, out v) => number.TryGetValue(out v),
+                v => v);
         }
 
         [Theory]
@@ -453,6 +471,8 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData("0")]
+        [InlineData("1.1e1")]
+        [InlineData("0.0")]
         [InlineData("-17")]
         [InlineData("17")]
         [InlineData("3.14")]

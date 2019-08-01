@@ -26,6 +26,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Provided value is not in a legal JSON number format.
         /// </exception>
+        /// <remarks>Provided value is stored in the same format as passed.</remarks> 
         public JsonNumber(string value) => SetFormattedValue(value);
 
         /// <summary>
@@ -162,6 +163,12 @@ namespace System.Text.Json
         /// <exception cref="FormatException">
         ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="float"/>.
         /// </exception>
+        /// <remarks> 
+        ///   On .NET Core this method does not return <see langword="false"/> for values larger than 
+        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>), 
+        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
+        ///   <see cref="float.NegativeInfinity"/>) is emitted. 
+        /// </remarks> 
         public float GetSingle() => float.Parse(_value);
 
         /// <summary>
@@ -174,6 +181,12 @@ namespace System.Text.Json
         /// <exception cref="FormatException">
         ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="double"/>.
         /// </exception>
+        /// <remarks> 
+        ///   On .NET Core this method does not return <see langword="false"/> for values larger than 
+        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>), 
+        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
+        ///   <see cref="float.NegativeInfinity"/>) is emitted. 
+        /// </remarks> 
         public double GetDouble() => double.Parse(_value);
 
         /// <summary>
@@ -308,6 +321,12 @@ namespace System.Text.Json
         ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
+        /// <remarks> 
+        ///   On .NET Core this method does not return <see langword="false"/> for values larger than 
+        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>), 
+        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
+        ///   <see cref="float.NegativeInfinity"/>) is emitted. 
+        /// </remarks> 
         public bool TryGetSingle(out float value) => float.TryParse(_value, out value);
 
         /// <summary>
@@ -322,6 +341,12 @@ namespace System.Text.Json
         ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
+        /// <remarks> 
+        ///   On .NET Core this method does not return <see langword="false"/> for values larger than 
+        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>), 
+        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
+        ///   <see cref="float.NegativeInfinity"/>) is emitted. 
+        /// </remarks> 
         public bool TryGetDouble(out double value) => double.TryParse(_value, out value);
 
         /// <summary>
@@ -408,6 +433,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Provided value is not in a legal JSON number format.
         /// </exception>
+        /// <remarks>Provided value is stored in the same format as passed.</remarks> 
         public void SetFormattedValue(string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -587,7 +613,7 @@ namespace System.Text.Json
         ///   <see langword="true"/> if the numeric value of this instance matches <paramref name="other"/>,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public bool Equals(JsonNumber other) => _value == other._value;
+        public bool Equals(JsonNumber other) => !(other is null) && _value == other._value;
 
         /// <summary>
         ///   Compares numeric values of two JSON numbers. 
@@ -598,7 +624,7 @@ namespace System.Text.Json
         ///   <see langword="true"/> if the numeric value of instances matches,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator ==(JsonNumber left, JsonNumber right) => left._value == right._value;
+        public static bool operator ==(JsonNumber left, JsonNumber right) => left?._value == right?._value;
 
         /// <summary>
         ///   Compares numeric values of two JSON numbers. 
@@ -609,6 +635,6 @@ namespace System.Text.Json
         ///   <see langword="true"/> if the numeric value of instances does not match,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator !=(JsonNumber left, JsonNumber right) => left._value != right._value;
+        public static bool operator !=(JsonNumber left, JsonNumber right) => left?._value != right?._value;
     }
 }
