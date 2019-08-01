@@ -176,13 +176,13 @@ namespace System.Net.Security
 
         private SecurityStatusPal EncryptData(ReadOnlyMemory<byte> buffer, ref byte[] outBuffer, out int outSize)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             return _context.Encrypt(buffer, ref outBuffer, out outSize);
         }
 
         private SecurityStatusPal DecryptData()
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             return PrivateDecryptData(_internalBuffer, ref _decryptedBytesOffset, ref _decryptedBytesCount);
         }
 
@@ -223,7 +223,7 @@ namespace System.Net.Security
         //
         private int CheckOldKeyDecryptedData(Memory<byte> buffer)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             if (_queuedReadData != null)
             {
                 // This is inefficient yet simple and should be a REALLY rare case.
@@ -1004,7 +1004,7 @@ namespace System.Net.Security
             {
                 if (_lockWriteState != LockHandshake)
                 {
-                    CheckThrowAndAuthState();
+                    ThrowIfExceptionalOrNotAuthenticated();
                     return Task.CompletedTask;
                 }
 
@@ -1032,7 +1032,7 @@ namespace System.Net.Security
                 if (_lockWriteState != LockHandshake)
                 {
                     // Handshake has completed before we grabbed the lock.
-                    CheckThrowAndAuthState();
+                    ThrowIfExceptionalOrNotAuthenticated();
                     return;
                 }
 
@@ -1044,7 +1044,7 @@ namespace System.Net.Security
 
             // Need to exit from lock before waiting.
             lazyResult.InternalWaitForCompletion();
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             return;
         }
 
@@ -1465,7 +1465,7 @@ namespace System.Net.Security
         private async Task WriteAsyncInternal<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
             where TWriteAdapter : struct, ISslWriteAdapter
         {
-            CheckThrowAuthAndShutdownState();
+            ThrowIfExceptionalOrNotAuthenticatedOrShutdown();
 
             if (buffer.Length == 0 && !SslStreamPal.CanEncryptEmptyMessage)
             {

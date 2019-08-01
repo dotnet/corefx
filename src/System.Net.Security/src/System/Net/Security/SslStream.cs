@@ -289,7 +289,7 @@ namespace System.Net.Security
 
         internal IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
         {
-            CheckThrowAuthAndShutdownState();
+            ThrowIfExceptionalOrNotAuthenticatedOrShutdown();
 
             ProtocolToken message = _context.CreateShutdownToken();
             return TaskToApm.Begin(InnerStream.WriteAsync(message.Payload, 0, message.Payload.Length), asyncCallback, asyncState);
@@ -297,7 +297,7 @@ namespace System.Net.Security
 
         internal void EndShutdown(IAsyncResult asyncResult)
         {
-            CheckThrowAuthAndShutdownState();
+            ThrowIfExceptionalOrNotAuthenticatedOrShutdown();
 
             TaskToApm.End(asyncResult);
             _shutdown = true;
@@ -475,7 +475,7 @@ namespace System.Net.Security
         {
             get
             {
-                CheckThrowAndAuthState();
+                ThrowIfExceptionalOrNotAuthenticated();
                 SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
@@ -531,7 +531,7 @@ namespace System.Net.Security
         {
             get
             {
-                CheckThrowAndAuthState();
+                ThrowIfExceptionalOrNotAuthenticated();
                 return _context.IsServer ? _context.LocalServerCertificate : _context.LocalClientCertificate;
             }
         }
@@ -540,7 +540,7 @@ namespace System.Net.Security
         {
             get
             {
-                CheckThrowAndAuthState();
+                ThrowIfExceptionalOrNotAuthenticated();
                 _remoteCertificateExposed = true;
                 return _remoteCertificate;
             }
@@ -551,7 +551,7 @@ namespace System.Net.Security
         {
             get
             {
-                CheckThrowAndAuthState();
+                ThrowIfExceptionalOrNotAuthenticated();
                 return _context.ConnectionInfo?.TlsCipherSuite ?? default(TlsCipherSuite);
             }
         }
@@ -560,7 +560,7 @@ namespace System.Net.Security
         {
             get
             {
-                CheckThrowAndAuthState();
+                ThrowIfExceptionalOrNotAuthenticated();
                 SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
@@ -574,7 +574,7 @@ namespace System.Net.Security
         {
             get
             {
-                CheckThrowAndAuthState();
+                ThrowIfExceptionalOrNotAuthenticated();
                 SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
@@ -589,7 +589,7 @@ namespace System.Net.Security
         {
             get
             {
-                CheckThrowAndAuthState();
+                ThrowIfExceptionalOrNotAuthenticated();
                 SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
@@ -603,7 +603,7 @@ namespace System.Net.Security
         {
             get
             {
-                CheckThrowAndAuthState();
+                ThrowIfExceptionalOrNotAuthenticated();
                 SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
@@ -618,7 +618,7 @@ namespace System.Net.Security
         {
             get
             {
-                CheckThrowAndAuthState();
+                ThrowIfExceptionalOrNotAuthenticated();
                 SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
@@ -633,7 +633,7 @@ namespace System.Net.Security
         {
             get
             {
-                CheckThrowAndAuthState();
+                ThrowIfExceptionalOrNotAuthenticated();
                 SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
@@ -715,7 +715,7 @@ namespace System.Net.Security
 
         public override int ReadByte()
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             if (Interlocked.Exchange(ref _nestedRead, 1) == 1)
             {
                 throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "ReadByte", "read"));
@@ -751,7 +751,7 @@ namespace System.Net.Security
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             ValidateParameters(buffer, offset, count);
             SslReadSync reader = new SslReadSync(this);
             return ReadAsyncInternal(reader, new Memory<byte>(buffer, offset, count)).GetAwaiter().GetResult();
@@ -761,7 +761,7 @@ namespace System.Net.Security
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             ValidateParameters(buffer, offset, count);
 
             SslWriteSync writeAdapter = new SslWriteSync(this);
@@ -770,45 +770,45 @@ namespace System.Net.Security
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             return TaskToApm.Begin(ReadAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
         }
 
         public override int EndRead(IAsyncResult asyncResult)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             return TaskToApm.End<int>(asyncResult);
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             return TaskToApm.Begin(WriteAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
         }
 
         public override void EndWrite(IAsyncResult asyncResult)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             TaskToApm.End(asyncResult);
         }
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             ValidateParameters(buffer, offset, count);
             return WriteAsync(new ReadOnlyMemory<byte>(buffer, offset, count), cancellationToken).AsTask();
         }
 
         public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             SslWriteAsync writeAdapter = new SslWriteAsync(this, cancellationToken);
             return new ValueTask(WriteAsyncInternal(writeAdapter, buffer));
         }
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             ValidateParameters(buffer, offset, count);
             SslReadAsync read = new SslReadAsync(this, cancellationToken);
             return ReadAsyncInternal(read, new Memory<byte>(buffer, offset, count)).AsTask();
@@ -816,7 +816,7 @@ namespace System.Net.Security
 
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
-            CheckThrowAndAuthState();
+            ThrowIfExceptionalOrNotAuthenticated();
             SslReadAsync read = new SslReadAsync(this, cancellationToken);
             return ReadAsyncInternal(read, buffer);
         }
@@ -845,7 +845,7 @@ namespace System.Net.Security
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CheckThrowAndAuthState()
+        private void ThrowIfExceptionalOrNotAuthenticated()
         {
             ThrowIfExceptional();
 
@@ -856,7 +856,7 @@ namespace System.Net.Security
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CheckThrowAuthAndShutdownState()
+        private void ThrowIfExceptionalOrNotAuthenticatedOrShutdown()
         {
             ThrowIfExceptional();
 
