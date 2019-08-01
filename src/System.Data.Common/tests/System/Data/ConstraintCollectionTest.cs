@@ -222,6 +222,7 @@ namespace System.Data.Tests
             table.BeginInit();
             table.Constraints.AddRange(constraints);
 
+            //TODO: what's up with this NRE swallow? does not seem to throw.
             //Check the table property of UniqueConstraint Object
             try
             {
@@ -235,17 +236,10 @@ namespace System.Data.Tests
         [Fact]
         public void Clear()
         {
-            //try
-            //{
             _table.Constraints.Clear(); //Clear all constraints
             Assert.Equal(0, _table.Constraints.Count);
             _table2.Constraints.Clear();
             Assert.Equal(0, _table2.Constraints.Count);
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine(e);
-            //}
         }
 
         [Fact]

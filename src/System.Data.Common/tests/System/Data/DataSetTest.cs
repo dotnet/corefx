@@ -46,7 +46,7 @@ namespace System.Data.Tests
     {
         public DataSetTest()
         {
-            MyDataSet.count = 0;
+            MyDataSet.Count = 0;
         }
 
         [Fact]
@@ -738,7 +738,7 @@ namespace System.Data.Tests
             ser.Deserialize(new XmlTextReader(
                 xml, XmlNodeType.Document, null));
         }
-
+        // TODO: what's this?
         /* To be added
         [Fact]
         public void WriteDiffReadAutoWriteSchema ()
@@ -1712,7 +1712,7 @@ namespace System.Data.Tests
         {
             MyDataSet ds1 = new MyDataSet();
             MyDataSet ds = (MyDataSet)(ds1.Clone());
-            Assert.Equal(2, MyDataSet.count);
+            Assert.Equal(2, MyDataSet.Count);
         }
 
         #region DataSet.GetChanges Tests
@@ -1956,27 +1956,27 @@ namespace System.Data.Tests
            });
         }
 
-        internal struct fillErrorStruct
+        internal struct FillErrorStruct
         {
-            internal string error;
-            internal string tableName;
-            internal int rowKey;
-            internal bool contFlag;
+            internal string _error;
+            internal string _tableName;
+            internal int _rowKey;
+            internal bool _contFlag;
             internal void init(string tbl, int row, bool cont, string err)
             {
-                tableName = tbl;
-                rowKey = row;
-                contFlag = cont;
-                error = err;
+                _tableName = tbl;
+                _rowKey = row;
+                _contFlag = cont;
+                _error = err;
             }
         }
-        private fillErrorStruct[] _fillErr = new fillErrorStruct[3];
+        private readonly FillErrorStruct[] _fillErr = new FillErrorStruct[3];
         private int _fillErrCounter;
-        private void fillErrorHandler(object sender, FillErrorEventArgs e)
+        private void FillErrorHandler(object sender, FillErrorEventArgs e)
         {
-            e.Continue = _fillErr[_fillErrCounter].contFlag;
-            Assert.Equal(_fillErr[_fillErrCounter].tableName, e.DataTable.TableName);
-            Assert.Equal(_fillErr[_fillErrCounter].contFlag, e.Continue);
+            e.Continue = _fillErr[_fillErrCounter]._contFlag;
+            Assert.Equal(_fillErr[_fillErrCounter]._tableName, e.DataTable.TableName);
+            Assert.Equal(_fillErr[_fillErrCounter]._contFlag, e.Continue);
             _fillErrCounter++;
         }
 
@@ -2029,27 +2029,27 @@ namespace System.Data.Tests
             dsLoad.Tables.Add(table2);
             DataTableReader dtr = _ds.CreateDataReader();
             dsLoad.Load(dtr, LoadOption.PreserveChanges,
-                     fillErrorHandler, table1, table2);
+                     FillErrorHandler, table1, table2);
         }
         [Fact]
         public void Load_TableConflictF()
         {
             AssertExtensions.Throws<ArgumentException>(null, () =>
-           {
-               _fillErrCounter = 0;
-               _fillErr[0].init("Table1", 1, false,
-                   "Input string was not in a correct format.Couldn't store <mono 1> in name1 Column.  Expected type is Double.");
-               localSetup();
-               DataSet dsLoad = new DataSet("LoadTableConflict");
-               DataTable table1 = new DataTable();
-               table1.Columns.Add("name1", typeof(double));
-               dsLoad.Tables.Add(table1);
-               DataTable table2 = new DataTable();
-               dsLoad.Tables.Add(table2);
-               DataTableReader dtr = _ds.CreateDataReader();
-               dsLoad.Load(dtr, LoadOption.Upsert,
-                        fillErrorHandler, table1, table2);
-           });
+            {
+                _fillErrCounter = 0;
+                _fillErr[0].init("Table1", 1, false,
+                    "Input string was not in a correct format.Couldn't store <mono 1> in name1 Column.  Expected type is Double.");
+                localSetup();
+                DataSet dsLoad = new DataSet("LoadTableConflict");
+                DataTable table1 = new DataTable();
+                table1.Columns.Add("name1", typeof(double));
+                dsLoad.Tables.Add(table1);
+                DataTable table2 = new DataTable();
+                dsLoad.Tables.Add(table2);
+                DataTableReader dtr = _ds.CreateDataReader();
+                dsLoad.Load(dtr, LoadOption.Upsert,
+                        FillErrorHandler, table1, table2);
+            });
         }
 
         [Fact]
@@ -2190,11 +2190,11 @@ namespace System.Data.Tests
 
     public class MyDataSet : DataSet
     {
-        public static int count;
+        public static int Count;
 
         public MyDataSet()
         {
-            count++;
+            Count++;
         }
     }
 }

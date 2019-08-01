@@ -26,7 +26,7 @@
 using Xunit;
 using System.Collections;
 using System.ComponentModel;
-
+using System.Collections.Generic;
 
 namespace System.Data.Tests
 {
@@ -302,13 +302,14 @@ namespace System.Data.Tests
             // FindRows - check data
 
             //check that result is ok
-            bool Succeed = true;
+            bool succeed = true;
             for (int i = 0; i < dvArr.Length; i++)
             {
-                Succeed = (int)dvArr[i]["ChildId"] == (int)drExpected[i]["ChildId"];
-                if (!Succeed) break;
+                succeed = (int)dvArr[i]["ChildId"] == (int)drExpected[i]["ChildId"];
+                if (!succeed)
+                    break;
             }
-            Assert.True(Succeed);
+            Assert.True(succeed);
         }
 
         [Fact]
@@ -347,13 +348,14 @@ namespace System.Data.Tests
             // FindRows - check data
 
             //check that result is ok
-            bool Succeed = true;
+            bool succeed = true;
             for (int i = 0; i < dvArr.Length; i++)
             {
-                Succeed = (int)dvArr[i]["ChildId"] == (int)drExpected[i]["ChildId"];
-                if (!Succeed) break;
+                succeed = (int)dvArr[i]["ChildId"] == (int)drExpected[i]["ChildId"];
+                if (!succeed)
+                    break;
             }
-            Assert.True(Succeed);
+            Assert.True(succeed);
         }
 
         //Activate This Construntor to log All To Standard output
@@ -370,7 +372,7 @@ namespace System.Data.Tests
         [Fact]
         public void Find_ByObject()
         {
-            int FindResult, ExpectedResult = -1;
+            int findResult, expectedResult = -1;
 
             //create the source datatable
             DataTable dt = DataProvider.CreateParentDataTable();
@@ -382,7 +384,7 @@ namespace System.Data.Tests
             {
                 if ((int)dt.Rows[i]["ParentId"] == 3)
                 {
-                    ExpectedResult = i;
+                    expectedResult = i;
                     break;
                 }
             }
@@ -390,18 +392,18 @@ namespace System.Data.Tests
             // Find ,no sort - exception
             AssertExtensions.Throws<ArgumentException>(null, () =>
             {
-                FindResult = dv.Find("3");
+                findResult = dv.Find("3");
             });
 
             dv.Sort = "String1";
             // Find = wrong sort, can not find
-            FindResult = dv.Find("3");
-            Assert.Equal(-1, FindResult);
+            findResult = dv.Find("3");
+            Assert.Equal(-1, findResult);
 
             dv.Sort = "ParentId";
-            // Find
-            FindResult = dv.Find("3");
-            Assert.Equal(ExpectedResult, FindResult);
+            // Find 
+            findResult = dv.Find("3");
+            Assert.Equal(expectedResult, findResult);
         }
 
         [Fact]
@@ -512,7 +514,7 @@ namespace System.Data.Tests
             _evProp = null;
             // change value - Event raised
             dv[1]["String1"] = "something";
-            Assert.True(_evProp != null);
+            Assert.NotNull(_evProp);
             // change value - ListChangedType
             Assert.Equal(ListChangedType.ItemChanged, _evProp.lstType);
             // change value - NewIndex
@@ -524,7 +526,7 @@ namespace System.Data.Tests
             _evProp = null;
             // Add New  - Event raised
             dv.AddNew();
-            Assert.True(_evProp != null);
+            Assert.NotNull(_evProp);
             // Add New  - ListChangedType
             Assert.Equal(ListChangedType.ItemAdded, _evProp.lstType);
             // Add New  - NewIndex
@@ -536,7 +538,7 @@ namespace System.Data.Tests
             _evProp = null;
             // sort  - Event raised
             dv.Sort = "ParentId Desc";
-            Assert.True(_evProp != null);
+            Assert.NotNull(_evProp);
             // sort - ListChangedType
             Assert.Equal(ListChangedType.Reset, _evProp.lstType);
             // sort - NewIndex
@@ -564,7 +566,7 @@ namespace System.Data.Tests
             // ListChangedType.Reset
             dt.AcceptChanges();
 
-            Assert.True(_evProp != null);
+            Assert.NotNull(_evProp);
             // AcceptChanges - should emit ListChangedType.Reset
             Assert.Equal(ListChangedType.Reset, _evProp.lstType);
         }
@@ -582,7 +584,7 @@ namespace System.Data.Tests
             // Clears DataTable
             dt.Clear();
 
-            Assert.True(_evProp != null);
+            Assert.NotNull(_evProp);
             // Clear DataTable - should emit ListChangedType.Reset
             Assert.Equal(ListChangedType.Reset, _evProp.lstType);
             // Clear DataTable - should clear view count
@@ -604,7 +606,7 @@ namespace System.Data.Tests
             // this test also check DataView.Count property
 
             DataRowView[] drvResult = null;
-            ArrayList al = new ArrayList();
+            List<DataRow> list = new List<DataRow>();
 
             //create the source datatable
             DataTable dt = DataProvider.CreateChildDataTable();
@@ -613,55 +615,56 @@ namespace System.Data.Tests
             DataView dv = new DataView(dt);
 
             //-------------------------------------------------------------
-            //Get excpected result
-            al.Clear();
+            //Get expected result
             foreach (DataRow dr in dt.Rows)
             {
                 if ((int)dr["ChildId"] == 1)
                 {
-                    al.Add(dr);
+                    list.Add(dr);
                 }
             }
 
             // RowFilter = 'ChildId=1', check count
             dv.RowFilter = "ChildId=1";
-            Assert.Equal(al.Count, dv.Count);
+            Assert.Equal(list.Count, dv.Count);
 
             // RowFilter = 'ChildId=1', check rows
             drvResult = new DataRowView[dv.Count];
             dv.CopyTo(drvResult, 0);
             //check that the filterd rows exists
-            bool Succeed = true;
+            bool succeed = true;
             for (int i = 0; i < drvResult.Length; i++)
             {
-                Succeed = al.Contains(drvResult[i].Row);
-                if (!Succeed) break;
+                succeed = list.Contains(drvResult[i].Row);
+                if (!succeed)
+                    break;
             }
-            Assert.True(Succeed);
+            Assert.True(succeed);
             //-------------------------------------------------------------
 
             //-------------------------------------------------------------
-            //Get excpected result
-            al.Clear();
+            //Get excpected result 
+            list.Clear();
             foreach (DataRow dr in dt.Rows)
                 if ((int)dr["ChildId"] == 1 && dr["String1"].ToString() == "1-String1")
-                    al.Add(dr);
+                    list.Add(dr);
 
             // RowFilter - ChildId=1 and String1='1-String1'
             dv.RowFilter = "ChildId=1 and String1='1-String1'";
-            Assert.Equal(al.Count, dv.Count);
+            Assert.Equal(list.Count, dv.Count);
 
             // RowFilter = ChildId=1 and String1='1-String1', check rows
             drvResult = new DataRowView[dv.Count];
             dv.CopyTo(drvResult, 0);
             //check that the filterd rows exists
-            Succeed = true;
+            succeed = true;
             for (int i = 0; i < drvResult.Length; i++)
             {
-                Succeed = al.Contains(drvResult[i].Row);
-                if (!Succeed) break;
+                succeed = list.Contains(drvResult[i].Row);
+                if (!succeed)
+                    break;
             }
-            Assert.True(Succeed);
+            Assert.True(succeed);
             //-------------------------------------------------------------
 
             //EvaluateException
@@ -699,9 +702,6 @@ namespace System.Data.Tests
                 OriginalRows    Original rows including unchanged and deleted rows. 42
                 Unchanged       An unchanged row. 2
              */
-
-            //DataRowView[] drvResult = null;
-            ArrayList al = new ArrayList();
 
             DataTable dt = DataProvider.CreateParentDataTable();
 
@@ -759,7 +759,7 @@ namespace System.Data.Tests
         private DataRow[] GetResultRows(DataTable dt, DataRowState State)
         {
             //get expected rows
-            ArrayList al = new ArrayList();
+            List<DataRow> al = new List<DataRow>();
             DataRowVersion drVer = DataRowVersion.Current;
 
             //From MSDN -    The row the default version for the current DataRowState.
@@ -784,7 +784,7 @@ namespace System.Data.Tests
                     )
                     al.Add(dr);
             }
-            DataRow[] result = (DataRow[])al.ToArray((typeof(DataRow)));
+            DataRow[] result = al.ToArray();
             return result;
         }
 
@@ -910,22 +910,16 @@ namespace System.Data.Tests
         [Fact]
         public void ctor_Empty()
         {
-            DataView dv;
-            dv = new DataView();
-
+            DataView dv = new DataView();
             // ctor
-            Assert.False(dv == null);
         }
 
         [Fact]
         public void ctor_DataTable()
         {
-            DataView dv = null;
             DataTable dt = new DataTable("myTable");
-
             // ctor
-            dv = new DataView(dt);
-            Assert.False(dv == null);
+            DataView dv = new DataView(dt);
 
             // ctor - table
             Assert.Equal(dt, dv.Table);
@@ -965,7 +959,6 @@ namespace System.Data.Tests
 
             // ctor
             dv = new DataView(dt, "CustomerId > 100", "Age", DataViewRowState.Added);
-            Assert.False(dv == null);
 
             // ctor - table
             Assert.Equal(dt, dv.Table);
@@ -1196,16 +1189,18 @@ namespace System.Data.Tests
 
             table.AcceptChanges();
             DataView view = new DataView(table);
-            try
-            {
-                DataTable newTable = view.ToTable(false, null);
-            }
-            catch (ArgumentNullException e)
-            {
-                // Never premise English.
-                //Assert.Equal ("'columnNames' argument cannot be null." + Environment.NewLine +
-                //        "Parameter name: columnNames", e.Message, "#1");
-            }
+            //TODO
+            //try
+            //{
+            //    DataTable newTable = view.ToTable(false, null);
+            //}
+            //catch (ArgumentNullException e)
+            //{
+            //    // Never premise English.
+            //    //Assert.Equal ("'columnNames' argument cannot be null." + Environment.NewLine + 
+            //    //		"Parameter name: columnNames", e.Message, "#1");
+            //}
+            Assert.Throws<ArgumentNullException>(() => view.ToTable(false, null));
             DataTable newTable1 = view.ToTable(false, new string[] { });
             Assert.Equal(10, newTable1.Rows.Count);
 

@@ -69,18 +69,11 @@ namespace System.Data.Tests.Common
         {
             DataAdapter da = new MyAdapter();
             DataSet ds = new DataSet();
-            try
-            {
-                da.Fill(ds);
-                Assert.False(true);
-            }
-            catch (NotSupportedException ex)
-            {
-                // Specified method is not supported
-                Assert.Equal(typeof(NotSupportedException), ex.GetType());
-                Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-            }
+            NotSupportedException ex = Assert.Throws<NotSupportedException>(() => da.Fill(ds));
+            // Specified method is not supported
+            Assert.Null(ex.InnerException);
+            Assert.NotNull(ex.Message);
+
         }
 
         [Fact]
@@ -99,22 +92,14 @@ namespace System.Data.Tests.Common
         public void FillLoadOption_Invalid()
         {
             DataAdapter da = new MyAdapter();
-            try
-            {
-                da.FillLoadOption = (LoadOption)666;
-                Assert.False(true);
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                // The LoadOption enumeration value, 666, is invalid
-                Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
-                Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("LoadOption") != -1);
-                Assert.True(ex.Message.IndexOf("666") != -1);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("LoadOption", ex.ParamName);
-            }
+            ArgumentOutOfRangeException ex = Assert.Throws<ArgumentOutOfRangeException>(() => da.FillLoadOption = (LoadOption)666);
+            // The LoadOption enumeration value, 666, is invalid
+            Assert.Null(ex.InnerException);
+            Assert.NotNull(ex.Message);
+            Assert.Contains(ex.Message, "LoadOption");
+            Assert.Contains(ex.Message, "666");
+            Assert.NotNull(ex.ParamName);
+            Assert.Equal("LoadOption", ex.ParamName);
         }
 
         [Fact]
@@ -133,22 +118,15 @@ namespace System.Data.Tests.Common
         public void MissingMappingAction_Invalid()
         {
             DataAdapter da = new MyAdapter();
-            try
-            {
-                da.MissingMappingAction = (MissingMappingAction)666;
-                Assert.False(true);
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                // The MissingMappingAction enumeration value, 666, is invalid
-                Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
-                Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("MissingMappingAction") != -1);
-                Assert.True(ex.Message.IndexOf("666") != -1);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("MissingMappingAction", ex.ParamName);
-            }
+            ArgumentOutOfRangeException ex = Assert.Throws<ArgumentOutOfRangeException>(() => da.MissingMappingAction = (MissingMappingAction)666);
+            // The MissingMappingAction enumeration value, 666, is invalid
+            Assert.Null(ex.InnerException);
+            Assert.NotNull(ex.Message);
+            Assert.Contains(ex.Message, "MissingMappingAction");
+            Assert.Contains(ex.Message, "666");
+            Assert.NotNull(ex.ParamName);
+            Assert.Equal("MissingMappingAction", ex.ParamName);
+
         }
 
         [Fact]
@@ -167,22 +145,14 @@ namespace System.Data.Tests.Common
         public void MissingSchemaAction_Invalid()
         {
             DataAdapter da = new MyAdapter();
-            try
-            {
-                da.MissingSchemaAction = (MissingSchemaAction)666;
-                Assert.False(true);
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                // The MissingSchemaAction enumeration value, 666, is invalid
-                Assert.Equal(typeof(ArgumentOutOfRangeException), ex.GetType());
-                Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.True(ex.Message.IndexOf("MissingSchemaAction") != -1);
-                Assert.True(ex.Message.IndexOf("666") != -1);
-                Assert.NotNull(ex.ParamName);
-                Assert.Equal("MissingSchemaAction", ex.ParamName);
-            }
+            ArgumentOutOfRangeException ex = Assert.Throws<ArgumentOutOfRangeException>(() => da.MissingSchemaAction = (MissingSchemaAction)666);
+            // The MissingSchemaAction enumeration value, 666, is invalid
+            Assert.Null(ex.InnerException);
+            Assert.NotNull(ex.Message);
+            Assert.Contains(ex.Message, "MissingSchemaAction");
+            Assert.Contains(ex.Message, "666");
+            Assert.NotNull(ex.ParamName);
+            Assert.Equal("MissingSchemaAction", ex.ParamName);
         }
 
         [Fact]

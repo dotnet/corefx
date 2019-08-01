@@ -259,8 +259,6 @@ namespace System.Data.Tests
         [Serializable]
         public class CustomTypeXml : IXmlSerializable
         {
-            private XmlNode _mFuncXmlNode;
-
             #region Constructors
             public CustomTypeXml()
             {
@@ -270,45 +268,33 @@ namespace System.Data.Tests
             {
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(str);
-                _mFuncXmlNode = doc.DocumentElement;
+                Node = doc.DocumentElement;
             }
 
             public CustomTypeXml(XmlNode xNode)
             {
-                _mFuncXmlNode = xNode;
+                Node = xNode;
             }
             #endregion
 
-            #region Node (set/get)
-            public XmlNode Node
-            {
-                get
-                {
-                    return _mFuncXmlNode;
-                }
-                set
-                {
-                    _mFuncXmlNode = value;
-                }
-            }
-            #endregion
-            #region ToString
+            public XmlNode Node { get; set; }
+
             public override string ToString()
             {
                 return Node.OuterXml;
             }
-            #endregion
 
             /* IXmlSerializable overrides */
             #region WriteXml
             void IXmlSerializable.WriteXml(XmlWriter writer)
             {
                 XmlDocument doc = new XmlDocument();
-                doc.LoadXml(_mFuncXmlNode.OuterXml);
+                doc.LoadXml(Node.OuterXml);
 
                 // On function level
                 if (doc.DocumentElement.Name == "Func")
                 {
+                    //TODO: what
                     try { doc.DocumentElement.Attributes.Remove(doc.DocumentElement.Attributes["ReturnType"]); }
                     catch { }
                     try { doc.DocumentElement.Attributes.Remove(doc.DocumentElement.Attributes["ReturnTId"]); }
@@ -335,6 +321,7 @@ namespace System.Data.Tests
             {
                 XmlDocument doc = new XmlDocument();
                 string str = reader.ReadString();
+                //TODO: what
                 try
                 {
                     doc.LoadXml(str);
@@ -343,7 +330,7 @@ namespace System.Data.Tests
                 {
                     doc.LoadXml(reader.ReadOuterXml());
                 }
-                _mFuncXmlNode = doc.DocumentElement;
+                Node = doc.DocumentElement;
             }
             #endregion
             #region GetSchema
@@ -357,6 +344,7 @@ namespace System.Data.Tests
             #region private UpgradeSchema
             private void UpgradeSchema(XmlNode xNode)
             {
+                //TODO: what
                 // Attribute removals (cleanup)
                 try { xNode.Attributes.Remove(xNode.Attributes["TId"]); }
                 catch { }
@@ -370,6 +358,7 @@ namespace System.Data.Tests
                 catch { }
 
                 // Attribute removals (order)
+                //TODO: what
                 try
                 {
                     XmlAttribute attr = xNode.Attributes["IsExpGetRef"];

@@ -63,7 +63,7 @@ namespace System.Data.Tests
             Assert.Equal(5, dt.Columns.Count);
 
             //----------------------------- check Add/Remove from begining --------------------
-            dt = initTable();
+            dt = InitTable();
 
             dt.Columns.Remove(dt.Columns[0]);
             dt.Columns.Remove(dt.Columns[0]);
@@ -101,7 +101,7 @@ namespace System.Data.Tests
 
             //----------------------------- check Add/Remove from middle --------------------
 
-            dt = initTable();
+            dt = InitTable();
 
             dt.Columns.Remove(dt.Columns[2]);
             dt.Columns.Remove(dt.Columns[2]);
@@ -138,7 +138,7 @@ namespace System.Data.Tests
 
             //----------------------------- check Add/Remove from end --------------------
 
-            dt = initTable();
+            dt = InitTable();
 
             dt.Columns.Remove(dt.Columns[4]);
             dt.Columns.Remove(dt.Columns[3]);
@@ -174,7 +174,7 @@ namespace System.Data.Tests
             Assert.Equal("Column6", dt.Columns[5].ColumnName);
         }
 
-        private DataTable initTable()
+        private DataTable InitTable()
         {
             DataTable dt = new DataTable();
             for (int i = 0; i < 5; i++)
@@ -370,8 +370,6 @@ namespace System.Data.Tests
             {
                 Assert.Equal(i, dt.Columns.IndexOf(dt.Columns[i].ColumnName));
             }
-
-            DataColumn col = new DataColumn();
 
             Assert.Equal(-1, dt.Columns.IndexOf("temp1"));
 
@@ -645,18 +643,11 @@ namespace System.Data.Tests
         {
             DataTable dt = DataProvider.CreateParentDataTable();
 
-            try
-            {
-                DataColumn column = dt.Columns[6];
-                Assert.False(true);
-            }
-            catch (IndexOutOfRangeException ex)
-            {
-                // Cannot find column 6
-                Assert.Equal(typeof(IndexOutOfRangeException), ex.GetType());
-                Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-            }
+            IndexOutOfRangeException ex =
+                Assert.Throws<IndexOutOfRangeException>(() => dt.Columns[6]);
+            Assert.Null(ex.InnerException);
+            Assert.NotNull(ex.Message);
+
         }
 
         [Fact] // this [String]
@@ -696,18 +687,11 @@ namespace System.Data.Tests
         {
             DataTable dt = DataProvider.CreateParentDataTable();
 
-            try
-            {
-                DataColumn column = dt.Columns[null];
-                Assert.False(true);
-            }
-            catch (ArgumentNullException ex)
-            {
-                Assert.Equal(typeof(ArgumentNullException), ex.GetType());
-                Assert.Null(ex.InnerException);
-                Assert.NotNull(ex.Message);
-                Assert.Equal("name", ex.ParamName);
-            }
+            ArgumentNullException ex =
+                Assert.Throws<ArgumentNullException>(() => dt.Columns[null]);
+            Assert.Null(ex.InnerException);
+            Assert.NotNull(ex.Message);
+            Assert.Equal("name", ex.ParamName);
         }
 
         [Fact]

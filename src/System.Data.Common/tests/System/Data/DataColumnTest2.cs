@@ -24,9 +24,6 @@
 //
 
 using System.ComponentModel;
-using System.Globalization;
-
-
 using Xunit;
 
 namespace System.Data.Tests
@@ -236,18 +233,6 @@ namespace System.Data.Tests
         }
 
         [Fact]
-        public void TestGetType()
-        {
-            DataColumn dc;
-            Type myType;
-            dc = new DataColumn();
-            myType = dc.GetType();
-
-            // GetType
-            Assert.Equal(typeof(DataColumn), myType);
-        }
-
-        [Fact]
         public void MaxLength()
         {
             DataColumn dc;
@@ -395,14 +380,7 @@ namespace System.Data.Tests
 
             Assert.True(col.Unique);
 
-            try
-            {
-                col.Unique = false;
-                Assert.False(true);
-            }
-            catch (ArgumentException e)
-            {
-            }
+            Assert.Throws<ArgumentException>(() => col.Unique = false);
 
             Assert.True(col.Unique);
         }
@@ -424,9 +402,6 @@ namespace System.Data.Tests
             string sName = "ColName";
             dc = new DataColumn(sName);
 
-            // ctor - object
-            Assert.False(dc == null);
-
             // ctor - ColName
             Assert.Equal(sName, dc.ColumnName);
         }
@@ -445,8 +420,6 @@ namespace System.Data.Tests
             {
                 typTest = Type.GetType(sType);
                 dc = new DataColumn("ColName", typTest);
-                // ctor - object
-                Assert.False(dc == null);
 
                 // ctor - ColName
                 Assert.Equal(typTest, dc.DataType);
@@ -458,9 +431,6 @@ namespace System.Data.Tests
         {
             DataColumn dc;
             dc = new DataColumn("ColName", typeof(string), "Price * 1.18");
-
-            // ctor - object
-            Assert.False(dc == null);
         }
 
         [Fact]
@@ -473,7 +443,6 @@ namespace System.Data.Tests
                 dc = null;
                 dc = new DataColumn("ColName", typeof(string), "Price * 1.18", (MappingType)i);
                 // Ctor #" + i.ToString());
-                Assert.False(dc == null);
             }
         }
 
@@ -755,12 +724,7 @@ namespace System.Data.Tests
         {
             DataColumn col = new DataColumn("col", typeof(int));
             Assert.Equal(DataSetDateTime.UnspecifiedLocal, col.DateTimeMode);
-            try
-            {
-                col.DateTimeMode = DataSetDateTime.Local;
-                Assert.False(true);
-            }
-            catch (InvalidOperationException e) { }
+            Assert.Throws<InvalidOperationException>(() => col.DateTimeMode = DataSetDateTime.Local);
 
             col = new DataColumn("col", typeof(DateTime));
             col.DateTimeMode = DataSetDateTime.Utc;
@@ -773,19 +737,9 @@ namespace System.Data.Tests
         public void DateTimeMode_InvalidValues()
         {
             DataColumn col = new DataColumn("col", typeof(DateTime));
-            try
-            {
-                col.DateTimeMode = (DataSetDateTime)(-1);
-                Assert.False(true);
-            }
-            catch (InvalidEnumArgumentException e) { }
+            Assert.Throws<InvalidEnumArgumentException>(() => col.DateTimeMode = (DataSetDateTime)(-1));
 
-            try
-            {
-                col.DateTimeMode = (DataSetDateTime)5;
-                Assert.False(true);
-            }
-            catch (InvalidEnumArgumentException e) { }
+            Assert.Throws<InvalidEnumArgumentException>(() => col.DateTimeMode = (DataSetDateTime)5);
         }
 
         [Fact]
@@ -800,31 +754,16 @@ namespace System.Data.Tests
             table.Columns[0].DateTimeMode = DataSetDateTime.Unspecified;
             table.Columns[0].DateTimeMode = DataSetDateTime.UnspecifiedLocal;
 
-            try
-            {
-                table.Columns[0].DateTimeMode = DataSetDateTime.Local;
-                Assert.False(true);
-            }
-            catch (InvalidOperationException e) { }
+            Assert.Throws<InvalidOperationException>(() => table.Columns[0].DateTimeMode = DataSetDateTime.Local);
 
-            try
-            {
-                table.Columns[0].DateTimeMode = DataSetDateTime.Utc;
-                Assert.False(true);
-            }
-            catch (InvalidOperationException e) { }
+            Assert.Throws<InvalidOperationException>(() => table.Columns[0].DateTimeMode = DataSetDateTime.Utc);
         }
 
         [Fact]
         public void SetOrdinalTest()
         {
             DataColumn col = new DataColumn("col", typeof(int));
-            try
-            {
-                col.SetOrdinal(2);
-                Assert.False(true);
-            }
-            catch (ArgumentException e) { }
+            Assert.Throws<ArgumentException>(() => col.SetOrdinal(2));
 
             DataTable table = new DataTable();
             DataColumn col1 = table.Columns.Add("col1", typeof(int));
@@ -842,22 +781,12 @@ namespace System.Data.Tests
             Assert.Equal(1, col3.Ordinal);
             Assert.Equal(2, col1.Ordinal);
 
-            try
-            {
-                table.Columns[0].SetOrdinal(-1);
-                Assert.False(true);
-            }
-            catch (ArgumentOutOfRangeException e) { }
+            Assert.Throws<ArgumentOutOfRangeException>(() => table.Columns[0].SetOrdinal(-1));
 
-            try
-            {
-                table.Columns[0].SetOrdinal(4);
-                Assert.False(true);
-            }
-            catch (ArgumentOutOfRangeException e) { }
+            Assert.Throws<ArgumentOutOfRangeException>(() => table.Columns[0].SetOrdinal(4));
         }
         [Fact]
-        public void bug672113_MulpleColConstraint()
+        public void Bug672113_MulpleColConstraint()
         {
             DataTable FirstTable = new DataTable("First Table");
             DataColumn col0 = new DataColumn("empno", typeof(int));

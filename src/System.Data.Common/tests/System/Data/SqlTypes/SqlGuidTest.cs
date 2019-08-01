@@ -74,24 +74,17 @@ namespace System.Data.Tests.SqlTypes
             b[0] = 100;
             b[1] = 200;
 
-            try
-            {
-                SqlGuid Test = new SqlGuid(b);
+            _ =  new SqlGuid(b);
 
-                // SqlGuid (Guid)
-                Guid TestGuid = new Guid(b);
-                Test = new SqlGuid(TestGuid);
+            // SqlGuid (Guid)
+            Guid TestGuid = new Guid(b);
+            _ = new SqlGuid(TestGuid);
 
-                // SqlGuid (string)
-                Test = new SqlGuid("12345678-1234-1234-1234-123456789012");
+            // SqlGuid (string)
+            _ = new SqlGuid("12345678-1234-1234-1234-123456789012");
 
-                // SqlGuid (int, short, short, byte, byte, byte, byte, byte, byte, byte, byte)
-                Test = new SqlGuid(10, 1, 2, 13, 14, 15, 16, 17, 19, 20, 21);
-            }
-            catch (Exception e)
-            {
-                Assert.False(true);
-            }
+            // SqlGuid (int, short, short, byte, byte, byte, byte, byte, byte, byte, byte)
+            _ = new SqlGuid(10, 1, 2, 13, 14, 15, 16, 17, 19, 20, 21);
         }
 
         // Test public fields
@@ -106,7 +99,7 @@ namespace System.Data.Tests.SqlTypes
         public void Properties()
         {
             Guid ResultGuid = new Guid("00000f64-0000-0000-0000-000000000000");
-            Assert.True(!_test1.IsNull);
+            Assert.False(_test1.IsNull);
             Assert.True(SqlGuid.Null.IsNull);
             Assert.Equal(ResultGuid, _test2.Value);
         }
@@ -115,7 +108,7 @@ namespace System.Data.Tests.SqlTypes
         [Fact]
         public void CompareTo()
         {
-            string TestString = "This is a test string";
+            string testString = "This is a test string";
             SqlGuid test1 = new SqlGuid("1AAAAAAA-BBBB-CCCC-DDDD-3EEEEEEEEEEE");
             SqlGuid test2 = new SqlGuid("1AAAAAAA-BBBB-CCCC-DDDD-2EEEEEEEEEEE");
             SqlGuid test3 = new SqlGuid("1AAAAAAA-BBBB-CCCC-DDDD-1EEEEEEEEEEE");
@@ -126,28 +119,20 @@ namespace System.Data.Tests.SqlTypes
             Assert.True(test1.CompareTo(test2) > 0);
             Assert.True(test3.CompareTo(test2) < 0);
 
-            try
-            {
-                _test1.CompareTo(TestString);
-                Assert.False(true);
-            }
-            catch (Exception e)
-            {
-                Assert.Equal(typeof(ArgumentException), e.GetType());
-            }
+            Assert.Throws<ArgumentException>(() => _test1.CompareTo(testString));
         }
 
         [Fact]
         public void EqualsMethods()
         {
-            Assert.True(!_test1.Equals(_test2));
-            Assert.True(!_test2.Equals(_test4));
-            Assert.True(!_test2.Equals(new SqlString("TEST")));
+            Assert.False(_test1.Equals(_test2));
+            Assert.False(_test2.Equals(_test4));
+            Assert.False(_test2.Equals(new SqlString("TEST")));
             Assert.True(_test2.Equals(_test3));
 
             // Static Equals()-method
             Assert.True(SqlGuid.Equals(_test2, _test3).Value);
-            Assert.True(!SqlGuid.Equals(_test1, _test2).Value);
+            Assert.False(SqlGuid.Equals(_test1, _test2).Value);
         }
 
         [Fact]
@@ -169,11 +154,11 @@ namespace System.Data.Tests.SqlTypes
         public void Greaters()
         {
             // GreateThan ()
-            Assert.True(!SqlGuid.GreaterThan(_test1, _test2).Value);
+            Assert.False(SqlGuid.GreaterThan(_test1, _test2).Value);
             Assert.True(SqlGuid.GreaterThan(_test2, _test1).Value);
-            Assert.True(!SqlGuid.GreaterThan(_test2, _test3).Value);
+            Assert.False(SqlGuid.GreaterThan(_test2, _test3).Value);
             // GreaterTharOrEqual ()
-            Assert.True(!SqlGuid.GreaterThanOrEqual(_test1, _test2).Value);
+            Assert.False(SqlGuid.GreaterThanOrEqual(_test1, _test2).Value);
             Assert.True(SqlGuid.GreaterThanOrEqual(_test2, _test1).Value);
             Assert.True(SqlGuid.GreaterThanOrEqual(_test2, _test3).Value);
         }
@@ -182,13 +167,13 @@ namespace System.Data.Tests.SqlTypes
         public void Lessers()
         {
             // LessThan()
-            Assert.True(!SqlGuid.LessThan(_test2, _test3).Value);
-            Assert.True(!SqlGuid.LessThan(_test2, _test1).Value);
+            Assert.False(SqlGuid.LessThan(_test2, _test3).Value);
+            Assert.False(SqlGuid.LessThan(_test2, _test1).Value);
             Assert.True(SqlGuid.LessThan(_test1, _test2).Value);
 
             // LessThanOrEqual ()
             Assert.True(SqlGuid.LessThanOrEqual(_test1, _test2).Value);
-            Assert.True(!SqlGuid.LessThanOrEqual(_test2, _test1).Value);
+            Assert.False(SqlGuid.LessThanOrEqual(_test2, _test1).Value);
             Assert.True(SqlGuid.LessThanOrEqual(_test2, _test3).Value);
             Assert.True(SqlGuid.LessThanOrEqual(_test4, SqlGuid.Null).IsNull);
         }
@@ -199,22 +184,14 @@ namespace System.Data.Tests.SqlTypes
             Assert.True(SqlGuid.NotEquals(_test1, _test2).Value);
             Assert.True(SqlGuid.NotEquals(_test2, _test1).Value);
             Assert.True(SqlGuid.NotEquals(_test3, _test1).Value);
-            Assert.True(!SqlGuid.NotEquals(_test3, _test2).Value);
+            Assert.False(SqlGuid.NotEquals(_test3, _test2).Value);
             Assert.True(SqlGuid.NotEquals(SqlGuid.Null, _test2).IsNull);
         }
 
         [Fact]
         public void Parse()
         {
-            try
-            {
-                SqlGuid.Parse(null);
-                Assert.False(true);
-            }
-            catch (Exception e)
-            {
-                Assert.Equal(typeof(ArgumentNullException), e.GetType());
-            }
+            Assert.Throws<ArgumentNullException>(() => SqlGuid.Parse(null));
 
             try
             {
@@ -225,16 +202,9 @@ namespace System.Data.Tests.SqlTypes
             {
                 Assert.Equal(typeof(FormatException), e.GetType());
             }
+            Assert.Throws<FormatException>(() => SqlGuid.Parse("not-a-number"));
 
-            try
-            {
-                SqlGuid.Parse("9e400");
-                Assert.False(true);
-            }
-            catch (Exception e)
-            {
-                Assert.Equal(typeof(FormatException), e.GetType());
-            }
+            Assert.Throws<FormatException>(() => SqlGuid.Parse("9e400"));
 
             Assert.Equal(new Guid("87654321-0000-0000-0000-000000000000"), SqlGuid.Parse("87654321-0000-0000-0000-000000000000").Value);
         }
@@ -247,9 +217,7 @@ namespace System.Data.Tests.SqlTypes
             Assert.Equal((byte)15, _test2.ToByteArray()[1]);
 
             // ToSqlBinary ()
-            byte[] b = new byte[2];
-            b[0] = 100;
-            b[1] = 15;
+            byte[] b = new byte[2] { 100, 15 };
 
             Assert.Equal(new SqlBinary(b), _test3.ToSqlBinary());
 
@@ -269,35 +237,35 @@ namespace System.Data.Tests.SqlTypes
         {
             // == -operator
             Assert.True((_test3 == _test2).Value);
-            Assert.True(!(_test1 == _test2).Value);
+            Assert.False((_test1 == _test2).Value);
             Assert.True((_test1 == SqlGuid.Null).IsNull);
 
             // != -operator
-            Assert.True(!(_test2 != _test3).Value);
+            Assert.False((_test2 != _test3).Value);
             Assert.True((_test1 != _test3).Value);
             Assert.True((_test1 != SqlGuid.Null).IsNull);
 
             // > -operator
             Assert.True((_test2 > _test1).Value);
-            Assert.True(!(_test1 > _test3).Value);
-            Assert.True(!(_test3 > _test2).Value);
+            Assert.False((_test1 > _test3).Value);
+            Assert.False((_test3 > _test2).Value);
             Assert.True((_test1 > SqlGuid.Null).IsNull);
 
             // >=  -operator
-            Assert.True(!(_test1 >= _test3).Value);
+            Assert.False((_test1 >= _test3).Value);
             Assert.True((_test3 >= _test1).Value);
             Assert.True((_test3 >= _test2).Value);
             Assert.True((_test1 >= SqlGuid.Null).IsNull);
 
             // < -operator
-            Assert.True(!(_test2 < _test1).Value);
+            Assert.False((_test2 < _test1).Value);
             Assert.True((_test1 < _test3).Value);
-            Assert.True(!(_test2 < _test3).Value);
+            Assert.False((_test2 < _test3).Value);
             Assert.True((_test1 < SqlGuid.Null).IsNull);
 
             // <= -operator
             Assert.True((_test1 <= _test3).Value);
-            Assert.True(!(_test3 <= _test1).Value);
+            Assert.False((_test3 <= _test1).Value);
             Assert.True((_test2 <= _test3).Value);
             Assert.True((_test1 <= SqlGuid.Null).IsNull);
         }
@@ -308,9 +276,9 @@ namespace System.Data.Tests.SqlTypes
             byte[] b = new byte[16];
             b[0] = 100;
             b[1] = 200;
-            SqlBinary TestBinary = new SqlBinary(b);
+            SqlBinary testBinary = new SqlBinary(b);
 
-            Assert.Equal(new Guid("0000c864-0000-0000-0000-000000000000"), ((SqlGuid)TestBinary).Value);
+            Assert.Equal(new Guid("0000c864-0000-0000-0000-000000000000"), ((SqlGuid)testBinary).Value);
         }
 
         [Fact]
@@ -323,27 +291,19 @@ namespace System.Data.Tests.SqlTypes
         [Fact]
         public void SqlStringToSqlGuid()
         {
-            SqlString TestString = new SqlString("Test string");
-            SqlString TestString100 = new SqlString("0000c864-0000-0000-0000-000000000000");
+            SqlString testString = new SqlString("Test string");
+            SqlString testString100 = new SqlString("0000c864-0000-0000-0000-000000000000");
 
-            Assert.Equal(new Guid("0000c864-0000-0000-0000-000000000000"), ((SqlGuid)TestString100).Value);
+            Assert.Equal(new Guid("0000c864-0000-0000-0000-000000000000"), ((SqlGuid)testString100).Value);
 
-            try
-            {
-                SqlGuid test = (SqlGuid)TestString;
-                Assert.False(true);
-            }
-            catch (Exception e)
-            {
-                Assert.Equal(typeof(FormatException), e.GetType());
-            }
+            Assert.Throws<FormatException>(() => (SqlGuid)testString);
         }
 
         [Fact]
         public void GuidToSqlGuid()
         {
-            Guid TestGuid = new Guid("0000c864-0000-0000-0000-000007650000");
-            Assert.Equal(new SqlGuid("0000c864-0000-0000-0000-000007650000"), TestGuid);
+            Guid testGuid = new Guid("0000c864-0000-0000-0000-000007650000");
+            Assert.Equal(new SqlGuid("0000c864-0000-0000-0000-000007650000"), testGuid);
         }
         [Fact]
         public void GetXsdTypeTest()

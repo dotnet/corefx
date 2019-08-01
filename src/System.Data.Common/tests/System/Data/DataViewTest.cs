@@ -38,7 +38,8 @@ namespace System.Data.Tests
         private DataTable _dataTable;
         private DataView _dataView;
         private Random _rndm;
-        private int _seed,_rowCount;
+        private const int Seed = 123;
+        private int _rowCount;
         private ListChangedEventArgs _listChangedArgs;
         private TextWriter _eventWriter;
 
@@ -60,9 +61,8 @@ namespace System.Data.Tests
             _dataTable.Columns.Add(_dc3);
             _dataTable.Columns.Add(_dc4);
             DataRow dr;
-            _seed = 123;
             _rowCount = 5;
-            _rndm = new Random(_seed);
+            _rndm = new Random(Seed);
             for (int i = 1; i <= _rowCount; i++)
             {
                 dr = _dataTable.NewRow();
@@ -107,7 +107,8 @@ namespace System.Data.Tests
             }
             Console.WriteLine();
         }
-
+        
+        //TODO: what is this for? looks like it's called from nowhere.
         public void Dispose()
         {
             _dataTable = null;

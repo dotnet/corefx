@@ -20,6 +20,7 @@ namespace System.Data.Tests
         [Fact]
         public void Ctor_ArgumentsRoundtrip()
         {
+            const int COR_E_SYSTEM = unchecked((int)0x80131501);
             var innerException = new Exception("inner exception");
 
             var e = new CustomDataException("test");
@@ -30,7 +31,7 @@ namespace System.Data.Tests
             e = new CustomDataException("test", innerException);
             Assert.Equal("test", e.Message);
             Assert.Same(innerException, e.InnerException);
-            Assert.Equal(-2146233087, e.HResult);
+            Assert.Equal(COR_E_SYSTEM, e.HResult);
         }
 
         private class CustomDataException : DataException
