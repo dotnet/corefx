@@ -643,7 +643,8 @@ namespace System.IO.Ports
                 _readPos += bytesReadToBuffer;
                 if (bytesReadToBuffer == count)
                 {
-                    if (_readPos == _readLen) _readPos = _readLen = 0;  // just a check to see if we can reset buffer
+                    if (_readPos == _readLen)
+                        _readPos = _readLen = 0;  // just a check to see if we can reset buffer
                     return count;
                 }
 
@@ -786,7 +787,8 @@ namespace System.IO.Ports
             Debug.Assert(count >= 0, "invalid count!");
             Debug.Assert(buffer.Length - offset >= count, "invalid offset/count!");
 
-            if (count == 0) return 0;   // immediately return on zero chars desired.  This simplifies things later.
+            if (count == 0)
+                return 0;   // immediately return on zero chars desired.  This simplifies things later.
 
             // Get the startticks before we read the underlying stream
             int startTicks = Environment.TickCount;
@@ -867,7 +869,8 @@ namespace System.IO.Ports
                 _decoder.GetChars(_inBuffer, _readPos, bytesToRead, buffer, offset);
 
                 _readPos += bytesToRead;
-                if (_readPos == _readLen) _readPos = _readLen = 0;
+                if (_readPos == _readLen)
+                    _readPos = _readLen = 0;
                 return bytesToRead;
             }
             else
@@ -937,7 +940,8 @@ namespace System.IO.Ports
 
                 _readPos = lastFullCharPos;
 
-                if (_readPos == _readLen) _readPos = _readLen = 0;
+                if (_readPos == _readLen)
+                    _readPos = _readLen = 0;
                 return totalCharsFound;
             }
         }
@@ -1080,7 +1084,8 @@ namespace System.IO.Ports
                         {
                             // we found the search string.  Exclude it from the return string.
                             string ret = currentLine.ToString(0, currentLine.Length - value.Length);
-                            if (_readPos == _readLen) _readPos = _readLen = 0;
+                            if (_readPos == _readLen)
+                                _readPos = _readLen = 0;
                             return ret;
                         }
                     }
@@ -1134,7 +1139,8 @@ namespace System.IO.Ports
                 throw new InvalidOperationException(SR.Port_not_open);
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
-            if (text.Length == 0) return;
+            if (text.Length == 0)
+                return;
             byte[] bytesToWrite;
 
             bytesToWrite = _encoding.GetBytes(text);
@@ -1157,7 +1163,8 @@ namespace System.IO.Ports
             if (buffer.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
 
-            if (buffer.Length == 0) return;
+            if (buffer.Length == 0)
+                return;
 
             byte[] byteArray = Encoding.GetBytes(buffer, offset, count);
             Write(byteArray, 0, byteArray.Length);
@@ -1176,7 +1183,8 @@ namespace System.IO.Ports
                 throw new ArgumentOutOfRangeException(nameof(count), SR.ArgumentOutOfRange_NeedNonNegNumRequired);
             if (buffer.Length - offset < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
-            if (buffer.Length == 0) return;
+            if (buffer.Length == 0)
+                return;
 
             _internalSerialStream.Write(buffer, offset, count, _writeTimeout);
         }

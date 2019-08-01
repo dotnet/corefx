@@ -336,14 +336,17 @@ namespace System.IO.Ports
             {
                 int constant = _commTimeouts.ReadTotalTimeoutConstant;
 
-                if (constant == infiniteTimeoutConst) return SerialPort.InfiniteTimeout;
-                else return constant;
+                if (constant == infiniteTimeoutConst)
+                    return SerialPort.InfiniteTimeout;
+                else
+                    return constant;
             }
             set
             {
                 if (value < 0 && value != SerialPort.InfiniteTimeout)
                     throw new ArgumentOutOfRangeException(nameof(ReadTimeout), SR.ArgumentOutOfRange_Timeout);
-                if (_handle == null) InternalResources.FileNotOpen();
+                if (_handle == null)
+                    InternalResources.FileNotOpen();
 
                 int oldReadConstant = _commTimeouts.ReadTotalTimeoutConstant;
                 int oldReadInterval = _commTimeouts.ReadIntervalTimeout;
@@ -468,7 +471,8 @@ namespace System.IO.Ports
             {
                 if (value <= 0 && value != SerialPort.InfiniteTimeout)
                     throw new ArgumentOutOfRangeException(nameof(WriteTimeout), SR.ArgumentOutOfRange_WriteTimeout);
-                if (_handle == null) InternalResources.FileNotOpen();
+                if (_handle == null)
+                    InternalResources.FileNotOpen();
 
                 int oldWriteConstant = _commTimeouts.WriteTotalTimeoutConstant;
                 _commTimeouts.WriteTotalTimeoutConstant = ((value == SerialPort.InfiniteTimeout) ? 0 : value);
@@ -558,9 +562,9 @@ namespace System.IO.Ports
         {
             if (portName == null)
             {
-                 throw new ArgumentNullException(nameof(portName));
+                throw new ArgumentNullException(nameof(portName));
             }
-                       
+
             // Error checking done in SerialPort.
 
             SafeFileHandle tempHandle = OpenPort(portName); // OpenPort(portNumber);
@@ -980,7 +984,8 @@ namespace System.IO.Ports
         // Note: Serial driver's write buffer is *already* attempting to write it, so we can only wait until it finishes.
         public override void Flush()
         {
-            if (_handle == null) throw new ObjectDisposedException(SR.Port_not_open);
+            if (_handle == null)
+                throw new ObjectDisposedException(SR.Port_not_open);
             Interop.Kernel32.FlushFileBuffers(_handle);
         }
 
@@ -995,7 +1000,8 @@ namespace System.IO.Ports
         {
             CheckReadWriteArguments(array, offset, count);
 
-            if (count == 0) return 0; // return immediately if no bytes requested; no need for overhead.
+            if (count == 0)
+                return 0; // return immediately if no bytes requested; no need for overhead.
 
             Debug.Assert(timeout == SerialPort.InfiniteTimeout || timeout >= 0, "Serial Stream Read - called with timeout " + timeout);
 
@@ -1023,7 +1029,8 @@ namespace System.IO.Ports
 
         internal unsafe int ReadByte(int timeout)
         {
-            if (_handle == null) InternalResources.FileNotOpen();
+            if (_handle == null)
+                InternalResources.FileNotOpen();
 
             int numBytes = 0;
             if (_isAsync)
@@ -1049,7 +1056,8 @@ namespace System.IO.Ports
 
         internal void SetBufferSizes(int readBufferSize, int writeBufferSize)
         {
-            if (_handle == null) InternalResources.FileNotOpen();
+            if (_handle == null)
+                InternalResources.FileNotOpen();
 
             if (!Interop.Kernel32.SetupComm(_handle, readBufferSize, writeBufferSize))
                 throw Win32Marshal.GetExceptionForLastWin32Error();
@@ -1059,7 +1067,8 @@ namespace System.IO.Ports
         {
             CheckWriteArguments(array, offset, count);
 
-            if (count == 0) return; // no need to expend overhead in creating asyncResult, etc.
+            if (count == 0)
+                return; // no need to expend overhead in creating asyncResult, etc.
 
             Debug.Assert(timeout == SerialPort.InfiniteTimeout || timeout >= 0, "Serial Stream Write - write timeout is " + timeout);
 
@@ -1102,7 +1111,8 @@ namespace System.IO.Ports
             if (_inBreak)
                 throw new InvalidOperationException(SR.In_Break_State);
 
-            if (_handle == null) InternalResources.FileNotOpen();
+            if (_handle == null)
+                InternalResources.FileNotOpen();
             _tempBuf[0] = value;
 
 
@@ -1519,7 +1529,8 @@ namespace System.IO.Ports
             if (wh != null)
             {
                 bool r = wh.Set();
-                if (!r) throw Win32Marshal.GetExceptionForLastWin32Error();
+                if (!r)
+                    throw Win32Marshal.GetExceptionForLastWin32Error();
             }
 
             asyncResult._userCallback?.Invoke(asyncResult);
