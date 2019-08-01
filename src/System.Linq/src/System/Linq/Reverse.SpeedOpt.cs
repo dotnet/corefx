@@ -583,7 +583,7 @@ namespace System.Linq
             }
         }
 
-        private sealed class ReverseListPartition<TSource> : Iterator<TSource>, IPartition<TSource>, IReverseProvider<TSource>
+        private sealed class ReverseListPartition<TSource> : Iterator<TSource>, IPartition<TSource>
         {
             private readonly IList<TSource> _source;
             private readonly int _minIndexInclusive;
@@ -622,9 +622,6 @@ namespace System.Linq
 
             public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
                 new ReverseSelectListPartitionIterator<TSource, TResult>(_source, selector, _minIndexInclusive, _maxIndexInclusive);
-
-            public IEnumerable<TSource> Reverse() =>
-                new ListPartition<TSource>(_source, _minIndexInclusive, _maxIndexInclusive);
 
             public TSource[] ToArray()
             {
@@ -730,7 +727,7 @@ namespace System.Linq
             }
         }
 
-        private sealed class ReverseSelectListPartitionIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>, IReverseProvider<TResult>
+        private sealed class ReverseSelectListPartitionIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
         {
             private readonly IList<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
@@ -772,9 +769,6 @@ namespace System.Linq
 
             public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
                 new ReverseSelectListPartitionIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector), _minIndexInclusive, _maxIndexInclusive);
-
-            public IEnumerable<TResult> Reverse() =>
-                new SelectListPartitionIterator<TSource, TResult>(_source, _selector, _minIndexInclusive, _maxIndexInclusive);
 
             public TResult[] ToArray()
             {
