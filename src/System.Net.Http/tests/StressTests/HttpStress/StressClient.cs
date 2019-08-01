@@ -283,6 +283,22 @@ namespace HttpStress
                     Console.ResetColor();
                     Console.WriteLine(_failures[i].ToString("N0"));
                 }
+                
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write("\t    TOTAL".PadRight(31));
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("Success: ");
+                Console.Write(_successes.Sum().ToString("N0"));
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("\tCanceled: ");
+                Console.Write(_cancellations.Sum().ToString("N0"));
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.Write("\tFail: ");
+                Console.ResetColor();
+                Console.WriteLine(_failures.Sum().ToString("N0"));
                 Console.WriteLine();
             }
 
@@ -317,7 +333,7 @@ namespace HttpStress
                     }
 
                     Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.Write("\t" + "    TOTAL".PadRight(30));
+                    Console.Write("\t    TOTAL".PadRight(31));
                     Console.ResetColor();
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.Write($"Fail: ");
