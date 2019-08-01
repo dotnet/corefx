@@ -139,7 +139,7 @@ namespace HttpStress
         // and the delegate to invoke for it, provided with the HttpClient instance on which to make the call and
         // returning asynchronously the retrieved response string from the server.  Individual operations can be
         // commented out from here to turn them off, or additional ones can be added.
-        public static (string, Func<RequestContext, Task>)[] Operations =>
+        public static (string name, Func<RequestContext, Task> operation)[] Operations =>
             new (string, Func<RequestContext, Task>)[] 
             {
                 ("GET",
