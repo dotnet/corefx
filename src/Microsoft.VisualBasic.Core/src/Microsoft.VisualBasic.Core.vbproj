@@ -92,10 +92,6 @@
     <Compile Include="Microsoft\VisualBasic\Information.vb" />
     <Compile Include="Microsoft\VisualBasic\Interaction.vb" />
     <Compile Include="Microsoft\VisualBasic\MyGroupCollectionAttribute.vb" />
-    <Compile Include="Microsoft\VisualBasic\MyServices\ClipboardProxy.vb" />
-    <Compile Include="Microsoft\VisualBasic\MyServices\FileSystemProxy.vb" />
-    <Compile Include="Microsoft\VisualBasic\MyServices\RegistryProxy.vb" />
-    <Compile Include="Microsoft\VisualBasic\MyServices\SpecialDirectoriesProxy.vb" />
     <Compile Include="Microsoft\VisualBasic\Strings.vb" />
     <Compile Include="Microsoft\VisualBasic\VBFixedArrayAttribute.vb" />
     <Compile Include="Microsoft\VisualBasic\VBFixedStringAttribute.vb" />

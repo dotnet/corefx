@@ -38,8 +38,6 @@
     <Compile Include="Microsoft\VisualBasic\FileIO\TextFieldParserTests.cs" />
     <Compile Include="Microsoft\VisualBasic\HideModuleNameAttributeTests.cs" />
     <Compile Include="Microsoft\VisualBasic\MyGroupCollectionAttributeTests.cs" />
-    <Compile Include="Microsoft\VisualBasic\MyServices\FileSystemProxyTests.cs" />
-    <Compile Include="Microsoft\VisualBasic\MyServices\SpecialDirectoriesProxyTests.cs" />
     <Compile Include="Microsoft\VisualBasic\VBFixedArrayAttributeTests.cs" />
     <Compile Include="Microsoft\VisualBasic\VBFixedStringAttributeTests.cs" />
     <Compile Include="ObjectTypeTests.cs" />
