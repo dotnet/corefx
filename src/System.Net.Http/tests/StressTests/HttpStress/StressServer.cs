@@ -3,11 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -64,7 +64,9 @@ namespace HttpStress
                     // conservative estimation based on https://github.com/aspnet/AspNetCore/blob/caa910ceeba5f2b2c02c47a23ead0ca31caea6f0/src/Servers/Kestrel/Core/src/Internal/Http2/Http2Stream.cs#L204
                     ko.Limits.MaxRequestLineSize = Math.Max(ko.Limits.MaxRequestLineSize, configuration.MaxRequestUriSize + 100);
 
-                    ko.ListenLocalhost(configuration.ServerUri.Port, listenOptions =>
+                    IPAddress iPAddress = Dns.GetHostAddresses(configuration.ServerUri.Host).First();
+
+                    ko.Listen(iPAddress, configuration.ServerUri.Port, listenOptions =>
                     {
                         // Create self-signed cert for server.
                         using (RSA rsa = RSA.Create())
