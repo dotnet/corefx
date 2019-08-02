@@ -46,7 +46,7 @@ namespace System.Composition.UnitTests
         {
             var container = CreateContainer(typeof(UnfairRule));
             var rule = container.GetExport<IRule>();
-            Assert.IsAssignableFrom(typeof(UnfairRule), rule);
+            Assert.IsAssignableFrom<UnfairRule>(rule);
         }
 
         [Fact]
@@ -55,11 +55,10 @@ namespace System.Composition.UnitTests
         {
             var container = CreateContainer(new ConventionBuilder(), typeof(UnfairRule));
             var rule = container.GetExport<IRule>();
-            Assert.IsAssignableFrom(typeof(UnfairRule), rule);
+            Assert.IsAssignableFrom<UnfairRule>(rule);
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20656", TargetFrameworkMonikers.UapAot)]
         [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void InstanceExportsOfIncompatibleContractsAreDetected()
         {
@@ -68,7 +67,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20656", TargetFrameworkMonikers.UapAot)]
         [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void PropertyExportsOfIncompatibleContractsAreDetected()
         {
@@ -119,7 +117,7 @@ namespace System.Composition.UnitTests
         {
             var container = CreateContainer(typeof(HomeController), typeof(CloudBus));
             var hc = container.GetExport<HomeController>();
-            Assert.IsAssignableFrom(typeof(CloudBus), hc.Bus);
+            Assert.IsAssignableFrom<CloudBus>(hc.Bus);
         }
 
         private class CustomImportAttribute : ImportAttribute { }
@@ -132,7 +130,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20656", TargetFrameworkMonikers.UapAot)]
         [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void MultipleImportAttributesAreDetected()
         {

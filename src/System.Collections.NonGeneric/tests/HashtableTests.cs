@@ -378,7 +378,6 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttribute()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new Hashtable());
@@ -1175,7 +1174,7 @@ namespace System.Collections.Tests
 
             Task.WaitAll(workers);
 
-            Assert.Equal(_hash2.Count, 0);
+            Assert.Equal(0, _hash2.Count);
         }
 
         private void AddElements(string strName)
@@ -1195,7 +1194,6 @@ namespace System.Collections.Tests
         }
     }
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Changed behavior
     public class Hashtable_SyncRootTests
     {
         private Hashtable _hashDaughter;
@@ -1210,7 +1208,7 @@ namespace System.Collections.Tests
             var hash2 = new Hashtable();
 
             Assert.NotSame(hash1.SyncRoot, hash2.SyncRoot);
-            Assert.Equal(hash1.SyncRoot.GetType(), typeof(Hashtable));
+            Assert.Equal(typeof(Hashtable), hash1.SyncRoot.GetType());
 
             // Cloned hashtables have different SyncRoots
             hash1 = new Hashtable();

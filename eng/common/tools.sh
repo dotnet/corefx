@@ -1,7 +1,19 @@
+#!/usr/bin/env bash
+
 # Initialize variables if they aren't already defined.
 
 # CI mode - set to true on CI server for PR validation build or official build.
 ci=${ci:-false}
+
+# Set to true to use the pipelines logger which will enable Azure logging output.
+# https://github.com/Microsoft/azure-pipelines-tasks/blob/master/docs/authoring/commands.md
+# This flag is meant as a temporary opt-opt for the feature while validate it across
+# our consumers. It will be deleted in the future.
+if [[ "$ci" == true ]]; then
+  pipelines_log=${pipelines_log:-true}
+else
+  pipelines_log=${pipelines_log:-false}
+fi
 
 # Build configuration. Common values include 'Debug' and 'Release', but the repository may use other names.
 configuration=${configuration:-'Debug'}
@@ -32,6 +44,10 @@ warn_as_error=${warn_as_error:-true}
 # True to attempt using .NET Core already that meets requirements specified in global.json 
 # installed on the machine instead of downloading one.
 use_installed_dotnet_cli=${use_installed_dotnet_cli:-true}
+
+# Enable repos to use a particular version of the on-line dotnet-install scripts.
+#    default URL: https://dot.net/v1/dotnet-install.sh
+dotnetInstallScriptVersion=${dotnetInstallScriptVersion:-'v1'}
 
 # True to use global NuGet cache instead of restoring packages to repository-local directory.
 if [[ "$ci" == true ]]; then
@@ -65,7 +81,7 @@ function ReadGlobalVersion {
   local pattern="\"$key\" *: *\"(.*)\""
 
   if [[ ! $line =~ $pattern ]]; then
-    echo "Error: Cannot find \"$key\" in $global_json_file" >&2
+    Write-PipelineTelemetryError -category 'InitializeToolset' "Error: Cannot find \"$key\" in $global_json_file"
     ExitWithExitCode 1
   fi
 
@@ -126,7 +142,7 @@ function InitializeDotNetCli {
       if [[ "$install" == true ]]; then
         InstallDotNetSdk "$dotnet_root" "$dotnet_sdk_version"
       else
-        echo "Unable to find dotnet with SDK version '$dotnet_sdk_version'" >&2
+        Write-PipelineTelemetryError -category 'InitializeToolset' "Unable to find dotnet with SDK version '$dotnet_sdk_version'"
         ExitWithExitCode 1
       fi
     fi
@@ -134,14 +150,10 @@ function InitializeDotNetCli {
 
   # Add dotnet to PATH. This prevents any bare invocation of dotnet in custom
   # build steps from using anything other than what we've downloaded.
-  export PATH="$dotnet_root:$PATH"
+  Write-PipelinePrependPath -path "$dotnet_root"
 
-  if [[ $ci == true ]]; then
-    # Make Sure that our bootstrapped dotnet cli is avaliable in future steps of the Azure Pipelines build
-    echo "##vso[task.prependpath]$dotnet_root"
-    echo "##vso[task.setvariable variable=DOTNET_MULTILEVEL_LOOKUP]0"
-    echo "##vso[task.setvariable variable=DOTNET_SKIP_FIRST_TIME_EXPERIENCE]1"
-  fi
+  Write-PipelineSetVariable -name "DOTNET_MULTILEVEL_LOOKUP" -value "0"
+  Write-PipelineSetVariable -name "DOTNET_SKIP_FIRST_TIME_EXPERIENCE" -value "1"
 
   # return value
   _InitializeDotNetCli="$dotnet_root"
@@ -179,7 +191,7 @@ function InstallDotNet {
   fi
   bash "$install_script" --version $version --install-dir "$root" $archArg $runtimeArg $skipNonVersionedFilesArg || {
     local exit_code=$?
-    echo "Failed to install dotnet SDK (exit code '$exit_code')." >&2
+    Write-PipelineTelemetryError -category 'InitializeToolset' "Failed to install dotnet SDK (exit code '$exit_code')."
     ExitWithExitCode $exit_code
   }
 }
@@ -187,7 +199,7 @@ function InstallDotNet {
 function GetDotNetInstallScript {
   local root=$1
   local install_script="$root/dotnet-install.sh"
-  local install_script_url="https://dot.net/v1/dotnet-install.sh"
+  local install_script_url="https://dot.net/$dotnetInstallScriptVersion/dotnet-install.sh"
 
   if [[ ! -a "$install_script" ]]; then
     mkdir -p "$root"
@@ -216,6 +228,7 @@ function InitializeBuildTool {
   # return values
   _InitializeBuildTool="$_InitializeDotNetCli/dotnet"  
   _InitializeBuildToolCommand="msbuild"
+  _InitializeBuildToolFramework="netcoreapp2.1"
 }
 
 function GetNuGetPackageCachePath {
@@ -236,7 +249,7 @@ function InitializeNativeTools() {
   then
     local nativeArgs=""
     if [[ "$ci" == true ]]; then
-      nativeArgs="-InstallDirectory $tools_dir"
+      nativeArgs="--installDirectory $tools_dir"
     fi
     "$_script_dir/init-tools-native.sh" $nativeArgs
   fi
@@ -264,7 +277,7 @@ function InitializeToolset {
   fi
 
   if [[ "$restore" != true ]]; then
-    echo "Toolset version $toolsetVersion has not been restored." >&2
+    Write-PipelineTelemetryError -category 'InitializeToolset' "Toolset version $toolset_version has not been restored."
     ExitWithExitCode 2
   fi
 
@@ -276,12 +289,12 @@ function InitializeToolset {
   fi
   
   echo '<Project Sdk="Microsoft.DotNet.Arcade.Sdk"/>' > "$proj"
-  MSBuild "$proj" $bl /t:__WriteToolsetLocation /clp:ErrorsOnly\;NoSummary /p:__ToolsetLocationOutputFile="$toolset_location_file"
+  MSBuild-Core "$proj" $bl /t:__WriteToolsetLocation /clp:ErrorsOnly\;NoSummary /p:__ToolsetLocationOutputFile="$toolset_location_file"
 
   local toolset_build_proj=`cat "$toolset_location_file"`
 
   if [[ ! -a "$toolset_build_proj" ]]; then
-    echo "Invalid toolset path: $toolset_build_proj" >&2
+    Write-PipelineTelemetryError -category 'InitializeToolset' "Invalid toolset path: $toolset_build_proj"
     ExitWithExitCode 3
   fi
 
@@ -304,14 +317,27 @@ function StopProcesses {
 }
 
 function MSBuild {
+  local args=$@
+  if [[ "$pipelines_log" == true ]]; then
+    InitializeBuildTool
+    InitializeToolset
+    local toolset_dir="${_InitializeToolset%/*}"
+    local logger_path="$toolset_dir/$_InitializeBuildToolFramework/Microsoft.DotNet.Arcade.Sdk.dll"
+    args=( "${args[@]}" "-logger:$logger_path" )
+  fi
+
+  MSBuild-Core ${args[@]}
+}
+
+function MSBuild-Core {
   if [[ "$ci" == true ]]; then
     if [[ "$binary_log" != true ]]; then
-      echo "Binary log must be enabled in CI build." >&2
+      Write-PipelineTaskError "Binary log must be enabled in CI build."
       ExitWithExitCode 1
     fi
 
     if [[ "$node_reuse" == true ]]; then
-      echo "Node reuse must be disabled in CI build." >&2
+      Write-PipelineTaskError "Node reuse must be disabled in CI build."
       ExitWithExitCode 1
     fi
   fi
@@ -325,13 +351,15 @@ function MSBuild {
 
   "$_InitializeBuildTool" "$_InitializeBuildToolCommand" /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error /p:ContinuousIntegrationBuild=$ci "$@" || {
     local exit_code=$?
-    echo "Build failed (exit code '$exit_code')." >&2
+    Write-PipelineTaskError "Build failed (exit code '$exit_code')."
     ExitWithExitCode $exit_code
   }
 }
 
 ResolvePath "${BASH_SOURCE[0]}"
 _script_dir=`dirname "$_ResolvePath"`
+
+. "$_script_dir/pipeline-logging-functions.sh"
 
 eng_root=`cd -P "$_script_dir/.." && pwd`
 repo_root=`cd -P "$_script_dir/../.." && pwd`
@@ -359,7 +387,8 @@ mkdir -p "$toolset_dir"
 mkdir -p "$temp_dir"
 mkdir -p "$log_dir"
 
-if [[ $ci == true ]]; then
-  export TEMP="$temp_dir"
-  export TMP="$temp_dir"
-fi
+Write-PipelineSetVariable -name "Artifacts" -value "$artifacts_dir"
+Write-PipelineSetVariable -name "Artifacts.Toolset" -value "$toolset_dir"
+Write-PipelineSetVariable -name "Artifacts.Log" -value "$log_dir"
+Write-PipelineSetVariable -name "Temp" -value "$temp_dir"
+Write-PipelineSetVariable -name "TMP" -value "$temp_dir"

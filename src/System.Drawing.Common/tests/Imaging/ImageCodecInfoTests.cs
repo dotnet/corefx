@@ -2,8 +2,8 @@
 // See the LICENSE file in the project root for more information.
 //
 // Authors:
-// 	Jordi Mas i Hernàndez (jordi@ximian.com)
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Jordi Mas i Hernàndez (jordi@ximian.com)
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // (C) 2004 Ximian, Inc.  http://www.ximian.com
 // Copyright (C) 2004-2007 Novell, Inc (http://www.novell.com)
@@ -96,7 +96,7 @@ namespace System.Drawing.Imaging.Tests
             Assert.Equal(format.Guid, codecInfo.FormatID);
             Assert.Contains(CodecName, codecInfo.CodecName);
             Assert.Equal(DllName, codecInfo.DllName);
-            Assert.True(extRegex.IsMatch(codecInfo.FilenameExtension));
+            Assert.Matches(extRegex, codecInfo.FilenameExtension);
             Assert.Equal(Flags, codecInfo.Flags);
             Assert.Contains(FormatDescription, codecInfo.FormatDescription);
             Assert.Contains(MimeType, codecInfo.MimeType);

@@ -42,7 +42,7 @@ namespace System.Xml.Schema
         private static readonly Type s_uriType = typeof(Uri);
         private static readonly Type s_timeSpanType = typeof(TimeSpan);
 
-        private static readonly string s_untypedStringTypeName = "xdt:untypedAtomic";
+        private const string UntypedStringTypeName = "xdt:untypedAtomic";
 
         // Static convertor instance
         internal static XmlUntypedStringConverter Instance = new XmlUntypedStringConverter(true);
@@ -189,8 +189,8 @@ namespace System.Xml.Schema
                 Type itemTypeDst = destinationType.GetElementType();
 
                 // Different StringSplitOption needs to be used because of following bugs:
-                // 566053: Behavior change between SL2 and Dev10 in the way string arrays are deserialized by the XmlReader.ReadContentsAs method	
-                // 643697: Deserialization of typed arrays by the XmlReader.ReadContentsAs method fails	
+                // 566053: Behavior change between SL2 and Dev10 in the way string arrays are deserialized by the XmlReader.ReadContentsAs method
+                // 643697: Deserialization of typed arrays by the XmlReader.ReadContentsAs method fails
                 //
                 // In Silverligt 2 the XmlConvert.SplitString was not using the StringSplitOptions, which is the same as using StringSplitOptions.None.
                 // What it meant is that whenever there is a double space between two values in the input string it turned into 
@@ -240,7 +240,7 @@ namespace System.Xml.Schema
 
         private Exception CreateInvalidClrMappingException(Type sourceType, Type destinationType)
         {
-            return new InvalidCastException(SR.Format(SR.XmlConvert_TypeListBadMapping2, s_untypedStringTypeName, sourceType.Name, destinationType.Name));
+            return new InvalidCastException(SR.Format(SR.XmlConvert_TypeListBadMapping2, UntypedStringTypeName, sourceType.Name, destinationType.Name));
         }
     }
 }

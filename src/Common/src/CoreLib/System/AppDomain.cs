@@ -41,7 +41,7 @@ namespace System
 
         public PermissionSet PermissionSet => new PermissionSet(PermissionState.Unrestricted);
 
-        public event UnhandledExceptionEventHandler UnhandledException
+        public event UnhandledExceptionEventHandler? UnhandledException
         {
             add { AppContext.UnhandledException += value; }
             remove { AppContext.UnhandledException -= value; }
@@ -67,15 +67,15 @@ namespace System
 
         public bool IsHomogenous => true;
 
-        public event EventHandler DomainUnload;
+        public event EventHandler? DomainUnload;
 
-        public event EventHandler<FirstChanceExceptionEventArgs> FirstChanceException
+        public event EventHandler<FirstChanceExceptionEventArgs>? FirstChanceException
         {
             add { AppContext.FirstChanceException += value; }
             remove { AppContext.FirstChanceException -= value; }
         }
 
-        public event EventHandler ProcessExit
+        public event EventHandler? ProcessExit
         {
             add { AppContext.ProcessExit += value; }
             remove { AppContext.ProcessExit -= value; }
@@ -184,26 +184,28 @@ namespace System
 
         public static bool MonitoringIsEnabled
         {
-            get { return false; }
+            get { return true; }
             set
             {
                 if (!value)
                 {
                     throw new ArgumentException(SR.Arg_MustBeTrue);
                 }
-                throw new PlatformNotSupportedException(SR.PlatformNotSupported_AppDomain_ResMon);
             }
         }
 
-        public long MonitoringSurvivedMemorySize { get { throw CreateResMonNotAvailException(); } }
+        public long MonitoringSurvivedMemorySize => MonitoringSurvivedProcessMemorySize;
 
-        public static long MonitoringSurvivedProcessMemorySize { get { throw CreateResMonNotAvailException(); } }
+        public static long MonitoringSurvivedProcessMemorySize
+        {
+            get
+            {
+                GCMemoryInfo mi = GC.GetGCMemoryInfo();
+                return mi.HeapSizeBytes - mi.FragmentedBytes;
+            }
+        }
 
-        public long MonitoringTotalAllocatedMemorySize { get { throw CreateResMonNotAvailException(); } }
-
-        public TimeSpan MonitoringTotalProcessorTime { get { throw CreateResMonNotAvailException(); } }
-
-        private static Exception CreateResMonNotAvailException() => new InvalidOperationException(SR.PlatformNotSupported_AppDomain_ResMon);
+        public long MonitoringTotalAllocatedMemorySize => GC.GetTotalAllocatedBytes(precise: false);
 
         [ObsoleteAttribute("AppDomain.GetCurrentThreadId has been deprecated because it does not provide a stable Id when managed threads are running on fibers (aka lightweight threads). To get a stable identifier for a managed thread, use the ManagedThreadId property on Thread.  https://go.microsoft.com/fwlink/?linkid=14202", false)]
         public static int GetCurrentThreadId() => Environment.CurrentManagedThreadId;
@@ -230,27 +232,27 @@ namespace System
 
         public Assembly[] GetAssemblies() => AssemblyLoadContext.GetLoadedAssemblies();
 
-        public event AssemblyLoadEventHandler AssemblyLoad
+        public event AssemblyLoadEventHandler? AssemblyLoad
         {
             add { AssemblyLoadContext.AssemblyLoad += value; }
             remove { AssemblyLoadContext.AssemblyLoad -= value; }
         }
 
-        public event ResolveEventHandler AssemblyResolve
+        public event ResolveEventHandler? AssemblyResolve
         {
             add { AssemblyLoadContext.AssemblyResolve += value; }
             remove { AssemblyLoadContext.AssemblyResolve -= value; }
         }
 
-        public event ResolveEventHandler ReflectionOnlyAssemblyResolve;
+        public event ResolveEventHandler? ReflectionOnlyAssemblyResolve;
 
-        public event ResolveEventHandler TypeResolve
+        public event ResolveEventHandler? TypeResolve
         {
             add { AssemblyLoadContext.TypeResolve += value; }
             remove { AssemblyLoadContext.TypeResolve -= value; }
         }
 
-        public event ResolveEventHandler ResourceResolve
+        public event ResolveEventHandler? ResourceResolve
         {
             add { AssemblyLoadContext.ResourceResolve += value; }
             remove { AssemblyLoadContext.ResourceResolve -= value; }
@@ -388,7 +390,7 @@ namespace System
             return oh?.Unwrap();
         }
 
-        public IPrincipal? GetThreadPrincipal()
+        internal IPrincipal? GetThreadPrincipal()
         {
             IPrincipal? principal = _defaultPrincipal;
             if (principal == null)
@@ -407,7 +409,7 @@ namespace System
                                 (Func<IPrincipal>)mi.CreateDelegate(typeof(Func<IPrincipal>)));
                         }
 
-                        principal = s_getUnauthenticatedPrincipal!(); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                        principal = s_getUnauthenticatedPrincipal();
                         break;
 
                     case PrincipalPolicy.WindowsPrincipal:
@@ -423,7 +425,7 @@ namespace System
                                 (Func<IPrincipal>)mi.CreateDelegate(typeof(Func<IPrincipal>)));
                         }
 
-                        principal = s_getWindowsPrincipal!(); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                        principal = s_getWindowsPrincipal();
                         break;
                 }
             }

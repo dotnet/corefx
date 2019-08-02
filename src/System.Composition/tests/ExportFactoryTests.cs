@@ -117,7 +117,6 @@ namespace System.Composition.UnitTests
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20656", TargetFrameworkMonikers.UapAot)]
         [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void TheSameSharedInstanceIsReusedWithinItsSharingBoundary()
         {
@@ -138,7 +137,7 @@ namespace System.Composition.UnitTests
             var cc = CreateContainer(typeof(A), typeof(UseExportFactory));
             var bef = cc.GetExport<UseExportFactory>();
             var a = bef.AFactory.CreateExport();
-            Assert.IsAssignableFrom(typeof(A), a.Value);
+            Assert.IsAssignableFrom<A>(a.Value);
             Assert.False(((A)a.Value).IsDisposed);
             a.Dispose();
             Assert.True(((A)a.Value).IsDisposed);

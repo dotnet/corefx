@@ -71,8 +71,6 @@ namespace System.Collections
         private KeyList keyList; // Do not rename (binary serialization)
         private ValueList valueList; // Do not rename (binary serialization)
 
-        private const int _defaultCapacity = 16;
-
         // Copy of Array.MaxArrayLength
         internal const int MaxArrayLength = 0X7FEFFFFF;
 
@@ -89,8 +87,8 @@ namespace System.Collections
         
         private void Init()
         {
-            keys = Array.Empty<Object>();
-            values = Array.Empty<Object>();
+            keys = Array.Empty<object>();
+            values = Array.Empty<object>();
             _size = 0;
             comparer = new Comparer(CultureInfo.CurrentCulture);
         }
@@ -231,8 +229,8 @@ namespace System.Collections
                     {
                         // size can only be zero here.
                         Debug.Assert(_size == 0, "Size is not zero");
-                        keys = Array.Empty<Object>();
-                        values = Array.Empty<Object>();
+                        keys = Array.Empty<object>();
+                        values = Array.Empty<object>();
                     }
                 }
             }

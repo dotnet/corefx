@@ -7,7 +7,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
@@ -66,8 +65,6 @@ namespace System.Diagnostics
         private StreamReader _standardError;
         private bool _disposed;
 
-        private static object s_createProcessLock = new object();
-
         private bool _standardInputAccessed;
 
         private StreamReadMode _outputStreamReadMode;
@@ -84,8 +81,6 @@ namespace System.Diagnostics
         internal bool _pendingErrorRead;
 
         private static int s_cachedSerializationSwitch = 0;
-        delegate void ThrowIfDeserializationInProgressWithSwitchDel(string switchName, ref int cachedValue);
-        private static ThrowIfDeserializationInProgressWithSwitchDel s_throwIfDeserializationInProgressWithSwitch = CreateThrowIfDeserializationInProgressWithSwitchDelegate();
 
         /// <devdoc>
         ///    <para>
@@ -1179,23 +1174,6 @@ namespace System.Diagnostics
         /// <summary>Additional optional configuration hook after a process ID is set.</summary>
         partial void ConfigureAfterProcessIdSet();
 
-        /// <summary>
-        /// Builds a wrapper delegate for SerializationInfo.ThrowIfDeserializationInProgress(string, ref int),
-        /// since it is not exposed via contracts.
-        /// </summary>
-        private static ThrowIfDeserializationInProgressWithSwitchDel CreateThrowIfDeserializationInProgressWithSwitchDelegate()
-        {
-            ThrowIfDeserializationInProgressWithSwitchDel throwIfDeserializationInProgressDelegate = null;
-            MethodInfo throwMethod = typeof(SerializationInfo).GetMethod("ThrowIfDeserializationInProgress",
-                BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public, null, new Type[] { typeof(string), typeof(int).MakeByRefType() }, new ParameterModifier[0]);
-            if (throwMethod != null)
-            {
-                throwIfDeserializationInProgressDelegate = (ThrowIfDeserializationInProgressWithSwitchDel)throwMethod.CreateDelegate(typeof(ThrowIfDeserializationInProgressWithSwitchDel));
-            }
-
-            return throwIfDeserializationInProgressDelegate;
-        }
-
         /// <devdoc>
         ///    <para>
         ///       Starts a process specified by the <see cref='System.Diagnostics.Process.StartInfo'/> property of this <see cref='System.Diagnostics.Process'/>
@@ -1237,10 +1215,7 @@ namespace System.Diagnostics
                 throw new ObjectDisposedException(GetType().Name);
             }
 
-            if (s_throwIfDeserializationInProgressWithSwitch != null)
-            {
-                s_throwIfDeserializationInProgressWithSwitch("AllowProcessCreation", ref s_cachedSerializationSwitch);
-            }
+            SerializationGuard.ThrowIfDeserializationInProgress("AllowProcessCreation", ref s_cachedSerializationSwitch);
 
             return StartCore(startInfo);
         }

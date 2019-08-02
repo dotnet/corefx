@@ -69,7 +69,7 @@ namespace System.Resources
         {
             LazyInitializer.EnsureInitialized(ref s_binaryFormatterType, () =>
                 Type.GetType("System.Runtime.Serialization.Formatters.Binary.BinaryFormatter, System.Runtime.Serialization.Formatters, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                throwOnError: true));
+                throwOnError: true)!);
 
             LazyInitializer.EnsureInitialized(ref s_deserializeMethod, () =>
             {
@@ -78,7 +78,7 @@ namespace System.Resources
                 // create an unbound delegate that can accept a BinaryFormatter instance as object
                 return (Func<object?, Stream, object>)typeof(ResourceReader)
                         .GetMethod(nameof(CreateUntypedDelegate), BindingFlags.NonPublic | BindingFlags.Static)!
-                        .MakeGenericMethod(s_binaryFormatterType)!
+                        .MakeGenericMethod(s_binaryFormatterType)
                         .Invoke(null, new object[] { binaryFormatterDeserialize })!;
             });
 

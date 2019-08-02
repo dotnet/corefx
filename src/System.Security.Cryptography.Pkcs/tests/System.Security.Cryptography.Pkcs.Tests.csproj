@@ -2,7 +2,12 @@
   <PropertyGroup>
     <ProjectGuid>{2DD8DFFA-09FF-46C6-8313-4A9CC1849A44}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <!--
+      UAP fails when loading the src assembly:
+      Could not load file or assembly 'System.Security.Cryptography.Pkcs, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'. 
+      The located assembly's manifest definition does not match the assembly reference. (0x80131040)
+    -->
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\ByteUtils.cs">
@@ -33,7 +38,7 @@
     <Compile Include="SignedCms\SignedDocuments.cs" />
     <Compile Include="SignedCms\SignerInfoTests.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="AlgorithmIdentifierTest.cs" />
     <Compile Include="EnvelopedCms\DecryptTestsRsaPaddingModeTests.cs" />
     <Compile Include="EnvelopedCms\DecryptTestsUsingExplicitPrivateKey.cs" />
@@ -63,10 +68,10 @@
     <Compile Include="Pkcs8PrivateKeyInfoTests.cs" />
     <Compile Include="PrivateKeyHelpers.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp' OR '$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' OR '$(TargetsNetFx)' == 'true'">
     <Compile Include="EnvelopedCms\KeyTransRecipientInfoRsaOaepCertTests.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(TargetGroup)'=='netcoreapp'">
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="EnvelopedCms\DecryptTests.KeyPersistence.cs" />
   </ItemGroup>
 </Project>

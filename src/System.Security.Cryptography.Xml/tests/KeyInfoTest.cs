@@ -4,7 +4,7 @@
 // KeyInfoTest.cs - Test Cases for KeyInfo
 //
 // Author:
-//	Sebastien Pouliot <sebastien@ximian.com>
+//  Sebastien Pouliot <sebastien@ximian.com>
 //
 // (C) 2002, 2003 Motus Technologies Inc. (http://www.motus.com)
 // Copyright (C) 2004-2005 Novell, Inc (http://www.novell.com)
@@ -339,7 +339,7 @@ namespace System.Security.Cryptography.Xml.Tests
             }
 
             // 0x1f = b11111, number of ones = 5
-            Assert.Equal(pathsCovered, 0x1f);
+            Assert.Equal(0x1f, pathsCovered);
             Assert.Equal(5, i);
         }
 

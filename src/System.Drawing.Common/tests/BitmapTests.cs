@@ -176,11 +176,13 @@ namespace System.Drawing.Tests
         [InlineData(5, 15)]
         public void Ctor_Width_Height(int width, int height)
         {
-            var bitmap = new Bitmap(width, height);
-            Assert.Equal(width, bitmap.Width);
-            Assert.Equal(height, bitmap.Height);
-            Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
-            Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            using (var bitmap = new Bitmap(width, height))
+            {
+                Assert.Equal(width, bitmap.Width);
+                Assert.Equal(height, bitmap.Height);
+                Assert.Equal(PixelFormat.Format32bppArgb, bitmap.PixelFormat);
+                Assert.Equal(ImageFormat.MemoryBmp, bitmap.RawFormat);
+            }
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
@@ -269,7 +271,6 @@ namespace System.Drawing.Tests
         [InlineData(PixelFormat.Undefined - 1)]
         [InlineData(PixelFormat.Undefined)]
         [InlineData(PixelFormat.Gdi - 1)]
-        [InlineData(PixelFormat.DontCare)]
         [InlineData(PixelFormat.Max)]
         [InlineData(PixelFormat.Indexed)]
         [InlineData(PixelFormat.Gdi)]
@@ -477,7 +478,6 @@ namespace System.Drawing.Tests
         [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0, 0, 4, 1)]
         [InlineData(0, 0, 1, 4)]
-        [InlineData(0, 0, 1, 4)]
         [InlineData(1, 0, 3, 1)]
         [InlineData(0, 1, 1, 3)]
         [InlineData(4, 1, 1, 1)]
@@ -544,6 +544,7 @@ namespace System.Drawing.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => bitmap.Clone(new RectangleF(0, 0, 1, 1), PixelFormat.Format32bppArgb));
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetFrameCount_NewBitmap_ReturnsZero()
         {

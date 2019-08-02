@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
+using System.Diagnostics;
+
 namespace System
 {
     internal static partial class IPv6AddressHelper
@@ -11,7 +14,7 @@ namespace System
         // RFC 5952 Section 4.2.3
         // Longest consecutive sequence of zero segments, minimum 2.
         // On equal, first sequence wins. <-1, -1> for no compression.
-        internal unsafe static (int longestSequenceStart, int longestSequenceLength) FindCompressionRange(
+        internal static unsafe (int longestSequenceStart, int longestSequenceLength) FindCompressionRange(
             ReadOnlySpan<ushort> numbers)
         {
             int longestSequenceLength = 0, longestSequenceStart = -1, currentSequenceLength = 0;
@@ -40,7 +43,7 @@ namespace System
 
         // Returns true if the IPv6 address should be formatted with an embedded IPv4 address:
         // ::192.168.1.1
-        internal unsafe static bool ShouldHaveIpv4Embedded(ReadOnlySpan<ushort> numbers)
+        internal static unsafe bool ShouldHaveIpv4Embedded(ReadOnlySpan<ushort> numbers)
         {
             // 0:0 : 0:0 : x:x : x.x.x.x
             if (numbers[0] == 0 && numbers[1] == 0 && numbers[2] == 0 && numbers[3] == 0 && numbers[6] != 0)
@@ -93,7 +96,7 @@ namespace System
 
         //  Remarks: MUST NOT be used unless all input indexes are verified and trusted.
         //           start must be next to '[' position, or error is reported
-        internal unsafe static bool IsValidStrict(char* name, int start, ref int end)
+        internal static unsafe bool IsValidStrict(char* name, int start, ref int end)
         {
             int sequenceCount = 0;
             int sequenceLength = 0;
@@ -107,6 +110,17 @@ namespace System
             {
                 start++;
                 needsClosingBracket = true;
+
+                // IsValidStrict() is only called if there is a ':' in the name string, i.e. 
+                // it is a possible IPv6 address. So, if the string starts with a '[' and
+                // the pointer is advanced here there are still more characters to parse.
+                Debug.Assert(start < end);
+            }
+
+            // Starting with a colon character is only valid if another colon follows.
+            if (name[start] == ':' && (start + 1 >= end || name[start + 1] != ':'))
+            {
+                return false;
             }
 
             int i;
@@ -142,11 +156,6 @@ namespace System
                                 else if (name[i] == '/')
                                 {
                                     goto case '/';
-                                }
-                                else if (name[i] < '0' || name[i] > '9')
-                                {
-                                    // scope ID must only contain digits
-                                    return false;
                                 }
                             }
                             break;
@@ -278,7 +287,7 @@ namespace System
         //  Nothing
         //
 
-        internal static unsafe void Parse(ReadOnlySpan<char> address, ushort* numbers, int start, ref string scopeId)
+        internal static void Parse(ReadOnlySpan<char> address, Span<ushort> numbers, int start, ref string? scopeId)
         {
             int number = 0;
             int index = 0;
@@ -402,10 +411,15 @@ namespace System
                 int toIndex = NumberOfLabels - 1;
                 int fromIndex = index - 1;
 
-                for (int i = index - compressorIndex; i > 0; --i)
+                // if fromIndex and toIndex are the same, it means that "zero bits" are already in the correct place
+                // it happens for leading and trailing compression
+                if (fromIndex != toIndex)
                 {
-                    numbers[toIndex--] = numbers[fromIndex];
-                    numbers[fromIndex--] = 0;
+                    for (int i = index - compressorIndex; i > 0; --i)
+                    {
+                        numbers[toIndex--] = numbers[fromIndex];
+                        numbers[fromIndex--] = 0;
+                    }
                 }
             }
         }

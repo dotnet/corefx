@@ -13,13 +13,13 @@ namespace System.Data.OleDb
         {
         }
 
-        new public OleDbCommand Command
+        public new OleDbCommand Command
         {
             get { return (base.Command as OleDbCommand); }
             set { base.Command = value; }
         }
 
-        override protected IDbCommand BaseCommand
+        protected override IDbCommand BaseCommand
         {
             get { return base.BaseCommand; }
             set { base.BaseCommand = (value as OleDbCommand); }

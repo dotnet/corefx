@@ -186,5 +186,13 @@ namespace System.SpanTests
                 Assert.True(found);
             }
         }
+
+        [Theory]
+        [MemberData(nameof(TestHelpers.ContainsNullData), MemberType = typeof(TestHelpers))]
+        public static void ContainsNull_String(string[] spanInput, bool expected)
+        {
+            ReadOnlySpan<string> theStrings = spanInput;
+            Assert.Equal(expected, theStrings.Contains(null));
+        }
     }
 }

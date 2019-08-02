@@ -32,7 +32,6 @@ namespace System.IO.Tests
         [InlineData((WatcherChangeTypes)0)]
         [InlineData((WatcherChangeTypes)int.MinValue)]
         [InlineData((WatcherChangeTypes)int.MaxValue)]
-        [InlineData((WatcherChangeTypes)int.MaxValue)]
         public static void WaitForChangedResult_ChangeType_Roundtrip(WatcherChangeTypes changeType)
         {
             var result = new WaitForChangedResult();
@@ -64,7 +63,7 @@ namespace System.IO.Tests
             Assert.Equal(name, result.OldName);
         }
 
-        [Theory]
+        [Fact]
         public static void WaitForChangedResult_TimedOut_Roundtrip()
         {
             var result = new WaitForChangedResult();
@@ -128,7 +127,6 @@ namespace System.IO.Tests
         [OuterLoop("This test has a longer than average timeout and may fail intermittently")]
         [InlineData(WatcherChangeTypes.Created)]
         [InlineData(WatcherChangeTypes.Deleted)]
-        [ActiveIssue("dotnet/corefx #18308", TargetFrameworkMonikers.NetFramework)]
         public void CreatedDeleted_Success(WatcherChangeTypes changeType)
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))

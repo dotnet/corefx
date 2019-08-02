@@ -32,6 +32,7 @@ namespace System.IO.Pipelines
 
         // Mutable struct! Don't make this readonly
         private BufferSegmentStack _bufferSegmentPool;
+        private bool _leaveOpen;
 
         /// <summary>
         /// Creates a new StreamPipeReader.
@@ -51,6 +52,7 @@ namespace System.IO.Pipelines
             _minimumReadThreshold = Math.Min(options.MinimumReadSize, options.BufferSize);
             _pool = options.Pool == MemoryPool<byte>.Shared ? null : options.Pool;
             _bufferSize = _pool == null ? options.BufferSize : Math.Min(options.BufferSize, _pool.MaxBufferSize);
+            _leaveOpen = options.LeaveOpen;
         }
 
         /// <summary>
@@ -179,15 +181,10 @@ namespace System.IO.Pipelines
                 returnSegment.ResetMemory();
             }
 
-            // REVIEW: Do we need a way to avoid this (leaveOpen?)
-            InnerStream.Dispose();
-        }
-
-        /// <inheritdoc />
-        public override void OnWriterCompleted(Action<Exception, object> callback, object state)
-        {
-            // REVIEW: Do we fire this when the stream has ended?
-            throw new NotSupportedException("OnWriterCompleted is not supported");
+            if (!_leaveOpen)
+            {
+                InnerStream.Dispose();
+            }
         }
 
         /// <inheritdoc />
@@ -239,12 +236,16 @@ namespace System.IO.Pipelines
                 {
                     ClearCancellationToken();
 
-                    if (cancellationToken.IsCancellationRequested)
+                    if (tokenSource.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+                    {
+                        // Catch cancellation and translate it into setting isCanceled = true
+                        isCanceled = true;
+                    }
+                    else
                     {
                         throw;
                     }
 
-                    isCanceled = true;
                 }
 
                 return new ReadResult(GetCurrentReadOnlySequence(), isCanceled, _isStreamCompleted);

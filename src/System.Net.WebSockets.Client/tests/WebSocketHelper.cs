@@ -40,9 +40,9 @@ namespace System.Net.WebSockets.Client.Tests
                 Assert.Equal(WebSocketState.Open, cws.State);
                 Assert.Equal(message.Length, recvRet.Count);
                 Assert.Equal(type, recvRet.MessageType);
-                Assert.Equal(true, recvRet.EndOfMessage);
-                Assert.Equal(null, recvRet.CloseStatus);
-                Assert.Equal(null, recvRet.CloseStatusDescription);
+                Assert.True(recvRet.EndOfMessage);
+                Assert.Null(recvRet.CloseStatus);
+                Assert.Null(recvRet.CloseStatusDescription);
 
                 var recvSegment = new ArraySegment<byte>(receiveSegment.Array, receiveSegment.Offset, recvRet.Count);
                 Assert.Equal(message, WebSocketData.GetTextFromBuffer(recvSegment));

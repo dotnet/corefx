@@ -153,7 +153,7 @@ namespace System.Linq.Expressions.Tests
             AssertStackTrace(() => f(new Thrower(error: false)), "Thrower.Foo");
         }
 
-        public static void VerifyInstructions(this LambdaExpression expression, string expected)
+        internal static void VerifyInstructions(this LambdaExpression expression, string expected)
         {
             string actual = expression.GetInstructions();
 
@@ -202,7 +202,7 @@ namespace System.Linq.Expressions.Tests
 
         private static void AssertStackTrace(Exception ex, string searchTerm)
         {
-            Assert.True(ex.StackTrace.Contains(searchTerm));
+            Assert.Contains(searchTerm, ex.StackTrace);
         }
 
         private sealed class Thrower

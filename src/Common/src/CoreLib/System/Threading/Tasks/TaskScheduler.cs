@@ -298,7 +298,7 @@ namespace System.Threading.Tasks
                 Interlocked.CompareExchange(ref s_activeTaskSchedulers, new ConditionalWeakTable<TaskScheduler, object?>(), null);
                 activeTaskSchedulers = s_activeTaskSchedulers;
             }
-            activeTaskSchedulers!.Add(this, null); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+            activeTaskSchedulers.Add(this, null);
         }
 
         /// <summary>
@@ -445,7 +445,7 @@ namespace System.Threading.Tasks
         /// Each handler is passed a <see cref="T:System.Threading.Tasks.UnobservedTaskExceptionEventArgs"/>
         /// instance, which may be used to examine the exception and to mark it as observed.
         /// </remarks>
-        public static event EventHandler<UnobservedTaskExceptionEventArgs> UnobservedTaskException;
+        public static event EventHandler<UnobservedTaskExceptionEventArgs>? UnobservedTaskException;
 
         ////////////////////////////////////////////////////////////
         //

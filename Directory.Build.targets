@@ -35,7 +35,6 @@
   </PropertyGroup>
 
   <Import Project="$(RepositoryEngineeringDir)versioning.targets" />
-  <Import Project="$(RepositoryEngineeringDir)CodeAnalysis.targets" />
 
   <!-- Corefx-specific binplacing properties -->
   <PropertyGroup>
@@ -49,7 +48,6 @@
 
     <BinPlaceRef Condition="'$(BinPlaceRef)' == '' And ('$(IsReferenceAssembly)' == 'true' OR '$(IsRuntimeAndReferenceAssembly)' == 'true')">true</BinPlaceRef>
     <BinPlaceRuntime Condition="'$(BinPlaceRuntime)' == '' And ('$(IsRuntimeAssembly)' == 'true' OR '$(IsRuntimeAndReferenceAssembly)' == 'true')">true</BinPlaceRuntime>
-    <BinPlaceTest Condition="'$(BinPlaceTest)' == '' And '$(IsTestProject)' == 'true'">true</BinPlaceTest>
   </PropertyGroup>
 
   <ItemGroup Condition="'@(BinPlaceConfiguration)' == ''">
@@ -57,8 +55,6 @@
     <BinPlaceConfiguration Include="$(_bc_TargetGroup)-$(_bc_OSGroup)">
       <RefPath>$(BuildConfigurationRefPath)</RefPath>
       <RuntimePath>$(RuntimePath)</RuntimePath>
-      <!-- we want to bin place the test output into the working directory -->
-      <TestPath>$(TestPath)</TestPath>
     </BinPlaceConfiguration>
     <!-- binplace to directories for packages -->
     <BinPlaceConfiguration Condition="'$(IsNETCoreApp)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreapp-$(_bc_OSGroup)">
@@ -69,23 +65,16 @@
       <!-- enable trimming for any runtime project that's part of the shared framework and hasn't already set ILLinkTrimAssembly -->
       <SetProperties Condition="'$(BinPlaceRuntime)' == 'true' AND '$(ILLinkTrimAssembly)' == ''">ILLinkTrimAssembly=true</SetProperties>
     </BinPlaceConfiguration>
-    <BinPlaceConfiguration Condition="'$(IsUAPRef)'=='true' AND ('$(BuildingUAPVertical)' == 'true' OR '$(BuildingUAPAOTVertical)' == 'true')" Include="uap-Windows_NT">
+    <BinPlaceConfiguration Condition="'$(IsUAPRef)'=='true' AND '$(BuildingUAPVertical)' == 'true'" Include="uap-Windows_NT">
       <PackageFileRefPath>$(UAPPackageRefPath)</PackageFileRefPath>
     </BinPlaceConfiguration>
     <BinPlaceConfiguration Condition="'$(IsUAP)' == 'true' AND '$(BuildingUAPVertical)' == 'true'" Include="uap-Windows_NT">
       <PackageFileRuntimePath>$(UAPPackageRuntimePath)</PackageFileRuntimePath>
     </BinPlaceConfiguration>
-    <BinPlaceConfiguration Condition="'$(IsUAP)' == 'true' AND '$(BuildingUAPAOTVertical)' == 'true'" Include="uapaot-Windows_NT">
-      <PackageFileRuntimePath>$(UAPAOTPackageRuntimePath)</PackageFileRuntimePath>
-    </BinPlaceConfiguration>
 
     <!-- Setup the shared framework directory for testing -->
     <BinPlaceConfiguration Condition="'$(BinPlaceTestSharedFramework)' == 'true'" Include="netcoreapp-$(_bc_OSGroup)">
       <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)</RuntimePath>
-    </BinPlaceConfiguration>
-    <!-- Setup the ILCInputFolder directory for testing aot -->
-    <BinPlaceConfiguration Condition="'$(BinPlaceILCInputFolder)' == 'true'" Include="uapaot-Windows_NT">
-      <RuntimePath>$(ILCFXInputFolder)</RuntimePath>
     </BinPlaceConfiguration>
     <!-- And the UAP folder for the F5 (CoreCLR UAP-debugging) scenario -->
     <BinPlaceConfiguration Condition="'$(BinPlaceUAPFramework)' == 'true'" Include="uap-Windows_NT">
@@ -97,57 +86,43 @@
 
     <!-- binplace targeting packs which may be different from BuildConfiguration -->
     <BinPlaceConfiguration Include="netstandard">
-      <RefPath>$(RefRootPath)netstandard/</RefPath>
+      <RefPath>$(NetStandardRefPath)</RefPath>
+    </BinPlaceConfiguration>
+    <BinPlaceConfiguration Include="netstandard2.1">
+      <RefPath>$(NetStandard21RefPath)</RefPath>
     </BinPlaceConfiguration>
     <!-- some libraries that produce packages will remain targeting netcoreapp2.0 -->
     <BinPlaceConfiguration Condition="'$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreapp2.0">
       <RefPath>$(RefRootPath)netcoreapp2.0/</RefPath>
     </BinPlaceConfiguration>
     <!-- some libraries that produce packages will remain targeting uap10.0.16299 -->
-    <BinPlaceConfiguration Condition="'$(BuildingUAPVertical)' == 'true' OR '$(BuildingUAPAOTVertical)' == 'true'" Include="uap10.0.16299">
+    <BinPlaceConfiguration Condition="'$(BuildingUAPVertical)' == 'true'" Include="uap10.0.16299">
       <RefPath>$(RefRootPath)uap10.0.16299/</RefPath>
     </BinPlaceConfiguration>
     <!-- for BuildAllConfigurations make sure all refpaths are created.  -->
-    <_TargetGroupsWithIsAot Condition="'$(BuildAllConfigurations)' == 'true'" Include="@(TargetGroups)">
-      <IsAot>$([System.String]::new('%(Identity)').Contains('aot'))</IsAot>
-    </_TargetGroupsWithIsAot>
-    <BinPlaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'"
-                           Include="@(_TargetGroupsWithIsAot->WithMetadataValue('IsAot', 'false'))">
+    <BinPlaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'" Include="@(TargetGroups)">
       <RefPath>$(RefRootPath)%(Identity)/</RefPath>
     </BinPlaceConfiguration>
     <!-- for BuildAllConfigurations make sure runtimepaths are created for all vertical targetgroups. -->
-    <BinPlaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'" Include="netcoreapp-$(_bc_OSGroup);uap-Windows_NT;uapaot-Windows_NT">
+    <BinPlaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'" Include="netcoreapp-$(_bc_OSGroup);uap-Windows_NT">
       <RuntimePath>$(ArtifactsBinDir)runtime/%(Identity)-$(ConfigurationGroup)-$(ArchGroup)</RuntimePath>
     </BinPlaceConfiguration>
 
     <BinPlaceConfiguration Include="@(AdditionalBinPlaceConfiguration)" />
   </ItemGroup>
 
-  <Import Project="$(RepositoryEngineeringDir)blockReflectionAttribute.targets" />
   <Import Project="$(RepositoryEngineeringDir)codeOptimization.targets" />
   <Import Project="$(RepositoryEngineeringDir)depProj.targets" Condition="'$(MSBuildProjectExtension)' == '.depproj'" />
   <Import Project="$(RepositoryEngineeringDir)references.targets" />
   <Import Project="$(RepositoryEngineeringDir)resolveContract.targets" />
 
-  <Import Project="$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets" Condition="Exists('$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets')" />
-
-  <!-- permit a wrapping build system to contribute targets to this build -->
-  <Import Condition="Exists('$(MSBuildThisFileDirectory)..\open.targets')" Project="$(MSBuildThisFileDirectory)..\open.targets" />
+  <Import Sdk="Microsoft.DotNet.Build.Tasks.Configuration" Project="Sdk.targets" />
+  <Import Sdk="Microsoft.DotNet.CoreFxTesting" Project="Sdk.targets"  />
+  <Import Condition="'$(EnableProjectRestore)' != 'true'" Project="$(RepositoryEngineeringDir)restore\repoRestore.targets" />
 
   <Import Project="$(RepositoryEngineeringDir)referenceFromRuntime.targets" />
   <Import Project="$(RepositoryEngineeringDir)illink.targets" />
-
-  <ItemGroup Condition="'$(NuGetTargetMoniker)'=='.NETStandard,Version=v1.7'">
-    <!-- Temporarily suppress the message until we get a nuget version that knows about the mapping between netstandard1.7 and uapvNext -->
-    <SuppressPackageTargetFrameworkCompatibility Include="$(UAPvNextTFM)" />
-  </ItemGroup>
-
-  <Target Name="ProducesPackageId"
-          Returns="@(PackageIds)">
-    <ItemGroup>
-      <PackageIds Include="$(Id)" />
-    </ItemGroup>
-  </Target>
+  <Import Project="$(RepositoryEngineeringDir)notSupported.SourceBuild.targets" Condition="'$(DotNetBuildFromSource)' == 'true'" />
 
   <Target Name="ReportConfigurationErrorMessage"
           BeforeTargets="AssignProjectConfiguration"
@@ -158,7 +133,7 @@
 
   <Target Name="GenerateReferenceSource">
     <PropertyGroup>
-      <_RefSourceFileOutputPath>$(MSBuildProjectDirectory)/../ref/$(AssemblyName).cs</_RefSourceFileOutputPath>
+      <_RefSourceFileOutputPath>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', '..', 'ref', '$(AssemblyName).cs'))</_RefSourceFileOutputPath>
       <_ExcludeAPIList>$(RepositoryEngineeringDir)DefaultGenApiDocIds.txt</_ExcludeAPIList>
       <_LicenseHeaderTxtPath>$(RepositoryEngineeringDir)LicenseHeader.txt</_LicenseHeaderTxtPath>
     </PropertyGroup>
@@ -166,7 +141,7 @@
     <PropertyGroup>
       <_GenAPICmd>$(_GenAPICommand)</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) "@(IntermediateAssembly)"</_GenAPICmd>
-      <_GenAPICmd>$(_GenAPICmd) --lib-path "$(RefPath)"</_GenAPICmd>
+      <_GenAPICmd>$(_GenAPICmd) --lib-path "$(RefPath.Trim('\/'))"</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) --out "$(_RefSourceFileOutputPath)"</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) --exclude-attributes-list "$(_ExcludeAPIList)"</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) --header-file "$(_LicenseHeaderTxtPath)"</_GenAPICmd>
@@ -177,7 +152,10 @@
     <Message Text="Generated reference assembly source code: $(_RefSourceFileOutputPath)" />
   </Target>
 
-  <Import Project="$(RepositoryEngineeringDir)/DisableSourceControlManagement.targets" Condition="'$(EnableSourceLink)' == 'false'" />
+  <!-- Import Packaging targets -->
+  <Import Project="$(RepositoryEngineeringDir)Packaging.targets" />
+
+  <Import Project="$(RepositoryEngineeringDir)DisableSourceControlManagement.targets" Condition="'$(EnableSourceLink)' == 'false'" />
 
   <!-- Define this now until we can clean-up targets that depend on it in the packaging targets -->
   <Target Name="CreateVersionFileDuringBuild" />

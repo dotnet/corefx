@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Text;
 using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System
 {
@@ -17,7 +18,11 @@ namespace System
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public sealed class Version : ICloneable, IComparable, IComparable<Version?>, IEquatable<Version?>, ISpanFormattable
+    public sealed class Version : ICloneable, IComparable, IComparable<Version?>,
+#nullable disable // see comment on String
+        IEquatable<Version>,
+#nullable restore
+        ISpanFormattable
     {
         // AssemblyName depends on the order staying the same
         private readonly int _Major; // Do not rename (binary serialization)
@@ -306,7 +311,7 @@ namespace System
         public static Version Parse(ReadOnlySpan<char> input) =>
             ParseVersion(input, throwOnFailure: true)!;
 
-        public static bool TryParse(string? input, out Version? result) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        public static bool TryParse(string? input, [NotNullWhen(true)] out Version? result)
         {
             if (input == null)
             {
@@ -317,7 +322,7 @@ namespace System
             return (result = ParseVersion(input.AsSpan(), throwOnFailure: false)) != null;
         }
 
-        public static bool TryParse(ReadOnlySpan<char> input, out Version? result) =>
+        public static bool TryParse(ReadOnlySpan<char> input, [NotNullWhen(true)] out Version? result) =>
             (result = ParseVersion(input, throwOnFailure: false)) != null;
 
         private static Version? ParseVersion(ReadOnlySpan<char> input, bool throwOnFailure)

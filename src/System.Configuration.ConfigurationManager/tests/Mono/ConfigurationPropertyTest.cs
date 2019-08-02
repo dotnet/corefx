@@ -5,7 +5,7 @@
 // for System.Configuration.ConfigurationElement.
 //
 // Author:
-//	Konstantin Triger <kostat@mainsoft.com>
+//  Konstantin Triger <kostat@mainsoft.com>
 //
 // Copyright (C) 2006 Mainsoft, Inc (http://www.mainsoft.com)
 //
@@ -57,7 +57,7 @@ namespace MonoTests.System.Configuration
             Assert.Equal(typeof(char), poker.DefaultValue.GetType());
 
             ConfigurationProperty poker1 = new ConfigurationProperty("Name", typeof(ConfigurationProperty));
-            Assert.Equal(null, poker1.DefaultValue);
+            Assert.Null(poker1.DefaultValue);
 
             ConfigurationProperty poker2 = new ConfigurationProperty("Name", typeof(string));
             Assert.Equal(string.Empty, poker2.DefaultValue);

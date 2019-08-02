@@ -318,13 +318,13 @@ namespace MonoTests.System.Runtime.Caching
             // The actual unique id is constructed from key names followed by the hex value of ticks of their last modifed time
             Assert.False(string.IsNullOrEmpty(monitor.UniqueId));
 
-			monitor = mc.CreateCacheEntryChangeMonitor (new string [] { "key1", "doesnotexist" });
-			Assert.NotNull (monitor);
-			Assert.Equal ("System.Runtime.Caching.MemoryCacheEntryChangeMonitor", monitor.GetType ().ToString ());
-			Assert.Equal (2, monitor.CacheKeys.Count);
-			Assert.Equal ("key1", monitor.CacheKeys [0]);
-			Assert.Null (monitor.RegionName);
-			Assert.True (monitor.HasChanged);
+            monitor = mc.CreateCacheEntryChangeMonitor (new string [] { "key1", "doesnotexist" });
+            Assert.NotNull (monitor);
+            Assert.Equal ("System.Runtime.Caching.MemoryCacheEntryChangeMonitor", monitor.GetType ().ToString ());
+            Assert.Equal (2, monitor.CacheKeys.Count);
+            Assert.Equal ("key1", monitor.CacheKeys [0]);
+            Assert.Null (monitor.RegionName);
+            Assert.True (monitor.HasChanged);
         }
 
         [Fact]
@@ -1082,11 +1082,11 @@ namespace MonoTests.System.Runtime.Caching
 
                     if (sw.ElapsedMilliseconds < SlidingExpirationThresholdMSec)
                     {
-                        Assert.NotEqual(null, item);
+                        Assert.NotNull(item);
                     }
                     else
                     {
-                        // for the sake of simplicity skip an inversed assert here (Assert.Equal(null, item)) 
+                        // for the sake of simplicity skip an inversed assert here (Assert.Null(item)) 
                         // (to avoid further complicating the test as we would need to address a few more subtle timing cases)
                     }
                 }
@@ -1372,7 +1372,7 @@ namespace MonoTests.System.Runtime.Caching
 
                 Assert.Equal(HEAP_RESIZE_SHORT_ENTRIES, mc.GetCount());
 
-                // add some long duration entries				
+                // add some long duration entries                
                 for (int i = 0; i < HEAP_RESIZE_LONG_ENTRIES; i++)
                 {
                     var expireAt = DateTimeOffset.Now.AddSeconds(42);

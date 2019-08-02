@@ -2,7 +2,7 @@
 // See the LICENSE file in the project root for more information.
 //
 // Authors:
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // Copyright (C) 2007 Novell, Inc (http://www.novell.com)
 //
@@ -95,7 +95,7 @@ namespace System.Drawing.Printing.Tests
                 Collate = false
             };
 
-            Assert.Equal(false, printerSettings.Collate);
+            Assert.False(printerSettings.Collate);
         }
 
         [ConditionalFact(Helpers.IsDrawingSupported)]
@@ -197,15 +197,15 @@ namespace System.Drawing.Printing.Tests
         public void LandscapeAngle_ReturnsExpected()
         {
             var printerSettings = new PrinterSettings();
-            int[] validValues = new[] { 0, 90, 270 };
-            Assert.True(validValues.Contains(printerSettings.LandscapeAngle), "PrinterSettings.LandscapeAngle must be 0, 90, or 270 degrees.");
+            int[] validValues = new[] { -90, 0, 90, 270 };
+            Assert.True(validValues.Contains(printerSettings.LandscapeAngle), $"PrinterSettings.LandscapeAngle ({printerSettings.LandscapeAngle}) must be 0, 90, or 270 degrees.");
         }
 
         [ConditionalFact(Helpers.AnyInstalledPrinters, Helpers.IsDrawingSupported)]
         public void MaximumCopies_ReturnsExpected()
         {
             var printerSettings = new PrinterSettings();
-            Assert.True(printerSettings.MaximumCopies >= 0, "PrinterSettings.MaximumCopies should not be negative.");
+            Assert.True(printerSettings.MaximumCopies >= 0, $"PrinterSettings.MaximumCopies ({printerSettings.MaximumCopies}) should not be negative.");
         }
 
         [Fact]
@@ -417,7 +417,7 @@ namespace System.Drawing.Printing.Tests
         public void IsDirectPrintingSupported_ImageFormatNotSupported_ReturnsExpected(ImageFormat imageFormat)
         {
             var printerSettings = new PrinterSettings();
-            Assert.Equal(false, printerSettings.IsDirectPrintingSupported(imageFormat));
+            Assert.False(printerSettings.IsDirectPrintingSupported(imageFormat));
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
@@ -427,7 +427,7 @@ namespace System.Drawing.Printing.Tests
             using (var bitmap = new Bitmap(10, 10))
             {
                 var printerSettings = new PrinterSettings();
-                Assert.Equal(false, printerSettings.IsDirectPrintingSupported(bitmap));
+                Assert.False(printerSettings.IsDirectPrintingSupported(bitmap));
             }
         }
 

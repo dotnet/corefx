@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Data.SqlClient
 {
-    sealed internal class LastIOTimer
+    internal sealed class LastIOTimer
     {
         internal long _value;
     }
@@ -775,7 +775,7 @@ namespace System.Data.SqlClient
 
         protected abstract uint SNIPacketGetData(PacketHandle packet, byte[] _inBuff, ref uint dataSize);
 
-        internal abstract PacketHandle GetResetWritePacket();
+        internal abstract PacketHandle GetResetWritePacket(int dataSize);
 
         internal abstract void ClearAllWritePackets();
 
@@ -2257,7 +2257,7 @@ namespace System.Data.SqlClient
                                         DecrementPendingCallbacks(release: false);
                                     }
                                 }
-                            });
+                            }, CancellationToken.None, TaskContinuationOptions.DenyChildAttach, TaskScheduler.Default);
                         }
                     }
                 }
@@ -2784,7 +2784,7 @@ namespace System.Data.SqlClient
 
                 // The safest thing to do is to ensure that the connection is broken and attempt to cancel the task
                 // This must be done from another thread to not block the callback thread                
-                Task.Factory.StartNew(() =>
+                Task.Run(() =>
                 {
                     _parser.State = TdsParserState.Broken;
                     _parser.Connection.BreakConnection();
@@ -3418,7 +3418,7 @@ namespace System.Data.SqlClient
         private Task WriteSni(bool canAccumulate)
         {
             // Prepare packet, and write to packet.
-            PacketHandle packet = GetResetWritePacket();
+            PacketHandle packet = GetResetWritePacket(_outBytesUsed);
 
             SetBufferSecureStrings();
             SetPacketData(packet, _outBuff, _outBytesUsed);

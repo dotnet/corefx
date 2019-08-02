@@ -164,7 +164,6 @@ namespace System.CodeDom.Compiler.Tests
         [InlineData("  cs  ", "c#")]
         [InlineData(".cs", "c#")]
         [InlineData("Cs", "c#")]
-        [InlineData("cs", "c#")]
         [InlineData("vb", "vb")]
         [InlineData(".vb", "vb")]
         [InlineData("VB", "vb")]
@@ -193,7 +192,6 @@ namespace System.CodeDom.Compiler.Tests
         [InlineData("cs", true)]
         [InlineData(".cs", true)]
         [InlineData("Cs", true)]
-        [InlineData("cs", true)]
         [InlineData("vb", true)]
         [InlineData(".vb", true)]
         [InlineData("VB", true)]
@@ -419,10 +417,7 @@ namespace System.CodeDom.Compiler.Tests
 
         private static void AssertIsConfigurationErrorsException(Exception ex)
         {
-            if (!PlatformDetection.IsNetNative) // Can't do internal Reflection
-            {
-                Assert.Equal("ConfigurationErrorsException", ex.GetType().Name);
-            }
+            Assert.Equal("ConfigurationErrorsException", ex.GetType().Name);
         }
 
         protected class NullProvider : CodeDomProvider

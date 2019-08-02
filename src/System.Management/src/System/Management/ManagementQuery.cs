@@ -10,7 +10,7 @@ using System.ComponentModel;
 
 namespace System.Management
 {
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
+    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     /// <summary>
     ///    <para> Provides an abstract base class for all management query objects.</para>
     /// </summary>
@@ -23,7 +23,7 @@ namespace System.Management
     public abstract class ManagementQuery : ICloneable
     {
         internal const string DEFAULTQUERYLANGUAGE = "WQL";
-        internal static readonly string tokenSelect = "select ";	// Keep trailing space char.
+        internal const string TokenSelect = "select ";    // Keep trailing space char.
 
         //Used when any public property on this object is changed, to signal
         //to the containing object that it needs to be refreshed.
@@ -78,7 +78,7 @@ namespace System.Management
             get {return (null != queryString) ? queryString : string.Empty;}
             set {
                 if (queryString != value) {
-                    ParseQuery (value);	// this may throw
+                    ParseQuery (value); // this may throw
                     queryString = value;
                     FireIdentifierChanged ();
                 }
@@ -116,7 +116,7 @@ namespace System.Management
         internal static void ParseToken (ref string q, string token, string op, ref bool bTokenFound, ref string tokenValue)
         {
             if (bTokenFound)
-                throw new ArgumentException (SR.InvalidQueryDuplicatedToken);	// Invalid query - duplicate token
+                throw new ArgumentException (SR.InvalidQueryDuplicatedToken);    // Invalid query - duplicate token
 
             bTokenFound = true;
             q = q.Remove (0, token.Length).TrimStart (null);
@@ -125,20 +125,20 @@ namespace System.Management
             if (op != null)
             {
                 if (0 != q.IndexOf(op, StringComparison.Ordinal))
-                    throw new ArgumentException(SR.InvalidQuery);	// Invalid query
+                    throw new ArgumentException(SR.InvalidQuery);    // Invalid query
 
                 // Strip off the op and any leading WS
                 q = q.Remove(0, op.Length).TrimStart(null);
             }
 
             if (0 == q.Length)
-                throw new ArgumentException (SR.InvalidQueryNullToken);		// Invalid query - token has no value
+                throw new ArgumentException (SR.InvalidQueryNullToken);        // Invalid query - token has no value
             
             // Next token should be the token value - look for terminating WS 
             // or end of string
             int i;
             if (-1 == (i = q.IndexOf (' ')))
-                i = q.Length;			// No WS => consume entire string
+                i = q.Length;            // No WS => consume entire string
                 
             tokenValue = q.Substring (0, i);
             q = q.Remove (0, tokenValue.Length).TrimStart(null);
@@ -147,7 +147,7 @@ namespace System.Management
         internal static void ParseToken (ref string q, string token, ref bool bTokenFound)
         {
             if (bTokenFound)
-                throw new ArgumentException (SR.InvalidQueryDuplicatedToken);	// Invalid query - duplicate token
+                throw new ArgumentException (SR.InvalidQueryDuplicatedToken);    // Invalid query - duplicate token
 
             bTokenFound = true;
             q = q.Remove (0, token.Length).TrimStart (null);
@@ -156,7 +156,7 @@ namespace System.Management
     }//ManagementQuery
 
 
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
+    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     /// <summary>
     ///    <para> Represents a management query that returns instances or classes.</para>
     /// </summary>
@@ -248,7 +248,7 @@ namespace System.Management
     }//ObjectQuery
 
 
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
+    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     /// <summary>
     ///    <para> Represents a WMI event query.</para>
     /// </summary>
@@ -459,7 +459,7 @@ namespace System.Management
     }//EventQuery
 
 
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
+    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     /// <summary>
     ///    <para> Represents a WMI data query in WQL format.</para>
     /// </summary>
@@ -559,7 +559,7 @@ namespace System.Management
 
 
     
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
+    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     /// <summary>
     ///    <para> Represents a WQL SELECT data query.</para>
     /// </summary>
@@ -657,11 +657,11 @@ namespace System.Management
             {
                 // Minimally determine if the string is a query or class name.
                 //
-                if (queryOrClassName.TrimStart().StartsWith(tokenSelect, StringComparison.OrdinalIgnoreCase))
+                if (queryOrClassName.TrimStart().StartsWith(TokenSelect, StringComparison.OrdinalIgnoreCase))
                 {
                     // Looks to be a query - do further checking.
                     //
-                    QueryString = queryOrClassName;		// Parse/validate; may throw.
+                    QueryString = queryOrClassName;        // Parse/validate; may throw.
                 }
                 else
                 {
@@ -915,7 +915,7 @@ namespace System.Management
                     return;
 
                 //Select clause
-                s = tokenSelect;
+                s = TokenSelect;
 
                 //If properties are specified list them
                 if ((null != selectedProperties) && (0 < selectedProperties.Count))
@@ -968,7 +968,7 @@ namespace System.Management
             if (isSchemaQuery == false) //instances query
             {
                 //Find "select" clause and get the property list if exists
-                string keyword = tokenSelect;
+                string keyword = TokenSelect;
                 if ((q.Length >= keyword.Length) && (string.Compare(q, 0, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase) == 0)) //select clause found
                 {
                     ParseToken (ref q, keyword, ref bFound);
@@ -1074,9 +1074,9 @@ namespace System.Management
 
                     // Must be some white space next
                     if ((0 == q.Length) || !char.IsWhiteSpace (q[0]))
-                        throw new ArgumentException(SR.InvalidQuery);	// Invalid query
+                        throw new ArgumentException(SR.InvalidQuery);    // Invalid query
                 
-                    q = q.TrimStart(null);	// Remove the leading whitespace
+                    q = q.TrimStart(null);    // Remove the leading whitespace
 
                     condition = q;
                 }
@@ -1119,7 +1119,7 @@ namespace System.Management
     }//SelectQuery
 
     
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
+    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     /// <summary>
     ///    <para> Represents a WQL ASSOCIATORS OF data query. 
     ///       It can be used for both instances and schema queries.</para>
@@ -1175,17 +1175,17 @@ namespace System.Management
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     public class RelatedObjectQuery : WqlObjectQuery
     {
-        private static readonly string tokenAssociators = "associators";
-        private static readonly string tokenOf = "of";
-        private static readonly string tokenWhere = "where";
-        private static readonly string tokenResultClass = "resultclass";
-        private static readonly string tokenAssocClass = "assocclass";
-        private static readonly string tokenResultRole = "resultrole";
-        private static readonly string tokenRole = "role";
-        private static readonly string tokenRequiredQualifier = "requiredqualifier";
-        private static readonly string tokenRequiredAssocQualifier = "requiredassocqualifier";
-        private static readonly string tokenClassDefsOnly = "classdefsonly";
-        private static readonly string tokenSchemaOnly = "schemaonly";
+        private const string TokenAssociators = "associators";
+        private const string TokenOf = "of";
+        private const string TokenWhere = "where";
+        private const string TokenResultClass = "resultclass";
+        private const string TokenAssocClass = "assocclass";
+        private const string TokenResultRole = "resultrole";
+        private const string TokenRole = "role";
+        private const string TokenRequiredQualifier = "requiredqualifier";
+        private const string TokenRequiredAssocQualifier = "requiredassocqualifier";
+        private const string TokenClassDefsOnly = "classdefsonly";
+        private const string TokenSchemaOnly = "schemaonly";
 
         private bool isSchemaQuery;
         private string sourceObject;
@@ -1250,11 +1250,11 @@ namespace System.Management
             {
                 // Minimally determine if the string is a query or instance name.
                 //
-                if (queryOrSourceObject.TrimStart().StartsWith(tokenAssociators, StringComparison.OrdinalIgnoreCase))
+                if (queryOrSourceObject.TrimStart().StartsWith(TokenAssociators, StringComparison.OrdinalIgnoreCase))
                 {
                     // Looks to be a query - do further checking.
                     //
-                    QueryString = queryOrSourceObject;	// Parse/validate; may throw.
+                    QueryString = queryOrSourceObject;    // Parse/validate; may throw.
                 }
                 else
                 {
@@ -1562,7 +1562,7 @@ namespace System.Management
                 return;
 
             //"associators" clause
-            string s = tokenAssociators + " " + tokenOf + " {" + sourceObject + "}";
+            string s = TokenAssociators + " " + TokenOf + " {" + sourceObject + "}";
 
             //If any of the other parameters are set we need a "where" clause
             if (!(RelatedClass.Length==0) || 
@@ -1574,40 +1574,40 @@ namespace System.Management
                 classDefinitionsOnly ||
                 isSchemaQuery)
             {
-                s = s + " " + tokenWhere;
+                s = s + " " + TokenWhere;
 
                 //"ResultClass"
                 if (!(RelatedClass.Length==0))
-                    s = s + " " + tokenResultClass + " = " + relatedClass;
+                    s = s + " " + TokenResultClass + " = " + relatedClass;
 
                 //"AssocClass"
                 if (!(RelationshipClass.Length==0))
-                    s = s + " " + tokenAssocClass + " = " + relationshipClass;
+                    s = s + " " + TokenAssocClass + " = " + relationshipClass;
 
                 //"ResultRole"
                 if (!(RelatedRole.Length==0))
-                    s = s + " " + tokenResultRole + " = " + relatedRole;
+                    s = s + " " + TokenResultRole + " = " + relatedRole;
 
                 //"Role"
                 if (!(ThisRole.Length==0))
-                    s = s + " " + tokenRole + " = " + thisRole;
+                    s = s + " " + TokenRole + " = " + thisRole;
 
                 //"RequiredQualifier"
                 if (!(RelatedQualifier.Length==0))
-                    s = s + " " + tokenRequiredQualifier + " = " + relatedQualifier;
+                    s = s + " " + TokenRequiredQualifier + " = " + relatedQualifier;
 
                 //"RequiredAssocQualifier"
                 if (!(RelationshipQualifier.Length==0))
-                    s = s + " " + tokenRequiredAssocQualifier + " = " + relationshipQualifier;
+                    s = s + " " + TokenRequiredAssocQualifier + " = " + relationshipQualifier;
 
                 //"SchemaOnly" and "ClassDefsOnly"
                 if (!isSchemaQuery) //this is an instance query - classDefs allowed
                 {
                     if (classDefinitionsOnly)
-                        s = s + " " + tokenClassDefsOnly;
+                        s = s + " " + TokenClassDefsOnly;
                 }
                 else //this is a schema query, schemaonly required
-                    s = s + " " + tokenSchemaOnly;
+                    s = s + " " + TokenSchemaOnly;
             }
     
             //Set the queryString member to the built query (NB: note we set
@@ -1640,35 +1640,35 @@ namespace System.Management
             int i;
 
             //Find "associators" clause
-            if (0 != string.Compare(q, 0, tokenAssociators, 0, tokenAssociators.Length, StringComparison.OrdinalIgnoreCase))
-                throw new ArgumentException(SR.InvalidQuery,"associators");	// Invalid query
+            if (0 != string.Compare(q, 0, TokenAssociators, 0, TokenAssociators.Length, StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException(SR.InvalidQuery,"associators");    // Invalid query
             
             // Strip off the clause
-            q = q.Remove(0, tokenAssociators.Length);
+            q = q.Remove(0, TokenAssociators.Length);
 
             // Must be some white space next
             if ((0 == q.Length) || !char.IsWhiteSpace (q[0]))
-                throw new ArgumentException(SR.InvalidQuery);	// Invalid query
+                throw new ArgumentException(SR.InvalidQuery);    // Invalid query
             
-            q = q.TrimStart(null);	// Remove the leading whitespace
+            q = q.TrimStart(null);    // Remove the leading whitespace
 
             // Next token should be "of"
-            if (0 != string.Compare(q, 0, tokenOf, 0, tokenOf.Length, StringComparison.OrdinalIgnoreCase))
-                throw new ArgumentException(SR.InvalidQuery,"of");	// Invalid query
+            if (0 != string.Compare(q, 0, TokenOf, 0, TokenOf.Length, StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException(SR.InvalidQuery,"of");    // Invalid query
             
             // Strip off the clause and leading WS
-            q = q.Remove(0, tokenOf.Length).TrimStart (null);
+            q = q.Remove(0, TokenOf.Length).TrimStart (null);
 
             // Next character should be "{"
             if (0 != q.IndexOf('{'))
-                throw new ArgumentException(SR.InvalidQuery);	// Invalid query
+                throw new ArgumentException(SR.InvalidQuery);    // Invalid query
 
             // Strip off the "{" and any leading WS
             q = q.Remove(0, 1).TrimStart(null);
 
             // Next item should be the source object
             if (-1 == (i = q.IndexOf('}')))
-                throw new ArgumentException(SR.InvalidQuery);	// Invalid query
+                throw new ArgumentException(SR.InvalidQuery);    // Invalid query
 
             tempSourceObject = q.Substring(0, i).TrimEnd(null);
             q = q.Remove(0, i+1).TrimStart(null);
@@ -1677,16 +1677,16 @@ namespace System.Management
             if (0 < q.Length)
             {
                 // Next should be the "where" clause
-                if (0 != string.Compare (q, 0, tokenWhere, 0, tokenWhere.Length, StringComparison.OrdinalIgnoreCase))
-                    throw new ArgumentException(SR.InvalidQuery,"where");	// Invalid query
+                if (0 != string.Compare (q, 0, TokenWhere, 0, TokenWhere.Length, StringComparison.OrdinalIgnoreCase))
+                    throw new ArgumentException(SR.InvalidQuery,"where");    // Invalid query
                 
-                q = q.Remove (0, tokenWhere.Length);
+                q = q.Remove (0, TokenWhere.Length);
 
                 // Must be some white space next
                 if ((0 == q.Length) || !char.IsWhiteSpace (q[0]))
-                    throw new ArgumentException(SR.InvalidQuery);	// Invalid query
+                    throw new ArgumentException(SR.InvalidQuery);    // Invalid query
                 
-                q = q.TrimStart(null);	// Remove the leading whitespace
+                q = q.TrimStart(null);    // Remove the leading whitespace
 
                 // Remaining tokens can appear in any order
                 bool bResultClassFound = false;
@@ -1701,32 +1701,32 @@ namespace System.Management
                 // Keep looking for tokens until we are done
                 while (true)
                 {
-                    if ((q.Length >= tokenResultClass.Length) && (0 == string.Compare (q, 0, tokenResultClass, 0, tokenResultClass.Length, StringComparison.OrdinalIgnoreCase)))
-                        ParseToken (ref q, tokenResultClass, "=", ref bResultClassFound, ref tempRelatedClass);
-                    else if ((q.Length >= tokenAssocClass.Length) && (0 == string.Compare (q, 0, tokenAssocClass, 0, tokenAssocClass.Length, StringComparison.OrdinalIgnoreCase)))
-                        ParseToken (ref q, tokenAssocClass, "=", ref bAssocClassFound, ref tempRelationshipClass);
-                    else if ((q.Length >= tokenResultRole.Length) && (0 == string.Compare (q, 0, tokenResultRole, 0, tokenResultRole.Length, StringComparison.OrdinalIgnoreCase)))
-                        ParseToken (ref q, tokenResultRole, "=", ref bResultRoleFound, ref tempRelatedRole);
-                    else if ((q.Length >= tokenRole.Length) && (0 == string.Compare (q, 0, tokenRole, 0, tokenRole.Length, StringComparison.OrdinalIgnoreCase)))
-                        ParseToken (ref q, tokenRole, "=", ref bRoleFound, ref tempThisRole);
-                    else if ((q.Length >= tokenRequiredQualifier.Length) && (0 == string.Compare (q, 0, tokenRequiredQualifier, 0, tokenRequiredQualifier.Length, StringComparison.OrdinalIgnoreCase)))
-                        ParseToken (ref q, tokenRequiredQualifier, "=", ref bRequiredQualifierFound, ref tempRelatedQualifier);
-                    else if ((q.Length >= tokenRequiredAssocQualifier.Length) && (0 == string.Compare (q, 0, tokenRequiredAssocQualifier, 0, tokenRequiredAssocQualifier.Length, StringComparison.OrdinalIgnoreCase)))
-                        ParseToken (ref q, tokenRequiredAssocQualifier, "=", ref bRequiredAssocQualifierFound, ref tempRelationshipQualifier);
-                    else if ((q.Length >= tokenSchemaOnly.Length) && (0 == string.Compare (q, 0, tokenSchemaOnly, 0, tokenSchemaOnly.Length, StringComparison.OrdinalIgnoreCase)))
+                    if ((q.Length >= TokenResultClass.Length) && (0 == string.Compare (q, 0, TokenResultClass, 0, TokenResultClass.Length, StringComparison.OrdinalIgnoreCase)))
+                        ParseToken (ref q, TokenResultClass, "=", ref bResultClassFound, ref tempRelatedClass);
+                    else if ((q.Length >= TokenAssocClass.Length) && (0 == string.Compare (q, 0, TokenAssocClass, 0, TokenAssocClass.Length, StringComparison.OrdinalIgnoreCase)))
+                        ParseToken (ref q, TokenAssocClass, "=", ref bAssocClassFound, ref tempRelationshipClass);
+                    else if ((q.Length >= TokenResultRole.Length) && (0 == string.Compare (q, 0, TokenResultRole, 0, TokenResultRole.Length, StringComparison.OrdinalIgnoreCase)))
+                        ParseToken (ref q, TokenResultRole, "=", ref bResultRoleFound, ref tempRelatedRole);
+                    else if ((q.Length >= TokenRole.Length) && (0 == string.Compare (q, 0, TokenRole, 0, TokenRole.Length, StringComparison.OrdinalIgnoreCase)))
+                        ParseToken (ref q, TokenRole, "=", ref bRoleFound, ref tempThisRole);
+                    else if ((q.Length >= TokenRequiredQualifier.Length) && (0 == string.Compare (q, 0, TokenRequiredQualifier, 0, TokenRequiredQualifier.Length, StringComparison.OrdinalIgnoreCase)))
+                        ParseToken (ref q, TokenRequiredQualifier, "=", ref bRequiredQualifierFound, ref tempRelatedQualifier);
+                    else if ((q.Length >= TokenRequiredAssocQualifier.Length) && (0 == string.Compare (q, 0, TokenRequiredAssocQualifier, 0, TokenRequiredAssocQualifier.Length, StringComparison.OrdinalIgnoreCase)))
+                        ParseToken (ref q, TokenRequiredAssocQualifier, "=", ref bRequiredAssocQualifierFound, ref tempRelationshipQualifier);
+                    else if ((q.Length >= TokenSchemaOnly.Length) && (0 == string.Compare (q, 0, TokenSchemaOnly, 0, TokenSchemaOnly.Length, StringComparison.OrdinalIgnoreCase)))
                     {
-                        ParseToken (ref q, tokenSchemaOnly, ref bSchemaOnlyFound);
+                        ParseToken (ref q, TokenSchemaOnly, ref bSchemaOnlyFound);
                         tempIsSchemaQuery = true;
                     }
-                    else if ((q.Length >= tokenClassDefsOnly.Length) && (0 == string.Compare (q, 0, tokenClassDefsOnly, 0, tokenClassDefsOnly.Length, StringComparison.OrdinalIgnoreCase)))
+                    else if ((q.Length >= TokenClassDefsOnly.Length) && (0 == string.Compare (q, 0, TokenClassDefsOnly, 0, TokenClassDefsOnly.Length, StringComparison.OrdinalIgnoreCase)))
                     {
-                        ParseToken (ref q, tokenClassDefsOnly, ref bClassDefsOnlyFound);
+                        ParseToken (ref q, TokenClassDefsOnly, ref bClassDefsOnlyFound);
                         tempClassDefsOnly = true;
                     }
                     else if (0 == q.Length)
-                        break;		// done
+                        break;        // done
                     else 
-                        throw new ArgumentException(SR.InvalidQuery);		// Unrecognized token
+                        throw new ArgumentException(SR.InvalidQuery);        // Unrecognized token
                 }
 
                 //Can't have both classDefsOnly and schemaOnly
@@ -1771,7 +1771,7 @@ namespace System.Management
     }//RelatedObjectQuery
 
 
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
+    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     /// <summary>
     ///    <para> Represents a WQL REFERENCES OF data query.</para>
     /// </summary>
@@ -1819,14 +1819,14 @@ namespace System.Management
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     public class RelationshipQuery : WqlObjectQuery
     {
-        private static readonly string tokenReferences = "references";
-        private static readonly string tokenOf = "of";
-        private static readonly string tokenWhere = "where";
-        private static readonly string tokenResultClass = "resultclass";
-        private static readonly string tokenRole = "role";
-        private static readonly string tokenRequiredQualifier = "requiredqualifier";
-        private static readonly string tokenClassDefsOnly = "classdefsonly";
-        private static readonly string tokenSchemaOnly = "schemaonly";
+        private const string TokenReferences = "references";
+        private const string TokenOf = "of";
+        private const string TokenWhere = "where";
+        private const string TokenResultClass = "resultclass";
+        private const string TokenRole = "role";
+        private const string TokenRequiredQualifier = "requiredqualifier";
+        private const string TokenClassDefsOnly = "classdefsonly";
+        private const string TokenSchemaOnly = "schemaonly";
 
         private string sourceObject;
         private string relationshipClass;
@@ -1877,11 +1877,11 @@ namespace System.Management
             {
                 // Minimally determine if the string is a query or instance name.
                 //
-                if (queryOrSourceObject.TrimStart().StartsWith(tokenReferences, StringComparison.OrdinalIgnoreCase))
+                if (queryOrSourceObject.TrimStart().StartsWith(TokenReferences, StringComparison.OrdinalIgnoreCase))
                 {
                     // Looks to be a query - do further checking.
                     //
-                    QueryString = queryOrSourceObject;	// Parse/validate; may throw.
+                    QueryString = queryOrSourceObject;    // Parse/validate; may throw.
                 }
                 else
                 {
@@ -2095,7 +2095,7 @@ namespace System.Management
                 return;
 
             //"references" clause
-            string s = tokenReferences + " " + tokenOf + " {" + sourceObject + "}";
+            string s = TokenReferences + " " + TokenOf + " {" + sourceObject + "}";
 
             //If any of the other parameters are set we need a "where" clause
             if (!(RelationshipClass.Length==0) || 
@@ -2104,28 +2104,28 @@ namespace System.Management
                 classDefinitionsOnly ||
                 isSchemaQuery)
             {
-                s = s + " " + tokenWhere;
+                s = s + " " + TokenWhere;
 
                 //"ResultClass"
                 if (!(RelationshipClass.Length==0))
-                    s = s + " " + tokenResultClass + " = " + relationshipClass;
+                    s = s + " " + TokenResultClass + " = " + relationshipClass;
 
                 //"Role"
                 if (!(ThisRole.Length==0))
-                    s = s + " " + tokenRole + " = " + thisRole;
+                    s = s + " " + TokenRole + " = " + thisRole;
 
                 //"RequiredQualifier"
                 if (!(RelationshipQualifier.Length==0))
-                    s = s + " " + tokenRequiredQualifier + " = " + relationshipQualifier;
+                    s = s + " " + TokenRequiredQualifier + " = " + relationshipQualifier;
 
                 //"SchemaOnly" and "ClassDefsOnly"
                 if (!isSchemaQuery) //this is an instance query - classDefs allowed
                 {
                     if (classDefinitionsOnly)
-                        s = s + " " + tokenClassDefsOnly;
+                        s = s + " " + TokenClassDefsOnly;
                 }
                 else //this is a schema query, schemaonly required
-                    s = s + " " + tokenSchemaOnly;
+                    s = s + " " + TokenSchemaOnly;
                 
             }
 
@@ -2155,35 +2155,35 @@ namespace System.Management
             int i;
 
             //Find "references" clause
-            if (0 != string.Compare(q, 0, tokenReferences, 0, tokenReferences.Length, StringComparison.OrdinalIgnoreCase))
-                throw new ArgumentException(SR.InvalidQuery,"references");	// Invalid query
+            if (0 != string.Compare(q, 0, TokenReferences, 0, TokenReferences.Length, StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException(SR.InvalidQuery,"references");    // Invalid query
             
             // Strip off the clause
-            q = q.Remove(0, tokenReferences.Length);
+            q = q.Remove(0, TokenReferences.Length);
 
             // Must be some white space next
             if ((0 == q.Length) || !char.IsWhiteSpace (q[0]))
-                throw new ArgumentException(SR.InvalidQuery);	// Invalid query
+                throw new ArgumentException(SR.InvalidQuery);    // Invalid query
             
-            q = q.TrimStart(null);	// Remove the leading whitespace
+            q = q.TrimStart(null);    // Remove the leading whitespace
 
             // Next token should be "of"
-            if (0 != string.Compare(q, 0, tokenOf, 0, tokenOf.Length, StringComparison.OrdinalIgnoreCase))
-                throw new ArgumentException(SR.InvalidQuery,"of");	// Invalid query
+            if (0 != string.Compare(q, 0, TokenOf, 0, TokenOf.Length, StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException(SR.InvalidQuery,"of");    // Invalid query
             
             // Strip off the clause and leading WS
-            q = q.Remove(0, tokenOf.Length).TrimStart (null);
+            q = q.Remove(0, TokenOf.Length).TrimStart (null);
 
             // Next character should be "{"
             if (0 != q.IndexOf('{'))
-                throw new ArgumentException(SR.InvalidQuery);	// Invalid query
+                throw new ArgumentException(SR.InvalidQuery);    // Invalid query
 
             // Strip off the "{" and any leading WS
             q = q.Remove(0, 1).TrimStart(null);
 
             // Next item should be the source object
             if (-1 == (i = q.IndexOf('}')))
-                throw new ArgumentException(SR.InvalidQuery);	// Invalid query
+                throw new ArgumentException(SR.InvalidQuery);    // Invalid query
 
             tempSourceObject = q.Substring(0, i).TrimEnd(null);
             q = q.Remove(0, i+1).TrimStart(null);
@@ -2192,16 +2192,16 @@ namespace System.Management
             if (0 < q.Length)
             {
                 // Next should be the "where" clause
-                if (0 != string.Compare (q, 0, tokenWhere, 0, tokenWhere.Length, StringComparison.OrdinalIgnoreCase))
-                    throw new ArgumentException(SR.InvalidQuery,"where");	// Invalid query
+                if (0 != string.Compare (q, 0, TokenWhere, 0, TokenWhere.Length, StringComparison.OrdinalIgnoreCase))
+                    throw new ArgumentException(SR.InvalidQuery,"where");    // Invalid query
                 
-                q = q.Remove (0, tokenWhere.Length);
+                q = q.Remove (0, TokenWhere.Length);
 
                 // Must be some white space next
                 if ((0 == q.Length) || !char.IsWhiteSpace (q[0]))
-                    throw new ArgumentException(SR.InvalidQuery);	// Invalid query
+                    throw new ArgumentException(SR.InvalidQuery);    // Invalid query
                 
-                q = q.TrimStart(null);	// Remove the leading whitespace
+                q = q.TrimStart(null);    // Remove the leading whitespace
 
                 // Remaining tokens can appear in any order
                 bool bResultClassFound = false;
@@ -2213,26 +2213,26 @@ namespace System.Management
                 // Keep looking for tokens until we are done
                 while (true)
                 {
-                    if ((q.Length >= tokenResultClass.Length) && (0 == string.Compare (q, 0, tokenResultClass, 0, tokenResultClass.Length, StringComparison.OrdinalIgnoreCase)))
-                        ParseToken (ref q, tokenResultClass, "=", ref bResultClassFound, ref tempRelationshipClass);
-                    else if ((q.Length >= tokenRole.Length) && (0 == string.Compare (q, 0, tokenRole, 0, tokenRole.Length, StringComparison.OrdinalIgnoreCase)))
-                        ParseToken (ref q, tokenRole, "=", ref bRoleFound, ref tempThisRole);
-                    else if ((q.Length >= tokenRequiredQualifier.Length) && (0 == string.Compare (q, 0, tokenRequiredQualifier, 0, tokenRequiredQualifier.Length, StringComparison.OrdinalIgnoreCase)))
-                        ParseToken (ref q, tokenRequiredQualifier, "=", ref bRequiredQualifierFound, ref tempRelationshipQualifier);
-                    else if ((q.Length >= tokenClassDefsOnly.Length) && (0 == string.Compare (q, 0, tokenClassDefsOnly, 0, tokenClassDefsOnly.Length, StringComparison.OrdinalIgnoreCase)))
+                    if ((q.Length >= TokenResultClass.Length) && (0 == string.Compare (q, 0, TokenResultClass, 0, TokenResultClass.Length, StringComparison.OrdinalIgnoreCase)))
+                        ParseToken (ref q, TokenResultClass, "=", ref bResultClassFound, ref tempRelationshipClass);
+                    else if ((q.Length >= TokenRole.Length) && (0 == string.Compare (q, 0, TokenRole, 0, TokenRole.Length, StringComparison.OrdinalIgnoreCase)))
+                        ParseToken (ref q, TokenRole, "=", ref bRoleFound, ref tempThisRole);
+                    else if ((q.Length >= TokenRequiredQualifier.Length) && (0 == string.Compare (q, 0, TokenRequiredQualifier, 0, TokenRequiredQualifier.Length, StringComparison.OrdinalIgnoreCase)))
+                        ParseToken (ref q, TokenRequiredQualifier, "=", ref bRequiredQualifierFound, ref tempRelationshipQualifier);
+                    else if ((q.Length >= TokenClassDefsOnly.Length) && (0 == string.Compare (q, 0, TokenClassDefsOnly, 0, TokenClassDefsOnly.Length, StringComparison.OrdinalIgnoreCase)))
                     {
-                        ParseToken (ref q, tokenClassDefsOnly, ref bClassDefsOnlyFound);
+                        ParseToken (ref q, TokenClassDefsOnly, ref bClassDefsOnlyFound);
                         tempClassDefsOnly = true;
                     }
-                    else if ((q.Length >= tokenSchemaOnly.Length) && (0 == string.Compare (q, 0, tokenSchemaOnly, 0, tokenSchemaOnly.Length, StringComparison.OrdinalIgnoreCase)))
+                    else if ((q.Length >= TokenSchemaOnly.Length) && (0 == string.Compare (q, 0, TokenSchemaOnly, 0, TokenSchemaOnly.Length, StringComparison.OrdinalIgnoreCase)))
                     {
-                        ParseToken (ref q, tokenSchemaOnly, ref bSchemaOnlyFound);
+                        ParseToken (ref q, TokenSchemaOnly, ref bSchemaOnlyFound);
                         tempSchemaOnly = true;
                     }
                     else if (0 == q.Length)
-                        break;		// done
+                        break;        // done
                     else 
-                        throw new ArgumentException(SR.InvalidQuery);		// Unrecognized token
+                        throw new ArgumentException(SR.InvalidQuery);        // Unrecognized token
                 }
 
                 //Can't have both classDefsOnly and schemaOnly
@@ -2272,7 +2272,7 @@ namespace System.Management
     }//RelationshipQuery
 
 
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//	
+    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//    
     /// <summary>
     ///    <para> Represents a WMI event query in WQL format.</para>
     /// </summary>
@@ -2414,7 +2414,7 @@ namespace System.Management
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     public class WqlEventQuery : EventQuery
     {
-        private static readonly string tokenSelectAll = "select * ";
+        private const string TokenSelectAll = "select * ";
 
         private string eventClassName;
         private TimeSpan withinInterval;
@@ -2468,9 +2468,9 @@ namespace System.Management
             {
                 // Minimally determine if the string is a query or event class name.
                 //
-                if (queryOrEventClassName.TrimStart().StartsWith(tokenSelectAll, StringComparison.OrdinalIgnoreCase))
+                if (queryOrEventClassName.TrimStart().StartsWith(TokenSelectAll, StringComparison.OrdinalIgnoreCase))
                 {
-                    QueryString = queryOrEventClassName;	// Parse/validate; may throw.
+                    QueryString = queryOrEventClassName;    // Parse/validate; may throw.
                 }
                 else
                 {
@@ -2957,7 +2957,7 @@ namespace System.Management
             }
 
             //Select clause
-            string s = tokenSelectAll;	//no property list allowed here...
+            string s = TokenSelectAll;    //no property list allowed here...
 
             //From clause
             s = s + "from " + eventClassName;
@@ -3021,10 +3021,10 @@ namespace System.Management
             bool bFound = false;
 
             //Find "select" clause and make sure it's a select *
-            string keyword = tokenSelect;
+            string keyword = TokenSelect;
             if ((q.Length < keyword.Length) || (0 != string.Compare (q, 0, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase)))
                 throw new ArgumentException(SR.InvalidQuery);
-            q =	q.Remove(0, keyword.Length).TrimStart(null);
+            q =    q.Remove(0, keyword.Length).TrimStart(null);
 
             if (!q.StartsWith("*", StringComparison.Ordinal)) 
                     throw new ArgumentException(SR.InvalidQuery,"*");
@@ -3116,7 +3116,7 @@ namespace System.Management
             keyword = "where ";
             if ((w.Length >= keyword.Length) && (0 == string.Compare (w, 0, keyword, 0, keyword.Length, StringComparison.OrdinalIgnoreCase))) //where clause exists
             {
-                condition = w.Substring(keyword.Length);				
+                condition = w.Substring(keyword.Length);                
             }
 
         }//ParseQuery()
@@ -3219,7 +3219,7 @@ namespace System.Management
                 {
                     return new InstanceDescriptor(ctor, new object[] {obj.QueryString});
                 }
-            }			
+            }
         
             if (value is ObjectQuery && destinationType == typeof(InstanceDescriptor)) 
             {

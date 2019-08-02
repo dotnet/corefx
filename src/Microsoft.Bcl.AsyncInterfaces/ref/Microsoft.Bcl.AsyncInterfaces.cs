@@ -62,6 +62,11 @@ namespace System.Runtime.CompilerServices
             public System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable<bool> MoveNextAsync() { throw null; }
         }
     }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Parameter, Inherited=false)]
+    public sealed partial class EnumeratorCancellationAttribute : System.Attribute
+    {
+        public EnumeratorCancellationAttribute() { }
+    }
 }
 namespace System.Threading.Tasks
 {

@@ -383,6 +383,7 @@ namespace System.Security.AccessControl
         protected bool IsContainer { get { throw null; } }
         protected bool IsDS { get { throw null; } }
         protected bool OwnerModified { get { throw null; } set { } }
+        protected System.Security.AccessControl.CommonSecurityDescriptor SecurityDescriptor { get { throw null; } }
         public abstract System.Security.AccessControl.AccessRule AccessRuleFactory(System.Security.Principal.IdentityReference identityReference, int accessMask, bool isInherited, System.Security.AccessControl.InheritanceFlags inheritanceFlags, System.Security.AccessControl.PropagationFlags propagationFlags, System.Security.AccessControl.AccessControlType type);
         public abstract System.Security.AccessControl.AuditRule AuditRuleFactory(System.Security.Principal.IdentityReference identityReference, int accessMask, bool isInherited, System.Security.AccessControl.InheritanceFlags inheritanceFlags, System.Security.AccessControl.PropagationFlags propagationFlags, System.Security.AccessControl.AuditFlags flags);
         public System.Security.Principal.IdentityReference GetGroup(System.Type targetType) { throw null; }

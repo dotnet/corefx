@@ -22,13 +22,14 @@ T:System.Runtime.CompilerServices.CompilerGeneratedAttribute
 T:System.Runtime.CompilerServices.IteratorStateMachineAttribute
 T:System.Runtime.CompilerServices.MethodImpl
 T:System.Runtime.CompilerServices.NullableAttribute
+T:System.Runtime.CompilerServices.NullableContextAttribute
 T:System.Runtime.CompilerServices.TypeForwardedFromAttribute
 T:System.Runtime.ConstrainedExecution.ReliabilityContractAttribute
 T:System.Runtime.InteropServices.ClassInterfaceAttribute
 T:System.Runtime.InteropServices.ComDefaultInterfaceAttribute
 T:System.Runtime.InteropServices.ComVisibleAttribute
 T:System.Runtime.InteropServices.GuidAttribute
-T:System.Runtime.InteropServices.InterfaceTypeAttribute
+T:System.Runtime.InteropServices.LCIDConversionAttribute
 T:System.Runtime.InteropServices.StructLayoutAttribute
 T:System.Security.Permissions.EnvironmentPermissionAttribute
 T:System.Security.Permissions.FileIOPermissionAttribute

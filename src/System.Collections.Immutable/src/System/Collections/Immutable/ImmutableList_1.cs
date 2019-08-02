@@ -169,13 +169,13 @@ namespace System.Collections.Immutable
         /// <param name="index">The 0-based index of the element in the set to return.</param>
         /// <returns>The element at the given position.</returns>
         /// <exception cref="IndexOutOfRangeException">Thrown from getter when <paramref name="index"/> is negative or not less than <see cref="Count"/>.</exception>
-#if FEATURE_ITEMREFAPI
+#if !NETSTANDARD10
         public T this[int index] => _root.ItemRef(index);
 #else
         public T this[int index] => _root[index];
 #endif
 
-#if FEATURE_ITEMREFAPI
+#if !NETSTANDARD10
         /// <summary>
         /// Gets a read-only reference to the element of the set at the given index.
         /// </summary>
@@ -1080,10 +1080,10 @@ namespace System.Collections.Immutable
         void IList.Remove(object value) => throw new NotSupportedException();
 
         /// <summary>
-        /// Gets or sets the <see cref="System.Object"/> at the specified index.
+        /// Gets or sets the <see cref="object"/> at the specified index.
         /// </summary>
         /// <value>
-        /// The <see cref="System.Object"/>.
+        /// The <see cref="object"/>.
         /// </value>
         /// <param name="index">The index.</param>
         /// <returns>The value at the specified index.</returns>

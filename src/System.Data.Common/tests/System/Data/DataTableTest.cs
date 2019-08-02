@@ -698,14 +698,14 @@ namespace System.Data.Tests
             Assert.Equal(1, Rows.Length);
 
             /*
-			try {
-				Mom.Select ("Child.Name = 'Jack'");
+            try {
+                Mom.Select ("Child.Name = 'Jack'");
 Assert.False(true);
-			} catch (Exception e) {
-				Assert.Equal (typeof (SyntaxErrorException), e.GetType ());
-				Assert.Equal ("Cannot interpret token 'Child' at position 1.", e.Message);
-			}
-			*/
+            } catch (Exception e) {
+                Assert.Equal (typeof (SyntaxErrorException), e.GetType ());
+                Assert.Equal ("Cannot interpret token 'Child' at position 1.", e.Message);
+            }
+            */
 
             Rows = Child.Select("Parent.name = 'Laura'");
             Assert.Equal(3, Rows.Length);
@@ -2136,12 +2136,12 @@ Assert.False(true);
             _tableInitialized = true;
         }
 
-        public void OnRowChanging(object src, DataRowChangeEventArgs args)
+        private void OnRowChanging(object src, DataRowChangeEventArgs args)
         {
             _rowActionChanging = args.Action;
         }
 
-        public void OnRowChanged(object src, DataRowChangeEventArgs args)
+        private void OnRowChanged(object src, DataRowChangeEventArgs args)
         {
             _rowActionChanged = args.Action;
         }
@@ -2938,10 +2938,10 @@ Assert.False(true);
             DataTableReader dtr = _dt.CreateDataReader();
             DataRowAction[] dra = new DataRowAction[] {
                 DataRowAction.Nothing,// REAL action
-				DataRowAction.Nothing,// dummy  
-				DataRowAction.Nothing,// dummy  
-				DataRowAction.Nothing,// dummy  
-				DataRowAction.Nothing};// dummy  
+                DataRowAction.Nothing,// dummy  
+                DataRowAction.Nothing,// dummy  
+                DataRowAction.Nothing,// dummy  
+                DataRowAction.Nothing};// dummy  
             rowActionInit(dra);
             dtLoad.Load(dtr, LoadOption.Upsert);
             rowActionEnd();
@@ -3776,12 +3776,12 @@ Assert.False(true);
             StringWriter sw1 = new StringWriter();
             ds1.Tables[0].WriteXmlSchema(sw1);
             string xml1 = sw1.ToString();
-            Assert.True(xml1.IndexOf(@"<xs:unique name=""Constraint1"">") != -1);
+            Assert.Contains(@"<xs:unique name=""Constraint1"">", xml1, StringComparison.Ordinal);
 
             StringWriter sw2 = new StringWriter();
             ds1.Tables[1].WriteXmlSchema(sw2);
             string xml2 = sw2.ToString();
-            Assert.True(xml2.IndexOf(@"<xs:unique name=""Constraint1"">") == -1);
+            Assert.DoesNotContain(@"<xs:unique name=""Constraint1"">", xml2, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -3988,22 +3988,22 @@ Assert.False(true);
         public void ReadXmlSchemeWithScheme()
         {
             const string xml = @"<CustomElement>
-				  <xs:schema id='NewDataSet' xmlns='' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:msdata='urn:schemas-microsoft-com:xml-msdata'>
-					<xs:element name='NewDataSet' msdata:IsDataSet='true' msdata:MainDataTable='row' msdata:Locale=''>
-					  <xs:complexType>
-						<xs:choice minOccurs='0' maxOccurs='unbounded'>
-						  <xs:element name='row' msdata:Locale=''>
-							<xs:complexType>
-							  <xs:sequence>
-								<xs:element name='Text' type='xs:string' minOccurs='0' />
-							  </xs:sequence>
-							</xs:complexType>
-						  </xs:element>
-						</xs:choice>
-					  </xs:complexType>
-					</xs:element>
-				  </xs:schema>
-				</CustomElement>";
+                  <xs:schema id='NewDataSet' xmlns='' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:msdata='urn:schemas-microsoft-com:xml-msdata'>
+                    <xs:element name='NewDataSet' msdata:IsDataSet='true' msdata:MainDataTable='row' msdata:Locale=''>
+                      <xs:complexType>
+                        <xs:choice minOccurs='0' maxOccurs='unbounded'>
+                          <xs:element name='row' msdata:Locale=''>
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name='Text' type='xs:string' minOccurs='0' />
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:choice>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:schema>
+                </CustomElement>";
             using (var s = new StringReader(xml))
             {
                 DataTable dt = new DataTable();
@@ -4016,9 +4016,9 @@ Assert.False(true);
         public void ReadXmlSchemeWithBadScheme()
         {
             const string xml = @"<CustomElement>
-				  <xs:schema id='NewDataSet' xmlns='' xmlns:xs='http://www.w3.org/2001/BAD' xmlns:msdata='urn:schemas-microsoft-com:xml-msdata'>
-				  </xs:schema>
-				</CustomElement>";
+                  <xs:schema id='NewDataSet' xmlns='' xmlns:xs='http://www.w3.org/2001/BAD' xmlns:msdata='urn:schemas-microsoft-com:xml-msdata'>
+                  </xs:schema>
+                </CustomElement>";
             AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 using (var s = new StringReader(xml))
@@ -4043,8 +4043,9 @@ Assert.False(true);
     }
 
     [Serializable]
-
-    public class AppDomainsAndFormatInfo    {
+    public class AppDomainsAndFormatInfo
+    {
+        [Fact]
         public void Remote()
         {
             int n = (int)Convert.ChangeType("5", typeof(int));

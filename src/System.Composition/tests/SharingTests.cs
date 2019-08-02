@@ -330,7 +330,7 @@ namespace System.Composition.UnitTests
             }
             catch (Exception ex)
             {
-                Assert.True(ex.Message.Contains("The component (unknown) cannot be created outside the Boundary sharing boundary"));
+                Assert.Contains("The component (unknown) cannot be created outside the Boundary sharing boundary", ex.Message);
             }
         }
 
@@ -339,7 +339,6 @@ namespace System.Composition.UnitTests
         /// Needs to be fixed so that specifying boundary would automatically create the shared
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20656", TargetFrameworkMonikers.UapAot)]
         [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void BoundarySharingTest()
         {
@@ -362,7 +361,6 @@ namespace System.Composition.UnitTests
         /// CirA root of the composition has to be shared explicitly.
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20656", TargetFrameworkMonikers.UapAot)]
         [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void CircularBoundarySharingTest()
         {
@@ -370,17 +368,16 @@ namespace System.Composition.UnitTests
             var cInstance = cc.GetExport<CirA>();
             cInstance.SharedState = 1;
             var bInstance1 = cInstance.CreateInstance();
-            Assert.Equal(bInstance1.DepC.DepA.SharedState, 1);
+            Assert.Equal(1, bInstance1.DepC.DepA.SharedState);
             bInstance1.DepC.DepA.SharedState = 10;
             cInstance.CreateInstance();
-            Assert.Equal(bInstance1.DepC.DepA.SharedState, 10);
+            Assert.Equal(10, bInstance1.DepC.DepA.SharedState);
         }
 
         /// <summary>
         /// Something is badly busted here.. I am getting a null ref exception
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/20656", TargetFrameworkMonikers.UapAot)]
         [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void MultipleBoundarySpecified()
         {

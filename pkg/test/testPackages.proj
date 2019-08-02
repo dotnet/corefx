@@ -3,7 +3,6 @@
 
   <ItemGroup>
     <TestPackages Condition="'$(TestPackages)' != ''" Include="$(TestPackages)" />
-    <ExcludePackages Include="CoreFx.Private.TestUtilities" />
     <ExcludePackages Include="$(ExcludePackages)" />
 
     <PackageReports Condition="'@(TestPackages)' == ''" Include="$(PackageReportDir)*.json" Exclude="@(ExcludePackages->'$(PackageReportDir)%(Identity).json')"/>
@@ -40,13 +39,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <TestSupportFiles Include="$(DotnetCliPath)\**\*.*" Exclude="$(DotnetCliPath)\sdk\NuGetFallbackFolder\**\*.*">
+    <TestSupportFiles Include="$(DotNetRoot)**\*.*" Exclude="$(DotNetRoot)sdk\NuGetFallbackFolder\**\*.*">
       <DestinationFolder>$(TestToolsDir)%(RecursiveDir)</DestinationFolder>
     </TestSupportFiles>
     <TestSupportFiles Include="$(SourceDir)shims\netfxreference.props">
-      <DestinationFolder>$(TestToolsDir)</DestinationFolder>
-    </TestSupportFiles>
-    <TestSupportFiles Include="$(RepositoryEngineeringDir)dependencies.props">
       <DestinationFolder>$(TestToolsDir)</DestinationFolder>
     </TestSupportFiles>
     <TestSupportFiles Include="$(RepositoryEngineeringDir)versions.props">

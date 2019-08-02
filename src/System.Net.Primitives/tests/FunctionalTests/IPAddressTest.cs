@@ -131,7 +131,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Equal(0, ip.ScopeId);
 
             ip.ScopeId = 700;
-            Assert.Equal(ip.ScopeId, 700);
+            Assert.Equal(700, ip.ScopeId);
 
             ip.ScopeId = 700;
         }
@@ -316,7 +316,6 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // IPAddress.Value can be set on full framework
         public static void Address_ReadOnlyStatics_Set_Failure()
         {
             Assert.Throws<SocketException>(() => IPAddress.Any.Address = MaxAddress - 1);

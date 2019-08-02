@@ -227,7 +227,7 @@ namespace System.Threading.Tasks.Dataflow
         #endregion
 
         #region Post and SendAsync
-        /// <summary>Posts an item to the <see cref="T:System.Threading.Tasks.Dataflow.ITargetBlock`1"/>.</summary>
+        /// <summary>Posts an item to the <see cref="System.Threading.Tasks.Dataflow.ITargetBlock{T}"/>.</summary>
         /// <typeparam name="TInput">Specifies the type of data accepted by the target block.</typeparam>
         /// <param name="target">The target block.</param>
         /// <param name="item">The item being offered to the target.</param>
@@ -235,11 +235,11 @@ namespace System.Threading.Tasks.Dataflow
         /// <remarks>
         /// This method will return once the target block has decided to accept or decline the item,
         /// but unless otherwise dictated by special semantics of the target block, it does not wait
-        /// for the item to actually be processed (for example, <see cref="T:System.Threading.Tasks.Dataflow.ActionBlock`1"/>
+        /// for the item to actually be processed (for example, <see cref="System.Threading.Tasks.Dataflow.ActionBlock{T}"/>
         /// will return from Post as soon as it has stored the posted item into its input queue).  From the perspective
         /// of the block's processing, Post is asynchronous. For target blocks that support postponing offered messages, 
         /// or for blocks that may do more processing in their Post implementation, consider using
-        ///  <see cref="T:System.Threading.Tasks.Dataflow.DataflowBlock.SendAsync">SendAsync</see>, 
+        /// <see cref="System.Threading.Tasks.Dataflow.DataflowBlock.SendAsync{TInput}(ITargetBlock{TInput}, TInput)">SendAsync</see>, 
         /// which will return immediately and will enable the target to postpone the posted message and later consume it 
         /// after SendAsync returns.
         /// </remarks>
@@ -299,7 +299,7 @@ namespace System.Threading.Tasks.Dataflow
 
             // Fast path check for cancellation
             if (cancellationToken.IsCancellationRequested)
-                return Common.CreateTaskFromCancellation<Boolean>(cancellationToken);
+                return Common.CreateTaskFromCancellation<bool>(cancellationToken);
 
             SendAsyncSource<TInput> source;
 
@@ -338,7 +338,7 @@ namespace System.Threading.Tasks.Dataflow
             {
                 // If the target throws from OfferMessage, return a faulted task
                 Common.StoreDataflowMessageValueIntoExceptionData(exc, item);
-                return Common.CreateTaskFromException<Boolean>(exc);
+                return Common.CreateTaskFromException<bool>(exc);
             }
 
             Debug.Assert(source != null, "The SendAsyncSource instance must have been constructed.");
@@ -766,7 +766,7 @@ namespace System.Threading.Tasks.Dataflow
         #region TryReceive, ReceiveAsync, and Receive
         #region TryReceive
         /// <summary>
-        /// Attempts to synchronously receive an item from the <see cref="T:System.Threading.Tasks.Dataflow.ISourceBlock`1"/>.
+        /// Attempts to synchronously receive an item from the <see cref="System.Threading.Tasks.Dataflow.ISourceBlock{T}"/>.
         /// </summary>
         /// <param name="source">The source from which to receive.</param>
         /// <param name="item">The item received from the source.</param>
@@ -828,7 +828,7 @@ namespace System.Threading.Tasks.Dataflow
         /// </returns>
         /// <exception cref="System.ArgumentNullException">The <paramref name="source"/> is null (Nothing in Visual Basic).</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// timeout is a negative number other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than <see cref="System.Int32.MaxValue"/>.
+        /// timeout is a negative number other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than <see cref="int.MaxValue"/>.
         /// </exception>
         public static Task<TOutput> ReceiveAsync<TOutput>(
             this ISourceBlock<TOutput> source, TimeSpan timeout)
@@ -849,7 +849,7 @@ namespace System.Threading.Tasks.Dataflow
         /// </returns>
         /// <exception cref="System.ArgumentNullException">The <paramref name="source"/> is null (Nothing in Visual Basic).</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// timeout is a negative number other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than <see cref="System.Int32.MaxValue"/>.
+        /// timeout is a negative number other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than <see cref="int.MaxValue"/>.
         /// </exception>
         public static Task<TOutput> ReceiveAsync<TOutput>(
             this ISourceBlock<TOutput> source, TimeSpan timeout, CancellationToken cancellationToken)
@@ -903,7 +903,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <param name="timeout">A <see cref="System.TimeSpan"/> that represents the number of milliseconds to wait, or a TimeSpan that represents -1 milliseconds to wait indefinitely.</param>
         /// <returns>The received item.</returns>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// timeout is a negative number other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than <see cref="System.Int32.MaxValue"/>.
+        /// timeout is a negative number other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than <see cref="int.MaxValue"/>.
         /// </exception>
         /// <exception cref="System.ArgumentNullException">The <paramref name="source"/> is null (Nothing in Visual Basic).</exception>
         /// <exception cref="System.InvalidOperationException">No item could be received from the source.</exception>
@@ -926,7 +926,7 @@ namespace System.Threading.Tasks.Dataflow
         /// <returns>The received item.</returns>
         /// <exception cref="System.ArgumentNullException">The <paramref name="source"/> is null (Nothing in Visual Basic).</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// timeout is a negative number other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than <see cref="System.Int32.MaxValue"/>.
+        /// timeout is a negative number other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than <see cref="int.MaxValue"/>.
         /// </exception>
         /// <exception cref="System.InvalidOperationException">No item could be received from the source.</exception>
         /// <exception cref="System.TimeoutException">The specified timeout expired before an item was received from the source.</exception>
@@ -1938,7 +1938,7 @@ namespace System.Threading.Tasks.Dataflow
 
             // Early cancellation check and bail out
             if (dataflowBlockOptions.CancellationToken.IsCancellationRequested)
-                return Common.CreateTaskFromCancellation<Int32>(dataflowBlockOptions.CancellationToken);
+                return Common.CreateTaskFromCancellation<int>(dataflowBlockOptions.CancellationToken);
 
             // Fast path: if any of the sources already has data available that can be received immediately.
             Task<int> resultTask;
@@ -2716,7 +2716,7 @@ namespace System.Threading.Tasks.Dataflow
         /// Gets a target block that synchronously accepts all messages offered to it and drops them.
         /// </summary>
         /// <typeparam name="TInput">The type of the messages this block can accept.</typeparam>
-        /// <returns>A <see cref="T:System.Threading.Tasks.Dataflow.ITargetBlock`1"/> that accepts and subsequently drops all offered messages.</returns>
+        /// <returns>A <see cref="System.Threading.Tasks.Dataflow.ITargetBlock{T}"/> that accepts and subsequently drops all offered messages.</returns>
         public static ITargetBlock<TInput> NullTarget<TInput>()
         {
             return new NullTargetBlock<TInput>();

@@ -224,7 +224,7 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public async Task ThrowsOnReadAfterCompleteReader()
         {
-            var reader = PipeReader.Create(Stream.Null);
+            PipeReader reader = PipeReader.Create(Stream.Null);
 
             reader.Complete();
             await Assert.ThrowsAsync<InvalidOperationException>(async () => await reader.ReadAsync());
@@ -233,7 +233,7 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public void TryReadAfterCancelPendingReadReturnsTrue()
         {
-            var reader = PipeReader.Create(Stream.Null);
+            PipeReader reader = PipeReader.Create(Stream.Null);
 
             reader.CancelPendingRead();
 
@@ -482,12 +482,15 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void OnWriterCompletedThrowsNotSupportedException()
+        public void OnWriterCompletedNoops()
         {
+            bool fired = false;
             PipeReader reader = PipeReader.Create(Stream.Null);
-
-            Assert.Throws<NotSupportedException>(() => reader.OnWriterCompleted((_, __) => { }, null));
+#pragma warning disable CS0618 // Type or member is obsolete
+            reader.OnWriterCompleted((_, __) => { fired = true; }, null);
+#pragma warning restore CS0618 // Type or member is obsolete
             reader.Complete();
+            Assert.False(fired);
         }
 
         [Fact]
@@ -518,15 +521,57 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public void InvalidBufferSizeThrows()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(bufferSize: -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(bufferSize: -2));
             Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(bufferSize: 0));
         }
 
         [Fact]
         public void InvalidMinimumReadSizeThrows()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(minimumReadSize: -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(minimumReadSize: -2));
             Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(minimumReadSize: 0));
+        }
+
+        [Fact]
+        public void StreamPipeReaderOptions_Ctor_Defaults()
+        {
+            var options = new StreamPipeReaderOptions();
+            Assert.Same(MemoryPool<byte>.Shared, options.Pool);
+            Assert.Equal(4096, options.BufferSize);
+            Assert.Equal(1024, options.MinimumReadSize);
+            Assert.False(options.LeaveOpen);
+        }
+
+        [Fact]
+        public void StreamPipeReaderOptions_Ctor_Roundtrip()
+        {
+            using (var pool = new TestMemoryPool())
+            {
+                var options = new StreamPipeReaderOptions(pool: pool, bufferSize: 1234, minimumReadSize: 5678, leaveOpen: true);
+                Assert.Same(pool, options.Pool);
+                Assert.Equal(1234, options.BufferSize);
+                Assert.Equal(5678, options.MinimumReadSize);
+                Assert.True(options.LeaveOpen);
+            }
+        }
+
+        [Fact]
+        public void LeaveUnderlyingStreamOpen()
+        {
+            var stream = new MemoryStream();
+            PipeReader reader = PipeReader.Create(stream, new StreamPipeReaderOptions(leaveOpen: true));
+
+            reader.Complete();
+
+            Assert.True(stream.CanRead);
+        }
+
+        [Fact]
+        public async Task OperationCancelledExceptionNotSwallowedIfNotThrownFromSpecifiedToken()
+        {
+            PipeReader reader = PipeReader.Create(new ThrowsOperationCanceledExceptionStream());
+
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await reader.ReadAsync());
         }
 
         private static async Task<string> ReadFromPipeAsString(PipeReader reader)
@@ -556,6 +601,25 @@ namespace System.IO.Pipelines.Tests
             return new object[] { bytesInBuffer, bufferSize, minimumReadSize, readSizes };
         }
 
+        private class ThrowsOperationCanceledExceptionStream : ReadOnlyStream
+        {
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                throw new OperationCanceledException();
+            }
+
+            public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+                throw new OperationCanceledException();
+            }
+#if netcoreapp
+            public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+            {
+                throw new OperationCanceledException();
+            }
+#endif
+        }
+
         private class ThrowAfterZeroByteReadStream : MemoryStream
         {
             public ThrowAfterZeroByteReadStream()
@@ -583,7 +647,7 @@ namespace System.IO.Pipelines.Tests
                 return bytes;
             }
 
-#if !netstandard
+#if netcoreapp
             public override async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
             {
                 if (_throwOnNextCallToRead)

@@ -180,7 +180,6 @@ namespace System.Threading.Tasks.Tests
             tokenSource.Dispose(); //Repeat calls to Dispose should be ok.
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Relies on quirked behavior to not throw in token.Register when already disposed")]
         [Fact]
         public static void TokenSourceDispose_Negative()
         {
@@ -470,12 +469,12 @@ namespace System.Threading.Tasks.Tests
             token.Register(() => earlyEnlistedTokenSource.Cancel());
             tokenSource.Cancel();
 
-            Assert.Equal(true, earlyEnlistedTokenSource.IsCancellationRequested);
+            Assert.True(earlyEnlistedTokenSource.IsCancellationRequested);
 
 
             CancellationTokenSource lateEnlistedTokenSource = new CancellationTokenSource();
             token.Register(() => lateEnlistedTokenSource.Cancel());
-            Assert.Equal(true, lateEnlistedTokenSource.IsCancellationRequested);
+            Assert.True(lateEnlistedTokenSource.IsCancellationRequested);
         }
 
         /// <summary>
@@ -1273,7 +1272,7 @@ namespace System.Threading.Tasks.Tests
         {
             public bool DidSendOccur = false;
 
-            override public void Send(SendOrPostCallback d, object state)
+            public override void Send(SendOrPostCallback d, object state)
             {
                 //Note: another idea was to install this syncContext on the executing thread.
                 //unfortunately, the ExecutionContext business gets in the way and reestablishes a default SyncContext.
@@ -1291,7 +1290,7 @@ namespace System.Threading.Tasks.Tests
         {
             public bool DidSendOccur = false;
 
-            override public void Send(SendOrPostCallback d, object state)
+            public override void Send(SendOrPostCallback d, object state)
             {
                 Exception marshalledException = null;
                 Task t = new Task(
@@ -1370,7 +1369,7 @@ namespace System.Threading.Tasks.Tests
             public bool DisposeFalseCalled = false;
         }
 
-        public static void SetSynchronizationContext(SynchronizationContext sc)
+        private static void SetSynchronizationContext(SynchronizationContext sc)
         {
             SynchronizationContext.SetSynchronizationContext(sc);
         }

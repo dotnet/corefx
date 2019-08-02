@@ -74,14 +74,12 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(DutchTitleCaseInfo_TestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop Framework hasn't received the fix for dotnet/corefx#16770 yet.")]
         public void ToTitleCaseDutchTest(string cultureName, string expected, string actual)
         {
             TextInfo ti = CultureInfo.GetCultureInfo(cultureName).TextInfo;
             Assert.Equal(expected, ti.ToTitleCase(actual));
         }
 
-        [Theory]
         public static IEnumerable<object[]> CultureName_TestData()
         {
             yield return new object[] { CultureInfo.InvariantCulture.TextInfo, "" };
@@ -247,7 +245,7 @@ namespace System.Globalization.Tests
             }
         }
 
-        public void TestToLower(string name, string str, string expected)
+        private static void TestToLower(string name, string str, string expected)
         {
             Assert.Equal(expected, new CultureInfo(name).TextInfo.ToLower(str));
             if (str.Length == 1)
@@ -265,7 +263,6 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(ToLower_TestData_netcore))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void ToLower_Netcore(string name, string str, string expected)
         {
             TestToLower(name, str, expected);
@@ -371,7 +368,7 @@ namespace System.Globalization.Tests
             }
         }
 
-        public void TestToUpper(string name, string str, string expected)
+        private static void TestToUpper(string name, string str, string expected)
         {
             Assert.Equal(expected, new CultureInfo(name).TextInfo.ToUpper(str));
             if (str.Length == 1)
@@ -389,7 +386,6 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(ToUpper_TestData_netcore))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void ToUpper_netcore(string name, string str, string expected)
         {
             TestToUpper(name, str, expected);

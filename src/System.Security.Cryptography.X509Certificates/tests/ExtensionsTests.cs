@@ -190,6 +190,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void KeyUsageExtension_KeyAgreementAndDecipherOnly()
+        {
+            TestKeyUsageExtension(
+                X509KeyUsageFlags.KeyAgreement | X509KeyUsageFlags.DecipherOnly,
+                false,
+                "0303070880".HexToByteArray());
+        }
+
+        [Fact]
         public static void KeyUsageExtension_BER()
         {
             // Extensions encoded inside PKCS#8 on Windows may use BER encoding that would be invalid DER.
@@ -270,8 +279,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             // Ensure that no exception is thrown and the value is decoded correctly.
             X509BasicConstraintsExtension ext;
             ext = new X509BasicConstraintsExtension(new AsnEncodedData("30800101000201080000".HexToByteArray()), false);
-            Assert.Equal(false, ext.CertificateAuthority);
-            Assert.Equal(true, ext.HasPathLengthConstraint);
+            Assert.False(ext.CertificateAuthority);
+            Assert.True(ext.HasPathLengthConstraint);
             Assert.Equal(8, ext.PathLengthConstraint);
         }
 

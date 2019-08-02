@@ -67,7 +67,6 @@ namespace System.Net.Tests
 
         [Theory]
         [InlineData(AuthenticationSchemes.Basic)]
-        [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.None)]
         [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.Anonymous)]
         public async Task BasicAuthentication_ValidUsernameAndPassword_Success(AuthenticationSchemes authScheme)
         {
@@ -75,7 +74,6 @@ namespace System.Net.Tests
             await ValidateValidUser();
         }
 
-        [ActiveIssue(19967, TargetFrameworkMonikers.NetFramework)]
         [Theory]
         [MemberData(nameof(BasicAuthenticationHeader_TestData))]
         public async Task BasicAuthentication_InvalidRequest_SendsStatusCodeClient(string header, HttpStatusCode statusCode)
@@ -107,7 +105,6 @@ namespace System.Net.Tests
             yield return new object[] { "abc", HttpStatusCode.InternalServerError };
         }
 
-        [ActiveIssue(19967, TargetFrameworkMonikers.NetFramework)]
         [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20098, TestPlatforms.Unix)]
         [InlineData("ExampleRealm")]
         [InlineData("  ExampleRealm  ")]
@@ -339,7 +336,7 @@ namespace System.Net.Tests
         {
             using (var listener = new HttpListener())
             {
-                Assert.Equal(false, listener.UnsafeConnectionNtlmAuthentication);
+                Assert.False(listener.UnsafeConnectionNtlmAuthentication);
 
                 listener.UnsafeConnectionNtlmAuthentication = true;
                 Assert.True(listener.UnsafeConnectionNtlmAuthentication);

@@ -869,7 +869,7 @@ namespace System.IO.Packaging.Tests
                     using (Stream partStream = mainPart.GetStream(FileMode.OpenOrCreate, FileAccess.Read))
                     {
                         var len = partStream.Length;
-                        Assert.Equal(len, 2142);
+                        Assert.Equal(2142, len);
                     }
                 }
             }
@@ -890,7 +890,7 @@ namespace System.IO.Packaging.Tests
                 {
                     var rootUri = new Uri("/", UriKind.Relative);
                     var rootRelationshipPartUri = PackUriHelper.GetRelationshipPartUri(rootUri);
-                    Assert.Equal(rootRelationshipPartUri.ToString(), "/_rels/.rels");
+                    Assert.Equal("/_rels/.rels", rootRelationshipPartUri.ToString());
 
                     PackageRelationship docPackageRelationship =
                       package
@@ -906,7 +906,7 @@ namespace System.IO.Packaging.Tests
                                      docPackageRelationship.TargetUri);
 
                         var docRelationshipPartUri = PackUriHelper.GetRelationshipPartUri(documentUri);
-                        Assert.Equal(docRelationshipPartUri.ToString(), "/word/_rels/document.xml.rels");
+                        Assert.Equal("/word/_rels/document.xml.rels", docRelationshipPartUri.ToString());
                     }
                 }
             }
@@ -942,7 +942,7 @@ namespace System.IO.Packaging.Tests
                         Assert.Throws<ArgumentNullException>(() => PackUriHelper.GetRelativeUri(null, stylesUri));
                         Assert.Throws<ArgumentNullException>(() => PackUriHelper.GetRelativeUri(documentUri, null));
                         var relativeUri = PackUriHelper.GetRelativeUri(documentUri, stylesUri);
-                        Assert.Equal(relativeUri.ToString(), "styles.xml");
+                        Assert.Equal("styles.xml", relativeUri.ToString());
                     }
                 }
             }
@@ -974,8 +974,8 @@ namespace System.IO.Packaging.Tests
                         else
                             nonRel++;
                     }
-                    Assert.Equal(nonRel, 8);
-                    Assert.Equal(rel, 2);
+                    Assert.Equal(8, nonRel);
+                    Assert.Equal(2, rel);
                 }
             }
         }
@@ -1008,7 +1008,7 @@ namespace System.IO.Packaging.Tests
                         Assert.Throws<ArgumentNullException>(() => new PackageRelationshipSelector(documentUri, PackageRelationshipSelectorType.Id, null));
                         PackageRelationshipSelector prs = new PackageRelationshipSelector(documentUri, PackageRelationshipSelectorType.Id, "rId1");
                         var cnt = prs.Select(package).Count();
-                        Assert.Equal(cnt, 1);
+                        Assert.Equal(1, cnt);
                     }
                 }
             }
@@ -1028,7 +1028,7 @@ namespace System.IO.Packaging.Tests
                     var mainPartUri = new Uri("/", UriKind.Relative);
                     PackageRelationshipSelector prs = new PackageRelationshipSelector(mainPartUri, PackageRelationshipSelectorType.Id, "rId1");
                     var cnt = prs.Select(package).Count();
-                    Assert.Equal(cnt, 1);
+                    Assert.Equal(1, cnt);
                 }
             }
         }
@@ -1048,7 +1048,7 @@ namespace System.IO.Packaging.Tests
                     var mainPartUri = new Uri("/", UriKind.Relative);
                     PackageRelationshipSelector prs = new PackageRelationshipSelector(mainPartUri, PackageRelationshipSelectorType.Type, DocumentRelationshipType);
                     var cnt = prs.Select(package).Count();
-                    Assert.Equal(cnt, 1);
+                    Assert.Equal(1, cnt);
                 }
             }
         }
@@ -1068,7 +1068,7 @@ namespace System.IO.Packaging.Tests
                     var mainPartUri = new Uri("/word/document.xml", UriKind.Relative);
                     PackageRelationshipSelector prs = new PackageRelationshipSelector(mainPartUri, PackageRelationshipSelectorType.Type, StylesRelationshipType);
                     var cnt = prs.Select(package).Count();
-                    Assert.Equal(cnt, 1);
+                    Assert.Equal(1, cnt);
                 }
             }
         }
@@ -1105,9 +1105,9 @@ namespace System.IO.Packaging.Tests
                         var validCompressionOption = documentPart.CompressionOption == CompressionOption.Normal ||
                             documentPart.CompressionOption == CompressionOption.SuperFast;
                         Assert.True(validCompressionOption);
-                        Assert.Equal(documentPart.ContentType, "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml");
+                        Assert.Equal("application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml", documentPart.ContentType);
                         Assert.NotNull(documentPart.Package);
-                        Assert.Equal(documentPart.Uri.ToString(), "/word/document.xml");
+                        Assert.Equal("/word/document.xml", documentPart.Uri.ToString());
                     }
                 }
             }
@@ -1148,7 +1148,7 @@ namespace System.IO.Packaging.Tests
                     var mainDocumentPart = package.GetPart(documentUri);
                     Uri documentUri2 = new Uri("/word/document.xml", UriKind.RelativeOrAbsolute);
                     Assert.True(package.PartExists(documentUri));
-                    Assert.Equal(package.FileOpenAccess, FileAccess.ReadWrite);
+                    Assert.Equal(FileAccess.ReadWrite, package.FileOpenAccess);
                 }
             }
         }
@@ -1166,12 +1166,12 @@ namespace System.IO.Packaging.Tests
                 Assert.Null(pp.Category);
                 Assert.Null(pp.ContentStatus);
                 Assert.Null(pp.ContentType);
-                Assert.Equal(pp.Creator, "Eric White");
-                Assert.Equal(pp.Description, "");
+                Assert.Equal("Eric White", pp.Creator);
+                Assert.Equal("", pp.Description);
                 Assert.Null(pp.Identifier);
                 Assert.Null(pp.Language);
-                Assert.Equal(pp.Subject, "");
-                Assert.Equal(pp.Title, "");
+                Assert.Equal("", pp.Subject);
+                Assert.Equal("", pp.Title);
                 Assert.Null(pp.Version);
             }
             fiGuidName.Delete();
@@ -1368,7 +1368,7 @@ namespace System.IO.Packaging.Tests
                     sb.AppendFormatComma("pp.Version: >{0}<", pp.Version);
 
                     string s = sb.ToString();
-                    Assert.Equal(sb.ToString().Trim(), @"pp.Category: >(null)<, pp.ContentStatus: >(null)<, pp.ContentType: >(null)<, pp.Creator: >Eric White<, pp.Description: ><, pp.Identifier: >(null)<, pp.Keywords: ><, pp.Language: >(null)<, pp.LastModifiedBy: >Eric White<, pp.LastPrinted: >(null)<, pp.Revision: >2<, pp.Subject: ><, pp.Title: ><, pp.Version: >(null)<,");
+                    Assert.Equal(@"pp.Category: >(null)<, pp.ContentStatus: >(null)<, pp.ContentType: >(null)<, pp.Creator: >Eric White<, pp.Description: ><, pp.Identifier: >(null)<, pp.Keywords: ><, pp.Language: >(null)<, pp.LastModifiedBy: >Eric White<, pp.LastPrinted: >(null)<, pp.Revision: >2<, pp.Subject: ><, pp.Title: ><, pp.Version: >(null)<,", sb.ToString().Trim());
 
                     pp.Category = "Category";
                     pp.ContentStatus = "ContentStatus";
@@ -1403,7 +1403,7 @@ namespace System.IO.Packaging.Tests
                     sb.AppendFormatComma("pp.Version: >{0}<", pp.Version);
 
                     s = sb.ToString();
-                    Assert.Equal(sb.ToString().Trim(), @"pp.Category: >Category<, pp.ContentStatus: >ContentStatus<, pp.ContentType: >ContentType<, pp.Creator: >Creator<, pp.Description: >Description<, pp.Identifier: >Identifier<, pp.Keywords: >Keywords<, pp.Language: >Language<, pp.LastModifiedBy: >LastModifiedBy<, pp.Revision: >Revision<, pp.Subject: >Subject<, pp.Title: >Title<, pp.Version: >Version<,");
+                    Assert.Equal(@"pp.Category: >Category<, pp.ContentStatus: >ContentStatus<, pp.ContentType: >ContentType<, pp.Creator: >Creator<, pp.Description: >Description<, pp.Identifier: >Identifier<, pp.Keywords: >Keywords<, pp.Language: >Language<, pp.LastModifiedBy: >LastModifiedBy<, pp.Revision: >Revision<, pp.Subject: >Subject<, pp.Title: >Title<, pp.Version: >Version<,", sb.ToString().Trim());
 
                 }
             }
@@ -2084,15 +2084,15 @@ namespace System.IO.Packaging.Tests
             using (Package package = Package.Open(fiGuidName.FullName, FileMode.Open))
             using (PackageProperties pp = package.PackageProperties)
             {
-                Assert.Equal(pp.Category, "Test-Category");
-                Assert.Equal(pp.ContentStatus, "Test-Status");
+                Assert.Equal("Test-Category", pp.Category);
+                Assert.Equal("Test-Status", pp.ContentStatus);
                 Assert.Null(pp.ContentType);
-                Assert.Equal(pp.Creator, "Eric White");
-                Assert.Equal(pp.Description, "Test-Comments");
+                Assert.Equal("Eric White", pp.Creator);
+                Assert.Equal("Test-Comments", pp.Description);
                 Assert.Null(pp.Identifier);
                 Assert.Null(pp.Language);
-                Assert.Equal(pp.Subject, "Test-Subject");
-                Assert.Equal(pp.Title, "Test-Title");
+                Assert.Equal("Test-Subject", pp.Subject);
+                Assert.Equal("Test-Title", pp.Title);
                 Assert.Null(pp.Version);
             }
             fiGuidName.Delete();
@@ -2111,12 +2111,12 @@ namespace System.IO.Packaging.Tests
                 Assert.Null(pp.Category);
                 Assert.Null(pp.ContentStatus);
                 Assert.Null(pp.ContentType);
-                Assert.Equal(pp.Creator, "Eric White");
-                Assert.Equal(pp.Description, "");
+                Assert.Equal("Eric White", pp.Creator);
+                Assert.Equal("", pp.Description);
                 Assert.Null(pp.Identifier);
                 Assert.Null(pp.Language);
-                Assert.Equal(pp.Subject, "");
-                Assert.Equal(pp.Title, "");
+                Assert.Equal("", pp.Subject);
+                Assert.Equal("", pp.Title);
                 Assert.Null(pp.Version);
             }
             fiGuidName.Delete();
@@ -2407,7 +2407,7 @@ namespace System.IO.Packaging.Tests
             {
                 var parts = package.GetParts();
                 var numberOfParts = parts.Count();
-                Assert.Equal(numberOfParts, 10);
+                Assert.Equal(10, numberOfParts);
                 long sumLen = 0;
                 foreach (var part in parts)
                 {
@@ -2418,7 +2418,7 @@ namespace System.IO.Packaging.Tests
                     }
                     sumLen += len;
                 }
-                Assert.Equal(sumLen, 44768);
+                Assert.Equal(44768, sumLen);
             }
             fiGuidName.Delete();
         }
@@ -3224,13 +3224,12 @@ namespace System.IO.Packaging.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop doesn't support Package.Open with FileAccess.Write and FileMode.CreateNew")]
         public void T113_String_CreateNew_Write_Open_Read()
         {
             var tempGuidName = GetTempFileInfoWithExtension(".docx");
-            AssertExtensions.Throws<ArgumentException>(null, () =>
-            {
-                Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.Write);
-            });
+            Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.Write);
+            package.Close();
             tempGuidName.Delete();
         }
 
@@ -3238,7 +3237,7 @@ namespace System.IO.Packaging.Tests
         public void T112_String_CreateNew_Read_Create_Read()
         {
             var tempGuidName = GetTempFileInfoWithExtension(".docx");
-            AssertExtensions.Throws<ArgumentException>(null, () =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 Package package = Package.Open(tempGuidName.FullName, FileMode.CreateNew, FileAccess.Read);
             });
@@ -3246,11 +3245,13 @@ namespace System.IO.Packaging.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop doesn't support Package.Open with FileAccess.Write and FileMode.Create")]
         public void T111_String_Create_Write_Star()
         {
             var tempGuidName = GetTempFileInfoWithExtension(".docx");
             // opening the package attempts to read the package, and no permissions.
-            AssertExtensions.Throws<ArgumentException>(null, () => Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.Write));
+            Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.Write);
+            package.Close();
             tempGuidName.Delete();
         }
 
@@ -3538,7 +3539,7 @@ namespace System.IO.Packaging.Tests
         public void T100_String_Create_Read_Star()
         {
             var tempGuidName = GetTempFileInfoWithExtension(".docx");
-            AssertExtensions.Throws<ArgumentException>(null, () =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 Package package = Package.Open(tempGuidName.FullName, FileMode.Create, FileAccess.Read);
             });
@@ -3694,6 +3695,7 @@ namespace System.IO.Packaging.Tests
             }
         }
 
+        [ActiveIssue(39075)]
         [Fact]
         [OuterLoop]
         public void VeryLargePart()
@@ -3769,7 +3771,7 @@ namespace System.IO.Packaging.Tests
 
             Assert.NotNull(part);
             Assert.Equal(part.Uri, partUri);
-            Assert.IsType(typeof(MockPackagePart), part);
+            Assert.IsType<MockPackagePart>(part);
 
             // Validate we get the same object back if we call GetPart again
             Assert.Same(part, mockPackage.GetPart(partUri));
@@ -3792,12 +3794,21 @@ namespace System.IO.Packaging.Tests
             Uri returnedPackageUri = PackUriHelper.GetPackageUri(combinedUri);
             Uri returnedSamePackageUri = PackUriHelper.GetPackageUri(sameCombinedUri);
 
-            // Validate the PackageUri returned from PackUriHelper.GetPackageHelper matches what was given to PackUriHelper.Create
+            // Validate the PackageUri returned from PackUriHelper.GetPackageUri matches what was given to PackUriHelper.Create
             Assert.Equal(packageUri, returnedPackageUri);
             Assert.Equal(packageUri, returnedSamePackageUri);
 
             // Validate PackUriHelper.ComparePackUri correctly validates identical pack uri's.
             Assert.Equal(0, PackUriHelper.ComparePackUri(combinedUri, sameCombinedUri));
+
+            // Validate the PackageUri returned from PackUriHelper.GetPartUri matches what was given to PackUriHelper.Create
+            Uri returnedPartUri = PackUriHelper.GetPartUri(combinedUri);
+            Uri returnedSamePartUri = PackUriHelper.GetPartUri(sameCombinedUri);
+            Assert.Equal(partUri, returnedPartUri);
+            Assert.Equal(partUri, returnedSamePartUri);
+
+            // Validate PackUriHelper.ComparePartUri correctly validates identical pack uri's.
+            Assert.Equal(0, PackUriHelper.ComparePartUri(partUri, returnedPartUri));
         }
 
         [Fact]
@@ -3830,6 +3841,16 @@ namespace System.IO.Packaging.Tests
             Assert.NotEqual(0, PackUriHelper.ComparePackUri(combinedUriWithPart, combinedUriWithDifferentPart));
             Assert.NotEqual(0, PackUriHelper.ComparePackUri(combinedUriWithPart, combinedUriNoPart));
             Assert.NotEqual(0, PackUriHelper.ComparePackUri(combinedUriNoPart, combinedUriWithDifferentPart));
+
+            Uri returnedPartUri = PackUriHelper.GetPartUri(combinedUriWithPart);
+            Uri returnedPartUriDifferentPart = PackUriHelper.GetPartUri(combinedUriWithDifferentPart);
+
+            // Validate the PartUri returned from PackUriHelper.GetPartHelper matches what was given to PackUriHelper.Create
+            Assert.Equal(partUri, returnedPartUri);
+            Assert.Equal(differentPartUri, returnedPartUriDifferentPart);
+
+            // Validate the two different parts are considered different
+            Assert.NotEqual(0, PackUriHelper.ComparePartUri(partUri, differentPartUri));
         }
 
         [Fact]
@@ -3860,6 +3881,14 @@ namespace System.IO.Packaging.Tests
             // Validate PackUriHelper.ComparePackUri correctly compares pack uri's with different packages.
             Assert.NotEqual(0, PackUriHelper.ComparePackUri(packageUriWithPart, differentPackageSamePart));
             Assert.NotEqual(0, PackUriHelper.ComparePackUri(samePackageNoPart, differentPackageSamePart));
+
+            Uri returnedPartUri = PackUriHelper.GetPartUri(packageUriWithPart);
+            Uri returnedPartUriDifferentPackage = PackUriHelper.GetPartUri(differentPackageSamePart);
+            Assert.Equal(returnedPartUri, returnedPartUriDifferentPackage);
+            Assert.Equal(partUri, returnedPartUri);
+
+            // Validate the two parts are considered the same
+            Assert.Equal(0, PackUriHelper.ComparePartUri(returnedPartUri, returnedPartUriDifferentPackage));
         }
 
         [Fact]

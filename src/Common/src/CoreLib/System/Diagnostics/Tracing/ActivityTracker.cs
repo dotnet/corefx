@@ -269,15 +269,32 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         private string NormalizeActivityName(string providerName, string activityName, int task)
         {
-            if (activityName.EndsWith(EventSource.s_ActivityStartSuffix, StringComparison.Ordinal))
-                activityName = activityName.Substring(0, activityName.Length - EventSource.s_ActivityStartSuffix.Length);
-            else if (activityName.EndsWith(EventSource.s_ActivityStopSuffix, StringComparison.Ordinal))
-                activityName = activityName.Substring(0, activityName.Length - EventSource.s_ActivityStopSuffix.Length);
-            else if (task != 0)
-                activityName = "task" + task.ToString();
-
             // We use provider name to distinguish between activities from different providers.
-            return providerName + activityName;
+
+            if (activityName.EndsWith(EventSource.s_ActivityStartSuffix, StringComparison.Ordinal))
+            {
+#if ES_BUILD_STANDALONE
+                return string.Concat(providerName, activityName.Substring(0, activityName.Length - EventSource.s_ActivityStartSuffix.Length));
+#else
+                return string.Concat(providerName, activityName.AsSpan(0, activityName.Length - EventSource.s_ActivityStartSuffix.Length));
+#endif
+            }
+            else if (activityName.EndsWith(EventSource.s_ActivityStopSuffix, StringComparison.Ordinal))
+            {
+#if ES_BUILD_STANDALONE
+                return string.Concat(providerName, activityName.Substring(0, activityName.Length - EventSource.s_ActivityStopSuffix.Length));
+#else
+                return string.Concat(providerName, activityName.AsSpan(0, activityName.Length - EventSource.s_ActivityStopSuffix.Length));
+#endif
+            }
+            else if (task != 0)
+            {
+                return providerName + "task" + task.ToString();
+            }
+            else
+            {
+                return providerName + activityName;
+            }
         }
 
         // *******************************************************************************
@@ -532,16 +549,16 @@ namespace System.Diagnostics.Tracing
 
             #endregion // CreateGuidForActivityPath
 
-            readonly internal string m_name;                        // The name used in the 'start' and 'stop' APIs to help match up
-            readonly long m_uniqueId;                               // a small number that makes this activity unique among its siblings
+            internal readonly string m_name;                        // The name used in the 'start' and 'stop' APIs to help match up
+            private readonly long m_uniqueId;                               // a small number that makes this activity unique among its siblings
             internal readonly Guid m_guid;                          // Activity Guid, it is basically an encoding of the Path() (see CreateActivityPathGuid)
             internal readonly int m_activityPathGuidOffset;         // Keeps track of where in m_guid the causality path stops (used to generated child GUIDs)
             internal readonly int m_level;                          // current depth of the Path() of the activity (used to keep recursion under control)
-            readonly internal EventActivityOptions m_eventOptions;  // Options passed to start. 
+            internal readonly EventActivityOptions m_eventOptions;  // Options passed to start. 
             internal long m_lastChildID;                            // used to create a unique ID for my children activities
             internal int m_stopped;                                 // This work item has stopped
-            readonly internal ActivityInfo? m_creator;               // My parent (creator).  Forms the Path() for the activity.
-            readonly internal Guid m_activityIdToRestore;           // The Guid to restore after a stop.
+            internal readonly ActivityInfo? m_creator;               // My parent (creator).  Forms the Path() for the activity.
+            internal readonly Guid m_activityIdToRestore;           // The Guid to restore after a stop.
             #endregion
         }
 

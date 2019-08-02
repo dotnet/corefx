@@ -494,7 +494,7 @@ namespace System.Threading
 
         internal bool LocalFindAndPop(object callback)
         {
-            ThreadPoolWorkQueueThreadLocals tl = ThreadPoolWorkQueueThreadLocals.threadLocals;
+            ThreadPoolWorkQueueThreadLocals? tl = ThreadPoolWorkQueueThreadLocals.threadLocals;
             return tl != null && tl.workStealingQueue.LocalFindAndPop(callback);
         }
 
@@ -728,7 +728,7 @@ namespace System.Threading
     internal sealed class ThreadPoolWorkQueueThreadLocals
     {
         [ThreadStatic]
-        public static ThreadPoolWorkQueueThreadLocals threadLocals;
+        public static ThreadPoolWorkQueueThreadLocals? threadLocals;
 
         public readonly ThreadPoolWorkQueue workQueue;
         public readonly ThreadPoolWorkQueue.WorkStealingQueue workStealingQueue;
@@ -770,11 +770,12 @@ namespace System.Threading
     internal abstract class QueueUserWorkItemCallbackBase : IThreadPoolWorkItem
     {
 #if DEBUG
-        private volatile int executed;
+        private int executed;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1821:RemoveEmptyFinalizers")]
         ~QueueUserWorkItemCallbackBase()
         {
+            Interlocked.MemoryBarrier(); // ensure that an old cached value is not read below
             Debug.Assert(
                 executed != 0, "A QueueUserWorkItemCallback was never called!");
         }
@@ -926,15 +927,15 @@ namespace System.Threading
             }
         }
 
-        private static void WaitOrTimerCallback_Context_t(object state) =>
+        private static void WaitOrTimerCallback_Context_t(object? state) =>
             WaitOrTimerCallback_Context(state, timedOut: true);
 
-        private static void WaitOrTimerCallback_Context_f(object state) =>
+        private static void WaitOrTimerCallback_Context_f(object? state) =>
             WaitOrTimerCallback_Context(state, timedOut: false);
 
-        private static void WaitOrTimerCallback_Context(object state, bool timedOut)
+        private static void WaitOrTimerCallback_Context(object? state, bool timedOut)
         {
-            _ThreadPoolWaitOrTimerCallback helper = (_ThreadPoolWaitOrTimerCallback)state;
+            _ThreadPoolWaitOrTimerCallback helper = (_ThreadPoolWaitOrTimerCallback)state!;
             helper._waitOrTimerCallback(helper._state, timedOut);
         }
 
@@ -1230,7 +1231,7 @@ namespace System.Threading
 
         internal static IEnumerable<object> GetLocallyQueuedWorkItems()
         {
-            ThreadPoolWorkQueue.WorkStealingQueue wsq = ThreadPoolWorkQueueThreadLocals.threadLocals.workStealingQueue;
+            ThreadPoolWorkQueue.WorkStealingQueue? wsq = ThreadPoolWorkQueueThreadLocals.threadLocals?.workStealingQueue;
             if (wsq != null && wsq.m_array != null)
             {
                 object?[] items = wsq.m_array;

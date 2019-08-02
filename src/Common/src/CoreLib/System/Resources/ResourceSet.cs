@@ -29,7 +29,7 @@ namespace System.Resources
     public class ResourceSet : IDisposable, IEnumerable
     {
         protected IResourceReader Reader = null!;
-        internal Hashtable? Table; // TODO-NULLABLE: should not be nulled out in Dispose
+        internal Hashtable? Table; // TODO-NULLABLE: Avoid nulling out in Dispose
 
         private Hashtable? _caseInsensitiveTable;  // For case-insensitive lookups.
 
@@ -92,11 +92,11 @@ namespace System.Resources
             {
                 // Close the Reader in a thread-safe way.
                 IResourceReader? copyOfReader = Reader;
-                Reader = null!; // TODO-NULLABLE: should not be nulled out in the Dispose
+                Reader = null!; // TODO-NULLABLE: Avoid nulling out in Dispose
                 if (copyOfReader != null)
                     copyOfReader.Close();
             }
-            Reader = null!; // TODO-NULLABLE: should not be nulled out in the Dispose
+            Reader = null!; // TODO-NULLABLE: Avoid nulling out in Dispose
             _caseInsensitiveTable = null;
             Table = null;
         }
@@ -120,7 +120,7 @@ namespace System.Resources
         public virtual Type GetDefaultWriter()
         {
             Assembly resourceWriterAssembly = Assembly.Load("System.Resources.Writer, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
-            return resourceWriterAssembly.GetType("System.Resources.ResourceWriter", true);
+            return resourceWriterAssembly.GetType("System.Resources.ResourceWriter", throwOnError: true)!;
         }
 
         public virtual IDictionaryEnumerator GetEnumerator()

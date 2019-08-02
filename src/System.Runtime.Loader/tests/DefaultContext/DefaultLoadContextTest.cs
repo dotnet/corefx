@@ -44,7 +44,6 @@ namespace System.Runtime.Loader.Tests
         }
     }
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "AssemblyLoadContext not supported on .NET Native")]
     public class DefaultLoadContextTests
     {
         private const string TestAssemblyName = "System.Runtime.Loader.Noop.Assembly";
@@ -91,7 +90,7 @@ namespace System.Runtime.Loader.Tests
             var assemblyName = new AssemblyName(TestAssemblyName);
 
             // By default, the assembly should not be found in DefaultContext at all
-            Assert.Throws(typeof(FileNotFoundException), () => Assembly.Load(assemblyName));
+            Assert.Throws<FileNotFoundException>(() => Assembly.Load(assemblyName));
 
             // Create a secondary load context and wireup its resolving event
             SecondaryLoadContext slc = new SecondaryLoadContext();
@@ -180,11 +179,10 @@ namespace System.Runtime.Loader.Tests
         public static void LoadNonExistentInDefaultContext()
         {
             // Now, try to load an assembly that does not exist
-            Assert.Throws(typeof(FileNotFoundException), 
-                () => AssemblyLoadContext.Default.LoadFromAssemblyName(new AssemblyName("System.Runtime.Loader.NonExistent.Assembly")));
+            Assert.Throws<FileNotFoundException>(() => AssemblyLoadContext.Default.LoadFromAssemblyName(new AssemblyName("System.Runtime.Loader.NonExistent.Assembly")));
         }
 
-        public void DefaultContextFallback()
+        private void DefaultContextFallback()
         {
             var lcDefault = AssemblyLoadContext.Default;
             
@@ -239,7 +237,7 @@ namespace System.Runtime.Loader.Tests
             Assert.Equal(typeof(FileNotFoundException), ex.GetType());
         }
 
-        public void DefaultContextOverrideTPA()
+        private void DefaultContextOverrideTPA()
         {
             var lcDefault = AssemblyLoadContext.Default;
             
@@ -268,7 +266,7 @@ namespace System.Runtime.Loader.Tests
             // Confirm assembly did not load from DefaultContext
             Assert.NotEqual(lcDefault, loadedContext);
             Assert.Equal(olc, loadedContext);
-            Assert.Equal(true, olc.LoadedFromContext);
+            Assert.True(olc.LoadedFromContext);
 
             // Now, do the same for an assembly that we explicitly had loaded in DefaultContext
             // in the caller of this method and ALSO loaded in the current load context. We should get it from our LoadContext,
@@ -281,7 +279,7 @@ namespace System.Runtime.Loader.Tests
             // Confirm assembly loaded from the intended LoadContext
             Assert.NotEqual(lcDefault, loadedContext);
             Assert.Equal(olc, loadedContext);
-            Assert.Equal(false, olc.LoadedFromContext);
+            Assert.False(olc.LoadedFromContext);
         }
     }
 }

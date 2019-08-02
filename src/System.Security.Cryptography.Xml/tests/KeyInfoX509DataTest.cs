@@ -4,7 +4,7 @@
 // KeyInfoX509DataTest.cs - Test Cases for KeyInfoX509Data
 //
 // Author:
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // (C) 2002, 2003 Motus Technologies Inc. (http://www.motus.com)
 // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
@@ -75,7 +75,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Null(data.IssuerSerials);
             Assert.Null(data.SubjectKeyIds);
             Assert.Null(data.SubjectNames);
-            Assert.Equal(data.GetXml().OuterXml, "<X509Data xmlns=\"http://www.w3.org/2000/09/xmldsig#\" />");
+            Assert.Equal("<X509Data xmlns=\"http://www.w3.org/2000/09/xmldsig#\" />", data.GetXml().OuterXml);
         }
 
         [Fact]

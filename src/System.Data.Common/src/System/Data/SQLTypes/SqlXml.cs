@@ -19,10 +19,8 @@ namespace System.Data.SqlTypes
         private static readonly Func<Stream, XmlReaderSettings, XmlParserContext, XmlReader> s_sqlReaderDelegate = CreateSqlReaderDelegate();
         private static readonly XmlReaderSettings s_defaultXmlReaderSettings = new XmlReaderSettings() { ConformanceLevel = ConformanceLevel.Fragment };
         private static readonly XmlReaderSettings s_defaultXmlReaderSettingsCloseInput = new XmlReaderSettings() { ConformanceLevel = ConformanceLevel.Fragment, CloseInput = true };
-#if !uapaot
         private static MethodInfo s_createSqlReaderMethodInfo;
         private MethodInfo _createSqlReaderMethodInfo;
-#endif
 
         private bool _fNotNull; // false if null, the default ctor (plain 0) will make it Null
         private Stream _stream;
@@ -42,7 +40,7 @@ namespace System.Data.SqlTypes
 
         public SqlXml(XmlReader value)
         {
-            // whoever pass in the XmlReader is responsible for closing it			  
+            // whoever pass in the XmlReader is responsible for closing it
             if (value == null)
             {
                 SetNull();
@@ -86,14 +84,12 @@ namespace System.Data.SqlTypes
                 stream.Seek(0, SeekOrigin.Begin);
             }
 
-#if !uapaot
             // NOTE: Maintaining createSqlReaderMethodInfo private field member to preserve the serialization of the class
             if (_createSqlReaderMethodInfo == null)
             {
                 _createSqlReaderMethodInfo = CreateSqlReaderMethodInfo;
             }
             Debug.Assert(_createSqlReaderMethodInfo != null, "MethodInfo reference for XmlReader.CreateSqlReader should not be null.");
-#endif
 
             XmlReader r = CreateSqlXmlReader(stream);
             _firstCreateReader = false;
@@ -122,9 +118,6 @@ namespace System.Data.SqlTypes
             }
         }
 
-#if uapaot
-        private static Func<Stream, XmlReaderSettings, XmlParserContext, XmlReader> CreateSqlReaderDelegate() => System.Xml.XmlReader.CreateSqlReader;
-#else
         private static Func<Stream, XmlReaderSettings, XmlParserContext, XmlReader> CreateSqlReaderDelegate()
         {
             Debug.Assert(CreateSqlReaderMethodInfo != null, "MethodInfo reference for XmlReader.CreateSqlReader should not be null.");
@@ -144,7 +137,6 @@ namespace System.Data.SqlTypes
                 return s_createSqlReaderMethodInfo;
             }
         }
-#endif
 
         // INullable
         public bool IsNull
@@ -216,7 +208,7 @@ namespace System.Data.SqlTypes
                 ww.WriteNode(reader, true);
             }
             ww.Flush();
-            // set the stream to the beginning			
+            // set the stream to the beginning
             writerStream.Seek(0, SeekOrigin.Begin);
             return writerStream;
         }
@@ -277,17 +269,17 @@ namespace System.Data.SqlTypes
         {
             return new XmlQualifiedName("anyType", XmlSchema.Namespace);
         }
-    } // SqlXml 		
+    } // SqlXml
 
     // two purposes for this class
     // 1) keep its internal position so one reader positions on the orginial stream 
-    //	  will not interface with the other
+    //    will not interface with the other
     // 2) when xmlreader calls close, do not close the orginial stream
     //
     internal sealed class SqlXmlStreamWrapper : Stream
     {
         // --------------------------------------------------------------
-        //	  Data members
+        //      Data members
         // --------------------------------------------------------------
 
         private Stream _stream;
@@ -295,7 +287,7 @@ namespace System.Data.SqlTypes
         private bool _isClosed;
 
         // --------------------------------------------------------------
-        //	  Constructor(s)
+        //      Constructor(s)
         // --------------------------------------------------------------
 
         internal SqlXmlStreamWrapper(Stream stream)
@@ -307,7 +299,7 @@ namespace System.Data.SqlTypes
         }
 
         // --------------------------------------------------------------
-        //	  Public properties
+        //      Public properties
         // --------------------------------------------------------------
 
         // Always can read/write/seek, unless stream is null, 
@@ -373,7 +365,7 @@ namespace System.Data.SqlTypes
         }
 
         // --------------------------------------------------------------
-        //	  Public methods
+        //      Public methods
         // --------------------------------------------------------------
 
         public override long Seek(long offset, SeekOrigin origin)

@@ -109,9 +109,6 @@ namespace System.Xml
         private string _xsiSchemaLocation;
         private string _xsiNoNamespaceSchemaLocation;
 
-        //XmlCharType instance
-        private XmlCharType _xmlCharType = XmlCharType.Instance;
-
         //Underlying reader's IXmlLineInfo
         private IXmlLineInfo _lineInfo;
 
@@ -1011,13 +1008,13 @@ namespace System.Xml
 
             try
             {
-                if (xmlType != null)
+                if (xmlType != null && typedValue != null)
                 {
                     return xmlType.ValueConverter.ToString(typedValue);
                 }
                 else
                 {
-                    return typedValue as string;
+                    return typedValue as string ?? string.Empty;
                 }
             }
             catch (InvalidCastException e)

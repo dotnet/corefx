@@ -4,8 +4,8 @@
 // XmlDsigC14NTransformTest.cs - Test Cases for XmlDsigC14NTransform
 //
 // Author:
-//	Sebastien Pouliot <sebastien@ximian.com>
-//	Aleksey Sanin (aleksey@aleksey.com)
+//  Sebastien Pouliot <sebastien@ximian.com>
+//  Aleksey Sanin (aleksey@aleksey.com)
 //
 // (C) 2002, 2003 Motus Technologies Inc. (http://www.motus.com)
 // (C) 2003 Aleksey Sanin (aleksey@aleksey.com)
@@ -53,7 +53,7 @@ namespace System.Security.Cryptography.Xml.Tests
             CheckProperties(transform);
         }
 
-        public void CheckProperties(XmlDsigC14NTransform transform)
+        private static void CheckProperties(XmlDsigC14NTransform transform)
         {
             Assert.Null(transform.Context);
             Assert.Equal(new[] { typeof(Stream), typeof(XmlDocument), typeof(XmlNodeList) }, transform.InputTypes);
@@ -276,7 +276,7 @@ namespace System.Security.Cryptography.Xml.Tests
                 "       <e7 xmlns=\"http://www.ietf.org\">\n" +
                 "           <e8 xmlns=\"\">\n" +
                 "               <e9 xmlns:a=\"http://www.ietf.org\" attr=\"default\"></e9>\n" +
-                //	    	        "               <e9 xmlns:a=\"http://www.ietf.org\"></e9>\n" +
+                //                    "               <e9 xmlns:a=\"http://www.ietf.org\"></e9>\n" +
                 "           </e8>\n" +
                 "       </e7>\n" +
                 "   </e6>\n" +
@@ -385,7 +385,7 @@ namespace System.Security.Cryptography.Xml.Tests
             XmlDsigC14NTransform t = new XmlDsigC14NTransform();
             t.LoadInput(doc);
             Stream s = t.GetOutput() as Stream;
-            Assert.Equal(new StreamReader(s, Encoding.UTF8).ReadToEnd(), "<foo xmlns=\"urn:foo\"><bar xmlns=\"urn:bar\"></bar></foo>");
+            Assert.Equal("<foo xmlns=\"urn:foo\"><bar xmlns=\"urn:bar\"></bar></foo>", new StreamReader(s, Encoding.UTF8).ReadToEnd());
             Assert.Equal("urn:foo", doc.DocumentElement.GetAttribute("xmlns"));
         }
 

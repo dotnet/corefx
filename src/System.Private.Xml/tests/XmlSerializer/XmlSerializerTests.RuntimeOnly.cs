@@ -22,12 +22,12 @@ public static partial class XmlSerializerTests
     [Fact]
     public static void Xml_BoolAsRoot()
     {
-        Assert.StrictEqual(SerializeAndDeserialize<bool>(true,
+        Assert.True(SerializeAndDeserialize<bool>(true,
 @"<?xml version=""1.0""?>
-<boolean>true</boolean>"), true);
-        Assert.StrictEqual(SerializeAndDeserialize<bool>(false,
+<boolean>true</boolean>"));
+        Assert.False(SerializeAndDeserialize<bool>(false,
 @"<?xml version=""1.0""?>
-<boolean>false</boolean>"), false);
+<boolean>false</boolean>"));
     }
 
     [Fact]
@@ -52,23 +52,23 @@ public static partial class XmlSerializerTests
         Assert.StrictEqual(SerializeAndDeserialize<char>(char.MaxValue,
 @"<?xml version=""1.0""?>
 <char>65535</char>"), char.MaxValue);
-        Assert.StrictEqual(SerializeAndDeserialize<char>('a',
+        Assert.StrictEqual('a', SerializeAndDeserialize<char>('a',
 @"<?xml version=""1.0""?>
-<char>97</char>"), 'a');
-        Assert.StrictEqual(SerializeAndDeserialize<char>('ñ',
+<char>97</char>"));
+        Assert.StrictEqual('\u00F1', SerializeAndDeserialize<char>('\u00F1',
 @"<?xml version=""1.0""?>
-<char>241</char>"), 'ñ');
-        Assert.StrictEqual(SerializeAndDeserialize<char>('漢',
+<char>241</char>"));
+        Assert.StrictEqual('\u6F22', SerializeAndDeserialize<char>('\u6F22',
 @"<?xml version=""1.0""?>
-<char>28450</char>"), '漢');
+<char>28450</char>"));
     }
 
     [Fact]
     public static void Xml_ByteAsRoot()
     {
-        Assert.StrictEqual(SerializeAndDeserialize<byte>(10,
+        Assert.StrictEqual(10, SerializeAndDeserialize<byte>(10,
 @"<?xml version=""1.0""?>
-<unsignedByte>10</unsignedByte>"), 10);
+<unsignedByte>10</unsignedByte>"));
         Assert.StrictEqual(SerializeAndDeserialize<byte>(byte.MinValue,
 @"<?xml version=""1.0""?>
 <unsignedByte>0</unsignedByte>"), byte.MinValue);
@@ -119,12 +119,12 @@ public static partial class XmlSerializerTests
         Assert.StrictEqual(SerializeAndDeserialize<double>(-1.2,
 @"<?xml version=""1.0""?>
 <double>-1.2</double>"), -1.2);
-        Assert.StrictEqual(SerializeAndDeserialize<double>(0,
+        Assert.StrictEqual(0, SerializeAndDeserialize<double>(0,
 @"<?xml version=""1.0""?>
-<double>0</double>"), 0);
-        Assert.StrictEqual(SerializeAndDeserialize<double>(2.3,
+<double>0</double>"));
+        Assert.StrictEqual(2.3, SerializeAndDeserialize<double>(2.3,
 @"<?xml version=""1.0""?>
-<double>2.3</double>"), 2.3);
+<double>2.3</double>"));
         Assert.StrictEqual(SerializeAndDeserialize<double>(double.MinValue,
 @"<?xml version=""1.0""?>
 <double>-1.7976931348623157E+308</double>"), double.MinValue);
@@ -148,19 +148,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-    public static void Xml_FloatAsRoot_NetFramework()
-    {
-        Assert.StrictEqual(SerializeAndDeserialize<float>(float.MinValue,
-@"<?xml version=""1.0""?>
-<float>-3.40282347E+38</float>"), float.MinValue);
-        Assert.StrictEqual(SerializeAndDeserialize<float>(float.MaxValue,
-@"<?xml version=""1.0""?>
-<float>3.40282347E+38</float>"), float.MaxValue);
-    }
-
-    [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
     public static void Xml_FloatAsRoot_NotNetFramework()
     {
         Assert.StrictEqual(SerializeAndDeserialize<float>(float.MinValue,
@@ -209,17 +196,17 @@ public static partial class XmlSerializerTests
     [Fact]
     public static void Xml_ObjectAsRoot()
     {
-        Assert.StrictEqual(SerializeAndDeserialize<object>(1,
+        Assert.StrictEqual(1, SerializeAndDeserialize<object>(1,
 @"<?xml version=""1.0""?>
-<anyType xmlns:q1=""http://www.w3.org/2001/XMLSchema"" d1p1:type=""q1:int"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"">1</anyType>"), 1);
-        Assert.StrictEqual(SerializeAndDeserialize<object>(true,
+<anyType xmlns:q1=""http://www.w3.org/2001/XMLSchema"" d1p1:type=""q1:int"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"">1</anyType>"));
+        Assert.StrictEqual(true, SerializeAndDeserialize<object>(true,
 @"<?xml version=""1.0""?>
-<anyType xmlns:q1=""http://www.w3.org/2001/XMLSchema"" d1p1:type=""q1:boolean"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"">true</anyType>"), true);
-        Assert.StrictEqual(SerializeAndDeserialize<object>("abc",
+<anyType xmlns:q1=""http://www.w3.org/2001/XMLSchema"" d1p1:type=""q1:boolean"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"">true</anyType>"));
+        Assert.StrictEqual("abc", SerializeAndDeserialize<object>("abc",
 @"<?xml version=""1.0""?>
-<anyType xmlns:q1=""http://www.w3.org/2001/XMLSchema"" d1p1:type=""q1:string"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"">abc</anyType>"), "abc");
-        Assert.StrictEqual(SerializeAndDeserialize<object>(null,
-@"<?xml version=""1.0""?><anyType xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:nil=""true"" />"), null);
+<anyType xmlns:q1=""http://www.w3.org/2001/XMLSchema"" d1p1:type=""q1:string"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"">abc</anyType>"));
+        Assert.Null(SerializeAndDeserialize<object>(null,
+@"<?xml version=""1.0""?><anyType xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:nil=""true"" />"));
     }
 
     [Fact]
@@ -255,24 +242,24 @@ public static partial class XmlSerializerTests
     [Fact]
     public static void Xml_StringAsRoot()
     {
-        Assert.StrictEqual(SerializeAndDeserialize<string>("abc",
+        Assert.Equal("abc", SerializeAndDeserialize<string>("abc",
 @"<?xml version=""1.0""?>
-<string>abc</string>"), "abc");
-        Assert.StrictEqual(SerializeAndDeserialize<string>("  a b  ",
+<string>abc</string>"));
+        Assert.Equal("  a b  ", SerializeAndDeserialize<string>("  a b  ",
 @"<?xml version=""1.0""?>
-<string>  a b  </string>"), "  a b  ");
-        Assert.StrictEqual(SerializeAndDeserialize<string>(null,
+<string>  a b  </string>"));
+        Assert.Null(SerializeAndDeserialize<string>(null,
 @"<?xml version=""1.0""?>
-<string d1p1:nil=""true"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"" />"), null);
-        Assert.StrictEqual(SerializeAndDeserialize<string>("",
+<string d1p1:nil=""true"" xmlns:d1p1=""http://www.w3.org/2001/XMLSchema-instance"" />"));
+        Assert.Equal("", SerializeAndDeserialize<string>("",
 @"<?xml version=""1.0""?>
-<string />"), "");
-        Assert.StrictEqual(SerializeAndDeserialize<string>(" ",
+<string />"));
+        Assert.Equal(SerializeAndDeserialize<string>(" ",
 @"<?xml version=""1.0""?>
 <string> </string>"), string.Empty);
-        Assert.StrictEqual(SerializeAndDeserialize<string>("Hello World! 漢 ñ",
+        Assert.Equal("Hello World! \u6F22 \u00F1", SerializeAndDeserialize<string>("Hello World! \u6F22 \u00F1",
 @"<?xml version=""1.0""?>
-<string>Hello World! 漢 ñ</string>"), "Hello World! 漢 ñ");
+<string>Hello World! 漢 ñ</string>"));
     }
 
     [Fact]
@@ -384,7 +371,7 @@ public static partial class XmlSerializerTests
         Assert.True(y.Count == 2);
 
         string itemsInY = string.Join("", y);
-        Assert.StrictEqual("a1a2", itemsInY);
+        Assert.Equal("a1a2", itemsInY);
     }
 
     [Fact]
@@ -468,12 +455,12 @@ public static partial class XmlSerializerTests
 
     private static void VerifyXElementObject(XElement x1, XElement x2, bool checkFirstAttribute = true)
     {
-        Assert.StrictEqual(x1.Value, x2.Value);
+        Assert.Equal(x1.Value, x2.Value);
         Assert.StrictEqual(x1.Name, x2.Name);
         if (checkFirstAttribute)
         {
             Assert.StrictEqual(x1.FirstAttribute.Name, x2.FirstAttribute.Name);
-            Assert.StrictEqual(x1.FirstAttribute.Value, x2.FirstAttribute.Value);
+            Assert.Equal(x1.FirstAttribute.Value, x2.FirstAttribute.Value);
         }
     }
 
@@ -655,12 +642,12 @@ public static partial class XmlSerializerTests
     [Fact]
     public static void Xml_DefaultNamespaceChangeTest()
     {
-        Assert.StrictEqual(
+        Assert.Equal(
+        "Teststring",
         SerializeAndDeserialize<string>("Teststring",
 @"<?xml version=""1.0""?>
 <string xmlns=""MycustomDefaultNamespace"">Teststring</string>",
-        () => { return new XmlSerializer(typeof(string), "MycustomDefaultNamespace"); }),
-        "Teststring");
+        () => { return new XmlSerializer(typeof(string), "MycustomDefaultNamespace"); }));
     }
 
     [Fact]
@@ -674,7 +661,7 @@ public static partial class XmlSerializerTests
   <P2>11</P2>
 </SimpleType>",
         () => { return new XmlSerializer(typeof(SimpleType), "MycustomDefaultNamespace"); });
-        Assert.StrictEqual(value.P1, o.P1);
+        Assert.Equal(value.P1, o.P1);
         Assert.StrictEqual(value.P2, o.P2);
     }
 
@@ -691,7 +678,7 @@ public static partial class XmlSerializerTests
   <P2>11</P2>
 </SimpleType>",
             () => { return new XmlSerializer(typeof(SimpleType), "MycustomDefaultNamespace"); }, xns: xns);
-        Assert.StrictEqual(value.P1, o.P1);
+        Assert.Equal(value.P1, o.P1);
         Assert.StrictEqual(value.P2, o.P2);
     }
 
@@ -760,8 +747,8 @@ public static partial class XmlSerializerTests
   <header>foo</header>
   <body>bar</body>
 </Envelope>");
-        Assert.StrictEqual(original.header, actual.header);
-        Assert.StrictEqual(original.body, actual.body);
+        Assert.Equal(original.header, actual.header);
+        Assert.Equal(original.body, actual.body);
     }
 
     [Fact]
@@ -777,8 +764,8 @@ public static partial class XmlSerializerTests
   <body>bar</body>
 </Envelope>");
 
-        Assert.StrictEqual(original.header, actual.header);
-        Assert.StrictEqual(original.body, actual.body);
+        Assert.Equal(original.header, actual.header);
+        Assert.Equal(original.body, actual.body);
         Assert.NotNull(actual.xmlns);
         Assert.Contains(ns, actual.xmlns.ToArray());
     }
@@ -803,7 +790,7 @@ public static partial class XmlSerializerTests
         var actual = SerializeAndDeserialize(expected,
 @"<?xml version=""1.0"" encoding=""utf-8""?><Element>Element innertext</Element>");
         Assert.NotNull(actual);
-        Assert.StrictEqual(expected.InnerText, actual.InnerText);
+        Assert.Equal(expected.InnerText, actual.InnerText);
     }
 
     [Fact]
@@ -814,7 +801,7 @@ public static partial class XmlSerializerTests
         var actual = SerializeAndDeserialize(expected,
 @"<?xml version=""1.0"" encoding=""utf-8""?><html><head>Head content</head><body><h1>Heading1</h1><div>Text in body</div></body></html>");
         Assert.NotNull(actual);
-        Assert.StrictEqual(expected.OuterXml, actual.OuterXml);
+        Assert.Equal(expected.OuterXml, actual.OuterXml);
     }
 
     [Fact]
@@ -850,15 +837,15 @@ public static partial class XmlSerializerTests
   </AnotherStringList>
 </TypeWithListPropertiesWithoutPublicSetters>");
         Assert.StrictEqual(value.PropertyWithXmlElementAttribute.Count, actual.PropertyWithXmlElementAttribute.Count);
-        Assert.StrictEqual(value.PropertyWithXmlElementAttribute[0], actual.PropertyWithXmlElementAttribute[0]);
-        Assert.StrictEqual(value.PropertyWithXmlElementAttribute[1], actual.PropertyWithXmlElementAttribute[1]);
+        Assert.Equal(value.PropertyWithXmlElementAttribute[0], actual.PropertyWithXmlElementAttribute[0]);
+        Assert.Equal(value.PropertyWithXmlElementAttribute[1], actual.PropertyWithXmlElementAttribute[1]);
         Assert.StrictEqual(value.IntList.Count, actual.IntList.Count);
         Assert.StrictEqual(value.IntList[0], actual.IntList[0]);
         Assert.StrictEqual(value.StringList.Count, actual.StringList.Count);
-        Assert.StrictEqual(value.StringList[0], actual.StringList[0]);
-        Assert.StrictEqual(value.StringList[1], actual.StringList[1]);
+        Assert.Equal(value.StringList[0], actual.StringList[0]);
+        Assert.Equal(value.StringList[1], actual.StringList[1]);
         Assert.StrictEqual(value.AnotherStringList.Count, actual.AnotherStringList.Count);
-        Assert.StrictEqual(value.AnotherStringList[0], actual.AnotherStringList[0]);
+        Assert.Equal(value.AnotherStringList[0], actual.AnotherStringList[0]);
         Assert.StrictEqual(value.PublicIntListField[0], actual.PublicIntListField[0]);
         Assert.StrictEqual(value.PublicIntListFieldWithXmlElementAttribute[0], actual.PublicIntListFieldWithXmlElementAttribute[0]);
     }
@@ -879,7 +866,7 @@ public static partial class XmlSerializerTests
 </ArrayOfBridgeGameHighScore>");
         Assert.StrictEqual(1, actual.Count);
         Assert.StrictEqual(value[0].Id, actual[0].Id);
-        Assert.StrictEqual(value[0].Name, actual[0].Name);
+        Assert.Equal(value[0].Name, actual[0].Name);
     }
 
     [Fact]
@@ -899,8 +886,8 @@ public static partial class XmlSerializerTests
   </LevelData>
 </ArrayOfLevelData>");
         Assert.StrictEqual(2, actual.Count);
-        Assert.StrictEqual(value[0].Name, actual[0].Name);
-        Assert.StrictEqual(value[1].Name, actual[1].Name);
+        Assert.Equal(value[0].Name, actual[0].Name);
+        Assert.Equal(value[1].Name, actual[1].Name);
     }
 
     [Fact]
@@ -920,8 +907,8 @@ public static partial class XmlSerializerTests
   </LevelData>
 </ArrayOfLevelData>");
         Assert.StrictEqual(2, actual.Count);
-        Assert.StrictEqual(value[0].Name, actual[0].Name);
-        Assert.StrictEqual(value[1].Name, actual[1].Name);
+        Assert.Equal(value[0].Name, actual[0].Name);
+        Assert.Equal(value[1].Name, actual[1].Name);
     }
 
     [Fact]
@@ -958,12 +945,12 @@ public static partial class XmlSerializerTests
         stream.Seek(0, SeekOrigin.Begin);
         List<SerializableSlide> actual = (List<SerializableSlide>)serializer.Deserialize(stream);
         Assert.StrictEqual(2, actual.Count);
-        Assert.StrictEqual("SecondAdventureImage", actual[0].ImageName);
+        Assert.Equal("SecondAdventureImage", actual[0].ImageName);
         Assert.StrictEqual(SlideEventType.LaunchSection, actual[0].EventType);
-        Assert.StrictEqual("Adventures.Episode2.Details", actual[0].EventData);
-        Assert.StrictEqual(actual[0].ImageName, actual[1].ImageName);
+        Assert.Equal("Adventures.Episode2.Details", actual[0].EventData);
+        Assert.Equal(actual[0].ImageName, actual[1].ImageName);
         Assert.StrictEqual(actual[0].EventType, actual[1].EventType);
-        Assert.StrictEqual(actual[0].EventData, actual[1].EventData);
+        Assert.Equal(actual[0].EventData, actual[1].EventData);
     }
 
     [Fact]
@@ -1021,7 +1008,7 @@ public static partial class XmlSerializerTests
         var actual = SerializeAndDeserialize(expected,
 @"<?xml version=""1.0"" encoding=""utf-8""?><Orchestra xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><Brass><Name>Trumpet</Name><IsValved>true</IsValved></Brass><Brass><Name>Cornet</Name><IsValved>true</IsValved></Brass></Orchestra>",
             () => serializer);
-        Assert.StrictEqual(expected.Instruments[0].Name, actual.Instruments[0].Name);
+        Assert.Equal(expected.Instruments[0].Name, actual.Instruments[0].Name);
 
         // XmlSerializer(Type, XmlAttributeOverrides, Type[], XmlRootAttribute, String)
         var root = new XmlRootAttribute("Collection");
@@ -1029,7 +1016,7 @@ public static partial class XmlSerializerTests
         actual = SerializeAndDeserialize(expected,
 @"<?xml version=""1.0"" encoding=""utf-8""?><Collection xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""  xmlns=""defaultNamespace""><Brass><Name>Trumpet</Name><IsValved>true</IsValved></Brass><Brass><Name>Cornet</Name><IsValved>true</IsValved></Brass></Collection>",
             () => serializer);
-        Assert.StrictEqual(expected.Instruments[0].Name, actual.Instruments[0].Name);
+        Assert.Equal(expected.Instruments[0].Name, actual.Instruments[0].Name);
 
         Assert.Throws<ArgumentNullException>(() =>
         {
@@ -1364,7 +1351,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void  SoapAttributeTests()
     {
         SoapAttributes soapAttrs = new SoapAttributes();
@@ -1375,7 +1361,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_ComplexField()
     {
         XmlTypeMapping typeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType2));
@@ -1391,7 +1376,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Basic()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType1));
@@ -1417,7 +1401,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithNullableFields()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType4));
@@ -1454,7 +1437,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Nullable()
     {
         XmlTypeMapping intMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(int?));
@@ -1487,7 +1469,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Basic_FromMappings()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestType1));
@@ -1513,7 +1494,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_With_SoapIgnore()
     {
         var soapAttributes = new SoapAttributes();
@@ -1545,7 +1525,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_With_SoapElement()
     {
         var soapAttributes = new SoapAttributes();
@@ -1578,7 +1557,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_With_SoapType()
     {
         var soapAttributes = new SoapAttributes();
@@ -1612,7 +1590,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Enum()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(SoapEncodedTestEnum));
@@ -1628,7 +1605,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Enum_With_SoapEnumOverrides()
     {
         var soapAtts = new SoapAttributes();
@@ -1653,7 +1629,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapEncodedSerialization_SoapAttribute()
     {
         var soapAtts1 = new SoapAttributes();
@@ -1688,7 +1663,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapEncodedSerialization_IncludeType()
     {
         var soapImporter = new SoapReflectionImporter();
@@ -1715,7 +1689,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapEncodedSerialization_CircularLink()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyCircularLink));
@@ -1731,7 +1704,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Array()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup));
@@ -1754,7 +1726,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_List()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup2));
@@ -1778,7 +1749,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_MyCollection()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(MyCollection<string>));
@@ -1813,7 +1783,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_WithNullables()
     {
         var mapping = new SoapReflectionImporter().ImportTypeMapping(typeof(WithNullables));
@@ -1833,7 +1802,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Enums()
     {
         var mapping = new SoapReflectionImporter().ImportTypeMapping(typeof(WithEnums));
@@ -1848,14 +1816,12 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_Dictionary()
     {
         Assert.Throws<NotSupportedException>(() => { new SoapReflectionImporter().ImportTypeMapping(typeof(MyGroup3)); });
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_NestedPublicType()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithNestedPublicType.LevelData));
@@ -1870,7 +1836,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_ObjectAsRoot()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(object));
@@ -1905,7 +1870,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_ObjectAsRoot_Nullable()
     {
         XmlTypeMapping nullableTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithNullableObject));
@@ -1999,7 +1963,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void SoapSchemaMemberTest()
     {
         string ns = "http://www.w3.org/2001/XMLSchema";
@@ -2031,7 +1994,6 @@ public static partial class XmlSerializerTests
         var getDataRequestBodyValue = 3;
         var getDataRequestBodyActual = RoundTripWithXmlMembersMapping<int>(getDataRequestBodyValue, memberName, "<?xml version=\"1.0\"?>\r\n<value xmlns=\"http://tempuri.org/\">3</value>");
 
-        Assert.NotNull(getDataRequestBodyActual);
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
@@ -2350,7 +2312,7 @@ public static partial class XmlSerializerTests
         Assert.Equal(2, xmlAttributes.Length);
         Assert.Equal("myattribute1", xmlAttributes[0].Name);
         Assert.Equal("myattribute2", xmlAttributes[1].Name);
-        Assert.Equal(true, deserialized[2]);
+        Assert.Equal((object)true, deserialized[2]);
 
         ms = new MemoryStream();
         serializer.Serialize(ms, deserialized);
@@ -2395,7 +2357,7 @@ public static partial class XmlSerializerTests
         Assert.Equal(2, xmlAttributes.Length);
         Assert.Equal("myattribute1", xmlAttributes[0].Name);
         Assert.Equal("myattribute2", xmlAttributes[1].Name);
-        Assert.Equal(false, deserialized[2]);
+        Assert.Equal((object)false, deserialized[2]);
 
         ms = new MemoryStream();
         serializer.Serialize(ms, deserialized);
@@ -2471,12 +2433,10 @@ public static partial class XmlSerializerTests
         var getDataRequestBodyValue = 3;
         var getDataRequestBodyActual = RoundTripWithXmlMembersMappingSoap<int>(getDataRequestBodyValue, memberName, "<?xml version=\"1.0\"?>\r\n<int d1p1:type=\"int\" xmlns:d1p1=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.w3.org/2001/XMLSchema\">3</int>");
 
-        Assert.NotNull(getDataRequestBodyActual);
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_SimpleType()
     {
         string memberName = "GetData";
@@ -2489,7 +2449,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_CompositeType()
     {
         string memberName = "GetDataUsingDataContract";
@@ -2512,7 +2471,6 @@ public static partial class XmlSerializerTests
             "<?xml version=\"1.0\"?>\r\n<q1:wrapper xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:q1=\"http://tempuri.org/\">\r\n  <value xsi:type=\"xsd:int\">3</value>\r\n</q1:wrapper>",
             wrapperName: "wrapper");
 
-        Assert.NotNull(getDataRequestBodyActual);
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
@@ -2527,7 +2485,6 @@ public static partial class XmlSerializerTests
             wrapperName: "wrapper",
             validate: true);
 
-        Assert.NotNull(getDataRequestBodyActual);
         Assert.Equal(getDataRequestBodyValue, getDataRequestBodyActual);
     }
 
@@ -2672,6 +2629,8 @@ public static partial class XmlSerializerTests
         Assert.Equal(intValue, (int)actual[1]);
     }
 
+    [Fact]
+    [ActiveIssue(39105)]
     public static void Xml_TypeWithReadOnlyMyCollectionProperty()
     {
         var value = new TypeWithReadOnlyMyCollectionProperty();
@@ -2684,7 +2643,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void Xml_Soap_TypeWithReadOnlyMyCollectionProperty()
     {
         XmlTypeMapping myTypeMapping = new SoapReflectionImporter().ImportTypeMapping(typeof(TypeWithReadOnlyMyCollectionProperty));
@@ -2699,7 +2657,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_SoapComplexType()
     {
         string memberName = "EchoComositeTypeXmlSerializerFormatSoapResult";
@@ -2729,7 +2686,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18964")]
     public static void XmlMembersMapping_Soap_SoapComplexTypeWithArray()
     {
         string memberName = "EchoComositeTypeXmlSerializerFormatSoapResult";
@@ -2812,8 +2768,8 @@ public static partial class XmlSerializerTests
         Assert.StrictEqual(value.XmlElementProperty, actual.XmlElementProperty);
         Assert.Equal(value.XmlEnumProperty, actual.XmlEnumProperty);
         Assert.StrictEqual(value.XmlIncludeProperty, actual.XmlIncludeProperty);
-        Assert.StrictEqual(value.XmlNamespaceDeclarationsProperty, actual.XmlNamespaceDeclarationsProperty);
-        Assert.StrictEqual(value.XmlTextProperty, actual.XmlTextProperty);
+        Assert.Equal(value.XmlNamespaceDeclarationsProperty, actual.XmlNamespaceDeclarationsProperty);
+        Assert.Equal(value.XmlTextProperty, actual.XmlTextProperty);
     }
 
     [Fact]
@@ -2825,7 +2781,7 @@ public static partial class XmlSerializerTests
     <TypeWithIndirectRef xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
       <Name>Foo</Name>
     </TypeWithIndirectRef>");
-        Assert.StrictEqual(value.Name, actual.Name);
+        Assert.Equal(value.Name, actual.Name);
     }
 
     [Fact]
@@ -2838,26 +2794,24 @@ public static partial class XmlSerializerTests
         var deserializedValue = SerializeAndDeserialize<NookAppLocalState>(value, "<?xml version=\"1.0\"?>\r\n<NookAppLocalState xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <TextColor>\r\n    <A>3</A>\r\n    <B>6</B>\r\n    <G>5</G>\r\n    <R>4</R>\r\n  </TextColor>\r\n  <ArticleViewCount>1</ArticleViewCount>\r\n  <CurrentlyReadingProductEAN>Current</CurrentlyReadingProductEAN>\r\n  <CurrentPaymentType>Microsoft</CurrentPaymentType>\r\n  <IsFirstRun>true</IsFirstRun>\r\n  <LocalReadingPositionState>\r\n    <LocalReadingPosition>\r\n      <Ean>Ean</Ean>\r\n      <LastReadTime>2013-01-02T00:00:00</LastReadTime>\r\n      <PageCount>1</PageCount>\r\n      <PageNumber>1</PageNumber>\r\n      <PlatformOffset>offset</PlatformOffset>\r\n    </LocalReadingPosition>\r\n  </LocalReadingPositionState>\r\n  <PreviousSearchQueries>\r\n    <string>one</string>\r\n    <string>two</string>\r\n  </PreviousSearchQueries>\r\n  <IsFirstRunDuplicate>false</IsFirstRunDuplicate>\r\n</NookAppLocalState>", null, true);
 
         Assert.StrictEqual(deserializedValue.ArticleViewCount, value.ArticleViewCount);
-        Assert.StrictEqual(deserializedValue.CurrentlyReadingProductEAN, value.CurrentlyReadingProductEAN);
+        Assert.Equal(deserializedValue.CurrentlyReadingProductEAN, value.CurrentlyReadingProductEAN);
         Assert.StrictEqual(deserializedValue.CurrentPaymentType, value.CurrentPaymentType);
         Assert.StrictEqual(deserializedValue.IsFirstRun, value.IsFirstRun);
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #21724")]
     public static void DerivedTypeWithDifferentOverrides()
     {
         DerivedTypeWithDifferentOverrides value = new DerivedTypeWithDifferentOverrides() { Name1 = "Name1", Name2 = "Name2", Name3 = "Name3", Name4 = "Name4", Name5 = "Name5" };
         DerivedTypeWithDifferentOverrides actual = SerializeAndDeserialize<DerivedTypeWithDifferentOverrides>(value, @"<?xml version=""1.0""?><DerivedTypeWithDifferentOverrides xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><Name1>Name1</Name1><Name2>Name2</Name2><Name3>Name3</Name3><Name5>Name5</Name5></DerivedTypeWithDifferentOverrides>");
-        Assert.StrictEqual(value.Name1, actual.Name1);
-        Assert.StrictEqual(value.Name2, actual.Name2);
-        Assert.StrictEqual(value.Name3, actual.Name3);
+        Assert.Equal(value.Name1, actual.Name1);
+        Assert.Equal(value.Name2, actual.Name2);
+        Assert.Equal(value.Name3, actual.Name3);
         Assert.Null(actual.Name4);
-        Assert.StrictEqual(value.Name5, actual.Name5);
+        Assert.Equal(value.Name5, actual.Name5);
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #21724")]
     public static void DerivedTypeWithDifferentOverrides2()
     {
         DerivedTypeWithDifferentOverrides2 value = new DerivedTypeWithDifferentOverrides2() { Name1 = "Name1", Name2 = "Name2", Name3 = "Name3", Name4 = "Name4", Name5 = "Name5", Name6 = "Name6" };
@@ -2867,18 +2821,18 @@ public static partial class XmlSerializerTests
         ((DerivedTypeWithDifferentOverrides)value).Name6 = "MidLevelName6";
         ((SerializationTypes.BaseType)value).Name6 = "BaseLevelName6";
         DerivedTypeWithDifferentOverrides2 actual = SerializeAndDeserialize<DerivedTypeWithDifferentOverrides2>(value, @"<?xml version=""1.0""?><DerivedTypeWithDifferentOverrides2 xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema""><Name1>Name1</Name1><Name2>Name2</Name2><Name3>Name3</Name3><Name4>BaseLevelName4</Name4><Name5>MidLevelName5</Name5><Name6>BaseLevelName6</Name6></DerivedTypeWithDifferentOverrides2>");
-        Assert.StrictEqual(value.Name1, actual.Name1);
-        Assert.StrictEqual(value.Name2, actual.Name2);
-        Assert.StrictEqual(value.Name3, actual.Name3);
+        Assert.Equal(value.Name1, actual.Name1);
+        Assert.Equal(value.Name2, actual.Name2);
+        Assert.Equal(value.Name3, actual.Name3);
         Assert.Null(actual.Name4);
         Assert.Null(((DerivedTypeWithDifferentOverrides)actual).Name4);
-        Assert.StrictEqual(((SerializationTypes.BaseType)value).Name4, ((SerializationTypes.BaseType)actual).Name4);
+        Assert.Equal(((SerializationTypes.BaseType)value).Name4, ((SerializationTypes.BaseType)actual).Name4);
         Assert.Null(actual.Name5);
-        Assert.StrictEqual(((DerivedTypeWithDifferentOverrides)value).Name5, ((DerivedTypeWithDifferentOverrides)actual).Name5);
+        Assert.Equal(((DerivedTypeWithDifferentOverrides)value).Name5, ((DerivedTypeWithDifferentOverrides)actual).Name5);
         Assert.Null(((SerializationTypes.BaseType)actual).Name5);
         Assert.Null(actual.Name6);
-        Assert.StrictEqual(((DerivedTypeWithDifferentOverrides)actual).Name6, ((SerializationTypes.BaseType)actual).Name6);
-        Assert.StrictEqual(((SerializationTypes.BaseType)actual).Name6, ((SerializationTypes.BaseType)actual).Name6);
+        Assert.Equal(((DerivedTypeWithDifferentOverrides)actual).Name6, ((SerializationTypes.BaseType)actual).Name6);
+        Assert.Equal(((SerializationTypes.BaseType)actual).Name6, ((SerializationTypes.BaseType)actual).Name6);
     }
 
     [Fact]
@@ -2909,7 +2863,7 @@ public static partial class XmlSerializerTests
         var value = new UnspecifiedRootSerializationType();
         var actual = SerializeAndDeserialize(value, "<?xml version=\"1.0\"?>\r\n<UnspecifiedRootSerializationType xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <MyIntProperty>0</MyIntProperty>\r\n</UnspecifiedRootSerializationType>", () => { return new XmlSerializer(Type.GetType(typeof(UnspecifiedRootSerializationType).FullName)); });
         Assert.StrictEqual(value.MyIntProperty, actual.MyIntProperty);
-        Assert.StrictEqual(value.MyStringProperty, actual.MyStringProperty);     
+        Assert.Equal(value.MyStringProperty, actual.MyStringProperty);     
     }
 
     [Fact]
@@ -2972,7 +2926,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #31427")]
     public static void SerializeXmlTextAttributeOnDerivedClass()
     {
         var value = new EnumTestDerived() { Test = TestEnum.On };
@@ -2981,7 +2934,6 @@ public static partial class XmlSerializerTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #31427")]
     public static void SerializePrimitiveXmlTextAttributeOnDerivedClass()
     {
         var value = new PrimiveAttributeTestDerived() { Number = 5 };

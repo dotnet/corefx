@@ -22,8 +22,8 @@ parameters:
   #     _framework: (netcoreapp, netfx, uap, etc).
   #     _helixQueues: Windows.Amd64 (Only needed if submitToHelix -> true.) -- Queues should be separated by + if multiple.
 
-  # Required: as part of the variables object, the following values need to be passed:
-  #     _outerloop: true | false
+  # Required: empty | innerloop | outerloop | all
+  testScope: ''
 
   # Optional: _publishTests -> Boolean -> Publish test assets to blob storage if true.
   # Default: false
@@ -75,6 +75,10 @@ jobs:
         - _msbuildCommonParameters: ''
         - _archiveTestsParameter: ''
         - _finalFrameworkArg: -framework $(_framework)
+        - _testScopeArg: ''
+
+        - ${{ if ne(parameters.testScope, '') }}:
+          - _testScopeArg: -testscope ${{ parameters.testScope }}
 
         - ${{ if ne(job._jobFramework, '')}}:
           - _finalFrameworkArg: ${{ job._jobFramework }}
@@ -142,15 +146,13 @@ jobs:
                 restoreDirectory: '$(Build.SourcesDirectory)\.packages'
                 verbosityRestore: 'normal'
                 externalFeedCredentials: 'dotnet-core-internal-tooling'
-              env:
-                TargetGroup: $(_framework)
 
           - ${{ if eq(job.customBuildSteps[0], '') }}:
             - script: $(_buildScript)
                     -build
                     -buildtests
                     $(_commonArguments)
-                    /p:OuterLoop=$(_outerloop)
+                    $(_testScopeArg)
                     $(_msbuildCommonParameters)
               displayName: Build Sources and Tests
 
@@ -190,14 +192,14 @@ jobs:
             - template: /eng/pipelines/helix.yml
               parameters:
                 # send tests to helix only on public builds, official scheduled builds or manual official builds.
-                condition: or(eq(${{ parameters.isOfficialBuild }}, False), notIn(variables['Build.Reason'], 'BatchedCI', 'IndividualCI'))
+                condition: eq(${{ parameters.isOfficialBuild }}, False)
                 targetOS: ${{ parameters.targetOS }}
                 archGroup: $(_architecture)
                 configuration: $(_BuildConfig)
                 helixQueues: $(_helixQueues)
                 msbuildScript: $(_msbuildCommand)
                 framework: $(_framework)
-                outerloop: $(_outerloop)
+                testScope: ${{ coalesce(parameters.testScope, 'innerloop') }} # if parameters.testScope is empty use 'innerloop'
 
                 ${{ if eq(parameters.isOfficialBuild, 'true') }}:
                   officialBuildId: $(Build.BuildNumber)

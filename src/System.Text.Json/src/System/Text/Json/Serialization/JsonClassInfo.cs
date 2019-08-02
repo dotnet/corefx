@@ -5,130 +5,177 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Converters;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
-    [DebuggerDisplay("ClassType.{ClassType} {Type.Name}")]
+    [DebuggerDisplay("ClassType.{ClassType}, {Type.Name}")]
     internal sealed partial class JsonClassInfo
     {
         // The length of the property name embedded in the key (in bytes).
         private const int PropertyNameKeyLength = 6;
 
-        private readonly List<PropertyRef> _propertyRefs = new List<PropertyRef>();
+        // The limit to how many property names from the JSON are cached before using PropertyCache.
+        private const int PropertyNameCountCacheThreshold = 64;
 
-        // Cache of properties by first ordering. Use an array for highest performance.
+        // The properties on a POCO keyed on property name.
+        public volatile Dictionary<string, JsonPropertyInfo> PropertyCache;
+
+        // Cache of properties by first JSON ordering. Use an array for highest performance.
         private volatile PropertyRef[] _propertyRefsSorted = null;
 
         internal delegate object ConstructorDelegate();
         internal ConstructorDelegate CreateObject { get; private set; }
+        internal ConstructorDelegate CreateConcreteDictionary { get; private set; }
 
         internal ClassType ClassType { get; private set; }
 
+        public JsonPropertyInfo DataExtensionProperty { get; private set; }
+
         // If enumerable, the JsonClassInfo for the element type.
         internal JsonClassInfo ElementClassInfo { get; private set; }
+
+        public JsonSerializerOptions Options { get; private set; }
 
         public Type Type { get; private set; }
 
         internal void UpdateSortedPropertyCache(ref ReadStackFrame frame)
         {
-            // Todo: on classes with many properties (about 50) we need to switch to a hashtable for performance.
-            // Todo: when using PropertyNameCaseInsensitive we also need to use the hashtable with case-insensitive
-            // comparison to handle Turkish etc. cultures properly.
-
-            // Set the sorted property cache. Overwrite any existing cache which can occur in multi-threaded cases.
-            if (frame.PropertyRefCache != null)
+            // Check if we are trying to build the sorted cache.
+            if (frame.PropertyRefCache == null)
             {
-                List<PropertyRef> cache = frame.PropertyRefCache;
-
-                // Add any missing properties. This creates a consistent cache count which is important for
-                // the loop in GetProperty() when there are multiple threads in a race conditions each generating
-                // a cache for a given POCO type but with different property counts in the json.
-                while (cache.Count < _propertyRefs.Count)
-                {
-                    for (int iProperty = 0; iProperty < _propertyRefs.Count; iProperty++)
-                    {
-                        PropertyRef propertyRef = _propertyRefs[iProperty];
-
-                        bool found = false;
-                        int iCacheProperty = 0;
-                        for (; iCacheProperty < cache.Count; iCacheProperty++)
-                        {
-                            if (IsPropertyRefEqual(ref propertyRef, cache[iCacheProperty]))
-                            {
-                                // The property is already cached, skip to the next property.
-                                found = true;
-                                break;
-                            }
-                        }
-
-                        if (found == false)
-                        {
-                            cache.Add(propertyRef);
-                            break;
-                        }
-                    }
-                }
-
-                Debug.Assert(cache.Count == _propertyRefs.Count);
-                _propertyRefsSorted = cache.ToArray();
-                frame.PropertyRefCache = null;
+                return;
             }
+
+            List<PropertyRef> newList;
+            if (_propertyRefsSorted != null)
+            {
+                newList = new List<PropertyRef>(_propertyRefsSorted);
+                newList.AddRange(frame.PropertyRefCache);
+                _propertyRefsSorted = newList.ToArray();
+            }
+            else
+            {
+                _propertyRefsSorted = frame.PropertyRefCache.ToArray();
+            }
+
+            frame.PropertyRefCache = null;
         }
 
         internal JsonClassInfo(Type type, JsonSerializerOptions options)
         {
             Type = type;
-            ClassType = GetClassType(type);
+            Options = options;
+            ClassType = GetClassType(type, options);
 
-            CreateObject = options.ClassMaterializerStrategy.CreateConstructor(type);
+            CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
 
             // Ignore properties on enumerable.
             switch (ClassType)
             {
                 case ClassType.Object:
-                    var propertyNames = new HashSet<string>(StringComparer.Ordinal);
-
-                    foreach (PropertyInfo propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                     {
-                        // For now we only support public getters\setters
-                        if (propertyInfo.GetMethod?.IsPublic == true ||
-                            propertyInfo.SetMethod?.IsPublic == true)
+                        PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+                        Dictionary<string, JsonPropertyInfo> cache = CreatePropertyCache(properties.Length);
+
+                        foreach (PropertyInfo propertyInfo in properties)
                         {
-                            JsonPropertyInfo jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
-
-                            if (jsonPropertyInfo.NameAsString == null)
+                            // Ignore indexers
+                            if (propertyInfo.GetIndexParameters().Length > 0)
                             {
-                                ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameNull(this, jsonPropertyInfo);
+                                continue;
                             }
 
-                            // If the JsonPropertyNameAttribute or naming policy results in collisions, throw an exception.
-                            if (!propertyNames.Add(jsonPropertyInfo.NameUsedToCompareAsString))
+                            // For now we only support public getters\setters
+                            if (propertyInfo.GetMethod?.IsPublic == true ||
+                                propertyInfo.SetMethod?.IsPublic == true)
                             {
-                                ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameConflict(this, jsonPropertyInfo);
-                            }
+                                JsonPropertyInfo jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
+                                Debug.Assert(jsonPropertyInfo != null);
 
-                            jsonPropertyInfo.ClearUnusedValuesAfterAdd();
+                                // If the JsonPropertyNameAttribute or naming policy results in collisions, throw an exception.
+                                if (!JsonHelpers.TryAdd(cache, jsonPropertyInfo.NameAsString, jsonPropertyInfo))
+                                {
+                                    JsonPropertyInfo other = cache[jsonPropertyInfo.NameAsString];
+
+                                    if (other.ShouldDeserialize == false && other.ShouldSerialize == false)
+                                    {
+                                        // Overwrite the one just added since it has [JsonIgnore].
+                                        cache[jsonPropertyInfo.NameAsString] = jsonPropertyInfo;
+                                    }
+                                    else if (jsonPropertyInfo.ShouldDeserialize == true || jsonPropertyInfo.ShouldSerialize == true)
+                                    {
+                                        ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameConflict(this, jsonPropertyInfo);
+                                    }
+                                    // else ignore jsonPropertyInfo since it has [JsonIgnore].
+                                }
+                            }
                         }
+
+                        if (DetermineExtensionDataProperty(cache))
+                        {
+                            // Remove from cache since it is handled independently.
+                            cache.Remove(DataExtensionProperty.NameAsString);
+                        }
+
+                        // Set as a unit to avoid concurrency issues.
+                        PropertyCache = cache;
                     }
                     break;
                 case ClassType.Enumerable:
                 case ClassType.Dictionary:
-                    // Add a single property that maps to the class type so we can have policies applied.
-                    JsonPropertyInfo policyProperty = AddPolicyProperty(type, options);
+                    {
+                        // Add a single property that maps to the class type so we can have policies applied.
+                         AddPolicyProperty(type, options);
 
-                    // Use the type from the property policy to get any late-bound concrete types (from an interface like IDictionary).
-                    CreateObject = options.ClassMaterializerStrategy.CreateConstructor(policyProperty.RuntimePropertyType);
+                        Type objectType;
+                        if (IsNativelySupportedCollection(type))
+                        {
+                            // Use the type from the property policy to get any late-bound concrete types (from an interface like IDictionary).
+                            objectType = PolicyProperty.RuntimePropertyType;
+                        }
+                        else
+                        {
+                            // We need to create the declared instance for types implementing natively supported collections.
+                            objectType = PolicyProperty.DeclaredPropertyType;
+                        }
 
-                    // Create a ClassInfo that maps to the element type which is used for (de)serialization and policies.
-                    Type elementType = GetElementType(type);
-                    ElementClassInfo = options.GetOrAddClass(elementType);
+                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(objectType);
+
+                        // Create a ClassInfo that maps to the element type which is used for (de)serialization and policies.
+                        Type elementType = GetElementType(type, parentType: null, memberInfo: null, options: options);
+                        ElementClassInfo = options.GetOrAddClass(elementType);
+                    }
+                    break;
+                case ClassType.IDictionaryConstructible:
+                    {
+                        // Add a single property that maps to the class type so we can have policies applied.
+                        AddPolicyProperty(type, options);
+
+                        Type elementType = GetElementType(type, parentType: null, memberInfo: null, options: options);
+
+                       CreateConcreteDictionary = options.MemberAccessorStrategy.CreateConstructor(
+                           typeof(Dictionary<,>).MakeGenericType(typeof(string), elementType));
+
+                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(PolicyProperty.DeclaredPropertyType);
+
+                        // Create a ClassInfo that maps to the element type which is used for (de)serialization and policies.
+                        ElementClassInfo = options.GetOrAddClass(elementType);
+                    }
                     break;
                 case ClassType.Value:
+                    // Add a single property that maps to the class type so we can have policies applied.
+                    AddPolicyProperty(type, options);
+                    break;
                 case ClassType.Unknown:
                     // Add a single property that maps to the class type so we can have policies applied.
                     AddPolicyProperty(type, options);
+                    PropertyCache = new Dictionary<string, JsonPropertyInfo>();
                     break;
                 default:
                     Debug.Fail($"Unexpected class type: {ClassType}");
@@ -136,37 +183,69 @@ namespace System.Text.Json.Serialization
             }
         }
 
-        internal JsonPropertyInfo GetProperty(JsonSerializerOptions options, ReadOnlySpan<byte> propertyName, ref ReadStackFrame frame)
+        private bool DetermineExtensionDataProperty(Dictionary<string, JsonPropertyInfo> cache)
         {
-            // If we should compare with case-insensitive, normalize to an uppercase format since that is what is cached on the propertyInfo.
-            if (options.PropertyNameCaseInsensitive)
+            JsonPropertyInfo jsonPropertyInfo = GetPropertyWithUniqueAttribute(typeof(JsonExtensionDataAttribute), cache);
+            if (jsonPropertyInfo != null)
             {
-                string utf16PropertyName = Encoding.UTF8.GetString(propertyName.ToArray());
-                string upper = utf16PropertyName.ToUpperInvariant();
-                propertyName = Encoding.UTF8.GetBytes(upper);
+                Type declaredPropertyType = jsonPropertyInfo.DeclaredPropertyType;
+                if (!typeof(IDictionary<string, JsonElement>).IsAssignableFrom(declaredPropertyType) &&
+                    !typeof(IDictionary<string, object>).IsAssignableFrom(declaredPropertyType))
+                {
+                    ThrowHelper.ThrowInvalidOperationException_SerializationDataExtensionPropertyInvalid(this, jsonPropertyInfo);
+                }
+
+                DataExtensionProperty = jsonPropertyInfo;
+                return true;
             }
 
-            ulong key = GetKey(propertyName);
+            return false;
+        }
+
+        private JsonPropertyInfo GetPropertyWithUniqueAttribute(Type attributeType, Dictionary<string, JsonPropertyInfo> cache)
+        {
+            JsonPropertyInfo property = null;
+
+            foreach (JsonPropertyInfo jsonPropertyInfo in cache.Values)
+            {
+                Attribute attribute = jsonPropertyInfo.PropertyInfo.GetCustomAttribute(attributeType);
+                if (attribute != null)
+                {
+                    if (property != null)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException_SerializationDuplicateTypeAttribute(Type, attributeType);
+                    }
+
+                    property = jsonPropertyInfo;
+                }
+            }
+
+            return property;
+        }
+
+        internal JsonPropertyInfo GetProperty(ReadOnlySpan<byte> propertyName, ref ReadStackFrame frame)
+        {
             JsonPropertyInfo info = null;
 
-            // First try sorted lookup.
-            int propertyIndex = frame.PropertyIndex;
-
             // If we're not trying to build the cache locally, and there is an existing cache, then use it.
-            bool hasPropertyCache = frame.PropertyRefCache == null && _propertyRefsSorted != null;
-            if (hasPropertyCache)
+            if (_propertyRefsSorted != null)
             {
+                ulong key = GetKey(propertyName);
+
+                // First try sorted lookup.
+                int propertyIndex = frame.PropertyIndex;
+
                 // This .Length is consistent no matter what json data intialized _propertyRefsSorted.
                 int count = _propertyRefsSorted.Length;
                 if (count != 0)
                 {
-                    int iForward = propertyIndex;
-                    int iBackward = propertyIndex - 1;
+                    int iForward = Math.Min(propertyIndex, count);
+                    int iBackward = iForward - 1;
                     while (iForward < count || iBackward >= 0)
                     {
                         if (iForward < count)
                         {
-                            if (TryIsPropertyRefEqual(ref _propertyRefsSorted[iForward], propertyName, key, ref info))
+                            if (TryIsPropertyRefEqual(_propertyRefsSorted[iForward], propertyName, key, ref info))
                             {
                                 return info;
                             }
@@ -175,7 +254,7 @@ namespace System.Text.Json.Serialization
 
                         if (iBackward >= 0)
                         {
-                            if (TryIsPropertyRefEqual(ref _propertyRefsSorted[iBackward], propertyName, key, ref info))
+                            if (TryIsPropertyRefEqual(_propertyRefsSorted[iBackward], propertyName, key, ref info))
                             {
                                 return info;
                             }
@@ -188,61 +267,72 @@ namespace System.Text.Json.Serialization
             // Try the main list which has all of the properties in a consistent order.
             // We could get here even when hasPropertyCache==true if there is a race condition with different json
             // property ordering and _propertyRefsSorted is re-assigned while in the loop above.
-            for (int i = 0; i < _propertyRefs.Count; i++)
-            {
-                PropertyRef propertyRef = _propertyRefs[i];
-                if (TryIsPropertyRefEqual(ref propertyRef, propertyName, key, ref info))
-                {
-                    break;
-                }
-            }
 
-            if (!hasPropertyCache)
+            string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
+            if (PropertyCache.TryGetValue(stringPropertyName, out info))
             {
-                if (propertyIndex == 0)
+                // For performance, only add to cache up to a threshold and then just use the dictionary.
+                int count;
+                if (_propertyRefsSorted != null)
                 {
-                    // Create the temporary list on first property access to prevent a partially filled List.
-                    Debug.Assert(frame.PropertyRefCache == null);
-                    frame.PropertyRefCache = new List<PropertyRef>();
+                    count = _propertyRefsSorted.Length;
                 }
-
-                if (info != null)
+                else
                 {
-                    Debug.Assert(frame.PropertyRefCache != null);
-                    frame.PropertyRefCache.Add(new PropertyRef(key, info));
+                    count = 0;
+                }
+                
+                // Do a quick check for the stable (after warm-up) case.
+                if (count < PropertyNameCountCacheThreshold)
+                {
+                    if (frame.PropertyRefCache != null)
+                    {
+                        count += frame.PropertyRefCache.Count;
+                    }
+
+                    // Check again to fill up to the limit.
+                    if (count < PropertyNameCountCacheThreshold)
+                    {
+                        if (frame.PropertyRefCache == null)
+                        {
+                            frame.PropertyRefCache = new List<PropertyRef>();
+                        }
+
+                        ulong key = info.PropertyNameKey;
+                        PropertyRef propertyRef = new PropertyRef(key, info);
+                        frame.PropertyRefCache.Add(propertyRef);
+                    }
                 }
             }
 
             return info;
         }
 
-        internal JsonPropertyInfo GetPolicyProperty()
+        private Dictionary<string, JsonPropertyInfo> CreatePropertyCache(int capacity)
         {
-            Debug.Assert(_propertyRefs.Count == 1);
-            return _propertyRefs[0].Info;
-        }
+            StringComparer comparer;
 
-        internal JsonPropertyInfo GetProperty(int index)
-        {
-            Debug.Assert(index < _propertyRefs.Count);
-            return _propertyRefs[index].Info;
-        }
-
-        internal int PropertyCount
-        {
-            get
+            if (Options.PropertyNameCaseInsensitive)
             {
-                return _propertyRefs.Count;
+                comparer = StringComparer.OrdinalIgnoreCase;
             }
+            else
+            {
+                comparer = StringComparer.Ordinal;
+            }
+
+            return new Dictionary<string, JsonPropertyInfo>(capacity, comparer);
         }
 
-        private static bool TryIsPropertyRefEqual(ref PropertyRef propertyRef, ReadOnlySpan<byte> propertyName, ulong key, ref JsonPropertyInfo info)
+        public JsonPropertyInfo PolicyProperty { get; private set; }
+
+        private static bool TryIsPropertyRefEqual(in PropertyRef propertyRef, ReadOnlySpan<byte> propertyName, ulong key, ref JsonPropertyInfo info)
         {
             if (key == propertyRef.Key)
             {
                 if (propertyName.Length <= PropertyNameKeyLength ||
                     // We compare the whole name, although we could skip the first 6 bytes (but it's likely not any faster)
-                    propertyName.SequenceEqual(propertyRef.Info.NameUsedToCompare))
+                    propertyName.SequenceEqual(propertyRef.Info.Name))
                 {
                     info = propertyRef.Info;
                     return true;
@@ -257,7 +347,7 @@ namespace System.Text.Json.Serialization
             if (propertyRef.Key == other.Key)
             {
                 if (propertyRef.Info.Name.Length <= PropertyNameKeyLength ||
-                    propertyRef.Info.Name.SequenceEqual(other.Info.Name))
+                    propertyRef.Info.Name.AsSpan().SequenceEqual(other.Info.Name.AsSpan()))
                 {
                     return true;
                 }
@@ -266,7 +356,7 @@ namespace System.Text.Json.Serialization
             return false;
         }
 
-        private static ulong GetKey(ReadOnlySpan<byte> propertyName)
+        public static ulong GetKey(ReadOnlySpan<byte> propertyName)
         {
             ulong key;
             int length = propertyName.Length;
@@ -307,72 +397,105 @@ namespace System.Text.Json.Serialization
             return key;
         }
 
-        public static Type GetElementType(Type propertyType)
+        // Return the element type of the IEnumerable or return null if not an IEnumerable.
+        public static Type GetElementType(Type propertyType, Type parentType, MemberInfo memberInfo, JsonSerializerOptions options)
         {
-            Type elementType = null;
-            if (typeof(IEnumerable).IsAssignableFrom(propertyType))
-            {
-                elementType = propertyType.GetElementType();
-                if (elementType == null)
-                {
-                    Type[] args = propertyType.GetGenericArguments();
+            // We want to handle as the implemented collection type, if applicable.
+            Type implementedType = GetImplementedCollectionType(propertyType);
 
-                    if (propertyType.IsGenericType)
-                    {
-                        if (GetClassType(propertyType) == ClassType.Dictionary &&
-                            args.Length >= 2) // It is >= 2 in case there is a Dictionary<TKey, TValue, TSomeExtension>.
-                        {
-                            elementType = args[1];
-                        }
-                        else if (GetClassType(propertyType) == ClassType.Enumerable && args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
-                        {
-                            elementType = args[0];
-                        }
-                    }
-                    else
-                    {
-                        // Unable to determine collection type; attempt to use object which will be used to create loosely-typed collection.
-                        elementType = typeof(object);
-                    }
+            if (!typeof(IEnumerable).IsAssignableFrom(implementedType))
+            {
+                return null;
+            }
+
+            // Check for Array.
+            Type elementType = implementedType.GetElementType();
+            if (elementType != null)
+            {
+                return elementType;
+            }
+
+            // Check for Dictionary<TKey, TValue> or IEnumerable<T>
+            if (implementedType.IsGenericType)
+            {
+                Type[] args = implementedType.GetGenericArguments();
+                ClassType classType = GetClassType(implementedType, options);
+
+                if ((classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible) &&
+                    args.Length >= 2 && // It is >= 2 in case there is a IDictionary<TKey, TValue, TSomeExtension>.
+                    args[0].UnderlyingSystemType == typeof(string))
+                {
+                    return args[1];
+                }
+
+                if (classType == ClassType.Enumerable && args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
+                {
+                    return args[0];
                 }
             }
 
-            return elementType;
+            if (implementedType.IsAssignableFrom(typeof(IList)) ||
+                implementedType.IsAssignableFrom(typeof(IDictionary)) ||
+                IsDeserializedByConstructingWithIList(implementedType) ||
+                IsDeserializedByConstructingWithIDictionary(implementedType))
+            {
+                return typeof(object);
+            }
+
+            throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(propertyType, parentType, memberInfo);
         }
 
-        internal static ClassType GetClassType(Type type)
+        public static ClassType GetClassType(Type type, JsonSerializerOptions options)
         {
             Debug.Assert(type != null);
 
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            // We want to handle as the implemented collection type, if applicable.
+            Type implementedType = GetImplementedCollectionType(type);
+
+            if (implementedType.IsGenericType && implementedType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                type = Nullable.GetUnderlyingType(type);
+                implementedType = Nullable.GetUnderlyingType(implementedType);
             }
 
-            // A Type is considered a value if it implements IConvertible or is a DateTimeOffset or JsonElement.
-            if (typeof(IConvertible).IsAssignableFrom(type) || type == typeof(DateTimeOffset) || type == typeof(JsonElement))
-            {
-                return ClassType.Value;
-            }
-
-            if (typeof(IDictionary).IsAssignableFrom(type) || 
-                (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) 
-                || type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))))
-            {
-                return ClassType.Dictionary;
-            }
-
-            if (typeof(IEnumerable).IsAssignableFrom(type))
-            {
-                return ClassType.Enumerable;
-            }
-
-            if (type == typeof(object))
+            if (implementedType == typeof(object))
             {
                 return ClassType.Unknown;
             }
 
+            if (options.HasConverter(implementedType))
+            {
+                return ClassType.Value;
+            }
+
+            if (DefaultImmutableDictionaryConverter.IsImmutableDictionary(implementedType) ||
+                IsDeserializedByConstructingWithIDictionary(implementedType))
+            {
+                return ClassType.IDictionaryConstructible;
+            }
+
+            if (typeof(IDictionary).IsAssignableFrom(implementedType) || IsDictionaryClassType(implementedType))
+            {
+                // Special case for immutable dictionaries
+                if (type != implementedType && !IsNativelySupportedCollection(type))
+                {
+                    return ClassType.IDictionaryConstructible;
+                }
+
+                return ClassType.Dictionary;
+            }
+
+            if (typeof(IEnumerable).IsAssignableFrom(implementedType))
+            {
+                return ClassType.Enumerable;
+            }
+
             return ClassType.Object;
+        }
+
+        public static bool IsDictionaryClassType(Type type)
+        {
+            return (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
+                type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>)));
         }
     }
 }

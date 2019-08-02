@@ -15,7 +15,7 @@ namespace System.IO.Tests
 
         #region Utilities
 
-        public virtual void Delete(string path)
+        protected virtual void Delete(string path)
         {
             Directory.Delete(path);
         }
@@ -223,12 +223,12 @@ namespace System.IO.Tests
     {
         #region Utilities
 
-        public override void Delete(string path)
+        protected override void Delete(string path)
         {
             Directory.Delete(path, false);
         }
 
-        public virtual void Delete(string path, bool recursive)
+        protected virtual void Delete(string path, bool recursive)
         {
             Directory.Delete(path, recursive);
         }
@@ -257,7 +257,6 @@ namespace System.IO.Tests
         [ActiveIssue(24242)]
         [PlatformSpecific(TestPlatforms.Windows)]
         [OuterLoop("This test is very slow.")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop does not have the fix for #22596")]
         public void RecursiveDelete_DeepNesting()
         {
             // Create a 2000 level deep directory and recursively delete from the root.

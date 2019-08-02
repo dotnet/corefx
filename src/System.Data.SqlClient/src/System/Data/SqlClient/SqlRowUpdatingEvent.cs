@@ -14,13 +14,13 @@ namespace System.Data.SqlClient
         {
         }
 
-        new public SqlCommand Command
+        public new SqlCommand Command
         {
             get { return (base.Command as SqlCommand); }
             set { base.Command = value; }
         }
 
-        override protected IDbCommand BaseCommand
+        protected override IDbCommand BaseCommand
         {
             get { return base.BaseCommand; }
             set { base.BaseCommand = (value as SqlCommand); }

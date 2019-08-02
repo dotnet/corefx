@@ -122,10 +122,10 @@ namespace BasicEventSourceTests
 
                     // We log EventWithXferWeirdArgs in one case and 
                     // WorkWeirdArgs/Send in the other
-                    Assert.True(evt.EventName.Contains("WeirdArgs"));
+                    Assert.Contains("WeirdArgs", evt.EventName);
 
                     Assert.Equal("128", evt.PayloadValue(0, "iptr").ToString());
-                    Assert.Equal(true, (bool)evt.PayloadValue(1, "b"));
+                    Assert.True((bool)evt.PayloadValue(1, "b"));
                     Assert.Equal((long)SdtEventSources.MyLongEnum.LongVal1, ((IConvertible)evt.PayloadValue(2, "le")).ToInt64(null));
                 }));
         }

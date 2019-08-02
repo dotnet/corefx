@@ -1242,7 +1242,6 @@ namespace System.Threading.Tasks.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/coreclr/pull/23152")]
         public static void LongContinuationChain_Await_DoesNotStackOverflow()
         {
             const int DiveDepth = 12_000;
@@ -1296,7 +1295,7 @@ namespace System.Threading.Tasks.Tests
 
         #region Helper Methods
 
-        public static void ContinueWithTortureTest(int numCanceled, int numLeftover, int completeAfter, int cancelAfter)
+        private static void ContinueWithTortureTest(int numCanceled, int numLeftover, int completeAfter, int cancelAfter)
         {
             //Debug.WriteLine("    - ContinueWithTortureTest(numCanceled={0}, numLeftover={1}, completeAfter={2}, cancelAfter={3})",
             //    numCanceled, numLeftover, completeAfter, cancelAfter);
@@ -1379,7 +1378,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         // Ensures that the specified action throws a AggregateException wrapping a TaskCanceledException
-        public static void EnsureTaskCanceledExceptionThrown(Action action, string message)
+        private static void EnsureTaskCanceledExceptionThrown(Action action, string message)
         {
             Exception exception = null;
 
@@ -1396,7 +1395,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         // Ensures that the specified exception is an AggregateException wrapping a TaskCanceledException
-        public static void EnsureExceptionIsAEofTCE(Exception exception, string message)
+        private static void EnsureExceptionIsAEofTCE(Exception exception, string message)
         {
             if (exception == null)
             {

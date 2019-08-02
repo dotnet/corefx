@@ -92,10 +92,10 @@ namespace System.Globalization
             Array.Resize(ref registryEraRanges, iFoundEras);
 
             // Sort them
-            Array.Sort(registryEraRanges!, CompareEraRanges); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+            Array.Sort(registryEraRanges, CompareEraRanges);
 
             // Clean up era information
-            for (int i = 0; i < registryEraRanges!.Length; i++) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+            for (int i = 0; i < registryEraRanges.Length; i++)
             {
                 // eras count backwards from length to 1 (and are 1 based indexes into string arrays)
                 registryEraRanges[i].era = registryEraRanges.Length - i;
@@ -195,16 +195,6 @@ namespace System.Globalization
             //
             return new EraInfo(0, year, month, day, year - 1, 1, 0,
                                 names[0], names[1], names[3]);
-        }
-
-        // PAL Layer ends here
-
-        private static readonly string[] s_japaneseErasEnglishNames = new string[] { "M", "T", "S", "H", "R" };
-
-        private static string GetJapaneseEnglishEraName(int era)
-        {
-            Debug.Assert(era > 0);
-            return era <= s_japaneseErasEnglishNames.Length ? s_japaneseErasEnglishNames[era - 1] : " ";
         }
     }
 }

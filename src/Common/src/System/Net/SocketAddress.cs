@@ -22,8 +22,10 @@ namespace System.Net.Internals
 #endif
     class SocketAddress
     {
+#pragma warning disable CA1802 // these could be const on Windows but need to be static readonly for Unix
         internal static readonly int IPv6AddressSize = SocketAddressPal.IPv6AddressSize;
         internal static readonly int IPv4AddressSize = SocketAddressPal.IPv4AddressSize;
+#pragma warning restore CA1802
 
         internal int InternalSize;
         internal byte[] Buffer;
@@ -229,18 +231,50 @@ namespace System.Net.Internals
 
         public override string ToString()
         {
-            var sb = new StringBuilder().Append(Family.ToString()).Append(':').Append(Size).Append(":{");
+            // Get the address family string.  In almost all cases, this should be a cached string
+            // from the enum and won't actually allocate.
+            string familyString = Family.ToString();
 
+            // Determine the maximum length needed to format.
+            int maxLength =
+                familyString.Length + // AddressFamily
+                1 + // :
+                10 + // Size (max length for a positive Int32)
+                2 + // :{
+                (Size - DataOffset) * 4 + // at most ','+3digits per byte
+                1; // }
+
+            Span<char> result = maxLength <= 256 ? // arbitrary limit that should be large enough for the vast majority of cases
+                stackalloc char[256] :
+                new char[maxLength];
+
+            familyString.AsSpan().CopyTo(result);
+            int length = familyString.Length;
+
+            result[length++] = ':';
+
+            bool formatted = Size.TryFormat(result.Slice(length), out int charsWritten);
+            Debug.Assert(formatted);
+            length += charsWritten;
+
+            result[length++] = ':';
+            result[length++] = '{';
+
+            byte[] buffer = Buffer;
             for (int i = DataOffset; i < Size; i++)
             {
                 if (i > DataOffset)
                 {
-                    sb.Append(',');
+                    result[length++] = ',';
                 }
-                sb.Append(this[i]);
+
+                formatted = buffer[i].TryFormat(result.Slice(length), out charsWritten);
+                Debug.Assert(formatted);
+                length += charsWritten;
             }
 
-            return sb.Append('}').ToString();
+            result[length++] = '}';
+            return result.Slice(0, length).ToString();
         }
     }
 }

@@ -355,7 +355,6 @@ namespace System.Runtime.InteropServices.Tests
             };
 
             var obj = new object();
-#if !netstandard // Marshal.GetIDispatchForObject is not in netstandard2.0
             if (!PlatformDetection.IsNetCore)
             {
                 IntPtr dispatch = Marshal.GetIDispatchForObject(obj);
@@ -369,7 +368,6 @@ namespace System.Runtime.InteropServices.Tests
             {
                 Assert.Throws<PlatformNotSupportedException>(() => Marshal.GetIDispatchForObject(obj));
             }
-#endif
 
             // VT_ERROR => int.
             yield return new object[]
@@ -773,9 +771,10 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Theory]
+        [InlineData(VT_I1 | VT_BYREF)]
         [InlineData(VT_I2 | VT_BYREF)]
-        [InlineData(VT_UI2 | VT_BYREF)]
         [InlineData(VT_I4 | VT_BYREF)]
+        [InlineData(VT_I8 | VT_BYREF)]
         [InlineData(VT_R4 | VT_BYREF)]
         [InlineData(VT_R8 | VT_BYREF)]
         [InlineData(VT_CY | VT_BYREF)]
@@ -786,11 +785,9 @@ namespace System.Runtime.InteropServices.Tests
         [InlineData(VT_BOOL | VT_BYREF)]
         [InlineData(VT_VARIANT | VT_BYREF)]
         [InlineData(VT_UNKNOWN | VT_BYREF)]
-        [InlineData(VT_I1 | VT_BYREF)]
         [InlineData(VT_UI1 | VT_BYREF)]
         [InlineData(VT_UI2 | VT_BYREF)]
         [InlineData(VT_UI4 | VT_BYREF)]
-        [InlineData(VT_I8 | VT_BYREF)]
         [InlineData(VT_UI8 | VT_BYREF)]
         [InlineData(VT_INT | VT_BYREF)]
         [InlineData(VT_UINT | VT_BYREF)]
@@ -820,8 +817,6 @@ namespace System.Runtime.InteropServices.Tests
         [InlineData(VT_ARRAY | VT_BYREF)]
         [InlineData(VT_RESERVED | VT_BYREF)]
         [InlineData(VT_ILLEGAL | VT_BYREF)]
-        [InlineData(VT_ILLEGALMASKED | VT_BYREF)]
-        [InlineData(VT_TYPEMASK| VT_BYREF)]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void GetObjectForNativeVariant_ZeroByRefTypeNotEmptyOrNull_ThrowsArgumentException(ushort vt)
         {

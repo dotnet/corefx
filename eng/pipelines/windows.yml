@@ -3,15 +3,19 @@ parameters:
   # Required: value to specify if the job is comming from an official build to run extra steps and sign binaries
   #   Default: false
   isOfficialBuild: false
-  # Required: value to specify if the build is comming from an outerloop pipeline.
+  # Required: value to specify if the full test matrix should be tested
   #   Default: false
-  isOuterloopBuild: false
+  fullMatrix: false
+  # Optional: value to scope the tests.
+  #   Default: empty
+  testScope: ''
 
 jobs:
 
 - template: corefx-base.yml
   parameters:
     isOfficialBuild: ${{ parameters.isOfficialBuild }}
+    testScope: ${{ parameters.testScope }}
     targetOS: Windows_NT
     jobs:
 
@@ -21,12 +25,12 @@ jobs:
       strategy:
         matrix:
           # PR CI Matrix
-          ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+          ${{ if eq(parameters.fullMatrix, 'false') }}:
             x64_Debug:
               _BuildConfig: Debug
               _architecture: x64
               _framework: netcoreapp
-              _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
+              _helixQueues: $(netcoreappWindowsQueues) # Temporarily disable Nano for issue 38858: +$(nanoQueues)
 
             x86_Release:
               _BuildConfig: Release
@@ -47,8 +51,8 @@ jobs:
               _framework: uap
               _helixQueues: $(uapNetfxQueues)
           
-          # Official build LEGS with HELIX Testing
-          ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+          # Full test matrix
+          ${{ if eq(parameters.fullMatrix, 'true') }}:
             x64_Release:
               _BuildConfig: Release
               _architecture: x64
@@ -61,13 +65,6 @@ jobs:
               _architecture: x86
               _framework: netcoreapp
               _helixQueues: $(netcoreappWindowsQueues)
-              _publishTests: true
-
-            arm64_Release:
-              _BuildConfig: Release
-              _architecture: arm64
-              _framework: netcoreapp
-              _helixQueues: $(windowsArmQueue)
               _publishTests: true
 
             NETFX_x86_Release:
@@ -96,62 +93,45 @@ jobs:
               _framework: uap
               _helixQueues: $(uapNetfxQueues)
 
-            UAPAOT_x86_Release:
+            arm64_Release:
               _BuildConfig: Release
-              _architecture: x86
-              _framework: uapaot
-              _helixQueues: $(uapNetfxQueues)
-
-            UAPAOT_x64_Release:
-              _BuildConfig: Release
-              _architecture: x64
-              _framework: uapaot
-              _helixQueues: $(uapNetfxQueues)
+              _architecture: arm64
+              _framework: netcoreapp
+              _helixQueues: $(windowsArmQueue)
+              _publishTests: true
 
       pool:
-        ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-          name: NetCoreInternal-Pool
-          queue: buildpool.windows.10.amd64.vs2017
-        ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-          name: Hosted VS2017
+        name: Hosted VS2017
 
       submitToHelix: true
       buildExtraArguments: /p:RuntimeOS=win10
 
       variables:
-        - _skipTests: true
-        - _outerloop: ${{ parameters.isOfficialBuild }}
-        - ${{ if eq(parameters.isOuterloopBuild, 'true') }}:
-          - _outerloop: true
+        - nanoQueues: "`(Windows.Nano.1803.Amd64.Open`)windows.10.amd64.serverrs4.open@mcr.microsoft.com/dotnet-buildtools/prereqs:nanoserver-1803-helix-amd64-05227e1-20190509225944"
+        - uapNetfxQueues: Windows.10.Amd64.ClientRS5.Open
+        - windowsArmQueue: Windows.10.Arm64.Open
 
-        - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+        - ${{ if eq(parameters.fullMatrix, 'false') }}:
           - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.ES.Open
-          - nanoQueues: "`(Windows.Nano.1803.Amd64.Open`)windows.10.amd64.serverrs4.open@mcr.microsoft.com/dotnet-buildtools/prereqs:nanoserver-1803-helix-amd64-05227e1-20190509225944"
-          - uapNetfxQueues: Windows.10.Amd64.ClientRS5.Open
 
-        - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-          - netcoreappWindowsQueues: Windows.7.Amd64+Windows.81.Amd64+Windows.10.Amd64.Core+Windows.10.Amd64.ClientRS4
-          - nanoQueues: "`(Windows.Nano.1803.Amd64`)windows.10.amd64.serverrs4@mcr.microsoft.com/dotnet-buildtools/prereqs:nanoserver-1803-helix-amd64-05227e1-20190509225944"
-          - uapNetfxQueues: Windows.10.Amd64.ClientRS5
-          - windowsArmQueue: Windows.10.Arm64
+        - ${{ if eq(parameters.fullMatrix, 'true') }}:
+          - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.Open+Windows.10.Amd64.ServerRS5.Open+Windows.10.Amd64.Client19H1.Open
 
     # There is no point of running legs without outerloop tests, when in an outerloop build.
-    - ${{ if eq(parameters.isOuterloopBuild, 'false') }}:
+    - ${{ if and(ne(parameters.testScope, 'outerloop'), ne(parameters.testScope, 'all')) }}:
       # Packaging all configurations
       - job: AllConfigurations
         displayName: Packaging All Configurations
         strategy:
           matrix:
-            # PR Validation Matrix
-            ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+            ${{ if eq(parameters.fullMatrix, 'false') }}:
               x64_Debug:
                 _BuildConfig: Debug
                 _architecture: x64
                 _framework: allConfigurations
                 _helixQueues: $(allConfigurationsQueues)
 
-            # Official Build Matrix
-            ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+            ${{ if eq(parameters.fullMatrix, 'true') }}:
               x64_Release:
                 _BuildConfig: Release
                 _architecture: x64
@@ -159,21 +139,13 @@ jobs:
                 _helixQueues: $(allConfigurationsQueues)
 
         pool:
-          ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            name: NetCoreInternal-Pool
-            queue: buildpool.windows.10.amd64.vs2017
-          ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-            name: Hosted VS2017
+          name: Hosted VS2017
 
         submitToHelix: true
         buildExtraArguments: /p:RuntimeOS=win10
 
         variables:
-          - _outerloop: false
-          - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-            - allConfigurationsQueues: Windows.10.Amd64.ClientRS5.Open
-          - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            - allConfigurationsQueues: Windows.10.Amd64.ClientRS5
+          - allConfigurationsQueues: Windows.10.Amd64.ClientRS5.Open
 
         _jobFramework: -allConfigurations
         customBuildSteps:
@@ -189,19 +161,12 @@ jobs:
                     $(_msbuildCommonParameters)
             displayName: Build Packages and Tests
 
-      # TODO: UAPAOT official builds should send to helix using continuation runner.
       # Legs without HELIX testing
-      - job: WindowsNoTest
-        displayName: Windows
-        strategy:
-          matrix:
-            ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-              UWP_NETNative_x86_Release:
-                _BuildConfig: Release
-                _architecture: x86
-                _framework: uapaot
-
-            ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+      - ${{ if eq(parameters.fullMatrix, 'true') }}:
+        - job: WindowsNoTest
+          displayName: Windows
+          strategy:
+            matrix:
               arm_Release:
                 _BuildConfig: Release
                 _architecture: arm
@@ -212,26 +177,8 @@ jobs:
                 _architecture: arm
                 _framework: uap
 
-              UAPAOT_arm_Release:
-                _BuildConfig: Release
-                _architecture: arm
-                _framework: uapaot
-
-              UAPAOT_arm64_Release:
-                _BuildConfig: Release
-                _architecture: arm64
-                _framework: uapaot
-
-        pool:
-          ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            name: NetCoreInternal-Pool
-            queue: buildpool.windows.10.amd64.vs2017
-          ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+          pool:
             name: Hosted VS2017
 
-        submitToHelix: false
-        buildExtraArguments: /p:RuntimeOS=win10
-
-        variables:
-          - _skipTests: true
-          - _outerloop: ${{ parameters.isOfficialBuild }}
+          submitToHelix: false
+          buildExtraArguments: /p:RuntimeOS=win10

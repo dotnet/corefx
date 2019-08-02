@@ -135,8 +135,8 @@ namespace System.Tests
             object[] args = new object[] { null };
             d.DynamicInvoke(args);
             MyStruct s = (MyStruct)(args[0]);
-            Assert.Equal(s.X, 7);
-            Assert.Equal(s.Y, 8);
+            Assert.Equal(7, s.X);
+            Assert.Equal(8, s.Y);
         }
 
         [Fact]
@@ -447,8 +447,8 @@ namespace System.Tests
 
         private static void ValueTypeMethod(MyStruct s)
         {
-            Assert.Equal(s.X, 0);
-            Assert.Equal(s.Y, 0);
+            Assert.Equal(0, s.X);
+            Assert.Equal(0, s.Y);
         }
 
         private delegate void ValueTypeDelegate(MyStruct s);
@@ -456,7 +456,7 @@ namespace System.Tests
         private static void NullableMethod(int? n)
         {
             Assert.True(n.HasValue);
-            Assert.Equal(n.Value, 7);
+            Assert.Equal(7, n.Value);
         }
 
         private delegate void NullableDelegate(int? s);
@@ -682,7 +682,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/coreclr#15196")]
         public static void CreateDelegate2_Target_GenericTypeParameter()
         {
 
@@ -1158,7 +1157,7 @@ namespace System.Tests
             {
             }
 
-            public new static int DoRun(C x)
+            public static new int DoRun(C x)
             {
                 return 107;
             }

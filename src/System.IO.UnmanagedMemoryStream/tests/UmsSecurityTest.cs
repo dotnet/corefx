@@ -39,7 +39,6 @@ public class UmsSecurityTests
     }
 
     [Fact]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetFX allows a negative Position following some PositionPointer overflowing inputs. See dotnet/coreclr#11376.")]
     public static void OverflowPositionPointer()
     {
         unsafe
@@ -74,7 +73,7 @@ public class UmsSecurityTests
         Assert.Throws<NotSupportedException>(() => stream.WriteByte(byte.MaxValue)); // Stream does not support writing.
     }
 
-    public static void CheckStreamIntegrity(UnmanagedMemoryStream stream, byte[] originalData)
+    private static void CheckStreamIntegrity(UnmanagedMemoryStream stream, byte[] originalData)
     {
         stream.Position = 0;
         byte[] streamData = new byte[originalData.Length];

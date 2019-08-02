@@ -20,25 +20,29 @@ namespace System.Text.Encodings.Web
     {
         protected JavaScriptEncoder() { }
         public static System.Text.Encodings.Web.JavaScriptEncoder Default { get { throw null; } }
+        public static System.Text.Encodings.Web.JavaScriptEncoder UnsafeRelaxedJsonEscaping { get { throw null; } }
         public static System.Text.Encodings.Web.JavaScriptEncoder Create(System.Text.Encodings.Web.TextEncoderSettings settings) { throw null; }
         public static System.Text.Encodings.Web.JavaScriptEncoder Create(params System.Text.Unicode.UnicodeRange[] allowedRanges) { throw null; }
     }
     public abstract partial class TextEncoder
     {
         protected TextEncoder() { }
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public abstract int MaxOutputCharactersPerInputCharacter { get; }
         public virtual void Encode(System.IO.TextWriter output, char[] value, int startIndex, int characterCount) { }
         public void Encode(System.IO.TextWriter output, string value) { }
         public virtual void Encode(System.IO.TextWriter output, string value, int startIndex, int characterCount) { }
         public virtual string Encode(string value) { throw null; }
+        public virtual System.Buffers.OperationStatus EncodeUtf8(System.ReadOnlySpan<byte> utf8Source, System.Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock = true) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public unsafe abstract int FindFirstCharacterToEncode(char* text, int textLength);
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+        public virtual int FindFirstCharacterToEncodeUtf8(System.ReadOnlySpan<byte> utf8Text) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public unsafe abstract bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten);
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public abstract bool WillEncode(int unicodeScalar);
     }
     public partial class TextEncoderSettings

@@ -29,6 +29,10 @@ namespace System.Text.Json
         public const byte UtcOffsetToken = (byte)'Z';
         public const byte TimePrefix = (byte)'T';
 
+        // \u2028 and \u2029 are considered respectively line and paragraph separators
+        // UTF-8 representation for them is E2, 80, A8/A9
+        public const byte StartingByteOfNonStandardSeparator = 0xE2;
+
         public static ReadOnlySpan<byte> Utf8Bom => new byte[] { 0xEF, 0xBB, 0xBF };
         public static ReadOnlySpan<byte> TrueValue => new byte[] { (byte)'t', (byte)'r', (byte)'u', (byte)'e' };
         public static ReadOnlySpan<byte> FalseValue => new byte[] { (byte)'f', (byte)'a', (byte)'l', (byte)'s', (byte)'e' };
@@ -57,8 +61,10 @@ namespace System.Text.Json
         // All other UTF-16 characters can be represented by either 1 or 2 UTF-8 bytes.
         public const int MaxExpansionFactorWhileTranscoding = 3;
 
-        public const int MaxTokenSize = 2_000_000_000 / MaxExpansionFactorWhileEscaping;  // 357_913_941 bytes
-        public const int MaxCharacterTokenSize = 2_000_000_000 / MaxExpansionFactorWhileEscaping; // 357_913_941 characters
+        public const int MaxEscapedTokenSize = 1_000_000_000;   // Max size for already escaped value.
+        public const int MaxUnescapedTokenSize = MaxEscapedTokenSize / MaxExpansionFactorWhileEscaping;  // 166_666_666 bytes
+        public const int MaxBase46ValueTokenSize = (MaxEscapedTokenSize >> 2 * 3) / MaxExpansionFactorWhileEscaping;  // 125_000_000 bytes
+        public const int MaxCharacterTokenSize = MaxEscapedTokenSize / MaxExpansionFactorWhileEscaping; // 166_666_666 characters
 
         public const int MaximumFormatInt64Length = 20;   // 19 + sign (i.e. -9223372036854775808)
         public const int MaximumFormatUInt64Length = 20;  // i.e. 18446744073709551615

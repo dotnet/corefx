@@ -5,7 +5,7 @@
 // for System.Configuration.CommaDelimitedStringCollection.
 //
 // Author:
-//	Chris Toshok  <toshok@ximian.com>
+//  Chris Toshok  <toshok@ximian.com>
 //
 // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
 //
@@ -63,7 +63,7 @@ namespace MonoTests.System.Configuration
             Assert.Equal("1,2,3", c.ToString());
 
             c.Clear();
-            Assert.Equal(null, c.ToString());
+            Assert.Null(c.ToString());
 
             string[] foo = new string[3];
             foo[0] = "1";

@@ -55,13 +55,13 @@ namespace System.Data.Tests
         private const string diff2 = diff1 + xml8;
 
         private const string schema1 = @"<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>
-	<xs:element name='Root'>
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name='Child' type='xs:string' />
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
+    <xs:element name='Root'>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name='Child' type='xs:string' />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 </xs:schema>";
         private const string schema2 = schema1 + xml8;
 
@@ -643,13 +643,13 @@ namespace System.Data.Tests
         public void NameConflictDSAndTable()
         {
             string xml = @"<PriceListDetails> 
-	<PriceListList>    
-		<Id>1</Id>
-	</PriceListList>
-	<PriceListDetails> 
-		<Id>1</Id>
-		<Status>0</Status>
-	</PriceListDetails>
+    <PriceListList>    
+        <Id>1</Id>
+    </PriceListList>
+    <PriceListDetails> 
+        <Id>1</Id>
+        <Status>0</Status>
+    </PriceListDetails>
 </PriceListDetails>";
 
             var ds = new DataSet();
@@ -720,6 +720,7 @@ namespace System.Data.Tests
             Assert.Equal(2, ds.Tables[0].Columns[2].Ordinal);
         }
 
+        [Fact]
         public void TestSameParentChildName()
         {
             string xml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><resource type=\"parent\">" +
@@ -732,6 +733,7 @@ namespace System.Data.Tests
                 "NewDataSet", 1);
         }
 
+        [Fact]
         public void TestSameColumnName()
         {
             string xml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><resource resource_Id_0=\"parent\">" +

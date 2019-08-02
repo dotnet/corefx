@@ -306,8 +306,8 @@ namespace System.Tests
             var dateTimeOffset3 = new DateTimeOffset(new DateTime(1996, 10, 12, 8, 42, 0, DateTimeKind.Utc));
 
             yield return new object[] { dateTimeOffset2, dateTimeOffset1, new TimeSpan(185, 14, 47, 0) };
-            yield return new object[] { dateTimeOffset1, dateTimeOffset2, new TimeSpan(-185, -14, -47, 0) };
-            yield return new object[] { dateTimeOffset1, dateTimeOffset2, new TimeSpan(-185, -14, -47, 0) };
+            yield return new object[] { dateTimeOffset1, dateTimeOffset2, -new TimeSpan(185, 14, 47, 0) };
+            yield return new object[] { dateTimeOffset1, dateTimeOffset3, -new TimeSpan(130, 10, 27, 0) };
         }
 
         [Theory]
@@ -674,7 +674,42 @@ namespace System.Tests
             DateTimeOffset dateTimeOffset = new DateTimeOffset(new DateTime(1000, DateTimeKind.Utc));
             Assert.Equal(new DateTimeOffset(dateTimeOffset.UtcDateTime.ToLocalTime()), dateTimeOffset.ToLocalTime());
         }
-        
+
+        public static bool IsMinValueNegativeLocalOffset() => TimeZoneInfo.Local.GetUtcOffset(DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc)).Ticks < 0;
+
+        [ConditionalFact(nameof(IsMinValueNegativeLocalOffset))]
+        public static void ToLocalTime_MinValue()
+        {
+            DateTimeOffset dateTimeOffset = new DateTimeOffset(DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc));
+            TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(dateTimeOffset);
+            Assert.Equal(new DateTimeOffset(DateTime.MinValue, offset), dateTimeOffset.ToLocalTime());
+        }
+
+        public static bool IsMaxValuePositiveLocalOffset() => TimeZoneInfo.Local.GetUtcOffset(DateTime.SpecifyKind(DateTime.MaxValue, DateTimeKind.Utc)).Ticks > 0;
+
+        [ConditionalFact(nameof(IsMaxValuePositiveLocalOffset))]
+        public static void ToLocalTime_MaxValue()
+        {
+            DateTimeOffset dateTimeOffset = new DateTimeOffset(DateTime.SpecifyKind(DateTime.MaxValue, DateTimeKind.Utc));
+            TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(dateTimeOffset);
+            Assert.Equal(new DateTimeOffset(DateTime.MaxValue, offset), dateTimeOffset.ToLocalTime());
+        }
+
+        public static bool IsPacificTime() => TimeZoneInfo.Local.Id == "Pacific Standard Time";
+
+        public static IEnumerable<object[]> ToLocalTime_Ambiguous_TestData()
+        {
+            yield return new object[] { new DateTimeOffset(2019, 11, 3, 1, 0, 0, new TimeSpan(-7, 0, 0)) };
+            yield return new object[] { new DateTimeOffset(2019, 11, 3, 1, 0, 0, new TimeSpan(-8, 0, 0)) };
+        }
+
+        [ConditionalTheory(nameof(IsPacificTime))]
+        [MemberData(nameof(ToLocalTime_Ambiguous_TestData))]
+        public static void ToLocalTime_Ambiguous(DateTimeOffset dateTimeOffset)
+        {
+            Assert.True(dateTimeOffset.EqualsExact(dateTimeOffset.ToLocalTime()));
+        }
+
         public static IEnumerable<object[]> Equals_TestData()
         {
             yield return new object[] { DateTimeOffset.MinValue, DateTimeOffset.MinValue, true, true };
@@ -817,7 +852,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework has a bug and incorrectly parses this date")]
         public static void TryParse_TimeDesignators_NetCore()
         {
             DateTimeOffset result;
@@ -832,26 +866,6 @@ namespace System.Tests
             Assert.Equal(4, result.Month);
             Assert.Equal(21, result.Day);
             Assert.Equal(17, result.Hour);
-            Assert.Equal(0, result.Minute);
-            Assert.Equal(0, result.Second);
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr fixed a bug where the .NET framework incorrectly parses this date")]
-        public static void TryParse_TimeDesignators_Netfx()
-        {
-            DateTimeOffset result;
-            Assert.True(DateTimeOffset.TryParse("4/21 5am", new CultureInfo("en-US"), DateTimeStyles.None, out result));
-            Assert.Equal(DateTimeOffset.Now.Month, result.Month);
-            Assert.Equal(DateTimeOffset.Now.Day, result.Day);
-            Assert.Equal(4, result.Hour);
-            Assert.Equal(0, result.Minute);
-            Assert.Equal(0, result.Second);
-
-            Assert.True(DateTimeOffset.TryParse("4/21 5pm", new CultureInfo("en-US"), DateTimeStyles.None, out result));
-            Assert.Equal(DateTimeOffset.Now.Month, result.Month);
-            Assert.Equal(DateTimeOffset.Now.Day, result.Day);
-            Assert.Equal(16, result.Hour);
             Assert.Equal(0, result.Minute);
             Assert.Equal(0, result.Second);
         }

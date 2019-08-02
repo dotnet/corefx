@@ -917,10 +917,10 @@ namespace System.Diagnostics.Tests
             try
             {
                 _process.PriorityClass = ProcessPriorityClass.High;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.High);
+                Assert.Equal(ProcessPriorityClass.High, _process.PriorityClass);
 
                 _process.PriorityClass = ProcessPriorityClass.Normal;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.Normal);
+                Assert.Equal(ProcessPriorityClass.Normal, _process.PriorityClass);
             }
             finally
             {
@@ -1088,22 +1088,27 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void GetProcesses_RemoteMachinePath_ReturnsExpected()
         {
+            string computerDomain = null;
             try
             {
-                Process[] processes = Process.GetProcesses(Environment.MachineName + "." + Domain.GetComputerDomain());
+                computerDomain = Domain.GetComputerDomain().Name;
+            }
+            catch
+            {
+                // Ignore all exceptions - this test is not testing GetComputerDomain.
+                // This path is taken when the executing machine is not domain-joined or DirectoryServices are unavailable.
+                return;
+            }
+
+            try
+            {
+                Process[] processes = Process.GetProcesses(Environment.MachineName + "." + computerDomain);
                 Assert.NotEmpty(processes);
             }
-            catch (ActiveDirectoryObjectNotFoundException)
+            catch (InvalidOperationException)
             {
-                //This will be thrown when the executing machine is not domain-joined, i.e. in CI
-            }
-            catch (TypeInitializationException tie) when (tie.InnerException is ActiveDirectoryOperationException)
-            {
-                //Thrown if the ActiveDirectory module is unavailable
-            }
-            catch (PlatformNotSupportedException)
-            {
-                //System.DirectoryServices is not supported on all platforms
+                // As we can't detect reliably if performance counters are enabled
+                // we let possible InvalidOperationExceptions pass silently.
             }
         }
 
@@ -1221,7 +1226,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Behavior differs on Windows and Unix
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "Retrieving information about local processes is not supported on uap")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void TestProcessOnRemoteMachineWindows()
         {
             Process currentProccess = Process.GetCurrentProcess();
@@ -1255,9 +1260,7 @@ namespace System.Diagnostics.Tests
             Process process = CreateProcessLong();
             process.Start();
 
-            // Processes are not hosted by dotnet in the full .NET Framework.
-            string expectedFileName = (PlatformDetection.IsFullFramework || PlatformDetection.IsNetNative) ? RemoteExecutor.HostRunner : RemoteExecutor.HostRunner;
-            Assert.Equal(expectedFileName, process.StartInfo.FileName);
+            Assert.Equal(RemoteExecutor.HostRunner, process.StartInfo.FileName);
 
             process.Kill();
             Assert.True(process.WaitForExit(WaitInMS));
@@ -1273,16 +1276,7 @@ namespace System.Diagnostics.Tests
             // .NET Core fixes a bug where Process.StartInfo for a unrelated process would
             // return information about the current process, not the unrelated process.
             // See https://github.com/dotnet/corefx/issues/1100.
-            if (PlatformDetection.IsFullFramework)
-            {
-                var startInfo = new ProcessStartInfo();
-                process.StartInfo = startInfo;
-                Assert.Equal(startInfo, process.StartInfo);
-            }
-            else
-            {
-                Assert.Throws<InvalidOperationException>(() => process.StartInfo = new ProcessStartInfo());
-            }
+            Assert.Throws<InvalidOperationException>(() => process.StartInfo = new ProcessStartInfo());
 
             process.Kill();
             Assert.True(process.WaitForExit(WaitInMS));
@@ -1310,14 +1304,7 @@ namespace System.Diagnostics.Tests
             // .NET Core fixes a bug where Process.StartInfo for an unrelated process would
             // return information about the current process, not the unrelated process.
             // See https://github.com/dotnet/corefx/issues/1100.
-            if (PlatformDetection.IsFullFramework)
-            {
-                Assert.NotNull(process.StartInfo);
-            }
-            else
-            {
-                Assert.Throws<InvalidOperationException>(() => process.StartInfo);
-            }
+            Assert.Throws<InvalidOperationException>(() => process.StartInfo);
         }
 
         [Theory]
@@ -1358,16 +1345,6 @@ namespace System.Diagnostics.Tests
         {
             var process = new Process();
             Assert.Throws<InvalidOperationException>(() => process.StandardInput);
-        }
-
-        // [Fact] // uncomment for diagnostic purposes to list processes to console
-        public void TestDiagnosticsWithConsoleWriteLine()
-        {
-            foreach (var p in Process.GetProcesses().OrderBy(p => p.Id))
-            {
-                Console.WriteLine("{0} : \"{1}\" (Threads: {2})", p.Id, p.ProcessName, p.Threads.Count);
-                p.Dispose();
-            }
         }
 
         [Fact]
@@ -1498,7 +1475,6 @@ namespace System.Diagnostics.Tests
         [OuterLoop]
         [Fact]
         [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.Windows)]  // Expected process HandleCounts differs on OSX
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Handle count change is not reliable, but seems less robust on NETFX")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void HandleCountChanges()
         {
@@ -1921,15 +1897,16 @@ namespace System.Diagnostics.Tests
             Assert.True(p.HasExited);
         }
 
-        [ActiveIssue(37198)]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         [ActiveIssue(37054, TestPlatforms.OSX)]
         [Fact]
         public void LongProcessNamesAreSupported()
         {
+            // Alpine implements sleep as a symlink to the busybox executable.
+            // If we rename it, the program will no longer sleep.
             if (PlatformDetection.IsAlpine)
             {
-                return; // https://github.com/dotnet/corefx/issues/37054
+                return;
             }
 
             string programPath = GetProgramPath("sleep");

@@ -14,6 +14,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Threading;
 
@@ -21,21 +22,21 @@ namespace System.Collections.Concurrent
 {
     /// <summary> 
     /// Provides blocking and bounding capabilities for thread-safe collections that 
-    /// implement <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/>. 
+    /// implement <see cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/>. 
     /// </summary>
     /// <remarks>
-    /// <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/> represents a collection
+    /// <see cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/> represents a collection
     /// that allows for thread-safe adding and removing of data. 
-    /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> is used as a wrapper
-    /// for an <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/> instance, allowing
+    /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> is used as a wrapper
+    /// for an <see cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/> instance, allowing
     /// removal attempts from the collection to block until data is available to be removed.  Similarly,
-    /// a <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> can be created to enforce
+    /// a <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> can be created to enforce
     /// an upper-bound on the number of data elements allowed in the 
-    /// <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/>; addition attempts to the
+    /// <see cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/>; addition attempts to the
     /// collection may then block until space is available to store the added items.  In this manner,
-    /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> is similar to a traditional
+    /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> is similar to a traditional
     /// blocking queue data structure, except that the underlying data storage mechanism is abstracted
-    /// away as an <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/>. 
+    /// away as an <see cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/>. 
     /// </remarks>
     /// <typeparam name="T">Specifies the type of elements in the collection.</typeparam>
     [DebuggerTypeProxy(typeof(BlockingCollectionDebugView<>))]
@@ -55,10 +56,10 @@ namespace System.Collections.Concurrent
         private const int COMPLETE_ADDING_ON_MASK = unchecked((int)0x80000000);
 
         #region Properties
-        /// <summary>Gets the bounded capacity of this <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</summary>
+        /// <summary>Gets the bounded capacity of this <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</summary>
         /// <value>The bounded capacity of this collection, or -1 if no bound was supplied.</value>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         public int BoundedCapacity
         {
             get
@@ -68,10 +69,10 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>Gets whether this <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been marked as complete for adding.</summary>
+        /// <summary>Gets whether this <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been marked as complete for adding.</summary>
         /// <value>Whether this collection has been marked as complete for adding.</value>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         public bool IsAddingCompleted
         {
             get
@@ -81,10 +82,10 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>Gets whether this <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been marked as complete for adding and is empty.</summary>
+        /// <summary>Gets whether this <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been marked as complete for adding and is empty.</summary>
         /// <value>Whether this collection has been marked as complete for adding and is empty.</value>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         public bool IsCompleted
         {
             get
@@ -94,10 +95,10 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>Gets the number of items contained in the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.</summary>
-        /// <value>The number of items contained in the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.</value>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <summary>Gets the number of items contained in the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.</summary>
+        /// <value>The number of items contained in the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.</value>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         public int Count
         {
             get
@@ -107,9 +108,9 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>Gets a value indicating whether access to the <see cref="T:System.Collections.ICollection"/> is synchronized.</summary>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <summary>Gets a value indicating whether access to the <see cref="System.Collections.ICollection"/> is synchronized.</summary>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         bool ICollection.IsSynchronized
         {
             get
@@ -121,9 +122,9 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Gets an object that can be used to synchronize access to the <see
-        /// cref="T:System.Collections.ICollection"/>. This property is not supported.
+        /// cref="System.Collections.ICollection"/>. This property is not supported.
         /// </summary>
-        /// <exception cref="T:System.NotSupportedException">The SyncRoot property is not supported.</exception>
+        /// <exception cref="System.NotSupportedException">The SyncRoot property is not supported.</exception>
         object ICollection.SyncRoot
         {
             get
@@ -135,7 +136,7 @@ namespace System.Collections.Concurrent
 
 
         /// <summary>Initializes a new instance of the 
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>
         /// class without an upper-bound.
         /// </summary>
         /// <remarks>
@@ -147,11 +148,11 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>Initializes a new instance of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/>
         /// class with the specified upper-bound.
         /// </summary>
         /// <param name="boundedCapacity">The bounded size of the collection.</param>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The <paramref name="boundedCapacity"/> is
+        /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="boundedCapacity"/> is
         /// not a positive value.</exception>
         /// <remarks>
         /// The default underlying collection is a <see cref="System.Collections.Concurrent.ConcurrentQueue{T}">ConcurrentQueue&lt;T&gt;</see>.
@@ -161,14 +162,14 @@ namespace System.Collections.Concurrent
         {
         }
 
-        /// <summary>Initializes a new instance of the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>
+        /// <summary>Initializes a new instance of the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>
         /// class with the specified upper-bound and using the provided 
-        /// <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/> as its underlying data store.</summary>
+        /// <see cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/> as its underlying data store.</summary>
         /// <param name="collection">The collection to use as the underlying data store.</param>
         /// <param name="boundedCapacity">The bounded size of the collection.</param>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collection"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collection"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The <paramref name="boundedCapacity"/> is not a positive value.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="boundedCapacity"/> is not a positive value.</exception>
         /// <exception cref="System.ArgumentException">The supplied <paramref name="collection"/> contains more values 
         /// than is permitted by <paramref name="boundedCapacity"/>.</exception>
         public BlockingCollection(IProducerConsumerCollection<T> collection, int boundedCapacity)
@@ -191,11 +192,11 @@ nameof(boundedCapacity), boundedCapacity,
             Initialize(collection, boundedCapacity, count);
         }
 
-        /// <summary>Initializes a new instance of the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>
+        /// <summary>Initializes a new instance of the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>
         /// class without an upper-bound and using the provided 
-        /// <see cref="T:System.Collections.Concurrent.IProducerConsumerCollection{T}"/> as its underlying data store.</summary>
+        /// <see cref="System.Collections.Concurrent.IProducerConsumerCollection{T}"/> as its underlying data store.</summary>
         /// <param name="collection">The collection to use as the underlying data store.</param>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collection"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collection"/> argument is
         /// null.</exception>
         public BlockingCollection(IProducerConsumerCollection<T> collection)
         {
@@ -236,18 +237,18 @@ nameof(boundedCapacity), boundedCapacity,
 
 
         /// <summary>
-        /// Adds the item to the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.
+        /// Adds the item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
         /// </summary>
         /// <param name="item">The item to be added to the collection. The value can be a null reference.</param>
-        /// <exception cref="T:System.InvalidOperationException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
+        /// <exception cref="System.InvalidOperationException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
         /// as complete with regards to additions.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
         /// <remarks>
         /// If a bounded capacity was specified when this instance of 
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> was initialized, 
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> was initialized, 
         /// a call to Add may block until space is available to store the provided item.
         /// </remarks>
         public void Add(T item)
@@ -262,22 +263,22 @@ nameof(boundedCapacity), boundedCapacity,
         }
 
         /// <summary>
-        /// Adds the item to the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.
+        /// Adds the item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
         /// canceled.
         /// </summary>
         /// <param name="item">The item to be added to the collection. The value can be a null reference.</param>
         /// <param name="cancellationToken">A cancellation token to observe.</param>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
+        /// <exception cref="System.InvalidOperationException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
         /// as complete with regards to additions.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
         /// <remarks>
         /// If a bounded capacity was specified when this instance of 
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> was initialized, 
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> was initialized, 
         /// a call to <see cref="Add(T,System.Threading.CancellationToken)"/> may block until space is available to store the provided item.
         /// </remarks>
         public void Add(T item, CancellationToken cancellationToken)
@@ -292,23 +293,23 @@ nameof(boundedCapacity), boundedCapacity,
         }
 
         /// <summary>
-        /// Attempts to add the specified item to the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.
+        /// Attempts to add the specified item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
         /// </summary>
         /// <param name="item">The item to be added to the collection.</param>
         /// <returns>true if the <paramref name="item"/> could be added; otherwise, false.</returns>
-        /// <exception cref="T:System.InvalidOperationException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
+        /// <exception cref="System.InvalidOperationException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
         /// as complete with regards to additions.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
         public bool TryAdd(T item)
         {
             return TryAddWithNoTimeValidation(item, 0, new CancellationToken());
         }
 
         /// <summary>
-        /// Attempts to add the specified item to the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.
+        /// Attempts to add the specified item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
         /// </summary>
         /// <param name="item">The item to be added to the collection.</param>
         /// <param name="timeout">A <see cref="System.TimeSpan"/> that represents the number of milliseconds
@@ -316,15 +317,15 @@ nameof(boundedCapacity), boundedCapacity,
         /// </param>
         /// <returns>true if the <paramref name="item"/> could be added to the collection within 
         /// the alloted time; otherwise, false.</returns>
-        /// <exception cref="T:System.InvalidOperationException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
+        /// <exception cref="System.InvalidOperationException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
         /// as complete with regards to additions.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
         /// other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than
-        /// <see cref="System.Int32.MaxValue"/>.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
+        /// <see cref="int.MaxValue"/>.</exception>
+        /// <exception cref="System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
         public bool TryAdd(T item, TimeSpan timeout)
         {
             ValidateTimeout(timeout);
@@ -332,21 +333,21 @@ nameof(boundedCapacity), boundedCapacity,
         }
 
         /// <summary>
-        /// Attempts to add the specified item to the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.
+        /// Attempts to add the specified item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
         /// </summary>
         /// <param name="item">The item to be added to the collection.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
         /// <returns>true if the <paramref name="item"/> could be added to the collection within 
         /// the alloted time; otherwise, false.</returns>
-        /// <exception cref="T:System.InvalidOperationException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
+        /// <exception cref="System.InvalidOperationException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
         /// as complete with regards to additions.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
         /// negative number other than -1, which represents an infinite time-out.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
         public bool TryAdd(T item, int millisecondsTimeout)
         {
             ValidateMillisecondsTimeout(millisecondsTimeout);
@@ -354,7 +355,7 @@ nameof(boundedCapacity), boundedCapacity,
         }
 
         /// <summary>
-        /// Attempts to add the specified item to the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.
+        /// Attempts to add the specified item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
         /// canceled.
         /// </summary>
@@ -365,14 +366,14 @@ nameof(boundedCapacity), boundedCapacity,
         /// <returns>true if the <paramref name="item"/> could be added to the collection within 
         /// the alloted time; otherwise, false.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
+        /// <exception cref="System.InvalidOperationException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
         /// as complete with regards to additions.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
         /// negative number other than -1, which represents an infinite time-out.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
         public bool TryAdd(T item, int millisecondsTimeout, CancellationToken cancellationToken)
         {
             ValidateMillisecondsTimeout(millisecondsTimeout);
@@ -393,7 +394,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <exception cref="System.InvalidOperationException">the collection has already been marked
         /// as complete with regards to additions.</exception>
         /// <exception cref="System.ObjectDisposedException">If the collection has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.InvalidOperationException">The underlying collection didn't accept the item.</exception>
         private bool TryAddWithNoTimeValidation(T item, int millisecondsTimeout, CancellationToken cancellationToken)
         {
             CheckDisposed();
@@ -521,16 +522,16 @@ nameof(boundedCapacity), boundedCapacity,
             return waitForSemaphoreWasSuccessful;
         }
 
-        /// <summary>Takes an item from the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.</summary>
+        /// <summary>Takes an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.</summary>
         /// <returns>The item removed from the collection.</returns>
-        /// <exception cref="T:System.OperationCanceledException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> is empty and has been marked
+        /// <exception cref="System.OperationCanceledException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> is empty and has been marked
         /// as complete with regards to additions.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection was modified
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">The underlying collection was modified
         /// outside of this <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
         /// <remarks>A call to <see cref="Take()"/> may block until an item is available to be removed.</remarks>
         public T Take()
         {
@@ -544,17 +545,17 @@ nameof(boundedCapacity), boundedCapacity,
             return item;
         }
 
-        /// <summary>Takes an item from the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.</summary>
+        /// <summary>Takes an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.</summary>
         /// <returns>The item removed from the collection.</returns>
-        /// <exception cref="T:System.OperationCanceledException">If the <see cref="CancellationToken"/> is
+        /// <exception cref="System.OperationCanceledException">If the <see cref="CancellationToken"/> is
         /// canceled or the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> is empty and has been marked
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> is empty and has been marked
         /// as complete with regards to additions.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection was modified
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">The underlying collection was modified
         /// outside of this <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
         /// <remarks>A call to <see cref="Take(CancellationToken)"/> may block until an item is available to be removed.</remarks>
         public T Take(CancellationToken cancellationToken)
         {
@@ -569,22 +570,22 @@ nameof(boundedCapacity), boundedCapacity,
         }
 
         /// <summary>
-        /// Attempts to remove an item from the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.
+        /// Attempts to remove an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
         /// </summary>
         /// <param name="item">The item removed from the collection.</param>
         /// <returns>true if an item could be removed; otherwise, false.</returns>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection was modified
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">The underlying collection was modified
         /// outside of this <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
-        public bool TryTake(out T item) // TODO-NULLABLE-GENERIC
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        public bool TryTake([MaybeNullWhen(false)] out T item)
         {
             return TryTake(out item, 0, CancellationToken.None);
         }
 
         /// <summary>
-        /// Attempts to remove an item from the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.
+        /// Attempts to remove an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
         /// </summary>
         /// <param name="item">The item removed from the collection.</param>
         /// <param name="timeout">A <see cref="System.TimeSpan"/> that represents the number of milliseconds
@@ -592,43 +593,43 @@ nameof(boundedCapacity), boundedCapacity,
         /// </param>
         /// <returns>true if an item could be removed from the collection within 
         /// the alloted time; otherwise, false.</returns>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
         /// other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than
-        /// <see cref="System.Int32.MaxValue"/>.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection was modified
+        /// <see cref="int.MaxValue"/>.</exception>
+        /// <exception cref="System.InvalidOperationException">The underlying collection was modified
         /// outside of this <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
-        public bool TryTake(out T item, TimeSpan timeout) // TODO-NULLABLE-GENERIC
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        public bool TryTake([MaybeNullWhen(false)] out T item, TimeSpan timeout)
         {
             ValidateTimeout(timeout);
             return TryTakeWithNoTimeValidation(out item, (int)timeout.TotalMilliseconds, CancellationToken.None, null);
         }
 
         /// <summary>
-        /// Attempts to remove an item from the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.
+        /// Attempts to remove an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
         /// </summary>
         /// <param name="item">The item removed from the collection.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
         /// <returns>true if an item could be removed from the collection within 
         /// the alloted time; otherwise, false.</returns>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
         /// negative number other than -1, which represents an infinite time-out.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection was modified
+        /// <exception cref="System.InvalidOperationException">The underlying collection was modified
         /// outside of this <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
-        public bool TryTake(out T item, int millisecondsTimeout) // TODO-NULLABLE-GENERIC
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        public bool TryTake([MaybeNullWhen(false)] out T item, int millisecondsTimeout)
         {
             ValidateMillisecondsTimeout(millisecondsTimeout);
             return TryTakeWithNoTimeValidation(out item, millisecondsTimeout, CancellationToken.None, null);
         }
 
         /// <summary>
-        /// Attempts to remove an item from the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/>.
+        /// Attempts to remove an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
         /// canceled.
         /// </summary>
@@ -639,14 +640,14 @@ nameof(boundedCapacity), boundedCapacity,
         /// <returns>true if an item could be removed from the collection within 
         /// the alloted time; otherwise, false.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
         /// negative number other than -1, which represents an infinite time-out.</exception>
-        /// <exception cref="T:System.InvalidOperationException">The underlying collection was modified
+        /// <exception cref="System.InvalidOperationException">The underlying collection was modified
         /// outside of this <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
-        public bool TryTake(out T item, int millisecondsTimeout, CancellationToken cancellationToken) // TODO-NULLABLE-GENERIC
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        public bool TryTake([MaybeNullWhen(false)] out T item, int millisecondsTimeout, CancellationToken cancellationToken)
         {
             ValidateMillisecondsTimeout(millisecondsTimeout);
             return TryTakeWithNoTimeValidation(out item, millisecondsTimeout, cancellationToken, null);
@@ -668,10 +669,10 @@ nameof(boundedCapacity), boundedCapacity,
         /// <returns>False if the collection remained empty till the timeout period was exhausted. True otherwise.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
         /// <exception cref="System.ObjectDisposedException">If the collection has been disposed.</exception>
-        private bool TryTakeWithNoTimeValidation(out T item, int millisecondsTimeout, CancellationToken cancellationToken, CancellationTokenSource? combinedTokenSource) // TODO-NULLABLE-GENERIC
+        private bool TryTakeWithNoTimeValidation([MaybeNullWhen(false)] out T item, int millisecondsTimeout, CancellationToken cancellationToken, CancellationTokenSource? combinedTokenSource)
         {
             CheckDisposed();
-            item = default(T)!; // TODO-NULLABLE-GENERIC
+            item = default(T)!;
 
             if (cancellationToken.IsCancellationRequested)
                 throw new OperationCanceledException(SR.Common_OperationCanceled, cancellationToken);
@@ -766,24 +767,24 @@ nameof(boundedCapacity), boundedCapacity,
 
         /// <summary>
         /// Adds the specified item to any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item to be added to one of the collections.</param>
         /// <returns>The index of the collection in the <paramref name="collections"/> array to which the item was added.</returns>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element, or at least one of collections has been
         /// marked as complete for adding.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         /// <remarks>
         /// If a bounded capacity was specified when all of the
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances were initialized, 
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances were initialized, 
         /// a call to AddToAny may block until space is available in one of the collections
         /// to store the provided item.
         /// </remarks>
@@ -804,7 +805,7 @@ nameof(boundedCapacity), boundedCapacity,
 
         /// <summary>
         /// Adds the specified item to any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
         /// canceled. 
         /// </summary>
@@ -813,19 +814,19 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="cancellationToken">A cancellation token to observe.</param>
         /// <returns>The index of the collection in the <paramref name="collections"/> array to which the item was added.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element, or at least one of collections has been
         /// marked as complete for adding.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         /// <remarks>
         /// If a bounded capacity was specified when all of the
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances were initialized, 
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances were initialized, 
         /// a call to AddToAny may block until space is available in one of the collections
         /// to store the provided item.
         /// </remarks>
@@ -846,21 +847,21 @@ nameof(boundedCapacity), boundedCapacity,
 
         /// <summary>
         /// Attempts to add the specified item to any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item to be added to one of the collections.</param>
         /// <returns>The index of the collection in the <paramref name="collections"/> 
         /// array to which the item was added, or -1 if the item could not be added.</returns>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element, or at least one of collections has been
         /// marked as complete for adding.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         public static int TryAddToAny(BlockingCollection<T>[] collections, T item)
         {
@@ -869,7 +870,7 @@ nameof(boundedCapacity), boundedCapacity,
 
         /// <summary>
         /// Attempts to add the specified item to any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item to be added to one of the collections.</param>
@@ -878,18 +879,18 @@ nameof(boundedCapacity), boundedCapacity,
         /// </param>
         /// <returns>The index of the collection in the <paramref name="collections"/> 
         /// array to which the item was added, or -1 if the item could not be added.</returns>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element, or at least one of collections has been
         /// marked as complete for adding.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
         /// other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than
-        /// <see cref="System.Int32.MaxValue"/>.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
+        /// <see cref="int.MaxValue"/>.</exception>
+        /// <exception cref="System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         public static int TryAddToAny(BlockingCollection<T>[] collections, T item, TimeSpan timeout)
         {
@@ -899,24 +900,24 @@ nameof(boundedCapacity), boundedCapacity,
 
         /// <summary>
         /// Attempts to add the specified item to any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item to be added to one of the collections.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>        /// <returns>The index of the collection in the <paramref name="collections"/> 
         /// array to which the item was added, or -1 if the item could not be added.</returns>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element, or at least one of collections has been
         /// marked as complete for adding.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
         /// negative number other than -1, which represents an infinite time-out.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
+        /// <exception cref="System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         public static int TryAddToAny(BlockingCollection<T>[] collections, T item, int millisecondsTimeout)
         {
@@ -926,7 +927,7 @@ nameof(boundedCapacity), boundedCapacity,
 
         /// <summary>
         /// Attempts to add the specified item to any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
         /// canceled.
         /// </summary>
@@ -938,17 +939,17 @@ nameof(boundedCapacity), boundedCapacity,
         /// array to which the item was added, or -1 if the item could not be added.</returns>
         /// <param name="cancellationToken">A cancellation token to observe.</param>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element, or at least one of collections has been
         /// marked as complete for adding.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
         /// negative number other than -1, which represents an infinite time-out.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
+        /// <exception cref="System.InvalidOperationException">At least one underlying collection didn't accept the item.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         public static int TryAddToAny(BlockingCollection<T>[] collections, T item, int millisecondsTimeout, CancellationToken cancellationToken)
         {
@@ -1093,7 +1094,7 @@ nameof(boundedCapacity), boundedCapacity,
                 {
                     if (collections[i]._freeNodes != null)
                     {
-                        handlesList.Add(collections[i]._freeNodes!.AvailableWaitHandle); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                        handlesList.Add(collections[i]._freeNodes!.AvailableWaitHandle); // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
                         tokensList.Add(collections[i]._producersCancellationTokenSource.Token);
                     }
                 }
@@ -1148,32 +1149,32 @@ nameof(boundedCapacity), boundedCapacity,
         }
         /// <summary>
         /// Takes an item from any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item removed from one of the collections.</param>
         /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
         /// the item was removed, or -1 if an item could not be removed.</returns>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one of the underlying collections was modified
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">At least one of the underlying collections was modified
         /// outside of its <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         /// <remarks>A call to TakeFromAny may block until an item is available to be removed.</remarks>
-        public static int TakeFromAny(BlockingCollection<T>[] collections, out T item) // TODO-NULLABLE-GENERIC
+        public static int TakeFromAny(BlockingCollection<T>[] collections, [MaybeNull] out T item)
         {
             return TakeFromAny(collections, out item, CancellationToken.None);
         }
 
         /// <summary>
         /// Takes an item from any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
         /// canceled.
         /// </summary>
@@ -1182,20 +1183,20 @@ nameof(boundedCapacity), boundedCapacity,
         /// <param name="cancellationToken">A cancellation token to observe.</param>
         /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
         /// the item was removed, or -1 if an item could not be removed.</returns>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one of the underlying collections was modified
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">At least one of the underlying collections was modified
         /// outside of its <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of 
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of 
         /// 62 for STA and 63 for MTA.</exception>
         /// <remarks>A call to TakeFromAny may block until an item is available to be removed.</remarks>
-        public static int TakeFromAny(BlockingCollection<T>[] collections, out T item, CancellationToken cancellationToken) // TODO-NULLABLE-GENERIC
+        public static int TakeFromAny(BlockingCollection<T>[] collections, [MaybeNull] out T item, CancellationToken cancellationToken)
         {
             int returnValue = TryTakeFromAnyCore(collections, out item, Timeout.Infinite, true, cancellationToken);
             Debug.Assert((returnValue >= 0 && returnValue < collections.Length)
@@ -1205,32 +1206,32 @@ nameof(boundedCapacity), boundedCapacity,
 
         /// <summary>
         /// Attempts to remove an item from any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item removed from one of the collections.</param>
         /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
         /// the item was removed, or -1 if an item could not be removed.</returns>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one of the underlying collections was modified
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.InvalidOperationException">At least one of the underlying collections was modified
         /// outside of its <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         /// <remarks>A call to TryTakeFromAny may block until an item is available to be removed.</remarks>
-        public static int TryTakeFromAny(BlockingCollection<T>[] collections, out T item) // TODO-NULLABLE-GENERIC
+        public static int TryTakeFromAny(BlockingCollection<T>[] collections, [MaybeNull] out T item)
         {
             return TryTakeFromAny(collections, out item, 0);
         }
 
         /// <summary>
         /// Attempts to remove an item from any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item removed from one of the collections.</param>
@@ -1239,22 +1240,22 @@ nameof(boundedCapacity), boundedCapacity,
         /// </param>
         /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
         /// the item was removed, or -1 if an item could not be removed.</returns>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
         /// other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than
-        /// <see cref="System.Int32.MaxValue"/>.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one of the underlying collections was modified
+        /// <see cref="int.MaxValue"/>.</exception>
+        /// <exception cref="System.InvalidOperationException">At least one of the underlying collections was modified
         /// outside of its <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         /// <remarks>A call to TryTakeFromAny may block until an item is available to be removed.</remarks>
-        public static int TryTakeFromAny(BlockingCollection<T>[] collections, out T item, TimeSpan timeout) // TODO-NULLABLE-GENERIC
+        public static int TryTakeFromAny(BlockingCollection<T>[] collections, [MaybeNull] out T item, TimeSpan timeout)
         {
             ValidateTimeout(timeout);
             return TryTakeFromAnyCore(collections, out item, (int)timeout.TotalMilliseconds, false, CancellationToken.None);
@@ -1262,7 +1263,7 @@ nameof(boundedCapacity), boundedCapacity,
 
         /// <summary>
         /// Attempts to remove an item from any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// </summary>
         /// <param name="collections">The array of collections.</param>
         /// <param name="item">The item removed from one of the collections.</param>
@@ -1270,21 +1271,21 @@ nameof(boundedCapacity), boundedCapacity,
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
         /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
         /// the item was removed, or -1 if an item could not be removed.</returns>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
         /// negative number other than -1, which represents an infinite time-out.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one of the underlying collections was modified
+        /// <exception cref="System.InvalidOperationException">At least one of the underlying collections was modified
         /// outside of its <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         /// <remarks>A call to TryTakeFromAny may block until an item is available to be removed.</remarks>
-        public static int TryTakeFromAny(BlockingCollection<T>[] collections, out T item, int millisecondsTimeout) // TODO-NULLABLE-GENERIC
+        public static int TryTakeFromAny(BlockingCollection<T>[] collections, [MaybeNull] out T item, int millisecondsTimeout)
         {
             ValidateMillisecondsTimeout(millisecondsTimeout);
             return TryTakeFromAnyCore(collections, out item, millisecondsTimeout, false, CancellationToken.None);
@@ -1292,7 +1293,7 @@ nameof(boundedCapacity), boundedCapacity,
 
         /// <summary>
         /// Attempts to remove an item from any one of the specified
-        /// <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances.
+        /// <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances.
         /// A <see cref="System.OperationCanceledException"/> is thrown if the <see cref="CancellationToken"/> is
         /// canceled. 
         /// </summary>
@@ -1304,21 +1305,21 @@ nameof(boundedCapacity), boundedCapacity,
         /// <returns>The index of the collection in the <paramref name="collections"/> array from which 
         /// the item was removed, or -1 if an item could not be removed.</returns>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="collections"/> argument is
         /// null.</exception>
-        /// <exception cref="T:System.ArgumentException">The <paramref name="collections"/> argument is
+        /// <exception cref="System.ArgumentException">The <paramref name="collections"/> argument is
         /// a 0-length array or contains a null element.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">At least one of the <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
+        /// <exception cref="System.ObjectDisposedException">At least one of the <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances has been disposed.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
         /// negative number other than -1, which represents an infinite time-out.</exception>
-        /// <exception cref="T:System.InvalidOperationException">At least one of the underlying collections was modified
+        /// <exception cref="System.InvalidOperationException">At least one of the underlying collections was modified
         /// outside of its <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">The count of <paramref name="collections"/> is greater than the maximum size of
         /// 62 for STA and 63 for MTA.</exception>
         /// <remarks>A call to TryTakeFromAny may block until an item is available to be removed.</remarks>
-        public static int TryTakeFromAny(BlockingCollection<T>[] collections, out T item, int millisecondsTimeout, CancellationToken cancellationToken) // TODO-NULLABLE-GENERIC
+        public static int TryTakeFromAny(BlockingCollection<T>[] collections, [MaybeNull] out T item, int millisecondsTimeout, CancellationToken cancellationToken)
         {
             ValidateMillisecondsTimeout(millisecondsTimeout);
             return TryTakeFromAnyCore(collections, out item, millisecondsTimeout, false, cancellationToken);
@@ -1341,7 +1342,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <exception cref="System.ArgumentException">If the collections argument is a 0-length array or contains a 
         /// null element. Also, if at least one of the collections has been marked complete for adds.</exception>
         /// <exception cref="System.ObjectDisposedException">If at least one of the collections has been disposed.</exception>
-        private static int TryTakeFromAnyCore(BlockingCollection<T>[] collections, out T item, int millisecondsTimeout, bool isTakeOperation, CancellationToken externalCancellationToken) // TODO-NULLABLE-GENERIC
+        private static int TryTakeFromAnyCore(BlockingCollection<T>[] collections, [MaybeNull] out T item, int millisecondsTimeout, bool isTakeOperation, CancellationToken externalCancellationToken)
         {
             ValidateCollectionsArray(collections, false);
 
@@ -1375,7 +1376,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <exception cref="System.ArgumentException">If the collections argument is a 0-length array or contains a 
         /// null element. Also, if at least one of the collections has been marked complete for adds.</exception>
         /// <exception cref="System.ObjectDisposedException">If at least one of the collections has been disposed.</exception>
-        private static int TryTakeFromAnyCoreSlow(BlockingCollection<T>[] collections, out T item, int millisecondsTimeout, bool isTakeOperation, CancellationToken externalCancellationToken) // TODO-NULLABLE-GENERIC
+        private static int TryTakeFromAnyCoreSlow(BlockingCollection<T>[] collections, [MaybeNull] out T item, int millisecondsTimeout, bool isTakeOperation, CancellationToken externalCancellationToken)
         {
             const int OPERATION_FAILED = -1;
 
@@ -1453,20 +1454,20 @@ nameof(boundedCapacity), boundedCapacity,
                     timeout = UpdateTimeOut(startTime, millisecondsTimeout);
             }
 
-            item = default(T)!; //case#2  // TODO-NULLABLE-GENERIC
+            item = default(T)!; //case#2
             return OPERATION_FAILED;
         }
 
         /// <summary>
-        /// Marks the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instances
+        /// Marks the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instances
         /// as not accepting any more additions.  
         /// </summary>
         /// <remarks>
         /// After a collection has been marked as complete for adding, adding to the collection is not permitted 
         /// and attempts to remove from the collection will not wait when the collection is empty.
         /// </remarks>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         public void CompleteAdding()
         {
             CheckDisposed();
@@ -1518,7 +1519,7 @@ nameof(boundedCapacity), boundedCapacity,
 
 
         /// <summary>
-        /// Releases resources used by the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.
+        /// Releases resources used by the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.
         /// </summary>
         public void Dispose()
         {
@@ -1527,7 +1528,7 @@ nameof(boundedCapacity), boundedCapacity,
         }
 
         /// <summary>
-        /// Releases resources used by the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance.
+        /// Releases resources used by the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.
         /// </summary>
         /// <param name="disposing">Whether being disposed explicitly (true) or due to a finalizer (false).</param>
         protected virtual void Dispose(bool disposing)
@@ -1545,10 +1546,10 @@ nameof(boundedCapacity), boundedCapacity,
             }
         }
 
-        /// <summary>Copies the items from the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance into a new array.</summary>
+        /// <summary>Copies the items from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance into a new array.</summary>
         /// <returns>An array containing copies of the elements of the collection.</returns>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         /// <remarks>
         /// The copied elements are not removed from the collection.
         /// </remarks>
@@ -1558,38 +1559,38 @@ nameof(boundedCapacity), boundedCapacity,
             return _collection.ToArray();
         }
 
-        /// <summary>Copies all of the items in the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance 
+        /// <summary>Copies all of the items in the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance 
         /// to a compatible one-dimensional array, starting at the specified index of the target array.
         /// </summary>
         /// <param name="array">The one-dimensional array that is the destination of the elements copied from 
-        /// the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance. The array must have zero-based indexing.</param>
+        /// the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance. The array must have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying begins.</param>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="array"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="array"/> argument is
         /// null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="index"/> argument is less than zero.</exception>
         /// <exception cref="System.ArgumentException">The <paramref name="index"/> argument is equal to or greater 
         /// than the length of the <paramref name="array"/>.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         public void CopyTo(T[] array, int index)
         {
             ((ICollection)this).CopyTo(array, index);
         }
 
-        /// <summary>Copies all of the items in the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance 
+        /// <summary>Copies all of the items in the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance 
         /// to a compatible one-dimensional array, starting at the specified index of the target array.
         /// </summary>
         /// <param name="array">The one-dimensional array that is the destination of the elements copied from 
-        /// the <see cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> instance. The array must have zero-based indexing.</param>
+        /// the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance. The array must have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying begins.</param>
-        /// <exception cref="T:System.ArgumentNullException">The <paramref name="array"/> argument is
+        /// <exception cref="System.ArgumentNullException">The <paramref name="array"/> argument is
         /// null.</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">The <paramref name="index"/> argument is less than zero.</exception>
         /// <exception cref="System.ArgumentException">The <paramref name="index"/> argument is equal to or greater 
         /// than the length of the <paramref name="array"/>, the array is multidimensional, or the type parameter for the collection 
         /// cannot be cast automatically to the type of the destination array.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         void ICollection.CopyTo(Array array, int index)
         {
             CheckDisposed();
@@ -1628,23 +1629,23 @@ nameof(boundedCapacity), boundedCapacity,
             }
         }
 
-        /// <summary>Provides a consuming <see cref="T:System.Collections.Generics.IEnumerable{T}"/> for items in the collection.</summary>
-        /// <returns>An <see cref="T:System.Collections.Generics.IEnumerable{T}"/> that removes and returns items from the collection.</returns>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <summary>Provides a consuming <see cref="System.Collections.Generic.IEnumerable{T}"/> for items in the collection.</summary>
+        /// <returns>An <see cref="System.Collections.Generic.IEnumerable{T}"/> that removes and returns items from the collection.</returns>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         public IEnumerable<T> GetConsumingEnumerable()
         {
             return GetConsumingEnumerable(CancellationToken.None);
         }
 
-        /// <summary>Provides a consuming <see cref="T:System.Collections.Generics.IEnumerable{T}"/> for items in the collection.
+        /// <summary>Provides a consuming <see cref="System.Collections.Generic.IEnumerable{T}"/> for items in the collection.
         /// Calling MoveNext on the returned enumerable will block if there is no data available, or will
         /// throw an <see cref="System.OperationCanceledException"/> if the <see cref="CancellationToken"/> is canceled.
         /// </summary>
         /// <param name="cancellationToken">A cancellation token to observe.</param>
-        /// <returns>An <see cref="T:System.Collections.Generics.IEnumerable{T}"/> that removes and returns items from the collection.</returns>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <returns>An <see cref="System.Collections.Generic.IEnumerable{T}"/> that removes and returns items from the collection.</returns>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled.</exception>
         public IEnumerable<T> GetConsumingEnumerable(CancellationToken cancellationToken)
         {
@@ -1670,20 +1671,20 @@ nameof(boundedCapacity), boundedCapacity,
             }
         }
 
-        /// <summary>Provides an <see cref="T:System.Collections.Generics.IEnumerator{T}"/> for items in the collection.</summary>
-        /// <returns>An <see cref="T:System.Collections.Generics.IEnumerator{T}"/> for the items in the collection.</returns>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <summary>Provides an <see cref="System.Collections.Generic.IEnumerator{T}"/> for items in the collection.</summary>
+        /// <returns>An <see cref="System.Collections.Generic.IEnumerator{T}"/> for the items in the collection.</returns>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
             CheckDisposed();
             return _collection.GetEnumerator();
         }
 
-        /// <summary>Provides an <see cref="T:System.Collections.IEnumerator"/> for items in the collection.</summary>
-        /// <returns>An <see cref="T:System.Collections.IEnumerator"/> for the items in the collection.</returns>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
-        /// cref="T:System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
+        /// <summary>Provides an <see cref="System.Collections.IEnumerator"/> for items in the collection.</summary>
+        /// <returns>An <see cref="System.Collections.IEnumerator"/> for the items in the collection.</returns>
+        /// <exception cref="System.ObjectDisposedException">The <see
+        /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been disposed.</exception>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable<T>)this).GetEnumerator();

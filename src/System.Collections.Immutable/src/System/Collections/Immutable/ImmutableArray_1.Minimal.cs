@@ -18,7 +18,7 @@ namespace System.Collections.Immutable
     /// <typeparam name="T">The type of element stored by the array.</typeparam>
     /// <devremarks>
     /// This type has a documented contract of being exactly one reference-type field in size.
-    /// Our own <see cref="T:System.Collections.Immutable.ImmutableInterlocked"/> class depends on it, as well as others externally.
+    /// Our own <see cref="System.Collections.Immutable.ImmutableInterlocked"/> class depends on it, as well as others externally.
     /// IMPORTANT NOTICE FOR MAINTAINERS AND REVIEWERS:
     /// This type should be thread-safe. As a struct, it cannot protect its own fields
     /// from being changed from one thread while its members are executing on other threads
@@ -39,7 +39,9 @@ namespace System.Collections.Immutable
         /// <summary>
         /// An empty (initialized) instance of <see cref="ImmutableArray{T}"/>.
         /// </summary>
+#pragma warning disable CA1825 // Array.Empty<T>() doesn't exist in all configurations
         public static readonly ImmutableArray<T> Empty = new ImmutableArray<T>(new T[0]);
+#pragma warning restore CA1825
 
         /// <summary>
         /// The backing field for this instance. References to this value should never be shared with outside code.
@@ -129,7 +131,7 @@ namespace System.Collections.Immutable
             }
         }
 
-#if FEATURE_ITEMREFAPI
+#if !NETSTANDARD10
         /// <summary>
         /// Gets a read-only reference to the element at the specified index in the read-only list.
         /// </summary>
@@ -302,11 +304,11 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="Object"/> is equal to this instance.
+        /// Determines whether the specified <see cref="object"/> is equal to this instance.
         /// </summary>
-        /// <param name="obj">The <see cref="Object"/> to compare with this instance.</param>
+        /// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="Object"/> is equal to this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [Pure]
         public override bool Equals(object obj)

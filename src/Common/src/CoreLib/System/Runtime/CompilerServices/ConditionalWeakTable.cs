@@ -5,13 +5,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Internal.Runtime.CompilerServices;
 
 namespace System.Runtime.CompilerServices
 {
     public sealed class ConditionalWeakTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
-        where TKey : class?
+        where TKey : class
         where TValue : class?
     {
         // Lifetimes of keys and values:
@@ -51,7 +52,7 @@ namespace System.Runtime.CompilerServices
         /// The key may get garbaged collected during the TryGetValue operation. If so, TryGetValue
         /// may at its discretion, return "false" and set "value" to the default (as if the key was not present.)
         /// </remarks>
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
             if (key is null)
             {
@@ -336,7 +337,7 @@ namespace System.Runtime.CompilerServices
                             while (_currentIndex < _maxIndexInclusive)
                             {
                                 _currentIndex++;
-                                if (c.TryGetEntry(_currentIndex, out TKey key, out TValue value))
+                                if (c.TryGetEntry(_currentIndex, out TKey? key, out TValue value))
                                 {
                                     _current = new KeyValuePair<TKey, TValue>(key, value);
                                     return true;
@@ -362,7 +363,7 @@ namespace System.Runtime.CompilerServices
                 }
             }
 
-            object? IEnumerator.Current => Current; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/23268
+            object? IEnumerator.Current => Current;
 
             public void Reset() { }
         }
@@ -502,7 +503,7 @@ namespace System.Runtime.CompilerServices
             }
 
             /// <summary>Worker for finding a key/value pair. Must hold _lock.</summary>
-            internal bool TryGetValueWorker(TKey key, out TValue value)
+            internal bool TryGetValueWorker(TKey key, [MaybeNullWhen(false)] out TValue value)
             {
                 Debug.Assert(key != null); // Key already validated as non-null
 
@@ -536,7 +537,7 @@ namespace System.Runtime.CompilerServices
             }
 
             /// <summary>Gets the entry at the specified entry index.</summary>
-            internal bool TryGetEntry(int index, out TKey key, out TValue value)
+            internal bool TryGetEntry(int index, [NotNullWhen(true)] out TKey? key, [MaybeNullWhen(false)] out TValue value)
             {
                 if (index < _entries.Length)
                 {
@@ -551,8 +552,8 @@ namespace System.Runtime.CompilerServices
                     }
                 }
 
-                key = default!; // TODO-NULLABLE-GENERIC
-                value = default!; // TODO-NULLABLE-GENERIC
+                key = default;
+                value = default!;
                 return false;
             }
 

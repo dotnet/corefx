@@ -134,7 +134,7 @@ namespace System.Security.Cryptography.CryptoConfigTests
             Assert.Equal("1.3.36.3.3.2.8.1.1.8", CryptoConfig.MapNameToOID("brainpoolP256t1"));
 
             // Invalid oid
-            Assert.Equal(null, CryptoConfig.MapNameToOID("NOT_A_VALID_OID"));
+            Assert.Null(CryptoConfig.MapNameToOID("NOT_A_VALID_OID"));
         }
 
         [Fact]
@@ -301,7 +301,7 @@ namespace System.Security.Cryptography.CryptoConfigTests
             // Valid case
             object obj = CryptoConfig.CreateFromName(className, "Hello");
             Assert.NotNull(obj);
-            Assert.IsType(typeof(ClassWithCtorArguments), obj);
+            Assert.IsType<ClassWithCtorArguments>(obj);
 
             ClassWithCtorArguments ctorObj = (ClassWithCtorArguments)obj;
             Assert.Equal("Hello", ctorObj.MyString);
@@ -374,7 +374,7 @@ namespace System.Security.Cryptography.CryptoConfigTests
         {
             object obj = CryptoConfig.CreateFromName(name);
             Assert.NotNull(obj);
-            Assert.IsType(typeof(TExpected), obj);
+            Assert.IsType<TExpected>(obj);
         }
 
         public class ClassWithCtorArguments

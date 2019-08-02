@@ -10,12 +10,105 @@ namespace System.Text.Json.Serialization.Tests
     public static partial class ArrayTests
     {
         [Fact]
+        public static void WritePrimitiveArray()
+        {
+            var input = new int[] { 0, 1 };
+            string json = JsonSerializer.Serialize(input);
+            Assert.Equal("[0,1]", json);
+        }
+
+        [Fact]
+        public static void WriteArrayWithEnums()
+        {
+            var input = new SampleEnum[] { SampleEnum.One, SampleEnum.Two };
+            string json = JsonSerializer.Serialize(input);
+            Assert.Equal("[1,2]", json);
+        }
+
+        [Fact]
+        public static void WriteNullByteArray()
+        {
+            byte[] input = null;
+            string json = JsonSerializer.Serialize(input);
+            Assert.Equal($"null", json);
+        }
+
+        [Fact]
+        public static void WriteEmptyByteArray()
+        {
+            var input = new byte[] {};
+            string json = JsonSerializer.Serialize(input);
+            Assert.Equal(@"""""", json);
+        }
+
+        [Fact]
+        public static void WriteByteArray()
+        {
+            var input = new byte[] { 1, 2 };
+            string json = JsonSerializer.Serialize(input);
+            Assert.Equal($"\"{Convert.ToBase64String(input)}\"", json);
+        }
+
+        [Fact]
+        public static void WriteTwo2dByteArray()
+        {
+            var inner = new byte[] { 1, 2 };
+            var outer = new byte[2][] { inner, inner };
+            string json = JsonSerializer.Serialize(outer);
+            Assert.Equal($"[\"{Convert.ToBase64String(inner)}\",\"{Convert.ToBase64String(inner)}\"]", json);
+        }
+
+        [Fact]
+        public static void WriteObjectArray()
+        {
+            string json;
+
+            {
+                SimpleTestClass[] input = new SimpleTestClass[] { new SimpleTestClass(), new SimpleTestClass() };
+                input[0].Initialize();
+                input[0].Verify();
+
+                input[1].Initialize();
+                input[1].Verify();
+
+                json = JsonSerializer.Serialize(input);
+            }
+
+            {
+                SimpleTestClass[] output = JsonSerializer.Deserialize<SimpleTestClass[]>(json);
+                Assert.Equal(2, output.Length);
+                output[0].Verify();
+                output[1].Verify();
+            }
+        }
+
+        [Fact]
+        public static void WriteEmptyObjectArray()
+        {
+            object[] arr = new object[] { new object() };
+
+            string json = JsonSerializer.Serialize(arr);
+            Assert.Equal("[{}]", json);
+        }
+
+        [Fact]
+        public static void WritePrimitiveJaggedArray()
+        {
+            var input = new int[2][];
+            input[0] = new int[] { 1, 2 };
+            input[1] = new int[] { 3, 4 };
+
+            string json = JsonSerializer.Serialize(input);
+            Assert.Equal("[[1,2],[3,4]]", json);
+        }
+
+        [Fact]
         public static void WriteEmpty()
         {
-            string json = JsonSerializer.ToString(new SimpleTestClass[] { });
+            string json = JsonSerializer.Serialize(new SimpleTestClass[] { });
             Assert.Equal("[]", json);
 
-            json = JsonSerializer.ToString(new List<SimpleTestClass>());
+            json = JsonSerializer.Serialize(new List<SimpleTestClass>());
             Assert.Equal("[]", json);
         }
 
@@ -28,16 +121,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithStringArray obj = new TestClassWithStringArray();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithStringArray obj = JsonSerializer.Parse<TestClassWithStringArray>(json);
+                TestClassWithStringArray obj = JsonSerializer.Deserialize<TestClassWithStringArray>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithStringArray obj = JsonSerializer.Parse<TestClassWithStringArray>(TestClassWithStringArray.s_data);
+                TestClassWithStringArray obj = JsonSerializer.Deserialize<TestClassWithStringArray>(TestClassWithStringArray.s_data);
                 obj.Verify();
             }
         }
@@ -51,21 +144,19 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithObjectList obj = new TestClassWithObjectList();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithObjectList obj = JsonSerializer.Parse<TestClassWithObjectList>(json);
+                TestClassWithObjectList obj = JsonSerializer.Deserialize<TestClassWithObjectList>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithObjectList obj = JsonSerializer.Parse<TestClassWithObjectList>(TestClassWithObjectList.s_data);
+                TestClassWithObjectList obj = JsonSerializer.Deserialize<TestClassWithObjectList>(TestClassWithObjectList.s_data);
                 obj.Verify();
             }
         }
-
-
 
         [Fact]
         public static void WriteClassWithGenericList()
@@ -76,20 +167,21 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithGenericList obj = new TestClassWithGenericList();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithGenericList obj = JsonSerializer.Parse<TestClassWithGenericList>(json);
+                TestClassWithGenericList obj = JsonSerializer.Deserialize<TestClassWithGenericList>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithGenericList obj = JsonSerializer.Parse<TestClassWithGenericList>(TestClassWithGenericList.s_data);
+                TestClassWithGenericList obj = JsonSerializer.Deserialize<TestClassWithGenericList>(TestClassWithGenericList.s_data);
                 obj.Verify();
             }
         }
 
+        [Fact]
         public static void WriteClassWithGenericIEnumerableT()
         {
             string json;
@@ -98,16 +190,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithGenericIEnumerableT obj = new TestClassWithGenericIEnumerableT();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithGenericIEnumerableT obj = JsonSerializer.Parse<TestClassWithGenericIEnumerableT>(json);
+                TestClassWithGenericIEnumerableT obj = JsonSerializer.Deserialize<TestClassWithGenericIEnumerableT>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithGenericIEnumerableT obj = JsonSerializer.Parse<TestClassWithGenericIEnumerableT>(TestClassWithGenericIEnumerableT.s_data);
+                TestClassWithGenericIEnumerableT obj = JsonSerializer.Deserialize<TestClassWithGenericIEnumerableT>(TestClassWithGenericIEnumerableT.s_data);
                 obj.Verify();
             }
         }
@@ -121,16 +213,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithGenericIListT obj = new TestClassWithGenericIListT();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithGenericIListT obj = JsonSerializer.Parse<TestClassWithGenericIListT>(json);
+                TestClassWithGenericIListT obj = JsonSerializer.Deserialize<TestClassWithGenericIListT>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithGenericIListT obj = JsonSerializer.Parse<TestClassWithGenericIListT>(TestClassWithGenericIListT.s_data);
+                TestClassWithGenericIListT obj = JsonSerializer.Deserialize<TestClassWithGenericIListT>(TestClassWithGenericIListT.s_data);
                 obj.Verify();
             }
         }
@@ -144,16 +236,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithGenericICollectionT obj = new TestClassWithGenericICollectionT();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithGenericICollectionT obj = JsonSerializer.Parse<TestClassWithGenericICollectionT>(json);
+                TestClassWithGenericICollectionT obj = JsonSerializer.Deserialize<TestClassWithGenericICollectionT>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithGenericICollectionT obj = JsonSerializer.Parse<TestClassWithGenericICollectionT>(TestClassWithGenericICollectionT.s_data);
+                TestClassWithGenericICollectionT obj = JsonSerializer.Deserialize<TestClassWithGenericICollectionT>(TestClassWithGenericICollectionT.s_data);
                 obj.Verify();
             }
         }
@@ -167,16 +259,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithGenericIReadOnlyCollectionT obj = new TestClassWithGenericIReadOnlyCollectionT();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithGenericIReadOnlyCollectionT obj = JsonSerializer.Parse<TestClassWithGenericIReadOnlyCollectionT>(json);
+                TestClassWithGenericIReadOnlyCollectionT obj = JsonSerializer.Deserialize<TestClassWithGenericIReadOnlyCollectionT>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithGenericIReadOnlyCollectionT obj = JsonSerializer.Parse<TestClassWithGenericIReadOnlyCollectionT>(TestClassWithGenericIReadOnlyCollectionT.s_data);
+                TestClassWithGenericIReadOnlyCollectionT obj = JsonSerializer.Deserialize<TestClassWithGenericIReadOnlyCollectionT>(TestClassWithGenericIReadOnlyCollectionT.s_data);
                 obj.Verify();
             }
         }
@@ -190,16 +282,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithGenericIReadOnlyListT obj = new TestClassWithGenericIReadOnlyListT();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithGenericIReadOnlyListT obj = JsonSerializer.Parse<TestClassWithGenericIReadOnlyListT>(json);
+                TestClassWithGenericIReadOnlyListT obj = JsonSerializer.Deserialize<TestClassWithGenericIReadOnlyListT>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithGenericIReadOnlyListT obj = JsonSerializer.Parse<TestClassWithGenericIReadOnlyListT>(TestClassWithGenericIEnumerableT.s_data);
+                TestClassWithGenericIReadOnlyListT obj = JsonSerializer.Deserialize<TestClassWithGenericIReadOnlyListT>(TestClassWithGenericIEnumerableT.s_data);
                 obj.Verify();
             }
         }
@@ -213,16 +305,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithObjectIEnumerableT obj = new TestClassWithObjectIEnumerableT();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithObjectIEnumerableT obj = JsonSerializer.Parse<TestClassWithObjectIEnumerableT>(json);
+                TestClassWithObjectIEnumerableT obj = JsonSerializer.Deserialize<TestClassWithObjectIEnumerableT>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithObjectIEnumerableT obj = JsonSerializer.Parse<TestClassWithObjectIEnumerableT>(TestClassWithObjectIEnumerableT.s_data);
+                TestClassWithObjectIEnumerableT obj = JsonSerializer.Deserialize<TestClassWithObjectIEnumerableT>(TestClassWithObjectIEnumerableT.s_data);
                 obj.Verify();
             }
         }
@@ -236,16 +328,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithObjectIListT obj = new TestClassWithObjectIListT();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithObjectIListT obj = JsonSerializer.Parse<TestClassWithObjectIListT>(json);
+                TestClassWithObjectIListT obj = JsonSerializer.Deserialize<TestClassWithObjectIListT>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithObjectIListT obj = JsonSerializer.Parse<TestClassWithObjectIListT>(TestClassWithObjectIListT.s_data);
+                TestClassWithObjectIListT obj = JsonSerializer.Deserialize<TestClassWithObjectIListT>(TestClassWithObjectIListT.s_data);
                 obj.Verify();
             }
         }
@@ -259,16 +351,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithObjectICollectionT obj = new TestClassWithObjectICollectionT();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithObjectICollectionT obj = JsonSerializer.Parse<TestClassWithObjectICollectionT>(json);
+                TestClassWithObjectICollectionT obj = JsonSerializer.Deserialize<TestClassWithObjectICollectionT>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithObjectICollectionT obj = JsonSerializer.Parse<TestClassWithObjectICollectionT>(TestClassWithObjectICollectionT.s_data);
+                TestClassWithObjectICollectionT obj = JsonSerializer.Deserialize<TestClassWithObjectICollectionT>(TestClassWithObjectICollectionT.s_data);
                 obj.Verify();
             }
         }
@@ -282,16 +374,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithObjectIReadOnlyCollectionT obj = new TestClassWithObjectIReadOnlyCollectionT();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithObjectIReadOnlyCollectionT obj = JsonSerializer.Parse<TestClassWithObjectIReadOnlyCollectionT>(json);
+                TestClassWithObjectIReadOnlyCollectionT obj = JsonSerializer.Deserialize<TestClassWithObjectIReadOnlyCollectionT>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithObjectIReadOnlyCollectionT obj = JsonSerializer.Parse<TestClassWithObjectIReadOnlyCollectionT>(TestClassWithObjectIReadOnlyCollectionT.s_data);
+                TestClassWithObjectIReadOnlyCollectionT obj = JsonSerializer.Deserialize<TestClassWithObjectIReadOnlyCollectionT>(TestClassWithObjectIReadOnlyCollectionT.s_data);
                 obj.Verify();
             }
         }
@@ -305,16 +397,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithObjectIReadOnlyListT obj = new TestClassWithObjectIReadOnlyListT();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithObjectIReadOnlyListT obj = JsonSerializer.Parse<TestClassWithObjectIReadOnlyListT>(json);
+                TestClassWithObjectIReadOnlyListT obj = JsonSerializer.Deserialize<TestClassWithObjectIReadOnlyListT>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithObjectIReadOnlyListT obj = JsonSerializer.Parse<TestClassWithObjectIReadOnlyListT>(TestClassWithObjectIEnumerableT.s_data);
+                TestClassWithObjectIReadOnlyListT obj = JsonSerializer.Deserialize<TestClassWithObjectIReadOnlyListT>(TestClassWithObjectIEnumerableT.s_data);
                 obj.Verify();
             }
         }
@@ -328,16 +420,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithObjectIEnumerableConstructibleTypes obj = new TestClassWithObjectIEnumerableConstructibleTypes();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithObjectIEnumerableConstructibleTypes obj = JsonSerializer.Parse<TestClassWithObjectIEnumerableConstructibleTypes>(json);
+                TestClassWithObjectIEnumerableConstructibleTypes obj = JsonSerializer.Deserialize<TestClassWithObjectIEnumerableConstructibleTypes>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithObjectIEnumerableConstructibleTypes obj = JsonSerializer.Parse<TestClassWithObjectIEnumerableConstructibleTypes>(TestClassWithObjectIEnumerableConstructibleTypes.s_data);
+                TestClassWithObjectIEnumerableConstructibleTypes obj = JsonSerializer.Deserialize<TestClassWithObjectIEnumerableConstructibleTypes>(TestClassWithObjectIEnumerableConstructibleTypes.s_data);
                 obj.Verify();
             }
         }
@@ -351,16 +443,16 @@ namespace System.Text.Json.Serialization.Tests
                 TestClassWithObjectImmutableTypes obj = new TestClassWithObjectImmutableTypes();
                 obj.Initialize();
                 obj.Verify();
-                json = JsonSerializer.ToString(obj);
+                json = JsonSerializer.Serialize(obj);
             }
 
             {
-                TestClassWithObjectImmutableTypes obj = JsonSerializer.Parse<TestClassWithObjectImmutableTypes>(json);
+                TestClassWithObjectImmutableTypes obj = JsonSerializer.Deserialize<TestClassWithObjectImmutableTypes>(json);
                 obj.Verify();
             }
 
             {
-                TestClassWithObjectImmutableTypes obj = JsonSerializer.Parse<TestClassWithObjectImmutableTypes>(TestClassWithObjectImmutableTypes.s_data);
+                TestClassWithObjectImmutableTypes obj = JsonSerializer.Deserialize<TestClassWithObjectImmutableTypes>(TestClassWithObjectImmutableTypes.s_data);
                 obj.Verify();
             }
         }

@@ -55,13 +55,12 @@ namespace System.Reflection.Tests
         public void Invoke()
         {
             ConstructorInfo[] constructors = GetConstructors(typeof(ClassWith3Constructors));
-            Assert.Equal(constructors.Length, 3);
+            Assert.Equal(3, constructors.Length);
             ClassWith3Constructors obj = (ClassWith3Constructors)constructors[0].Invoke(null);
             Assert.NotNull(obj);
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Invoking static constructors are not supported on UapAot.")]
         public void Invoke_StaticConstructor_NullObject_NullParameters()
         {
             ConstructorInfo[] constructors = GetConstructors(typeof(ClassWithStaticConstructor));
@@ -111,7 +110,7 @@ namespace System.Reflection.Tests
         {
             ConstructorInfo[] constructors = GetConstructors(typeof(ClassWith3Constructors));
             ClassWith3Constructors obj = (ClassWith3Constructors)constructors[1].Invoke(new object[] { 100 });
-            Assert.Equal(obj.intValue, 100);
+            Assert.Equal(100, obj.intValue);
         }
 
         [Fact]
@@ -119,8 +118,8 @@ namespace System.Reflection.Tests
         {
             ConstructorInfo[] constructors = GetConstructors(typeof(ClassWith3Constructors));
             ClassWith3Constructors obj = (ClassWith3Constructors)constructors[2].Invoke(new object[] { 101, "hello" });
-            Assert.Equal(obj.intValue, 101);
-            Assert.Equal(obj.stringValue, "hello");
+            Assert.Equal(101, obj.intValue);
+            Assert.Equal("hello", obj.stringValue);
         }
 
         [Fact]
@@ -152,8 +151,8 @@ namespace System.Reflection.Tests
             ClassWith3Constructors obj1 = new ClassWith3Constructors(100, "hello");
             ClassWith3Constructors obj2 = (ClassWith3Constructors)constructors[2].Invoke(obj1, new object[] { 999, "initialized" });
             Assert.Null(obj2);
-            Assert.Equal(obj1.intValue, 999);
-            Assert.Equal(obj1.stringValue, "initialized");
+            Assert.Equal(999, obj1.intValue);
+            Assert.Equal("initialized", obj1.stringValue);
         }
 
         [Fact]

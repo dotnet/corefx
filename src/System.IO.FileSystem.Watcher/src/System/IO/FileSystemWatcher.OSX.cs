@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Text;
 
+#pragma warning disable SA1121 // we don't want to simplify built-ins here as we're using aliasing
 using CFStringRef = System.IntPtr;
 using FSEventStreamRef = System.IntPtr;
 using size_t = System.IntPtr;
@@ -169,7 +170,7 @@ namespace System.IO
                 _includeChildren = includeChildren;
                 _filterFlags = filter;
                 _cancellationToken = cancelToken;
-                _cancellationToken.Register(obj => ((RunningInstance)obj).CancellationCallback(), this);
+                _cancellationToken.UnsafeRegister(obj => ((RunningInstance)obj).CancellationCallback(), this);
                 _stopping = false;
             }
 

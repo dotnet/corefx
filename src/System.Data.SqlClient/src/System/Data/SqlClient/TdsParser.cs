@@ -19,7 +19,6 @@ using MSS = Microsoft.SqlServer.Server;
 
 namespace System.Data.SqlClient
 {
-
     internal struct SNIErrorDetails
     {
         public string errorMessage;
@@ -117,13 +116,10 @@ namespace System.Data.SqlClient
 
         // SSPI variables
 
-        private volatile static uint s_maxSSPILength = 0;     // variable to hold max SSPI data size, keep for token from server
+        private static volatile uint s_maxSSPILength = 0;     // variable to hold max SSPI data size, keep for token from server
 
         // textptr sequence
         private static readonly byte[] s_longDataHeader = { 0x10, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
-
-        private static object s_tdsParserLock = new object();
-
 
         // XML metadata substitute sequence
         private static readonly byte[] s_xmlMetadataSubstituteSequence = { 0xe7, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -1108,7 +1104,7 @@ namespace System.Data.SqlClient
                     var connHandler = _connHandler;
                     Action<Action> wrapCloseAction = closeAction =>
                     {
-                        Task.Factory.StartNew(() =>
+                        Task.Run(() =>
                         {
                             connHandler._parserLock.Wait(canReleaseFromAnyThread: false);
                             connHandler.ThreadHasParserLockForClose = true;
@@ -3375,7 +3371,7 @@ namespace System.Data.SqlClient
             if (0 != collation.sortId)
             {
                 codePage = TdsEnums.CODE_PAGE_FROM_SORT_ID[collation.sortId];
-                Debug.Assert(0 != codePage, "GetCodePage accessed codepage array and produced 0!, sortID =" + ((Byte)(collation.sortId)).ToString((IFormatProvider)null));
+                Debug.Assert(0 != codePage, "GetCodePage accessed codepage array and produced 0!, sortID =" + ((byte)(collation.sortId)).ToString((IFormatProvider)null));
             }
             else
             {
@@ -4466,7 +4462,7 @@ namespace System.Data.SqlClient
                             }
                             else
                             {
-                                s = ADP.StrEmpty;
+                                s = string.Empty;
                             }
                         }
                         else
@@ -5742,7 +5738,7 @@ namespace System.Data.SqlClient
 
         internal int GetEncodingCharLength(string value, int numChars, int charOffset, Encoding encoding)
         {
-            if (value == null || value == ADP.StrEmpty)
+            if (value == null || value == string.Empty)
             {
                 return 0;
             }
@@ -7602,13 +7598,13 @@ namespace System.Data.SqlClient
 
             if (_isYukon && (mt.SqlDbType == SqlDbType.Xml))
             {
-                if (((param.XmlSchemaCollectionDatabase != null) && (param.XmlSchemaCollectionDatabase != ADP.StrEmpty)) ||
-                    ((param.XmlSchemaCollectionOwningSchema != null) && (param.XmlSchemaCollectionOwningSchema != ADP.StrEmpty)) ||
-                    ((param.XmlSchemaCollectionName != null) && (param.XmlSchemaCollectionName != ADP.StrEmpty)))
+                if (((param.XmlSchemaCollectionDatabase != null) && (param.XmlSchemaCollectionDatabase != string.Empty)) ||
+                    ((param.XmlSchemaCollectionOwningSchema != null) && (param.XmlSchemaCollectionOwningSchema != string.Empty)) ||
+                    ((param.XmlSchemaCollectionName != null) && (param.XmlSchemaCollectionName != string.Empty)))
                 {
                     stateObj.WriteByte(1);  //Schema present flag
 
-                    if ((param.XmlSchemaCollectionDatabase != null) && (param.XmlSchemaCollectionDatabase != ADP.StrEmpty))
+                    if ((param.XmlSchemaCollectionDatabase != null) && (param.XmlSchemaCollectionDatabase != string.Empty))
                     {
                         tempLen = (param.XmlSchemaCollectionDatabase).Length;
                         stateObj.WriteByte((byte)(tempLen));
@@ -7619,7 +7615,7 @@ namespace System.Data.SqlClient
                         stateObj.WriteByte(0);       // No dbname
                     }
 
-                    if ((param.XmlSchemaCollectionOwningSchema != null) && (param.XmlSchemaCollectionOwningSchema != ADP.StrEmpty))
+                    if ((param.XmlSchemaCollectionOwningSchema != null) && (param.XmlSchemaCollectionOwningSchema != string.Empty))
                     {
                         tempLen = (param.XmlSchemaCollectionOwningSchema).Length;
                         stateObj.WriteByte((byte)(tempLen));
@@ -7630,7 +7626,7 @@ namespace System.Data.SqlClient
                         stateObj.WriteByte(0);      // no xml schema name
                     }
 
-                    if ((param.XmlSchemaCollectionName != null) && (param.XmlSchemaCollectionName != ADP.StrEmpty))
+                    if ((param.XmlSchemaCollectionName != null) && (param.XmlSchemaCollectionName != string.Empty))
                     {
                         tempLen = (param.XmlSchemaCollectionName).Length;
                         WriteShort((short)(tempLen), stateObj);
@@ -8703,7 +8699,7 @@ namespace System.Data.SqlClient
                             return true;
                     }
                 }
-                else if ((currentType == typeof(string)) && (((String)value).Length > 0))
+                else if ((currentType == typeof(string)) && (((string)value).Length > 0))
                 {
                     if ((value != null) && (((string)value)[0] & 0xff) != 0xff)
                         return true;

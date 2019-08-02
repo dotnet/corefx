@@ -6,6 +6,8 @@ using Xunit;
 using Xunit.Sdk;
 using System.Collections.Generic;
 
+#pragma warning disable xUnit1025 // reporting duplicate test cases due to not distinguishing 0.0 from -0.0
+
 namespace System.Tests
 {
     public static partial class MathFTests
@@ -137,12 +139,12 @@ namespace System.Tests
             }
         }
 
-        private unsafe static bool IsNegativeZero(float value)
+        private static unsafe bool IsNegativeZero(float value)
         {
             return (*(uint*)(&value)) == 0x80000000;
         }
 
-        private unsafe static bool IsPositiveZero(float value)
+        private static unsafe bool IsPositiveZero(float value)
         {
             return (*(uint*)(&value)) == 0x00000000;
         }
@@ -498,19 +500,7 @@ namespace System.Tests
         [InlineData( float.NegativeInfinity, float.PositiveInfinity, -0.785398163f, CrossPlatformMachineEpsilon)]          // expected: -(pi / 4)
         [InlineData( float.PositiveInfinity, float.NegativeInfinity,  2.35619449f,  CrossPlatformMachineEpsilon * 10)]     // expected:  (3 * pi / 4
         [InlineData( float.PositiveInfinity, float.PositiveInfinity,  0.785398163f, CrossPlatformMachineEpsilon)]          // expected:  (pi / 4)
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Atan2_IEEE(float y, float x, float expectedResult, float allowedVariance)
-        {
-            AssertEqual(expectedResult, MathF.Atan2(y, x), allowedVariance);
-        }
-
-        [Theory]
-        [InlineData( float.NegativeInfinity, float.NegativeInfinity,  float.NaN, 0.0f)]
-        [InlineData( float.NegativeInfinity, float.PositiveInfinity,  float.NaN, 0.0f)]
-        [InlineData( float.PositiveInfinity, float.NegativeInfinity,  float.NaN, 0.0f)]
-        [InlineData( float.PositiveInfinity, float.PositiveInfinity,  float.NaN, 0.0f)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void Atan2_IEEE_Legacy(float y, float x, float expectedResult, float allowedVariance)
         {
             AssertEqual(expectedResult, MathF.Atan2(y, x), allowedVariance);
         }
@@ -1409,20 +1399,7 @@ namespace System.Tests
         [InlineData( float.NaN, -0.0f,                   1.0f, CrossPlatformMachineEpsilon * 10)]
         [InlineData( float.NaN,  0.0f,                   1.0f, CrossPlatformMachineEpsilon * 10)]
         [InlineData( 1.0f,       float.NaN,              1.0f, CrossPlatformMachineEpsilon * 10)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Pow_IEEE(float x, float y, float expectedResult, float allowedVariance)
-        {
-            AssertEqual(expectedResult, MathF.Pow(x, y), allowedVariance);
-        }
-
-        [Theory]
-        [InlineData(-1.0f,      float.NegativeInfinity, float.NaN, 0.0f)]
-        [InlineData(-1.0f,      float.PositiveInfinity, float.NaN, 0.0f)]
-        [InlineData( float.NaN,-0.0f,                   float.NaN, 0.0f)]
-        [InlineData( float.NaN, 0.0f,                   float.NaN, 0.0f)]
-        [InlineData( 1.0f,      float.NaN,              float.NaN, 0.0f)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void Pow_IEEE_Legacy(float x, float y, float expectedResult, float allowedVariance)
         {
             AssertEqual(expectedResult, MathF.Pow(x, y), allowedVariance);
         }

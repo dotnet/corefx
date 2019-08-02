@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -15,21 +15,114 @@ namespace System.Text.Json.Serialization.Tests
         void Verify();
     }
 
+    public enum SampleEnumByte : byte
+    {
+        MinZero = byte.MinValue,
+        One = 1,
+        Two = 2,
+        Max = byte.MaxValue
+    }
+
+    public enum SampleEnumSByte : sbyte
+    {
+        MinNegative = sbyte.MinValue,
+        Zero = 0,
+        One = 1,
+        Two = 2,
+        Max = sbyte.MaxValue
+    }
+
     public enum SampleEnum
     {
+        MinZero = 0,
         One = 1,
         Two = 2
     }
 
-    public enum SampleInt64Enum : long
+    public enum SampleEnumInt16 : short
     {
-        Min = long.MinValue,
+        MinNegative = short.MinValue,
+        Zero = 0,
+        One = 1,
+        Two = 2,
+        Max = short.MaxValue
+    }
+
+    public enum SampleEnumUInt16 : ushort
+    {
+        MinZero = ushort.MinValue,
+        One = 1,
+        Two = 2,
+        Max = ushort.MaxValue
+    }
+
+    public enum SampleEnumInt32 : Int32
+    {
+        MinNegative = Int32.MinValue,
+        Zero = 0,
+        One = 1,
+        Two = 2,
+        Max = Int32.MaxValue
+    }
+
+    public enum SampleEnumUInt32 : UInt32
+    {
+        MinZero = UInt32.MinValue,
+        One = 1,
+        Two = 2,
+        Max = UInt32.MaxValue
+    }
+
+    public enum SampleEnumInt64 : long
+    {
+        MinNegative = long.MinValue,
+        Zero = 0,
+        One = 1,
+        Two = 2,
         Max = long.MaxValue
     }
 
-    public enum SampleUInt64Enum : ulong
+    public enum SampleEnumUInt64 : ulong
     {
+        MinZero = ulong.MinValue,
+        One = 1,
+        Two = 2,
         Max = ulong.MaxValue
+    }
+
+    public struct SimpleStruct
+    {
+        public int One { get; set; }
+        public double Two { get; set; }
+    }
+    
+    public struct SimpleStructWithSimpleClass: ITestClass
+    {
+        public short MyInt32 { get; set; }
+        public SimpleTestClass MySimpleClass { get; set; }
+        public int[] MyInt32Array { get; set; }
+
+        public static readonly string s_json =
+            @"{" +
+                @"""MySimpleClass"" : {""MyString"" : ""Hello"", ""MyDouble"" : 3.14}," +
+                @"""MyInt32"" : 32," +
+                @"""MyInt32Array"" : [32]" +
+            @"}";
+
+        public void Initialize()
+        {
+            MySimpleClass = new SimpleTestClass { MyString = "Hello", MyDouble = 3.14 };
+            MyInt32 = 32;
+            MyInt32Array = new int[] { 32 };
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(32, MyInt32);
+            Assert.Equal(32, MyInt32Array[0]);
+            Assert.Equal("Hello", MySimpleClass.MyString);
+            Assert.Equal(3.14, MySimpleClass.MyDouble);
+        }
     }
 
     public class TestClassWithNull
@@ -44,7 +137,7 @@ namespace System.Text.Json.Serialization.Tests
 
         public void Verify()
         {
-            Assert.Equal(MyString, null);
+            Assert.Null(MyString);
         }
     }
 
@@ -297,6 +390,149 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
+    public class TestClassWithObjectIEnumerable : ITestClass
+    {
+        public IEnumerable MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            SimpleTestClass obj1 = new SimpleTestClass();
+            obj1.Initialize();
+
+            SimpleTestClass obj2 = new SimpleTestClass();
+            obj2.Initialize();
+
+            MyData = new SimpleTestClass[] { obj1, obj2 };
+        }
+
+        public void Verify()
+        {
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    SimpleTestClass obj = JsonSerializer.Deserialize<SimpleTestClass>(element.GetRawText());
+                    obj.Verify();
+                }
+                else
+                {
+                    ((SimpleTestClass)data).Verify();
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithObjectIList : ITestClass
+    {
+        public IList MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<SimpleTestClass>();
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyData.Add(obj);
+            }
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyData.Add(obj);
+            }
+        }
+
+        public void Verify()
+        {
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    SimpleTestClass obj = JsonSerializer.Deserialize<SimpleTestClass>(element.GetRawText());
+                    obj.Verify();
+                }
+                else
+                {
+                    ((SimpleTestClass)data).Verify();
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithObjectICollection : ITestClass
+    {
+        public ICollection MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            List<SimpleTestClass> dataTemp = new List<SimpleTestClass>();
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                dataTemp.Add(obj);
+            }
+
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                dataTemp.Add(obj);
+            }
+
+            MyData = dataTemp;
+        }
+
+        public void Verify()
+        {
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    SimpleTestClass obj = JsonSerializer.Deserialize<SimpleTestClass>(element.GetRawText());
+                    obj.Verify();
+                }
+                else
+                {
+                    ((SimpleTestClass)data).Verify();
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+    }
+
     public class TestClassWithObjectIReadOnlyCollectionT : ITestClass
     {
         public IReadOnlyCollection<SimpleTestClass> MyData { get; set; }
@@ -362,6 +598,65 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
+    public class TestClassWithObjectISetT : ITestClass
+    {
+        public ISet<SimpleTestClass> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            SimpleTestClass obj1 = new SimpleTestClass();
+            obj1.Initialize();
+
+            SimpleTestClass obj2 = new SimpleTestClass();
+            obj2.Initialize();
+
+            MyData = new HashSet<SimpleTestClass> { obj1, obj2 };
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyData.Count);
+
+            foreach (SimpleTestClass obj in MyData)
+            {
+                obj.Verify();
+            }
+        }
+    }
+
+    public class TestClassWithInitializedArray
+    {
+        public int[] Values { get; set; }
+
+        public TestClassWithInitializedArray()
+        {
+            Values = Array.Empty<int>();
+        }
+    }
+
+    public class SimpleClassWithDictionary
+    {
+        public int MyInt { get; set; }
+        public Dictionary<string, string> MyDictionary { get; set; }
+    }
+    public class OuterClassHavingPropertiesDefinedAfterClassWithDictionary
+    {
+        public double MyDouble { get; set; }
+        public SimpleClassWithDictionary MyInnerTestClass { get; set; }
+        public int MyInt { get; set; }
+        public string MyString { get; set; }
+        public List<string> MyList { get; set; }
+        public int[] MyIntArray { get; set; }
+    }
+
     public class TestClassWithStringArray : ITestClass
     {
         public string[] MyData { get; set; }
@@ -384,16 +679,6 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyData[0]);
             Assert.Equal("World", MyData[1]);
             Assert.Equal(2, MyData.Length);
-        }
-    }
-
-    public class TestClassWithCycle
-    {
-        public TestClassWithCycle Parent { get; set; }
-
-        public void Initialize()
-        {
-            Parent = this;
         }
     }
 
@@ -424,6 +709,138 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyData[0]);
             Assert.Equal("World", MyData[1]);
             Assert.Equal(2, MyData.Count);
+        }
+    }
+
+    public class TestClassWithGenericIEnumerable : ITestClass
+    {
+        public IEnumerable MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<string>
+            {
+                "Hello",
+                "World"
+            };
+
+            int count = 0;
+            foreach (string data in MyData)
+            {
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+
+        public void Verify()
+        {
+            string[] expected = { "Hello", "World" };
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    Assert.Equal(expected[count], element.GetString());
+                }
+                else
+                {
+                    Assert.Equal(expected[count], (string)data);
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithGenericIList : ITestClass
+    {
+        public IList MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<string>
+            {
+                "Hello",
+                "World"
+            };
+            Assert.Equal(2, MyData.Count);
+        }
+
+        public void Verify()
+        {
+            string[] expected = { "Hello", "World" };
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    Assert.Equal(expected[count], element.GetString());
+                }
+                else
+                {
+                    Assert.Equal(expected[count], (string)data);
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
+        }
+    }
+
+    public class TestClassWithGenericICollection : ITestClass
+    {
+        public ICollection MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new List<string>
+            {
+                "Hello",
+                "World"
+            };
+            Assert.Equal(2, MyData.Count);
+        }
+
+        public void Verify()
+        {
+            string[] expected = { "Hello", "World" };
+            int count = 0;
+            foreach (object data in MyData)
+            {
+                if (data is JsonElement element)
+                {
+                    Assert.Equal(expected[count], element.GetString());
+                }
+                else
+                {
+                    Assert.Equal(expected[count], (string)data);
+                }
+                count++;
+            }
+            Assert.Equal(2, count);
         }
     }
 
@@ -602,6 +1019,51 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
+    public class TestClassWithGenericISetT : ITestClass
+    {
+        public ISet<string> MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyData"":[" +
+                    @"""Hello""," +
+                    @"""World""" +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new HashSet<string>
+            {
+                "Hello",
+                "World"
+            };
+            Assert.Equal(2, MyData.Count);
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyData.Count);
+
+            bool helloSeen = false;
+            bool worldSeen = false;
+
+            foreach (string data in MyData)
+            {
+                if (data == "Hello")
+                {
+                    helloSeen = true;
+                }
+                else if (data == "World")
+                {
+                    worldSeen = true;
+                }
+            }
+
+            Assert.True(helloSeen && worldSeen);
+        }
+    }
+
     public class TestClassWithStringToPrimitiveDictionary : ITestClass
     {
         public Dictionary<string, int> MyInt32Dict { get; set; }
@@ -711,8 +1173,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, MyInt32Dict["key2"]);
             Assert.Equal(2, MyInt32Dict.Count);
 
-            Assert.Equal(true, MyBooleanDict["key1"]);
-            Assert.Equal(false, MyBooleanDict["key2"]);
+            Assert.True(MyBooleanDict["key1"]);
+            Assert.False(MyBooleanDict["key2"]);
             Assert.Equal(2, MyBooleanDict.Count);
 
             Assert.Equal(1.1f, MySingleDict["key1"]);
@@ -731,8 +1193,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, MyInt32IDict["key2"]);
             Assert.Equal(2, MyInt32IDict.Count);
 
-            Assert.Equal(true, MyBooleanIDict["key1"]);
-            Assert.Equal(false, MyBooleanIDict["key2"]);
+            Assert.True(MyBooleanIDict["key1"]);
+            Assert.False(MyBooleanIDict["key2"]);
             Assert.Equal(2, MyBooleanIDict.Count);
 
             Assert.Equal(1.1f, MySingleIDict["key1"]);
@@ -751,8 +1213,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, MyInt32IReadOnlyDict["key2"]);
             Assert.Equal(2, MyInt32IReadOnlyDict.Count);
 
-            Assert.Equal(true, MyBooleanIReadOnlyDict["key1"]);
-            Assert.Equal(false, MyBooleanIReadOnlyDict["key2"]);
+            Assert.True(MyBooleanIReadOnlyDict["key1"]);
+            Assert.False(MyBooleanIReadOnlyDict["key2"]);
             Assert.Equal(2, MyBooleanIReadOnlyDict.Count);
 
             Assert.Equal(1.1f, MySingleIReadOnlyDict["key1"]);
@@ -877,6 +1339,7 @@ namespace System.Text.Json.Serialization.Tests
 
     public class TestClassWithObjectImmutableTypes : ITestClass
     {
+        public ImmutableArray<SimpleTestClass> MyImmutableArray { get; set; }
         public IImmutableList<SimpleTestClass> MyIImmutableList { get; set; }
         public IImmutableStack<SimpleTestClass> MyIImmutableStack { get; set; }
         public IImmutableQueue<SimpleTestClass> MyIImmutableQueue { get; set; }
@@ -888,6 +1351,10 @@ namespace System.Text.Json.Serialization.Tests
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
             @"{" +
+                @"""MyImmutableArray"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
                 @"""MyIImmutableList"":[" +
                     SimpleTestClass.s_json + "," +
                     SimpleTestClass.s_json +
@@ -924,6 +1391,15 @@ namespace System.Text.Json.Serialization.Tests
 
         public void Initialize()
         {
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyImmutableArray = ImmutableArray.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
             {
                 SimpleTestClass obj1 = new SimpleTestClass();
                 obj1.Initialize();
@@ -1000,6 +1476,12 @@ namespace System.Text.Json.Serialization.Tests
 
         public void Verify()
         {
+            Assert.Equal(2, MyImmutableArray.Length);
+            foreach (SimpleTestClass data in MyImmutableArray)
+            {
+                data.Verify();
+            }
+
             Assert.Equal(2, MyIImmutableList.Count);
             foreach (SimpleTestClass data in MyIImmutableList)
             {
@@ -1273,5 +1755,63 @@ namespace System.Text.Json.Serialization.Tests
 
         // A 400 character property name with a unicode character making it 401 bytes.
         public int Aѧ34567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890 { get; set; }
+    }
+
+    public class ClassWithExtensionProperty
+    {
+        public SimpleTestClass MyNestedClass { get; set; }
+        public int MyInt { get; set; }
+
+        [JsonExtensionData]
+        public IDictionary<string, JsonElement> MyOverflow { get; set; }
+    }
+
+    public class TestClassWithNestedObjectCommentsInner : ITestClass
+    {
+        public SimpleTestClass MyData { get; set; }
+
+        public static readonly string s_json =
+            @"{" +
+                @"""MyData"":" + SimpleTestClass.s_json + " // Trailing comment\n" +
+                "/* Multi\nLine Comment with } */\n" +
+            @"}";
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
+
+        public void Initialize()
+        {
+            MyData = new SimpleTestClass();
+            MyData.Initialize();
+        }
+
+        public void Verify()
+        {
+            Assert.NotNull(MyData);
+            MyData.Verify();
+        }
+    }
+
+    public class TestClassWithNestedObjectCommentsOuter : ITestClass
+    {
+        public TestClassWithNestedObjectCommentsInner MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                " // This } will be ignored\n" +
+                @"""MyData"":" + TestClassWithNestedObjectCommentsInner.s_json +
+                " /* As will this [ */\n" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new TestClassWithNestedObjectCommentsInner();
+            MyData.Initialize();
+        }
+
+        public void Verify()
+        {
+            Assert.NotNull(MyData);
+            MyData.Verify();
+        }
     }
 }

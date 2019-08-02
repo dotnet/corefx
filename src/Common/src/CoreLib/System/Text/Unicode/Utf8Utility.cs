@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -31,7 +32,7 @@ namespace System.Text.Unicode
         /// comes first) is ASCII.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static int GetIndexOfFirstInvalidUtf8Sequence(ReadOnlySpan<byte> utf8Data, out bool isAscii)
+        public static unsafe int GetIndexOfFirstInvalidUtf8Sequence(ReadOnlySpan<byte> utf8Data, out bool isAscii)
         {
             fixed (byte* pUtf8Data = &MemoryMarshal.GetReference(utf8Data))
             {
@@ -50,6 +51,7 @@ namespace System.Text.Unicode
         /// <paramref name="value"/> but where all invalid UTF-8 sequences have been replaced
         /// with U+FFD.
         /// </summary>
+        [return: NotNullIfNotNull("value")]
         public static Utf8String? ValidateAndFixupUtf8String(Utf8String? value)
         {
             if (Utf8String.IsNullOrEmpty(value))

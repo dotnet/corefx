@@ -36,18 +36,18 @@ namespace System.Data.OleDb
             this.oledbErrors = errors;
         }
 
-        override public void GetObjectData(SerializationInfo si, StreamingContext context)
+        public override void GetObjectData(SerializationInfo si, StreamingContext context)
         {
             if (null == si)
             {
-                throw new ArgumentNullException("si");
+                throw new ArgumentNullException(nameof(si));
             }
             si.AddValue("oledbErrors", oledbErrors, typeof(OleDbErrorCollection));
             base.GetObjectData(si, context);
         }
 
         [TypeConverter(typeof(ErrorCodeConverter))]
-        override public int ErrorCode
+        public override int ErrorCode
         {
             get
             {
@@ -65,7 +65,7 @@ namespace System.Data.OleDb
             }
         }
 
-        static internal OleDbException CreateException(UnsafeNativeMethods.IErrorInfo errorInfo, OleDbHResult errorCode, Exception inner)
+        internal static OleDbException CreateException(UnsafeNativeMethods.IErrorInfo errorInfo, OleDbHResult errorCode, Exception inner)
         {
             OleDbErrorCollection errors = new OleDbErrorCollection(errorInfo);
             string message = null;
@@ -109,7 +109,7 @@ namespace System.Data.OleDb
             return new OleDbException(message, inner, source, errorCode, errors);
         }
 
-        static internal OleDbException CombineExceptions(List<OleDbException> exceptions)
+        internal static OleDbException CombineExceptions(List<OleDbException> exceptions)
         {
             Debug.Assert(0 < exceptions.Count, "missing exceptions");
             if (1 < exceptions.Count)
@@ -131,20 +131,20 @@ namespace System.Data.OleDb
             }
         }
 
-        sealed internal class ErrorCodeConverter : Int32Converter
+        internal sealed class ErrorCodeConverter : Int32Converter
         {
             // converter classes should have public ctor
             public ErrorCodeConverter()
             {
             }
 
-            override public object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+            public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
             {
                 if (destinationType == null)
                 {
                     throw ADP.ArgumentNull("destinationType");
                 }
-                if ((destinationType == typeof(string)) && (value != null) && (value is Int32))
+                if ((destinationType == typeof(string)) && (value != null) && (value is int))
                 {
                     return ODB.ELookup((OleDbHResult)value);
                 }

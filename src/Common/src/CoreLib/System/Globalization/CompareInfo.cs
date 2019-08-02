@@ -170,12 +170,12 @@ namespace System.Globalization
         [OnDeserializing]
         private void OnDeserializing(StreamingContext ctx)
         {
-            // TODO-NULLABLE: this becomes null for a brief moment before deserialization
-            //                after serialization is finished it is never null
+            // this becomes null for a brief moment before deserialization
+            // after serialization is finished it is never null.
             m_name = null!;
         }
 
-        void IDeserializationCallback.OnDeserialization(object sender)
+        void IDeserializationCallback.OnDeserialization(object? sender)
         {
             OnDeserialized();
         }

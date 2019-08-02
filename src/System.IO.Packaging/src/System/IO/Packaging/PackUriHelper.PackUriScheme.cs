@@ -13,6 +13,12 @@ namespace System.IO.Packaging
     /// </summary>
     public static partial class PackUriHelper
     {
+        // We need to perform Escaping for the following - '%'; '@'; ',' and '?' 
+        // !!Important!! - The order is important - The '%' sign should be escaped first.
+        // If any more characters need to be added to the array below they should be added at the end.
+        // All of these arrays must maintain the same ordering.
+        private static readonly char[] s_specialCharacterChars = { '%', '@', ',', '?' };
+
         #region Public Methods
 
         /// <summary>
@@ -95,7 +101,7 @@ namespace System.IO.Packaging
             absolutePackageUri = absolutePackageUri.Replace('/', ',');
 
             // Step 5 - Append pack:// at the begining and a '/' at the end of the pack uri obtained so far            
-            absolutePackageUri = String.Concat(PackUriHelper.UriSchemePack, Uri.SchemeDelimiter, absolutePackageUri);
+            absolutePackageUri = string.Concat(PackUriHelper.UriSchemePack, Uri.SchemeDelimiter, absolutePackageUri);
 
             Uri packUri = new Uri(absolutePackageUri);
 
@@ -105,7 +111,7 @@ namespace System.IO.Packaging
 
             // Step 7 - Append fragment if present
             if (fragment != null)
-                packUri = new Uri(String.Concat(packUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.UriEscaped), fragment));
+                packUri = new Uri(string.Concat(packUri.GetComponents(UriComponents.AbsoluteUri, UriFormat.UriEscaped), fragment));
 
             // We want to ensure that internal content of resulting Uri has canonical form
             // i.e.  result.OrignalString would appear as perfectly formatted Uri string 
@@ -130,6 +136,29 @@ namespace System.IO.Packaging
             ValidateAndGetPackUriComponents(packUri, out Uri packageUri, out _);
 
             return packageUri;
+        }
+
+        /// <summary>
+        /// This method parses the pack uri and returns the absolute 
+        /// path of the URI. This corresponds to the part within the 
+        /// package. This corresponds to the absolute path component in 
+        /// the Uri. If there is no part component present, this method
+        /// returns a null
+        /// </summary>
+        /// <param name="packUri">Returns a relative Uri that represents the
+        /// part within the package. If the pack Uri points to the entire
+        /// package then we return a null</param>
+        /// <returns>Returns a relative URI with an absolute path that points to a part within a package</returns>
+        /// <exception cref="ArgumentNullException">If packUri parameter is null</exception>
+        /// <exception cref="ArgumentException">If packUri parameter is not an absolute Uri</exception>
+        /// <exception cref="ArgumentException">If packUri parameter does not have "pack://" scheme</exception>
+        /// <exception cref="ArgumentException">If partUri extracted from packUri does not conform to the valid partUri syntax</exception>
+        public static Uri GetPartUri(Uri packUri)
+        {
+            //Parameter Validation is done in the following method
+            ValidateAndGetPackUriComponents(packUri, out _, out Uri partUri);
+
+            return partUri;
         }
 
         /// <summary>
@@ -273,7 +302,7 @@ namespace System.IO.Packaging
             Debug.Assert(packUri != null, "packUri parameter cannot be null");
 
             //Step 1 - Get the authority part of the URI. This section represents that package URI
-            String hostAndPort = packUri.GetComponents(UriComponents.HostAndPort, UriFormat.UriEscaped);
+            string hostAndPort = packUri.GetComponents(UriComponents.HostAndPort, UriFormat.UriEscaped);
 
             //Step 2 - Replace the ',' with '/' to reconstruct the package URI
             hostAndPort = hostAndPort.Replace(',', '/');
@@ -281,7 +310,7 @@ namespace System.IO.Packaging
             //Step 3 - Unescape the special characters that we had escaped to construct the packUri
             Uri packageUri = new Uri(Uri.UnescapeDataString(hostAndPort));
 
-            if (packageUri.Fragment != String.Empty)
+            if (packageUri.Fragment != string.Empty)
                 throw new ArgumentException(SR.InnerPackageUriHasFragment);
 
             return packageUri;
@@ -294,7 +323,7 @@ namespace System.IO.Packaging
             
             string partName = GetStringForPartUriFromAnyUri(packUri);
 
-            if (partName == String.Empty)
+            if (partName == string.Empty)
                 return null;
             else
                 return ValidatePartUri(new Uri(partName, UriKind.Relative));

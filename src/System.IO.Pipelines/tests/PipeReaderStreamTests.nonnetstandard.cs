@@ -31,7 +31,9 @@ namespace System.IO.Pipelines.Tests
             }
 
             var readerCompletedTask = new TaskCompletionSource<bool>();
+#pragma warning disable CS0618 // Type or member is obsolete
             pipe.Writer.OnReaderCompleted(delegate { readerCompletedTask.SetResult(true); }, null);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             // Call Dispose{Async} multiple times; all should succeed.
             for (int i = 0; i < 2; i++)
@@ -59,7 +61,7 @@ namespace System.IO.Pipelines.Tests
             await pipe.Writer.WriteAsync(helloBytes);
             pipe.Writer.Complete();
 
-            var stream = new PipeReaderStream(pipe.Reader);
+            var stream = new PipeReaderStream(pipe.Reader, leaveOpen: false);
 
             var buffer = new byte[1024];
             int read = await readAsync(stream, buffer);
@@ -278,6 +280,15 @@ namespace System.IO.Pipelines.Tests
             Assert.Equal(producedSum, consumedSum);
         }
 
+        [Fact]
+        public void AsStreamDoNotCompleteReader()
+        {
+            var pipeReader = new NotImplementedPipeReader();
+            
+            // would throw in Complete if it was actually invoked
+            pipeReader.AsStream(leaveOpen: true).Dispose();
+        }
+
         public class BuggyPipeReader : PipeReader
         {
             public override void AdvanceTo(SequencePosition consumed)
@@ -300,11 +311,6 @@ namespace System.IO.Pipelines.Tests
                 throw new NotImplementedException();
             }
 
-            public override void OnWriterCompleted(Action<Exception, object> callback, object state)
-            {
-                throw new NotImplementedException();
-            }
-
             public override ValueTask<ReadResult> ReadAsync(CancellationToken cancellationToken = default)
             {
                 // Returns a ReadResult with no buffer and with IsCompleted and IsCancelled false
@@ -315,6 +321,16 @@ namespace System.IO.Pipelines.Tests
             {
                 throw new NotImplementedException();
             }
+        }
+
+        public class NotImplementedPipeReader : PipeReader
+        {
+            public override void AdvanceTo(SequencePosition consumed) => throw new NotImplementedException();
+            public override void AdvanceTo(SequencePosition consumed, SequencePosition examined) => throw new NotImplementedException();
+            public override void CancelPendingRead() => throw new NotImplementedException();
+            public override void Complete(Exception exception = null) => throw new NotImplementedException();
+            public override ValueTask<ReadResult> ReadAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
+            public override bool TryRead(out ReadResult result) => throw new NotImplementedException();
         }
 
         public class TestPipeReader : PipeReader
@@ -338,11 +354,6 @@ namespace System.IO.Pipelines.Tests
             }
 
             public override void Complete(Exception exception = null)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void OnWriterCompleted(Action<Exception, object> callback, object state)
             {
                 throw new NotImplementedException();
             }

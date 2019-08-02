@@ -3,9 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-using System.Collections.Generic;
 
-namespace System.Text.Json.Serialization.Policies
+namespace System.Text.Json.Serialization.Converters
 {
     internal abstract class JsonEnumerableConverter
     {

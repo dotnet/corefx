@@ -47,7 +47,7 @@ namespace System.Diagnostics.Tracing
 
         internal override void WritePayload(float intervalSec, int pollingIntervalMillisec)
         {
-            lock (MyLock)
+            lock (this)
             {
                 double value = 0;
                 try 
@@ -71,6 +71,7 @@ namespace System.Diagnostics.Tracing
                 payload.Min = value;
                 payload.Metadata = GetMetadataString();
                 payload.StandardDeviation = 0;
+                payload.DisplayUnits = DisplayUnits ?? "";
                 _lastVal = value;
                 EventSource.Write("EventCounters", new EventSourceOptions() { Level = EventLevel.LogAlways }, new PollingPayloadType(payload));
             }

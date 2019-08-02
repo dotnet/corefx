@@ -4,12 +4,7 @@
 
 namespace System.Net.Sockets
 {
-    /// <devdoc>
-    ///    <para>
-    ///       Specifies the address families that an instance of the <see cref='T:System.Net.Sockets.Socket'/>
-    ///       class can use.
-    ///    </para>
-    /// </devdoc>
+    /// <summary>Specifies the addressing scheme that an instance of the Socket class can use.</summary>
     public enum AddressFamily
     {
         Unknown = -1,           // Unknown
@@ -43,5 +38,8 @@ namespace System.Net.Sockets
         Irda = 26,              // IrDA
         NetworkDesigners = 28,  // Network Designers OSI & gateway enabled protocols
         Max = 29,               // Max
+        Netlink = 30,           // Netlink protocol
+        Packet = 31,            // Linux Packet
+        ControllerAreaNetwork = 32, // Controller Area Network automotive bus protocol
     }
 }

@@ -37,15 +37,6 @@ namespace System.Xml.Serialization
         private bool _soap12;
         private bool _escapeName = true;
 
-#if FEATURE_SERIALIZATION_UAPAOT
-        // this method must be called before any generated serialization methods are called
-        internal void Init(XmlWriter w, XmlSerializerNamespaces namespaces, string encodingStyle, string idBase)
-        {
-            _w = w;
-            _namespaces = namespaces;
-        }
-#endif
-
         // this method must be called before any generated serialization methods are called
         internal void Init(XmlWriter w, XmlSerializerNamespaces namespaces, string encodingStyle, string idBase, TempAssembly tempAssembly)
         {
@@ -1441,7 +1432,6 @@ namespace System.Xml.Serialization
 
     internal static class DynamicAssemblies
     {
-        private static ArrayList s_assembliesInConfig = new ArrayList();
         private static volatile Hashtable s_nameToAssemblyMap = new Hashtable();
         private static volatile Hashtable s_assemblyToNameMap = new Hashtable();
         private static Hashtable s_tableIsTypeDynamic = Hashtable.Synchronized(new Hashtable());
@@ -1484,7 +1474,6 @@ namespace System.Xml.Serialization
             return (bool)oIsTypeDynamic;
         }
 
-#if !FEATURE_SERIALIZATION_UAPAOT
         internal static bool IsTypeDynamic(Type[] arguments)
         {
             foreach (Type t in arguments)
@@ -1524,22 +1513,18 @@ namespace System.Xml.Serialization
                 }
             }
         }
-#endif
 
         internal static Assembly Get(string fullName)
         {
             return s_nameToAssemblyMap != null ? (Assembly)s_nameToAssemblyMap[fullName] : null;
         }
 
-#if !FEATURE_SERIALIZATION_UAPAOT
         internal static string GetName(Assembly a)
         {
             return s_assemblyToNameMap != null ? (string) s_assemblyToNameMap[a] : null;
         }
-#endif
     }
 
-#if !FEATURE_SERIALIZATION_UAPAOT
     internal class ReflectionAwareCodeGen
     {
         private const string hexDigits = "0123456789ABCDEF";
@@ -4226,7 +4211,7 @@ namespace System.Xml.Serialization
                     Writer.Write('\'');
                 }
                 else if (type == typeof(int))
-                    Writer.Write(((Int32)value).ToString(null, NumberFormatInfo.InvariantInfo));
+                    Writer.Write(((int)value).ToString(null, NumberFormatInfo.InvariantInfo));
                 else if (type == typeof(double))
                 {
                     if (double.IsNaN((double)value))
@@ -4243,7 +4228,7 @@ namespace System.Xml.Serialization
                     }
                     else
                     {
-                        Writer.Write(((Double)value).ToString("R", NumberFormatInfo.InvariantInfo));
+                        Writer.Write(((double)value).ToString("R", NumberFormatInfo.InvariantInfo));
                     }
                 }
                 else if (type == typeof(bool))
@@ -4273,13 +4258,13 @@ namespace System.Xml.Serialization
                     }
                     else
                     {
-                        Writer.Write(((Single)value).ToString("R", NumberFormatInfo.InvariantInfo));
+                        Writer.Write(((float)value).ToString("R", NumberFormatInfo.InvariantInfo));
                         Writer.Write("f");
                     }
                 }
                 else if (type == typeof(decimal))
                 {
-                    Writer.Write(((Decimal)value).ToString(null, NumberFormatInfo.InvariantInfo));
+                    Writer.Write(((decimal)value).ToString(null, NumberFormatInfo.InvariantInfo));
                     Writer.Write("m");
                 }
                 else if (type == typeof(DateTime))
@@ -4426,5 +4411,4 @@ namespace System.Xml.Serialization
             return enumValue;
         }
     }
-#endif
 }

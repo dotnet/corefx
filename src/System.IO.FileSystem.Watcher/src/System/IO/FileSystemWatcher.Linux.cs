@@ -32,30 +32,23 @@ namespace System.IO
                 return;
             }
 
-            // Open an inotify file descriptor. Ideally this would be a constrained execution region, but we don't have access to 
-            // PrepareConstrainedRegions. We still use a finally block to house the code that opens the handle and stores it in 
-            // hopes of making it as non-interruptible as possible.  Ideally the SafeFileHandle would be allocated before the block, 
-            // but SetHandle is protected and SafeFileHandle is sealed, so we're stuck doing the allocation here.
-            SafeFileHandle handle;
-            try { } finally
+            // Open an inotify file descriptor.
+            SafeFileHandle handle = Interop.Sys.INotifyInit();
+            if (handle.IsInvalid)
             {
-                handle = Interop.Sys.INotifyInit();
-                if (handle.IsInvalid)
+                Interop.ErrorInfo error = Interop.Sys.GetLastErrorInfo();
+                switch (error.Error)
                 {
-                    Interop.ErrorInfo error = Interop.Sys.GetLastErrorInfo();
-                    switch (error.Error)
-                    {
-                        case Interop.Error.EMFILE:
-                            string maxValue = ReadMaxUserLimit(MaxUserInstancesPath);
-                            string message = !string.IsNullOrEmpty(maxValue) ?
-                                SR.Format(SR.IOException_INotifyInstanceUserLimitExceeded_Value, maxValue) :
-                                SR.IOException_INotifyInstanceUserLimitExceeded;
-                            throw new IOException(message, error.RawErrno);
-                        case Interop.Error.ENFILE:
-                            throw new IOException(SR.IOException_INotifyInstanceSystemLimitExceeded, error.RawErrno);
-                        default:
-                            throw Interop.GetExceptionForIoErrno(error);
-                    }
+                    case Interop.Error.EMFILE:
+                        string maxValue = ReadMaxUserLimit(MaxUserInstancesPath);
+                        string message = !string.IsNullOrEmpty(maxValue) ?
+                            SR.Format(SR.IOException_INotifyInstanceUserLimitExceeded_Value, maxValue) :
+                            SR.IOException_INotifyInstanceUserLimitExceeded;
+                        throw new IOException(message, error.RawErrno);
+                    case Interop.Error.ENFILE:
+                        throw new IOException(SR.IOException_INotifyInstanceSystemLimitExceeded, error.RawErrno);
+                    default:
+                        throw Interop.GetExceptionForIoErrno(error);
                 }
             }
 
@@ -526,7 +519,7 @@ namespace System.IO
                 // When cancellation is requested, clear out all watches.  This should force any active or future reads 
                 // on the inotify handle to return 0 bytes read immediately, allowing us to wake up from the blocking call 
                 // and exit the processing loop and clean up.
-                var ctr = _cancellationToken.Register(obj => ((RunningInstance)obj).CancellationCallback(), this);
+                var ctr = _cancellationToken.UnsafeRegister(obj => ((RunningInstance)obj).CancellationCallback(), this);
                 try
                 {
                     // Previous event information

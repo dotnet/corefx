@@ -28,8 +28,6 @@ namespace System.DirectoryServices.ActiveDirectory
         // Private Variables
         private readonly DirectoryContext _context = null;
         private readonly DirectoryEntryManager _directoryEntryMgr = null;
-        private readonly IntPtr _dsHandle = IntPtr.Zero;
-        private readonly IntPtr _authIdentity = IntPtr.Zero;
         private bool _disposed = false;
 
         // Internal variables corresponding to public properties
@@ -999,8 +997,8 @@ namespace System.DirectoryServices.ActiveDirectory
 
                 foreach (SearchResult res in resCol)
                 {
-                    //	add the name of the appNC only if it is not 
-                    //	the Schema or Configuration partition
+                    // add the name of the appNC only if it is not 
+                    // the Schema or Configuration partition
                     string nCName = (string)PropertyManager.GetSearchResultPropertyValue(res, PropertyManager.NCName);
                     if ((!(nCName.Equals(schemaNamingContext)))
                         && (!(nCName.Equals(configurationNamingContext))))

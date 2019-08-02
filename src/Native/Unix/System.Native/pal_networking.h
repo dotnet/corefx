@@ -56,10 +56,13 @@ typedef enum
  */
 typedef enum
 {
-    AddressFamily_AF_UNSPEC = 0, // System.Net.AddressFamily.Unspecified
-    AddressFamily_AF_UNIX = 1,   // System.Net.AddressFamily.Unix
-    AddressFamily_AF_INET = 2,   // System.Net.AddressFamily.InterNetwork
-    AddressFamily_AF_INET6 = 23, // System.Net.AddressFamily.InterNetworkV6
+    AddressFamily_AF_UNSPEC = 0,   // System.Net.AddressFamily.Unspecified
+    AddressFamily_AF_UNIX = 1,     // System.Net.AddressFamily.Unix
+    AddressFamily_AF_INET = 2,     // System.Net.AddressFamily.InterNetwork
+    AddressFamily_AF_INET6 = 23,   // System.Net.AddressFamily.InterNetworkV6
+    AddressFamily_AF_NETLINK = 30, // System.Net.AddressFamily.Netlink
+    AddressFamily_AF_PACKET = 31,  // System.Net.AddressFamily.Packet
+    AddressFamily_AF_CAN = 32,     // System.Net.AddressFamily.ControllerAreaNetwork
 } AddressFamily;
 
 /*
@@ -88,6 +91,12 @@ typedef enum
     ProtocolType_PT_TCP = 6,         // System.Net.ProtocolType.Tcp
     ProtocolType_PT_UDP = 17,        // System.Net.ProtocolType.Udp
     ProtocolType_PT_ICMPV6 = 58,     // System.Net.ProtocolType.IcmpV6
+    ProtocolType_PT_RAW = 255,       // System.Net.ProtocolType.Raw
+    ProtocolType_PT_IGMP = 2,        // System.Net.ProtocolType.Igmp
+    ProtocolType_PT_NONE = 59,       // System.Net.ProtocolType.IPv6NoNextHeader
+    ProtocolType_PT_DSTOPTS = 60,    // System.Net.ProtocolType.IPv6DestinationOptions
+    ProtocolType_PT_ROUTING = 43,    // System.Net.ProtocolType.IPv6RoutingHeader
+    ProtocolType_PT_FRAGMENT = 44,   // System.Net.ProtocolType.IPv6FragmentHeader
 } ProtocolType;
 
 typedef enum
@@ -410,3 +419,7 @@ DLLEXPORT char* SystemNative_GetPeerUserName(intptr_t socket);
 DLLEXPORT void SystemNative_GetDomainSocketSizes(int32_t* pathOffset, int32_t* pathSize, int32_t* addressSize);
 
 DLLEXPORT int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, int64_t count, int64_t* sent);
+
+DLLEXPORT int32_t SystemNative_Disconnect(intptr_t socket);
+
+DLLEXPORT uint32_t SystemNative_InterfaceNameToIndex(char* interfaceName);

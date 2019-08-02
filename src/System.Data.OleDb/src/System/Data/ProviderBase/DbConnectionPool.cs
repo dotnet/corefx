@@ -17,7 +17,7 @@ namespace System.Data.ProviderBase
 {
     using SysTx = Transactions;
 
-    sealed internal class DbConnectionPool
+    internal sealed class DbConnectionPool
     {
         private enum State
         {
@@ -29,7 +29,7 @@ namespace System.Data.ProviderBase
         // This class is a way to stash our cloned Tx key for later disposal when it's no longer needed.
         // We can't get at the key in the dictionary without enumerating entries, so we stash an extra
         // copy as part of the value.
-        sealed private class TransactedConnectionList : List<DbConnectionInternal>
+        private sealed class TransactedConnectionList : List<DbConnectionInternal>
         {
             private SysTx.Transaction _transaction;
             internal TransactedConnectionList(int initialAllocation, SysTx.Transaction tx) : base(initialAllocation)
@@ -60,7 +60,7 @@ namespace System.Data.ProviderBase
             public DbConnectionOptions UserOptions { get; private set; }
         }
 
-        sealed private class TransactedConnectionPool
+        private sealed class TransactedConnectionPool
         {
             Dictionary<SysTx.Transaction, TransactedConnectionList> _transactedCxns;
 
@@ -509,7 +509,7 @@ namespace System.Data.ProviderBase
             get { return (null != _identity && DbConnectionPoolIdentity.NoIdentity != _identity); }
         }
 
-        private void CleanupCallback(Object state)
+        private void CleanupCallback(object state)
         {
             // Called when the cleanup-timer ticks over.
 
@@ -922,7 +922,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        private void ErrorCallback(Object state)
+        private void ErrorCallback(object state)
         {
             _errorOccurred = false;
             _waitHandles.ErrorEvent.Reset();

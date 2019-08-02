@@ -169,7 +169,6 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void RunOverflow()
         {
             var bytes = new byte[1000];
@@ -199,7 +198,7 @@ namespace System.Numerics.Tests
 
             StackCalc sc2 = new StackCalc(opstring2);
             while (sc2.DoNextOperation())
-            {	
+            {
                 //Run the full calculation
                 sc2.DoNextOperation();
             }

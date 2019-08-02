@@ -144,7 +144,6 @@ namespace System.Data
         private readonly DataRowBuilder _rowBuilder;
         private const string KEY_XMLSCHEMA = "XmlSchema";
         private const string KEY_XMLDIFFGRAM = "XmlDiffGram";
-        private const string KEY_NAME = "TableName";
 
         internal readonly List<DataView> _delayedViews = new List<DataView>();
         private readonly List<DataViewListener> _dataViewListeners = new List<DataViewListener>();
@@ -4438,7 +4437,7 @@ namespace System.Data
                     // deferred until after the row has been completely added.
                     if (action != DataRowAction.Add)
                     {
-                        throw exc;
+                        throw;
                     }
                     else
                     {

@@ -62,19 +62,6 @@ namespace System.Collections.Generic
         private const string ItemsName = "Items"; // Do not rename (binary serialization)
         private const string VersionName = "Version"; // Do not rename (binary serialization)
 
-        // Needed for enumerator
-        private const string TreeName = "Tree";
-        private const string NodeValueName = "Item";
-        private const string EnumStartName = "EnumStarted";
-        private const string ReverseName = "Reverse";
-        private const string EnumVersionName = "EnumVersion";
-
-        // Needed for TreeSubset
-        private const string MinName = "Min";
-        private const string MaxName = "Max";
-        private const string LowerBoundActiveName = "lBoundActive";
-        private const string UpperBoundActiveName = "uBoundActive";
-
         internal const int StackAllocThreshold = 100;
 
         #endregion
@@ -1520,15 +1507,17 @@ namespace System.Collections.Generic
 
         #region ISorted members
 
+        [MaybeNull]
         public T Min => MinInternal;
 
+        [MaybeNull]
         internal virtual T MinInternal
         {
             get
             {
                 if (root == null)
                 {
-                    return default(T)!; // TODO-NULLABLE-GENERIC
+                    return default(T)!;
                 }
 
                 Node current = root;
@@ -1541,15 +1530,17 @@ namespace System.Collections.Generic
             }
         }
 
+        [MaybeNull]
         public T Max => MaxInternal;
 
+        [MaybeNull]
         internal virtual T MaxInternal
         {
             get
             {
                 if (root == null)
                 {
-                    return default(T)!; // TODO-NULLABLE-GENERIC
+                    return default(T)!;
                 }
 
                 Node current = root;
@@ -1612,9 +1603,9 @@ namespace System.Collections.Generic
             }
         }
 
-        void IDeserializationCallback.OnDeserialization(object sender) => OnDeserialization(sender);
+        void IDeserializationCallback.OnDeserialization(object? sender) => OnDeserialization(sender);
 
-        protected virtual void OnDeserialization(object sender)
+        protected virtual void OnDeserialization(object? sender)
         {
             if (comparer != null)
             {
@@ -1912,8 +1903,6 @@ namespace System.Collections.Generic
         [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "not an expected scenario")]
         public struct Enumerator : IEnumerator<T>, IEnumerator, ISerializable, IDeserializationCallback
         {
-            private static readonly Node s_dummyNode = new Node(default(T)!, NodeColor.Red);
-
             private SortedSet<T> _tree;
             private int _version;
 
@@ -1946,7 +1935,7 @@ namespace System.Collections.Generic
                 throw new PlatformNotSupportedException();
             }
 
-            void IDeserializationCallback.OnDeserialization(object sender)
+            void IDeserializationCallback.OnDeserialization(object? sender)
             {
                 throw new PlatformNotSupportedException();
             }
@@ -2026,7 +2015,7 @@ namespace System.Collections.Generic
                     {
                         return _current.Item;
                     }
-                    return default(T)!; // TODO-NULLABLE-GENERIC
+                    return default(T)!; // Should only happen when accessing Current is undefined behavior
                 }
             }
 
@@ -2081,7 +2070,7 @@ namespace System.Collections.Generic
         /// a value that has more complete data than the value you currently have, although their
         /// comparer functions indicate they are equal.
         /// </remarks>
-        public bool TryGetValue(T equalValue, out T actualValue) // TODO-NULLABLE-GENERIC
+        public bool TryGetValue(T equalValue, [MaybeNullWhen(false)] out T actualValue)
         {
             Node? node = FindNode(equalValue);
             if (node != null)
@@ -2089,7 +2078,7 @@ namespace System.Collections.Generic
                 actualValue = node.Item;
                 return true;
             }
-            actualValue = default(T)!; // TODO-NULLABLE-GENERIC
+            actualValue = default(T)!;
             return false;
         }
 

@@ -15,7 +15,6 @@ namespace System.IO.Pipelines.Tests
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
         }
 
         public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
@@ -25,7 +24,7 @@ namespace System.IO.Pipelines.Tests
             cancellationToken.ThrowIfCancellationRequested();
         }
 
-#if !netstandard
+#if netcoreapp
         public override async ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
         {
             await WaitForWriteTask.Task;

@@ -121,7 +121,7 @@ namespace System.IO.Ports.Tests
 
                 com.WriteTimeout = rndGen.Next(minRandomTimeout, maxRandomTimeout);
                 com.Handshake = Handshake.RequestToSendXOnXOff;
-                //		com.Encoding = new System.Text.UTF7Encoding();
+                //        com.Encoding = new System.Text.UTF7Encoding();
                 com.Encoding = Encoding.Unicode;
 
                 Debug.WriteLine("Verifying WriteTimeout={0} with successive call to write method", com.WriteTimeout);
@@ -340,7 +340,7 @@ namespace System.IO.Ports.Tests
         #endregion
 
         #region Verification for Test Cases
-        public static void VerifyWriteException(SerialPort com, Type expectedException)
+        private static void VerifyWriteException(SerialPort com, Type expectedException)
         {
             Assert.Throws(expectedException, () => com.Write(new char[CHAR_SIZE_EXCEPTION], 0, CHAR_SIZE_EXCEPTION));
         }

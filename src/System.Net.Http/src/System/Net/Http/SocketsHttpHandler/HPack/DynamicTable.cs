@@ -1,6 +1,6 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0.
+// See THIRD-PARTY-NOTICES.TXT in the project root for license information.
 
 namespace System.Net.Http.HPack
 {
@@ -34,7 +34,15 @@ namespace System.Net.Http.HPack
                     throw new IndexOutOfRangeException();
                 }
 
-                return _buffer[_insertIndex == 0 ? _buffer.Length - 1 : _insertIndex - index - 1];
+                index = _insertIndex - index - 1;
+
+                if (index < 0)
+                {
+                    // _buffer is circular; wrap the index back around.
+                    index += _buffer.Length;
+                }
+
+                return _buffer[index];
             }
         }
 

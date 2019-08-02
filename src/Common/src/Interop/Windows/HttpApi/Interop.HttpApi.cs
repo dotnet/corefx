@@ -363,7 +363,6 @@ internal static partial class Interop
         }
 
         private const int HttpHeaderRequestMaximum = (int)HttpRequestHeader.UserAgent + 1;
-        private const int HttpHeaderResponseMaximum = (int)HttpResponseHeader.WwwAuthenticate + 1;
 
         internal static class HTTP_REQUEST_HEADER_ID
         {
@@ -531,7 +530,7 @@ internal static partial class Interop
                 return result;
             }
 
-            override protected bool ReleaseHandle()
+            protected override bool ReleaseHandle()
             {
                 return Interop.Kernel32.LocalFree(handle) == IntPtr.Zero;
             }

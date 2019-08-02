@@ -16,7 +16,6 @@ namespace System.Tests
         static string s_stackTrace;
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "UapAot does not support nice stack traces. It's for people who like performance.")]
         public void StackTraceTest()
         {
             //arrange
@@ -42,35 +41,33 @@ namespace System.Tests
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public void TestFrame()
+        private void TestFrame()
         {
             GenericFrame<DateTime, StringBuilder>(DateTime.Now, null);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public void GenericFrame<T1, T2>(T1 t1, T2 t2)
+        private void GenericFrame<T1, T2>(T1 t1, T2 t2)
         {
-            var test = new TestClass();
+            new TestClass();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void StaticFrame(object obj)
+        private static void StaticFrame(object obj)
         {
             s_stackTrace = Environment.StackTrace;
         }
 
-        class TestClass
+        private class TestClass
         {
             [MethodImpl(MethodImplOptions.NoInlining)]
             public TestClass()
             {
-                EnvironmentStackTrace.StaticFrame(null);
+                StaticFrame(null);
             }
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "On Desktop, Environment.StackTrace contains internal frames")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "UapAot does not support nice stack traces. It's for people who like performance.")]
         public void StackTraceDoesNotStartWithInternalFrame()
         {
              string stackTrace = Environment.StackTrace;

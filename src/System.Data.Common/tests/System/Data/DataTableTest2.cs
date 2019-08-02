@@ -748,12 +748,12 @@ namespace System.Data.Tests
             dtParent = DataProvider.CreateParentDataTable();
 
             // Checking HasErrors default 
-            Assert.Equal(false, dtParent.HasErrors);
+            Assert.False(dtParent.HasErrors);
 
             // Checking HasErrors Get 
             dtParent.Rows[0].RowError = "Error on row 0";
             dtParent.Rows[2].RowError = "Error on row 2";
-            Assert.Equal(true, dtParent.HasErrors);
+            Assert.True(dtParent.HasErrors);
         }
 
         [Fact]
@@ -794,7 +794,7 @@ namespace System.Data.Tests
             Assert.Equal(dr["String1"], dt.Columns["String1"].DefaultValue);
 
             // LoadDataRow(update1) - check column String2
-            Assert.Equal(dr["String2"], "Changed");
+            Assert.Equal("Changed", dr["String2"]);
 
             // LoadDataRow(update1) - check row state
             Assert.Equal(DataRowState.Modified, dr.RowState);
@@ -861,10 +861,10 @@ namespace System.Data.Tests
         [Fact]
         public void MinimumCapacity()
         {
-            //				i get default=50, according to MSDN the value should be 25 
-            //				// Checking MinimumCapacity default = 25 
-            //				Assert.Equal(25, dtParent.MinimumCapacity);
-            //				EndCase(null);
+            //                i get default=50, according to MSDN the value should be 25 
+            //                // Checking MinimumCapacity default = 25 
+            //                Assert.Equal(25, dtParent.MinimumCapacity);
+            //                EndCase(null);
             DataTable dt = new DataTable();
 
             // Checking MinimumCapacity get/set int.MaxValue 
@@ -875,10 +875,10 @@ namespace System.Data.Tests
             dt.MinimumCapacity = 0;
             Assert.Equal(0, dt.MinimumCapacity);
 
-            //				// Checking MinimumCapacity get/set int.MinValue 
-            //				dtParent.MinimumCapacity = int.MinValue;
-            //				Assert.Equal(int.MinValue, dtParent.MinimumCapacity);
-            //				EndCase(null);
+            //                // Checking MinimumCapacity get/set int.MinValue 
+            //                dtParent.MinimumCapacity = int.MinValue;
+            //                Assert.Equal(int.MinValue, dtParent.MinimumCapacity);
+            //                EndCase(null);
         }
 
         [Fact]
@@ -915,15 +915,15 @@ namespace System.Data.Tests
             _eventRaised = false;
             dt.OnColumnChanged_Test();
             // OnColumnChanged Event 1
-            Assert.Equal(false, _eventRaised);
+            Assert.False(_eventRaised);
             _eventRaised = false;
             _eventValues = false;
             dt.ColumnChanged += new DataColumnChangeEventHandler(OnColumnChanged_Handler);
             dt.OnColumnChanged_Test();
             // OnColumnChanged Event 2
-            Assert.Equal(true, _eventRaised);
+            Assert.True(_eventRaised);
             // OnColumnChanged Values
-            Assert.Equal(true, _eventValues);
+            Assert.True(_eventValues);
             dt.ColumnChanged -= new DataColumnChangeEventHandler(OnColumnChanged_Handler);
         }
 
@@ -949,15 +949,15 @@ namespace System.Data.Tests
             _eventRaised = false;
             dt.OnColumnChanging_Test();
             // OnColumnChanging Event 1
-            Assert.Equal(false, _eventRaised);
+            Assert.False(_eventRaised);
             _eventRaised = false;
             _eventValues = false;
             dt.ColumnChanging += new DataColumnChangeEventHandler(OnColumnChanging_Handler);
             dt.OnColumnChanging_Test();
             // OnColumnChanging Event 2
-            Assert.Equal(true, _eventRaised);
+            Assert.True(_eventRaised);
             // OnColumnChanging Values
-            Assert.Equal(true, _eventValues);
+            Assert.True(_eventValues);
             dt.ColumnChanging -= new DataColumnChangeEventHandler(OnColumnChanging_Handler);
         }
 
@@ -1088,24 +1088,24 @@ namespace System.Data.Tests
             _EventTriggered = false;
             // RowChanged - 1
             dt.Rows[0][1] = "NewValue";
-            Assert.Equal(true, _EventTriggered);
+            Assert.True(_EventTriggered);
 
             _EventTriggered = false;
             // RowChanged - 2
             dt.Rows[0].BeginEdit();
             dt.Rows[0][1] = "NewValue";
-            Assert.Equal(false, _EventTriggered);
+            Assert.False(_EventTriggered);
 
             _EventTriggered = false;
             // RowChanged - 3
             dt.Rows[0].EndEdit();
-            Assert.Equal(true, _EventTriggered);
+            Assert.True(_EventTriggered);
 
             _EventTriggered = false;
             dt.RowChanged -= new DataRowChangeEventHandler(Row_Changed);
             // RowChanged - 4
             dt.Rows[0][1] = "NewValue A";
-            Assert.Equal(false, _EventTriggered);
+            Assert.False(_EventTriggered);
         }
 
         private void Row_Changed(object sender, DataRowChangeEventArgs e)
@@ -1123,24 +1123,24 @@ namespace System.Data.Tests
             _EventTriggered = false;
             // RowChanging - 1
             dt.Rows[0][1] = "NewValue";
-            Assert.Equal(true, _EventTriggered);
+            Assert.True(_EventTriggered);
 
             _EventTriggered = false;
             // RowChanging - 2
             dt.Rows[0].BeginEdit();
             dt.Rows[0][1] = "NewValue";
-            Assert.Equal(false, _EventTriggered);
+            Assert.False(_EventTriggered);
 
             _EventTriggered = false;
             // RowChanging - 3
             dt.Rows[0].EndEdit();
-            Assert.Equal(true, _EventTriggered);
+            Assert.True(_EventTriggered);
 
             _EventTriggered = false;
             dt.RowChanging -= new DataRowChangeEventHandler(Row_Changing);
             // RowChanging - 4
             dt.Rows[0][1] = "NewValue A";
-            Assert.Equal(false, _EventTriggered);
+            Assert.False(_EventTriggered);
         }
 
         private void Row_Changing(object sender, DataRowChangeEventArgs e)
@@ -1390,14 +1390,14 @@ namespace System.Data.Tests
             CompareUnSorted(drSelect, al.ToArray());
 
 #if LATER
-			//-------------------------------------------------------------
-			al.Clear();
-			foreach (DataRow dr in dt.Rows)
-				if (dr["ChildDouble"].ToString().Length > 10)
-					al.Add(dr);
-				// Select_S - Len(Convert(ChildDouble,'System.String')) > 10
-				drSelect = dt.Select ("Len(Convert(ChildDouble,'System.String')) > 10");
-				Assert.Equal (al.ToArray(), drSelect);
+            //-------------------------------------------------------------
+            al.Clear();
+            foreach (DataRow dr in dt.Rows)
+                if (dr["ChildDouble"].ToString().Length > 10)
+                    al.Add(dr);
+                // Select_S - Len(Convert(ChildDouble,'System.String')) > 10
+                drSelect = dt.Select ("Len(Convert(ChildDouble,'System.String')) > 10");
+                Assert.Equal (al.ToArray(), drSelect);
 #endif
             //-------------------------------------------------------------
             al.Clear();
@@ -1409,14 +1409,14 @@ namespace System.Data.Tests
             Assert.Equal(al.ToArray(), drSelect);
             //-------------------------------------------------------------
             /*
-			al.Clear();
-			foreach (DataRow dr in ds.Tables[0].Rows)
-				if (dr.IsNull("ParentBool") || (bool)dr["ParentBool"])
-					al.Add(dr);
-				// Select_S - IsNull(ParentBool,true)
-				drSelect = ds.Tables[0].Select("IsNull(ParentBool,true) ");
-				Assert.Equal (al.ToArray(), drSelect);
-			*/
+            al.Clear();
+            foreach (DataRow dr in ds.Tables[0].Rows)
+                if (dr.IsNull("ParentBool") || (bool)dr["ParentBool"])
+                    al.Add(dr);
+                // Select_S - IsNull(ParentBool,true)
+                drSelect = ds.Tables[0].Select("IsNull(ParentBool,true) ");
+                Assert.Equal (al.ToArray(), drSelect);
+            */
             //-------------------------------------------------------------
             al.Clear();
             // Select_S - Relation not exists, Exception
@@ -1499,11 +1499,11 @@ namespace System.Data.Tests
             ArrayList al = new ArrayList();
             DataRowVersion drVer = DataRowVersion.Current;
 
-            //From MSDN -	The row the default version for the current DataRowState.
-            //				For a DataRowState value of Added, Modified or Current, 
-            //				the default version is Current. 
-            //				For a DataRowState of Deleted, the version is Original.
-            //				For a DataRowState value of Detached, the version is Proposed.
+            //From MSDN -    The row the default version for the current DataRowState.
+            //                For a DataRowState value of Added, Modified or Current, 
+            //                the default version is Current. 
+            //                For a DataRowState of Deleted, the version is Original.
+            //                For a DataRowState value of Detached, the version is Proposed.
 
             if (((State & DataRowState.Added) > 0)
                 | ((State & DataRowState.Modified) > 0)
@@ -1851,7 +1851,7 @@ namespace System.Data.Tests
             table.PrimaryKey = new DataColumn[] { col };
             table.AcceptChanges();
 
-            // ms.net behavior.	
+            // ms.net behavior.    
             table.BeginInit();
             DataColumn col1 = new DataColumn("col1", typeof(int));
             table.Columns.AddRange(new DataColumn[] { col1 });
@@ -2226,13 +2226,13 @@ namespace System.Data.Tests
             // ms.net throws a nullreference exception.
             // If any data is merged, exception is anyways raised.
             /*
-			table1.PrimaryKey = new DataColumn[] {table1.Columns[0]};
-			table3 = table1.Clone ();
-			try {
-				table3.Merge(table2);
+            table1.PrimaryKey = new DataColumn[] {table1.Columns[0]};
+            table3 = table1.Clone ();
+            try {
+                table3.Merge(table2);
 Assert.False(true);
-			} catch (DataException e) {}
-			*/
+            } catch (DataException e) {}
+            */
 
             table3.Merge(table2, false, MissingSchemaAction.Ignore);
             table1.PrimaryKey = null;

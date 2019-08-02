@@ -124,7 +124,6 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [ActiveIssue(37198)]
         [Theory, InlineData(true), InlineData(false)]
         [OuterLoop("Opens program")]
         public void ProcessStart_UseShellExecute_OnUnix_SuccessWhenProgramInstalled(bool isFolder)
@@ -153,6 +152,37 @@ namespace System.Diagnostics.Tests
                     px.Kill();
                     px.WaitForExit();
                     Assert.True(px.HasExited);
+                }
+            }
+        }
+
+        // Active issue https://github.com/dotnet/corefx/issues/37739
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotRedHatFamily6))]
+        [PlatformSpecific(~TestPlatforms.OSX)] // On OSX, ProcessName returns the script interpreter.
+        public void ProcessNameMatchesScriptName()
+        {
+            string scriptName = GetTestFileName();
+            string filename = Path.Combine(TestDirectory, scriptName);
+            File.WriteAllText(filename, $"#!/bin/sh\nsleep 600\n"); // sleep 10 min.
+            // set x-bit
+            int mode = Convert.ToInt32("744", 8);
+            Assert.Equal(0, chmod(filename, mode));
+
+            using (var process = Process.Start(new ProcessStartInfo { FileName = filename }))
+            {
+                try
+                {
+                    string stat = File.ReadAllText($"/proc/{process.Id}/stat");
+                    Assert.Contains($"({scriptName.Substring(0, 15)})", stat);
+                    string cmdline = File.ReadAllText($"/proc/{process.Id}/cmdline");
+                    Assert.Equal($"/bin/sh\0{filename}\0", cmdline);
+
+                    Assert.Equal(scriptName, process.ProcessName);
+                }
+                finally
+                {
+                    process.Kill();
+                    process.WaitForExit();
                 }
             }
         }
@@ -191,7 +221,7 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Linux)] // test relies on xdg-open
         public void ProcessStart_UseShellExecute_OnUnix_DocumentFile_IgnoresArguments()
         {
-            Assert.Equal(s_allowedProgramsToRun[0], "xdg-open");
+            Assert.Equal("xdg-open", s_allowedProgramsToRun[0]);
 
             if (!IsProgramInstalled("xdg-open"))
             {
@@ -271,55 +301,47 @@ namespace System.Diagnostics.Tests
             }, verb ?? "<null>", isValid.ToString(), options).Dispose();
         }
 
-        [Theory, InlineData("vi")]
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]
-        [OuterLoop("Opens program")]
-        public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram(string programToOpenWith)
+        public void ProcessStart_OnLinux_UsesSpecifiedProgram()
         {
-            if (IsProgramInstalled(programToOpenWith))
+            const string Program = "sleep";
+
+            using (var px = Process.Start(Program, "60"))
             {
-                string fileToOpen = GetTestFilePath() + ".txt";
-                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram)}");
-                using (var px = Process.Start(programToOpenWith, fileToOpen))
+                try
                 {
-                    Assert.Equal(programToOpenWith, px.ProcessName);
+                    Assert.Equal(Program, px.ProcessName);
+                }
+                finally
+                {
                     px.Kill();
                     px.WaitForExit();
-                    Assert.True(px.HasExited);
                 }
-            }
-            else
-            {
-                Console.WriteLine($"Program specified to open file with {programToOpenWith} is not installed on this machine.");
+                Assert.True(px.HasExited);
             }
         }
 
-        [ActiveIssue(37198)]
-        [Theory, InlineData("vi")]
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]
-        [OuterLoop("Opens program")]
-        public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList(string programToOpenWith)
+        public void ProcessStart_OnLinux_UsesSpecifiedProgramUsingArgumentList()
         {
-            if (PlatformDetection.IsAlpine)
-                return; // [ActiveIssue(https://github.com/dotnet/corefx/issues/31970)]
+            const string Program = "sleep";
 
-            if (IsProgramInstalled(programToOpenWith))
+            ProcessStartInfo psi = new ProcessStartInfo(Program);
+            psi.ArgumentList.Add("60");
+            using (var px = Process.Start(psi))
             {
-                string fileToOpen = GetTestFilePath() + ".txt";
-                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList)}");
-                ProcessStartInfo psi = new ProcessStartInfo(programToOpenWith);
-                psi.ArgumentList.Add(fileToOpen);
-                using (var px = Process.Start(psi))
+                try
                 {
-                    Assert.Equal(programToOpenWith, px.ProcessName);
+                    Assert.Equal(Program, px.ProcessName);
+                }
+                finally
+                {
                     px.Kill();
                     px.WaitForExit();
-                    Assert.True(px.HasExited);
                 }
-            }
-            else
-            {
-                Console.WriteLine($"Program specified to open file with {programToOpenWith} is not installed on this machine.");
+                Assert.True(px.HasExited);
             }
         }
 
@@ -406,15 +428,15 @@ namespace System.Diagnostics.Tests
             ProcessPriorityClass priorityClass = _process.PriorityClass;
 
             _process.PriorityClass = ProcessPriorityClass.Idle;
-            Assert.Equal(_process.PriorityClass, ProcessPriorityClass.Idle);
+            Assert.Equal(ProcessPriorityClass.Idle, _process.PriorityClass);
 
             try
             {
                 _process.PriorityClass = ProcessPriorityClass.High;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.High);
+                Assert.Equal(ProcessPriorityClass.High, _process.PriorityClass);
 
                 _process.PriorityClass = ProcessPriorityClass.Normal;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.Normal);
+                Assert.Equal(ProcessPriorityClass.Normal, _process.PriorityClass);
 
                 _process.PriorityClass = priorityClass;
             }
@@ -555,6 +577,7 @@ namespace System.Diagnostics.Tests
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
         [InlineData(true)]
         [InlineData(false)]
+        [ActiveIssue(38833, TestPlatforms.AnyUnix)]
         public unsafe void TestCheckChildProcessUserAndGroupIdsElevated(bool useRootGroups)
         {
             Func<string, string, int> runsAsRoot = (string username, string useRootGroupsArg) =>
@@ -886,9 +909,9 @@ namespace System.Diagnostics.Tests
         private static extern uint getgid();
 
         [DllImport("libc", SetLastError = true)]
-        private unsafe static extern int getgroups(int size, uint* list);
+        private static extern unsafe int getgroups(int size, uint* list);
 
-        private unsafe static HashSet<uint> GetGroups()
+        private static unsafe HashSet<uint> GetGroups()
         {
             int maxSize = 128;
             Span<uint> groups = stackalloc uint[maxSize];
@@ -910,7 +933,7 @@ namespace System.Diagnostics.Tests
         private static extern int seteuid(uint euid);
 
         [DllImport("libc")]
-        private static unsafe extern int setgroups(int length, uint* groups);
+        private static extern unsafe int setgroups(int length, uint* groups);
 
         private const int SIGKILL = 9;
 

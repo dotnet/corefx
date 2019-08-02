@@ -83,7 +83,7 @@ namespace System.Reflection.Tests
             }
 
             if (!found)
-                Assert.False(true, String.Format("Property {0} not found in Type {1}", name, t.Name));
+                Assert.False(true, string.Format("Property {0} not found in Type {1}", name, t.Name));
         }
     } //end class
 
@@ -100,6 +100,6 @@ namespace System.Reflection.Tests
     {
         public new string Pubprop1 { get { return ""; } set { } }
         public new virtual string Pubprop2 { get { return ""; } set { } }
-        public new static string Pubprop3 { get { return ""; } set { } }
+        public static new string Pubprop3 { get { return ""; } set { } }
     }
 }

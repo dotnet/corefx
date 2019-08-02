@@ -22,7 +22,7 @@ namespace System.Runtime.InteropServices.Tests
             yield return new NonGenericStruct();
             yield return Int32Enum.Value1;
 
-            MethodInfo method = typeof(GetTypedObjectForIUnknownTests).GetMethod(nameof(NonGenericMethod));
+            MethodInfo method = typeof(GetTypedObjectForIUnknownTests).GetMethod(nameof(NonGenericMethod), BindingFlags.NonPublic | BindingFlags.Static);
             Delegate d = method.CreateDelegate(typeof(NonGenericDelegate));
             yield return d;
         }
@@ -117,12 +117,10 @@ namespace System.Runtime.InteropServices.Tests
 
             yield return new object[] { typeof(GenericClass<>) };
 
-#if !netstandard // TODO: Enable for netstandard2.1
             AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Assembly"), AssemblyBuilderAccess.Run);
             ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("Module");
             TypeBuilder typeBuilder = moduleBuilder.DefineType("Type");
             yield return new object[] { typeBuilder };
-#endif
         }
 
         [Theory]
@@ -154,13 +152,11 @@ namespace System.Runtime.InteropServices.Tests
 
             yield return new object[] { new object(), typeof(int).MakePointerType() };
 
-#if !netstandard // TODO: Enable for netstandard2.1
             AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Assembly"), AssemblyBuilderAccess.RunAndCollect);
             ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("Module");
             TypeBuilder typeBuilder = moduleBuilder.DefineType("Type");
             Type collectibleType = typeBuilder.CreateType();
             yield return new object[] { new object(), collectibleType };
-#endif
         }
 
         [Theory]
@@ -205,7 +201,7 @@ namespace System.Runtime.InteropServices.Tests
         public class ClassWithInterface : NonGenericInterface { }
         public struct StructWithInterface : NonGenericInterface { }
 
-        public static void NonGenericMethod(int i) { }
+        private static void NonGenericMethod(int i) { }
         public delegate void NonGenericDelegate(int i);
 
         public enum Int32Enum : int { Value1, Value2 }

@@ -7,6 +7,8 @@ using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Globalization;
+using System.Net.NetworkInformation;
 
 namespace System.Net
 {
@@ -14,17 +16,17 @@ namespace System.Net
     {
         private const int MaxIPv4StringLength = 15; // 4 numbers separated by 3 periods, with up to 3 digits per number
 
-        internal static unsafe IPAddress Parse(ReadOnlySpan<char> ipSpan, bool tryParse)
+        internal static IPAddress Parse(ReadOnlySpan<char> ipSpan, bool tryParse)
         {
             if (ipSpan.Contains(':'))
             {
                 // The address is parsed as IPv6 if and only if it contains a colon. This is valid because
                 // we don't support/parse a port specification at the end of an IPv4 address.
-                ushort* numbers = stackalloc ushort[IPAddressParserStatics.IPv6AddressShorts];
-                new Span<ushort>(numbers, IPAddressParserStatics.IPv6AddressShorts).Clear();
+                Span<ushort> numbers = stackalloc ushort[IPAddressParserStatics.IPv6AddressShorts];
+                numbers.Clear();
                 if (Ipv6StringToAddress(ipSpan, numbers, IPAddressParserStatics.IPv6AddressShorts, out uint scope))
                 {
-                    return new IPAddress(numbers, IPAddressParserStatics.IPv6AddressShorts, scope);
+                    return new IPAddress(numbers, scope);
                 }
             }
             else if (Ipv4StringToAddress(ipSpan, out long address))
@@ -193,7 +195,7 @@ namespace System.Net
             }
         }
 
-        public static unsafe bool Ipv6StringToAddress(ReadOnlySpan<char> ipSpan, ushort* numbers, int numbersLength, out uint scope)
+        public static unsafe bool Ipv6StringToAddress(ReadOnlySpan<char> ipSpan, Span<ushort> numbers, int numbersLength, out uint scope)
         {
             Debug.Assert(numbers != null);
             Debug.Assert(numbersLength >= IPAddressParserStatics.IPv6AddressShorts);
@@ -210,33 +212,22 @@ namespace System.Net
                 string scopeId = null;
                 IPv6AddressHelper.Parse(ipSpan, numbers, 0, ref scopeId);
 
-                long result = 0;
-                if (!string.IsNullOrEmpty(scopeId))
+                if (scopeId?.Length > 1)
                 {
-                    if (scopeId.Length < 2)
+                    if (uint.TryParse(scopeId.AsSpan(1), NumberStyles.None, CultureInfo.InvariantCulture, out scope))
                     {
-                        scope = 0;
-                        return false;
+                        return true; // scopeId is a numeric value
                     }
-
-                    for (int i = 1; i < scopeId.Length; i++)
+                    uint interfaceIndex = InterfaceInfoPal.InterfaceNameToIndex(scopeId);
+                    if (interfaceIndex > 0)
                     {
-                        char c = scopeId[i];
-                        if (c < '0' || c > '9')
-                        {
-                            scope = 0;
-                            return false;
-                        }
-                        result = (result * 10) + (c - '0');
-                        if (result > uint.MaxValue)
-                        {
-                            scope = 0;
-                            return false;
-                        }
+                        scope = interfaceIndex;
+                        return true; // scopeId is a known interface name
                     }
+                    // scopeId is an unknown interface name
                 }
-
-                scope = (uint)result;
+                // scopeId is not presented
+                scope = 0;
                 return true;
             }
 

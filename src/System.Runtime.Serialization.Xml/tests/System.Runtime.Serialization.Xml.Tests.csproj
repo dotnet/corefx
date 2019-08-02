@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{30CAB353-089E-4294-B23B-F2DD1D945654}</ProjectGuid>
-    <Configurations>netstandard-Debug;netstandard-Release;uapaot-Debug;uapaot-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(TestSourceFolder)DataContractSerializerStressTests.cs" />
@@ -32,12 +32,5 @@
     <Compile Include="SerializationTestTypes\SampleIObjectRef.cs" />
     <Compile Include="SerializationTestTypes\SampleTypes.cs" />
     <Compile Include="SerializationTestTypes\SelfRefAndCycles.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'uapaot'">
-    <Compile Include="$(TestSourceFolder)SerializationTypes.CoreCLR.cs" />
-    <Compile Include="$(TestSourceFolder)DataContractSerializer.CoreCLR.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='uapaot'">
-    <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
 </Project>

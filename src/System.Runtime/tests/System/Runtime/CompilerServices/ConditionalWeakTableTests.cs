@@ -27,7 +27,7 @@ namespace System.Runtime.CompilerServices.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => cwt.Add(key, key)); // duplicate key
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         [InlineData(1)]
         [InlineData(100)]
         public static void Add(int numObjects)
@@ -200,7 +200,7 @@ namespace System.Runtime.CompilerServices.Tests
             return new WeakReference(value);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void AddRemove_DropValue()
         {
             // Verify that the removed entry is not keeping the value alive
@@ -231,7 +231,7 @@ namespace System.Runtime.CompilerServices.Tests
             key_out = new WeakReference<object>(key, false);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void GetOrCreateValue()
         {
             WeakReference<object> wrValue;
@@ -262,7 +262,7 @@ namespace System.Runtime.CompilerServices.Tests
             key_out = new WeakReference<object>(key, false);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void GetValue()
         {
             WeakReference<object> wrValue;

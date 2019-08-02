@@ -24,7 +24,6 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { new object(), IID_IINSPECTABLE };
 
             yield return new object[] { 10, IID_IUNKNOWN };
-            // [ActiveIssue(31079, ~TargetFrameworkMonikers.NetFramework)]
             if (!PlatformDetection.IsNetCore)
             {
                 yield return new object[] { 10, IID_IDISPATCH };
@@ -32,7 +31,6 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { 10, IID_IINSPECTABLE };
 
             yield return new object[] { "string", IID_IUNKNOWN };
-            // [ActiveIssue(31079, ~TargetFrameworkMonikers.NetFramework)]
             if (!PlatformDetection.IsNetCore)
             {
                 yield return new object[] { "string", IID_IDISPATCH };
@@ -40,7 +38,6 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { "string", IID_IINSPECTABLE };
 
             yield return new object[] { new NonGenericClass(), IID_IUNKNOWN };
-            // [ActiveIssue(31079, ~TargetFrameworkMonikers.NetFramework)]
             if (!PlatformDetection.IsNetCore)
             {
                 yield return new object[] { new NonGenericClass(), IID_IDISPATCH };
@@ -50,7 +47,6 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { new GenericClass<string>(), IID_IINSPECTABLE };
 
             yield return new object[] { new NonGenericStruct(), IID_IUNKNOWN };
-            // [ActiveIssue(31079, ~TargetFrameworkMonikers.NetFramework)]
             if (!PlatformDetection.IsNetCore)
             {
                 yield return new object[] { new NonGenericStruct(), IID_IDISPATCH };
@@ -60,7 +56,6 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { new GenericStruct<string>(), IID_IINSPECTABLE };
 
             yield return new object[] { Int32Enum.Value1, IID_IUNKNOWN };
-            // [ActiveIssue(31079, ~TargetFrameworkMonikers.NetFramework)]
             if (!PlatformDetection.IsNetCore)
             {
                 yield return new object[] { Int32Enum.Value1, IID_IDISPATCH };
@@ -74,7 +69,7 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { new int[,] { { 10 } }, IID_IUNKNOWN };
             yield return new object[] { new int[,] { { 10 } }, IID_IINSPECTABLE };
 
-            MethodInfo method = typeof(GetObjectForIUnknownTests).GetMethod(nameof(NonGenericMethod));
+            MethodInfo method = typeof(GetObjectForIUnknownTests).GetMethod(nameof(NonGenericMethod), BindingFlags.NonPublic | BindingFlags.Static);
             Delegate d = method.CreateDelegate(typeof(NonGenericDelegate));
             yield return new object[] { d, IID_IUNKNOWN };
             yield return new object[] { d, IID_IDISPATCH };
@@ -156,13 +151,13 @@ namespace System.Runtime.InteropServices.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void QueryInterface_ZeroPointer_ThrowsArugmentNullException()
+        public void QueryInterface_ZeroPointer_ThrowsArgumentNullException()
         {
             Guid iid = Guid.Empty;
             AssertExtensions.Throws<ArgumentNullException>("pUnk", () => Marshal.QueryInterface(IntPtr.Zero, ref iid, out IntPtr ppv));
         }
 
-        public static void NonGenericMethod(int i) { }
+        private static void NonGenericMethod(int i) { }
         public delegate void NonGenericDelegate(int i);
 
         public enum Int32Enum : int { Value1, Value2 }

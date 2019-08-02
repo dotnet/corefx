@@ -47,7 +47,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(23702, TargetFrameworkMonikers.NetFramework)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Fact]
         public async Task ProxyExplicitlyProvided_DefaultCredentials_Ignored()
@@ -65,7 +64,7 @@ namespace System.Net.Http.Functional.Tests
                     handler.DefaultProxyCredentials = defaultSystemProxyCreds;
                     using (HttpResponseMessage response = await client.GetAsync("http://notatrealserver.com/")) // URL does not matter
                     {
-                        Assert.Equal(response.StatusCode, HttpStatusCode.OK);
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     }
                 }
             }, async server =>
@@ -143,7 +142,7 @@ namespace System.Net.Http.Functional.Tests
                 handler.DefaultProxyCredentials = new NetworkCredential("UsernameNotUsed", "PasswordNotUsed");
                 HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer);
 
-                Assert.Equal(response.StatusCode, HttpStatusCode.OK);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
         }
     }

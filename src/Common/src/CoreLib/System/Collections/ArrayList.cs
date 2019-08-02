@@ -39,9 +39,6 @@ namespace System.Collections
 
         private const int _defaultCapacity = 4;
 
-        // Copy of Array.MaxArrayLength
-        internal const int MaxArrayLength = 0X7FEFFFFF;
-
         // Note: this constructor is a bogus constructor that does nothing
         // and is for use only with SyncArrayList.
         internal ArrayList(bool trash)
@@ -295,7 +292,7 @@ namespace System.Collections
             else
             {
                 for (int i = 0; i < _size; i++)
-                    if ((_items[i] != null) && (_items[i]!.Equals(item))) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                    if ((_items[i] != null) && (_items[i]!.Equals(item))) // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
                         return true;
                 return false;
             }
@@ -347,7 +344,7 @@ namespace System.Collections
                 int newCapacity = _items.Length == 0 ? _defaultCapacity : _items.Length * 2;
                 // Allow the list to grow to maximum possible capacity (~2G elements) before encountering overflow.
                 // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
-                if ((uint)newCapacity > MaxArrayLength) newCapacity = MaxArrayLength;
+                if ((uint)newCapacity > Array.MaxArrayLength) newCapacity = Array.MaxArrayLength;
                 if (newCapacity < min) newCapacity = min;
                 Capacity = newCapacity;
             }
@@ -969,7 +966,7 @@ namespace System.Collections
                 else
                 {
                     for (int i = startIndex; i < endIndex; i++)
-                        if (_list[i] != null && _list[i]!.Equals(value)) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                        if (_list[i] != null && _list[i]!.Equals(value)) // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
                             return i;
                     return -1;
                 }
@@ -1040,7 +1037,7 @@ namespace System.Collections
                 else
                 {
                     for (int i = startIndex; i >= endIndex; i--)
-                        if (_list[i] != null && _list[i]!.Equals(value)) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                        if (_list[i] != null && _list[i]!.Equals(value)) // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
                             return i;
                     return -1;
                 }
@@ -2521,7 +2518,7 @@ namespace System.Collections
                 else
                 {
                     for (int i = 0; i < _baseSize; i++)
-                        if (_baseList[_baseIndex + i] != null && _baseList[_baseIndex + i]!.Equals(item)) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                        if (_baseList[_baseIndex + i] != null && _baseList[_baseIndex + i]!.Equals(item)) // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
                             return true;
                     return false;
                 }

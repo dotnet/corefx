@@ -53,10 +53,20 @@ namespace System.IO.Pipelines
         /// <summary>
         /// Returns a <see cref="Stream"/> that wraps the <see cref="PipeReader"/>.
         /// </summary>
+        /// <param name="leaveOpen">Optional flag indicating disposing returned <see cref="Stream"/> won't complete <see cref="PipeReader"/>.</param>
         /// <returns>The <see cref="Stream"/>.</returns>
-        public virtual Stream AsStream()
+        public virtual Stream AsStream(bool leaveOpen = false)
         {
-            return _stream ?? (_stream = new PipeReaderStream(this));
+            if (_stream == null)
+            {
+                _stream = new PipeReaderStream(this, leaveOpen);
+            }
+            else if (leaveOpen)
+            {
+                _stream.LeaveOpen = leaveOpen;
+            }
+
+            return _stream;
         }
 
         /// <summary>
@@ -65,15 +75,37 @@ namespace System.IO.Pipelines
         public abstract void CancelPendingRead();
 
         /// <summary>
-        /// Signal to the producer that the consumer is done reading.
+        /// Marks the <see cref="PipeReader"/> as being complete, meaning no more data will be read from it.
         /// </summary>
-        /// <param name="exception">Optional <see cref="Exception"/> indicating a failure that's causing the pipeline to complete.</param>
+        /// <param name="exception">Optional <see cref="Exception"/> indicating a failure that's causing the reader to complete.</param>
         public abstract void Complete(Exception exception = null);
 
         /// <summary>
-        /// Cancel the pending <see cref="ReadAsync"/> operation. If there is none, cancels next <see cref="ReadAsync"/> operation, without completing the <see cref="PipeWriter"/>.
+        /// Marks the <see cref="PipeReader"/> as being complete, meaning no more data will be read from it.
         /// </summary>
-        public abstract void OnWriterCompleted(Action<Exception, object> callback, object state);
+        /// <param name="exception">Optional <see cref="Exception"/> indicating a failure that's causing the reader to complete.</param>
+        public virtual ValueTask CompleteAsync(Exception exception = null)
+        {
+            try
+            {
+                Complete(exception);
+                return default;
+            }
+            catch (Exception ex)
+            {
+                return new ValueTask(Task.FromException(ex));
+            }
+        }
+
+        /// <summary>
+        /// Registers a callback that gets executed when the <see cref="PipeWriter"/> side of the pipe is completed
+        /// </summary>
+        [Obsolete("OnWriterCompleted may not be invoked on all implementations of PipeReader. This will be removed in a future release.")]
+        public virtual void OnWriterCompleted(Action<Exception, object> callback, object state)
+        {
+
+        }
+
 
         /// <summary>
         /// Creates a <see cref="PipeReader"/> wrapping the specified <see cref="Stream"/>.
@@ -89,7 +121,37 @@ namespace System.IO.Pipelines
         /// <summary>
         /// Asynchronously reads the bytes from the <see cref="PipeReader"/> and writes them to the specified stream, using a specified buffer size and cancellation token.
         /// </summary>
-        /// <param name="destination">The stream to which the contents of the current stream will be copied.</param>
+        /// <param name="destination">The <see cref="PipeWriter"/> to which the contents of the current stream will be copied.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+        /// <returns>A task that represents the asynchronous copy operation.</returns>
+        public virtual Task CopyToAsync(PipeWriter destination, CancellationToken cancellationToken = default)
+        {
+            if (destination == null)
+            {
+                throw new ArgumentNullException(nameof(destination));
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled(cancellationToken);
+            }
+
+            return CopyToAsyncCore(destination, async (destination, memory, cancellationToken) =>
+            {
+                FlushResult result = await destination.WriteAsync(memory, cancellationToken).ConfigureAwait(false);
+
+                if (result.IsCanceled)
+                {
+                    ThrowHelper.ThrowOperationCanceledException_FlushCanceled();
+                }
+            },
+            cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the bytes from the <see cref="PipeReader"/> and writes them to the specified stream, using a specified buffer size and cancellation token.
+        /// </summary>
+        /// <param name="destination">The <see cref="Stream"/> to which the contents of the current stream will be copied.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
         /// <returns>A task that represents the asynchronous copy operation.</returns>
         public virtual Task CopyToAsync(Stream destination, CancellationToken cancellationToken = default)
@@ -104,18 +166,21 @@ namespace System.IO.Pipelines
                 return Task.FromCanceled(cancellationToken);
             }
 
-            return CopyToAsyncCore(destination, cancellationToken);
+            return CopyToAsyncCore(
+                destination,
+                (destination, memory, cancellationToken) => destination.WriteAsync(memory, cancellationToken),
+                cancellationToken);
         }
 
-        private async Task CopyToAsyncCore(Stream destination, CancellationToken cancellationToken)
+        private async Task CopyToAsyncCore<TStream>(TStream destination, Func<TStream, ReadOnlyMemory<byte>, CancellationToken, ValueTask> writeAsync, CancellationToken cancellationToken)
         {
             while (true)
             {
                 SequencePosition consumed = default;
 
+                ReadResult result = await ReadAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    ReadResult result = await ReadAsync(cancellationToken).ConfigureAwait(false);
                     ReadOnlySequence<byte> buffer = result.Buffer;
                     SequencePosition position = buffer.Start;
 
@@ -126,9 +191,14 @@ namespace System.IO.Pipelines
 
                     while (buffer.TryGet(ref position, out ReadOnlyMemory<byte> memory))
                     {
-                        await destination.WriteAsync(memory, cancellationToken).ConfigureAwait(false);
+                        await writeAsync(destination, memory, cancellationToken).ConfigureAwait(false);
 
                         consumed = position;
+                    }
+
+                    if (consumed.Equals(default))
+                    {
+                        consumed = buffer.End;
                     }
 
                     if (result.IsCompleted)

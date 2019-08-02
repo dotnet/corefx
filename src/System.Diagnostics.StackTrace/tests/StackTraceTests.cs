@@ -29,7 +29,6 @@ namespace System.Diagnostics
 
 namespace System.Diagnostics.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "StackTrace is not supported in uapaot.")]
     public class StackTraceTests
     {
         [Fact]
@@ -70,11 +69,11 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void Ctor_LargeSkipFrames_GetFramesReturnsNull()
+        public void Ctor_LargeSkipFrames_GetFramesReturnsEmtpy()
         {
             var stackTrace = new StackTrace(int.MaxValue);
             Assert.Equal(0, stackTrace.FrameCount);
-            Assert.Null(stackTrace.GetFrames());
+            Assert.Empty(stackTrace.GetFrames());
         }
 
         [Theory]
@@ -97,11 +96,11 @@ namespace System.Diagnostics.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void Ctor_LargeSkipFramesFNeedFileInfo_GetFramesReturnsNull(bool fNeedFileInfo)
+        public void Ctor_LargeSkipFramesFNeedFileInfo_GetFramesReturnsEmpty(bool fNeedFileInfo)
         {
             var stackTrace = new StackTrace(int.MaxValue, fNeedFileInfo);
             Assert.Equal(0, stackTrace.FrameCount);
-            Assert.Null(stackTrace.GetFrames());
+            Assert.Empty(stackTrace.GetFrames());
         }
 
         [Fact]
@@ -112,12 +111,12 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void Ctor_EmptyException_GetFramesReturnsNull()
+        public void Ctor_EmptyException_GetFramesReturnsEmpty()
         {
             var exception = new Exception();
             var stackTrace = new StackTrace(exception);
             Assert.Equal(0, stackTrace.FrameCount);
-            Assert.Null(stackTrace.GetFrames());
+            Assert.Empty(stackTrace.GetFrames());
             Assert.Null(stackTrace.GetFrame(0));
         }
 
@@ -138,11 +137,10 @@ namespace System.Diagnostics.Tests
             var exception = new Exception();
             var stackTrace = new StackTrace(exception, fNeedFileInfo);
             Assert.Equal(0, stackTrace.FrameCount);
-            Assert.Null(stackTrace.GetFrames());
+            Assert.Empty(stackTrace.GetFrames());
             Assert.Null(stackTrace.GetFrame(0));
         }
 
-        [ActiveIssue(23796, TargetFrameworkMonikers.NetFramework)]
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
@@ -157,18 +155,7 @@ namespace System.Diagnostics.Tests
 
             // Netfx has null Frames if skipping frames in Release mode.
             StackFrame[] frames = stackTrace.GetFrames();
-#if DEBUG
             Assert.Equal(expectedMethods, frames.Select(f => f.GetMethod()));
-#else
-            if (PlatformDetection.IsFullFramework && skipFrames > 0)
-            {
-                Assert.Null(frames);
-            }
-            else
-            {
-                Assert.Equal(expectedMethods, frames.Select(f => f.GetMethod()));
-            }
-#endif
             if (frames != null)
             {
                 VerifyFrames(stackTrace, false);
@@ -180,7 +167,7 @@ namespace System.Diagnostics.Tests
         {
             var stackTrace = new StackTrace(InvokeException(), int.MaxValue);
             Assert.Equal(0, stackTrace.FrameCount);
-            Assert.Null(stackTrace.GetFrames());
+            Assert.Empty(stackTrace.GetFrames());
         }
 
         [Fact]
@@ -188,11 +175,10 @@ namespace System.Diagnostics.Tests
         {
             var stackTrace = new StackTrace(new Exception(), 0);
             Assert.Equal(0, stackTrace.FrameCount);
-            Assert.Null(stackTrace.GetFrames());
+            Assert.Empty(stackTrace.GetFrames());
             Assert.Null(stackTrace.GetFrame(0));
         }
 
-        [ActiveIssue(23796, TargetFrameworkMonikers.NetFramework)]
         [Theory]
         [InlineData(0, true)]
         [InlineData(1, true)]
@@ -208,18 +194,7 @@ namespace System.Diagnostics.Tests
 
             // Netfx has null Frames if skipping frames in Release mode.
             StackFrame[] frames = stackTrace.GetFrames();
-#if DEBUG
             Assert.Equal(expectedMethods, frames.Select(f => f.GetMethod()));
-#else
-            if (PlatformDetection.IsFullFramework && skipFrames > 0)
-            {
-                Assert.Null(frames);
-            }
-            else
-            {
-                Assert.Equal(expectedMethods, frames.Select(f => f.GetMethod()));
-            }
-#endif
             if (frames != null)
             {
                 VerifyFrames(stackTrace, fNeedFileInfo);
@@ -233,7 +208,7 @@ namespace System.Diagnostics.Tests
         {
             var stackTrace = new StackTrace(InvokeException(), int.MaxValue);
             Assert.Equal(0, stackTrace.FrameCount);
-            Assert.Null(stackTrace.GetFrames());
+            Assert.Empty(stackTrace.GetFrames());
         }
 
         [Theory]
@@ -243,7 +218,7 @@ namespace System.Diagnostics.Tests
         {
             var stackTrace = new StackTrace(new Exception(), 0, fNeedFileInfo);
             Assert.Equal(0, stackTrace.FrameCount);
-            Assert.Null(stackTrace.GetFrames());
+            Assert.Empty(stackTrace.GetFrames());
             Assert.Null(stackTrace.GetFrame(0));
         }
 
@@ -313,12 +288,12 @@ namespace System.Diagnostics.Tests
                 Assert.EndsWith(Environment.NewLine, toString);
 
                 string[] frames = toString.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-                Assert.Equal(frames.Length, stackTrace.FrameCount);
+                // StackTrace pretty printer omits uninteresting frames from the formatted stacktrace
+                AssertExtensions.LessThanOrEqualTo(frames.Length, stackTrace.FrameCount);
             }
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void ToString_NullFrame_ThrowsNullReferenceException()
         {
             var stackTrace = new StackTrace((StackFrame)null);

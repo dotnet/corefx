@@ -11,7 +11,6 @@ namespace System.IO.Tests
 {
     public class FileSystemWatcher_Multiple_Test : FileSystemWatcherTest
     {
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "#34017")]        
         [OuterLoop]
         [Fact]
         public void FileSystemWatcher_File_Create_ExecutionContextFlowed()
@@ -47,7 +46,6 @@ namespace System.IO.Tests
             });
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "#34017")]
         [OuterLoop]
         [Fact]
         public void FileSystemWatcher_File_Create_SuppressedExecutionContextHandled()
@@ -330,19 +328,19 @@ namespace System.IO.Tests
 
                     File.Move(filePath, filePathRenamed);
                     Assert.True(WaitHandle.WaitAll(
-                    	new[] { autoResetEvent1_created, autoResetEvent1_deleted, autoResetEvent2_created, autoResetEvent2_deleted },
-                    	WaitForExpectedEventTimeout_NoRetry));
+                        new[] { autoResetEvent1_created, autoResetEvent1_deleted, autoResetEvent2_created, autoResetEvent2_deleted },
+                        WaitForExpectedEventTimeout_NoRetry));
 
                     File.Move(filePathRenamed, filePath);
                     watcher1.EnableRaisingEvents = false;
 
                     File.Move(filePath, filePathRenamed);
                     Assert.False(WaitHandle.WaitAll(
-                    	new[] { autoResetEvent1_created, autoResetEvent1_deleted },
-                    	WaitForUnexpectedEventTimeout));
+                        new[] { autoResetEvent1_created, autoResetEvent1_deleted },
+                        WaitForUnexpectedEventTimeout));
                     Assert.True(WaitHandle.WaitAll(
-                    	new[] { autoResetEvent2_created, autoResetEvent2_deleted },
-                    	WaitForExpectedEventTimeout_NoRetry));
+                        new[] { autoResetEvent2_created, autoResetEvent2_deleted },
+                        WaitForExpectedEventTimeout_NoRetry));
                 }
             });
         }

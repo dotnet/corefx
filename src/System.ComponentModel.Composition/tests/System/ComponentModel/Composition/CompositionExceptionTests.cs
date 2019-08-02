@@ -407,17 +407,13 @@ namespace System.ComponentModel.Composition
 
         private void AssertMessage(CompositionException exception, int rootCauseCount, CultureInfo culture)
         {
-            if (PlatformDetection.IsNetNative)
-            {
-                return;
-            }
             using (StringReader reader = new StringReader(exception.Message))
             {
                 string line = reader.ReadLine();
 
                 if (rootCauseCount == 1)
                 {
-                    Assert.True(line.Contains(SR.CompositionException_SingleErrorWithSinglePath));
+                    Assert.Contains(SR.CompositionException_SingleErrorWithSinglePath, line);
                 }
                 else
                 {
@@ -431,10 +427,6 @@ namespace System.ComponentModel.Composition
 
         private void AssertMessage(CompositionException exception, string[] expected)
         {
-            if (PlatformDetection.IsNetNative)
-            {
-                return;
-            }
             using (StringReader reader = new StringReader(exception.Message))
             {
                 // Skip header

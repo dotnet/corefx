@@ -256,7 +256,7 @@ namespace System.Threading.Tasks
 #if PROJECTN
         [DependencyReductionRoot]
 #endif
-        internal abstract Delegate[] GetDelegateContinuationsForDebugger();
+        internal abstract Delegate[]? GetDelegateContinuationsForDebugger();
     }
 
     /// <summary>Provides the standard implementation of a task continuation.</summary>
@@ -350,6 +350,7 @@ namespace System.Threading.Tasks
 
             return new Delegate[] { m_task.m_action };
         }
+
     }
 
     /// <summary>Task continuation for awaiting with a current synchronization context.</summary>
@@ -492,7 +493,7 @@ namespace System.Threading.Tasks
                 {
                     try
                     {
-                        ((Action)state!)(); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                        ((Action)state!)();
                     }
                     catch (Exception exception)
                     {
@@ -662,12 +663,12 @@ namespace System.Threading.Tasks
         }
 
         /// <summary>Cached delegate that invokes an Action passed as an object parameter.</summary>
-        private readonly static ContextCallback s_invokeContextCallback = (state) =>
+        private static readonly ContextCallback s_invokeContextCallback = (state) =>
         {
             Debug.Assert(state is Action);
             ((Action)state)();
         };
-        private readonly static Action<Action> s_invokeAction = (action) => action();
+        private static readonly Action<Action> s_invokeAction = (action) => action();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static ContextCallback GetInvokeActionCallback() => s_invokeContextCallback;

@@ -8,12 +8,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+#pragma warning disable CA1823 // analyzer incorrectly flags fixed buffer length const (https://github.com/dotnet/roslyn-analyzers/issues/2724)
 
 internal static partial class Interop
 {
     internal static partial class Process
     {
-        private const ulong SecondsToNanoSeconds = 1000000000;
+        private const ulong SecondsToNanoseconds = 1000000000;
 
         // Constants from sys/syslimits.h
         private const int PATH_MAX  = 1024;
@@ -337,7 +338,7 @@ internal static partial class Interop
         /// Returns a valid ProcessInfo struct for valid processes that the caller
         /// has permission to access; otherwise, returns null
         /// </returns>
-        static public unsafe ProcessInfo GetProcessInfoById(int pid)
+        public static unsafe ProcessInfo GetProcessInfoById(int pid)
         {
             kinfo_proc* kinfo = null;
             int count;
@@ -397,7 +398,7 @@ internal static partial class Interop
         /// Returns basic info about thread. If tis is 0, it will return
         /// info for process e.g. main thread.
         /// </returns>
-        public unsafe static proc_stats GetThreadInfo(int pid, int tid)
+        public static unsafe proc_stats GetThreadInfo(int pid, int tid)
         {
             proc_stats ret = new proc_stats();
             kinfo_proc* info = null;
@@ -412,8 +413,8 @@ internal static partial class Interop
                     {
                         ret.startTime = (int)info->ki_start.tv_sec;
                         ret.nice = info->ki_nice;
-                        ret.userTime = (ulong)info->ki_rusage.ru_utime.tv_sec * SecondsToNanoSeconds + (ulong)info->ki_rusage.ru_utime.tv_usec;
-                        ret.systemTime = (ulong)info->ki_rusage.ru_stime.tv_sec * SecondsToNanoSeconds + (ulong)info->ki_rusage.ru_stime.tv_usec;
+                        ret.userTime = (ulong)info->ki_rusage.ru_utime.tv_sec * SecondsToNanoseconds + (ulong)info->ki_rusage.ru_utime.tv_usec;
+                        ret.systemTime = (ulong)info->ki_rusage.ru_stime.tv_sec * SecondsToNanoseconds + (ulong)info->ki_rusage.ru_stime.tv_usec;
                     }
                     else
                     {
@@ -424,8 +425,8 @@ internal static partial class Interop
                             {
                                 ret.startTime = (int)list[i].ki_start.tv_sec;
                                 ret.nice = list[i].ki_nice;
-                                ret.userTime = (ulong)list[i].ki_rusage.ru_utime.tv_sec * SecondsToNanoSeconds + (ulong)list[i].ki_rusage.ru_utime.tv_usec;
-                                ret.systemTime = (ulong)list[i].ki_rusage.ru_stime.tv_sec * SecondsToNanoSeconds + (ulong)list[i].ki_rusage.ru_stime.tv_usec;
+                                ret.userTime = (ulong)list[i].ki_rusage.ru_utime.tv_sec * SecondsToNanoseconds + (ulong)list[i].ki_rusage.ru_utime.tv_usec;
+                                ret.systemTime = (ulong)list[i].ki_rusage.ru_stime.tv_sec * SecondsToNanoseconds + (ulong)list[i].ki_rusage.ru_stime.tv_usec;
                                 break;
                             }
                         }

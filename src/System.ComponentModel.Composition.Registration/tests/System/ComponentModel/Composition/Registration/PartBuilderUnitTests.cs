@@ -126,7 +126,6 @@ namespace System.ComponentModel.Composition.Registration.Tests
     public class PartBuilderUnitTests
     {
         [Fact]
-        [ActiveIssue(35144, TargetFrameworkMonikers.UapAot)]
         public void ManyConstructorsControllerFindLongestConstructor_ShouldSucceed()
         {
             var ctx = new RegistrationBuilder();
@@ -155,7 +154,6 @@ namespace System.ComponentModel.Composition.Registration.Tests
         }
 
         [Fact]
-        [ActiveIssue(35144, TargetFrameworkMonikers.UapAot)]
         public void ManyConstructorsControllerFindLongestConstructorAndImportByName_ShouldSucceed()
         {
             var ctx = new RegistrationBuilder();
@@ -193,7 +191,6 @@ namespace System.ComponentModel.Composition.Registration.Tests
         }
 
         [Fact]
-        [ActiveIssue(35144, TargetFrameworkMonikers.UapAot)]
         public void LongestConstructorWithAttribute_ShouldSucceed()
         {
             var ctx = new RegistrationBuilder();
@@ -213,7 +210,6 @@ namespace System.ComponentModel.Composition.Registration.Tests
         }
 
         [Fact]
-        [ActiveIssue(35144, TargetFrameworkMonikers.UapAot)]
         public void LongestConstructorShortestWithAttribute_ShouldSucceed()
         {
             var ctx = new RegistrationBuilder();
@@ -229,11 +225,10 @@ namespace System.ComponentModel.Composition.Registration.Tests
             var container = new CompositionContainer(catalog, CompositionOptions.DisableSilentRejection);
             LongestConstructorShortestWithAttribute item = container.GetExportedValue<LongestConstructorShortestWithAttribute>();
             Assert.Equal(10, item.IntArg);
-            Assert.Equal(null, item.StringArg);
+            Assert.Null(item.StringArg);
         }
 
         [Fact]
-        [ActiveIssue(35144, TargetFrameworkMonikers.UapAot)]
         public void AmbiguousConstructorWithAttributeAppliedToOne_ShouldSucceed()
         {
             var ctx = new RegistrationBuilder();
@@ -255,7 +250,6 @@ namespace System.ComponentModel.Composition.Registration.Tests
 
 
         [Fact]
-        [ActiveIssue(35144, TargetFrameworkMonikers.UapAot)]
         public void AmbiguousConstructor_ShouldFail()
         {
             var ctx = new RegistrationBuilder();
@@ -267,7 +261,7 @@ namespace System.ComponentModel.Composition.Registration.Tests
             var catalog = new TypeCatalog(new[] {
                 typeof(AmbiguousConstructors),
                 typeof(ConstructorArgs) }, ctx);
-            Assert.Equal(catalog.Parts.Count(), 2);
+            Assert.Equal(2, catalog.Parts.Count());
             var container = new CompositionContainer(catalog, CompositionOptions.DisableSilentRejection);
             Assert.Throws<CompositionException>(() => container.GetExportedValue<AmbiguousConstructors>());
         }

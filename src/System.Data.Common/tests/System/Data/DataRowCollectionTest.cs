@@ -207,7 +207,7 @@ namespace System.Data.Tests
             catch (ArgumentException e)
             {
                 // MSDN says this exception is InvalidCastException
-                //				Assert.Equal (typeof (ArgumentException), e.GetType ());
+                //                Assert.Equal (typeof (ArgumentException), e.GetType ());
             }
 
             object[] obs1 = new object[5];
@@ -899,7 +899,7 @@ namespace System.Data.Tests
 
             try
             {
-                Assert.Equal(null, dt.Rows.Find(new object[] { null }));
+                Assert.Null(dt.Rows.Find(new object[] { null }));
             }
             catch (IndexOutOfRangeException)
             {
@@ -919,7 +919,7 @@ namespace System.Data.Tests
 
             try
             {
-                Assert.Equal(null, dt.Rows.Find((object)null));
+                Assert.Null(dt.Rows.Find((object)null));
             }
             catch (IndexOutOfRangeException)
             {

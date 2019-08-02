@@ -632,7 +632,7 @@ namespace System.Drawing.Tests
         [InlineData(FlushIntention.Flush)]
         [InlineData(FlushIntention.Sync)]
         [InlineData(FlushIntention.Flush - 1)] // Not in the range of valid values of FlushIntention.
-        [InlineData(FlushIntention.Sync - 1)] // Not in the range of valid values of FlushIntention.
+        [InlineData(FlushIntention.Sync + 1)] // Not in the range of valid values of FlushIntention.
         public void Flush_MultipleTimes_Success(FlushIntention intention)
         {
             using (var image = new Bitmap(10, 10))
@@ -1634,7 +1634,7 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ConditionalTheory(Helpers.IsDrawingSupported)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ScaleTransform_ZeroZero_ThrowsArgumentException()
         {
             using (var image = new Bitmap(10, 10))
@@ -2441,7 +2441,6 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void DrawRectangles_NullPen_ThrowsArgumentNullException()
         {

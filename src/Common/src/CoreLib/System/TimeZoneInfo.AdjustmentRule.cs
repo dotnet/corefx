@@ -9,7 +9,11 @@ namespace System
     public sealed partial class TimeZoneInfo
     {
         [Serializable]
-        public sealed class AdjustmentRule : IEquatable<AdjustmentRule?>, ISerializable, IDeserializationCallback
+        public sealed class AdjustmentRule :
+#nullable disable // see comment on String
+            IEquatable<AdjustmentRule>,
+#nullable restore
+            ISerializable, IDeserializationCallback
         {
             private static readonly TimeSpan DaylightDeltaAdjustment = TimeSpan.FromHours(24.0);
             private static readonly TimeSpan MaxDaylightDelta = TimeSpan.FromHours(12.0);
@@ -209,7 +213,7 @@ namespace System
                                                 "DaylightDelta should not ever be more than 24h");
             }
 
-            void IDeserializationCallback.OnDeserialization(object sender)
+            void IDeserializationCallback.OnDeserialization(object? sender)
             {
                 // OnDeserialization is called after each instance of this class is deserialized.
                 // This callback method performs AdjustmentRule validation after being deserialized.

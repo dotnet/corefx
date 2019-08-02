@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <ProjectGuid>{4A85232C-E914-4E06-8542-26DAF4B22D60}</ProjectGuid>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>System.Security.Cryptography.Xml.Tests</RootNamespace>
@@ -54,7 +54,7 @@
     <Compile Include="XmlLicenseEncryptedRef.cs" />
     <Compile Include="XmlLicenseTransformTest.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="KeyInfo_ArbitraryElements.cs" />
     <Compile Include="Reference_ArbitraryElements.cs" />
     <Compile Include="Signature_ArbitraryElements.cs" />

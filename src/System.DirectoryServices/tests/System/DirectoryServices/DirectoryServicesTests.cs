@@ -101,14 +101,14 @@ namespace System.DirectoryServices.Tests
                                 Assert.Equal(originalPhone, (string) sameUserEntry.Properties["telephoneNumber"].Value);
                             }
 
-			                userEntry.CommitChanges();
+                            userEntry.CommitChanges();
 
                             using (DirectoryEntry sameUserEntry = GetOrganizationalRole(rootOU, "caching.user.1"))
                             {
                                 Assert.Equal(newPhone, (string) sameUserEntry.Properties["telephoneNumber"].Value);
                             }
 
-			                userEntry.UsePropertyCache = false;
+                            userEntry.UsePropertyCache = false;
                             Assert.False(userEntry.UsePropertyCache);
 
                             userEntry.Properties["telephoneNumber"].Value = originalPhone;
@@ -518,7 +518,7 @@ namespace System.DirectoryServices.Tests
                             {
                                 throw new DirectoryServicesCOMException($"Couldn't find CustomUser in the entry {de.Name}");
                             }
-                            Assert.Equal(true, sr.Properties["deleteOldRDN"][0]);
+                            Assert.Equal((object)true, sr.Properties["deleteOldRDN"][0]);
                             Assert.Equal(101, sr.Properties["changeNumber"][0]);
                             Assert.Equal("Some Custom User", sr.Properties["description"][0]);
                             Assert.Equal("1 111 111 11111", sr.Properties["telephoneNumber"][0]);

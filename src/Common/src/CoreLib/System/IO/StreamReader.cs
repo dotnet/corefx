@@ -16,7 +16,7 @@ namespace System.IO
     public class StreamReader : TextReader
     {
         // StreamReader.Null is threadsafe.
-        public new static readonly StreamReader Null = new NullStreamReader();
+        public static new readonly StreamReader Null = new NullStreamReader();
 
         // Using a 1K byte buffer and a 4K FileStream buffer works out pretty well
         // perf-wise.  On even a 40 MB text file, any perf loss by using a 4K
@@ -84,6 +84,7 @@ namespace System.IO
             }
         }
 
+        [DoesNotReturn]
         private static void ThrowAsyncIOInProgress() =>
             throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
 
@@ -229,7 +230,7 @@ namespace System.IO
             _disposed = true;
 
             // Dispose of our resources if this StreamReader is closable.
-            if (!LeaveOpen)
+            if (_closable)
             {
                 try
                 {
@@ -257,11 +258,6 @@ namespace System.IO
         public virtual Stream BaseStream
         {
             get { return _stream; }
-        }
-
-        internal bool LeaveOpen
-        {
-            get { return !_closable; }
         }
 
         // DiscardBufferedData tells StreamReader to throw away its internal
@@ -1237,7 +1233,7 @@ namespace System.IO
             return new ValueTask<int>(t);
         }
 
-        private async Task<int> ReadBufferAsync()
+        private async ValueTask<int> ReadBufferAsync()
         {
             _charLen = 0;
             _charPos = 0;

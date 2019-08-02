@@ -275,7 +275,7 @@ namespace System.Composition.Hosting.Tests
         [Export]
         public class Derived : Base
         {
-            new public string Prop { get; set; } = "Derived";
+            public new string Prop { get; set; } = "Derived";
         }
 
         public class Base
@@ -329,7 +329,7 @@ namespace System.Composition.Hosting.Tests
                 .CreateContainer();
 
             DerivedFromBaseWithImport export = container.GetExport<DerivedFromBaseWithImport>();
-            Assert.IsAssignableFrom(typeof(Imported), export.Imported);
+            Assert.IsAssignableFrom<Imported>(export.Imported);
         }
 
         public class Imported { }
@@ -604,7 +604,6 @@ namespace System.Composition.Hosting.Tests
 
         [Theory]
         [MemberData(nameof(DebuggerAttributes_TestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributes_GetViaReflection_Success(ContainerConfiguration configuration)
         {
             DebuggerAttributeInfo debuggerAttributeInfo = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(configuration);

@@ -9,12 +9,8 @@
 **
 ===========================================================*/
 
-using Microsoft.Win32;
-using System;
-using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
@@ -39,7 +35,7 @@ namespace System.Security.AccessControl
 
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
-        internal CommonSecurityDescriptor _securityDescriptor;
+        internal readonly CommonSecurityDescriptor _securityDescriptor;
 
         private bool _ownerModified = false;
         private bool _groupModified = false;
@@ -48,14 +44,14 @@ namespace System.Security.AccessControl
         
         // only these SACL control flags will be automatically carry forward
         // when update with new security descriptor.
-        private static readonly ControlFlags SACL_CONTROL_FLAGS = 
+        private const ControlFlags SACL_CONTROL_FLAGS = 
             ControlFlags.SystemAclPresent | 
             ControlFlags.SystemAclAutoInherited |
             ControlFlags.SystemAclProtected;
 
         // only these DACL control flags will be automatically carry forward
         // when update with new security descriptor
-        private static readonly ControlFlags DACL_CONTROL_FLAGS = 
+        private const ControlFlags DACL_CONTROL_FLAGS = 
             ControlFlags.DiscretionaryAclPresent | 
             ControlFlags.DiscretionaryAclAutoInherited |
             ControlFlags.DiscretionaryAclProtected;
@@ -146,6 +142,11 @@ namespace System.Security.AccessControl
         #endregion
 
         #region Protected Properties and Methods
+
+        /// <summary>
+        /// Gets the security descriptor for this instance.
+        /// </summary>
+        protected CommonSecurityDescriptor SecurityDescriptor => _securityDescriptor;
 
         protected void ReadLock()
         {

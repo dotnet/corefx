@@ -13,7 +13,7 @@ using System.Collections;
 namespace System.DirectoryServices.AccountManagement
 {
     [System.Diagnostics.DebuggerDisplay("Name ( {Name} )")]
-    abstract public class Principal : IDisposable
+    public abstract class Principal : IDisposable
     {
         //
         // Public properties
@@ -434,7 +434,7 @@ namespace System.DirectoryServices.AccountManagement
                     if (e is System.Runtime.InteropServices.COMException)
                         throw ExceptionHelper.GetExceptionFromCOMException((System.Runtime.InteropServices.COMException)e);
                     else
-                        throw e;
+                        throw;
                 }
             }
 
@@ -744,13 +744,13 @@ namespace System.DirectoryServices.AccountManagement
 
         internal bool Loaded
         {
-            set
-            {
-                _loaded = value;
-            }
             get
             {
                 return _loaded;
+            }
+            set
+            {
+                _loaded = value;
             }
         }
 
@@ -758,7 +758,7 @@ namespace System.DirectoryServices.AccountManagement
         // hence the LinkDemand.
         [System.ComponentModel.Browsable(false)]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        internal protected PrincipalContext ContextRaw
+        protected internal PrincipalContext ContextRaw
         {
             get
             { return _ctx; }
@@ -772,7 +772,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        static internal Principal MakePrincipal(PrincipalContext ctx, Type principalType)
+        internal static Principal MakePrincipal(PrincipalContext ctx, Type principalType)
         {
             Principal p = null;
 

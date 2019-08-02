@@ -238,7 +238,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Stackwalking is not supported on UaoAot")]
         public void GetTypeByName_InvokeViaReflection_Success()
         {
             MethodInfo method = typeof(Type).GetMethod("GetType", new[] { typeof(string) });
@@ -279,11 +278,12 @@ namespace System.Tests
             Assert.Equal(typeCode, Type.GetTypeCode(t));
         }
 
+        [Fact]
         public void ReflectionOnlyGetType()
         {
-            AssertExtensions.Throws<ArgumentNullException>("typeName", () => Type.ReflectionOnlyGetType(null, true, false));
-            Assert.Throws<TypeLoadException>(() => Type.ReflectionOnlyGetType("", true, true));
-            Assert.Throws<NotSupportedException>(() => Type.ReflectionOnlyGetType("System.Tests.TypeTests", false, true));
+            Assert.Throws<PlatformNotSupportedException>(() => Type.ReflectionOnlyGetType(null, true, false));
+            Assert.Throws<PlatformNotSupportedException>(() => Type.ReflectionOnlyGetType("", true, true));
+            Assert.Throws<PlatformNotSupportedException>(() => Type.ReflectionOnlyGetType("System.Tests.TypeTests", false, true));
         }
     }
 
@@ -303,7 +303,6 @@ namespace System.Tests
                              Type.GetType(name, false, ignore) :
                                  assem.GetType(name, false, ignore);
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
         public void GetTypeByName()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
@@ -330,7 +329,6 @@ namespace System.Tests
         }
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
         [InlineData("System.Collections.Generic.Dictionary`2[[Program, TestLoadAssembly], [Program2, TestLoadAssembly]]")]
         [InlineData("")]
         public void GetTypeByName_NoSuchType_ThrowsTypeLoadException(string typeName)
@@ -345,7 +343,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
         public void GetTypeByNameCaseSensitiveTypeloadFailure()
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
@@ -376,7 +373,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void IsContextful()
         {
             Assert.True(!typeof(TypeTestsExtended).IsContextful);
@@ -418,7 +414,6 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(GetInterfaceMap_TestData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Type.GetInterfaceMap() is not supported on UapAot")]
         public void GetInterfaceMap(Type interfaceType, Type classType, Tuple<MethodInfo, MethodInfo>[] expectedMap)
         {
             InterfaceMapping actualMapping = classType.GetInterfaceMap(interfaceType);

@@ -1,21 +1,23 @@
 [CmdletBinding(PositionalBinding=$false)]
 Param(
   [switch][Alias('b')]$build,
+  [switch][Alias('t')]$test,
   [switch] $buildtests,
   [string][Alias('c')]$configuration = "Debug",
   [string][Alias('f')]$framework,
-  [string] $os,
-  [switch] $allconfigurations,
-  [switch] $coverage,
-  [switch] $outerloop,
-  [string] $arch,
-  [switch] $clean,
+  [string]$vs,
+  [string]$os,
+  [switch]$allconfigurations,
+  [switch]$coverage,
+  [string]$testscope,
+  [string]$arch,
+  [switch]$clean,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
 function Get-Help() {
   Write-Host "Common settings:"
-  Write-Host "  -framework              Build framework: netcoreapp, netfx, uap or uapaot (short: -f)"
+  Write-Host "  -framework              Build framework: netcoreapp, netfx, uap (short: -f)"
   Write-Host "  -configuration <value>  Build configuration: Debug or Release (short: -c)"
   Write-Host "  -verbosity <value>      MSBuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic] (short: -v)"
   Write-Host "  -binaryLog              Output binary log (short: -bl)"
@@ -32,11 +34,12 @@ function Get-Help() {
   Write-Host "  -sign                   Sign build outputs"
   Write-Host "  -publish                Publish artifacts (e.g. symbols)"
   Write-Host "  -clean                  Clean the solution"
+  Write-Host "  -vs                     Open the solution with VS for Test Explorer support. Path or solution name (ie -vs Microsoft.CSharp)"
   Write-Host ""
 
   Write-Host "Advanced settings:"
   Write-Host "  -coverage               Collect code coverage when testing"
-  Write-Host "  -outerloop              Include tests which are marked as OuterLoop"
+  Write-Host "  -testscope              Scope tests, allowed values: innerloop, outerloop, all"
   Write-Host "  -allconfigurations      Build packages for all build configurations"
   Write-Host "  -os                     Build operating system: Windows_NT or Unix"
   Write-Host "  -arch                   Build platform: x86, x64, arm or arm64"
@@ -70,6 +73,29 @@ if ($clean) {
   }
 }
 
+# VS Test Explorer support
+if ($vs) {
+  if (-Not (Test-Path $vs)) {
+    $vs = Join-Path "$PSScriptRoot\..\src" $vs | Join-Path -ChildPath "$vs.sln"
+  }
+
+  $archTestHost = if ($arch) { $arch } else { "x64" }
+
+  # This tells .NET Core to use the same dotnet.exe that build scripts use
+  $env:DOTNET_ROOT="$PSScriptRoot\..\artifacts\bin\testhost\netcoreapp-Windows_NT-$configuration-$archTestHost";
+
+  # This tells .NET Core not to go looking for .NET Core in other places
+  $env:DOTNET_MULTILEVEL_LOOKUP=0;
+
+  # Put our local dotnet.exe on PATH first so Visual Studio knows which one to use
+  $env:PATH=($env:DOTNET_ROOT + ";" + $env:PATH);
+
+  # Launch Visual Studio with the locally defined environment variables
+  ."$vs"
+
+  exit 0
+}
+
 if (!$actionPassedIn) {
   $arguments = "-restore -build"
 }
@@ -93,6 +119,8 @@ foreach ($argument in $PSBoundParameters.Keys)
 {
   switch($argument)
   {
+    "build"             { $arguments += " -build" }
+    "test"              { $arguments += " -test" }
     "buildtests"        { $arguments += " /p:BuildTests=true" }
     "clean"             { }
     "configuration"     { $configuration = (Get-Culture).TextInfo.ToTitleCase($($PSBoundParameters[$argument])); $arguments += " /p:ConfigurationGroup=$configuration -configuration $configuration" }
@@ -100,7 +128,7 @@ foreach ($argument in $PSBoundParameters.Keys)
     "os"                { $arguments += " /p:OSGroup=$($PSBoundParameters[$argument])" }
     "allconfigurations" { $arguments += " /p:BuildAllConfigurations=true" }
     "coverage"          { $arguments += " /p:Coverage=true" }
-    "outerloop"         { $arguments += " /p:OuterLoop=true" }
+    "testscope"         { $arguments += " /p:TestScope=$($PSBoundParameters[$argument])" }
     "arch"              { $arguments += " /p:ArchGroup=$($PSBoundParameters[$argument])" }
     "properties"        { $arguments += " " + $properties }
     default             { $arguments += " /p:$argument=$($PSBoundParameters[$argument])" }

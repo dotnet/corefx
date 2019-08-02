@@ -74,7 +74,7 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("mode", null, () => GC.Collect(2, mode, false)); 
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void Collect_CallsFinalizer()
         {
             FinalizerTest.Run();
@@ -111,7 +111,7 @@ namespace System.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void KeepAlive()
         {
             KeepAliveTest.Run();
@@ -161,7 +161,7 @@ namespace System.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void KeepAlive_Null()
         {
             KeepAliveNullTest.Run();
@@ -273,7 +273,7 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentNullException>("obj", () => GC.SuppressFinalize(null)); // Obj is null
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void ReRegisterForFinalize()
         {
             ReRegisterForFinalizeTest.Run();
@@ -339,7 +339,7 @@ namespace System.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void GetTotalMemoryTest_ForceCollection()
         {
             // We don't test GetTotalMemory(false) at all because a collection
@@ -378,7 +378,7 @@ namespace System.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         [InlineData(GCLargeObjectHeapCompactionMode.CompactOnce)]
         [InlineData(GCLargeObjectHeapCompactionMode.Default)]
         public static void LargeObjectHeapCompactionModeRoundTrips(GCLargeObjectHeapCompactionMode value)
@@ -632,7 +632,7 @@ namespace System.Tests
                 //
                 // In addition to this, the Assert.Throws xunit combinator tends to also allocate a lot.
                 Assert.True(GC.TryStartNoGCRegion(4000 * 1024, true));
-                Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+                Assert.Equal(GCLatencyMode.NoGCRegion, GCSettings.LatencyMode);
                 Assert.Throws<InvalidOperationException>(() => GCSettings.LatencyMode = GCLatencyMode.LowLatency);
 
                 GC.EndNoGCRegion();
@@ -651,7 +651,7 @@ namespace System.Tests
                 {
 
                     Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget));
-                    Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+                    Assert.Equal(GCLatencyMode.NoGCRegion, GCSettings.LatencyMode);
                     GC.EndNoGCRegion();
 
                     return RemoteExecutor.SuccessExitCode;
@@ -668,7 +668,7 @@ namespace System.Tests
             RemoteExecutor.Invoke(() =>
             {
                 Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget, true));
-                Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+                Assert.Equal(GCLatencyMode.NoGCRegion, GCSettings.LatencyMode);
                 GC.EndNoGCRegion();
 
                 return RemoteExecutor.SuccessExitCode;
@@ -685,7 +685,7 @@ namespace System.Tests
             RemoteExecutor.Invoke(() =>
             {
                 Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget, NoGCRequestedBudget));
-                Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+                Assert.Equal(GCLatencyMode.NoGCRegion, GCSettings.LatencyMode);
                 GC.EndNoGCRegion();
 
                 return RemoteExecutor.SuccessExitCode;
@@ -702,7 +702,7 @@ namespace System.Tests
             RemoteExecutor.Invoke(() =>
             {
                 Assert.True(GC.TryStartNoGCRegion(NoGCRequestedBudget, NoGCRequestedBudget, true));
-                Assert.Equal(GCSettings.LatencyMode, GCLatencyMode.NoGCRegion);
+                Assert.Equal(GCLatencyMode.NoGCRegion, GCSettings.LatencyMode);
                 GC.EndNoGCRegion();
 
                 return RemoteExecutor.SuccessExitCode;
@@ -714,7 +714,6 @@ namespace System.Tests
         [OuterLoop]
         [InlineData(0)]
         [InlineData(-1)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Difference in behavior, full framework doesn't throw, fixed in .NET Core")]
         public static void TryStartNoGCRegion_TotalSizeOutOfRange(long size)
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
@@ -731,7 +730,6 @@ namespace System.Tests
         [InlineData(0)]                   // invalid because lohSize ==
         [InlineData(-1)]                  // invalid because lohSize < 0
         [InlineData(1152921504606846976)] // invalid because lohSize > totalSize
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Difference in behavior, full framework doesn't throw, fixed in .NET Core")]
         public static void TryStartNoGCRegion_LOHSizeInvalid(long size)
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions();
@@ -743,7 +741,7 @@ namespace System.Tests
             }, size.ToString(), options).Dispose();
         }
 
-        public static void TestWait(bool approach, int timeout)
+        private static void TestWait(bool approach, int timeout)
         {
             GCNotificationStatus result = GCNotificationStatus.Failed;
             Thread cancelProc = null;
@@ -788,7 +786,7 @@ namespace System.Tests
             }
         }
 
-        public static void CancelProc()
+        private static void CancelProc()
         {
             Thread.Sleep(500);
             GC.CancelFullGCNotification();

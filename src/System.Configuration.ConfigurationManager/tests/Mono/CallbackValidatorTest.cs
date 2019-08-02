@@ -5,7 +5,7 @@
 // for System.Configuration.CallbackValidator.
 //
 // Author:
-//	Chris Toshok  <toshok@ximian.com>
+//  Chris Toshok  <toshok@ximian.com>
 //
 // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
 //
@@ -44,16 +44,6 @@ namespace MonoTests.System.Configuration
             Assert.False(v.CanValidate(typeof(string)));
             Assert.True(v.CanValidate(typeof(int)));
             Assert.False(v.CanValidate(typeof(object)));
-        }
-
-        public void NullCallback()
-        {
-            CallbackValidator v = new CallbackValidator(typeof(int), null);
-        }
-
-        public void NullType()
-        {
-            CallbackValidator v = new CallbackValidator(null, success);
         }
 
         bool hit_success;

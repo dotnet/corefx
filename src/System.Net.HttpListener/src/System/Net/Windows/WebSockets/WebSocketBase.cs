@@ -118,14 +118,6 @@ namespace System.Net.WebSockets
             }
         }
 
-        internal static bool LoggingEnabled
-        {
-            get
-            {
-                return NetEventSource.IsEnabled;
-            }
-        }
-
         public override WebSocketState State
         {
             get
@@ -1196,15 +1188,6 @@ namespace System.Net.WebSockets
             _internalBuffer.ValidateNativeBuffers(action, bufferType, dataBuffers, dataBufferCount);
         }
 
-        internal void ThrowIfClosedOrAborted()
-        {
-            if (State == WebSocketState.Closed || State == WebSocketState.Aborted)
-            {
-                throw new WebSocketException(WebSocketError.InvalidState,
-                    SR.Format(SR.net_WebSockets_InvalidState_ClosedOrAborted, GetType().FullName, State));
-            }
-        }
-
         private void ThrowIfAborted(bool aborted, Exception innerException)
         {
             if (aborted)
@@ -1464,7 +1447,7 @@ namespace System.Net.WebSockets
             }
         }
 
-        private async static void OnKeepAlive(object sender)
+        private static async void OnKeepAlive(object sender)
         {
             Debug.Assert(sender != null, "'sender' MUST NOT be NULL.");
             Debug.Assert((sender as WebSocketBase) != null, "'sender as WebSocketBase' MUST NOT be NULL.");

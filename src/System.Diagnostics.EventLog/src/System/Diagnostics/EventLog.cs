@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -25,8 +26,6 @@ namespace System.Diagnostics
         internal const string DllName = "EventLogMessages.dll";
         private const string eventLogMutexName = "netfxeventlog.1.0";
         private const int DefaultMaxSize = 512 * 1024;
-        private const int DefaultRetention = 7 * SecondsPerDay;
-        private const int SecondsPerDay = 60 * 60 * 24;
 
         private EventLogInternal _underlyingEventLog;
 
@@ -655,14 +654,26 @@ namespace System.Diagnostics
                 eventkey?.Close();
             }
             // now create EventLog objects that point to those logs
-            EventLog[] logs = new EventLog[logNames.Length];
+            List<EventLog> logs = new List<EventLog>(logNames.Length);
             for (int i = 0; i < logNames.Length; i++)
             {
                 EventLog log = new EventLog(logNames[i], machineName);
-                logs[i] = log;
+                SafeEventLogReadHandle handle = Interop.Advapi32.OpenEventLog(machineName, logNames[i]);
+
+                if (!handle.IsInvalid)
+                {
+                    handle.Close();
+                    logs.Add(log);
+                }
+                else if (Marshal.GetLastWin32Error() != Interop.Errors.ERROR_INVALID_PARAMETER)
+                {
+                    // This api should return the list of all event logs present on the system even if the current user can't open the log.
+                    // Windows returns ERROR_INVALID_PARAMETER for special keys which were added in RS5+ but do not represent actual event logs.
+                    logs.Add(log);
+                }
             }
 
-            return logs;
+            return logs.ToArray();
         }
 
         internal static RegistryKey GetEventLogRegKey(string machine, bool writable)

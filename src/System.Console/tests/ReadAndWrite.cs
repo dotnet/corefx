@@ -195,7 +195,7 @@ public class ReadAndWrite
         }
     }
 
-    public static unsafe void ValidateConsoleEncoding(Encoding encoding)
+    private static unsafe void ValidateConsoleEncoding(Encoding encoding)
     {
         Assert.NotNull(encoding);
 
@@ -259,8 +259,6 @@ public class ReadAndWrite
     }
 
     [Fact]
-    // On the full framework it is not guaranteed to eat the preamble bytes
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
     public static unsafe void OutputEncodingPreamble()
     {
         Encoding curEncoding = Console.OutputEncoding;

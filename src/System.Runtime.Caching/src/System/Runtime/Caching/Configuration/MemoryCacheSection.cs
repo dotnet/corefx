@@ -17,25 +17,17 @@ namespace System.Runtime.Caching.Configuration
              <add name="Foo" physicalMemoryPercentage="0" pollingInterval="00:02:00"/>
              <add name="Bar" physicalMemoryPercentage="0" pollingInterval="00:02:00"/>
            </namedCaches>
-	     </memoryCaches>
+         </memoryCaches>
        </system.caching>
     */
 
     internal sealed class MemoryCacheSection : ConfigurationSection
     {
-        private static ConfigurationPropertyCollection s_properties;
-        private static readonly ConfigurationProperty s_propNamedCaches;
-
-        static MemoryCacheSection()
-        {
-            s_propNamedCaches = new ConfigurationProperty("namedCaches",
-                                            typeof(MemoryCacheSettingsCollection),
-                                            null, // defaultValue
-                                            ConfigurationPropertyOptions.None);
-
-            s_properties = new ConfigurationPropertyCollection();
-            s_properties.Add(s_propNamedCaches);
-        }
+        private static readonly ConfigurationProperty s_propNamedCaches = new ConfigurationProperty("namedCaches",
+            typeof(MemoryCacheSettingsCollection),
+            null, // defaultValue
+            ConfigurationPropertyOptions.None);
+        private static readonly ConfigurationPropertyCollection s_properties = new ConfigurationPropertyCollection() { s_propNamedCaches };
 
         public MemoryCacheSection()
         {

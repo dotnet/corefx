@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -135,8 +136,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET Framework has a bug. See https://github.com/dotnet/corefx/issues/26479")]
-        public static void CaseInsensiveLookup()
+        public static void CaseInsensitiveLookup()
         {
             Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strBrasilia), TimeZoneInfo.FindSystemTimeZoneById(s_strBrasilia.ToLowerInvariant()));
             Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strJohannesburg), TimeZoneInfo.FindSystemTimeZoneById(s_strJohannesburg.ToUpperInvariant()));
@@ -1997,7 +1997,7 @@ namespace System.Tests
             DateTimeKind expectedKind = (TimeZoneInfo.Local == TimeZoneInfo.Utc) ? DateTimeKind.Utc : DateTimeKind.Local;
             Assert.Equal(expectedKind, converted.Kind);
             back = TimeZoneInfo.ConvertTimeToUtc(converted, TimeZoneInfo.Local);
-            Assert.Equal(back.Kind, DateTimeKind.Utc);
+            Assert.Equal(DateTimeKind.Utc, back.Kind);
             Assert.Equal(utc, back);
         }
 
@@ -2243,6 +2243,14 @@ namespace System.Tests
             }
         }
 
+        [Fact]
+        public static void EnsureUtcObjectSingleton()
+        {
+            TimeZoneInfo utcObject = TimeZoneInfo.GetSystemTimeZones().Single(x => x.Id.Equals("UTC", StringComparison.OrdinalIgnoreCase));
+            Assert.True(ReferenceEquals(utcObject, TimeZoneInfo.Utc));
+            Assert.True(ReferenceEquals(TimeZoneInfo.FindSystemTimeZoneById("UTC"), TimeZoneInfo.Utc));
+        }
+
         private static void VerifyConvertException<TException>(DateTimeOffset inputTime, string destinationTimeZoneId) where TException : Exception
         {
             Assert.ThrowsAny<TException>(() => TimeZoneInfo.ConvertTime(inputTime, TimeZoneInfo.FindSystemTimeZoneById(destinationTimeZoneId)));
@@ -2316,7 +2324,7 @@ namespace System.Tests
             VerifyTimeSpanArray(ret, expectedOffsets, string.Format("Wrong offsets when used {0} with the zone {1}", dt, tz.Id));
         }
 
-        public static void VerifyTimeSpanArray(TimeSpan[] actual, TimeSpan[] expected, string errorMsg)
+        private static void VerifyTimeSpanArray(TimeSpan[] actual, TimeSpan[] expected, string errorMsg)
         {
             Assert.True(actual != null);
             Assert.True(expected != null);

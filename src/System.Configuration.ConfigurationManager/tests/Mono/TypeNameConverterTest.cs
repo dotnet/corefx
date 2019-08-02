@@ -5,7 +5,7 @@
 // for System.Configuration.TypeNameConverter.
 //
 // Author:
-//	Chris Toshok  <toshok@ximian.com>
+//  Chris Toshok  <toshok@ximian.com>
 //
 // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
 //
@@ -93,7 +93,7 @@ namespace MonoTests.System.Configuration
         {
             TypeNameConverter cv = new TypeNameConverter();
 
-            Assert.Equal(null, cv.ConvertTo(null, null, null, typeof(string)));
+            Assert.Null(cv.ConvertTo(null, null, null, typeof(string)));
         }
 
         [Fact]

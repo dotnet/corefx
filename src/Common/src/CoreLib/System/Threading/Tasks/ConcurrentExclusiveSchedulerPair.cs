@@ -152,7 +152,7 @@ namespace System.Threading.Tasks
         private CompletionState EnsureCompletionStateInitialized()
         {
             // ValueLock not needed, but it's ok if it's held
-            return LazyInitializer.EnsureInitialized<CompletionState>(ref m_completionState!, () => new CompletionState()); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+            return LazyInitializer.EnsureInitialized(ref m_completionState, () => new CompletionState());
         }
 
         /// <summary>Gets whether completion has been requested.</summary>
@@ -297,7 +297,7 @@ namespace System.Threading.Tasks
                     {
                         try
                         {
-                            processingTask = new Task(thisPair => ((ConcurrentExclusiveSchedulerPair)thisPair!).ProcessExclusiveTasks(), this, // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                            processingTask = new Task(thisPair => ((ConcurrentExclusiveSchedulerPair)thisPair!).ProcessExclusiveTasks(), this,
                                 default, GetCreationOptionsForTask(fairly));
                             processingTask.Start(m_underlyingTaskScheduler);
                             // When we call Start, if the underlying scheduler throws in QueueTask, TPL will fault the task and rethrow
@@ -327,7 +327,7 @@ namespace System.Threading.Tasks
                             {
                                 try
                                 {
-                                    processingTask = new Task(thisPair => ((ConcurrentExclusiveSchedulerPair)thisPair!).ProcessConcurrentTasks(), this, // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                                    processingTask = new Task(thisPair => ((ConcurrentExclusiveSchedulerPair)thisPair!).ProcessConcurrentTasks(), this,
                                         default, GetCreationOptionsForTask(fairly));
                                     processingTask.Start(m_underlyingTaskScheduler); // See above logic for why we use new + Start rather than StartNew
                                 }
@@ -382,7 +382,7 @@ namespace System.Threading.Tasks
                 for (int i = 0; i < m_maxItemsPerTask; i++)
                 {
                     // Get the next available exclusive task.  If we can't find one, bail.
-                    Task exclusiveTask;
+                    Task? exclusiveTask;
                     if (!m_exclusiveTaskScheduler.m_tasks.TryDequeue(out exclusiveTask)) break;
 
                     // Execute the task.  If the scheduler was previously faulted,
@@ -430,7 +430,7 @@ namespace System.Threading.Tasks
                 for (int i = 0; i < m_maxItemsPerTask; i++)
                 {
                     // Get the next available concurrent task.  If we can't find one, bail.
-                    Task concurrentTask;
+                    Task? concurrentTask;
                     if (!m_concurrentTaskScheduler.m_tasks.TryDequeue(out concurrentTask)) break;
 
                     // Execute the task.  If the scheduler was previously faulted,

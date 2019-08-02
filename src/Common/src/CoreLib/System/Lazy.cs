@@ -11,6 +11,7 @@
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 
@@ -42,11 +43,11 @@ namespace System
     /// </summary>
     internal class LazyHelper
     {
-        internal readonly static LazyHelper NoneViaConstructor            = new LazyHelper(LazyState.NoneViaConstructor);
-        internal readonly static LazyHelper NoneViaFactory                = new LazyHelper(LazyState.NoneViaFactory);
-        internal readonly static LazyHelper PublicationOnlyViaConstructor = new LazyHelper(LazyState.PublicationOnlyViaConstructor);
-        internal readonly static LazyHelper PublicationOnlyViaFactory     = new LazyHelper(LazyState.PublicationOnlyViaFactory);
-        internal readonly static LazyHelper PublicationOnlyWaitForOtherThreadToPublish       = new LazyHelper(LazyState.PublicationOnlyWait);
+        internal static readonly LazyHelper NoneViaConstructor            = new LazyHelper(LazyState.NoneViaConstructor);
+        internal static readonly LazyHelper NoneViaFactory                = new LazyHelper(LazyState.NoneViaFactory);
+        internal static readonly LazyHelper PublicationOnlyViaConstructor = new LazyHelper(LazyState.PublicationOnlyViaConstructor);
+        internal static readonly LazyHelper PublicationOnlyViaFactory     = new LazyHelper(LazyState.PublicationOnlyViaFactory);
+        internal static readonly LazyHelper PublicationOnlyWaitForOtherThreadToPublish       = new LazyHelper(LazyState.PublicationOnlyWait);
 
         internal LazyState State { get; }
 
@@ -87,6 +88,7 @@ namespace System
             _exceptionDispatch = ExceptionDispatchInfo.Capture(exception);
         }
 
+        [DoesNotReturn]
         internal void ThrowException()
         {
             Debug.Assert(_exceptionDispatch != null, "execution path is invalid");
@@ -192,7 +194,7 @@ namespace System
         private Func<T>? _factory;
 
         // _value eventually stores the lazily created value. It is valid when _state = null.
-        private T _value = default!; // TODO-NULLABLE-GENERIC
+        private T _value = default!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:System.Threading.Lazy{T}"/> class that 
@@ -444,13 +446,14 @@ namespace System
         }
 
         /// <summary>Gets the value of the Lazy&lt;T&gt; for debugging display purposes.</summary>
+        [MaybeNull]
         internal T ValueForDebugDisplay
         {
             get
             {
                 if (!IsValueCreated)
                 {
-                    return default!; // TODO-NULLABLE-GENERIC
+                    return default!;
                 }
                 return _value;
             }

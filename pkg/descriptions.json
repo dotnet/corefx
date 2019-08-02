@@ -1,10 +1,5 @@
 [
   {
-    "Name": "CoreFx.Private.TestUtilities",
-    "Description": "Private package, which provides testing utility classes. The package is meant to be used when running CoreFX tests on a runtime.",
-    "CommonTypes": []
-  },
-  {
     "Name": "RuntimePackage",
     "Description": "Internal implementation package not meant for direct consumption.  Please do not reference directly.",
     "CommonTypes": []
@@ -101,11 +96,6 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.NETCore.Runtime.Native",
-    "Description": "Support libraries for the .NET Core runtime used by .NETNative.",
-    "CommonTypes": []
-  },
-  {
     "Name": "Microsoft.NETCore.Targets",
     "Description": "Provides supporting infrastructure for portable projects: support identifiers that define framework and runtime for support targets and packages that reference the minimum supported package versions when targeting these.",
     "CommonTypes": []
@@ -156,6 +146,11 @@
     "CommonTypes": []
   },
   {
+    "Name": "Microsoft.Private.CoreFx.OOB",
+    "Description": "Package used to represent out-of-band packages that are not included in NetCoreApp.",
+    "CommonTypes": []
+  },
+  {
     "Name": "Microsoft.Private.CoreFx.UAP",
     "Description": "Package used to represent the portions of UAP that come from CoreFx.",
     "CommonTypes": []
@@ -168,11 +163,6 @@
   {
     "Name": "Microsoft.TargetingPack.Private.CoreCLR",
     "Description": "Contains a private targeting pack which contains only the CoreCLR mscorlib reference assembly. Used for producing platform specific libraries such as facades.",
-    "CommonTypes": []
-  },
-  {
-    "Name": "Microsoft.TargetingPack.Private.NETNative",
-    "Description": "Contains a private targeting pack which contains only the System.Private.* libraries that ship with the .NET Native ILC toolchain. Used for producing platform specific libraries such as facades.",
     "CommonTypes": []
   },
   {
@@ -2000,20 +1990,13 @@
   },
   {
     "Name": "System.Text.Json",
-    "Description": "Provides a fast, non-cached, forward-only way to read UTF-8 encoded JavaScript Object Notation (JSON) text.",
+    "Description": "Provides high-performance and low-allocating types that serialize objects to JavaScript Object Notation (JSON) text and deserialize JSON text to objects, with UTF-8 support built-in. Also provides types to read and write JSON text encoded as UTF-8, and to create an in-memory document object model (DOM), that is read-only, for random access of the JSON elements within a structured view of the data.",
     "CommonTypes": [
-      "System.Text.Json.Utf8JsonReader",
+      "System.Text.Json.JsonSerializer",
+      "System.Text.Json.JsonDocument",
+      "System.Text.Json.JsonElement",
       "System.Text.Json.Utf8JsonWriter",
-      "System.Text.Json.JsonDocument"
-    ]
-  },
-  {
-    "Name": "Microsoft.Bcl.Json.Sources",
-    "Description": "Provides the source code implementation of System.Text.Json as internal types. This package is only required for projects targeting .NET Framework 4.6.1+ or .NET Core 2.x; and is not for projects that can target .NET Core 3.0 and higher. For guidance on consuming the source pacakge, visit: https://aka.ms/json-source-package-guide.",
-    "CommonTypes": [
-      "System.Text.Json.Utf8JsonReader",
-      "System.Text.Json.Utf8JsonWriter",
-      "System.Text.Json.JsonDocument"
+      "System.Text.Json.Utf8JsonReader"
     ]
   },
   {

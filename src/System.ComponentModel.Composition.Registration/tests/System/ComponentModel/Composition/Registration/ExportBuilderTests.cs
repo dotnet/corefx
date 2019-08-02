@@ -7,7 +7,6 @@ using Xunit;
 
 namespace System.ComponentModel.Composition.Registration.Tests
 {
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Reflection based tests")]
     public class ExportBuilderTests
     {
         interface IFoo { }
@@ -111,5 +110,5 @@ namespace System.ComponentModel.Composition.Registration.Tests
 
             return list[1] as ExportMetadataAttribute;
         }
-	}
+    }
 }

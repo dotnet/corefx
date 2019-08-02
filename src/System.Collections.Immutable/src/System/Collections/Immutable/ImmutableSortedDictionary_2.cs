@@ -209,7 +209,7 @@ namespace System.Collections.Immutable
             }
         }
 
-#if FEATURE_ITEMREFAPI
+#if !NETSTANDARD10
         /// <summary>
         /// Returns a read-only reference to the value associated with the provided key.
         /// </summary>
@@ -815,7 +815,7 @@ namespace System.Collections.Immutable
         /// </summary>
         /// <param name="items">The entries to add.</param>
         /// <param name="overwriteOnCollision"><c>true</c> to allow the <paramref name="items"/> sequence to include duplicate keys and let the last one win; <c>false</c> to throw on collisions.</param>
-        /// <param name="avoidToSortedMap"><c>true</c> when being called from <see cref="WithComparers(IComparer{TKey}, IEqualityComparer{TValue})"/> to avoid <see cref="T:System.StackOverflowException"/>.</param>
+        /// <param name="avoidToSortedMap"><c>true</c> when being called from <see cref="WithComparers(IComparer{TKey}, IEqualityComparer{TValue})"/> to avoid a stack overflow.</param>
         [Pure]
         private ImmutableSortedDictionary<TKey, TValue> AddRange(IEnumerable<KeyValuePair<TKey, TValue>> items, bool overwriteOnCollision, bool avoidToSortedMap)
         {

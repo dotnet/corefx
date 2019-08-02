@@ -71,7 +71,7 @@ namespace System.Diagnostics.Tracing
 
         internal void OnMetricWritten(double value)
         {
-            Debug.Assert(Monitor.IsEntered(MyLock));
+            Debug.Assert(Monitor.IsEntered(this));
             _sum += value;
             _sumSquared += value * value;
             if (value > _max)
@@ -85,7 +85,7 @@ namespace System.Diagnostics.Tracing
 
         internal override void WritePayload(float intervalSec, int pollingIntervalMillisec)
         {
-            lock (MyLock)
+            lock (this)
             {
                 Flush();
                 CounterPayload payload = new CounterPayload();
@@ -106,21 +106,24 @@ namespace System.Diagnostics.Tracing
                 payload.Series = $"Interval={pollingIntervalMillisec}"; // TODO: This may need to change when we support multi-session
                 payload.CounterType = "Mean";
                 payload.Metadata = GetMetadataString();
-                payload.DisplayName = DisplayName;
+                payload.DisplayName = DisplayName ?? "";
+                payload.DisplayUnits = DisplayUnits ?? "";
                 payload.Name = Name;
                 ResetStatistics();
                 EventSource.Write("EventCounters", new EventSourceOptions() { Level = EventLevel.LogAlways }, new CounterPayloadType(payload));
             }
         }
 
-        private void ResetStatistics()
+        internal void ResetStatistics()
         {
-            Debug.Assert(Monitor.IsEntered(MyLock));
-            _count = 0;
-            _sum = 0;
-            _sumSquared = 0;
-            _min = double.PositiveInfinity;
-            _max = double.NegativeInfinity;
+            lock(this)
+            {
+                _count = 0;
+                _sum = 0;
+                _sumSquared = 0;
+                _min = double.PositiveInfinity;
+                _max = double.NegativeInfinity;
+            }
         }
 
         #endregion // Statistics Calculation
@@ -128,7 +131,6 @@ namespace System.Diagnostics.Tracing
         // Values buffering
         private const int BufferedSize = 10;
         private const double UnusedBufferSlotValue = double.NegativeInfinity;
-        private const int UnsetIndex = -1;
         private volatile double[] _bufferedValues = null!;
         private volatile int _bufferedValuesIndex;
 
@@ -153,7 +155,7 @@ namespace System.Diagnostics.Tracing
                 {
                     // It is possible that two threads both think the buffer is full, but only one get to actually flush it, the other
                     // will eventually enter this code path and potentially calling Flushing on a buffer that is not full, and that's okay too.
-                    lock (MyLock) // Lock the counter
+                    lock (this) // Lock the counter
                         Flush();
                     i = 0;
                 }
@@ -169,7 +171,7 @@ namespace System.Diagnostics.Tracing
 
         protected void Flush()
         {
-            Debug.Assert(Monitor.IsEntered(MyLock));
+            Debug.Assert(Monitor.IsEntered(this));
             for (int i = 0; i < _bufferedValues.Length; i++)
             {
                 var value = Interlocked.Exchange(ref _bufferedValues[i], UnusedBufferSlotValue);

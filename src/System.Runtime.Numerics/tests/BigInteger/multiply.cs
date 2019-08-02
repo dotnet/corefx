@@ -35,7 +35,6 @@ namespace System.Numerics.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void RunMultiply_TwoLargeBigIntegers_Threshold()
         {
             // Again, with lower threshold
@@ -219,14 +218,14 @@ namespace System.Numerics.Tests
         {
             StackCalc sc1 = new StackCalc(opstring1);
             while (sc1.DoNextOperation())
-            {	
+            {
                 //Run the full calculation
                 sc1.DoNextOperation();
             }
 
             StackCalc sc2 = new StackCalc(opstring2);
             while (sc2.DoNextOperation())
-            {	
+            {
                 //Run the full calculation
                 sc2.DoNextOperation();
             }

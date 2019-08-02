@@ -179,6 +179,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [ActiveIssue(29742, TestPlatforms.Windows)]
         [ConditionalTheory(nameof(PlatformSupportsUnixDomainSockets))]
         [InlineData(5000, 1, 1)]
         [InlineData(500, 18, 21)]
@@ -329,10 +330,10 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ArgumentNullException>(() => new UnixDomainSocketEndPoint(null));
             Assert.Throws<ArgumentOutOfRangeException>(() => new UnixDomainSocketEndPoint(string.Empty));
 
-            int maxNativeSize = (int)typeof(UnixDomainSocketEndPoint)
-                .GetField("s_nativePathLength", BindingFlags.Static | BindingFlags.NonPublic)
-                .GetValue(null);
+            FieldInfo fi = typeof(UnixDomainSocketEndPoint).GetField("s_nativePathLength", BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(fi);
 
+            int maxNativeSize = (int)fi.GetValue(null);
             string invalidLengthString = new string('a', maxNativeSize + 1);
             Assert.Throws<ArgumentOutOfRangeException>(() => new UnixDomainSocketEndPoint(invalidLengthString));
         }

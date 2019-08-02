@@ -188,18 +188,18 @@ namespace System.Threading.Tasks.Tests
                 CancellationTokenSource cts = new CancellationTokenSource();
                 TaskCompletionSource<int> tcs = new TaskCompletionSource<int>(cts.Token);
                 tcs.SetResult(5);
-                Assert.Equal(tcs.Task.Status, TaskStatus.RanToCompletion);
+                Assert.Equal(TaskStatus.RanToCompletion, tcs.Task.Status);
 
                 cts.Cancel();
 
-                Assert.Equal(tcs.Task.Status, TaskStatus.RanToCompletion);
+                Assert.Equal(TaskStatus.RanToCompletion, tcs.Task.Status);
 
                 Assert.False(tcs.TrySetException(new Exception("some exception")), "RunTaskCompletionSourceTests:    > Error!  Set result, Canceled, tcs.TrySetException succeeded");
 
                 Assert.False(tcs.TrySetResult(10), "RunTaskCompletionSourceTests:    > Error!  Set result, Canceled, tcs.TrySetResult succeeded");
                 Assert.False(tcs.TrySetCanceled(), "RunTaskCompletionSourceTests:    > Error!  Set result, Canceled, tcs.TrySetCanceled succeeded");
 
-                Assert.Equal(tcs.Task.Result, 5);
+                Assert.Equal(5, tcs.Task.Result);
 
                 Exception fake = new Exception("blah!");
                 try
@@ -1167,7 +1167,7 @@ namespace System.Threading.Tasks.Tests
                () => Task.WaitAny(new Task[] { Task.Factory.StartNew(() => { }) }, TimeSpan.FromMilliseconds(-2)));
         }
 
-        public static void CoreWaitAnyTest(int fillerTasks, bool[] finishMeFirst, int nExpectedReturnCode)
+        private static void CoreWaitAnyTest(int fillerTasks, bool[] finishMeFirst, int nExpectedReturnCode)
         {
             // We need to do this test in a local TM with # or threads equal to or greater than
             // the number of tasks requested. Otherwise this test can undeservedly fail on dual proc machines
@@ -1331,7 +1331,7 @@ namespace System.Threading.Tasks.Tests
             RunTaskWaitAllTest(false, 10);
         }
 
-        public static void RunTaskWaitAllTest(bool staThread, int nTaskCount)
+        private static void RunTaskWaitAllTest(bool staThread, int nTaskCount)
         {
             string methodInput = string.Format("RunTaskWaitAllTest:  > WaitAll() Tests for aptState={0}, task count={1}", staThread ? "MTA" : "STA", nTaskCount);
             string excpMsg = "foo";
@@ -1431,7 +1431,7 @@ namespace System.Threading.Tasks.Tests
         // the core function for WaitAll tests. Takes 2 types of actions to create tasks, how many copies of each task type
         // to create, whether to wait for the completion of the first group, etc
         //
-        public static void DoRunTaskWaitAllTest(bool staThread,
+        private static void DoRunTaskWaitAllTest(bool staThread,
                                                     int numTasksType1,
                                                     Action<object> taskAction1,
                                                     bool bWaitOnAct1,
@@ -1495,7 +1495,7 @@ namespace System.Threading.Tasks.Tests
         // the core function for WaitAll tests. Takes 2 types of actions to create tasks, how many copies of each task type
         // to create, whether to wait for the completion of the first group, etc
         //
-        public static void DoRunTaskWaitAllTestWithCancellationToken(bool staThread,
+        private static void DoRunTaskWaitAllTestWithCancellationToken(bool staThread,
                                                     int numTasks,
                                                     bool bWaitOnAct1,
                                                     bool bCancelAct1,

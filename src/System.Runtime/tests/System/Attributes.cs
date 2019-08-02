@@ -199,12 +199,19 @@ namespace System.Tests
             Assert.Throws<ArgumentNullException>(() => Attribute.GetCustomAttributes(typeof(TestClass2).GetMethod("TestMethod2"), null, false));
             Assert.Throws<ArgumentNullException>(() => Attribute.GetCustomAttributes(typeof(TestClass2).GetMethod("TestMethod2").GetParameters()[0], null, false));
         }
+
+        [Fact]
+        public static void MultipleAttributesTest()
+        {
+            Assert.Equal("System.Tests.MyCustomAttribute System.Tests.MyCustomAttribute", string.Join(" ", typeof(MultipleAttributes).GetCustomAttributes(inherit: false)));
+            Assert.Equal("System.Tests.MyCustomAttribute System.Tests.MyCustomAttribute", string.Join(" ", typeof(MultipleAttributes).GetCustomAttributes(inherit: true)));
+        }
     }
+
     public static class GetCustomAttribute
     {
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "CustomAttributes on Modules not supported in UapAot")]
         public static void customAttributeCount()
         {
             List<CustomAttributeData> customAttributes =  typeof(GetCustomAttribute).Module.CustomAttributes.ToList();
@@ -214,6 +221,7 @@ namespace System.Tests
             // [System.Diagnostics.DebuggableAttribute((Boolean)True, (Boolean)False)]
             Assert.Equal(4, customAttributes.Count);
         }
+
         [Fact]
         public static void PositiveTest1()
         {
@@ -374,7 +382,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "CustomAttributes on Modules not supported in UapAot")]
         public static void PositiveTest5()
         {
             Type clsType = typeof(GetCustomAttribute);
@@ -407,7 +414,6 @@ namespace System.Tests
 
         }
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "CustomAttributes on Modules not supported in UapAot")]
         public static void PositiveTest6()
         {
             Type clsType = typeof(GetCustomAttribute);
@@ -785,5 +791,11 @@ namespace System.Tests
             get { return ""; }
             set { }
         }
+    }
+
+    [MyCustomAttribute("Test")]
+    [MyCustomAttribute("Test")]
+    class MultipleAttributes
+    {
     }
 }

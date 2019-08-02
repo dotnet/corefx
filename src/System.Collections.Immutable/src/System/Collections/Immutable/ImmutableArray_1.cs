@@ -92,6 +92,11 @@ namespace System.Collections.Immutable
             }
         }
 
+#if !NETSTANDARD10
+        public ReadOnlySpan<T> AsSpan() => new ReadOnlySpan<T>(array);
+
+        public ReadOnlyMemory<T> AsMemory() => new ReadOnlyMemory<T>(array);
+#endif
         /// <summary>
         /// Searches the array for the specified item.
         /// </summary>
@@ -1141,10 +1146,10 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="System.Object"/> at the specified index.
+        /// Gets or sets the <see cref="object"/> at the specified index.
         /// </summary>
         /// <value>
-        /// The <see cref="System.Object"/>.
+        /// The <see cref="object"/>.
         /// </value>
         /// <param name="index">The index.</param>
         /// <returns></returns>

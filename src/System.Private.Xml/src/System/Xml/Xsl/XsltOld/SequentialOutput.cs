@@ -37,7 +37,6 @@ namespace System.Xml.Xsl.XsltOld
         private const string s_EncodingStart = " encoding=\"";
         private const string s_Public = "PUBLIC ";
         private const string s_System = "SYSTEM ";
-        private const string s_Html = "html";
         private const string s_QuoteSpace = "\" ";
         private const string s_CDataSplit = "]]]]><![CDATA[>";
 
@@ -316,7 +315,6 @@ namespace System.Xml.Xsl.XsltOld
 
         private void WriteEndElement(RecordBuilder record)
         {
-            BuilderInfo node = record.MainNode;
             HtmlElementProps htmlProps = record.Manager.CurrentElementScope.HtmlElementProps;
 
             if (htmlProps != null && htmlProps.Empty)

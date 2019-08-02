@@ -6,6 +6,7 @@
 #if netcoreapp
 using Internal.Runtime.CompilerServices;
 #endif
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics.Hashing;
 using System.Runtime.CompilerServices;
@@ -60,7 +61,13 @@ namespace System.Numerics
             get
             {
                 ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
+#if PROJECTN
+                // Hits an active bug in ProjectN (887908). This code path is actually only used rarely,
+                // since get_Count is an intrinsic.
+                throw new NotImplementedException();
+#else
                 return Unsafe.SizeOf<Vector<T>>() / Unsafe.SizeOf<T>();
+#endif
             }
         }
 
@@ -796,7 +803,7 @@ namespace System.Numerics
         /// <exception cref="ArgumentNullException">If the destination array is null</exception>
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination array</exception>
         [Intrinsic]
-        public unsafe readonly void CopyTo(T[] destination)
+        public readonly unsafe void CopyTo(T[] destination)
         {
             CopyTo(destination, 0);
         }
@@ -810,7 +817,7 @@ namespace System.Numerics
         /// <exception cref="ArgumentOutOfRangeException">If index is greater than end of the array or index is less than zero</exception>
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination array</exception>
         [Intrinsic]
-        public unsafe readonly void CopyTo(T[] destination, int startIndex)
+        public readonly unsafe void CopyTo(T[] destination, int startIndex)
         {
             if (destination == null)
             {
@@ -1083,7 +1090,7 @@ namespace System.Numerics
         /// <summary>
         /// Returns the element at the given index.
         /// </summary>
-        public unsafe readonly T this[int index]
+        public readonly unsafe T this[int index]
         {
             [Intrinsic]
             get
@@ -5351,6 +5358,7 @@ namespace System.Numerics
         #endregion Same-Size Conversion
 
         #region Throw Helpers
+        [DoesNotReturn]
         internal static void ThrowInsufficientNumberOfElementsException(int requiredElementCount)
         {
             throw new IndexOutOfRangeException(SR.Format(SR.Arg_InsufficientNumberOfElements, requiredElementCount, "values"));

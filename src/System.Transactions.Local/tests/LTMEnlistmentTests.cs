@@ -64,11 +64,11 @@ namespace System.Transactions.Tests
             }
             catch (TransactionInDoubtException)
             {
-                Assert.Equal(expectedTxStatus, TransactionStatus.InDoubt);
+                Assert.Equal(TransactionStatus.InDoubt, expectedTxStatus);
             }
             catch (TransactionAbortedException)
             {
-                Assert.Equal(expectedTxStatus, TransactionStatus.Aborted);
+                Assert.Equal(TransactionStatus.Aborted, expectedTxStatus);
             }
 
 
@@ -83,7 +83,6 @@ namespace System.Transactions.Tests
         [InlineData(0, EnlistmentOptions.None, EnlistmentOptions.None, Phase1Vote.Prepared, Phase1Vote.Prepared, true, EnlistmentOutcome.Aborted, EnlistmentOutcome.Aborted, TransactionStatus.Aborted)]
         [InlineData(1, EnlistmentOptions.None, EnlistmentOptions.None, Phase1Vote.Prepared, Phase1Vote.Prepared, true, EnlistmentOutcome.Aborted, EnlistmentOutcome.Aborted, TransactionStatus.Aborted)]
         [InlineData(2, EnlistmentOptions.None, EnlistmentOptions.None, Phase1Vote.Prepared, Phase1Vote.Prepared, true, EnlistmentOutcome.Aborted, EnlistmentOutcome.Aborted, TransactionStatus.Aborted)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Expects PNSE due to not being supported on core")]
         public void TwoPhaseDurable(int volatileCount, EnlistmentOptions volatileEnlistmentOption, EnlistmentOptions durableEnlistmentOption, Phase1Vote volatilePhase1Vote, Phase1Vote durablePhase1Vote, bool commit, EnlistmentOutcome expectedVolatileOutcome, EnlistmentOutcome expectedDurableOutcome, TransactionStatus expectedTxStatus)
         {
             Transaction tx = null;
@@ -119,11 +118,11 @@ namespace System.Transactions.Tests
             }
             catch (TransactionInDoubtException)
             {
-                Assert.Equal(expectedTxStatus, TransactionStatus.InDoubt);
+                Assert.Equal(TransactionStatus.InDoubt, expectedTxStatus);
             }
             catch (TransactionAbortedException)
             {
-                Assert.Equal(expectedTxStatus, TransactionStatus.Aborted);
+                Assert.Equal(TransactionStatus.Aborted, expectedTxStatus);
             }
 
             Assert.NotNull(tx);
@@ -154,11 +153,11 @@ namespace System.Transactions.Tests
             }
             catch (TransactionInDoubtException)
             {
-                Assert.Equal(expectedTxStatus, TransactionStatus.InDoubt);
+                Assert.Equal(TransactionStatus.InDoubt, expectedTxStatus);
             }
             catch (TransactionAbortedException)
             {
-                Assert.Equal(expectedTxStatus, TransactionStatus.Aborted);
+                Assert.Equal(TransactionStatus.Aborted, expectedTxStatus);
             }
 
             Assert.True(outcomeEvent.WaitOne(TimeSpan.FromSeconds(MaxTransactionCommitTimeoutInSeconds)));
@@ -203,11 +202,11 @@ namespace System.Transactions.Tests
             }
             catch (TransactionInDoubtException)
             {
-                Assert.Equal(expectedTxStatus, TransactionStatus.InDoubt);
+                Assert.Equal(TransactionStatus.InDoubt, expectedTxStatus);
             }
             catch (TransactionAbortedException)
             {
-                Assert.Equal(expectedTxStatus, TransactionStatus.Aborted);
+                Assert.Equal(TransactionStatus.Aborted, expectedTxStatus);
             }
 
             Task.Run(() => // in case current thread is STA thread, where WaitHandle.WaitAll isn't supported

@@ -67,6 +67,18 @@ In addition to the above packages, the runtime versions of the packages listed
 in the native section should also be installed (this happens automatically on
 most systems when you install the development packages).
 
+### Windows Subsystem For Linux
+
+Generally building and testing should work fine on Windows Subsystem for Linux (WSL) and it can be convenient if you primarily work on Windows and want to run tests sometimes on Linux. 
+
+There is one caveat: you must set the LANG in your shell to something other than the default. For example,
+```sh
+export LANG=en_US.UTF-8
+```
+Otherwise you may get errors like `PackagingException: File not found: '/home/dan/git/corefx/LICENSE.TXT'`. More info in [this issue](https://github.com/dotnet/corefx/issues/38608). It is possible this may occur on other distros, if LANG is set as above.
+
+We have not tested on WSL2 yet. If you try it out, we'd welcome an update.
+
 ### macOS
 
 macOS 10.12 or higher is needed to build corefx 2.x.
@@ -109,31 +121,6 @@ ln -s /usr/local/opt/openssl/lib/pkgconfig/libssl.pc /usr/local/lib/pkgconfig/
 ln -s /usr/local/opt/openssl/lib/pkgconfig/openssl.pc /usr/local/lib/pkgconfig/
 ```
 
-Alternatively, to avoid modifying /usr/local/ you can invoke cmake with the `OPENSSL_ROOT_DIR` env var set. The value to be passed in the directory where openssl is installed. Use `brew info openssl` to determine it. For example:
-
-```none
-$ brew info openssl
-openssl: stable 1.0.2p (bottled) [keg-only]
-SSL/TLS cryptography library
-https://openssl.org/
-/usr/local/Cellar/openssl/1.0.2l (1,709 files, 12.3MB)
-  Poured from bottle on 2017-10-10 at 21:30:10
-/usr/local/Cellar/openssl/1.0.2m (1,792 files, 12.3MB)
-  Poured from bottle on 2017-11-06 at 17:45:21
-/usr/local/Cellar/openssl/1.0.2n (1,792 files, 12.3MB)
-  Poured from bottle on 2018-01-25 at 20:22:45
-/usr/local/Cellar/openssl/1.0.2o_2 (1,792 files, 12.3MB)
-  Poured from bottle on 2018-07-15 at 16:59:46
-/usr/local/Cellar/openssl/1.0.2p (1,793 files, 12.3MB)
-  Poured from bottle on 2018-08-31 at 19:37:10
-```
-
-With the above example, use the latest version path for `1.0.2p`:
-
-```none
-$ OPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2p ./build.sh
-```
-
 ### Known Issues
 If you see errors along the lines of `SendFailure (Error writing headers)` you may need to import trusted root certificates:
 
@@ -141,4 +128,3 @@ If you see errors along the lines of `SendFailure (Error writing headers)` you m
 mozroots --import --sync
 ```
 
-Bash on Ubuntu on Windows issues are tracked by: [#11057](https://github.com/dotnet/corefx/issues/11057)

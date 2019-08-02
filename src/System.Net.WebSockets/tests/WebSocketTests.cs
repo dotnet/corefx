@@ -85,7 +85,6 @@ namespace System.Net.WebSockets.Tests
                 new MemoryStream(), "subProtocol", 16480, 9856, TimeSpan.FromSeconds(-2), false, WebSocket.CreateClientBuffer(16480, 9856)));
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [Fact]
         public static void RegisterPrefixes_Unsupported()
         {
@@ -148,9 +147,9 @@ namespace System.Net.WebSockets.Tests
 
         public abstract class ExposeProtectedWebSocket : WebSocket
         {
-            public new static bool IsStateTerminal(WebSocketState state) => 
+            public static new bool IsStateTerminal(WebSocketState state) => 
                 WebSocket.IsStateTerminal(state);
-            public new static void ThrowOnInvalidState(WebSocketState state, params WebSocketState[] validStates) =>
+            public static new void ThrowOnInvalidState(WebSocketState state, params WebSocketState[] validStates) =>
                 WebSocket.ThrowOnInvalidState(state, validStates);
         }
     }

@@ -12,7 +12,7 @@ namespace System.Text.Json
         /// Writes the JSON literal "null" as an element of a JSON array.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteNullValue()
         {
@@ -25,9 +25,9 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the <see cref="bool"/> value (as a JSON literal "true" or "false") as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The value to be written as a JSON literal "true" or "false" as an element of a JSON array.</param>
+        /// <param name="value">The value write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteBooleanValue(bool value)
         {
@@ -48,7 +48,7 @@ namespace System.Text.Json
         private void WriteLiteralByOptions(ReadOnlySpan<byte> utf8Value)
         {
             ValidateWritingValue();
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteLiteralIndented(utf8Value);
             }
@@ -100,13 +100,15 @@ namespace System.Text.Json
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
-            if (_tokenType != JsonTokenType.None)
+            if (_tokenType != JsonTokenType.PropertyName)
             {
-                WriteNewLine(output);
+                if (_tokenType != JsonTokenType.None)
+                {
+                    WriteNewLine(output);
+                }
+                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
+                BytesPending += indent;
             }
-
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
 
             utf8Value.CopyTo(output.Slice(BytesPending));
             BytesPending += utf8Value.Length;

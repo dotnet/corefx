@@ -208,7 +208,7 @@ namespace System.Runtime.InteropServices
 
             try
             {
-                s_nativeDllResolveMap!.Add(assembly, resolver); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                s_nativeDllResolveMap.Add(assembly, resolver);
             }
             catch (ArgumentException)
             {
@@ -235,7 +235,7 @@ namespace System.Runtime.InteropServices
                 return IntPtr.Zero;
             }
 
-            if (!s_nativeDllResolveMap.TryGetValue(assembly, out DllImportResolver resolver))
+            if (!s_nativeDllResolveMap.TryGetValue(assembly, out DllImportResolver? resolver))
             {
                 return IntPtr.Zero;
             }

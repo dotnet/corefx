@@ -99,7 +99,7 @@ namespace System.Data.SqlClient
         }
     }
 
-    sealed internal class SqlInternalConnectionTds : SqlInternalConnection, IDisposable
+    internal sealed class SqlInternalConnectionTds : SqlInternalConnection, IDisposable
     {
         // CONNECTION AND STATE VARIABLES
         private readonly SqlConnectionPoolGroupProviderInfo _poolGroupProviderInfo; // will only be null when called for ChangePassword, or creating SSE User Instance
@@ -393,7 +393,7 @@ namespace System.Data.SqlClient
                             || _timeout.MillisecondsRemaining < transientRetryIntervalInMilliSeconds
                             || !IsTransientError(sqlex))
                         {
-                            throw sqlex;
+                            throw;
                         }
                         else
                         {
@@ -499,7 +499,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal protected override bool IsNonPoolableTransactionRoot
+        protected internal override bool IsNonPoolableTransactionRoot
         {
             get
             {

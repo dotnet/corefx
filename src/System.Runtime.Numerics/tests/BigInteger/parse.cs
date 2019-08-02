@@ -13,8 +13,8 @@ namespace System.Numerics.Tests
 {
     public partial class parseTest
     {
-        private readonly static int s_samples = 10;
-        private readonly static Random s_random = new Random(100);
+        private static readonly int s_samples = 10;
+        private static readonly Random s_random = new Random(100);
 
         // Invariant culture is commonly used for (de-)serialization and similar to en-US
         // Ukrainian (Ukraine) added to catch regressions (issue #1642)
@@ -77,7 +77,7 @@ namespace System.Numerics.Tests
                 {
                     BigInteger junk;
                     BigInteger.TryParse("1", invalid, null, out junk);
-                    Assert.Equal(junk.ToString("d"), "1");
+                    Assert.Equal("1", junk.ToString("d"));
                 });
 
                 //FormatProvider tests
@@ -108,7 +108,7 @@ namespace System.Numerics.Tests
             VerifyFormatParse("123&4567^ <", NumberStyles.Any, nfi, new BigInteger(-1234567));
         }
 
-        public static void VerifyDefaultParse(Random random)
+        private static void VerifyDefaultParse(Random random)
         {
             // BasicTests
             VerifyFailParseToString(null, typeof(ArgumentNullException));
@@ -229,7 +229,7 @@ namespace System.Numerics.Tests
             }
         }
 
-        public static void VerifyNumberStyles(NumberStyles ns, Random random)
+        private static void VerifyNumberStyles(NumberStyles ns, Random random)
         {
             VerifyParseToString(null, ns, false, null);
             VerifyParseToString(string.Empty, ns, false);
@@ -763,7 +763,7 @@ namespace System.Numerics.Tests
             return (ns & NumberStyles.AllowTrailingWhite) != 0;
         }
 
-        public static void Eval(BigInteger x, string expected)
+        private static void Eval(BigInteger x, string expected)
         {
             bool IsPos = (x >= 0);
             if (!IsPos)
@@ -773,7 +773,7 @@ namespace System.Numerics.Tests
 
             if (x == 0)
             {
-                Assert.Equal(expected, "0");
+                Assert.Equal("0", expected);
             }
             else
             {

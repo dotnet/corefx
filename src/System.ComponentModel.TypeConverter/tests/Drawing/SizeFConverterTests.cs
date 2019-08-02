@@ -134,16 +134,6 @@ namespace System.ComponentModel.TypeConverterTests
 
         [Theory]
         [MemberData(nameof(SizeFData))]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void ConvertTo_NetFramework(float width, float height)
-        {
-            TestConvertToString(new SizeF(width, height), FormattableString.Invariant($"{width:G9}, {height:G9}"));
-        }
-
-
-        [Theory]
-        [MemberData(nameof(SizeFData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void ConvertTo_NotNetFramework(float width, float height)
         {
             TestConvertToString(new SizeF(width, height), FormattableString.Invariant($"{width}, {height}"));
@@ -203,13 +193,13 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Equal(3, props.Count);
             Assert.Equal(1f, props["Width"].GetValue(pt));
             Assert.Equal(1f, props["Height"].GetValue(pt));
-            Assert.Equal(false, props["IsEmpty"].GetValue(pt));
+            Assert.Equal((object)false, props["IsEmpty"].GetValue(pt));
 
             props = Converter.GetProperties(null, new SizeF(1, 1), new Attribute[0]);
             Assert.Equal(3, props.Count);
             Assert.Equal(1f, props["Width"].GetValue(pt));
             Assert.Equal(1f, props["Height"].GetValue(pt));
-            Assert.Equal(false, props["IsEmpty"].GetValue(pt));
+            Assert.Equal((object)false, props["IsEmpty"].GetValue(pt));
 
             // Pick an attibute that cannot be applied to properties to make sure everything gets filtered
             props = Converter.GetProperties(null, new SizeF(1, 1), new Attribute[] { new System.Reflection.AssemblyCopyrightAttribute("")});
@@ -262,16 +252,6 @@ namespace System.ComponentModel.TypeConverterTests
 
         [Theory]
         [MemberData(nameof(SizeFData))]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void ConvertToInvariantString_NetFramework(float width, float height)
-        {
-            var str = Converter.ConvertToInvariantString(new SizeF(width, height));
-            Assert.Equal(FormattableString.Invariant($"{width:G9}, {height:G9}"), str);
-        }
-
-        [Theory]
-        [MemberData(nameof(SizeFData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void ConvertToInvariantString_NotNetFramework(float width, float height)
         {
             var str = Converter.ConvertToInvariantString(new SizeF(width, height));
@@ -280,16 +260,6 @@ namespace System.ComponentModel.TypeConverterTests
 
         [Theory]
         [MemberData(nameof(SizeFData))]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void ConvertToString_NetFramework(float width, float height)
-        {
-            var str = Converter.ConvertToString(new SizeF(width, height));
-            Assert.Equal(string.Format(CultureInfo.CurrentCulture, "{0:G9}{2} {1:G9}", width, height, CultureInfo.CurrentCulture.TextInfo.ListSeparator), str);
-        }
-
-        [Theory]
-        [MemberData(nameof(SizeFData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void ConvertToString_NotNetFramework(float width, float height)
         {
             var str = Converter.ConvertToString(new SizeF(width, height));

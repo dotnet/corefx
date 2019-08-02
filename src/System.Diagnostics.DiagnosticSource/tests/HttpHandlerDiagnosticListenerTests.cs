@@ -170,7 +170,7 @@ namespace System.Diagnostics.Tests
 
                     var traceparent = startRequest.Headers["traceparent"];
                     Assert.NotNull(traceparent);
-                    Assert.True(Regex.IsMatch(traceparent, "^[0-9a-f][0-9a-f]-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f][0-9a-f]$"));
+                    Assert.Matches("^[0-9a-f][0-9a-f]-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f][0-9a-f]$", traceparent);
                     Assert.Null(startRequest.Headers["tracestate"]);
                     Assert.Null(startRequest.Headers["Request-Id"]);
                 }
@@ -215,8 +215,8 @@ namespace System.Diagnostics.Tests
                     Assert.NotNull(traceparent);
                     Assert.Equal("some=state", tracestate);
                     Assert.Equal("k=v", correlationContext);
-                    Assert.True(traceparent.StartsWith($"00-{parent.TraceId.ToHexString()}-"));
-                    Assert.True(Regex.IsMatch(traceparent, "^[0-9a-f]{2}-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$"));
+                    Assert.StartsWith($"00-{parent.TraceId.ToHexString()}-", traceparent);
+                    Assert.Matches("^[0-9a-f]{2}-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$", traceparent);
                     Assert.Null(startRequest.Headers["Request-Id"]);
                 }
             }
@@ -315,7 +315,7 @@ namespace System.Diagnostics.Tests
                 HttpWebRequest stopRequest = ReadPublicProperty<HttpWebRequest>(stopEvent.Value, "Request");
                 Assert.Equal(startRequest, stopRequest);
                 HttpStatusCode status = ReadPublicProperty<HttpStatusCode>(stopEvent.Value, "StatusCode");
-                Assert.NotNull(status);
+                Assert.Equal(HttpStatusCode.OK, status);
 
                 WebHeaderCollection headers = ReadPublicProperty<WebHeaderCollection>(stopEvent.Value, "Headers");
                 Assert.NotNull(headers);
@@ -334,7 +334,7 @@ namespace System.Diagnostics.Tests
                 using (var client = new HttpClient())
                 {
                     Uri uriWithRedirect =
-                        Configuration.Http.RedirectUriForDestinationUri(true, 302, Configuration.Http.RemoteEchoServer, 10);
+                        Configuration.Http.RemoteSecureHttp11Server.RedirectUriForDestinationUri(302, Configuration.Http.RemoteEchoServer, 10);
                     (await client.GetAsync(uriWithRedirect)).Dispose();
                 }
 
@@ -413,7 +413,7 @@ namespace System.Diagnostics.Tests
                 var correlationContext = thisRequest.Headers["Correlation-Context"];
 
                 Assert.NotNull(requestId);
-                Assert.True(requestId.StartsWith(parentActivity.Id));
+                Assert.StartsWith(parentActivity.Id, requestId);
 
                 Assert.NotNull(correlationContext);
                 Assert.True(correlationContext == "k1=v1,k2=v2" || correlationContext == "k2=v2,k1=v1");
@@ -550,7 +550,7 @@ namespace System.Diagnostics.Tests
                 for (int i = 0; i < 10; i++)
                 {
                     Uri uriWithRedirect =
-                        Configuration.Http.RedirectUriForDestinationUri(true, 302, new Uri($"{Configuration.Http.RemoteEchoServer}?q={i}"), 3);
+                        Configuration.Http.RemoteSecureHttp11Server.RedirectUriForDestinationUri(302, new Uri($"{Configuration.Http.RemoteEchoServer}?q={i}"), 3);
 
                     requestData[uriWithRedirect] = null;
                 }
@@ -594,7 +594,7 @@ namespace System.Diagnostics.Tests
                         "An unexpected event of name " + pair.Key + "was received");
 
                     WebRequest request = ReadPublicProperty<WebRequest>(eventFields, "Request");
-                    Assert.Equal(request.GetType().Name, "HttpWebRequest");
+                    Assert.Equal("HttpWebRequest", request.GetType().Name);
 
                     if (pair.Key == "System.Net.Http.Desktop.HttpRequestOut.Start")
                     {
@@ -607,7 +607,7 @@ namespace System.Diagnostics.Tests
 
                         // all requests have Request-Id with proper parent Id
                         var requestId = request.Headers["Request-Id"];
-                        Assert.True(requestId.StartsWith(parentActivity.Id));
+                        Assert.StartsWith(parentActivity.Id, requestId);
                         // all request activities are siblings:
                         var childSuffix = requestId.Substring(0, parentActivity.Id.Length);
                         Assert.True(childSuffix.IndexOf('.') == childSuffix.Length - 1);
@@ -620,7 +620,7 @@ namespace System.Diagnostics.Tests
                     {
                         // This must be the response.
                         WebResponse response = ReadPublicProperty<WebResponse>(eventFields, "Response");
-                        Assert.Equal(response.GetType().Name, "HttpWebResponse");
+                        Assert.Equal("HttpWebResponse", response.GetType().Name);
 
                         // By the time we see the response, the request object may already have been redirected with a different
                         // url. Hence, it's not reliable to just look up requestData by the URL/hostname. Instead, we have to look
@@ -657,7 +657,7 @@ namespace System.Diagnostics.Tests
         }
 
 
-        public void CleanUp()
+        private void CleanUp()
         {
             Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
             Activity.ForceDefaultIdFormat = false;

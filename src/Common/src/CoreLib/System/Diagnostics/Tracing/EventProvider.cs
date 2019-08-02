@@ -111,9 +111,7 @@ namespace System.Diagnostics.Tracing
         private const int s_basicTypeAllocationBufferSize = 16;
         private const int s_etwMaxNumberArguments = 128;
         private const int s_etwAPIMaxRefObjCount = 8;
-        private const int s_maxEventDataDescriptors = 128;
         private const int s_traceEventMaximumSize = 65482;
-        private const int s_traceEventMaximumStringSize = 32724;
 
         [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public enum WriteEventErrorCode : int
@@ -278,7 +276,7 @@ namespace System.Diagnostics.Tracing
             try
             {
                 ControllerCommand command = ControllerCommand.Update;
-                IDictionary<string, string>? args = null;
+                IDictionary<string, string?>? args = null;
                 bool skipFinalOnControllerCommand = false;
                 if (controlCode == Interop.Advapi32.EVENT_CONTROL_CODE_ENABLE_PROVIDER)
                 {
@@ -321,8 +319,8 @@ namespace System.Diagnostics.Tracing
                         if (bEnabling &&
                             GetDataFromController(etwSessionId, filterData, out command, out data, out keyIndex))
                         {
-                            args = new Dictionary<string, string>(4);
-                            Debug.Assert(data != null); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                            args = new Dictionary<string, string?>(4);
+                            Debug.Assert(data != null);
                             while (keyIndex < data.Length)
                             {
                                 int keyEnd = FindNull(data, keyIndex);
@@ -368,7 +366,7 @@ namespace System.Diagnostics.Tracing
         }
 
         // New in CLR4.0
-        protected virtual void OnControllerCommand(ControllerCommand command, IDictionary<string, string>? arguments, int sessionId, int etwSessionId) { }
+        protected virtual void OnControllerCommand(ControllerCommand command, IDictionary<string, string?>? arguments, int sessionId, int etwSessionId) { }
         protected EventLevel Level { get { return (EventLevel)m_level; } set { m_level = (byte)value; } }
         protected EventKeywords MatchAnyKeyword { get { return (EventKeywords)m_anyKeywordMask; } set { m_anyKeywordMask = unchecked((long)value); } }
         protected EventKeywords MatchAllKeyword { get { return (EventKeywords)m_allKeywordMask; } set { m_allKeywordMask = unchecked((long)value); } }
@@ -602,7 +600,7 @@ namespace System.Diagnostics.Tracing
         /// starts, and the command being issued associated with that data.  
         /// </summary>
         private unsafe bool GetDataFromController(int etwSessionId,
-                Interop.Advapi32.EVENT_FILTER_DESCRIPTOR* filterData, out ControllerCommand command, out byte[]? data, out int dataStart)
+            Interop.Advapi32.EVENT_FILTER_DESCRIPTOR* filterData, out ControllerCommand command, out byte[]? data, out int dataStart)
         {
             data = null;
             dataStart = 0;
@@ -729,7 +727,7 @@ namespace System.Diagnostics.Tracing
         // <UsesUnsafeCode Name="Parameter dataDescriptor of type: EventData*" />
         // <UsesUnsafeCode Name="Parameter dataBuffer of type: Byte*" />
         // </SecurityKernel>
-        private static unsafe object? EncodeObject(ref object data, ref EventData* dataDescriptor, ref byte* dataBuffer, ref uint totalEventSize)
+        private static unsafe object? EncodeObject(ref object? data, ref EventData* dataDescriptor, ref byte* dataBuffer, ref uint totalEventSize)
         /*++
 
         Routine Description:
@@ -970,7 +968,7 @@ namespace System.Diagnostics.Tracing
         // </SecurityKernel>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Performance-critical code")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
-        internal unsafe bool WriteEvent(ref EventDescriptor eventDescriptor, IntPtr eventHandle, Guid* activityID, Guid* childActivityID, params object[] eventPayload)
+        internal unsafe bool WriteEvent(ref EventDescriptor eventDescriptor, IntPtr eventHandle, Guid* activityID, Guid* childActivityID, params object?[] eventPayload)
         {
             WriteEventErrorCode status = WriteEventErrorCode.NoError;
 
@@ -1167,7 +1165,7 @@ namespace System.Diagnostics.Tracing
         // <CallsSuppressUnmanagedCode Name="Interop.Advapi32.EventWrite(System.Int64,EventDescriptor&,System.UInt32,System.Void*):System.UInt32" />
         // </SecurityKernel>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
-        internal protected unsafe bool WriteEvent(ref EventDescriptor eventDescriptor, IntPtr eventHandle, Guid* activityID, Guid* childActivityID, int dataCount, IntPtr data)
+        protected internal unsafe bool WriteEvent(ref EventDescriptor eventDescriptor, IntPtr eventHandle, Guid* activityID, Guid* childActivityID, int dataCount, IntPtr data)
         {
             if (childActivityID != null)
             {

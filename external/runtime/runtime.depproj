@@ -4,39 +4,19 @@
     <NoWarn>$(NoWarn);NU1603;NU1605</NoWarn>
     <SwapNativeForIL Condition="'$(SwapNativeForIL)' == '' AND ('$(ConfigurationGroup)' == 'Debug' OR '$(Coverage)' == 'true')">true</SwapNativeForIL>
     <!-- uap10.0.16299 is missing IL -->
-    <SwapNativeForIL Condition="'$(TargetGroup)'=='uap10.0.16299' OR '$(TargetsAOT)'=='true'">false</SwapNativeForIL>
+    <SwapNativeForIL Condition="'$(TargetFramework)'=='uap10.0.16299'">false</SwapNativeForIL>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetsAOT)'=='true'">
-    <!-- System.Private.* can't be on the ILCInputFolder since ilc.exe needs to use the matching one from its toolchain. -->
-    <BinPlaceILCInputFolder>false</BinPlaceILCInputFolder>
-    <NuGetDeploySourceItem>Reference</NuGetDeploySourceItem>
-    <AssetTargetFallback>uap10.0</AssetTargetFallback>
-    <NoWarn>$(NoWarn);NU1701</NoWarn>
-  </PropertyGroup>
-  
-  <!-- There isn't a WebAssembly runtime package yet, but the Windows AOT package has the right surface area 
-  to build against. -->  
-  <PropertyGroup Condition="'$(TargetsAOT)'=='true' AND '$(ArchGroup)'=='wasm'">
-    <RuntimeIdentifier>win10-x86</RuntimeIdentifier>
-  </PropertyGroup>
-    
-  <ItemGroup Condition="'$(TargetsAOT)'=='true'">
-    <PackageReference Include="Microsoft.TargetingPack.Private.NETNative">
-      <Version Condition="'$(TargetGroup)'=='uapaot'">1.1.0-$(ProjectNTfsExpectedPrerelease)</Version>
-      <!-- Following is version used in release/uwp6.0 -->
-      <Version Condition="'$(TargetGroup)'=='uap10.0.16299aot'">1.1.0-rel-25728-00</Version>
-    </PackageReference>
-    <FileToExclude Include="System.Private.CoreLib.Augments" />
-    <FileToExclude Include="System.Private.CoreLib.DynamicDelegate" />
-    <FileToExclude Include="System.Private.CoreLib.WinRTInterop" />
+
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
+    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.7.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetsAOT)'!='true'">
+  <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="$(MicrosoftNETCorePlatformsPackageVersion)" />
     <PackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR">
       <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
       <!-- Following is version used in release/uwp6.0 -->
-      <Version Condition="'$(TargetGroup)'=='uap10.0.16299'">2.1.0-b-uwp6-25707-02</Version>
+      <Version Condition="'$(TargetFramework)'=='uap10.0.16299'">2.1.0-b-uwp6-25707-02</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.TestHost" Version="$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)" />
     <PackageReference Include="runtime.native.System.Data.SqlClient.sni" Version="$(RuntimeNativeSystemDataSqlClientSniPackageVersion)" />
@@ -49,11 +29,16 @@
   </ItemGroup>
 
   <!-- Setup the testing shared framework host -->
-  <Target Name="SetupTestingHost" AfterTargets="AfterResolveReferences" Condition="'$(BinPlaceTestSharedFramework)' == 'true'">
-
+  <Target Name="SetupTestingHost"
+          Condition="'$(BinPlaceTestSharedFramework)' == 'true'"
+          AfterTargets="AfterResolveReferences">
     <PropertyGroup>
-      <HostFxrFileName Condition="'$(OSGroup)'=='Windows_NT'">hostfxr</HostFxrFileName>
-      <HostFxrFileName Condition="'$(OSGroup)'!='Windows_NT'">libhostfxr</HostFxrFileName>
+      <GlobalJsonContent>$([System.IO.File]::ReadAllText('$(RepoRoot)global.json'))</GlobalJsonContent>
+      <DotNetVersion>$([System.Text.RegularExpressions.Regex]::Match($(GlobalJsonContent), '(%3F&lt;="dotnet": ").*(%3F=")'))</DotNetVersion>
+
+      <HostFxrFileName Condition="'$(TargetsWindows)' == 'true'">hostfxr</HostFxrFileName>
+      <HostFxrFileName Condition="'$(TargetsWindows)' != 'true'">libhostfxr</HostFxrFileName>
+      
       <UseHardlink>true</UseHardlink>
       <!-- workaround core-setup problem for hardlinking dotnet executable to testhost: core-setup #4742 -->
       <UseHardlink Condition="'$(_runtimeOSFamily)' == 'FreeBSD'">false</UseHardlink>
@@ -62,12 +47,13 @@
     <ItemGroup>
       <HostFxFile Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.Filename)' == '$(HostFxrFileName)'" />
       <DotnetExe Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.Filename)' == 'dotnet'" />
+      <HostSdkFile Include="$(DotNetRoot)sdk\$(DotNetVersion)\**\*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(HostFxFile)"
-          DestinationFolder="$(NETCoreAppTestHostFxrPath)"
+          DestinationFolder="$(TestHostRootPath)host\fxr\$(ProductVersion)"
           SkipUnchangedFiles="true"
-          UseHardlinksIfPossible="true" />
+          UseHardlinksIfPossible="$(UseHardlink)" />
 
     <Copy SourceFiles="@(DotnetExe)"
           DestinationFolder="$(TestHostRootPath)"
@@ -75,6 +61,11 @@
           UseHardlinksIfPossible="$(UseHardlink)" />
 
     <Exec Command="chmod +x $(TestHostRootPath)%(DotnetExe.Filename)%(DotnetExe.Extension)" Condition="'$(OS)' != 'Windows_NT'"/>
+
+    <Copy SourceFiles="@(HostSdkFile)"
+          DestinationFolder="$(TestHostRootPath)sdk\$(DotNetVersion)\%(RecursiveDir)"
+          SkipUnchangedFiles="true"
+          UseHardlinksIfPossible="$(UseHardlink)" />
   </Target>
 
   <Target Name="OverrideRuntime"

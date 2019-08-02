@@ -20,6 +20,30 @@ namespace System.Security.AccessControl
         private const int ReadAttributeAccessMask = 0x80;
 
         [Fact]
+        public void SetCustomDescriptor_Success()
+        {
+            // We didn't allow setting the security descriptor in core due to assembly refactoring.
+            // GetAccessRules() would throw a null ref after setting the descriptor. We now expose
+            // the descriptor as a protected property (instead of internal).
+            // https://github.com/dotnet/corefx/issues/34151
+
+            var customObjectSecurity = new CustomDirectoryObjectSecurity();
+
+            // DACL:SDDL_PROTECTED SDDL_AUTO_INHERITED
+            //  (SDDL_ACCESS_ALLOWED;SDDL_OBJECT_INHERIT SDDL_CONTAINER_INHERIT;access mask;;;SDDL_BUILTIN_USERS)
+            customObjectSecurity.SetSecurityDescriptorSddlForm("D:PAI(A;OICI;0x1200a9;;;BU)");
+            var rules = customObjectSecurity.GetAccessRules(true, true, typeof(SecurityIdentifier));
+
+            Assert.Equal(1, rules.Count);
+            CustomAccessRule rule = (CustomAccessRule)rules[0];
+            // Should be users group
+            Assert.Equal("S-1-5-32-545", rule.IdentityReference.Value);
+            Assert.Equal(AccessControlType.Allow, rule.AccessControlType);
+            Assert.Equal(InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, rule.InheritanceFlags);
+            Assert.Equal(0x1200a9, rule.AccessMaskValue);
+        }
+
+        [Fact]
         public void ObjectInitialization_DefaultConstructor_Success()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
@@ -220,13 +244,11 @@ namespace System.Security.AccessControl
             Assert.NotNull(ruleCollection);
             List<CustomAuditRule> existingRules = ruleCollection.Cast<CustomAuditRule>().ToList();
             Assert.True(existingRules.Count > 0);
-            Assert.True(
-                existingRules.Any(
-                    x => x.AccessMaskValue == ReadAccessMask &&
-                    x.AuditFlags == AuditFlags.Success &&
-                    x.IdentityReference == Helpers.s_LocalSystemNTAccount
-                    )
-                );
+            Assert.Contains(existingRules, x =>
+                x.AccessMaskValue == ReadAccessMask &&
+                x.AuditFlags == AuditFlags.Success &&
+                x.IdentityReference == Helpers.s_LocalSystemNTAccount
+            );
         }
 
         [Fact]
@@ -322,7 +344,7 @@ namespace System.Security.AccessControl
             customObjectSecurity.AddAccessRule(customAccessRuleReadWrite);
             bool result = customObjectSecurity.RemoveAccessRule(customAccessRuleWrite);
 
-            Assert.Equal(true, result);
+            Assert.True(result);
             AuthorizationRuleCollection ruleCollection = customObjectSecurity.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
 
             Assert.NotNull(ruleCollection);

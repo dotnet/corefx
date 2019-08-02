@@ -118,7 +118,7 @@ namespace System.Management
     /// </summary>
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
     [TypeConverter(typeof(ExpandableObjectConverter))]
-    abstract public class ManagementOptions : ICloneable
+    public abstract class ManagementOptions : ICloneable
     {
         /// <summary>
         ///    <para> Specifies an infinite timeout.</para>
@@ -1153,7 +1153,7 @@ namespace System.Management
         /// <para>Initializes a new instance of the <see cref='System.Management.InvokeMethodOptions'/> class.</para>
         /// </overload>
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.InvokeMethodOptions'/> class for the <see cref='System.Management.ManagementObject.InvokeMethod(String, ManagementBaseObject, InvokeMethodOptions) '/> operation, using default values.
+        /// <para>Initializes a new instance of the <see cref='System.Management.InvokeMethodOptions'/> class for the <see cref='System.Management.ManagementObject.InvokeMethod(string, ManagementBaseObject, InvokeMethodOptions) '/> operation, using default values.
         ///    This is the default constructor.</para>
         /// </summary>
         public InvokeMethodOptions() : base () {}

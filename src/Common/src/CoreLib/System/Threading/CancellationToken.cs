@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Threading
 {
@@ -35,7 +36,7 @@ namespace System.Threading
         private readonly CancellationTokenSource? _source;
         //!! warning. If more fields are added, the assumptions in CreateLinkedToken may no longer be valid
 
-        private readonly static Action<object?> s_actionToActionObjShunt = obj =>
+        private static readonly Action<object?> s_actionToActionObjShunt = obj =>
         {
             Debug.Assert(obj is Action, $"Expected {typeof(Action)}, got {obj}");
             ((Action)obj)();
@@ -348,6 +349,7 @@ namespace System.Threading
         }
 
         // Throws an OCE; separated out to enable better inlining of ThrowIfCancellationRequested
+        [DoesNotReturn]
         private void ThrowOperationCanceledException() =>
             throw new OperationCanceledException(SR.OperationCanceled, this);
     }

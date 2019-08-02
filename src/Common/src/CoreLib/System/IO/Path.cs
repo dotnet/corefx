@@ -4,6 +4,7 @@
 
 #nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -46,7 +47,8 @@ namespace System.IO
         // returns null. If path does not contain a file extension,
         // the new file extension is appended to the path. If extension
         // is null, any existing extension is removed from path.
-        public static string? ChangeExtension(string? path, string? extension) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        [return: NotNullIfNotNull("path")]
+        public static string? ChangeExtension(string? path, string? extension)
         {
             if (path == null)
                 return null;
@@ -99,7 +101,7 @@ namespace System.IO
         /// <remarks>
         /// Directory separators are normalized in the returned string.
         /// </remarks>
-        public static string? GetDirectoryName(string? path) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        public static string? GetDirectoryName(string? path)
         {
             if (path == null || PathInternal.IsEffectivelyEmpty(path.AsSpan()))
                 return null;
@@ -147,7 +149,8 @@ namespace System.IO
         /// The returned value is null if the given path is null or empty if the given path does not include an
         /// extension.
         /// </summary>
-        public static string? GetExtension(string? path) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        [return: NotNullIfNotNull("path")]
+        public static string? GetExtension(string? path)
         {
             if (path == null)
                 return null;
@@ -186,6 +189,7 @@ namespace System.IO
         /// the characters of path that follow the last separator in path. The resulting string is
         /// null if path is null.
         /// </summary>
+        [return: NotNullIfNotNull("path")]
         public static string? GetFileName(string? path)
         {
             if (path == null)
@@ -217,7 +221,8 @@ namespace System.IO
             return path;
         }
 
-        public static string? GetFileNameWithoutExtension(string? path) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        [return: NotNullIfNotNull("path")]
+        public static string? GetFileNameWithoutExtension(string? path)
         {
             if (path == null)
                 return null;
@@ -468,7 +473,7 @@ namespace System.IO
             return Join(path1.AsSpan(), path2.AsSpan(), path3.AsSpan(), path4.AsSpan());
         }
 
-        public static string Join(params string[] paths)
+        public static string Join(params string?[] paths)
         {
             if (paths == null)
             {
@@ -481,7 +486,7 @@ namespace System.IO
             }
             
             int maxSize = 0;
-            foreach (string path in paths)
+            foreach (string? path in paths)
             {
                 maxSize += path?.Length ?? 0;
             }
@@ -493,12 +498,11 @@ namespace System.IO
 
             for (int i = 0; i < paths.Length; i++)
             {
-                if ((paths[i]?.Length ?? 0) == 0)
+                string? path = paths[i];
+                if (path == null || path.Length == 0)
                 {
                     continue;
                 }
-
-                string path = paths[i];
 
                 if (builder.Length == 0)
                 {
@@ -537,7 +541,7 @@ namespace System.IO
                 return true;
             }
 
-            bool needsSeparator = !(PathInternal.EndsInDirectorySeparator(path1) || PathInternal.StartsWithDirectorySeparator(path2));
+            bool needsSeparator = !(EndsInDirectorySeparator(path1) || PathInternal.StartsWithDirectorySeparator(path2));
             int charsNeeded = path1.Length + path2.Length + (needsSeparator ? 1 : 0);
             if (destination.Length < charsNeeded)
                 return false;
@@ -565,8 +569,8 @@ namespace System.IO
             if (path3.Length == 0)
                 return TryJoin(path1, path2, destination, out charsWritten);
 
-            int neededSeparators = PathInternal.EndsInDirectorySeparator(path1) || PathInternal.StartsWithDirectorySeparator(path2) ? 0 : 1;
-            bool needsSecondSeparator = !(PathInternal.EndsInDirectorySeparator(path2) || PathInternal.StartsWithDirectorySeparator(path3));
+            int neededSeparators = EndsInDirectorySeparator(path1) || PathInternal.StartsWithDirectorySeparator(path2) ? 0 : 1;
+            bool needsSecondSeparator = !(EndsInDirectorySeparator(path2) || PathInternal.StartsWithDirectorySeparator(path3));
             if (needsSecondSeparator)
                 neededSeparators++;
 
@@ -808,8 +812,18 @@ namespace System.IO
 
         private static string GetRelativePath(string relativeTo, string path, StringComparison comparisonType)
         {
-            if (string.IsNullOrEmpty(relativeTo)) throw new ArgumentNullException(nameof(relativeTo));
-            if (PathInternal.IsEffectivelyEmpty(path.AsSpan())) throw new ArgumentNullException(nameof(path));
+            if (relativeTo == null)
+                throw new ArgumentNullException(nameof(relativeTo));
+
+            if (PathInternal.IsEffectivelyEmpty(relativeTo.AsSpan()))
+                throw new ArgumentException(SR.Arg_PathEmpty, nameof(relativeTo));
+
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
+            if (PathInternal.IsEffectivelyEmpty(path.AsSpan()))
+                throw new ArgumentException(SR.Arg_PathEmpty, nameof(path));
+
             Debug.Assert(comparisonType == StringComparison.Ordinal || comparisonType == StringComparison.OrdinalIgnoreCase);
 
             relativeTo = GetFullPath(relativeTo);
@@ -827,10 +841,10 @@ namespace System.IO
 
             // Trailing separators aren't significant for comparison
             int relativeToLength = relativeTo.Length;
-            if (PathInternal.EndsInDirectorySeparator(relativeTo.AsSpan()))
+            if (EndsInDirectorySeparator(relativeTo.AsSpan()))
                 relativeToLength--;
 
-            bool pathEndsInSeparator = PathInternal.EndsInDirectorySeparator(path.AsSpan());
+            bool pathEndsInSeparator = EndsInDirectorySeparator(path.AsSpan());
             int pathLength = path.Length;
             if (pathEndsInSeparator)
                 pathLength--;
@@ -899,5 +913,33 @@ namespace System.IO
                     StringComparison.OrdinalIgnoreCase;
             }
         }
+
+        /// <summary>
+        /// Trims one trailing directory separator beyond the root of the path.
+        /// </summary>
+        public static string TrimEndingDirectorySeparator(string path) =>
+            EndsInDirectorySeparator(path) && !PathInternal.IsRoot(path.AsSpan()) ?
+                path.Substring(0, path.Length - 1) :
+                path;
+
+        /// <summary>
+        /// Trims one trailing directory separator beyond the root of the path.
+        /// </summary>
+        public static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) =>
+            EndsInDirectorySeparator(path) && !PathInternal.IsRoot(path) ?
+                path.Slice(0, path.Length - 1) :
+                path;
+
+        /// <summary>
+        /// Returns true if the path ends in a directory separator.
+        /// </summary>
+        public static bool EndsInDirectorySeparator(ReadOnlySpan<char> path)
+            => path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]);
+
+        /// <summary>
+        /// Returns true if the path ends in a directory separator.
+        /// </summary>
+        public static bool EndsInDirectorySeparator(string path)
+              => path != null && path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]);
     }
 }

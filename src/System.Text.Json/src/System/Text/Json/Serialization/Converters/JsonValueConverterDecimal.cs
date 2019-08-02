@@ -2,31 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text.Json.Serialization.Policies;
-
 namespace System.Text.Json.Serialization.Converters
 {
-    internal sealed class JsonValueConverterDecimal : JsonValueConverter<decimal>
+    internal sealed class JsonConverterDecimal : JsonConverter<decimal>
     {
-        public override bool TryRead(Type valueType, ref Utf8JsonReader reader, out decimal value)
+        public override decimal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType != JsonTokenType.Number)
-            {
-                value = default;
-                return false;
-            }
-
-            return reader.TryGetDecimal(out value);
+            return reader.GetDecimal();
         }
 
-        public override void Write(decimal value, Utf8JsonWriter writer)
+        public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options)
         {
             writer.WriteNumberValue(value);
-        }
-
-        public override void Write(Span<byte> escapedPropertyName, decimal value, Utf8JsonWriter writer)
-        {
-            writer.WriteNumber(escapedPropertyName, value);
         }
     }
 }

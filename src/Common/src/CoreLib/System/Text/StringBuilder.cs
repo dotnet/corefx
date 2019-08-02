@@ -349,7 +349,9 @@ namespace System.Text
             }
 
             if (Capacity < capacity)
+            {
                 Capacity = capacity;
+            }
             return Capacity;
         }
 
@@ -610,10 +612,15 @@ namespace System.Text
             public bool MoveNext()
             {
                 if (_currentChunk == _firstChunk)
+                {
                     return false;
+                }
+                    
 
                 if (_manyChunks != null)
+                {
                     return _manyChunks.MoveNext(ref _currentChunk);
+                }
 
                 StringBuilder next = _firstChunk;
                 while (next.m_ChunkPrevious != _currentChunk)
@@ -637,7 +644,7 @@ namespace System.Text
                         ThrowHelper.ThrowInvalidOperationException_InvalidOperation_EnumOpCantHappen();
                     }
 
-                    return new ReadOnlyMemory<char>(_currentChunk!.m_ChunkChars, 0, _currentChunk.m_ChunkLength); // TODO-NULLABLE: https://github.com/dotnet/csharplang#538
+                    return new ReadOnlyMemory<char>(_currentChunk.m_ChunkChars, 0, _currentChunk.m_ChunkLength);
                 }
             }
 
@@ -657,7 +664,10 @@ namespace System.Text
                 // the chunks and we can be efficient for large N.    
                 int chunkCount = ChunkCount(stringBuilder);
                 if (8 < chunkCount)
+                {
                     _manyChunks = new ManyChunkInfo(stringBuilder, chunkCount);
+                }
+                    
             }
 
             private static int ChunkCount(StringBuilder? stringBuilder)
@@ -683,7 +693,9 @@ namespace System.Text
                 {
                     int pos = ++_chunkPos;
                     if (_chunks.Length <= pos)
+                    {
                         return false;
+                    }
                     current = _chunks[pos];
                     return true;
                 }
@@ -816,9 +828,13 @@ namespace System.Text
                     if (valueLen <= 2)
                     {
                         if (valueLen > 0)
+                        {
                             chunkChars[chunkLength] = value[0];
+                        }
                         if (valueLen > 1)
+                        {
                             chunkChars[chunkLength + 1] = value[1];
+                        }
                     }
                     else
                     {
@@ -948,7 +964,9 @@ namespace System.Text
         private StringBuilder AppendCore(StringBuilder value, int startIndex, int count)
         {
             if (value == this)
+            {
                 return Append(value.ToString(startIndex, count));
+            }
 
             int newLength = Length + count;
 
@@ -1335,7 +1353,7 @@ namespace System.Text
 
             if (values[0] != null)
             {
-                Append(values[0]!.ToString()); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                Append(values[0]!.ToString()); // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
             }
 
             for (int i = 1; i < values.Length; i++)
@@ -1343,7 +1361,7 @@ namespace System.Text
                 Append(separator, separatorLength);
                 if (values[i] != null)
                 {
-                    Append(values[i]!.ToString()); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                    Append(values[i]!.ToString()); // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
                 }
             }
             return this;
@@ -1395,7 +1413,9 @@ namespace System.Text
             }
 
             if (value != null)
+            {
                 Insert(index, value, 0, value.Length);
+            }
             return this;
         }
 
@@ -1500,13 +1520,13 @@ namespace System.Text
             return AppendFormatHelper(null, format, new ParamsArray(args));
         }
 
-        public StringBuilder AppendFormat(IFormatProvider provider, string format, object? arg0) => AppendFormatHelper(provider, format, new ParamsArray(arg0));
+        public StringBuilder AppendFormat(IFormatProvider? provider, string format, object? arg0) => AppendFormatHelper(provider, format, new ParamsArray(arg0));
 
-        public StringBuilder AppendFormat(IFormatProvider provider, string format, object? arg0, object? arg1) => AppendFormatHelper(provider, format, new ParamsArray(arg0, arg1));
+        public StringBuilder AppendFormat(IFormatProvider? provider, string format, object? arg0, object? arg1) => AppendFormatHelper(provider, format, new ParamsArray(arg0, arg1));
 
-        public StringBuilder AppendFormat(IFormatProvider provider, string format, object? arg0, object? arg1, object? arg2) => AppendFormatHelper(provider, format, new ParamsArray(arg0, arg1, arg2));
+        public StringBuilder AppendFormat(IFormatProvider? provider, string format, object? arg0, object? arg1, object? arg2) => AppendFormatHelper(provider, format, new ParamsArray(arg0, arg1, arg2));
 
-        public StringBuilder AppendFormat(IFormatProvider provider, string format, params object?[] args)
+        public StringBuilder AppendFormat(IFormatProvider? provider, string format, params object?[] args)
         {
             if (args == null)
             {
@@ -1538,7 +1558,6 @@ namespace System.Text
             int pos = 0;
             int len = format.Length;
             char ch = '\x0';
-            StringBuilder? unescapedItemFormat = null;
 
             ICustomFormatter? cf = null;
             if (provider != null)
@@ -1558,17 +1577,23 @@ namespace System.Text
                     {
                         // Check next character (if there is one) to see if it is escaped. eg }}
                         if (pos < len && format[pos] == '}')
+                        {
                             pos++;
+                        }
                         else
+                        {
                             // Otherwise treat it as an error (Mismatched closing brace)
                             FormatError();
+                        }
                     }
                     // Is it a opening brace?
                     if (ch == '{')
                     {
                         // Check next character (if there is one) to see if it is escaped. eg {{
                         if (pos < len && format[pos] == '{')
+                        {
                             pos++;
+                        }
                         else
                         {
                             // Otherwise treat it as the opening brace of an Argument Hole.
@@ -1584,7 +1609,10 @@ namespace System.Text
                 // Start of parsing of Argument Hole.
                 // Argument Hole ::= { Index (, WS* Alignment WS*)? (: Formatting)? }
                 //
-                if (pos == len) break;
+                if (pos == len)
+                {
+                    break;
+                }
 
                 //
                 //  Start of parsing required Index parameter.
@@ -1600,14 +1628,20 @@ namespace System.Text
                     index = index * 10 + ch - '0';
                     pos++;
                     // If reached end of text then error (Unexpected end of text)
-                    if (pos == len) FormatError();
+                    if (pos == len)
+                    {
+                        FormatError();
+                    }
                     ch = format[pos];
                     // so long as character is digit and value of the index is less than 1000000 ( index limit )
                 }
                 while (ch >= '0' && ch <= '9' && index < IndexLimit);
 
                 // If value of index is not within the range of the arguments passed in then error (Index out of range)
-                if (index >= args.Length) throw new FormatException(SR.Format_IndexOutOfRange);
+                if (index >= args.Length)
+                {
+                    throw new FormatException(SR.Format_IndexOutOfRange);
+                }
 
                 // Consume optional whitespace.
                 while (pos < len && (ch = format[pos]) == ' ') pos++;
@@ -1628,7 +1662,10 @@ namespace System.Text
                     while (pos < len && format[pos] == ' ') pos++;
 
                     // If reached the end of the text then error (Unexpected end of text)
-                    if (pos == len) FormatError();
+                    if (pos == len)
+                    {
+                        FormatError();
+                    }
 
                     // Is there a minus sign?
                     ch = format[pos];
@@ -1638,19 +1675,28 @@ namespace System.Text
                         leftJustify = true;
                         pos++;
                         // If reached end of text then error (Unexpected end of text)
-                        if (pos == len) FormatError();
+                        if (pos == len)
+                        {
+                            FormatError();
+                        }
                         ch = format[pos];
                     }
 
                     // If current character is not a digit then error (Unexpected character)
-                    if (ch < '0' || ch > '9') FormatError();
+                    if (ch < '0' || ch > '9')
+                    {
+                        FormatError();
+                    }
                     // Parse alignment digits.
                     do
                     {
                         width = width * 10 + ch - '0';
                         pos++;
                         // If reached end of text then error. (Unexpected end of text)
-                        if (pos == len) FormatError();
+                        if (pos == len)
+                        {
+                            FormatError();
+                        }
                         ch = format[pos];
                         // So long a current character is a digit and the value of width is less than 100000 ( width limit )
                     }
@@ -1665,7 +1711,7 @@ namespace System.Text
                 // Start of parsing of optional formatting parameter.
                 //
                 object? arg = args[index];
-                string? itemFormat = null;
+
                 ReadOnlySpan<char> itemFormatSpan = default; // used if itemFormat is null
                 // Is current character a colon? which indicates start of formatting parameter.
                 if (ch == ':')
@@ -1676,69 +1722,45 @@ namespace System.Text
                     while (true)
                     {
                         // If reached end of text then error. (Unexpected end of text)
-                        if (pos == len) FormatError();
+                        if (pos == len)
+                        {
+                            FormatError();
+                        }
                         ch = format[pos];
+
+                        if (ch == '}')
+                        {
+                            // Argument hole closed
+                            break;
+                        }
+                        else if (ch == '{')
+                        {
+                            // Braces inside the argument hole are not supported
+                            FormatError();
+                        }
+
                         pos++;
-
-                        // Is character a opening or closing brace?
-                        if (ch == '}' || ch == '{')
-                        {
-                            if (ch == '{')
-                            {
-                                // Yes, is next character also a opening brace, then treat as escaped. eg {{
-                                if (pos < len && format[pos] == '{')
-                                    pos++;
-                                else
-                                    // Error Argument Holes can not be nested.
-                                    FormatError();
-                            }
-                            else
-                            {
-                                // Yes, is next character also a closing brace, then treat as escaped. eg }}
-                                if (pos < len && format[pos] == '}')
-                                    pos++;
-                                else
-                                {
-                                    // No, then treat it as the closing brace of an Arg Hole.
-                                    pos--;
-                                    break;
-                                }
-                            }
-
-                            // Reaching here means the brace has been escaped
-                            // so we need to build up the format string in segments
-                            if (unescapedItemFormat == null)
-                            {
-                                unescapedItemFormat = new StringBuilder();
-                            }
-                            unescapedItemFormat.Append(format, startPos, pos - startPos - 1);
-                            startPos = pos;
-                        }
                     }
 
-                    if (unescapedItemFormat == null || unescapedItemFormat.Length == 0)
+                    if (pos > startPos)
                     {
-                        if (startPos != pos)
-                        {
-                            // There was no brace escaping, extract the item format as a single string
-                            itemFormatSpan = format.AsSpan(startPos, pos - startPos);
-                        }
-                    }
-                    else
-                    {
-                        unescapedItemFormat.Append(format, startPos, pos - startPos);
-                        itemFormatSpan = itemFormat = unescapedItemFormat.ToString();
-                        unescapedItemFormat.Clear();
+                        itemFormatSpan = format.AsSpan(startPos, pos - startPos);
                     }
                 }
-                // If current character is not a closing brace then error. (Unexpected Character)
-                if (ch != '}') FormatError();
+                else if (ch != '}')
+                {
+                    // Unexpected character
+                    FormatError();
+                }
+
                 // Construct the output for this arg hole.
                 pos++;
                 string? s = null;
+                string? itemFormat = null;
+                
                 if (cf != null)
                 {
-                    if (itemFormatSpan.Length != 0 && itemFormat == null)
+                    if (itemFormatSpan.Length != 0)
                     {
                         itemFormat = new string(itemFormatSpan);
                     }
@@ -1757,7 +1779,10 @@ namespace System.Text
 
                         // Pad the end, if needed.
                         int padding = width - charsWritten;
-                        if (leftJustify && padding > 0) Append(' ', padding);
+                        if (leftJustify && padding > 0)
+                        {
+                            Append(' ', padding);
+                        }
 
                         // Continue to parse other characters.
                         continue;
@@ -1778,11 +1803,21 @@ namespace System.Text
                     }
                 }
                 // Append it to the final output of the Format String.
-                if (s == null) s = string.Empty;
+                if (s == null)
+                {
+                    s = string.Empty;
+                }
                 int pad = width - s.Length;
-                if (!leftJustify && pad > 0) Append(' ', pad);
+                if (!leftJustify && pad > 0)
+                {
+                    Append(' ', pad);
+                }
+                
                 Append(s);
-                if (leftJustify && pad > 0) Append(' ', pad);
+                if (leftJustify && pad > 0)
+                {
+                    Append(' ', pad);
+                }
                 // Continue to parse other characters.
             }
             return this;
@@ -1806,12 +1841,17 @@ namespace System.Text
         public bool Equals(StringBuilder? sb)
         {
             if (sb == null)
+            {
                 return false;
+            }
             if (Length != sb.Length)
+            {
                 return false;
+            }
             if (sb == this)
+            {
                 return true;
-
+            }
             StringBuilder? thisChunk = this;
             int thisChunkIndex = thisChunk.m_ChunkLength;
             StringBuilder? sbChunk = sb;
@@ -1825,7 +1865,9 @@ namespace System.Text
                 {
                     thisChunk = thisChunk.m_ChunkPrevious;
                     if (thisChunk == null)
+                    {
                         break;
+                    }
                     thisChunkIndex = thisChunk.m_ChunkLength + thisChunkIndex;
                 }
 
@@ -1833,18 +1875,26 @@ namespace System.Text
                 {
                     sbChunk = sbChunk.m_ChunkPrevious;
                     if (sbChunk == null)
+                    {
                         break;
+                    }
                     sbChunkIndex = sbChunk.m_ChunkLength + sbChunkIndex;
                 }
 
                 if (thisChunkIndex < 0)
+                {
                     return sbChunkIndex < 0;
+                }
                 if (sbChunkIndex < 0)
+                {
                     return false;
-
+                }
+                
                 Debug.Assert(thisChunk != null && sbChunk != null);
                 if (thisChunk.m_ChunkChars[thisChunkIndex] != sbChunk.m_ChunkChars[sbChunkIndex])
+                {
                     return false;
+                }
             }
         }
 
@@ -1855,7 +1905,9 @@ namespace System.Text
         public bool Equals(ReadOnlySpan<char> span)
         {
             if (span.Length != Length)
+            {
                 return false;
+            }
 
             StringBuilder? sbChunk = this;
             int offset = 0;
@@ -1868,7 +1920,9 @@ namespace System.Text
                 ReadOnlySpan<char> chunk = new ReadOnlySpan<char>(sbChunk.m_ChunkChars, 0, chunk_length);
 
                 if (!chunk.EqualsOrdinal(span.Slice(span.Length - offset, chunk_length)))
+                {
                     return false;
+                }
 
                 sbChunk = sbChunk.m_ChunkPrevious;
             } while (sbChunk != null);
@@ -1933,9 +1987,9 @@ namespace System.Text
                     }
                     else if (replacementsCount >= replacements.Length)
                     {
-                        Array.Resize(ref replacements!, replacements.Length * 3 / 2 + 4); // Grow by ~1.5x, but more in the begining // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                        Array.Resize(ref replacements, replacements.Length * 3 / 2 + 4); // Grow by ~1.5x, but more in the begining
                     }
-                    replacements![replacementsCount++] = indexInChunk; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                    replacements[replacementsCount++] = indexInChunk;
                     indexInChunk += oldValue.Length;
                     count -= oldValue.Length;
                 }
@@ -2017,7 +2071,9 @@ namespace System.Text
                     }
                 }
                 if (startIndexInChunk >= 0)
+                {
                     break;
+                }
 
                 Debug.Assert(chunk.m_ChunkPrevious != null);
                 chunk = chunk.m_ChunkPrevious;
@@ -2128,14 +2184,19 @@ namespace System.Text
                     long longDelta = (value.Length - removeCount) * (long)replacementsCount;
                     int delta = (int)longDelta;
                     if (delta != longDelta)
+                    {
                         throw new OutOfMemoryException();
+                    }
 
                     StringBuilder targetChunk = sourceChunk;        // the target as we copy chars down
                     int targetIndexInChunk = replacements[0];
 
                     // Make the room needed for all the new characters if needed.
                     if (delta > 0)
+                    {
                         MakeRoom(targetChunk.m_ChunkOffset + targetIndexInChunk, delta, out targetChunk, out targetIndexInChunk, true);
+                    }
+                    
                     // We made certain that characters after the insertion point are not moved,
                     int i = 0;
                     for (;;)
@@ -2168,7 +2229,9 @@ namespace System.Text
 
                     // Remove extra space if necessary.
                     if (delta < 0)
+                    {
                         Remove(targetChunk.m_ChunkOffset + targetIndexInChunk, -delta, out targetChunk, out targetIndexInChunk);
+                    }
                 }
             }
         }
@@ -2193,7 +2256,9 @@ namespace System.Text
                 {
                     chunk = Next(chunk)!;
                     if (chunk == null)
+                    {
                         return false;
+                    }
                     indexInChunk = 0;
                 }
 
@@ -2382,8 +2447,10 @@ namespace System.Text
 
             // Check for integer overflow (logical buffer size > int.MaxValue)
             if (m_ChunkOffset + m_ChunkLength + newBlockLength < newBlockLength)
+            {
                 throw new OutOfMemoryException();
-
+            }
+            
             // Allocate the array before updating any state to avoid leaving inconsistent state behind in case of out of memory exception
             char[] chunkChars = new char[newBlockLength];
 

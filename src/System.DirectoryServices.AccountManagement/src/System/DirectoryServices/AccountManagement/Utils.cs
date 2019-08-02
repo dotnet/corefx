@@ -27,8 +27,8 @@ namespace System.DirectoryServices.AccountManagement
         /// Performs bytewise comparison of two byte[] arrays
         /// </summary>
         /// <param name="src">Array to compare</param>
-        /// <param name="tgt">Array to compare against src</param>		
-        /// <returns>true if identical, false otherwise</returns>		
+        /// <param name="tgt">Array to compare against src</param>
+        /// <returns>true if identical, false otherwise</returns>
         internal static bool AreBytesEqual(byte[] src, byte[] tgt)
         {
             if (src.Length != tgt.Length)
@@ -589,7 +589,8 @@ namespace System.DirectoryServices.AccountManagement
                     throw new PrincipalOperationException(
                                     SR.Format(
                                             SR.UnableToRetrieveDomainInfo,
-                                            err));
+                                            err),
+                                    err);
                 }
 
                 UnsafeNativeMethods.DomainControllerInfo domainControllerInfo =
@@ -665,7 +666,7 @@ namespace System.DirectoryServices.AccountManagement
         }
 
 
-        static internal Principal ConstructFakePrincipalFromSID(
+        internal static Principal ConstructFakePrincipalFromSID(
                                                             byte[] sid,
                                                             PrincipalContext ctx,
                                                             string serverName,

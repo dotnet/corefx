@@ -11,6 +11,8 @@ namespace System
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial class Exception : ISerializable
     {
+        private protected const string InnerExceptionPrefix = " ---> ";
+
         public Exception()
         {
             _HResult = HResults.COR_E_EXCEPTION;
@@ -141,14 +143,9 @@ namespace System
 
         public override string ToString()
         {
-            return ToString(true, true);
-        }
-
-        private string ToString(bool needFileLineInfo, bool needMessage)
-        {
             string s = GetClassName();
 
-            string? message = (needMessage ? Message : null);
+            string? message = Message;
             if (!string.IsNullOrEmpty(message))
             {
                 s += ": " + message;
@@ -156,11 +153,11 @@ namespace System
 
             if (_innerException != null)
             {
-                s = s + " ---> " + _innerException.ToString(needFileLineInfo, needMessage) + Environment.NewLine +
+                s = s + Environment.NewLine + InnerExceptionPrefix + _innerException.ToString() + Environment.NewLine +
                 "   " + SR.Exception_EndOfInnerExceptionStack;
             }
 
-            string? stackTrace = GetStackTrace(needFileLineInfo);
+            string? stackTrace = StackTrace;
             if (stackTrace != null)
             {
                 s += Environment.NewLine + stackTrace;
@@ -169,7 +166,7 @@ namespace System
             return s;
         }
 
-        protected event EventHandler<SafeSerializationEventArgs> SerializeObjectState
+        protected event EventHandler<SafeSerializationEventArgs>? SerializeObjectState
         {
             add { throw new PlatformNotSupportedException(SR.PlatformNotSupported_SecureBinarySerialization); }
             remove { throw new PlatformNotSupportedException(SR.PlatformNotSupported_SecureBinarySerialization); }

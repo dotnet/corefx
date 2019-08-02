@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{C85CF035-7804-41FF-9557-48B7C948B58D}</ProjectGuid>
     <DefineConstants Condition="'$(TargetsWindows)'=='true'">$(DefineConstants);TargetsWindows</DefineConstants>
     <DefineConstants>$(DefineConstants);SYSNETHTTP_NO_OPENSSL</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs" Condition="'$(TargetsUnix)' == 'true'">
@@ -80,6 +80,9 @@
     <Compile Include="$(CommonTestPath)\System\Threading\TrackingSynchronizationContext.cs">
       <Link>Common\System\Threading\TrackingSynchronizationContext.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Threading\Tasks\GetStateMachineData.cs">
+      <Link>Common\System\Threading\Tasks\GetStateMachineData.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Threading\Tasks\TaskTimeoutExtensions.cs">
       <Link>Common\System\Threading\Tasks\TaskTimeoutExtensions.cs</Link>
     </Compile>
@@ -90,17 +93,21 @@
     <Compile Include="DelegatingHandlerTest.cs" />
     <Compile Include="FakeDiagnosticSourceListenerObserver.cs" />
     <Compile Include="FormUrlEncodedContentTest.cs" />
+    <Compile Include="ByteAtATimeContent.cs" />
+    <Compile Include="HttpClientHandlerTest.cs" />
+    <Compile Include="HttpClientHandlerTest.Asynchrony.cs" />
     <Compile Include="HttpClientHandlerTest.Authentication.cs" />
     <Compile Include="HttpClientHandlerTest.AutoRedirect.cs" />
-    <Compile Include="HttpClientHandlerTest.cs" />
     <Compile Include="HttpClientHandlerTest.Cancellation.cs" />
     <Compile Include="HttpClientHandlerTest.ClientCertificates.cs" />
-    <Compile Include="HttpClientHandlerTest.Asynchrony.cs" />
+    <Compile Include="HttpClientHandlerTest.Cookies.cs" />
     <Compile Include="HttpClientHandlerTest.DefaultProxyCredentials.cs" />
-    <Compile Include="HttpClientHandlerTest.Proxy.cs" />
-    <Compile Include="HttpClientHandlerTest.ResponseDrain.cs" />
+    <Compile Include="HttpClientHandlerTest.Finalization.cs" />
+    <Compile Include="HttpClientHandlerTest.Headers.cs" />
     <Compile Include="HttpClientHandlerTest.MaxConnectionsPerServer.cs" />
     <Compile Include="HttpClientHandlerTest.MaxResponseHeadersLength.cs" />
+    <Compile Include="HttpClientHandlerTest.Proxy.cs" />
+    <Compile Include="HttpClientHandlerTest.ResponseDrain.cs" />
     <Compile Include="HttpClientHandlerTest.ServerCertificates.cs" />
     <Compile Include="HttpClientHandlerTest.ServerCertificates.Unix.cs" Condition="'$(TargetsUnix)' == 'true'" />
     <Compile Include="HttpClientHandlerTest.ServerCertificates.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
@@ -111,13 +118,10 @@
     <Compile Include="HttpClientHandlerTestBase.cs" />
     <Compile Include="HttpClientTest.cs" />
     <Compile Include="HttpClientEKUTest.cs" />
-    <Compile Include="HttpClientMiniStressTest.cs" />
     <Compile Include="HttpClient.SelectedSitesTest.cs" />
     <Compile Include="HttpContentTest.cs" />
     <Compile Include="HttpMessageInvokerTest.cs" />
     <Compile Include="HttpMethodTest.cs" />
-    <Compile Include="HttpClientHandlerTest.Cookies.cs" />
-    <Compile Include="HttpClientHandlerTest.Headers.cs" />
     <Compile Include="HttpRetryProtocolTests.cs" />
     <Compile Include="IdnaProtocolTests.cs" />
     <Compile Include="HttpProtocolTests.cs" />
@@ -136,31 +140,39 @@
     <Compile Include="SyncBlockingContent.cs" />
     <Compile Include="TestHelper.cs" />
     <Compile Include="DefaultCredentialsTest.cs" />
+    <Compile Include="ThrowingContent.cs" />
+    <Compile Include="Watchdog.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="CustomContent.netcore.cs" />
+    <Compile Include="HPackTest.cs" />
+    <Compile Include="HttpClientTest.netcoreapp.cs" />
+    <Compile Include="HttpClientHandlerTest.Http1.cs" />
+    <Compile Include="HttpClientHandlerTest.Http2.cs" />
     <Compile Include="HttpClientHandlerTest.AcceptAllCerts.cs" />
     <Compile Include="HttpClientHandlerTest.Decompression.cs" />
-    <Compile Include="HttpClientTest.netcoreapp.cs" />
+    <Compile Include="HttpClientMiniStressTest.cs" />
     <Compile Include="HttpMethodTest.netcoreapp.cs" />
-    <Compile Include="HuffmanDecodingTests.cs" />
     <Compile Include="NtAuthTests.cs" />
     <Compile Include="ReadOnlyMemoryContentTest.cs" />
     <Compile Include="SocketsHttpHandlerTest.cs" />
-    <Compile Include="HttpClientHandlerTest.Http1.cs" />
-    <Compile Include="HttpClientHandlerTest.Http2.cs" />
     <Compile Include="$(CommonTestPath)\System\Net\Http\Http2Frames.cs">
       <Link>Common\System\Net\Http\Http2Frames.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\HPackEncoder.cs">
+      <Link>Common\System\Net\Http\HPackEncoder.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Http\Http2LoopbackServer.cs">
       <Link>Common\System\Net\Http\Http2LoopbackServer.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\Http2LoopbackConnection.cs">
+      <Link>Common\System\Net\Http\Http2LoopbackConnection.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Http\HuffmanDecoder.cs">
       <Link>Common\System\Net\Http\HuffmanDecoder.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
-    <Compile Include="$(CommonTestPath)\System\IO\StreamSpanExtensions.netstandard.cs">
-      <Link>Common\System\IO\StreamSpanExtensions.netstandard.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\HuffmanEncoder.cs">
+      <Link>Common\System\Net\Http\HuffmanEncoder.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
@@ -172,10 +184,7 @@
     <Compile Include="XUnitAssemblyAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.2\content\**\*.*" DestinationDir="TestData" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsOSX)'=='true'">
-    <TestCommandLines Include="ulimit -Sn 4096" />
+    <PackageReference Include="System.Net.TestData" Version="$(SystemNetTestDataPackageVersion)" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="SelectedSitesTest.txt">

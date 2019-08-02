@@ -34,15 +34,22 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateProperty(ReadOnlySpan<byte> propertyName)
         {
-            if (propertyName.Length > JsonConstants.MaxTokenSize)
+            if (propertyName.Length > JsonConstants.MaxUnescapedTokenSize)
                 ThrowHelper.ThrowArgumentException_PropertyNameTooLarge(propertyName.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateValue(ReadOnlySpan<byte> value)
         {
-            if (value.Length > JsonConstants.MaxTokenSize)
+            if (value.Length > JsonConstants.MaxUnescapedTokenSize)
                 ThrowHelper.ThrowArgumentException_ValueTooLarge(value.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ValidateBytes(ReadOnlySpan<byte> bytes)
+        {
+            if (bytes.Length > JsonConstants.MaxBase46ValueTokenSize)
+                ThrowHelper.ThrowArgumentException_ValueTooLarge(bytes.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,21 +95,21 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidatePropertyAndValue(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
         {
-            if (propertyName.Length > JsonConstants.MaxCharacterTokenSize || value.Length > JsonConstants.MaxTokenSize)
+            if (propertyName.Length > JsonConstants.MaxCharacterTokenSize || value.Length > JsonConstants.MaxUnescapedTokenSize)
                 ThrowHelper.ThrowArgumentException(propertyName, value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidatePropertyAndValue(ReadOnlySpan<byte> propertyName, ReadOnlySpan<char> value)
         {
-            if (propertyName.Length > JsonConstants.MaxTokenSize || value.Length > JsonConstants.MaxCharacterTokenSize)
+            if (propertyName.Length > JsonConstants.MaxUnescapedTokenSize || value.Length > JsonConstants.MaxCharacterTokenSize)
                 ThrowHelper.ThrowArgumentException(propertyName, value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidatePropertyAndValue(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
         {
-            if (propertyName.Length > JsonConstants.MaxTokenSize || value.Length > JsonConstants.MaxTokenSize)
+            if (propertyName.Length > JsonConstants.MaxUnescapedTokenSize || value.Length > JsonConstants.MaxUnescapedTokenSize)
                 ThrowHelper.ThrowArgumentException(propertyName, value);
         }
 
@@ -113,14 +120,28 @@ namespace System.Text.Json
                 ThrowHelper.ThrowArgumentException(propertyName, value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ValidatePropertyAndBytes(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> bytes)
+        {
+            if (propertyName.Length > JsonConstants.MaxCharacterTokenSize || bytes.Length > JsonConstants.MaxBase46ValueTokenSize)
+                ThrowHelper.ThrowArgumentException(propertyName, bytes);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ValidatePropertyAndBytes(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> bytes)
+        {
+            if (propertyName.Length > JsonConstants.MaxUnescapedTokenSize || bytes.Length > JsonConstants.MaxBase46ValueTokenSize)
+                ThrowHelper.ThrowArgumentException(propertyName, bytes);
+        }
+
         internal static void ValidateNumber(ReadOnlySpan<byte> utf8FormattedNumber)
         {
             // This is a simplified version of the number reader from Utf8JsonReader.TryGetNumber,
             // because it doesn't need to deal with "NeedsMoreData", or remembering the format.
-            if (utf8FormattedNumber.IsEmpty)
-            {
-                throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
-            }
+            //
+            // The Debug.Asserts in this method should change to validated ArgumentExceptions if/when
+            // writing a formatted number becomes public API.
+            Debug.Assert(!utf8FormattedNumber.IsEmpty);
 
             int i = 0;
 
@@ -151,21 +172,39 @@ namespace System.Text.Json
                 return;
             }
 
+            // The non digit character inside the number
             byte val = utf8FormattedNumber[i];
 
             if (val == '.')
             {
                 i++;
+
+                if (utf8FormattedNumber.Length <= i)
+                {
+                    throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
+                }
+
+                while (i < utf8FormattedNumber.Length && JsonHelpers.IsDigit(utf8FormattedNumber[i]))
+                {
+                    i++;
+                }
+
+                if (i == utf8FormattedNumber.Length)
+                {
+                    return;
+                }
+
+                Debug.Assert(i < utf8FormattedNumber.Length);
+                val = utf8FormattedNumber[i];
             }
-            else if (val == 'e' || val == 'E')
+
+            if (val == 'e' || val == 'E')
             {
                 i++;
 
-                if (i >= utf8FormattedNumber.Length)
+                if (utf8FormattedNumber.Length <= i)
                 {
-                    throw new ArgumentException(
-                        SR.RequiredDigitNotFoundEndOfData,
-                        nameof(utf8FormattedNumber));
+                    throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
                 }
 
                 val = utf8FormattedNumber[i];
@@ -182,11 +221,9 @@ namespace System.Text.Json
                     nameof(utf8FormattedNumber));
             }
 
-            if (i >= utf8FormattedNumber.Length)
+            if (utf8FormattedNumber.Length <= i)
             {
-                throw new ArgumentException(
-                    SR.RequiredDigitNotFoundEndOfData,
-                    nameof(utf8FormattedNumber));
+                throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
             }
 
             while (i < utf8FormattedNumber.Length && JsonHelpers.IsDigit(utf8FormattedNumber[i]))

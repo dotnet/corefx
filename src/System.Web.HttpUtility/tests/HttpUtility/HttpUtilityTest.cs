@@ -5,7 +5,7 @@
 // System.Web.HttpUtilityTest.cs - Unit tests for System.Web.HttpUtility
 //
 // Author:
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
 //
@@ -258,9 +258,9 @@ namespace System.Web.Tests
         [MemberData(nameof(HtmlEncodeData))]
         [InlineData(null, null)]
         [InlineData(2, "2")]
-        public void HtmlEncodeObject(string decoded, string encoded)
+        public void HtmlEncodeObject(object decoded, string encoded)
         {
-            Assert.Equal(encoded, HttpUtility.HtmlEncode((object)decoded));
+            Assert.Equal(encoded, HttpUtility.HtmlEncode(decoded));
         }
 
         [Theory]
@@ -462,7 +462,11 @@ namespace System.Web.Tests
                 new object[] { "http://example.net/\uFFFD", "http://example.net/\uD800" },
                 new object[] { "http://example.net/\uFFFDa", "http://example.net/\uD800a" },
                 new object[] { "http://example.net/\uFFFD", "http://example.net/\uDC00" },
-                new object[] { "http://example.net/\uFFFDa", "http://example.net/\uDC00a" }
+                new object[] { "http://example.net/\uFFFDa", "http://example.net/\uDC00a" },
+                // The "Baz" portion of "http://example.net/Baz" has been double-encoded - one iteration of UrlDecode() should produce a once-encoded string.
+                new object[] { "http://example.net/%42%61%7A", "http://example.net/%2542%2561%257A"},
+                // The second iteration should return the original string
+                new object[] { "http://example.net/Baz", "http://example.net/%42%61%7A"}
             };
 
         public static IEnumerable<object[]> UrlDecodeDataToBytes =>

@@ -37,7 +37,7 @@ namespace System.Security.Cryptography.Pkcs
             }
 
             internal override bool VerifySignature(
-#if netcoreapp
+#if netcoreapp || netstandard21
                 ReadOnlySpan<byte> valueHash,
                 ReadOnlyMemory<byte> signature,
 #else
@@ -68,9 +68,8 @@ namespace System.Security.Cryptography.Pkcs
                 DSAParameters dsaParameters = dsa.ExportParameters(false);
                 int bufSize = 2 * dsaParameters.Q.Length;
 
-#if netcoreapp
-                ArrayPool<byte> pool = ArrayPool<byte>.Shared;
-                byte[] rented = pool.Rent(bufSize);
+#if netcoreapp || netstandard21
+                byte[] rented = CryptoPool.Rent(bufSize);
                 Span<byte> ieee = new Span<byte>(rented, 0, bufSize);
 
                 try
@@ -84,18 +83,17 @@ namespace System.Security.Cryptography.Pkcs
                     }
 
                     return dsa.VerifySignature(valueHash, ieee);
-#if netcoreapp
+#if netcoreapp || netstandard21
                 }
                 finally
                 {
-                    ieee.Clear();
-                    pool.Return(rented);
+                    CryptoPool.Return(rented, bufSize);
                 }
 #endif
             }
 
             protected override bool Sign(
-#if netcoreapp
+#if netcoreapp || netstandard21
                 ReadOnlySpan<byte> dataHash,
 #else
                 byte[] dataHash,
@@ -135,10 +133,9 @@ namespace System.Security.Cryptography.Pkcs
 
                 signatureAlgorithm = new Oid(oidValue, oidValue);
 
-#if netcoreapp
-                ArrayPool<byte> pool = ArrayPool<byte>.Shared;
+#if netcoreapp || netstandard21
                 // The Q size cannot be bigger than the KeySize.
-                byte[] rented = pool.Rent(dsa.KeySize / 8);
+                byte[] rented = CryptoPool.Rent(dsa.KeySize / 8);
                 int bytesWritten = 0;
 
                 try
@@ -160,8 +157,7 @@ namespace System.Security.Cryptography.Pkcs
                 }
                 finally
                 {
-                    Array.Clear(rented, 0, bytesWritten);
-                    pool.Return(rented);
+                    CryptoPool.Return(rented, bytesWritten);
                 }
 
                 signatureValue = null;

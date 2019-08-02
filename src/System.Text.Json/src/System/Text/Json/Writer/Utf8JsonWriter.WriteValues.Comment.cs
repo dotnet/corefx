@@ -16,26 +16,29 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the string text value (as a JSON comment).
         /// </summary>
-        /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON comment within /*..*/.</param>
+        /// <param name="value">The value to write as a JSON comment within /*..*/.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified value is too large OR if the given string text value contains a comment delimiter (that is, */).
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="value"/> parameter is <see langword="null"/>.
+        /// </exception>
         /// <remarks>
         /// The comment value is not escaped before writing.
         /// </remarks>
-        /// <exception cref="ArgumentException">
-        /// Thrown when the specified value is too large OR if the given string text value contains a comment delimiter (i.e. */).
-        /// </exception>
         public void WriteCommentValue(string value)
-            => WriteCommentValue(value.AsSpan());
+            => WriteCommentValue((value ?? throw new ArgumentNullException(nameof(value))).AsSpan());
 
         /// <summary>
-        /// Writes the UTF-16 text value (as a JSON comment).
+        /// Writes the text value (as a JSON comment).
         /// </summary>
-        /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON comment within /*..*/.</param>
+        /// <param name="value">The value to write as a JSON comment within /*..*/.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified value is too large OR if the given text value contains a comment delimiter (that is, */).
+        /// </exception>
         /// <remarks>
         /// The comment value is not escaped before writing.
         /// </remarks>
-        /// <exception cref="ArgumentException">
-        /// Thrown when the specified value is too large OR if the given UTF-16 text value contains a comment delimiter (i.e. */).
-        /// </exception>
         public void WriteCommentValue(ReadOnlySpan<char> value)
         {
             JsonWriterHelper.ValidateValue(value);
@@ -50,7 +53,7 @@ namespace System.Text.Json
 
         private void WriteCommentByOptions(ReadOnlySpan<char> value)
         {
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteCommentIndented(value);
             }
@@ -133,7 +136,7 @@ namespace System.Text.Json
         /// The comment value is not escaped before writing.
         /// </remarks>
         /// <exception cref="ArgumentException">
-        /// Thrown when the specified value is too large OR if the given UTF-8 text value contains a comment delimiter (i.e. */).
+        /// Thrown when the specified value is too large OR if the given UTF-8 text value contains a comment delimiter (that is, */).
         /// </exception>
         public void WriteCommentValue(ReadOnlySpan<byte> utf8Value)
         {
@@ -149,7 +152,7 @@ namespace System.Text.Json
 
         private void WriteCommentByOptions(ReadOnlySpan<byte> utf8Value)
         {
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteCommentIndented(utf8Value);
             }
@@ -199,13 +202,15 @@ namespace System.Text.Json
 
             Span<byte> output = _memory.Span;
 
-            if (_tokenType != JsonTokenType.None)
+            if (_tokenType != JsonTokenType.PropertyName)
             {
-                WriteNewLine(output);
+                if (_tokenType != JsonTokenType.None)
+                {
+                    WriteNewLine(output);
+                }
+                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
+                BytesPending += indent;
             }
-
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
 
             output[BytesPending++] = JsonConstants.Slash;
             output[BytesPending++] = JsonConstants.Asterisk;

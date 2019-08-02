@@ -581,9 +581,6 @@ namespace System.Data.Common
         internal const int DefaultCommandTimeout = 30;
         internal const float FailoverTimeoutStep = 0.08F;    // fraction of timeout to use for fast failover connections
 
-        // security issue, don't rely upon public static readonly values
-        internal static readonly string StrEmpty = ""; // String.Empty
-
         internal const int CharSize = sizeof(char);
 
         internal static Delegate FindBuilder(MulticastDelegate mcd)
@@ -914,11 +911,11 @@ namespace System.Data.Common
         {
             return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfAccessTokenAndIntegratedSecurity));
         }
-        static internal InvalidOperationException InvalidMixedUsageOfAccessTokenAndUserIDPassword()
+        internal static InvalidOperationException InvalidMixedUsageOfAccessTokenAndUserIDPassword()
         {
             return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfAccessTokenAndUserIDPassword));
         }
-        static internal Exception InvalidMixedUsageOfCredentialAndAccessToken()
+        internal static Exception InvalidMixedUsageOfCredentialAndAccessToken()
         {
             return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfCredentialAndAccessToken));
         }

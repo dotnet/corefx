@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks.Sources;
@@ -349,7 +350,6 @@ namespace System.Threading.Tasks
 
         /// <summary>Throws the exception that caused the <see cref="ValueTask"/> to fail.  If it completed successfully, nothing is thrown.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [StackTraceHidden]
         internal void ThrowIfCompletedUnsuccessfully()
         {
             object? obj = _obj;
@@ -415,7 +415,7 @@ namespace System.Threading.Tasks
         /// <summary>null if <see cref="_result"/> has the result, otherwise a <see cref="Task{TResult}"/> or a <see cref="IValueTaskSource{TResult}"/>.</summary>
         internal readonly object? _obj;
         /// <summary>The result to be used if the operation completed successfully synchronously.</summary>
-        internal readonly TResult _result;
+        [AllowNull] internal readonly TResult _result;
         /// <summary>Opaque value passed through to the <see cref="IValueTaskSource{TResult}"/>.</summary>
         internal readonly short _token;
         /// <summary>true to continue on the captured context; otherwise, false.</summary>
@@ -449,7 +449,7 @@ namespace System.Threading.Tasks
 
             _obj = task;
 
-            _result = default!; // TODO-NULLABLE-GENERIC
+            _result = default;
             _continueOnCapturedContext = true;
             _token = 0;
         }
@@ -468,7 +468,7 @@ namespace System.Threading.Tasks
             _obj = source;
             _token = token;
 
-            _result = default!; // TODO-NULLABLE-GENERIC
+            _result = default;
             _continueOnCapturedContext = true;
         }
 
@@ -740,6 +740,7 @@ namespace System.Threading.Tasks
         }
 
         /// <summary>Gets the result.</summary>
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)] // prevent debugger evaluation from invalidating an underling IValueTaskSource<T>
         public TResult Result
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -780,6 +781,8 @@ namespace System.Threading.Tasks
         {
             if (IsCompletedSuccessfully)
             {
+                Debugger.NotifyOfCrossThreadDependency(); // prevent debugger evaluation from invalidating an underling IValueTaskSource<T> unless forced
+
                 TResult result = Result;
                 if (result != null)
                 {

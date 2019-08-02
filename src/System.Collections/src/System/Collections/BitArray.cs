@@ -261,24 +261,33 @@ namespace System.Collections
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
-            if (Length != value.Length)
-                throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int count = m_array.Length;
+            // This method uses unsafe code to manipulate data in the BitArrays.  To avoid issues with
+            // buggy code concurrently mutating these instances in a way that could cause memory corruption,
+            // we snapshot the arrays from both and then operate only on those snapshots, while also validating
+            // that the count we iterate to is within the bounds of both arrays.  We don't care about such code
+            // corrupting the BitArray data in a way that produces incorrect answers, since BitArray is not meant
+            // to be thread-safe; we only care about avoiding buffer overruns.
+            int[] thisArray = m_array;
+            int[] valueArray = value.m_array;
+            
+            int count = GetInt32ArrayLengthFromBitLength(Length);
+            if (Length != value.Length || (uint)count > (uint)thisArray.Length || (uint)count > (uint)valueArray.Length)
+                throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
             switch (count)
             {
-                case 3: m_array[2] &= value.m_array[2]; goto case 2;
-                case 2: m_array[1] &= value.m_array[1]; goto case 1;
-                case 1: m_array[0] &= value.m_array[0]; goto Done;
+                case 3: thisArray[2] &= valueArray[2]; goto case 2;
+                case 2: thisArray[1] &= valueArray[1]; goto case 1;
+                case 1: thisArray[0] &= valueArray[0]; goto Done;
                 case 0: goto Done;
             }
 
             int i = 0;
             if (Sse2.IsSupported)
             {
-                fixed (int* leftPtr = m_array)
-                fixed (int* rightPtr = value.m_array)
+                fixed (int* leftPtr = thisArray)
+                fixed (int* rightPtr = valueArray)
                 {
                     for (; i < count - (Vector128<int>.Count - 1); i += Vector128<int>.Count)
                     {
@@ -290,7 +299,7 @@ namespace System.Collections
             }
 
             for (; i < count; i++)
-                m_array[i] &= value.m_array[i];
+                thisArray[i] &= valueArray[i];
 
         Done:
             _version++;
@@ -307,24 +316,33 @@ namespace System.Collections
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
-            if (Length != value.Length)
-                throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int count = m_array.Length;
+            // This method uses unsafe code to manipulate data in the BitArrays.  To avoid issues with
+            // buggy code concurrently mutating these instances in a way that could cause memory corruption,
+            // we snapshot the arrays from both and then operate only on those snapshots, while also validating
+            // that the count we iterate to is within the bounds of both arrays.  We don't care about such code
+            // corrupting the BitArray data in a way that produces incorrect answers, since BitArray is not meant
+            // to be thread-safe; we only care about avoiding buffer overruns.
+            int[] thisArray = m_array;
+            int[] valueArray = value.m_array;
+
+            int count = GetInt32ArrayLengthFromBitLength(Length);
+            if (Length != value.Length || (uint)count > (uint)thisArray.Length || (uint)count > (uint)valueArray.Length)
+                throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
             switch (count)
             {
-                case 3: m_array[2] |= value.m_array[2]; goto case 2;
-                case 2: m_array[1] |= value.m_array[1]; goto case 1;
-                case 1: m_array[0] |= value.m_array[0]; goto Done;
+                case 3: thisArray[2] |= valueArray[2]; goto case 2;
+                case 2: thisArray[1] |= valueArray[1]; goto case 1;
+                case 1: thisArray[0] |= valueArray[0]; goto Done;
                 case 0: goto Done;
             }
 
             int i = 0;
             if (Sse2.IsSupported)
             {
-                fixed (int* leftPtr = m_array)
-                fixed (int* rightPtr = value.m_array)
+                fixed (int* leftPtr = thisArray)
+                fixed (int* rightPtr = valueArray)
                 {
                     for (; i < count - (Vector128<int>.Count - 1); i += Vector128<int>.Count)
                     {
@@ -336,7 +354,7 @@ namespace System.Collections
             }
 
             for (; i < count; i++)
-                m_array[i] |= value.m_array[i];
+                thisArray[i] |= valueArray[i];
 
         Done:
             _version++;
@@ -353,24 +371,33 @@ namespace System.Collections
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
-            if (Length != value.Length)
-                throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int count = m_array.Length;
+            // This method uses unsafe code to manipulate data in the BitArrays.  To avoid issues with
+            // buggy code concurrently mutating these instances in a way that could cause memory corruption,
+            // we snapshot the arrays from both and then operate only on those snapshots, while also validating
+            // that the count we iterate to is within the bounds of both arrays.  We don't care about such code
+            // corrupting the BitArray data in a way that produces incorrect answers, since BitArray is not meant
+            // to be thread-safe; we only care about avoiding buffer overruns.
+            int[] thisArray = m_array;
+            int[] valueArray = value.m_array;
+
+            int count = GetInt32ArrayLengthFromBitLength(Length);
+            if (Length != value.Length || (uint)count > (uint)thisArray.Length || (uint)count > (uint)valueArray.Length)
+                throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
             switch (count)
             {
-                case 3: m_array[2] ^= value.m_array[2]; goto case 2;
-                case 2: m_array[1] ^= value.m_array[1]; goto case 1;
-                case 1: m_array[0] ^= value.m_array[0]; goto Done;
+                case 3: thisArray[2] ^= valueArray[2]; goto case 2;
+                case 2: thisArray[1] ^= valueArray[1]; goto case 1;
+                case 1: thisArray[0] ^= valueArray[0]; goto Done;
                 case 0: goto Done;
             }
 
             int i = 0;
             if (Sse2.IsSupported)
             {
-                fixed (int* leftPtr = m_array)
-                fixed (int* rightPtr = value.m_array)
+                fixed (int* leftPtr = thisArray)
+                fixed (int* rightPtr = valueArray)
                 {
                     for (; i < count - (Vector128<int>.Count - 1); i += Vector128<int>.Count)
                     {
@@ -382,7 +409,7 @@ namespace System.Collections
             }
 
             for (; i < count; i++)
-                m_array[i] ^= value.m_array[i];
+                thisArray[i] ^= valueArray[i];
 
         Done:
             _version++;
@@ -548,7 +575,7 @@ namespace System.Collections
                 if (newints > m_array.Length || newints + _ShrinkThreshold < m_array.Length)
                 {
                     // grow or shrink (if wasting more than _ShrinkThreshold ints)
-                    Array.Resize(ref m_array!, newints); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                    Array.Resize(ref m_array, newints);
                 }
 
                 if (value > m_length)
@@ -681,7 +708,6 @@ namespace System.Collections
 
         // XPerY=n means that n Xs can be stored in 1 Y. 
         private const int BitsPerInt32 = 32;
-        private const int BytesPerInt32 = 4;
         private const int BitsPerByte = 8;
 
         private const int BitShiftPerInt32 = 5;
@@ -781,9 +807,7 @@ namespace System.Collections
                 return false;
             }
 
-#pragma warning disable CS8612 // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/23268
             public virtual object Current
-#pragma warning restore CS8612
             {
                 get
                 {

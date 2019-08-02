@@ -384,7 +384,7 @@ namespace System.Reflection.Tests
         {
             MethodInfo methodInfo = GetMethod(typeof(MI_SubClass), "ReturnVoidMethod");
             MethodAttributes attributes = methodInfo.Attributes;
-            Assert.NotNull(attributes);
+            Assert.True(attributes.HasFlag(MethodAttributes.Public));
         }
 
         [Fact]
@@ -392,7 +392,7 @@ namespace System.Reflection.Tests
         {
             MethodInfo methodInfo = GetMethod(typeof(MI_SubClass), "ReturnVoidMethod");
             CallingConventions callingConvention = methodInfo.CallingConvention;
-            Assert.NotNull(callingConvention);
+            Assert.True(callingConvention.HasFlag(CallingConventions.HasThis));
         }
 
         [Theory]
@@ -561,12 +561,13 @@ namespace System.Reflection.Tests
             Assert.Equal(expected, methodInfo.ToString());
         }
 
+
         //Methods for Reflection Metadata  
-        public void DummyMethod1(string str, int iValue, long lValue)
+        private void DummyMethod1(string str, int iValue, long lValue)
         {
         }
 
-        public void DummyMethod2()
+        private void DummyMethod2()
         {
         }        
 

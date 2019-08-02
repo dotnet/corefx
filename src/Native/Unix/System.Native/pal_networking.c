@@ -27,6 +27,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <net/if.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -50,12 +51,13 @@
 #include <sys/uio.h>
 #endif
 #if !HAVE_IN_PKTINFO
-#include <net/if.h>
 #if HAVE_GETIFADDRS
 #include <ifaddrs.h>
 #endif
 #endif
-
+#ifdef AF_CAN
+#include <linux/can.h>
+#endif
 #if HAVE_KQUEUE
 #if KEVENT_HAS_VOID_UDATA
 static void* GetKeventUdata(uintptr_t udata)
@@ -490,7 +492,21 @@ static bool TryConvertAddressFamilyPlatformToPal(sa_family_t platformAddressFami
         case AF_INET6:
             *palAddressFamily = AddressFamily_AF_INET6;
             return true;
-
+#ifdef AF_NETLINK
+        case AF_NETLINK:
+            *palAddressFamily = AddressFamily_AF_NETLINK;
+            return true;
+#endif
+#ifdef AF_PACKET
+        case AF_PACKET:
+            *palAddressFamily = AddressFamily_AF_PACKET;
+            return true;
+#endif
+#ifdef AF_CAN
+        case AF_CAN:
+            *palAddressFamily = AddressFamily_AF_CAN;
+            return true;
+#endif
         default:
             *palAddressFamily = platformAddressFamily;
             return false;
@@ -518,7 +534,16 @@ static bool TryConvertAddressFamilyPalToPlatform(int32_t palAddressFamily, sa_fa
         case AddressFamily_AF_INET6:
             *platformAddressFamily = AF_INET6;
             return true;
-
+#ifdef AF_PACKET
+        case AddressFamily_AF_PACKET:
+            *platformAddressFamily = AF_PACKET;
+            return true;
+#endif
+#ifdef AF_CAN
+        case AddressFamily_AF_CAN:
+            *platformAddressFamily = AF_CAN;
+            return true;
+#endif
         default:
             *platformAddressFamily = (sa_family_t)palAddressFamily;
             return false;
@@ -1728,6 +1753,40 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
     }
 }
 
+static bool TryConvertSocketTypePlatformToPal(int platformSocketType, int32_t* palSocketType)
+{
+    assert(palSocketType != NULL);
+
+    switch (platformSocketType)
+    {
+        case SOCK_STREAM:
+            *palSocketType = SocketType_SOCK_STREAM;
+            return true;
+
+        case SOCK_DGRAM:
+            *palSocketType = SocketType_SOCK_DGRAM;
+            return true;
+
+        case SOCK_RAW:
+            *palSocketType = SocketType_SOCK_RAW;
+            return true;
+
+#ifdef SOCK_RDM
+        case SOCK_RDM:
+            *palSocketType = SocketType_SOCK_RDM;
+            return true;
+#endif
+
+        case SOCK_SEQPACKET:
+            *palSocketType = SocketType_SOCK_SEQPACKET;
+            return true;
+
+        default:
+            *palSocketType = (int32_t)platformSocketType;
+            return false;
+    }
+}
+
 int32_t SystemNative_GetSockOpt(
     intptr_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t* optionLen)
 {
@@ -1786,6 +1845,7 @@ int32_t SystemNative_GetSockOpt(
 
     socklen_t optLen = (socklen_t)*optionLen;
     int err = getsockopt(fd, optLevel, optName, optionValue, &optLen);
+
     if (err != 0)
     {
         return SystemNative_ConvertErrorPlatformToPal(errno);
@@ -1801,6 +1861,20 @@ int32_t SystemNative_GetSockOpt(
         }
     }
 #endif
+
+    if (socketOptionLevel == SocketOptionLevel_SOL_SOCKET)
+    {
+        if (socketOptionName == SocketOptionName_SO_TYPE)
+        {
+            if (optLen != sizeof(int) ||             // getsockopt didn't return an int.
+                *optionLen < (int)sizeof(int32_t) || // optionValue can't fit an int32_t.
+                !TryConvertSocketTypePlatformToPal(*(int*)optionValue, (int32_t*)optionValue))
+            {
+                return Error_ENOTSUP;
+            }
+            optLen = sizeof(int32_t);
+        }
+    }
 
     assert(optLen <= (socklen_t)*optionLen);
     *optionLen = (int32_t)optLen;
@@ -1920,35 +1994,126 @@ static bool TryConvertSocketTypePalToPlatform(int32_t palSocketType, int* platfo
     }
 }
 
-static bool TryConvertProtocolTypePalToPlatform(int32_t palProtocolType, int* platformProtocolType)
+static bool TryConvertProtocolTypePalToPlatform(int32_t palAddressFamily, int32_t palProtocolType, int* platformProtocolType)
 {
     assert(platformProtocolType != NULL);
 
-    switch (palProtocolType)
+    switch(palAddressFamily)
     {
-        case ProtocolType_PT_UNSPECIFIED:
-            *platformProtocolType = 0;
+#ifdef AF_PACKET
+        case AddressFamily_AF_PACKET:
+            // protocol is the IEEE 802.3 protocol number in network order.
+            *platformProtocolType = palProtocolType;
             return true;
+#endif
+#ifdef AF_CAN
+        case AddressFamily_AF_CAN:
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
 
-        case ProtocolType_PT_ICMP:
-            *platformProtocolType = IPPROTO_ICMP;
-            return true;
+                case ProtocolType_PT_RAW:
+                    *platformProtocolType = CAN_RAW;
+                    return true;
 
-        case ProtocolType_PT_TCP:
-            *platformProtocolType = IPPROTO_TCP;
-            return true;
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+            }
+#endif
+        case AddressFamily_AF_INET:
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
 
-        case ProtocolType_PT_UDP:
-            *platformProtocolType = IPPROTO_UDP;
-            return true;
+                case ProtocolType_PT_ICMP:
+                    *platformProtocolType = IPPROTO_ICMP;
+                    return true;
 
-        case ProtocolType_PT_ICMPV6:
-            *platformProtocolType = IPPROTO_ICMPV6;
-            return true;
+                case ProtocolType_PT_TCP:
+                    *platformProtocolType = IPPROTO_TCP;
+                    return true;
+
+                case ProtocolType_PT_UDP:
+                    *platformProtocolType = IPPROTO_UDP;
+                    return true;
+
+                case ProtocolType_PT_IGMP:
+                    *platformProtocolType = IPPROTO_IGMP;
+                    return true;
+
+                case ProtocolType_PT_RAW:
+                    *platformProtocolType = IPPROTO_RAW;
+                    return true;
+
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+                }
+
+        case AddressFamily_AF_INET6:
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
+
+                case ProtocolType_PT_ICMPV6:
+                case ProtocolType_PT_ICMP:
+                    *platformProtocolType = IPPROTO_ICMPV6;
+                    return true;
+
+                case ProtocolType_PT_TCP:
+                    *platformProtocolType = IPPROTO_TCP;
+                    return true;
+
+                case ProtocolType_PT_UDP:
+                    *platformProtocolType = IPPROTO_UDP;
+                    return true;
+
+                case ProtocolType_PT_IGMP:
+                    *platformProtocolType = IPPROTO_IGMP;
+                    return true;
+
+                case ProtocolType_PT_RAW:
+                    *platformProtocolType = IPPROTO_RAW;
+                    return true;
+
+                case ProtocolType_PT_DSTOPTS:
+                    *platformProtocolType = IPPROTO_DSTOPTS;
+                    return true;
+
+                case ProtocolType_PT_NONE:
+                    *platformProtocolType = IPPROTO_NONE;
+                    return true;
+
+                case ProtocolType_PT_ROUTING:
+                    *platformProtocolType = IPPROTO_ROUTING;
+                    return true;
+
+                case ProtocolType_PT_FRAGMENT:
+                    *platformProtocolType = IPPROTO_FRAGMENT;
+                    return true;
+
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+            }
 
         default:
-            *platformProtocolType = (int)palProtocolType;
-            return false;
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+            }
     }
 }
 
@@ -1974,7 +2139,7 @@ int32_t SystemNative_Socket(int32_t addressFamily, int32_t socketType, int32_t p
         return Error_EPROTOTYPE;
     }
 
-    if (!TryConvertProtocolTypePalToPlatform(protocolType, &platformProtocolType))
+    if (!TryConvertProtocolTypePalToPlatform(addressFamily, protocolType, &platformProtocolType))
     {
         *createdSocket = -1;
         return Error_EPROTONOSUPPORT;
@@ -2502,6 +2667,31 @@ void SystemNative_GetDomainSocketSizes(int32_t* pathOffset, int32_t* pathSize, i
     *addressSize = sizeof(domainSocket);
 }
 
+int32_t SystemNative_Disconnect(intptr_t socket)
+{
+    int fd = ToFileDescriptor(socket);
+    int err;
+
+#if defined(__linux__)
+    // On Linux, we can disconnect a socket by connecting to AF_UNSPEC.
+    // For TCP sockets, this causes an abortive close.
+
+    struct sockaddr addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sa_family = AF_UNSPEC;
+
+    err = connect(fd, &addr, sizeof(addr));
+#elif HAVE_DISCONNECTX
+    // disconnectx causes a FIN close on OSX. It's the best we can do.
+    err = disconnectx(fd, SAE_ASSOCID_ANY, SAE_CONNID_ANY);
+#else
+    // best-effort, this may cause a FIN close.
+    err = shutdown(fd, SHUT_RDWR);
+#endif
+
+    return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
+}
+
 int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, int64_t count, int64_t* sent)
 {
     assert(sent != NULL);
@@ -2572,4 +2762,12 @@ int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, i
     errno = ENOTSUP;
     return SystemNative_ConvertErrorPlatformToPal(errno);
 #endif
+}
+
+uint32_t SystemNative_InterfaceNameToIndex(char* interfaceName)
+{
+    assert(interfaceName != NULL);
+    if (interfaceName[0] == '%')
+        interfaceName++;
+    return if_nametoindex(interfaceName);
 }

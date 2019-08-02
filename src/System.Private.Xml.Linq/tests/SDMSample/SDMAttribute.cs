@@ -276,18 +276,6 @@ namespace XDocumentTests.SDMSample
         /// Validates the explicit float conversion operator on XAttribute.
         /// </summary>
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void AttributeExplicitToFloat_NetFramework()
-        {
-            XAttribute e3 = new XAttribute("x", "5e+500");
-            Assert.Throws<OverflowException>(() => (float)e3);
-        }
-
-        /// <summary>
-        /// Validates the explicit float conversion operator on XAttribute.
-        /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void AttributeExplicitToFloat_NotNetFramework()
         {
             XAttribute e3 = new XAttribute("x", "5e+500");
@@ -318,18 +306,6 @@ namespace XDocumentTests.SDMSample
         /// Validates the explicit double conversion operator on XAttribute.
         /// </summary>
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void AttributeExplicitToDouble_NetFramework()
-        {
-            XAttribute e3 = new XAttribute("x", "5e+5000");
-            Assert.Throws<OverflowException>(() => (double)e3);
-        }
-
-        /// <summary>
-        /// Validates the explicit double conversion operator on XAttribute.
-        /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void AttributeExplicitToDouble_NotNetFramework()
         {
             XAttribute e3 = new XAttribute("x", "5e+5000");
@@ -429,7 +405,7 @@ namespace XDocumentTests.SDMSample
         {
             string guid = "cd8d69ed-fef9-4283-aaf4-216463e4496f";
 
-            Assert.Equal(true, (bool?)new XAttribute("x", true));
+            Assert.True((bool?)new XAttribute("x", true));
             Assert.Equal(5, (int?)new XAttribute("x", 5));
             Assert.Equal(5u, (uint?)new XAttribute("x", 5));
             Assert.Equal(5L, (long?)new XAttribute("x", 5));

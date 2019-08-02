@@ -33,7 +33,6 @@ namespace System.Net.Tests
         [Theory]
         [InlineData("Accept: Test", new string[] { "Test" })]
         [InlineData("Accept: Test, Test2,Test3 ,  Test4", new string[] { "Test", "Test2", "Test3 ", " Test4" })]
-        [InlineData("Accept: Test", new string[] { "Test" })]
         [InlineData("Accept: ", new string[] { "" })]
         [InlineData("Unknown-Header: ", null)]
         public async Task AcceptTypes_GetProperty_ReturnsExpected(string acceptString, string[] expected)
@@ -101,16 +100,13 @@ namespace System.Net.Tests
 
             yield return new object[] { "Unknown-Header: Test", Encoding.Default };
 
-            if (!PlatformDetection.IsFullFramework)
-            {
-                // .NET Framework wrongly uses ' ' and ',' as delimiter for parsing Content-Type header.
-                // "charset=unicode;" will be parsed as "unicode;" for charSet parameter. Then the following GetEncoding(charSet)
-                // will fail with ArgumentException. In this case, Encoding.Default will be chosen for ContentEncoding,
-                // even if client explicitly specifies the Unicode encoding in the header.
-                yield return new object[] { "Content-Type:application/json;charset=unicode; boundary=something", Encoding.Unicode };
-                yield return new object[] { "Content-Type:application/json;boundary=something; charset=unicode;", Encoding.Unicode };
-                yield return new object[] { "Content-Type:application/json;boundary=something; charset=unicode;   ", Encoding.Unicode };
-            }
+            // .NET Framework wrongly uses ' ' and ',' as delimiter for parsing Content-Type header.
+            // "charset=unicode;" will be parsed as "unicode;" for charSet parameter. Then the following GetEncoding(charSet)
+            // will fail with ArgumentException. In this case, Encoding.Default will be chosen for ContentEncoding,
+            // even if client explicitly specifies the Unicode encoding in the header.
+            yield return new object[] { "Content-Type:application/json;charset=unicode; boundary=something", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json;boundary=something; charset=unicode;", Encoding.Unicode };
+            yield return new object[] { "Content-Type:application/json;boundary=something; charset=unicode;   ", Encoding.Unicode };
         }
 
         [Theory]
@@ -138,7 +134,6 @@ namespace System.Net.Tests
         [InlineData("PUT", "Content-Length: 1\nContent-Length: 1", 1, true)]
         [InlineData("POST", "Transfer-Encoding: chunked", -1, true)]
         [InlineData("PUT", "Transfer-Encoding: chunked", -1, true)]
-        [InlineData("PUT", "Transfer-Encoding: chunked", -1, true)]
         [InlineData("PUT", "Content-Length: 10\nTransfer-Encoding: chunked", -1, true)]
         [InlineData("PUT", "Transfer-Encoding: chunked\nContent-Length: 10", -1, true)]
         public async Task ContentLength_GetProperty_ReturnsExpected(string method, string contentLengthString, long expected, bool hasEntityBody)
@@ -146,25 +141,6 @@ namespace System.Net.Tests
             HttpListenerRequest request = await GetRequest(method, "", contentLengthString.Split('\n'), content: "\r\n");
             Assert.Equal(expected, request.ContentLength64);
             Assert.Equal(hasEntityBody, request.HasEntityBody);
-        }
-
-        [Theory]
-        [InlineData(100)]
-        [InlineData("-100")]
-        [InlineData("")]
-        [InlineData("abc")]
-        [InlineData("9223372036854775808")]
-        [ActiveIssue(20294, TargetFrameworkMonikers.Netcoreapp)]
-        public async Task ContentLength_ManuallySetInHeaders_ReturnsExpected(string newValue)
-        {
-            HttpListenerRequest request = await GetRequest("POST", null, new string[] { "Content-Length: 1" }, content: "\r\n");
-            Assert.Equal("1", request.Headers["Content-Length"]);
-
-            request.Headers.Set("Content-Length", newValue);
-            Assert.Equal(newValue, request.Headers["Content-Length"]);
-            Assert.Equal(1, request.ContentLength64);
-
-            Assert.True(request.HasEntityBody);
         }
 
         [Fact]
@@ -403,22 +379,16 @@ namespace System.Net.Tests
                 }
             };
 
-            // Unicode queries are destroyed by HttpListener.
-            // [ActiveIssue(19967, TargetFrameworkMonikers.NetFramework)]
-            // 
-            if (!PlatformDetection.IsFullFramework)
+            yield return new object[]
             {
-                yield return new object[]
+                "?name1=+&name2=\u1234&\u0100=value&name3=\u00FF", new NameValueCollection
                 {
-                    "?name1=+&name2=\u1234&\u0100=value&name3=\u00FF", new NameValueCollection
-                    {
-                        { "name1", " " },
-                        { "name2", "á\u0088´" },
-                        { "Ä\u0080", "value" },
-                        { "name3", "Ã¿" }
-                    }
-                };
-            }
+                    { "name1", " " },
+                    { "name2", "á\u0088´" },
+                    { "Ä\u0080", "value" },
+                    { "name3", "Ã¿" }
+                }
+            };
 
             yield return new object[] { "", new NameValueCollection() };
             yield return new object[] { "?", new NameValueCollection() };

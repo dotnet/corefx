@@ -283,9 +283,7 @@ namespace System.Collections
                 current = null;
             }
 
-#pragma warning disable CS8612 // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/30958
             public object Current
-#pragma warning restore CS8612
             {
                 get
                 {

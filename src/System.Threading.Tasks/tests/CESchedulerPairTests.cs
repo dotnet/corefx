@@ -65,8 +65,8 @@ namespace System.Threading.Tasks.Tests
 
         //public int SchedulerID
         //{
-        //	get;
-        //	set;
+        //    get;
+        //    set;
         //}
 
         protected override IEnumerable<Task> GetScheduledTasks() { return null; }
@@ -412,7 +412,7 @@ namespace System.Threading.Tasks.Tests
             }
 
             // Validate that CESP does not implement IDisposable
-            Assert.Equal(null, new ConcurrentExclusiveSchedulerPair() as IDisposable);
+            Assert.Null(new ConcurrentExclusiveSchedulerPair() as IDisposable);
         }
 
         /// <summary>
@@ -555,7 +555,7 @@ namespace System.Threading.Tasks.Tests
 
         #region Helper Methods
 
-        public static void SelectAPI2Target(string apiType, int taskCount, TaskScheduler scheduler, Action work)
+        private static void SelectAPI2Target(string apiType, int taskCount, TaskScheduler scheduler, Action work)
         {
             switch (apiType)
             {

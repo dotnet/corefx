@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal struct WriteStackFrame
     {
@@ -17,65 +17,55 @@ namespace System.Text.Json.Serialization
         // Support Dictionary keys.
         public string KeyName;
 
-        // The current enumerator for the IEnumerable or IDictionary.
-        public IEnumerator Enumerator;
+        // The current IEnumerable or IDictionary.
+        public IEnumerator CollectionEnumerator;
+        // Note all bools are kept together for packing:
+        public bool PopStackOnEndCollection;
+        public bool IsIDictionaryConstructible;
+        public bool IsIDictionaryConstructibleProperty;
 
-        // Current property values.
-        public JsonPropertyInfo JsonPropertyInfo;
+        // The current object.
+        public bool PopStackOnEndObject;
+        public bool StartObjectWritten;
+        public bool MoveToNextProperty;
 
         // The current property.
-        public int PropertyIndex;
-
-        // Has the Start tag been written.
-        public bool StartObjectWritten;
-
-        // Pop the stack when the current array or dictionary is done.
-        public bool PopStackOnEnd;
-
-        // Pop the stack when the current object is done.
-        public bool PopStackOnEndObject;
+        public bool PropertyEnumeratorActive;
+        public ExtensionDataWriteStatus ExtensionDataStatus;
+        public IEnumerator PropertyEnumerator;
+        public JsonPropertyInfo JsonPropertyInfo;
 
         public void Initialize(Type type, JsonSerializerOptions options)
         {
             JsonClassInfo = options.GetOrAddClass(type);
             if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
             {
-                JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
+                JsonPropertyInfo = JsonClassInfo.PolicyProperty;
+            }
+            else if (JsonClassInfo.ClassType == ClassType.IDictionaryConstructible)
+            {
+                JsonPropertyInfo = JsonClassInfo.PolicyProperty;
+                IsIDictionaryConstructible = true;
             }
         }
 
         public void WriteObjectOrArrayStart(ClassType classType, Utf8JsonWriter writer, bool writeNull = false)
         {
-            if (JsonPropertyInfo?._escapedName != null)
+            if (JsonPropertyInfo?.EscapedName.HasValue == true)
             {
-                WriteObjectOrArrayStart(classType, JsonPropertyInfo?._escapedName, writer, writeNull);
+                WriteObjectOrArrayStart(classType, JsonPropertyInfo.EscapedName.Value, writer, writeNull);
             }
             else if (KeyName != null)
             {
-                byte[] pooledKey = null;
-                byte[] utf8Key = Encoding.UTF8.GetBytes(KeyName);
-                int length = JsonWriterHelper.GetMaxEscapedLength(utf8Key.Length, 0);
-
-                Span<byte> escapedKey = length <= JsonConstants.StackallocThreshold ?
-                    stackalloc byte[length] :
-                    (pooledKey = ArrayPool<byte>.Shared.Rent(length));
-
-                JsonWriterHelper.EscapeString(utf8Key, escapedKey, 0, out int written);
-                Span<byte> propertyName = escapedKey.Slice(0, written);
-
+                JsonEncodedText propertyName = JsonEncodedText.Encode(KeyName);
                 WriteObjectOrArrayStart(classType, propertyName, writer, writeNull);
-
-                if (pooledKey != null)
-                {
-                    ArrayPool<byte>.Shared.Return(pooledKey);
-                }
             }
             else
             {
                 Debug.Assert(writeNull == false);
 
                 // Write start without a property name.
-                if (classType == ClassType.Object || classType == ClassType.Dictionary)
+                if (classType == ClassType.Object || classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible)
                 {
                     writer.WriteStartObject();
                     StartObjectWritten = true;
@@ -88,13 +78,15 @@ namespace System.Text.Json.Serialization
             }
         }
 
-        private void WriteObjectOrArrayStart(ClassType classType, ReadOnlySpan<byte> propertyName, Utf8JsonWriter writer, bool writeNull)
+        private void WriteObjectOrArrayStart(ClassType classType, JsonEncodedText propertyName, Utf8JsonWriter writer, bool writeNull)
         {
             if (writeNull)
             {
                 writer.WriteNull(propertyName);
             }
-            else if (classType == ClassType.Object || classType == ClassType.Dictionary)
+            else if (classType == ClassType.Object ||
+                classType == ClassType.Dictionary ||
+                classType == ClassType.IDictionaryConstructible)
             {
                 writer.WriteStartObject(propertyName);
                 StartObjectWritten = true;
@@ -109,40 +101,63 @@ namespace System.Text.Json.Serialization
         public void Reset()
         {
             CurrentValue = null;
-            Enumerator = null;
-            KeyName = null;
-            JsonClassInfo = null;
-            JsonPropertyInfo = null;
-            PropertyIndex = 0;
-            PopStackOnEndObject = false;
-            PopStackOnEnd = false;
-            StartObjectWritten = false;
+            EndObject();
         }
 
         public void EndObject()
         {
-            PropertyIndex = 0;
+            CollectionEnumerator = null;
+            ExtensionDataStatus = ExtensionDataWriteStatus.NotStarted;
+            IsIDictionaryConstructible = false;
+            JsonClassInfo = null;
+            PropertyEnumerator = null;
+            PropertyEnumeratorActive = false;
+            PopStackOnEndCollection = false;
             PopStackOnEndObject = false;
+            StartObjectWritten = false;
+            EndProperty();
+        }
+
+        public void EndProperty()
+        {
+            IsIDictionaryConstructibleProperty = false;
             JsonPropertyInfo = null;
+            KeyName = null;
+            MoveToNextProperty = false;
         }
 
         public void EndDictionary()
         {
-            Enumerator = null;
-            PopStackOnEnd = false;
+            CollectionEnumerator = null;
+            PopStackOnEndCollection = false;
         }
 
         public void EndArray()
         {
-            Enumerator = null;
-            PopStackOnEnd = false;
-            JsonPropertyInfo = null;
+            CollectionEnumerator = null;
+            PopStackOnEndCollection = false;
         }
 
         public void NextProperty()
         {
-            JsonPropertyInfo = null;
-            PropertyIndex++;
+            EndProperty();
+
+            if (PropertyEnumeratorActive)
+            {
+                if (PropertyEnumerator.MoveNext())
+                {
+                    PropertyEnumeratorActive = true;
+                }
+                else
+                {
+                    PropertyEnumeratorActive = false;
+                    ExtensionDataStatus = ExtensionDataWriteStatus.Writing;
+                }
+            }
+            else
+            {
+                ExtensionDataStatus = ExtensionDataWriteStatus.Finished;
+            }
         }
     }
 }

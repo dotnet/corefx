@@ -6,84 +6,90 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Text.Json.Serialization.Converters;
-using System.Text.Json.Serialization.Policies;
+using System.Text.Json.Serialization;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     /// <summary>
     /// Represents a strongly-typed property to prevent boxing and to create a direct delegate to the getter\setter.
     /// </summary>
-    internal abstract class JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty> : JsonPropertyInfo
+    internal abstract class JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty, TConverter> : JsonPropertyInfo
     {
-        public bool _isPropertyPolicy;
-        public Func<TClass, TDeclaredProperty> Get { get; private set; }
-        public Action<TClass, TDeclaredProperty> Set { get; private set; }
+        public Func<object, TDeclaredProperty> Get { get; private set; }
+        public Action<object, TDeclaredProperty> Set { get; private set; }
 
-        public JsonValueConverter<TRuntimeProperty> ValueConverter { get; internal set; }
+        public JsonConverter<TConverter> Converter { get; internal set; }
 
-        // Constructor used for internal identifiers
-        public JsonPropertyInfoCommon() { }
-
-        public JsonPropertyInfoCommon(
+        public override void Initialize(
             Type parentClassType,
             Type declaredPropertyType,
             Type runtimePropertyType,
+            Type implementedPropertyType,
             PropertyInfo propertyInfo,
             Type elementType,
-            JsonSerializerOptions options) :
-            base(parentClassType, declaredPropertyType, runtimePropertyType, propertyInfo, elementType, options)
+            JsonConverter converter,
+            JsonSerializerOptions options)
         {
+            base.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, elementType, converter, options);
+
             if (propertyInfo != null)
             {
                 if (propertyInfo.GetMethod?.IsPublic == true)
                 {
                     HasGetter = true;
-                    Get = (Func<TClass, TDeclaredProperty>)Delegate.CreateDelegate(typeof(Func<TClass, TDeclaredProperty>), propertyInfo.GetGetMethod());
+                    Get = options.MemberAccessorStrategy.CreatePropertyGetter<TClass, TDeclaredProperty>(propertyInfo);
                 }
 
                 if (propertyInfo.SetMethod?.IsPublic == true)
                 {
                     HasSetter = true;
-                    Set = (Action<TClass, TDeclaredProperty>)Delegate.CreateDelegate(typeof(Action<TClass, TDeclaredProperty>), propertyInfo.GetSetMethod());
+                    Set = options.MemberAccessorStrategy.CreatePropertySetter<TClass, TDeclaredProperty>(propertyInfo);
                 }
             }
             else
             {
-                _isPropertyPolicy = true;
+                IsPropertyPolicy = true;
                 HasGetter = true;
                 HasSetter = true;
-                ValueConverter = DefaultConverters<TRuntimeProperty>.s_converter;
             }
 
-            GetPolicies(options);
+            GetPolicies();
         }
 
-        public override void GetPolicies(JsonSerializerOptions options)
+        public override JsonConverter ConverterBase
         {
-            ValueConverter = DefaultConverters<TRuntimeProperty>.s_converter;
-            base.GetPolicies(options);
+            get
+            {
+                return Converter;
+            }
+            set
+            {
+                Debug.Assert(Converter == null);
+                Debug.Assert(value is JsonConverter<TConverter>);
+
+                Converter = (JsonConverter<TConverter>)value;
+            }
         }
 
         public override object GetValueAsObject(object obj)
         {
-            if (_isPropertyPolicy)
+            if (IsPropertyPolicy)
             {
                 return obj;
             }
 
-            Debug.Assert(Get != null);
-            return Get((TClass)obj);
+            Debug.Assert(HasGetter);
+            return Get(obj);
         }
 
         public override void SetValueAsObject(object obj, object value)
         {
-            Debug.Assert(Set != null);
+            Debug.Assert(HasSetter);
             TDeclaredProperty typedValue = (TDeclaredProperty)value;
 
             if (typedValue != null || !IgnoreNullValues)
             {
-                Set((TClass)obj, (TDeclaredProperty)value);
+                Set(obj, typedValue);
             }
         }
 
@@ -97,29 +103,201 @@ namespace System.Text.Json.Serialization
             return typeof(Dictionary<string, TRuntimeProperty>);
         }
 
-        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the,
+        public override Type GetConcreteType(Type parentType)
+        {
+            if (JsonClassInfo.IsDeserializedByAssigningFromList(parentType))
+            {
+                return typeof(List<TDeclaredProperty>);
+            }
+            else if (JsonClassInfo.IsSetInterface(parentType))
+            {
+                return typeof(HashSet<TDeclaredProperty>);
+            }
+
+            return parentType;
+        }
+
+        public override IEnumerable CreateDerivedEnumerableInstance(JsonPropertyInfo collectionPropertyInfo, IList sourceList, string jsonPath, JsonSerializerOptions options)
+        {
+            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
+
+            if (instance is IList instanceOfIList)
+            {
+                foreach (object item in sourceList)
+                {
+                    instanceOfIList.Add(item);
+                }
+                return instanceOfIList;
+            }
+            else if (instance is ICollection<TRuntimeProperty> instanceOfICollection)
+            {
+                foreach (TRuntimeProperty item in sourceList)
+                {
+                    instanceOfICollection.Add(item);
+                }
+                return instanceOfICollection;
+            }
+            else if (instance is Stack<TRuntimeProperty> instanceOfStack)
+            {
+                foreach (TRuntimeProperty item in sourceList)
+                {
+                    instanceOfStack.Push(item);
+                }
+                return instanceOfStack;
+            }
+            else if (instance is Queue<TRuntimeProperty> instanceOfQueue)
+            {
+                foreach (TRuntimeProperty item in sourceList)
+                {
+                    instanceOfQueue.Enqueue(item);
+                }
+                return instanceOfQueue;
+            }
+
+            // TODO: Use reflection to support types implementing Stack or Queue.
+
+            ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionPropertyInfo.DeclaredPropertyType, jsonPath);
+            return null;
+        }
+
+        public override object CreateDerivedDictionaryInstance(JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
+        {
+            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
+
+            if (instance is IDictionary instanceOfIDictionary)
+            {
+                foreach (DictionaryEntry entry in sourceDictionary)
+                {
+                    instanceOfIDictionary.Add((string)entry.Key, entry.Value);
+                }
+                return instanceOfIDictionary;
+            }
+            else if (instance is IDictionary<string, TRuntimeProperty> instanceOfGenericIDictionary)
+            {
+                foreach (DictionaryEntry entry in sourceDictionary)
+                {
+                    instanceOfGenericIDictionary.Add((string)entry.Key, (TRuntimeProperty)entry.Value);
+                }
+                return instanceOfGenericIDictionary;
+            }
+
+            // TODO: Use reflection to support types implementing SortedList and maybe immutable dictionaries.
+
+            // Types implementing SortedList and immutable dictionaries will fail here.
+            ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionPropertyInfo.DeclaredPropertyType, jsonPath);
+            return null;
+        }
+
+        public override IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options)
+        {
+            if (parentType.IsGenericType)
+            {
+                Type genericTypeDefinition = parentType.GetGenericTypeDefinition();
+                IEnumerable<TDeclaredProperty> items = CreateGenericTDeclaredPropertyIEnumerable(sourceList);
+
+                if (genericTypeDefinition == typeof(Stack<>))
+                {
+                    return new Stack<TDeclaredProperty>(items);
+                }
+                else if (genericTypeDefinition == typeof(Queue<>))
+                {
+                    return new Queue<TDeclaredProperty>(items);
+                }
+                else if (genericTypeDefinition == typeof(HashSet<>))
+                {
+                    return new HashSet<TDeclaredProperty>(items);
+                }
+                else if (genericTypeDefinition == typeof(LinkedList<>))
+                {
+                    return new LinkedList<TDeclaredProperty>(items);
+                }
+                else if (genericTypeDefinition == typeof(SortedSet<>))
+                {
+                    return new SortedSet<TDeclaredProperty>(items);
+                }
+
+                return (IEnumerable)Activator.CreateInstance(parentType, items);
+            }
+            else
+            {
+                if (parentType == typeof(ArrayList))
+                {
+                    return new ArrayList(sourceList);
+                }
+                // Stack and Queue go into this condition, until we support with reflection.
+                else
+                {
+                    return (IEnumerable)Activator.CreateInstance(parentType, sourceList);
+                }
+            }
+        }
+
+        public override IDictionary CreateIDictionaryInstance(Type parentType, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
+        {
+            if (parentType.FullName == JsonClassInfo.HashtableTypeName)
+            {
+                return new Hashtable(sourceDictionary);
+            }
+            // SortedList goes into this condition, unless we add a ref to System.Collections.NonGeneric.
+            else
+            {
+                return (IDictionary)Activator.CreateInstance(parentType, sourceDictionary);
+            }
+        }
+
+        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IEnumerable CreateImmutableCollectionFromList(string delegateKey, IList sourceList)
+        public override IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string jsonPath, JsonSerializerOptions options)
         {
-            Debug.Assert(DefaultImmutableConverter.CreateRangeDelegates.ContainsKey(delegateKey));
+            IEnumerable collection = null;
 
-            DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty> createRangeDelegate = (
-                (DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty>)DefaultImmutableConverter.CreateRangeDelegates[delegateKey]);
+            if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
+                !creator.CreateImmutableEnumerable(sourceList, out collection))
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
+            }
 
-            return (IEnumerable)createRangeDelegate.Invoke(CreateGenericIEnumerableFromList(sourceList));
+            return collection;
         }
 
-        public override IEnumerable CreateIEnumerableConstructibleType(Type enumerableType, IList sourceList)
+        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
+        // sourceList argument then uses the delegateKey argument to identify the appropriate cached
+        // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
+        public override IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
         {
-            return (IEnumerable)Activator.CreateInstance(enumerableType, CreateGenericIEnumerableFromList(sourceList));
+            IDictionary collection = null;
+
+            if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
+                !creator.CreateImmutableDictionary(sourceDictionary, out collection))
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
+            }
+
+            return collection;
         }
 
-        private IEnumerable<TRuntimeProperty> CreateGenericIEnumerableFromList(IList sourceList)
+        private IEnumerable<TRuntimeProperty> CreateGenericTRuntimePropertyIEnumerable(IList sourceList)
         {
             foreach (object item in sourceList)
             {
                 yield return (TRuntimeProperty)item;
+            }
+        }
+
+        private IEnumerable<TDeclaredProperty> CreateGenericTDeclaredPropertyIEnumerable(IList sourceList)
+        {
+            foreach (object item in sourceList)
+            {
+                yield return (TDeclaredProperty)item;
+            }
+        }
+
+        private IEnumerable<KeyValuePair<string, TRuntimeProperty>> CreateGenericIEnumerableFromDictionary(IDictionary sourceDictionary)
+        {
+            foreach (DictionaryEntry item in sourceDictionary)
+            {
+                yield return new KeyValuePair<string, TRuntimeProperty>((string)item.Key, (TRuntimeProperty)item.Value);
             }
         }
     }

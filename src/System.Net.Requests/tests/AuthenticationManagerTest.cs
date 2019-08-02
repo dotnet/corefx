@@ -13,7 +13,6 @@ namespace System.Net.Tests
 {
     public class AuthenticationManagerTest
     {
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "AuthenticationManager supported on NETFX")]
         [Fact]
         public void Authenticate_NotSupported()
         {
@@ -42,6 +41,7 @@ namespace System.Net.Tests
             }).Dispose();           
         }
 
+        [Fact]
         public void Register_UnregisterByScheme_ModuleCountUnchanged()
         {
             RemoteExecutor.Invoke(() =>
@@ -62,7 +62,7 @@ namespace System.Net.Tests
             int count = 0;
             IEnumerator modules = AuthenticationManager.RegisteredModules;
             while (modules.MoveNext()) count++;
-            Assert.Equal(PlatformDetection.IsFullFramework ? 5 : 0, count);
+            Assert.Equal(0, count);
         }
 
         [Fact]

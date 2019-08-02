@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal struct WriteStack
     {
@@ -48,8 +48,15 @@ namespace System.Text.Json.Serialization
 
             if (classType == ClassType.Enumerable || nextClassInfo.ClassType == ClassType.Dictionary)
             {
-                Current.PopStackOnEnd = true;
-                Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
+                Current.PopStackOnEndCollection = true;
+                Current.JsonPropertyInfo = Current.JsonClassInfo.PolicyProperty;
+            }
+            else if (classType == ClassType.IDictionaryConstructible)
+            {
+                Current.PopStackOnEndCollection = true;
+                Current.JsonPropertyInfo = Current.JsonClassInfo.PolicyProperty;
+
+                Current.IsIDictionaryConstructible = true;
             }
             else
             {
@@ -64,41 +71,50 @@ namespace System.Text.Json.Serialization
             Current = _previous[--_index];
         }
 
-        // Return a property path in the form of: [FullNameOfType].FirstProperty.SecondProperty.LastProperty
+        // Return a property path as a simple JSONPath using dot-notation when possible. When special characters are present, bracket-notation is used:
+        // $.x.y.z
+        // $['PropertyName.With.Special.Chars']
         public string PropertyPath
         {
             get
             {
-                StringBuilder path = new StringBuilder();
+                StringBuilder sb = new StringBuilder("$");
 
-                if (_previous == null || _index == 0)
+                for (int i = 0; i < _index; i++)
                 {
-                    path.Append($"[{Current.JsonClassInfo.Type.FullName}]");
-                }
-                else
-                {
-                    path.Append($"[{_previous[0].JsonClassInfo.Type.FullName}]");
-
-                    for (int i = 0; i < _index; i++)
-                    {
-                        path.Append(GetPropertyName(_previous[i]));
-                    }
+                    AppendStackFrame(sb, _previous[i]);
                 }
 
-                path.Append(GetPropertyName(Current));
-
-                return path.ToString();
+                AppendStackFrame(sb, Current);
+                return sb.ToString();
             }
         }
 
-        private string GetPropertyName(in WriteStackFrame frame)
+        private void AppendStackFrame(StringBuilder sb, in WriteStackFrame frame)
         {
-            if (frame.JsonPropertyInfo != null && frame.JsonClassInfo.ClassType == ClassType.Object)
-            {
-                return $".{frame.JsonPropertyInfo.PropertyInfo.Name}";
-            }
+            // Append the property name.
+            string propertyName = frame.JsonPropertyInfo?.PropertyInfo?.Name;
+            AppendPropertyName(sb, propertyName);
+        }
 
-            return string.Empty;
+        private void AppendPropertyName(StringBuilder sb, string propertyName)
+        {
+            if (propertyName != null)
+            {
+                JsonEncodedText encodedPropertyName = JsonEncodedText.Encode(propertyName);
+
+                if (propertyName.IndexOfAny(ReadStack.SpecialCharacters) != -1)
+                {
+                    sb.Append(@"['");
+                    sb.Append(encodedPropertyName);
+                    sb.Append(@"']");
+                }
+                else
+                {
+                    sb.Append('.');
+                    sb.Append(encodedPropertyName);
+                }
+            }
         }
     }
 }

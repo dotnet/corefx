@@ -1,17 +1,17 @@
 ﻿<Project DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <PropertyGroup>
-      <!-- We use the PackageVersion property defined in Packaging.props for the Prerelease packages which are using it to be built -->
-    <_PreReleasePackageVersion>$(PackageVersion)</_PreReleasePackageVersion>
-    <PackageVersion>3.0.0</PackageVersion>
     <ServiceModelVersion>4.5.3</ServiceModelVersion>
     <!-- We don't need to harvest the stable packages to build this -->
     <HarvestStablePackage>false</HarvestStablePackage>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <PrereleaseLibraryPackage>
-      <Version>$(_PreReleasePackageVersion)</Version>
+      <Version>$(PackageVersion)</Version>
     </PrereleaseLibraryPackage>
+    <NS21PrereleaseLibraryPackage>
+      <Version>$(PackageVersion)</Version>
+    </NS21PrereleaseLibraryPackage>
   </ItemDefinitionGroup>
   <ItemGroup>
     <PackageIndex Include="$(MSBuildThisFileDirectory)externalIndex.json" />
@@ -25,10 +25,7 @@
     <PrereleaseLibraryPackage Include="System.Configuration.ConfigurationManager" />
     <PrereleaseLibraryPackage Include="System.Data.Odbc" />
     <PrereleaseLibraryPackage Include="System.Data.OleDb" />
-    <PrereleaseLibraryPackage Include="System.Data.SqlClient">
-      <!-- SQL client defines its own version, higher than rest of master -->
-      <Version>4.7.0</Version>
-    </PrereleaseLibraryPackage>
+    <PrereleaseLibraryPackage Include="System.Data.SqlClient" />
     <PrereleaseLibraryPackage Include="System.Drawing.Common" />
     <PrereleaseLibraryPackage Include="System.Diagnostics.EventLog" />
     <PrereleaseLibraryPackage Include="System.Diagnostics.PerformanceCounter" />
@@ -39,7 +36,12 @@
     <PrereleaseLibraryPackage Include="System.IO.Packaging" />
     <PrereleaseLibraryPackage Include="System.IO.Ports" />
     <PrereleaseLibraryPackage Include="System.Management" />
+    <PrereleaseLibraryPackage Include="System.Reflection.Emit" />
+    <PrereleaseLibraryPackage Include="System.Reflection.Emit.ILGeneration" />
+    <PrereleaseLibraryPackage Include="System.Reflection.Emit.Lightweight" />
     <PrereleaseLibraryPackage Include="System.Runtime.Caching" />
+    <PrereleaseLibraryPackage Include="System.Runtime.WindowsRuntime" />
+    <PrereleaseLibraryPackage Include="System.Runtime.WindowsRuntime.UI.Xaml" />
     <PrereleaseLibraryPackage Include="System.Security.AccessControl" />
     <PrereleaseLibraryPackage Include="System.Security.Cryptography.Cng" />
     <PrereleaseLibraryPackage Include="System.Security.Cryptography.Pkcs" />
@@ -51,6 +53,9 @@
     <PrereleaseLibraryPackage Include="System.ServiceProcess.ServiceController" />
     <PrereleaseLibraryPackage Include="System.Text.Encoding.CodePages" />
     <PrereleaseLibraryPackage Include="System.Threading.AccessControl" />
+    
+    <NS21PrereleaseLibraryPackage Include="System.ComponentModel.Composition.Registration" />
+    <NS21PrereleaseLibraryPackage Include="System.Reflection.Context" />
     <!-- Service model packages -->
     <LibraryPackage Include="System.ServiceModel.Primitives">
       <Version>$(ServiceModelVersion)</Version>
@@ -85,8 +90,14 @@
     <Dependency Include="@(LibraryPackage);@(PrereleaseLibraryPackage)">
       <TargetFramework>netcoreapp2.1</TargetFramework>
     </Dependency>
+    <Dependency Include="@(LibraryPackage);@(PrereleaseLibraryPackage);@(NS21PrereleaseLibraryPackage)">
+      <TargetFramework>netcoreapp3.0</TargetFramework>
+    </Dependency>
     <Dependency Include="@(LibraryPackage);@(PrereleaseLibraryPackage)">
       <TargetFramework>netstandard2.0</TargetFramework>
+    </Dependency>
+    <Dependency Include="@(LibraryPackage);@(PrereleaseLibraryPackage);@(NS21PrereleaseLibraryPackage)">
+      <TargetFramework>netstandard2.1</TargetFramework>
     </Dependency>
     <!-- Include dependency to shims package -->
     <Dependency Include="Microsoft.Windows.Compatibility.Shims">

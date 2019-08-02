@@ -33,7 +33,6 @@ namespace System.DirectoryServices.ActiveDirectory
         internal const int DS_REPSYNC_ALL_SOURCES = 0x00000010;
         internal const int DS_REPSYNCALL_ID_SERVERS_BY_DN = 0x00000004;
         internal const int DS_REPL_NOTSUPPORTED = 50;
-        private const int DS_REPL_INFO_FLAG_IMPROVE_LINKED_ATTRS = 0x00000001;
         private ReplicationConnectionCollection _inbound = null;
         private ReplicationConnectionCollection _outbound = null;
 
@@ -56,7 +55,7 @@ namespace System.DirectoryServices.ActiveDirectory
             GC.SuppressFinalize(this);
         }
 
-        // private Dispose method		
+        // private Dispose method        
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -161,7 +160,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         #endregion public methods
 
-        #region abstract public methods
+        #region public abstract methods
 
         public abstract void CheckReplicationConsistency();
 
@@ -183,7 +182,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public abstract void SyncReplicaFromAllServers(string partition, SyncFromAllServersOptions options);
 
-        #endregion abstract public methods
+        #endregion public abstract methods
 
         #region public properties
 
@@ -211,7 +210,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         #endregion public properties
 
-        #region abstract public properties
+        #region public abstract properties
 
         public abstract string IPAddress { get; }
 
@@ -223,7 +222,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public abstract ReplicationConnectionCollection OutboundConnections { get; }
 
-        #endregion abstract public properties
+        #endregion public abstract properties
 
         #region private methods
 
@@ -435,7 +434,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         FreeReplicaInfo(DS_REPL_INFO_TYPE.DS_REPL_INFO_CURSORS_3_FOR_NC, info, libHandle);
                     }
 
-                    // get the next batch of results		            
+                    // get the next batch of results
                     info = GetReplicationInfoHelper(dsHandle, (int)DS_REPL_INFO_TYPE.DS_REPL_INFO_CURSORS_3_FOR_NC, (int)DS_REPL_INFO_TYPE.DS_REPL_INFO_CURSORS_FOR_NC, partition, ref advanced, context, libHandle);
                 }
             }
@@ -610,7 +609,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
                 if (temp != (IntPtr)0)
                 {
-                    // error information is available		            
+                    // error information is available
                     exception = ExceptionHelper.CreateSyncAllException(temp, true);
                     if (exception == null)
                     {

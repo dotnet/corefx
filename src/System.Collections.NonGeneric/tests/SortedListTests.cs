@@ -213,14 +213,12 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttribute_Empty()
         {
             Assert.Equal("Count = 0", DebuggerAttributes.ValidateDebuggerDisplayReferences(new SortedList()));
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttribute_NormalList()
         {
             var list = new SortedList() { { "a", 1 }, { "b", 2 } };
@@ -231,7 +229,6 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttribute_SynchronizedList()
         {
             var list = SortedList.Synchronized(new SortedList() { { "a", 1 }, { "b", 2 } });
@@ -242,7 +239,6 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttribute_NullSortedList_ThrowsArgumentNullException()
         {
             bool threwNull = false;
@@ -259,7 +255,6 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "This test intentionally reflects on an internal member of SortedList. Cannot do that on UaoAot.")]
         public void EnsureCapacity_NewCapacityLessThanMin_CapsToMaxArrayLength()
         {
             // A situation like this occurs for very large lengths of SortedList.
@@ -1408,7 +1403,7 @@ namespace System.Collections.Tests
                 Assert.Equal(2048, sortList2[101]);
 
                 sortList2[102] = null;
-                Assert.Equal(null, sortList2[102]);
+                Assert.Null(sortList2[102]);
             });
         }
 
@@ -1494,7 +1489,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public void SetByIndex_InvalidIndex_ThrowsArgumentOutOfRangeExeption()
+        public void SetByIndex_InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1555,7 +1550,6 @@ namespace System.Collections.Tests
 
         [Fact]
         [OuterLoop]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "https://github.com/dotnet/corefx/pull/34339")] // Changed behavior
         public void GetSyncRootBasic()
         {
             // Testing SyncRoot is not as simple as its implementation looks like. This is the working
@@ -1572,7 +1566,7 @@ namespace System.Collections.Tests
                 sortListMother.Add("Key_" + i, "Value_" + i);
             }
 
-            Assert.Equal(sortListMother.SyncRoot.GetType(), typeof(SortedList));
+            Assert.Equal(typeof(SortedList), sortListMother.SyncRoot.GetType());
 
             SortedList sortListSon = SortedList.Synchronized(sortListMother);
             _sortListGrandDaughter = SortedList.Synchronized(sortListSon);

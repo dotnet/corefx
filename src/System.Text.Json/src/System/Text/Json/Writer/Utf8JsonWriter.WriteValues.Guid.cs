@@ -13,17 +13,17 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the <see cref="Guid"/> value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The value to be written as a JSON string as an element of a JSON array.</param>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
+        /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (that is, 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
         /// </remarks>
         public void WriteStringValue(Guid value)
         {
             ValidateWritingValue();
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteStringValueIndented(value);
             }
@@ -81,13 +81,15 @@ namespace System.Text.Json
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
-            if (_tokenType != JsonTokenType.None)
+            if (_tokenType != JsonTokenType.PropertyName)
             {
-                WriteNewLine(output);
+                if (_tokenType != JsonTokenType.None)
+                {
+                    WriteNewLine(output);
+                }
+                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
+                BytesPending += indent;
             }
-
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
 
             output[BytesPending++] = JsonConstants.Quote;
 
