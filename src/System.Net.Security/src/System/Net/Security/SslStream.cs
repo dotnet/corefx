@@ -452,22 +452,31 @@ namespace System.Net.Security
                 this);
         #endregion
 
-        public override bool IsAuthenticated => _context != null && _context.IsValidContext && _exception == null && _handshakeCompleted;
+        private bool IsAuthenticatedCore
+        {
+            get
+            {
+                SecureChannel context = _context;
+                return context != null && context.IsValidContext && _exception == null && _handshakeCompleted;
+            }
+        }
+
+        public override bool IsAuthenticated => IsAuthenticatedCore;
 
         public override bool IsMutuallyAuthenticated
         {
             get
             {
                 return
-                    IsAuthenticated &&
+                    IsAuthenticatedCore &&
                     (_context.IsServer ? _context.LocalServerCertificate : _context.LocalClientCertificate) != null &&
                     _context.IsRemoteCertificateAvailable; /* does not work: Context.IsMutualAuthFlag;*/
             }
         }
 
-        public override bool IsEncrypted => IsAuthenticated;
+        public override bool IsEncrypted => IsAuthenticatedCore;
 
-        public override bool IsSigned => IsAuthenticated;
+        public override bool IsSigned => IsAuthenticatedCore;
 
         public override bool IsServer => _context != null && _context.IsServer;
 
@@ -649,11 +658,11 @@ namespace System.Net.Security
         //
         public override bool CanSeek => false;
 
-        public override bool CanRead => IsAuthenticated && InnerStream.CanRead;
+        public override bool CanRead => IsAuthenticatedCore && InnerStream.CanRead;
 
         public override bool CanTimeout => InnerStream.CanTimeout;
 
-        public override bool CanWrite => IsAuthenticated && InnerStream.CanWrite && !_shutdown;
+        public override bool CanWrite => IsAuthenticatedCore && InnerStream.CanWrite && !_shutdown;
 
         public override int ReadTimeout
         {
@@ -849,7 +858,7 @@ namespace System.Net.Security
         {
             ThrowIfExceptional();
 
-            if (!IsAuthenticated)
+            if (!IsAuthenticatedCore)
             {
                 ThrowNotAuthenticated();
             }
@@ -860,7 +869,7 @@ namespace System.Net.Security
         {
             ThrowIfExceptional();
 
-            if (!IsAuthenticated)
+            if (!IsAuthenticatedCore)
             {
                 ThrowNotAuthenticated();
             }
