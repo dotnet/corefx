@@ -200,6 +200,13 @@ namespace System.Net.Http
                         {
                             _requestCompletionState = StreamCompletionState.Failed;
 
+                            // This duplicates some of the existing logic in Cancel.
+                            // Cancel takes the lock, so we can't call it here while holding the lock.
+                            // We can't call Cancel before taking the lock, because we don't want to cancel in the _requestBodyAbandoned case.
+                            // But we also don't want to call Cancel after releasing the lock, because that can cause a race
+                            // where the client sees the request body has failed but the response body hasn't.
+                            // We should consider how to refactor this logic to avoid code duplication.
+
                             // Cancel the response body, if not complete.
                             if (_responseCompletionState == StreamCompletionState.InProgress)
                             {
