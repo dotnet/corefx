@@ -65,10 +65,19 @@ namespace HttpStress
                 // trigger a random cancellation
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(_globalToken);
 
-                int delayMs = _random.Next(0, 2);
                 Task<HttpResponseMessage> task = _client.SendAsync(request, httpCompletion, cts.Token);
-                if (delayMs > 0)
-                    await Task.Delay(delayMs);
+
+                // either spinwait or delay before triggering cancellation
+                if (GetRandomBoolean(probability: 0.66))
+                {
+                    Thread.SpinWait(_random.Next(0, 500));
+                }
+                else
+                {
+                    // 60ms is the 99th percentile when
+                    // running the stress suite locally under default load
+                    await Task.Delay(_random.Next(0, 60));
+                }
 
                 cts.Cancel();
                 IsCancellationRequested = true;
