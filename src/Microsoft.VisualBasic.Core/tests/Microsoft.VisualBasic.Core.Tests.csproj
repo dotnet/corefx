@@ -33,11 +33,6 @@
     <Compile Include="Microsoft\VisualBasic\CompilerServices\OptionTextAttributeTests.cs" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\StandardModuleAttributeTests.cs" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\StructUtilsTests.cs" />
-    <Compile Include="Microsoft\VisualBasic\Devices\ClockTests.cs" />
-    <Compile Include="Microsoft\VisualBasic\Devices\ComputerInfoTests.cs" />
-    <Compile Include="Microsoft\VisualBasic\Devices\ComputerTests.cs" />
-    <Compile Include="Microsoft\VisualBasic\Devices\NetworkAvailableEventArgsTests.cs" />
-    <Compile Include="Microsoft\VisualBasic\Devices\ServerComputerTests.cs" />
     <Compile Include="Microsoft\VisualBasic\FileIO\FileSystemTests.cs" />
     <Compile Include="Microsoft\VisualBasic\FileIO\SpecialDirectoriesTests.cs" />
     <Compile Include="Microsoft\VisualBasic\FileIO\TextFieldParserTests.cs" />
