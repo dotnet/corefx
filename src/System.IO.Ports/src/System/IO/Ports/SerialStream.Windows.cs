@@ -567,7 +567,7 @@ namespace System.IO.Ports
 
             // Error checking done in SerialPort.
 
-            SafeFileHandle tempHandle = OpenPort(portName); // OpenPort(portNumber);
+            SafeFileHandle tempHandle = OpenPort(portName); // OpenPort(portNumber); // Need to handle this for all other Windows Platforms eg SerialStrem.UAP
 
             if (tempHandle.IsInvalid)
             {

@@ -16,5 +16,11 @@ internal partial class Interop
              uint uPortNumber,
              int dwDesiredAccess,
              int dwFlagsAndAttributes);
+
+        [DllImport(Libraries.CoreComm_L1_1_1, SetLastError = true)]
+        internal static extern SafeFileHandle OpenCommPort(
+            string portName,  // Is Sybolic Device Name Possible here? eg '\\.\USB_VID......'
+            int dwDesiredAccess,
+            int dwFlagsAndAttributes);
     }
 }

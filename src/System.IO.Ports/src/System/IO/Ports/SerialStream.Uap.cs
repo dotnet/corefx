@@ -15,5 +15,12 @@ namespace System.IO.Ports
                 Interop.Kernel32.GenericOperations.GENERIC_READ | Interop.Kernel32.GenericOperations.GENERIC_WRITE,
                 Interop.Kernel32.FileOperations.FILE_FLAG_OVERLAPPED);
         }
+        public SafeFileHandle OpenPort(string portName)
+        {
+            return Interop.mincore.OpenCommPort(
+                portName,
+                Interop.Kernel32.GenericOperations.GENERIC_READ | Interop.Kernel32.GenericOperations.GENERIC_WRITE,
+                Interop.Kernel32.FileOperations.FILE_FLAG_OVERLAPPED);
+        }
     }
 }
