@@ -30,13 +30,6 @@
     <Compile Include="Microsoft\VisualBasic\FileIO\FileSystem.Unix.vb" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Microsoft\VisualBasic\ApplicationServices\ApplicationBase.vb" />
-    <Compile Include="Microsoft\VisualBasic\ApplicationServices\AssemblyInfo.vb" />
-    <Compile Include="Microsoft\VisualBasic\ApplicationServices\ConsoleApplicationBase.vb" />
-    <Compile Include="Microsoft\VisualBasic\ApplicationServices\StartupEventArgs.vb" />
-    <Compile Include="Microsoft\VisualBasic\ApplicationServices\StartupNextInstanceEventArgs.vb" />
-    <Compile Include="Microsoft\VisualBasic\ApplicationServices\UnhandledExceptionEventArgs.vb" />
-    <Compile Include="Microsoft\VisualBasic\ApplicationServices\User.vb" />
     <Compile Include="Microsoft\VisualBasic\Collection.vb" />
     <Compile Include="Microsoft\VisualBasic\ComClassAttribute.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\BooleanType.vb" />
