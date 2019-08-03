@@ -29,6 +29,8 @@ namespace HttpStress
 {
     public class StressServer : IDisposable
     {
+        private const string alphaNumeric = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
         private EventListener _eventListener;
         private readonly IWebHost _webHost;
 
@@ -110,7 +112,14 @@ namespace HttpStress
 
         private static void MapRoutes(IEndpointRouteBuilder endpoints, int maxContentLength)
         {
-            string contentSource = string.Concat(Enumerable.Repeat("1234567890", maxContentLength / 10));
+            string contentSource =
+                new String( 
+                    Enumerable
+                        .Range(0, maxContentLength)
+                        .SelectMany(_ => alphaNumeric)
+                        .Take(maxContentLength)
+                        .ToArray());
+
             var head = new[] { "HEAD" };
 
             endpoints.MapGet("/", async context =>

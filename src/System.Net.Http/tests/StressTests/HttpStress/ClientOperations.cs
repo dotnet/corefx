@@ -159,9 +159,10 @@ namespace HttpStress
                     {
                         ValidateHttpVersion(m, ctx.HttpVersion);
                         ValidateStatusCode(m);
-                        if ((await m.Content.ReadAsStringAsync()).Length != ctx.MaxContentLength)
+                        string content = await m.Content.ReadAsStringAsync();
+                        if (content.Length != ctx.MaxContentLength)
                         {
-                            throw new Exception("Got unexpected content length");
+                            throw new Exception($"Expected content length {ctx.MaxContentLength} but got {content.Length}");
                         }
                     }
                 }),
