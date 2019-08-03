@@ -2,21 +2,30 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO.Compression;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-
+using System.Threading;
 using SafeWinHttpHandle = Interop.WinHttp.SafeWinHttpHandle;
 
 namespace System.Net.Http
 {
     internal sealed class HttpWindowsProxy : IWebProxy, IDisposable
     {
-        private readonly Uri _insecureProxyUri;         // URI of the http system proxy if set
-        private readonly Uri _secureProxyUri;         // URI of the https system proxy if set
-        private readonly List<Regex> _bypass;           // list of domains not to proxy
-        private readonly bool _bypassLocal = false;     // we should bypass domain considered local
+        const int CacheCleanupFrequencyMilliseconds = 30 * 1000;
+        const int CacheCleanupAgeMilliseconds = 30 * 1000;
+
+        private readonly MultiProxy _insecureProxy;    // URI of the http system proxy if set
+        private readonly MultiProxy _secureProxy;      // URI of the https system proxy if set
+        private readonly ConcurrentDictionary<string, CachedProxy> _cachedProxies;
+        private readonly Timer _cacheCleanupTimer;
+        private readonly List<Regex> _bypass;          // list of domains not to proxy
+        private readonly bool _bypassLocal = false;    // we should bypass domain considered local
         private readonly List<IPAddress> _localIp;
         private ICredentials _credentials;
         private readonly WinInetProxyHelper _proxyHelper;
@@ -67,7 +76,11 @@ namespace System.Net.Http
             if (proxyHelper.ManualSettingsUsed)
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info(proxyHelper, $"ManualSettingsUsed, {proxyHelper.Proxy}");
-                ParseProxyConfig(proxyHelper.Proxy, out _insecureProxyUri, out _secureProxyUri);
+
+                if (!string.IsNullOrEmpty(proxyHelper.Proxy))
+                {
+                    ParseProxyConfig(proxyHelper.Proxy, out _secureProxy, out _insecureProxy);
+                }
 
                 if (!string.IsNullOrWhiteSpace(proxyHelper.ProxyBypass))
                 {
@@ -166,6 +179,21 @@ namespace System.Net.Http
                     }
                 }
             }
+
+            _cachedProxies = new ConcurrentDictionary<string, CachedProxy>();
+            _cacheCleanupTimer = new Timer(state =>
+            {
+                var cachedProxies = (ConcurrentDictionary<string, CachedProxy>)state;
+                int ticks = Environment.TickCount;
+
+                foreach (KeyValuePair<string, CachedProxy> kvp in cachedProxies)
+                {
+                    if ((ticks - kvp.Value.LastAccessTicks) > CacheCleanupAgeMilliseconds)
+                    {
+                        cachedProxies.TryRemove(kvp.Key, out _);
+                    }
+                }
+            }, _cachedProxies, CacheCleanupFrequencyMilliseconds, CacheCleanupFrequencyMilliseconds);
         }
 
         public void Dispose()
@@ -178,6 +206,8 @@ namespace System.Net.Http
                 {
                     SafeWinHttpHandle.DisposeAndClearHandle(ref _sessionHandle);
                 }
+
+                _cacheCleanupTimer.Dispose();
             }
         }
 
@@ -186,77 +216,112 @@ namespace System.Net.Http
         /// or whitespace separated list, with each entry in the following format:
         /// ([&lt;scheme&gt;=][&lt;scheme&gt;"://"]&lt;server&gt;[":"&lt;port&gt;])
         /// </summary>
-        private static void ParseProxyConfig(string value, out Uri insecureProxy, out Uri secureProxy)
+        private static void ParseProxyConfig(ReadOnlySpan<char> proxyString, out MultiProxy secureProxy, out MultiProxy insecureProxy)
         {
-            insecureProxy = null;
-            secureProxy = null;
-            if (string.IsNullOrEmpty(value))
-            {
-                return;
-            }
+            Uri[] secureUris = new Uri[4], insecureUris = new Uri[4];
+            int secureUriCount = 0, insecureUriCount = 0;
+            int iter = 0;
 
-            if (value.IndexOfAny(s_proxyDelimiters) == -1)
+            while (true)
             {
-                // Optimize out an allocation from Split() when no delimiters are present.
-                ParseProxyConfigPart(value, ref insecureProxy, ref secureProxy);
-                return;
-            }
-
-            string[] parts = value.Split(s_proxyDelimiters, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string part in parts)
-            {
-                ParseProxyConfigPart(part, ref insecureProxy, ref secureProxy);
-
-                if (insecureProxy != null && secureProxy != null)
+                // Skip any delimiters.
+                while(iter < proxyString.Length && Array.IndexOf(s_proxyDelimiters, proxyString[iter]) != -1)
                 {
-                    return;
+                    ++iter;
                 }
-            }
-        }
 
-        private static void ParseProxyConfigPart(ReadOnlySpan<char> part, ref Uri insecureProxy, ref Uri secureProxy)
-        {
-            ref Uri destUri = ref insecureProxy;
-            bool hasScheme = false;
-
-            if (part.StartsWith("http="))
-            {
-                hasScheme = true;
-                part = part.Slice(5);
-            }
-            else if (part.StartsWith("https="))
-            {
-                destUri = ref secureProxy;
-                hasScheme = true;
-                part = part.Slice(6);
-            }
-
-            if (part.StartsWith("http://"))
-            {
-                destUri = ref insecureProxy;
-                hasScheme = true;
-                part = part.Slice(7);
-            }
-            else if (part.StartsWith("https://"))
-            {
-                destUri = ref secureProxy;
-                hasScheme = true;
-                part = part.Slice(8);
-            }
-
-            string proxyString = string.Concat("http://", part);
-
-            if (!hasScheme)
-            {
-                if (Uri.TryCreate(proxyString, UriKind.Absolute, out Uri proxyUri))
+                if (iter == proxyString.Length)
                 {
-                    insecureProxy ??= proxyUri;
-                    secureProxy ??= proxyUri;
+                    break;
                 }
+
+                // Determine which scheme this part is for.
+                bool isSecure = true, isInsecure = true;
+
+                if (proxyString.Slice(iter).StartsWith("http="))
+                {
+                    isSecure = false;
+                    iter += 5;
+                }
+                else if (proxyString.Slice(iter).StartsWith("https="))
+                {
+                    isInsecure = false;
+                    iter += 6;
+                }
+
+                if (proxyString.Slice(iter).StartsWith("http://"))
+                {
+                    isSecure = false;
+                    isInsecure = true;
+                    iter += 7;
+                }
+                else if (proxyString.Slice(iter).StartsWith("https://"))
+                {
+                    isSecure = true;
+                    isInsecure = false;
+                    iter += 8;
+                }
+
+                // Find the next delimiter.
+                int end = iter;
+                while (end < proxyString.Length && Array.IndexOf(s_proxyDelimiters, proxyString[end]) == -1)
+                {
+                    ++end;
+                }
+
+                // return URI if it's a match to what we want.
+                if (Uri.TryCreate(string.Concat("http://", proxyString.Slice(iter, end - iter)), UriKind.Absolute, out Uri uri))
+                {
+                    if (isSecure)
+                    {
+                        if (secureUriCount == secureUris.Length)
+                        {
+                            Array.Resize(ref secureUris, secureUriCount * 3 / 2);
+                        }
+
+                        secureUris[secureUriCount++] = uri;
+                    }
+
+                    if (isInsecure)
+                    {
+                        if (insecureUriCount == insecureUris.Length)
+                        {
+                            Array.Resize(ref insecureUris, insecureUriCount * 3 / 2);
+                        }
+
+                        insecureUris[insecureUriCount++] = uri;
+                    }
+                }
+
+                iter = end;
             }
-            else if (destUri == null)
+
+            if (secureUriCount != 0)
             {
-                Uri.TryCreate(proxyString, UriKind.Absolute, out destUri);
+                if (secureUriCount != secureUris.Length)
+                {
+                    Array.Resize(ref secureUris, secureUriCount);
+                }
+
+                secureProxy = new MultiProxy(secureUris);
+            }
+            else
+            {
+                secureProxy = null;
+            }
+
+            if (insecureUriCount != 0)
+            {
+                if (insecureUriCount != insecureUris.Length)
+                {
+                    Array.Resize(ref insecureUris, insecureUriCount);
+                }
+
+                insecureProxy = new MultiProxy(insecureUris);
+            }
+            else
+            {
+                insecureProxy = null;
             }
         }
 
@@ -264,6 +329,14 @@ namespace System.Net.Http
         /// Gets the proxy URI. (IWebProxy interface)
         /// </summary>
         public Uri GetProxy(Uri uri)
+        {
+            return GetMultiProxy(uri)?.GetNextProxy();
+        }
+
+        /// <summary>
+        /// Gets the proxy URIs.
+        /// </summary>
+        public MultiProxy GetMultiProxy(Uri uri)
         {
             // We need WinHTTP to detect and/or process a PAC (JavaScript) file. This maps to
             // "Automatically detect settings" and/or "Use automatic configuration script" from IE
@@ -284,10 +357,36 @@ namespace System.Net.Http
                         // we can return the Proxy uri directly.
                         if (proxyInfo.ProxyBypass == IntPtr.Zero)
                         {
-                            string proxyString = Marshal.PtrToStringUni(proxyInfo.Proxy);
-                            ParseProxyConfig(proxyString, out Uri insecureProxy, out Uri secureProxy);
+                            if (proxyInfo.Proxy != IntPtr.Zero)
+                            {
+                                string proxyStr = Marshal.PtrToStringUni(proxyInfo.Proxy);
 
-                            return IsSecureUri(uri) ? secureProxy : insecureProxy;
+                                MultiProxy secureProxy, insecureProxy;
+
+                                if (_cachedProxies.TryGetValue(proxyStr, out CachedProxy cached))
+                                {
+                                    cached.LastAccessTicks = Environment.TickCount;
+                                    secureProxy = cached.SecureProxy;
+                                    insecureProxy = cached.InsecureProxy;
+                                }
+                                else
+                                {
+                                    ParseProxyConfig(proxyStr, out secureProxy, out insecureProxy);
+
+                                    cached = new CachedProxy(insecureProxy, secureProxy);
+                                    cached.LastAccessTicks = Environment.TickCount;
+
+                                    // Don't worry about updating LastAccessTicks if we get a different
+                                    // CachedProxy. It should be roughly the same value as our tickCount.
+                                    cached = _cachedProxies.GetOrAdd(proxyStr, cached);
+                                }
+
+                                return IsSecureUri(uri) ? secureProxy : insecureProxy;
+                            }
+                            else
+                            {
+                                return null;
+                            }
                         }
 
                         // A bypass list was also specified. This means that WinHTTP has fallen back to
@@ -363,7 +462,7 @@ namespace System.Net.Http
                 }
 
                 // We did not find match on bypass list.
-                return IsSecureUri(uri) ? _secureProxyUri : _insecureProxyUri;
+                return IsSecureUri(uri) ? _secureProxy : _insecureProxy;
             }
 
             return null;
@@ -402,5 +501,19 @@ namespace System.Net.Http
 
         // Access function for unit tests.
         internal List<Regex> BypassList => _bypass;
+
+        sealed class CachedProxy
+        {
+            public MultiProxy InsecureProxy { get; }
+            public MultiProxy SecureProxy { get; }
+
+            public int LastAccessTicks { get; set; }
+
+            public CachedProxy(MultiProxy insecureProxy, MultiProxy secureProxy)
+            {
+                InsecureProxy = insecureProxy;
+                SecureProxy = secureProxy;
+            }
+        }
     }
 }

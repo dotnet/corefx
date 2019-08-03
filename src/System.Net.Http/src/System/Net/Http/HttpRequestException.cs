@@ -10,7 +10,7 @@ namespace System.Net.Http
     [SuppressMessage("Microsoft.Serialization", "CA2229")]
     public class HttpRequestException : Exception
     {
-        internal bool AllowRetry { get; }
+        internal RequestRetryType AllowRetry { get; }
 
         public HttpRequestException()
             : this(null, null)
@@ -31,10 +31,17 @@ namespace System.Net.Http
 
         // This constructor is used internally to indicate that a request was not successfully sent due to an IOException,
         // and the exception occurred early enough so that the request may be retried on another connection.
-        internal HttpRequestException(string message, Exception inner, bool allowRetry)
+        internal HttpRequestException(string message, Exception inner, RequestRetryType allowRetry)
             : this(message, inner)
         {
             AllowRetry = allowRetry;
         }
+    }
+
+    internal enum RequestRetryType
+    {
+        NoRetry,
+        RetryOnSameProxy,
+        RetryOnNextProxy
     }
 }

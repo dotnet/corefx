@@ -430,6 +430,9 @@
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpWindowsProxy.cs">
       <Link>ProductionCode\System\Net\Http\HttpWindowsProxy.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\MultiProxy.cs">
+      <Link>ProductionCode\System\Net\Http\MultiProxy.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\src\System\Net\Http\WinHttpException.cs">
       <Link>ProductionCode\System\Net\Http\WinHttpException.cs</Link>
     </Compile>
