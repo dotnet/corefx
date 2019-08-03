@@ -156,6 +156,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
                 out int bytesRead,
                 skipCopy: true);
 
+            Assert.Equal(Pkcs12Documents.SimpleOracleWallet.Length, bytesRead);
             Assert.Equal(Pkcs12IntegrityMode.Password, info.IntegrityMode);
             Assert.False(info.VerifyMac(ReadOnlySpan<char>.Empty), "VerifyMac(no password)");
             Assert.False(info.VerifyMac(""), "VerifyMac(empty password)");
