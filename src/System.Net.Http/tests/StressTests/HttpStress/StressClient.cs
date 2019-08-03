@@ -67,6 +67,7 @@ namespace HttpStress
                 Console.WriteLine();
 
                 _aggregator.PrintCurrentResults(_stopwatch.Elapsed);
+                _aggregator.PrintLatencies();
                 _aggregator.PrintFailureTypes();
             }
         }
@@ -90,6 +91,7 @@ namespace HttpStress
             {
                 // create random instance specific to the current worker
                 var random = new Random(Combine(taskNum, _config.RandomSeed));
+                var stopwatch = new Stopwatch();
 
                 for (long i = taskNum; ; i++)
                 {
@@ -99,19 +101,20 @@ namespace HttpStress
                     int opIndex = (int)(i % _clientOperations.Length);
                     (string operation, Func<RequestContext, Task> func) = _clientOperations[opIndex];
                     var requestContext = new RequestContext(_config, client, random, _cts.Token, taskNum);
+                    stopwatch.Restart();
                     try
                     {
                         await func(requestContext);
 
-                        _aggregator.RecordSuccess(opIndex);
+                        _aggregator.RecordSuccess(opIndex, stopwatch.Elapsed);
                     }
                     catch (OperationCanceledException) when (requestContext.IsCancellationRequested || _cts.IsCancellationRequested)
                     {
-                        _aggregator.RecordCancellation(opIndex);
+                        _aggregator.RecordCancellation(opIndex, stopwatch.Elapsed);
                     }
                     catch (Exception e)
                     {
-                        _aggregator.RecordFailure(e, opIndex, taskNum: taskNum, iteration: i);
+                        _aggregator.RecordFailure(e, opIndex, stopwatch.Elapsed, taskNum: taskNum, iteration: i);
                     }
                 }
 
@@ -165,6 +168,7 @@ namespace HttpStress
             private long _lastTotal = -1;
 
             private readonly ConcurrentDictionary<(Type exception, string errorMessage), StressFailureType> _failureTypes;
+            private readonly ConcurrentBag<double> _latencies = new ConcurrentBag<double>();
 
             public StressResultAggregator((string name, Func<RequestContext, Task>)[] operations)
             {
@@ -175,22 +179,28 @@ namespace HttpStress
                 _failureTypes = new ConcurrentDictionary<(Type exception, string errorMessage), StressFailureType>();
             }
 
-            public void RecordSuccess(int operationIndex)
+            public void RecordSuccess(int operationIndex, TimeSpan elapsed)
             {
                 Interlocked.Increment(ref _totalRequests);
                 Interlocked.Increment(ref _successes[operationIndex]);
+
+                _latencies.Add(elapsed.TotalMilliseconds);
             }
 
-            public void RecordCancellation(int operationIndex)
+            public void RecordCancellation(int operationIndex, TimeSpan elapsed)
             {
                 Interlocked.Increment(ref _totalRequests);
                 Interlocked.Increment(ref _cancellations[operationIndex]);
+
+                _latencies.Add(elapsed.TotalMilliseconds);
             }
 
-            public void RecordFailure(Exception exn, int operationIndex, int taskNum, long iteration)
+            public void RecordFailure(Exception exn, int operationIndex, TimeSpan elapsed, int taskNum, long iteration)
             {
                 Interlocked.Increment(ref _totalRequests);
                 Interlocked.Increment(ref _failures[operationIndex]);
+
+                _latencies.Add(elapsed.TotalMilliseconds);
 
                 RecordFailureType();
                 PrintToConsole();
@@ -300,6 +310,31 @@ namespace HttpStress
                 Console.ResetColor();
                 Console.WriteLine(_failures.Sum().ToString("N0"));
                 Console.WriteLine();
+            }
+
+            public void PrintLatencies()
+            {
+                var latencies = _latencies.ToArray();
+                Array.Sort(latencies);
+
+                Console.WriteLine($"Latency(ms) : n={latencies.Length}, p50={Pc(0.5)}, p75={Pc(0.75)}, p99={Pc(0.99)}, p999={Pc(0.999)}, max={Pc(1)}");
+                Console.WriteLine();
+
+                double Pc(double percentile)
+                {
+                    int N = latencies.Length;
+                    double n = (N - 1) * percentile + 1;
+                    if (n == 1) return rnd(latencies[0]);
+                    else if (n == N) return rnd(latencies[N - 1]);
+                    else
+                    {
+                        int k = (int)n;
+                        double d = n - k;
+                        return rnd(latencies[k - 1] + d * (latencies[k] - latencies[k - 1]));
+                    }
+
+                    double rnd(double value) => Math.Round(value, 2);
+                }
             }
 
             public void PrintFailureTypes()
