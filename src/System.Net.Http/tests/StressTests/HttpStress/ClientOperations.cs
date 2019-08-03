@@ -164,6 +164,11 @@ namespace HttpStress
                         {
                             throw new Exception($"Expected content length {ctx.MaxContentLength} but got {content.Length}");
                         }
+
+                        if (!ServerContentUtils.IsValidServerContent(content))
+                        {
+                            throw new Exception("Unexpected response content");
+                        }
                     }
                 }),
 

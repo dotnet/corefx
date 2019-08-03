@@ -29,7 +29,6 @@ namespace HttpStress
 {
     public class StressServer : IDisposable
     {
-        private const string alphaNumeric = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
         private EventListener _eventListener;
         private readonly IWebHost _webHost;
@@ -112,14 +111,7 @@ namespace HttpStress
 
         private static void MapRoutes(IEndpointRouteBuilder endpoints, int maxContentLength)
         {
-            string contentSource =
-                new String( 
-                    Enumerable
-                        .Range(0, maxContentLength)
-                        .SelectMany(_ => alphaNumeric)
-                        .Take(maxContentLength)
-                        .ToArray());
-
+            string contentSource = ServerContentUtils.CreateStringContent(maxContentLength);
             var head = new[] { "HEAD" };
 
             endpoints.MapGet("/", async context =>
@@ -291,5 +283,29 @@ namespace HttpStress
                 }
             }
         }
+    }
+
+    public static class ServerContentUtils
+    {
+        // deterministically generate ascii string of given length
+        public static string CreateStringContent(int contentSize) =>
+            new String( 
+                Enumerable
+                    .Range(0, contentSize)
+                    .Select(i => (char)(i % 128))
+                    .ToArray());
+
+        // used for validating content on client side
+        public static bool IsValidServerContent(string input)
+        {
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] != i % 128)
+                    return false;
+            }
+
+            return true;
+        }
+
     }
 }
