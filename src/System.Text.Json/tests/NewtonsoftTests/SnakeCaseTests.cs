@@ -1,7 +1,3 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
 // Copyright (c) 2007 James Newton-King
 //
 // Permission is hereby granted, free of charge, to any person
@@ -30,31 +26,31 @@ using Xunit;
 
 namespace System.Text.Json.Tests
 {
-    public class CamelCaseTests
+    public class SnakeCaseTests
     {
-        private static readonly JsonSerializerOptions s_camelCaseAndIndentedOption = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions s_snakeCaseAndIndentedOption = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCase,
             WriteIndented = true,
         };
 
         [Fact]
-        public void JsonSerializerCamelCaseSettings()
+        public void JsonSerializerSnakeCaseSettings()
         {
             Person person = new Person();
             person.BirthDate = new DateTime(2000, 11, 20, 23, 55, 44, DateTimeKind.Utc);
             person.LastModified = new DateTime(2000, 11, 20, 23, 55, 44, DateTimeKind.Utc);
             person.Name = "Name!";
 
-            string json = JsonSerializer.Serialize(person, s_camelCaseAndIndentedOption);
+            string json = JsonSerializer.Serialize(person, s_snakeCaseAndIndentedOption);
 
             Assert.Equal(@"{
   ""name"": ""Name!"",
-  ""birthDate"": ""2000-11-20T23:55:44Z"",
-  ""lastModified"": ""2000-11-20T23:55:44Z""
+  ""birth_date"": ""2000-11-20T23:55:44Z"",
+  ""last_modified"": ""2000-11-20T23:55:44Z""
 }", json);
 
-            Person deserializedPerson = JsonSerializer.Deserialize<Person>(json, s_camelCaseAndIndentedOption);
+            Person deserializedPerson = JsonSerializer.Deserialize<Person>(json, s_snakeCaseAndIndentedOption);
 
             Assert.Equal(person.BirthDate, deserializedPerson.BirthDate);
             Assert.Equal(person.LastModified, deserializedPerson.LastModified);
@@ -79,11 +75,11 @@ namespace System.Text.Json.Tests
                 Sizes = new[] { "Small", "Medium", "Large" }
             };
 
-            string json = JsonSerializer.Serialize(product, s_camelCaseAndIndentedOption);
+            string json = JsonSerializer.Serialize(product, s_snakeCaseAndIndentedOption);
 
             Assert.Equal(@"{
   ""name"": ""Widget"",
-  ""expiryDate"": ""2010-12-20T18:01:00Z"",
+  ""expiry_date"": ""2010-12-20T18:01:00Z"",
   ""price"": 9.99,
   ""sizes"": [
     ""Small"",
