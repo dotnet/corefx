@@ -65,7 +65,7 @@ namespace System.Net
         public IPAddress Address
         {
             get => _address;
-            set => _address = value;
+            set => _address = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         /// <summary>
@@ -155,11 +155,17 @@ namespace System.Net
 
         public override EndPoint Create(SocketAddress socketAddress)
         {
+            if (socketAddress == null)
+            {
+                throw new ArgumentNullException(nameof(socketAddress));
+            }
             if (socketAddress.Family != AddressFamily)
             {
                 throw new ArgumentException(SR.Format(SR.net_InvalidAddressFamily, socketAddress.Family.ToString(), GetType().FullName, AddressFamily.ToString()), nameof(socketAddress));
             }
-            if (socketAddress.Size < 8)
+
+            int minSize = AddressFamily == AddressFamily.InterNetworkV6 ? SocketAddress.IPv6AddressSize : SocketAddress.IPv4AddressSize;
+            if (socketAddress.Size < minSize)
             {
                 throw new ArgumentException(SR.Format(SR.net_InvalidSocketAddressSize, socketAddress.GetType().FullName, GetType().FullName), nameof(socketAddress));
             }
