@@ -8,25 +8,30 @@ namespace System.Text.Json.Tests
 {
     public static partial class JsonNodeTests
     {
-        private delegate bool TryGetValue<T>(out T result);
+        private delegate bool TryGetValue<T>(JsonNumber number, out T result);
 
-        private static void SimpleNumberTests<T>(
+        private static void TestInitialization<T>(
                 T value,
-                Func<JsonNumber, T> ctor,
+                Func<T, JsonNumber> ctor,
                 Action<JsonNumber, T> setter,
-                Func<T, JsonNumber> getter, TryGetValue<T> tryGetter,
+                Func<JsonNumber, T> getter, 
+                TryGetValue<T> tryGetter,
                 Func<T, JsonNumber> implicitCaster)
         {
+            // Default constructor:
             JsonNumber number = new JsonNumber();
             setter(number, value);
             AssertValue(value, number, getter, tryGetter);
 
+            // Numeric type constructor:
             number = ctor(value);
             AssertValue(value, number, getter, tryGetter);
 
+            // String constructor:
             number = new JsonNumber(value.ToString());
             AssertValue(value, number, getter, tryGetter);
-
+            
+            // Implicit cast:
             number = implicitCaster(value);
             AssertValue(value, number, getter, tryGetter);
         }
@@ -34,14 +39,13 @@ namespace System.Text.Json.Tests
         private static void AssertValue<T>(
                 T value,
                 JsonNumber number,
-                Func<T, JsonNumber> getter,
+                Func<JsonNumber, T> getter,
                 TryGetValue<T> tryGetter)
         {
             Assert.Equal(value, getter(number));
             Assert.True(tryGetter(number, out T result));
             Assert.Equal(value, result);
         }
-
 
         [Fact]
         public static void TestDefaultCtor()
@@ -66,12 +70,12 @@ namespace System.Text.Json.Tests
         [InlineData(byte.MaxValue)]
         public static void TestByte(byte value)
         {
-            SimpleNumberTests(
+            TestInitialization(
                 value,
                 v => new JsonNumber(v),
-                (number, v) => number.SetInt16(v),
-                number => number.GetInt16(),
-                (number, out v) => number.TryGetValue(out v),
+                (number, v) => number.SetByte(v),
+                number => number.GetByte(),
+                (JsonNumber number, out byte v) => number.TryGetByte(out v),
                 v => v);
         }
 
@@ -83,30 +87,13 @@ namespace System.Text.Json.Tests
         [InlineData(short.MaxValue)]
         public static void TestShort(short value)
         {
-            // Default constructor:
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetInt16(value);
-            Assert.Equal(value, jsonNumber.GetInt16());
-            Assert.True(jsonNumber.TryGetInt16(out short result));
-            Assert.Equal(value, result);
-
-            // Numeric type constructor:
-            jsonNumber = new JsonNumber(value);
-            Assert.Equal(value, jsonNumber.GetInt16());
-            Assert.True(jsonNumber.TryGetInt16(out result));
-            Assert.Equal(value, result);
-
-            // Implicit cast:
-            jsonNumber = value;
-            Assert.Equal(value, jsonNumber.GetInt16());
-            Assert.True(jsonNumber.TryGetInt16(out result));
-            Assert.Equal(value, result);
-
-            // String constructor:
-            jsonNumber = new JsonNumber(value.ToString());
-            Assert.Equal(value, jsonNumber.GetInt16());
-            Assert.True(jsonNumber.TryGetInt16(out result));
-            Assert.Equal(value, result);
+            TestInitialization(
+                value,
+                v => new JsonNumber(v),
+                (number, v) => number.SetInt16(v),
+                number => number.GetInt16(),
+                (JsonNumber number, out short v) => number.TryGetInt16(out v),
+                v => v);
         }
 
         [Theory]
@@ -119,30 +106,13 @@ namespace System.Text.Json.Tests
         [InlineData(int.MaxValue)]
         public static void TestInt(int value)
         {
-            // Default constructor:
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetInt32(value);
-            Assert.Equal(value, jsonNumber.GetInt32());
-            Assert.True(jsonNumber.TryGetInt32(out int result));
-            Assert.Equal(value, result);
-
-            // Numeric type constructor:
-            jsonNumber = new JsonNumber(value);
-            Assert.Equal(value, jsonNumber.GetInt32());
-            Assert.True(jsonNumber.TryGetInt32(out result));
-            Assert.Equal(value, result);
-
-            // Implicit cast:
-            jsonNumber = value;
-            Assert.Equal(value, jsonNumber.GetInt32());
-            Assert.True(jsonNumber.TryGetInt32(out result));
-            Assert.Equal(value, result);
-
-            // String constructor:
-            jsonNumber = new JsonNumber(value.ToString());
-            Assert.Equal(value, jsonNumber.GetInt32());
-            Assert.True(jsonNumber.TryGetInt32(out result));
-            Assert.Equal(value, result);
+            TestInitialization(
+                value,
+                v => new JsonNumber(v),
+                (number, v) => number.SetInt32(v),
+                number => number.GetInt32(),
+                (JsonNumber number, out int v) => number.TryGetInt32(out v),
+                v => v);
         }
 
         [Theory]
@@ -153,30 +123,13 @@ namespace System.Text.Json.Tests
         [InlineData(long.MaxValue)]
         public static void TestLong(long value)
         {
-            // Default constructor:
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetInt64(value);
-            Assert.Equal(value, jsonNumber.GetInt64());
-            Assert.True(jsonNumber.TryGetInt64(out long result));
-            Assert.Equal(value, result);
-
-            // Numeric type constructor:
-            jsonNumber = new JsonNumber(value);
-            Assert.Equal(value, jsonNumber.GetInt64());
-            Assert.True(jsonNumber.TryGetInt64(out result));
-            Assert.Equal(value, result);
-
-            // Implicit cast:
-            jsonNumber = value;
-            Assert.Equal(value, jsonNumber.GetInt64());
-            Assert.True(jsonNumber.TryGetInt64(out result));
-            Assert.Equal(value, result);
-
-            // String constructor:
-            jsonNumber = new JsonNumber(value.ToString());
-            Assert.Equal(value, jsonNumber.GetInt64());
-            Assert.True(jsonNumber.TryGetInt64(out result));
-            Assert.Equal(value, result);
+            TestInitialization(
+                value,
+                v => new JsonNumber(v),
+                (number, v) => number.SetInt64(v),
+                number => number.GetInt64(),
+                (JsonNumber number, out long v) => number.TryGetInt64(out v),
+                v => v);
         }
 
         [Theory]
@@ -189,30 +142,13 @@ namespace System.Text.Json.Tests
         [InlineData(float.MaxValue)]
         public static void TestFloat(float value)
         {
-            // Default constructor:
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetSingle(value);
-            Assert.Equal(value, jsonNumber.GetSingle());
-            Assert.True(jsonNumber.TryGetSingle(out float result));
-            Assert.Equal(value, result);
-
-            // Numeric type constructor:
-            jsonNumber = new JsonNumber(value);
-            Assert.Equal(value, jsonNumber.GetSingle());
-            Assert.True(jsonNumber.TryGetSingle(out result));
-            Assert.Equal(value, result);
-
-            // Implicit cast:
-            jsonNumber = value;
-            Assert.Equal(value, jsonNumber.GetSingle());
-            Assert.True(jsonNumber.TryGetSingle(out result));
-            Assert.Equal(value, result);
-
-            // String constructor:
-            jsonNumber = new JsonNumber(value.ToString());
-            Assert.Equal(value, jsonNumber.GetSingle());
-            Assert.True(jsonNumber.TryGetSingle(out result));
-            Assert.Equal(value, result);
+            TestInitialization(
+                value,
+                v => new JsonNumber(v),
+                (number, v) => number.SetSingle(v),
+                number => number.GetSingle(),
+                (JsonNumber number, out float v) => number.TryGetSingle(out v),
+                v => v);
         }
 
         [Theory]
@@ -225,30 +161,13 @@ namespace System.Text.Json.Tests
         [InlineData(double.MaxValue)]
         public static void TestDouble(double value)
         {
-            // Default constructor:
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetDouble(value);
-            Assert.Equal(value, jsonNumber.GetDouble());
-            Assert.True(jsonNumber.TryGetDouble(out double result));
-            Assert.Equal(value, result);
-
-            // Numeric type constructor:
-            jsonNumber = new JsonNumber(value);
-            Assert.Equal(value, jsonNumber.GetDouble());
-            Assert.True(jsonNumber.TryGetDouble(out result));
-            Assert.Equal(value, result);
-
-            // Implicit cast:
-            jsonNumber = value;
-            Assert.Equal(value, jsonNumber.GetDouble());
-            Assert.True(jsonNumber.TryGetDouble(out result));
-            Assert.Equal(value, result);
-
-            // String constructor:
-            jsonNumber = new JsonNumber(value.ToString());
-            Assert.Equal(value, jsonNumber.GetDouble());
-            Assert.True(jsonNumber.TryGetDouble(out result));
-            Assert.Equal(value, result);
+            TestInitialization(
+                value,
+                v => new JsonNumber(v),
+                (number, v) => number.SetDouble(v),
+                number => number.GetDouble(),
+                (JsonNumber number, out double v) => number.TryGetDouble(out v),
+                v => v);
         }
 
         [Theory]
@@ -259,30 +178,13 @@ namespace System.Text.Json.Tests
         [InlineData(sbyte.MaxValue)]
         public static void TestSByte(sbyte value)
         {
-            // Default constructor:
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetSByte(value);
-            Assert.Equal(value, jsonNumber.GetSByte());
-            Assert.True(jsonNumber.TryGetSByte(out sbyte result));
-            Assert.Equal(value, result);
-
-            // Numeric type constructor:
-            jsonNumber = new JsonNumber(value);
-            Assert.Equal(value, jsonNumber.GetSByte());
-            Assert.True(jsonNumber.TryGetSByte(out result));
-            Assert.Equal(value, result);
-
-            // Implicit cast:
-            jsonNumber = value;
-            Assert.Equal(value, jsonNumber.GetSByte());
-            Assert.True(jsonNumber.TryGetSByte(out result));
-            Assert.Equal(value, result);
-
-            // String constructor:
-            jsonNumber = new JsonNumber(value.ToString());
-            Assert.Equal(value, jsonNumber.GetSByte());
-            Assert.True(jsonNumber.TryGetSByte(out result));
-            Assert.Equal(value, result);
+            TestInitialization(
+                value,
+                v => new JsonNumber(v),
+                (number, v) => number.SetSByte(v),
+                number => number.GetSByte(),
+                (JsonNumber number, out sbyte v) => number.TryGetSByte(out v),
+                v => v);
         }
 
         [Theory]
@@ -291,30 +193,13 @@ namespace System.Text.Json.Tests
         [InlineData(ushort.MaxValue)]
         public static void TestUInt16(ushort value)
         {
-            // Default constructor:
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetUInt16(value);
-            Assert.Equal(value, jsonNumber.GetUInt16());
-            Assert.True(jsonNumber.TryGetUInt16(out ushort result));
-            Assert.Equal(value, result);
-
-            // Numeric type constructor:
-            jsonNumber = new JsonNumber(value);
-            Assert.Equal(value, jsonNumber.GetUInt16());
-            Assert.True(jsonNumber.TryGetUInt16(out result));
-            Assert.Equal(value, result);
-
-            // Implicit cast:
-            jsonNumber = value;
-            Assert.Equal(value, jsonNumber.GetUInt16());
-            Assert.True(jsonNumber.TryGetUInt16(out result));
-            Assert.Equal(value, result);
-
-            // String constructor:
-            jsonNumber = new JsonNumber(value.ToString());
-            Assert.Equal(value, jsonNumber.GetUInt16());
-            Assert.True(jsonNumber.TryGetUInt16(out result));
-            Assert.Equal(value, result);
+            TestInitialization(
+                value,
+                v => new JsonNumber(v),
+                (number, v) => number.SetUInt16(v),
+                number => number.GetUInt16(),
+                (JsonNumber number, out ushort v) => number.TryGetUInt16(out v),
+                v => v);
         }
 
         [Theory]
@@ -323,30 +208,13 @@ namespace System.Text.Json.Tests
         [InlineData(uint.MaxValue)]
         public static void TestUInt32(uint value)
         {
-            // Default constructor:
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetUInt32(value);
-            Assert.Equal(value, jsonNumber.GetUInt32());
-            Assert.True(jsonNumber.TryGetUInt32(out uint result));
-            Assert.Equal(value, result);
-
-            // Numeric type constructor:
-            jsonNumber = new JsonNumber(value);
-            Assert.Equal(value, jsonNumber.GetUInt32());
-            Assert.True(jsonNumber.TryGetUInt32(out result));
-            Assert.Equal(value, result);
-
-            // Implicit cast:
-            jsonNumber = value;
-            Assert.Equal(value, jsonNumber.GetUInt32());
-            Assert.True(jsonNumber.TryGetUInt32(out result));
-            Assert.Equal(value, result);
-
-            // String constructor:
-            jsonNumber = new JsonNumber(value.ToString());
-            Assert.Equal(value, jsonNumber.GetUInt32());
-            Assert.True(jsonNumber.TryGetUInt32(out result));
-            Assert.Equal(value, result);
+            TestInitialization(
+                value,
+                v => new JsonNumber(v),
+                (number, v) => number.SetUInt32(v),
+                number => number.GetUInt32(),
+                (JsonNumber number, out uint v) => number.TryGetUInt32(out v),
+                v => v);
         }
 
         [Theory]
@@ -355,62 +223,26 @@ namespace System.Text.Json.Tests
         [InlineData(ulong.MaxValue)]
         public static void TestUInt64(ulong value)
         {
-            // Default constructor:
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetUInt64(value);
-            Assert.Equal(value, jsonNumber.GetUInt64());
-            Assert.True(jsonNumber.TryGetUInt64(out ulong result));
-            Assert.Equal(value, result);
-
-            // Numeric type constructor:
-            jsonNumber = new JsonNumber(value);
-            Assert.Equal(value, jsonNumber.GetUInt64());
-            Assert.True(jsonNumber.TryGetUInt64(out result));
-            Assert.Equal(value, result);
-
-            // Implicit cast:
-            jsonNumber = value;
-            Assert.Equal(value, jsonNumber.GetUInt64());
-            Assert.True(jsonNumber.TryGetUInt64(out result));
-            Assert.Equal(value, result);
-
-            // String constructor:
-            jsonNumber = new JsonNumber(value.ToString());
-            Assert.Equal(value, jsonNumber.GetUInt64());
-            Assert.True(jsonNumber.TryGetUInt64(out result));
-            Assert.Equal(value, result);
+            TestInitialization(
+                value,
+                v => new JsonNumber(v),
+                (number, v) => number.SetUInt64(v),
+                number => number.GetUInt64(),
+                (JsonNumber number, out ulong v) => number.TryGetUInt64(out v),
+                v => v);
         }
 
-        [Theory]
-        [InlineData(0)]
-        public static void TestDecimal(decimal value)
+        [Fact]
+        public static void TestDecimal()
         {
-            //var value = decimal.MaxValue;
-
-            // Default constructor:
-            var jsonNumber = new JsonNumber();
-            jsonNumber.SetDecimal(value);
-            Assert.Equal(value, jsonNumber.GetDecimal());
-            Assert.True(jsonNumber.TryGetDecimal(out decimal result));
-            Assert.Equal(value, result);
-
-            // Numeric type constructor:
-            jsonNumber = new JsonNumber(value);
-            Assert.Equal(value, jsonNumber.GetDecimal());
-            Assert.True(jsonNumber.TryGetDecimal(out result));
-            Assert.Equal(value, result);
-
-            // Implicit cast:
-            jsonNumber = value;
-            Assert.Equal(value, jsonNumber.GetDecimal());
-            Assert.True(jsonNumber.TryGetDecimal(out result));
-            Assert.Equal(value, result);
-
-            // String constructor:
-            jsonNumber = new JsonNumber(value.ToString());
-            Assert.Equal(value, jsonNumber.GetDecimal());
-            Assert.True(jsonNumber.TryGetDecimal(out result));
-            Assert.Equal(value, result);
+            decimal value = decimal.MaxValue;
+            TestInitialization(
+                value,
+                v => new JsonNumber(v),
+                (number, v) => number.SetDecimal(v),
+                number => number.GetDecimal(),
+                (JsonNumber number, out decimal v) => number.TryGetDecimal(out v),
+                v => v);
         }
 
         [Theory]
@@ -471,7 +303,6 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData("0")]
-        [InlineData("1.1e1")]
         [InlineData("0.0")]
         [InlineData("-17")]
         [InlineData("17")]
