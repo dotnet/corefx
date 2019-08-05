@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -232,10 +233,23 @@ namespace System.Text.Json.Tests
                 v => v);
         }
 
-        [Fact]
-        public static void TestDecimal()
+        public static IEnumerable<decimal> DecimalData =>
+           new List<decimal>
+           {
+               decimal.One,
+               decimal.Zero,
+               decimal.MinusOne,
+               decimal.Divide(1,2),
+               decimal.Divide(1,3),
+               decimal.Divide(1,10),
+               decimal.MinValue,
+               decimal.MaxValue,
+           };
+
+        [Theory]
+        [MemberData(nameof(DecimalData))]
+        public static void TestDecimal(decimal value)
         {
-            decimal value = decimal.MaxValue;
             TestInitialization(
                 value,
                 v => new JsonNumber(v),
