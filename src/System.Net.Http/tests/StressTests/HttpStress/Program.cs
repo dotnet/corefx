@@ -95,7 +95,7 @@ public static class Program
         (string name, Func<RequestContext, Task> op)[] clientOperations = 
             ClientOperations.Operations
                 // annotate the operation name with its index
-                .Selecti((i,op) => ($"{i.ToString().PadLeft(2)}: {op.name}", op.operation))
+                .Select((op, i) => ($"{i.ToString().PadLeft(2)}: {op.name}", op.operation))
                 .ToArray();
 
         if ((config.RunMode & RunMode.both) == 0)
@@ -188,14 +188,5 @@ public static class Program
     private static S? Select<T, S>(this T? value, Func<T, S> mapper) where T : struct where S : struct
     {
         return value != null ? new S?(mapper(value.Value)) : null;
-    }
-
-    private static IEnumerable<S> Selecti<T, S>(this IEnumerable<T> values, Func<int, T, S> mapper)
-    {
-        int i = 0;
-        foreach (T t in values)
-        {
-            yield return mapper(i++, t);
-        }
     }
 }
