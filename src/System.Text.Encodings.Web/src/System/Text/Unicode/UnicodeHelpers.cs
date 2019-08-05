@@ -290,7 +290,7 @@ namespace System.Text.Unicode
                 {
                     // unmatched surrogate - substitute
                     wasSurrogatePair = false;
-                    needMoreData = true;    // Last character was high surrgate; we need more data.
+                    needMoreData = true; // Last character was high surrogate; we need more data.
                     return UNICODE_REPLACEMENT_CHAR;
                 }
             }
@@ -299,7 +299,7 @@ namespace System.Text.Unicode
                 // unmatched surrogate - substitute
                 Debug.Assert(char.IsLowSurrogate(first));
                 wasSurrogatePair = false;
-                needMoreData = true; // Last character was high surrgate; we need more data.
+                needMoreData = false;
                 return UNICODE_REPLACEMENT_CHAR;
             }
         }

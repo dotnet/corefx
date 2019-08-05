@@ -333,14 +333,14 @@ namespace Microsoft.Framework.WebEncoders
             JavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeRanges.All); // allow all codepoints
 
             // "a<unpaired leading>b<unpaired trailing>c<trailing before leading>d<unpaired trailing><valid>e<high at end of string>"
-            const string input = "a\uD800b\uDFFFc\uDFFF\uD800d\uDFFF\uD800\uDFFFe\uD800";
-            const string expected = "a\uFFFDb\uFFFDc\uFFFD\uFFFDd\uFFFD\\uD800\\uDFFFe\uFFFD"; // 'D800' 'DFFF' was preserved since it's valid
+            const string Input = "a\uD800b\uDFFFc\uDFFF\uD800d\uDFFF\uD800\uDFFFe\uD800";
+            const string Expected = "a\uFFFDb\uFFFDc\uFFFD\uFFFDd\uFFFD\\uD800\\uDFFFe\uFFFD"; // 'D800' 'DFFF' was preserved since it's valid
 
             // Act
-            string retVal = encoder.JavaScriptStringEncode(input);
+            string retVal = encoder.JavaScriptStringEncode(Input);
 
             // Assert
-            Assert.Equal(expected, retVal);
+            Assert.Equal(Expected, retVal);
         }
 
         [Fact]
@@ -350,74 +350,83 @@ namespace Microsoft.Framework.WebEncoders
             JavaScriptEncoder encoder = JavaScriptEncoder.Create(UnicodeRanges.All); // allow all codepoints
 
             // "a<unpaired leading>b<unpaired trailing>c<trailing before leading>d<unpaired trailing><valid>e<high at end of string>"
-            const string input = "a\uD800b\uDFFFc\uDFFF\uD800d\uDFFF\uD800\uDFFFe\uD800";
-            const string expected = "a\uFFFDb\uFFFDc\uFFFD\uFFFDd\uFFFD\\uD800\\uDFFFe\uFFFD"; // 'D800' 'DFFF' was preserved since it's valid
+            const string Input = "a\uD800b\uDFFFc\uDFFF\uD800d\uDFFF\uD800\uDFFFe\uD800";
+            const string Expected = "a\uFFFDb\uFFFDc\uFFFD\uFFFDd\uFFFD\\uD800\\uDFFFe\uFFFD"; // 'D800' 'DFFF' was preserved since it's valid
 
             // String-based Encode()
-            string retVal = encoder.Encode(input);
-            Assert.Equal(expected, retVal);
+            string retVal = encoder.Encode(Input);
+            Assert.Equal(Expected, retVal);
 
             // OperationStatus-based Encode()
             Span<char> destination = new char[23];
-            OperationStatus status = encoder.Encode(input.AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+            OperationStatus status = encoder.Encode(Input.AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
             Assert.Equal(OperationStatus.Done, status);
             Assert.Equal(13, charsConsumed);
-            Assert.Equal(13, input.Length);
+            Assert.Equal(13, Input.Length);
             Assert.Equal(23, charsWritten);
-            Assert.Equal(expected, new string(destination.Slice(0, charsWritten).ToArray()));
+            Assert.Equal(Expected, new string(destination.Slice(0, charsWritten).ToArray()));
         }
 
         [Fact]
-        public void JavaScriptEncoder_BadSurrogates_NeedsMoreData()
+        public void JavaScriptEncoder_HighSurrogatesReplaced()
         {
             // Arrange
             JavaScriptEncoder encoder = JavaScriptEncoder.Create(UnicodeRanges.All); // allow all codepoints
 
             // "a<unpaired leading>"
-            const string input = "a\uD800";
-            const string expected = "a\uFFFD";
+            const string Input = "a\uD800";
+            const string Expected = "a\uFFFD";
+
+            Assert.Equal(2, Input.Length);
 
             // String-based Encode()
-            string retVal = encoder.Encode(input);
-            Assert.Equal(expected, retVal);
+            string retVal = encoder.Encode(Input);
+            Assert.Equal(Expected, retVal);
 
             // OperationStatus-based Encode()
+            OperationStatus status;
             Span<char> destination = new char[100];
-            OperationStatus status = encoder.Encode(input.AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+            status = encoder.Encode(Input.AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
             Assert.Equal(OperationStatus.Done, status);
             Assert.Equal(2, charsConsumed);
-            Assert.Equal(2, input.Length);
             Assert.Equal(2, charsWritten);
-            Assert.Equal(expected, new string(destination.Slice(0, charsWritten).ToArray()));
+            Assert.Equal(Expected, new string(destination.Slice(0, charsWritten).ToArray()));
+        }
 
-            // OperationStatus-based Encode() with isFinalBlock=false
-            destination.Clear();
-            status = encoder.Encode(input.AsSpan(), destination, out charsConsumed, out charsWritten, isFinalBlock: false);
+        [Fact]
+        public void JavaScriptEncoder_NeedsMoreData()
+        {
+            // "a<paired leading><paired trailing>"
+            const string Input = "a\uD800\uDFFF";
+            const string Expected = "a\\uD800\\uDFFF";
+
+            Assert.Equal(3, Input.Length);
+
+            JavaScriptEncoder encoder = JavaScriptEncoder.Create(UnicodeRanges.All); // allow all codepoints
+            Span<char> destination = new char[100];
+
+            OperationStatus status;
+
+            // Just pass in the first two characters, making uD800 a high unpaired surrogate. Set isFinalBlock=false so we get NeedMoreData.
+            status = encoder.Encode(Input.AsSpan(0, 2), destination, out int charsConsumed1, out int charsWritten1, isFinalBlock: false);
             Assert.Equal(OperationStatus.NeedMoreData, status);
-            Assert.Equal(1, charsConsumed);
-            Assert.Equal(1, charsWritten);
-            Assert.Equal("a", new string(destination.Slice(0, charsWritten).ToArray()));
-
-            // "<paired leading><paired trailing>"
-            const string inputContinued = "\uD800\uDFFF";
+            Assert.Equal(1, charsConsumed1);
+            Assert.Equal(1, charsWritten1);
+            Assert.Equal("a", new string(destination.Slice(0, charsWritten1).ToArray()));
 
             // Append additional data; keep IsFinalBlock=false
-            {
-                status = encoder.Encode(inputContinued.AsSpan(), destination.Slice(charsWritten), out int charsConsumed2, out int charsWritten2, isFinalBlock: false);
-                Assert.Equal(OperationStatus.Done, status);
-                Assert.Equal(2, charsConsumed2);
-                Assert.Equal(12, charsWritten2);
-                Assert.Equal("a\\uD800\\uDFFF", new string(destination.Slice(0, charsWritten + charsWritten2).ToArray()));
-            }
+            status = encoder.Encode(Input.AsSpan(charsConsumed1, 2), destination.Slice(charsWritten1), out int charsConsumed2, out int charsWritten2, isFinalBlock: false);
+            Assert.Equal(OperationStatus.Done, status);
+            Assert.Equal(2, charsConsumed2);
+            Assert.Equal(12, charsWritten2);
+            Assert.Equal(Expected, new string(destination.Slice(0, charsWritten1 + charsWritten2).ToArray()));
 
-            // Append additional data; set IsFinalBlock=true
-            {
-                status = encoder.Encode(inputContinued.AsSpan(), destination.Slice(charsWritten), out int charsConsumed2, out int charsWritten2, isFinalBlock: true);
-                Assert.Equal(OperationStatus.Done, status);
-                Assert.Equal(2, charsConsumed2);
-                Assert.Equal(12, charsWritten2);
-                Assert.Equal("a\\uD800\\uDFFF", new string(destination.Slice(0, charsWritten + charsWritten2).ToArray()));
-            }
+            // Ensure isFinalBlock=true has the same result since there is no longer a trailing high unpaired surrogate.
+            status = encoder.Encode(Input.AsSpan(charsConsumed1, 2), destination.Slice(charsWritten1), out charsConsumed2, out charsWritten2, isFinalBlock: true);
+            Assert.Equal(OperationStatus.Done, status);
+            Assert.Equal(2, charsConsumed2);
+            Assert.Equal(12, charsWritten2);
+            Assert.Equal(Expected, new string(destination.Slice(0, charsWritten1 + charsWritten2).ToArray()));
         }
 
         [Fact]
