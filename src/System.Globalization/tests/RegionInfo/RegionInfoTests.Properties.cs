@@ -51,8 +51,8 @@ namespace System.Globalization.Tests
         [Theory]
         [InlineData("en-US", new string[] { "United States" })]
         [InlineData("US", new string[] { "United States" })]
-        [InlineData("zh-CN", new string[] { "China mainland", "People's Republic of China" })]
-        [InlineData("CN", new string[] { "China mainland", "People's Republic of China" })]
+        [InlineData("zh-CN", new string[] { "China", "People's Republic of China", "China mainland" })]
+        [InlineData("CN", new string[] { "China", "People's Republic of China", "China mainland" })]
         public void EnglishName(string name, string[] expected)
         {
             string result = new RegionInfo(name).EnglishName;
