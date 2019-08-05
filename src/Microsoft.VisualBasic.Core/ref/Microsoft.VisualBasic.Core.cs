@@ -1470,3 +1470,12 @@ namespace Microsoft.VisualBasic.MyServices
         public string Temp { get { throw null; } }
     }
 }
+namespace Microsoft.VisualBasic.MyServices.Internal
+{
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public partial class ContextValue<T>
+    {
+        public ContextValue() { }
+        public T Value { get { throw null; } set { } }
+    }
+}
