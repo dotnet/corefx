@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 // See THIRD-PARTY-NOTICES.TXT in the project root for license information.
 
+using System.Text;
+
 namespace System.Net.Http.HPack
 {
     internal struct HeaderField
@@ -30,5 +32,17 @@ namespace System.Net.Http.HPack
         public int Length => GetLength(Name.Length, Value.Length);
 
         public static int GetLength(int nameLength, int valueLenth) => nameLength + valueLenth + RfcOverhead;
+
+        public override string ToString()
+        {
+            if (Name?.Length > 0)
+            {
+                return Encoding.ASCII.GetString(Name) + ": " + Encoding.ASCII.GetString(Value ?? Array.Empty<byte>());
+            }
+            else
+            {
+                return "<empty>";
+            }
+        }
     }
 }
