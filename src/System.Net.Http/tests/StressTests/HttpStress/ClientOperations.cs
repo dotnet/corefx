@@ -74,7 +74,7 @@ namespace HttpStress
                     // bound spinning to 1ms
                     double spinTimeMs = _random.NextDouble();
                     Stopwatch sw = Stopwatch.StartNew();
-                    do { Thread.SpinWait(10); } while (!task.IsCompleted || sw.Elapsed.TotalMilliseconds < spinTimeMs);
+                    do { Thread.SpinWait(10); } while (!task.IsCompleted && sw.Elapsed.TotalMilliseconds < spinTimeMs);
                 }
                 else
                 {
