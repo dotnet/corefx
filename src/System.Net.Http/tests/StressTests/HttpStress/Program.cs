@@ -134,6 +134,7 @@ public static class Program
 
         Console.WriteLine("       .NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(object).Assembly.Location)));
         Console.WriteLine("    ASP.NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(WebHost).Assembly.Location)));
+        Console.WriteLine(" System.Net.Http: " + GetSysNetHttpAssemblyInfo());
         Console.WriteLine("          Server: " + (config.UseHttpSys ? "http.sys" : "Kestrel"));
         Console.WriteLine("      Server URL: " + config.ServerUri);
         Console.WriteLine("         Tracing: " + (config.LogPath == null ? (object)false : config.LogPath.Length == 0 ? (object)true : config.LogPath));
@@ -185,5 +186,11 @@ public static class Program
     private static S? Select<T, S>(this T? value, Func<T, S> mapper) where T : struct where S : struct
     {
         return value != null ? new S?(mapper(value.Value)) : null;
+    }
+
+    private static string GetSysNetHttpAssemblyInfo() 
+    {
+        string location = typeof(System.Net.Http.HttpClient).Assembly.Location;
+        return $"{location}, last modified {new FileInfo(location).LastWriteTime}";
     }
 }
