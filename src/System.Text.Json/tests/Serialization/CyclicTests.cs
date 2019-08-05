@@ -123,14 +123,19 @@ namespace System.Text.Json.Serialization.Tests
 
         public class Child1
         {
-            public IList<Child2> Child2List { get; set; } = new List<Child2>();
+            public IList<Child2> Child2IList { get; set; } = new List<Child2>();
+            public List<Child2> Child2List { get; set; } = new List<Child2>();
+            public Dictionary<string, Child2> Child2Dictionary { get; set; } = new Dictionary<string, Child2>();
             public Child2 Child2 { get; set; }
         }
 
         public class Child2
         {
-            public Child1 Child1 { get; set; }
-            public IList<Child1> Child1List { get; set; } = new List<Child1>();
+            // Add properties that cause a cycle (Root->Child1->Child2->Child1)
+            public Child1 Child1 { get; set; } 
+            public IList<Child1> Child1IList { get; set; }
+            public IList<Child1> Child1List { get; set; }
+            public Dictionary<string, Child1> Child1Dictionary { get; set; }
         }
 
         [Fact]
@@ -138,7 +143,9 @@ namespace System.Text.Json.Serialization.Tests
         {
             CycleRoot root = new CycleRoot();
             root.Child1 = new Child1();
+            root.Child1.Child2IList.Add(new Child2());
             root.Child1.Child2List.Add(new Child2());
+            root.Child1.Child2Dictionary.Add("0", new Child2());
             root.Child1.Child2 = new Child2();
             root.Child1.Child2.Child1 = new Child1();
 
@@ -147,7 +154,9 @@ namespace System.Text.Json.Serialization.Tests
 
             root = JsonSerializer.Deserialize<CycleRoot>(json);
             Assert.NotNull(root.Child1);
+            Assert.NotNull(root.Child1.Child2IList[0]);
             Assert.NotNull(root.Child1.Child2List[0]);
+            Assert.NotNull(root.Child1.Child2Dictionary["0"]);
             Assert.NotNull(root.Child1.Child2);
             Assert.NotNull(root.Child1.Child2.Child1);
 
