@@ -73,6 +73,7 @@ internal static class Utils
             return new CompareResult { ErrorMessage = "actual was null, but was expecting:\n" + expected };
         }
 
+        actual = actual.Replace('\u00A0', ' ');
         int commonLength = Min(actual.Length, expected.Length);
 
         for (int currentIndex = 0; currentIndex < commonLength; ++currentIndex)
