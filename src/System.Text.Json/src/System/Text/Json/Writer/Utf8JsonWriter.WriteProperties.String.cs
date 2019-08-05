@@ -141,7 +141,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, and up to 3x growth when transcoding
             int maxRequired = (escapedPropertyName.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + 4;
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -150,14 +150,14 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedPropertyName, output);
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
         }
 
         private void WriteStringIndentedPropertyName(ReadOnlySpan<char> escapedPropertyName)
@@ -172,7 +172,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, 1-2 bytes for new line, and up to 3x growth when transcoding
             int maxRequired = indent + (escapedPropertyName.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + 5 + s_newLineLength;
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -181,7 +181,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.None)
@@ -189,16 +189,16 @@ namespace System.Text.Json
                 WriteNewLine(output);
             }
 
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
+            JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
+            _currentIndex += indent;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedPropertyName, output);
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
-            output[BytesPending++] = JsonConstants.Space;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Space;
         }
 
         /// <summary>
@@ -293,7 +293,7 @@ namespace System.Text.Json
             int minRequired = escapedPropertyName.Length + 3; // 2 quotes for property name, and 1 colon
             int maxRequired = minRequired + 1; // Optionally, 1 list separator
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -302,15 +302,15 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            escapedPropertyName.CopyTo(output.Slice(BytesPending));
-            BytesPending += escapedPropertyName.Length;
+            escapedPropertyName.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += escapedPropertyName.Length;
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
         }
 
         private void WriteStringIndentedPropertyName(ReadOnlySpan<byte> escapedPropertyName)
@@ -324,7 +324,7 @@ namespace System.Text.Json
             int minRequired = indent + escapedPropertyName.Length + 4; // 2 quotes for property name, 1 colon, and 1 space
             int maxRequired = minRequired + 1 + s_newLineLength; // Optionally, 1 list separator and 1-2 bytes for new line
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -333,7 +333,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
             Debug.Assert(_options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
@@ -343,17 +343,17 @@ namespace System.Text.Json
                 WriteNewLine(output);
             }
 
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
+            JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
+            _currentIndex += indent;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            escapedPropertyName.CopyTo(output.Slice(BytesPending));
-            BytesPending += escapedPropertyName.Length;
+            escapedPropertyName.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += escapedPropertyName.Length;
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
-            output[BytesPending++] = JsonConstants.Space;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Space;
         }
 
         /// <summary>
@@ -1335,7 +1335,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, and up to 3x growth when transcoding
             int maxRequired = ((escapedPropertyName.Length + escapedValue.Length) * JsonConstants.MaxExpansionFactorWhileTranscoding) + 6;
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -1344,20 +1344,20 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedPropertyName, output);
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedValue, output);
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
 
         // TODO: https://github.com/dotnet/corefx/issues/36958
@@ -1369,7 +1369,7 @@ namespace System.Text.Json
             int minRequired = escapedPropertyName.Length + escapedValue.Length + 5; // 2 quotes for property name, 2 quotes for value, and 1 colon
             int maxRequired = minRequired + 1; // Optionally, 1 list separator
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -1378,22 +1378,22 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            escapedPropertyName.CopyTo(output.Slice(BytesPending));
-            BytesPending += escapedPropertyName.Length;
+            escapedPropertyName.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += escapedPropertyName.Length;
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            escapedValue.CopyTo(output.Slice(BytesPending));
-            BytesPending += escapedValue.Length;
+            escapedValue.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += escapedValue.Length;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
 
         // TODO: https://github.com/dotnet/corefx/issues/36958
@@ -1406,7 +1406,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, and up to 3x growth when transcoding
             int maxRequired = (escapedPropertyName.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + escapedValue.Length + 6;
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -1415,21 +1415,21 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedPropertyName, output);
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            escapedValue.CopyTo(output.Slice(BytesPending));
-            BytesPending += escapedValue.Length;
+            escapedValue.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += escapedValue.Length;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
 
         // TODO: https://github.com/dotnet/corefx/issues/36958
@@ -1442,7 +1442,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, and up to 3x growth when transcoding
             int maxRequired = (escapedValue.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + escapedPropertyName.Length + 6;
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -1451,21 +1451,21 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            escapedPropertyName.CopyTo(output.Slice(BytesPending));
-            BytesPending += escapedPropertyName.Length;
+            escapedPropertyName.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += escapedPropertyName.Length;
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedValue, output);
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
 
         // TODO: https://github.com/dotnet/corefx/issues/36958
@@ -1481,7 +1481,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, 1-2 bytes for new line, and up to 3x growth when transcoding
             int maxRequired = indent + ((escapedPropertyName.Length + escapedValue.Length) * JsonConstants.MaxExpansionFactorWhileTranscoding) + 7 + s_newLineLength;
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -1490,7 +1490,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
             Debug.Assert(_options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
@@ -1500,22 +1500,22 @@ namespace System.Text.Json
                 WriteNewLine(output);
             }
 
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
+            JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
+            _currentIndex += indent;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedPropertyName, output);
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
-            output[BytesPending++] = JsonConstants.Space;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Space;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedValue, output);
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
 
         // TODO: https://github.com/dotnet/corefx/issues/36958
@@ -1530,7 +1530,7 @@ namespace System.Text.Json
             int minRequired = indent + escapedPropertyName.Length + escapedValue.Length + 6; // 2 quotes for property name, 2 quotes for value, 1 colon, and 1 space
             int maxRequired = minRequired + 1 + s_newLineLength; // Optionally, 1 list separator and 1-2 bytes for new line
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -1539,7 +1539,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
             Debug.Assert(_options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
@@ -1549,24 +1549,24 @@ namespace System.Text.Json
                 WriteNewLine(output);
             }
 
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
+            JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
+            _currentIndex += indent;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            escapedPropertyName.CopyTo(output.Slice(BytesPending));
-            BytesPending += escapedPropertyName.Length;
+            escapedPropertyName.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += escapedPropertyName.Length;
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
-            output[BytesPending++] = JsonConstants.Space;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Space;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            escapedValue.CopyTo(output.Slice(BytesPending));
-            BytesPending += escapedValue.Length;
+            escapedValue.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += escapedValue.Length;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
 
         // TODO: https://github.com/dotnet/corefx/issues/36958
@@ -1582,7 +1582,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, 1-2 bytes for new line, and up to 3x growth when transcoding
             int maxRequired = indent + (escapedPropertyName.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + escapedValue.Length + 7 + s_newLineLength;
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -1591,7 +1591,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
             Debug.Assert(_options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
@@ -1601,23 +1601,23 @@ namespace System.Text.Json
                 WriteNewLine(output);
             }
 
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
+            JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
+            _currentIndex += indent;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedPropertyName, output);
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
-            output[BytesPending++] = JsonConstants.Space;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Space;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            escapedValue.CopyTo(output.Slice(BytesPending));
-            BytesPending += escapedValue.Length;
+            escapedValue.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += escapedValue.Length;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
 
         // TODO: https://github.com/dotnet/corefx/issues/36958
@@ -1633,7 +1633,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, 1-2 bytes for new line, and up to 3x growth when transcoding
             int maxRequired = indent + (escapedValue.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + escapedPropertyName.Length + 7 + s_newLineLength;
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -1642,7 +1642,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
             Debug.Assert(_options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
@@ -1652,23 +1652,23 @@ namespace System.Text.Json
                 WriteNewLine(output);
             }
 
-            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-            BytesPending += indent;
+            JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
+            _currentIndex += indent;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            escapedPropertyName.CopyTo(output.Slice(BytesPending));
-            BytesPending += escapedPropertyName.Length;
+            escapedPropertyName.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += escapedPropertyName.Length;
 
-            output[BytesPending++] = JsonConstants.Quote;
-            output[BytesPending++] = JsonConstants.KeyValueSeperator;
-            output[BytesPending++] = JsonConstants.Space;
+            output[_currentIndex++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
+            output[_currentIndex++] = JsonConstants.Space;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedValue, output);
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
     }
 }

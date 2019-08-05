@@ -50,11 +50,11 @@ namespace System.Text.Json
             Debug.Assert(consumed == bytes.Length);
 
             encodedBytes = encodedBytes.Slice(0, written);
-            Span<byte> destination = output.Slice(BytesPending);
+            Span<byte> destination = output.Slice(_currentIndex);
 
             Debug.Assert(destination.Length >= written);
             encodedBytes.Slice(0, written).CopyTo(destination);
-            BytesPending += written;
+            _currentIndex += written;
 
             if (outputText != null)
             {

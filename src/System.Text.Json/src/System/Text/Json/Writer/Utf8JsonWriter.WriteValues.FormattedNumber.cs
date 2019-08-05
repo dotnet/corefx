@@ -45,7 +45,7 @@ namespace System.Text.Json
         {
             int maxRequired = utf8Value.Length + 1; // Optionally, 1 list separator
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -54,11 +54,11 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
-            utf8Value.CopyTo(output.Slice(BytesPending));
-            BytesPending += utf8Value.Length;
+            utf8Value.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += utf8Value.Length;
         }
 
         private void WriteNumberValueIndented(ReadOnlySpan<byte> utf8Value)
@@ -70,7 +70,7 @@ namespace System.Text.Json
 
             int maxRequired = indent + utf8Value.Length + 1 + s_newLineLength; // Optionally, 1 list separator and 1-2 bytes for new line
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -79,7 +79,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.PropertyName)
@@ -88,12 +88,12 @@ namespace System.Text.Json
                 {
                     WriteNewLine(output);
                 }
-                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-                BytesPending += indent;
+                JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
+                _currentIndex += indent;
             }
 
-            utf8Value.CopyTo(output.Slice(BytesPending));
-            BytesPending += utf8Value.Length;
+            utf8Value.CopyTo(output.Slice(_currentIndex));
+            _currentIndex += utf8Value.Length;
         }
     }
 }

@@ -40,7 +40,7 @@ namespace System.Text.Json
         {
             int maxRequired = JsonConstants.MaximumFormatGuidLength + 3; // 2 quotes, and optionally, 1 list separator
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -49,16 +49,16 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            bool result = Utf8Formatter.TryFormat(value, output.Slice(BytesPending), out int bytesWritten);
+            bool result = Utf8Formatter.TryFormat(value, output.Slice(_currentIndex), out int bytesWritten);
             Debug.Assert(result);
-            BytesPending += bytesWritten;
+            _currentIndex += bytesWritten;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
 
         private void WriteStringValueIndented(Guid value)
@@ -69,7 +69,7 @@ namespace System.Text.Json
             // 2 quotes, and optionally, 1 list separator and 1-2 bytes for new line
             int maxRequired = indent + JsonConstants.MaximumFormatGuidLength + 3 + s_newLineLength;
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -78,7 +78,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.PropertyName)
@@ -87,17 +87,17 @@ namespace System.Text.Json
                 {
                     WriteNewLine(output);
                 }
-                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-                BytesPending += indent;
+                JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
+                _currentIndex += indent;
             }
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
-            bool result = Utf8Formatter.TryFormat(value, output.Slice(BytesPending), out int bytesWritten);
+            bool result = Utf8Formatter.TryFormat(value, output.Slice(_currentIndex), out int bytesWritten);
             Debug.Assert(result);
-            BytesPending += bytesWritten;
+            _currentIndex += bytesWritten;
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
     }
 }

@@ -40,7 +40,7 @@ namespace System.Text.Json
         {
             int maxRequired = JsonConstants.MaximumFormatDecimalLength + 1; // Optionally, 1 list separator
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -49,12 +49,12 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
-            bool result = Utf8Formatter.TryFormat(value, output.Slice(BytesPending), out int bytesWritten);
+            bool result = Utf8Formatter.TryFormat(value, output.Slice(_currentIndex), out int bytesWritten);
             Debug.Assert(result);
-            BytesPending += bytesWritten;
+            _currentIndex += bytesWritten;
         }
 
         private void WriteNumberValueIndented(decimal value)
@@ -64,7 +64,7 @@ namespace System.Text.Json
 
             int maxRequired = indent + JsonConstants.MaximumFormatDecimalLength + 1 + s_newLineLength; // Optionally, 1 list separator and 1-2 bytes for new line
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -73,7 +73,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.PropertyName)
@@ -82,13 +82,13 @@ namespace System.Text.Json
                 {
                     WriteNewLine(output);
                 }
-                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-                BytesPending += indent;
+                JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
+                _currentIndex += indent;
             }
 
-            bool result = Utf8Formatter.TryFormat(value, output.Slice(BytesPending), out int bytesWritten);
+            bool result = Utf8Formatter.TryFormat(value, output.Slice(_currentIndex), out int bytesWritten);
             Debug.Assert(result);
-            BytesPending += bytesWritten;
+            _currentIndex += bytesWritten;
         }
     }
 }

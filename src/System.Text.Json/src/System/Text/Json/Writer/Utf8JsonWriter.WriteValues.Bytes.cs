@@ -57,7 +57,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator
             int maxRequired = encodingLength + 3;
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -66,13 +66,13 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             Base64EncodeAndWrite(bytes, output, encodingLength);
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
 
         // TODO: https://github.com/dotnet/corefx/issues/36958
@@ -89,7 +89,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, and 1-2 bytes for new line
             int maxRequired = indent + encodingLength + 3 + s_newLineLength;
 
-            if (_memory.Length - BytesPending < maxRequired)
+            if (_memory.Length - _currentIndex < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -98,7 +98,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[BytesPending++] = JsonConstants.ListSeparator;
+                output[_currentIndex++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.PropertyName)
@@ -107,15 +107,15 @@ namespace System.Text.Json
                 {
                     WriteNewLine(output);
                 }
-                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
-                BytesPending += indent;
+                JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
+                _currentIndex += indent;
             }
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
 
             Base64EncodeAndWrite(bytes, output, encodingLength);
 
-            output[BytesPending++] = JsonConstants.Quote;
+            output[_currentIndex++] = JsonConstants.Quote;
         }
     }
 }
