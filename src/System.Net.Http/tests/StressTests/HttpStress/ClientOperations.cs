@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -70,13 +71,16 @@ namespace HttpStress
                 // either spinwait or delay before triggering cancellation
                 if (GetRandomBoolean(probability: 0.66))
                 {
-                    Thread.SpinWait(_random.Next(0, 500));
+                    // bound spinning to 1ms
+                    double spinTimeMs = _random.NextDouble();
+                    Stopwatch sw = Stopwatch.StartNew();
+                    do { Thread.SpinWait(10); } while (!task.IsCompleted || sw.Elapsed.TotalMilliseconds < spinTimeMs);
                 }
                 else
                 {
                     // 60ms is the 99th percentile when
                     // running the stress suite locally under default load
-                    await Task.Delay(_random.Next(0, 60));
+                    await Task.WhenAny(task, Task.Delay(_random.Next(0, 60)));
                 }
 
                 cts.Cancel();
