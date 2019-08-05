@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Text.Json.Tests
 {
-    public static partial class JsonNodeTests
+    public static class JsonNumberTests
     {
         private delegate bool TryGetValue<T>(JsonNumber number, out T result);
 
@@ -233,17 +233,17 @@ namespace System.Text.Json.Tests
                 v => v);
         }
 
-        public static IEnumerable<decimal> DecimalData =>
-           new List<decimal>
+        public static IEnumerable<object[]> DecimalData =>
+           new List<object[]>
            {
-               decimal.One,
-               decimal.Zero,
-               decimal.MinusOne,
-               decimal.Divide(1,2),
-               decimal.Divide(1,3),
-               decimal.Divide(1,10),
-               decimal.MinValue,
-               decimal.MaxValue,
+               new object[] { decimal.One },
+               new object[] { decimal.Zero },
+               new object[] { decimal.MinusOne },
+               new object[] { decimal.Divide(1, 2) },
+               new object[] { decimal.Divide(1, 3) },
+               new object[] { decimal.Divide(1, 10) },
+               new object[] { decimal.MinValue },
+               new object[] { decimal.MaxValue }
            };
 
         [Theory]
