@@ -62,7 +62,7 @@ namespace System.Net.Http.Unit.Tests.HPack
         [MemberData(nameof(CreateResizeData))]
         public void DynamicTable_Resize_Success(int initialMaxSize, int finalMaxSize, int insertSize)
         {
-            // This is purely to make it simple to perfectly reach 256 inserted bytes (our initial maxSize).
+            // This is purely to make it simple to perfectly reach our initial max size to test growing a full but non-wrapping buffer.
             Debug.Assert((insertSize % 64) == 0, $"{nameof(insertSize)} must be a multiple of 64 ({nameof(HeaderField)}.{nameof(HeaderField.RfcOverhead)} * 2)");
 
             var dynamicTable = new DynamicTable(maxSize: initialMaxSize);
