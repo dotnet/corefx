@@ -14,7 +14,7 @@ namespace Microsoft.VisualBasic.MyServices.Internal.Tests
         [Fact]
         public void NoValue()
         {
-            Assert.Equal(null, (new ContextValue<string>()).Value);
+            Assert.Null((new ContextValue<string>()).Value);
             Assert.Throws<NullReferenceException>(() => (new ContextValue<int>()).Value);
         }
 
@@ -36,7 +36,7 @@ namespace Microsoft.VisualBasic.MyServices.Internal.Tests
             context.Value = "Hello";
             var thread = new Thread(() =>
             {
-                Assert.Equal(null, context.Value);
+                Assert.Null(context.Value);
                 context.Value = "World";
                 Assert.Equal("World", context.Value);
             });
