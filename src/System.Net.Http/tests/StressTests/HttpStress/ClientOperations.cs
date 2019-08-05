@@ -397,6 +397,22 @@ namespace HttpStress
                         if (r != "") throw new Exception($"Got unexpected response: {r}");
                     }
                 }),
+
+                ("PUT Slow",
+                async ctx =>
+                {
+                    string content = ctx.GetRandomString(0, ctx.MaxContentLength);
+
+                    using (var req = new HttpRequestMessage(HttpMethod.Put, "/") { Content = new ByteAtATimeNoLengthContent(Encoding.ASCII.GetBytes(content)) })
+                    using (HttpResponseMessage m = await ctx.SendAsync(req))
+                    {
+                        ValidateHttpVersion(m, ctx.HttpVersion);
+                        ValidateStatusCode(m);
+
+                        string r = await m.Content.ReadAsStringAsync();
+                        if (r != "") throw new Exception($"Got unexpected response: {r}");
+                    }
+                }),
             };
 
         // Validation of a response message

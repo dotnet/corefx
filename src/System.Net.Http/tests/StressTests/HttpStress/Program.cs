@@ -145,7 +145,7 @@ public static class Program
         Console.WriteLine("  Content Length: " + config.MaxContentLength);
         Console.WriteLine("   HTTP2 Version: " + config.HttpVersion);
         Console.WriteLine("        Lifetime: " + (config.ConnectionLifetime.HasValue ? $"{config.ConnectionLifetime.Value.TotalMilliseconds}ms" : "(infinite)"));
-        Console.WriteLine("      Operations: " + string.Join(", ", clientOperations.Select(o => o.name)));
+        Console.WriteLine("      Operations: " + string.Join(", ", usedClientOperations.Select(o => o.name)));
         Console.WriteLine("     Random Seed: " + config.RandomSeed);
         Console.WriteLine("    Cancellation: " + 100 * config.CancellationProbability + "%");
         Console.WriteLine("Max Content Size: " + config.MaxContentLength);
