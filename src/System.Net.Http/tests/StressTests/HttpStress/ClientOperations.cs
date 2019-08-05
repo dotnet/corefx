@@ -90,7 +90,7 @@ namespace HttpStress
             else
             {
                 // no cancellation
-                return await _client.SendAsync(request, _globalToken);
+                return await _client.SendAsync(request, httpCompletion, _globalToken);
             }
         }
 

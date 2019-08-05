@@ -127,10 +127,7 @@ public static class Program
             (_, int[] excl) =>
                 Enumerable
                 .Range(0, clientOperations.Length)
-                .Concat(excl)
-                .GroupBy(x => x)
-                .Where(gp => gp.Count() < 2)
-                .Select(gp => gp.Key)
+                .Except(excl)
                 .Select(i => clientOperations[i])
                 .ToArray(),
         };
