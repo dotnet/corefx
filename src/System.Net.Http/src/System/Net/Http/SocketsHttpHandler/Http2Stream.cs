@@ -182,6 +182,7 @@ namespace System.Net.Http
 
                     bool signalWaiter = false;
 
+                    Debug.Assert(!Monitor.IsEntered(SyncObject));
                     lock (SyncObject)
                     {
                         Debug.Assert(_requestCompletionState == StreamCompletionState.InProgress, $"Request already completed with state={_requestCompletionState}");
@@ -196,36 +197,12 @@ namespace System.Net.Http
                             Complete();
                             return;
                         }
-                        else
-                        {
-                            _requestCompletionState = StreamCompletionState.Failed;
 
-                            // This duplicates some of the existing logic in Cancel.
-                            // Cancel takes the lock, so we can't call it here while holding the lock.
-                            // We can't call Cancel before taking the lock, because we don't want to cancel in the _requestBodyAbandoned case.
-                            // But we also don't want to call Cancel after releasing the lock, because that can cause a race
-                            // where the client sees the request body has failed but the response body hasn't.
-                            // We should consider how to refactor this logic to avoid code duplication.
+                        // This should not cause RST_STREAM to be sent because the request is still marked as in progress.
+                        signalWaiter = CancelResponseBody();
 
-                            // Cancel the response body, if not complete.
-                            if (_responseCompletionState == StreamCompletionState.InProgress)
-                            {
-                                _responseCompletionState = StreamCompletionState.Failed;
-                            }
-
-                            // Discard any remaining buffered response data
-                            if (_responseBuffer.ActiveLength != 0)
-                            {
-                                _responseBuffer.Discard(_responseBuffer.ActiveLength);
-                            }
-
-                            _responseProtocolState = ResponseProtocolState.Aborted;
-
-                            signalWaiter = _hasWaiter;
-                            _hasWaiter = false;
-
-                            Reset();
-                        }
+                        _requestCompletionState = StreamCompletionState.Failed;
+                        Reset();
                     }
 
                     if (signalWaiter)
@@ -236,6 +213,7 @@ namespace System.Net.Http
                     throw;
                 }
 
+                Debug.Assert(!Monitor.IsEntered(SyncObject));
                 lock (SyncObject)
                 {
                     Debug.Assert(_requestCompletionState == StreamCompletionState.InProgress, $"Request already completed with state={_requestCompletionState}");
@@ -330,6 +308,7 @@ namespace System.Net.Http
                 CancellationTokenSource requestBodyCancellationSource = null;
                 bool signalWaiter = false;
 
+                Debug.Assert(!Monitor.IsEntered(SyncObject));
                 lock (SyncObject)
                 {
                     if (_requestCompletionState == StreamCompletionState.InProgress)
@@ -338,25 +317,7 @@ namespace System.Net.Http
                         Debug.Assert(requestBodyCancellationSource != null);
                     }
 
-                    if (_responseCompletionState == StreamCompletionState.InProgress)
-                    {
-                        _responseCompletionState = StreamCompletionState.Failed;
-                        if (_requestCompletionState != StreamCompletionState.InProgress)
-                        {
-                            Reset();
-                        }
-                    }
-
-                    // Discard any remaining buffered response data
-                    if (_responseBuffer.ActiveLength != 0)
-                    {
-                        _responseBuffer.Discard(_responseBuffer.ActiveLength);
-                    }
-
-                    _responseProtocolState = ResponseProtocolState.Aborted;
-
-                    signalWaiter = _hasWaiter;
-                    _hasWaiter = false;
+                    signalWaiter = CancelResponseBody();
                 }
 
                 if (requestBodyCancellationSource != null)
@@ -369,6 +330,34 @@ namespace System.Net.Http
                 {
                     _waitSource.SetResult(true);
                 }
+            }
+
+            // Returns whether the waiter should be signalled or not.
+            private bool CancelResponseBody()
+            {
+                Debug.Assert(Monitor.IsEntered(SyncObject));
+
+                if (_responseCompletionState == StreamCompletionState.InProgress)
+                {
+                    _responseCompletionState = StreamCompletionState.Failed;
+                    if (_requestCompletionState != StreamCompletionState.InProgress)
+                    {
+                        Reset();
+                    }
+                }
+
+                // Discard any remaining buffered response data
+                if (_responseBuffer.ActiveLength != 0)
+                {
+                    _responseBuffer.Discard(_responseBuffer.ActiveLength);
+                }
+
+                _responseProtocolState = ResponseProtocolState.Aborted;
+
+                bool signalWaiter = _hasWaiter;
+                _hasWaiter = false;
+
+                return signalWaiter;
             }
 
             public void OnWindowUpdate(int amount) => _streamWindow.AdjustCredit(amount);
@@ -386,6 +375,7 @@ namespace System.Net.Http
 
                 // TODO: ISSUE 31309: Optimize HPACK static table decoding
 
+                Debug.Assert(!Monitor.IsEntered(SyncObject));
                 lock (SyncObject)
                 {
                     if (_responseProtocolState == ResponseProtocolState.Aborted)
@@ -506,6 +496,7 @@ namespace System.Net.Http
 
             public void OnResponseHeadersStart()
             {
+                Debug.Assert(!Monitor.IsEntered(SyncObject));
                 lock (SyncObject)
                 {
                     if (_responseProtocolState == ResponseProtocolState.Aborted)
@@ -528,6 +519,7 @@ namespace System.Net.Http
 
             public void OnResponseHeadersComplete(bool endStream)
             {
+                Debug.Assert(!Monitor.IsEntered(SyncObject));
                 bool signalWaiter;
                 lock (SyncObject)
                 {
@@ -599,6 +591,7 @@ namespace System.Net.Http
 
             public void OnResponseData(ReadOnlySpan<byte> buffer, bool endStream)
             {
+                Debug.Assert(!Monitor.IsEntered(SyncObject));
                 bool signalWaiter;
                 lock (SyncObject)
                 {
@@ -662,6 +655,7 @@ namespace System.Net.Http
                 bool cancel = false;
                 CancellationTokenSource requestBodyCancellationSource = null;
 
+                Debug.Assert(!Monitor.IsEntered(SyncObject));
                 lock (SyncObject)
                 {
                     // If we've already finished, don't actually reset the stream.
@@ -746,6 +740,7 @@ namespace System.Net.Http
             // Determine if we have enough data to process up to complete final response headers.
             private (bool wait, bool isEmptyResponse) TryEnsureHeaders()
             {
+                Debug.Assert(!Monitor.IsEntered(SyncObject));
                 lock (SyncObject)
                 {
                     CheckResponseBodyState();
@@ -842,6 +837,7 @@ namespace System.Net.Http
             {
                 Debug.Assert(buffer.Length > 0);
 
+                Debug.Assert(!Monitor.IsEntered(SyncObject));
                 lock (SyncObject)
                 {
                     CheckResponseBodyState();
@@ -977,6 +973,7 @@ namespace System.Net.Http
             {
                 // Check if the response body has been fully consumed.
                 bool fullyConsumed = false;
+                Debug.Assert(!Monitor.IsEntered(SyncObject));
                 lock (SyncObject)
                 {
                     if (_responseBuffer.ActiveLength == 0 && _responseProtocolState == ResponseProtocolState.Complete)
@@ -1027,6 +1024,7 @@ namespace System.Net.Http
                     var thisRef = (Http2Stream)s;
 
                     bool signalWaiter;
+                    Debug.Assert(!Monitor.IsEntered(thisRef.SyncObject));
                     lock (thisRef.SyncObject)
                     {
                         signalWaiter = thisRef._hasWaiter;
