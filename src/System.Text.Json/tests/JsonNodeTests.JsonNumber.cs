@@ -84,6 +84,8 @@ namespace System.Text.Json.Tests
         [InlineData(0)]
         [InlineData(-17)]
         [InlineData(17)]
+        [InlineData(byte.MinValue-1)]
+        [InlineData(byte.MaxValue+1)]
         [InlineData(short.MinValue)]
         [InlineData(short.MaxValue)]
         public static void TestShort(short value)
@@ -103,6 +105,8 @@ namespace System.Text.Json.Tests
         [InlineData(17)]
         [InlineData(0x2A)]
         [InlineData(0b_0110_1010)]
+        [InlineData(short.MinValue-1)]
+        [InlineData(short.MaxValue+1)]
         [InlineData(int.MinValue)]
         [InlineData(int.MaxValue)]
         public static void TestInt(int value)
@@ -120,6 +124,8 @@ namespace System.Text.Json.Tests
         [InlineData(0)]
         [InlineData(-17)]
         [InlineData(17)]
+        [InlineData((long)int.MinValue - 1)]
+        [InlineData((long)int.MaxValue + 1)]
         [InlineData(long.MinValue)]
         [InlineData(long.MaxValue)]
         public static void TestLong(long value)
@@ -158,6 +164,10 @@ namespace System.Text.Json.Tests
         [InlineData(-17)]
         [InlineData(3.14)]
         [InlineData(-15.5)]
+        [InlineData(float.MinValue)]
+        [InlineData(float.MaxValue)]
+        [InlineData(float.MinValue-1.0)]
+        [InlineData(float.MaxValue+1.0)]
         [InlineData(double.MinValue)]
         [InlineData(double.MaxValue)]
         public static void TestDouble(double value)
@@ -191,6 +201,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(17)]
+        [InlineData(sbyte.MaxValue+1)]
         [InlineData(ushort.MaxValue)]
         public static void TestUInt16(ushort value)
         {
@@ -206,6 +217,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(17)]
+        [InlineData(ushort.MaxValue + 1)]
         [InlineData(uint.MaxValue)]
         public static void TestUInt32(uint value)
         {
@@ -221,6 +233,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(17)]
+        [InlineData((ulong)uint.MaxValue + 1)]
         [InlineData(ulong.MaxValue)]
         public static void TestUInt64(ulong value)
         {
@@ -267,6 +280,8 @@ namespace System.Text.Json.Tests
         [InlineData("-17.009")]
         [InlineData("1e400")]
         [InlineData("1e+100000002")]
+        [InlineData("-79228162514264337593543950336")]
+        [InlineData("79228162514264337593543950336")]
         [InlineData("184467440737095516150.184467440737095516150")]
         [InlineData("184467440737095516150184467440737095516150")]
         public static void TestString(string value)
