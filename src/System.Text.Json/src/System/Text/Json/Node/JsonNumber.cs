@@ -590,11 +590,11 @@ namespace System.Text.Json
         public static implicit operator JsonNumber(decimal value) => new JsonNumber(value);
 
         /// <summary>
-        ///   Compares <paramref name="obj"/> to the numeric value of this instance. 
+        ///   Compares <paramref name="obj"/> to the value of this instance. 
         /// </summary>
         /// <param name="obj">The object to compare against.</param>
         /// <returns>
-        ///   <see langword="true"/> if the numeric value of this instance matches <paramref name="obj"/>,
+        ///   <see langword="true"/> if the value of this instance matches exactly <paramref name="obj"/> (is equal and has the same format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
         public override bool Equals(object obj) => obj is JsonNumber number && _value == number._value;
@@ -606,33 +606,33 @@ namespace System.Text.Json
         public override int GetHashCode() => _value.GetHashCode();
 
         /// <summary>
-        ///   Compares other JSON number to the numeric value of this instance. 
+        ///   Compares other JSON number to the value of this instance. 
         /// </summary>
         /// <param name="other">The JSON number to compare against.</param>
         /// <returns>
-        ///   <see langword="true"/> if the numeric value of this instance matches <paramref name="other"/>,
+        ///   <see langword="true"/> if the value of this instance matches exactly <paramref name="other"/> (is equal and has the same format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
         public bool Equals(JsonNumber other) => !(other is null) && _value == other._value;
 
         /// <summary>
-        ///   Compares numeric values of two JSON numbers. 
+        ///   Compares values of two JSON numbers. 
         /// </summary>
         /// <param name="left">The JSON number to compare.</param>
         /// <param name="right">The JSON number to compare.</param>
         /// <returns>
-        ///   <see langword="true"/> if the numeric value of instances matches,
+        ///   <see langword="true"/> if values of instances match exactly (are equal and have the same format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
         public static bool operator ==(JsonNumber left, JsonNumber right) => left?._value == right?._value;
 
         /// <summary>
-        ///   Compares numeric values of two JSON numbers. 
+        ///   Compares values of two JSON numbers. 
         /// </summary>
         /// <param name="left">The JSON number to compare.</param>
         /// <param name="right">The JSON number to compare.</param>
         /// <returns>
-        ///   <see langword="true"/> if the numeric value of instances does not match,
+        ///   <see langword="true"/> if values of instances do not match exactly (are not equal or have different format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
         public static bool operator !=(JsonNumber left, JsonNumber right) => left?._value != right?._value;

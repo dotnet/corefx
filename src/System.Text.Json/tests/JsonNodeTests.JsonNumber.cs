@@ -508,5 +508,27 @@ namespace System.Text.Json.Tests
             jsonNumber.SetDecimal(decimal.MaxValue);
             Assert.Equal(decimal.MaxValue, jsonNumber.GetDecimal());
         }
+
+        [Fact]
+        public static void TestEquals()
+        {
+            var jsonNumber = new JsonNumber(123);
+
+            Assert.True(jsonNumber.Equals(new JsonNumber(123)));
+            Assert.True(jsonNumber.Equals(new JsonNumber((ushort)123)));
+            Assert.True(jsonNumber.Equals(new JsonNumber("123")));
+            Assert.False(jsonNumber.Equals(new JsonNumber("123e1")));
+            Assert.False(jsonNumber.Equals(new JsonNumber(17)));
+
+            Assert.True(jsonNumber == new JsonNumber(123));
+            Assert.True(jsonNumber != new JsonNumber(17));
+
+            JsonNode jsonNode = new JsonNumber(123);
+            Assert.True(jsonNumber.Equals(jsonNode));
+
+            IEquatable<JsonNumber> jsonNumberIEquatable = jsonNumber;
+            Assert.True(jsonNumberIEquatable.Equals(jsonNumber));
+            Assert.True(jsonNumber.Equals(jsonNumberIEquatable));
+        }
     }
 }
