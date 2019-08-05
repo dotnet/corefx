@@ -48,12 +48,12 @@ namespace System.Text.Json
 
         private static readonly StandardFormat s_hexStandardFormat = new StandardFormat('X', 4);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool NeedsEscaping(byte value) => AllowList[value] == 0;
 
+        private static bool NeedsEscapingNoBoundsCheck(char value) => AllowList[value] == 0;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        // Cast to (byte) for performance; avoids array bounds check.
-        private static bool NeedsEscaping(char value) => value > LastAsciiCharacter || AllowList[(byte)value] == 0;
+        private static bool NeedsEscaping(char value) => value > LastAsciiCharacter || AllowList[value] == 0;
 
         public static int NeedsEscaping(ReadOnlySpan<byte> value, JavaScriptEncoder encoder)
         {
@@ -65,8 +65,7 @@ namespace System.Text.Json
                 goto Return;
             }
 
-            int len = value.Length;
-            for (idx = 0; idx < len; idx++)
+            for (idx = 0; idx < value.Length; idx++)
             {
                 if (NeedsEscaping(value[idx]))
                 {
@@ -90,8 +89,7 @@ namespace System.Text.Json
                 goto Return;
             }
 
-            int len = value.Length;
-            for (idx = 0; idx < len; idx++)
+            for (idx = 0; idx < value.Length; idx++)
             {
                 if (NeedsEscaping(value[idx]))
                 {
@@ -120,12 +118,13 @@ namespace System.Text.Json
 
             Debug.Assert(result != OperationStatus.DestinationTooSmall);
             Debug.Assert(result != OperationStatus.NeedMoreData);
-            Debug.Assert(encoderBytesConsumed == value.Length);
 
             if (result != OperationStatus.Done)
             {
                 ThrowHelper.ThrowArgumentException_InvalidUTF8(value.Slice(encoderBytesWritten));
             }
+
+            Debug.Assert(encoderBytesConsumed == value.Length);
 
             written += encoderBytesWritten;
         }
@@ -147,8 +146,7 @@ namespace System.Text.Json
             {
                 // For performance when no encoder is specified, perform escaping here for Ascii and on the
                 // first occurrence of a non-Ascii character, then call into the default encoder.
-                int len = value.Length;
-                while (indexOfFirstByteToEscape < len)
+                while (indexOfFirstByteToEscape < value.Length)
                 {
                     byte val = value[indexOfFirstByteToEscape];
                     if (IsAsciiValue(val))
@@ -219,10 +217,8 @@ namespace System.Text.Json
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsAsciiValue(byte value) => value <= LastAsciiCharacter;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsAsciiValue(char value) => value <= LastAsciiCharacter;
 
         private static void EscapeString(ReadOnlySpan<char> value, Span<char> destination, JavaScriptEncoder encoder, ref int written)
@@ -233,12 +229,13 @@ namespace System.Text.Json
 
             Debug.Assert(result != OperationStatus.DestinationTooSmall);
             Debug.Assert(result != OperationStatus.NeedMoreData);
-            Debug.Assert(encoderBytesConsumed == value.Length);
 
             if (result != OperationStatus.Done)
             {
                 ThrowHelper.ThrowArgumentException_InvalidUTF16(value[encoderCharsWritten]);
             }
+
+            Debug.Assert(encoderBytesConsumed == value.Length);
 
             written += encoderCharsWritten;
         }
@@ -260,13 +257,12 @@ namespace System.Text.Json
             {
                 // For performance when no encoder is specified, perform escaping here for Ascii and on the
                 // first occurrence of a non-Ascii character, then call into the default encoder.
-                int len = value.Length;
-                while (indexOfFirstByteToEscape < len)
+                while (indexOfFirstByteToEscape < value.Length)
                 {
                     char val = value[indexOfFirstByteToEscape];
                     if (IsAsciiValue(val))
                     {
-                        if (NeedsEscaping((byte)val)) // Use the (byte) version for performance.
+                        if (NeedsEscapingNoBoundsCheck(val))
                         {
                             EscapeNextChars(val, destination, ref written);
                             indexOfFirstByteToEscape++;

@@ -18,16 +18,20 @@ namespace Microsoft.Framework.WebEncoders
         [Fact]
         public void TestSurrogate()
         {
+            // Encode(string)
             Assert.Equal("\\uD83D\\uDCA9", System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode("\U0001f4a9"));
 
+            // Encode(writer, string)
             using (var writer = new StringWriter())
             {
                 System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(writer, "\U0001f4a9");
                 Assert.Equal("\\uD83D\\uDCA9", writer.GetStringBuilder().ToString());
             }
 
+            // Encode(Span, ...)
             Span<char> destination = new char[12];
-            OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode("\U0001f4a9".AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+            OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                "\U0001f4a9".AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
             Assert.Equal(OperationStatus.Done, status);
             Assert.Equal(2, charsConsumed);
             Assert.Equal(12, charsWritten);
@@ -35,13 +39,94 @@ namespace Microsoft.Framework.WebEncoders
         }
 
         [Fact]
+        public void TestSurrogateBufferDoesNotUnderOrOverWrite()
+        {
+            Span<char> destination = new char[212];
+            destination[99] = 'x';
+            destination[112] = 'x';
+
+            // Pass in destination + 100 to check for underwrite.
+            OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                "\U0001f4a9".AsSpan(), destination.Slice(100, 12), out int charsConsumed, out int charsWritten, isFinalBlock: true);
+            Assert.Equal(OperationStatus.Done, status);
+            Assert.Equal(2, charsConsumed);
+            Assert.Equal(12, charsWritten);
+            Assert.Equal('x', destination[99]);
+            Assert.Equal('x', destination[112]);
+        }
+
+        [Fact]
+        public void TestSurrogateBufferOverlaps()
+        {
+            Span<char> destination = new char[100];
+            "\U0001f4a9".AsSpan().CopyTo(destination);
+
+            // Overlap behavior is undefined but documented that it is not valid. Here we don't expect any issues.
+            OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                destination.Slice(0, 2), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+            Assert.Equal(OperationStatus.Done, status);
+            Assert.Equal(2, charsConsumed);
+            Assert.Equal(12, charsWritten);
+        }
+
+        [Fact]
         public void TestSurrogateBufferTooSmall()
         {
             Span<char> destination = new char[11];
-            OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode("\U0001f4a9".AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+            OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                "\U0001f4a9".AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
             Assert.Equal(OperationStatus.DestinationTooSmall, status);
             Assert.Equal(0, charsConsumed);
             Assert.Equal(0, charsWritten);
+        }
+
+        [Fact]
+        public void JavaScriptStringEncoder_NonEmptySource_EmptyDest_Throws()
+        {
+            OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                "\U0001f4a9".AsSpan(), destination: null, out int _, out int _, isFinalBlock: true);
+
+            Assert.Equal(OperationStatus.DestinationTooSmall, status);
+        }
+
+        [Fact]
+        public void JavaScriptStringEncoder_EmptySource_EmptyDest()
+        {
+            OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                "".AsSpan(), destination: null, out int _, out int _, isFinalBlock: true);
+
+            Assert.Equal(OperationStatus.Done, status);
+        }
+
+        [Fact]
+        public void TestEmptySourceEncode()
+        {
+            // Encode(string)
+            Assert.Equal("", System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(""));
+
+            // Encode(writer, string)
+            using (var writer = new StringWriter())
+            {
+                System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(writer, "");
+                Assert.Equal("", writer.GetStringBuilder().ToString());
+            }
+
+            // Encode(Span, ...)
+            Span<char> destination = new char[12];
+            OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                "".AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+            Assert.Equal(OperationStatus.Done, status);
+            Assert.Equal(0, charsConsumed);
+            Assert.Equal(0, charsWritten);
+            Assert.Equal("", new string(destination.Slice(0, charsWritten).ToArray()));
+
+            destination = null; // null doesn't throw is no characters to encode
+            status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                "".AsSpan(), destination, out charsConsumed, out charsWritten, isFinalBlock: true);
+            Assert.Equal(OperationStatus.Done, status);
+            Assert.Equal(0, charsConsumed);
+            Assert.Equal(0, charsWritten);
+            Assert.Equal("", new string(destination.Slice(0, charsWritten).ToArray()));
         }
 
         [Fact]

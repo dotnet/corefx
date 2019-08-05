@@ -150,6 +150,9 @@ namespace System.Text.Encodings.Web
             int firstCharacterToEncode,
             bool isFinalBlock = true)
         {
+            Debug.Assert(value != null);
+            Debug.Assert(firstCharacterToEncode >= 0);
+
             char* originalBuffer = buffer;
             charsWritten = 0;
 
@@ -219,9 +222,10 @@ namespace System.Text.Encodings.Web
             if (secondCharIndex == valueLength)
             {
                 firstChar = value[valueLength - 1];
-                int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, null, out wasSurrogatePair, out bool wasUnmatchedSurrogate);
-                if (!isFinalBlock && wasUnmatchedSurrogate)
+                int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, null, out wasSurrogatePair, out bool needMoreData);
+                if (!isFinalBlock && needMoreData)
                 {
+                    Debug.Assert(wasSurrogatePair == false);
                     charsConsumed = (int)(buffer - originalBuffer);
                     return OperationStatus.NeedMoreData;
                 }
@@ -560,7 +564,7 @@ namespace System.Text.Encodings.Web
         /// <summary>
         /// Encodes the supplied characters.
         /// </summary>
-        /// <param name="source">A source buffer containing the characters text to encode.</param>
+        /// <param name="source">A source buffer containing the characters to encode.</param>
         /// <param name="destination">The destination buffer to which the encoded form of <paramref name="source"/>
         /// will be written.</param>
         /// <param name="charsConsumed">The number of characters consumed from the <paramref name="source"/> buffer.</param>
@@ -580,8 +584,31 @@ namespace System.Text.Encodings.Web
             {
                 fixed (char* sourcePtr = source)
                 fixed (char* destinationPtr = destination)
+                {
+                    int firstCharacterToEncode;
+                    if (sourcePtr == null || (firstCharacterToEncode = FindFirstCharacterToEncode(sourcePtr, source.Length)) == -1)
+                    {
+                        if (source.TryCopyTo(destination))
+                        {
+                            charsConsumed = source.Length;
+                            charsWritten = source.Length;
+                            return OperationStatus.Done;
+                        }
 
-                return EncodeIntoBuffer(destinationPtr, destination.Length, sourcePtr, source.Length, out charsConsumed, out charsWritten, 0, isFinalBlock);
+                        charsConsumed = 0;
+                        charsWritten = 0;
+                        return OperationStatus.DestinationTooSmall;
+                    }
+                    else if (destination.IsEmpty)
+                    {
+                        // Guards against passing a null destinationPtr to EncodeIntoBuffer (pinning an empty Span will return a null pointer).
+                        charsConsumed = 0;
+                        charsWritten = 0;
+                        return OperationStatus.DestinationTooSmall;
+                    }
+
+                    return EncodeIntoBuffer(destinationPtr, destination.Length, sourcePtr, source.Length, out charsConsumed, out charsWritten, firstCharacterToEncode, isFinalBlock);
+                }
             }
         }
 
