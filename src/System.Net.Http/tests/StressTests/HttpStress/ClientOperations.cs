@@ -71,8 +71,8 @@ namespace HttpStress
                 // either spinwait or delay before triggering cancellation
                 if (GetRandomBoolean(probability: 0.66))
                 {
-                    // bound spinning to 1ms
-                    double spinTimeMs = _random.NextDouble();
+                    // bound spinning to 100 us
+                    double spinTimeMs = 0.1 * _random.NextDouble();
                     Stopwatch sw = Stopwatch.StartNew();
                     do { Thread.SpinWait(10); } while (!task.IsCompleted && sw.Elapsed.TotalMilliseconds < spinTimeMs);
                 }
