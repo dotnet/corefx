@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
+
 namespace System.Text.Json
 {
     /// <summary>
@@ -103,6 +105,9 @@ namespace System.Text.Json
         ///   Converts the numeric value of this instance to its equivalent string representation.
         /// </summary>
         /// <returns>The string representation of the value of this instance.</returns>
+        /// <remarks> 
+        ///   Returns exactly the same value as it was set using  <see cref="SetFormattedValue(string)"/>. 
+        /// </remarks> 
         public override string ToString() => _value;
 
         /// <summary>
@@ -169,7 +174,18 @@ namespace System.Text.Json
         ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
         ///   <see cref="float.NegativeInfinity"/>) is emitted. 
         /// </remarks> 
-        public float GetSingle() => float.Parse(_value);
+        /// <remarks> 
+        ///   Allows scientific mode.
+        /// </remarks> 
+        public float GetSingle()
+        {
+            if (float.TryParse(_value, out float value))
+            {
+                return value;
+            }
+
+            return float.Parse(_value, NumberStyles.AllowExponent, GetJsonCulture());
+        }
 
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="double"/> equivalent.
@@ -187,7 +203,18 @@ namespace System.Text.Json
         ///   instead <see langword="true"/> is returned and <see cref="double.PositiveInfinity"/> (or 
         ///   <see cref="double.NegativeInfinity"/>) is emitted. 
         /// </remarks> 
-        public double GetDouble() => double.Parse(_value);
+        /// <remarks> 
+        ///   Allows scientific mode.
+        /// </remarks>
+        public double GetDouble()
+        {
+            if (double.TryParse(_value, out double value))
+            {
+                return value;
+            }
+
+            return double.Parse(_value, NumberStyles.AllowExponent, GetJsonCulture());
+        }
 
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="sbyte"/> equivalent.
@@ -327,7 +354,15 @@ namespace System.Text.Json
         ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
         ///   <see cref="float.NegativeInfinity"/>) is emitted. 
         /// </remarks> 
-        public bool TryGetSingle(out float value) => float.TryParse(_value, out value);
+        public bool TryGetSingle(out float value)
+        {
+            if (float.TryParse(_value, out value))
+            {
+                return true;
+            }
+
+            return float.TryParse(_value, NumberStyles.AllowExponent, GetJsonCulture(), out value);
+        }
 
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="double"/> equivalent.
@@ -347,7 +382,15 @@ namespace System.Text.Json
         ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
         ///   <see cref="float.NegativeInfinity"/>) is emitted. 
         /// </remarks> 
-        public bool TryGetDouble(out double value) => double.TryParse(_value, out value);
+        public bool TryGetDouble(out double value)
+        {
+            if (double.TryParse(_value, out value))
+            {
+                return true;
+            }
+
+            return double.TryParse(_value, NumberStyles.AllowExponent, GetJsonCulture(), out value);
+        }
 
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="sbyte"/> equivalent.
@@ -477,13 +520,26 @@ namespace System.Text.Json
         ///   Changes the numeric value of this instance to represent a specified <see cref="float"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
-        public void SetSingle(float value) => _value = value.ToString();
-
+        public void SetSingle(float value)
+        {
+            if (value.Equals(float.PositiveInfinity) || value.Equals(float.NegativeInfinity))
+            {
+                throw new FormatException("Provided value does not represent legal JSON number.");
+            }
+            _value = value.ToString();
+        }
         /// <summary>
         ///   Changes the numeric value of this instance to represent a specified <see cref="double"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
-        public void SetDouble(double value) => _value = value.ToString();
+        public void SetDouble(double value)
+        {
+            if(value.Equals(double.PositiveInfinity) || value.Equals(double.NegativeInfinity))
+            {
+                throw new FormatException("Provided value does not represent legal JSON number.");
+            }
+            _value = value.ToString();
+        }
 
         /// <summary>
         ///   Changes the numeric value of this instance to represent a specified <see cref="sbyte"/> value.
@@ -636,5 +692,16 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         public static bool operator !=(JsonNumber left, JsonNumber right) => left?._value != right?._value;
+
+        /// <summary>
+        /// Returns <see cref="CultureInfo"/> object with number decimal separator set to `.`
+        /// </summary>
+        /// <returns></returns>
+        private CultureInfo GetJsonCulture()
+        {
+            CultureInfo jsonCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
+            jsonCulture.NumberFormat.NumberDecimalSeparator = ".";
+            return jsonCulture;
+        }
     }
 }
