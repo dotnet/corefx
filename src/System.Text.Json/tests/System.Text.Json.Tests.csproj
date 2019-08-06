@@ -25,6 +25,7 @@
     <Compile Include="JsonNumberTestData.cs" />
     <Compile Include="JsonPropertyTests.cs" />
     <Compile Include="JsonReaderStateAndOptionsTests.cs" />
+    <Compile Include="JsonStringTests.cs" />
     <Compile Include="JsonTestHelper.cs" />
     <Compile Include="JsonWriterOptionsTests.cs" />
     <Compile Include="NewtonsoftTests\CamelCaseTests.cs" />
