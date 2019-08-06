@@ -80,7 +80,7 @@ namespace HttpStress
                 {
                     // 60ms is the 99th percentile when
                     // running the stress suite locally under default load
-                    await Task.WhenAny(task, Task.Delay(_random.Next(0, 60)));
+                    await Task.WhenAny(task, Task.Delay(_random.Next(0, 60), cts.Token));
                 }
 
                 cts.Cancel();
