@@ -73,7 +73,7 @@ In this document, the following terms are used:
 
 ### Common Language Runtime
 
-**Also referred to as**: CLR, VM
+**Also referred to as**: CLR, VM, runtime
 
 The CLR is a virtual machine, i.e. it includes the facilities to generate and
 compile code on-the-fly using a JIT compiler. The existing Microsoft CLR
@@ -81,7 +81,7 @@ implementation is Windows only.
 
 ### Core Common Language Runtime
 
-**Also referred to as**: CoreCLR, VM
+**Also referred to as**: CoreCLR, VM, runtime
 
 It's built from the same code base as the CLR. Originally, CoreCLR was the
 runtime of Silverlight and was designed to run on multiple platforms,
@@ -205,7 +205,7 @@ chunks of the .NET Framework under the MIT license as well, which can be found
 [here][referencesource]. This enabled the Mono community to use the same code
 the .NET Framework uses in order to close gaps and avoid behavioral differences.
 
-Mono is primarily used to run .NET applications on Linux and Mac OS X (though to
+Mono is primarily used to run .NET applications on Linux and macOS (though to
 get into the Mac App Store you need Xamarin, see below). There are ports of Mono
 to other platforms, see [Mono's Supported Platforms][mono-supported-platforms]
 
@@ -219,7 +219,7 @@ Android, iOS and Mac OS X Store. It's based on Mono, and on iOS and Android
 surfaces a different API profile, called the mobile profile. The subsetting was
 necessary to reduce the footprint, both by shipping smaller versions of the
 system libraries as well as making them more linker friendly. While Mono runs on
-Mac OS X without Xamarin, their linker is required make the app package for the
+macOS without Xamarin, their linker is required make the app package for the
 Mac App Store.  Xamarin ships a full static compiler on iOS, as the platform
 does not support dynamic code generation.
 
@@ -265,15 +265,6 @@ in any order. Generally to use Parallel LINQ you would just call the
 `AsParallel()` method on a collection implementing `IEnumerable`. And if at any
 point you wanted to return to "normal LINQ you can just call `AsSequential()`.
 
-### JSON.NET
-
-Released in June 2006 by [James Newton-King][JamesNK], JSON.NET has become the
-defacto standard for JSON serialization and deserialization in .NET. It is [open
-source][Newtonsoft.Json] and support almost every platform .NET code can run on
-(.NET Framework 2.0, 3.0, 3.5, 4.0, and 4.5; Mono; MonoTouch/Xamarin.iOS;
-MonoDroid/Xamarin.Android; Silverlight 3, 4, and 5; Windows Phone 8, 8, and 8.1;
-Windows 8 Store; .NET Core).
-
 ### Windows Forms
 
 **Also referred to as**: WinForms
@@ -285,7 +276,7 @@ native loop-driven Win32 model. Mono [has an implementation][mono-winforms] of
 Windows Forms, though it is not complete, since some parts of Windows Forms are
 tied to the Windows platform.
 
-On Decemember 4th, 2018 [Microsoft Open Sourced Windows Forms][ui-oss]. This
+[Microsoft has Open Sourced Windows Forms][ui-oss]. This
 included moving the code to [GitHub under the stewardship of the .NET
 Foundation][WinForms] and enabling support for running Windows Forms on .NET
 Core (Windows Only).
@@ -303,7 +294,7 @@ XML-based language which allows a declarative way to describe user interfaces
 and data binding to models (XAML is used by Silverlight, UWP, and Xamarin as
 well).
 
-On Decemember 4th, 2018 [Microsoft Open Sourced WPF][ui-oss]. This included
+[Microsoft has Open Sourced WPF][ui-oss]. This included
 moving the code to [GitHub under the stewardship of the .NET Foundation][Wpf]
 and enabling support for running WPF on .NET Core (Windows Only).
 
