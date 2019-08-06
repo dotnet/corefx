@@ -183,9 +183,9 @@ namespace System.Text.Json
         /// </exception>
         /// <remarks> 
         ///   On .NET Core this method does not return <see langword="false"/> for values larger than 
-        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>), 
-        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
-        ///   <see cref="float.NegativeInfinity"/>) is emitted. 
+        ///   <see cref="double.MaxValue"/> (or smaller than <see cref="double.MinValue"/>), 
+        ///   instead <see langword="true"/> is returned and <see cref="double.PositiveInfinity"/> (or 
+        ///   <see cref="double.NegativeInfinity"/>) is emitted. 
         /// </remarks> 
         public double GetDouble() => double.Parse(_value);
 
@@ -594,7 +594,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="obj">The object to compare against.</param>
         /// <returns>
-        ///   <see langword="true"/> if the value of this instance matches exactly <paramref name="obj"/> (is equal and has the same format),
+        ///   <see langword="true"/> if the value of this instance matches <paramref name="obj"/> exactly (is equal and has the same format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
         public override bool Equals(object obj) => obj is JsonNumber number && _value == number._value;
@@ -610,7 +610,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="other">The JSON number to compare against.</param>
         /// <returns>
-        ///   <see langword="true"/> if the value of this instance matches exactly <paramref name="other"/> (is equal and has the same format),
+        ///   <see langword="true"/> if the value of this instance matches <paramref name="other"/> exactly (is equal and has the same format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
         public bool Equals(JsonNumber other) => !(other is null) && _value == other._value;

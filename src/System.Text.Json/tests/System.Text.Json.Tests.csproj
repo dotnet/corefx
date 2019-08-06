@@ -101,7 +101,6 @@
     <Compile Include="Utf8JsonReaderTests.TryGet.Date.cs" />
     <Compile Include="Utf8JsonReaderTests.ValueTextEquals.cs" />
     <Compile Include="Utf8JsonWriterTests.cs" />
-    <Compile Include="JsonNodeTests.JsonNumber.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\src\System\Text\Json\BitStack.cs" Link="BitStack.cs" />
@@ -110,6 +109,9 @@
     <Compile Include="$(CommonPath)\System\Buffers\ArrayBufferWriter.cs">
       <Link>CommonTest\System\Buffers\ArrayBufferWriter.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="JsonNumberTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />

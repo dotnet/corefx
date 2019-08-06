@@ -84,8 +84,8 @@ namespace System.Text.Json.Tests
         [InlineData(0)]
         [InlineData(-17)]
         [InlineData(17)]
-        [InlineData(byte.MinValue-1)]
-        [InlineData(byte.MaxValue+1)]
+        [InlineData(byte.MinValue - 1)]
+        [InlineData(byte.MaxValue + 1)]
         [InlineData(short.MinValue)]
         [InlineData(short.MaxValue)]
         public static void TestShort(short value)
@@ -105,8 +105,8 @@ namespace System.Text.Json.Tests
         [InlineData(17)]
         [InlineData(0x2A)]
         [InlineData(0b_0110_1010)]
-        [InlineData(short.MinValue-1)]
-        [InlineData(short.MaxValue+1)]
+        [InlineData(short.MinValue - 1)]
+        [InlineData(short.MaxValue + 1)]
         [InlineData(int.MinValue)]
         [InlineData(int.MaxValue)]
         public static void TestInt(int value)
@@ -166,8 +166,8 @@ namespace System.Text.Json.Tests
         [InlineData(-15.5)]
         [InlineData(float.MinValue)]
         [InlineData(float.MaxValue)]
-        [InlineData(float.MinValue-1.0)]
-        [InlineData(float.MaxValue+1.0)]
+        [InlineData(float.MinValue - 1.0)]
+        [InlineData(float.MaxValue + 1.0)]
         [InlineData(double.MinValue)]
         [InlineData(double.MaxValue)]
         public static void TestDouble(double value)
@@ -201,7 +201,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(17)]
-        [InlineData(sbyte.MaxValue+1)]
+        [InlineData(sbyte.MaxValue + 1)]
         [InlineData(ushort.MaxValue)]
         public static void TestUInt16(ushort value)
         {
@@ -515,10 +515,22 @@ namespace System.Text.Json.Tests
             var jsonNumber = new JsonNumber(123);
 
             Assert.True(jsonNumber.Equals(new JsonNumber(123)));
+            Assert.True(new JsonNumber(123).Equals(jsonNumber));
+
             Assert.True(jsonNumber.Equals(new JsonNumber((ushort)123)));
+            Assert.True(new JsonNumber((ushort)123).Equals(jsonNumber));
+            
             Assert.True(jsonNumber.Equals(new JsonNumber("123")));
+            Assert.True(new JsonNumber("123").Equals(jsonNumber));
+            
+            Assert.False(jsonNumber.Equals(new JsonNumber("123e0")));
+            Assert.False(new JsonNumber("123e0").Equals(jsonNumber));
+            
             Assert.False(jsonNumber.Equals(new JsonNumber("123e1")));
+            Assert.False(new JsonNumber("123e1").Equals(jsonNumber));
+
             Assert.False(jsonNumber.Equals(new JsonNumber(17)));
+            Assert.False(new JsonNumber(17).Equals(jsonNumber));
 
             Assert.True(jsonNumber == new JsonNumber(123));
             Assert.True(jsonNumber != new JsonNumber(17));
@@ -529,6 +541,45 @@ namespace System.Text.Json.Tests
             IEquatable<JsonNumber> jsonNumberIEquatable = jsonNumber;
             Assert.True(jsonNumberIEquatable.Equals(jsonNumber));
             Assert.True(jsonNumber.Equals(jsonNumberIEquatable));
+
+            Assert.False(jsonNumber.Equals(null));
+
+            object jsonNumberCopy = jsonNumber;
+            object jsonNumberObject = new JsonNumber(123);
+            Assert.True(jsonNumber.Equals(jsonNumberObject));
+            Assert.True(jsonNumberCopy.Equals(jsonNumberObject));
+            Assert.True(jsonNumberObject.Equals(jsonNumber));
+
+            jsonNumber = new JsonNumber();
+            Assert.True(jsonNumber.Equals(new JsonNumber()));
+            Assert.False(jsonNumber.Equals(new JsonNumber(5)));
+        }
+
+        [Fact]
+        public static void TestGetHashCode()
+        {
+            var jsonNumber = new JsonNumber(123);
+
+            Assert.Equal(jsonNumber.GetHashCode(), new JsonNumber(123).GetHashCode());
+            Assert.Equal(jsonNumber.GetHashCode(), new JsonNumber((ushort)123).GetHashCode());
+            Assert.Equal(jsonNumber.GetHashCode(), new JsonNumber("123").GetHashCode());
+            Assert.NotEqual(jsonNumber.GetHashCode(), new JsonNumber("123e0").GetHashCode());
+            Assert.NotEqual(jsonNumber.GetHashCode(), new JsonNumber("123e1").GetHashCode());
+            Assert.NotEqual(jsonNumber.GetHashCode(), new JsonNumber(17).GetHashCode());
+
+            JsonNode jsonNode = new JsonNumber(123);
+            Assert.Equal(jsonNumber.GetHashCode(), jsonNode.GetHashCode());
+
+            IEquatable<JsonNumber> jsonNumberIEquatable = jsonNumber;
+            Assert.Equal(jsonNumber.GetHashCode(), jsonNumberIEquatable.GetHashCode());
+
+            object jsonNumberCopy = jsonNumber;
+            object jsonNumberObject = new JsonNumber(17);
+
+            Assert.Equal(jsonNumber.GetHashCode(), jsonNumberCopy.GetHashCode());
+            Assert.NotEqual(jsonNumber.GetHashCode(), jsonNumberObject.GetHashCode());
+
+            Assert.Equal(new JsonNumber().GetHashCode(), new JsonNumber().GetHashCode());
         }
     }
 }
