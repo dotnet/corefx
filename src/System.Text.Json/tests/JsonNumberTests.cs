@@ -175,6 +175,8 @@ namespace System.Text.Json.Tests
         [InlineData(-15.5)]
         [InlineData(float.MinValue)]
         [InlineData(float.MaxValue)]
+        [InlineData(ulong.MinValue)]
+        [InlineData(ulong.MaxValue)]
         public static void TestFloat(float value)
         {
             TestInitialization(
@@ -198,6 +200,8 @@ namespace System.Text.Json.Tests
         [InlineData(float.MaxValue + 1.0)]
         [InlineData(double.MinValue)]
         [InlineData(double.MaxValue)]
+        [InlineData(ulong.MinValue)]
+        [InlineData(ulong.MaxValue)]
         public static void TestDouble(double value)
         {
             TestInitialization(
@@ -284,7 +288,9 @@ namespace System.Text.Json.Tests
                new object[] { decimal.Divide(1, 3) },
                new object[] { decimal.Divide(1, 10) },
                new object[] { decimal.MinValue },
-               new object[] { decimal.MaxValue }
+               new object[] { decimal.MaxValue },
+               new object[] { ulong.MaxValue },
+               new object[] { ulong.MinValue }
            };
 
         [Theory]
