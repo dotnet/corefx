@@ -40,18 +40,18 @@
 
   <Target Name="BuildManaged">
     <ItemGroup Condition="'$(DirectoryToBuild)' == ''">
-      <_BuildMangedProjects Include="ref.builds" />
-      <_BuildMangedProjects Include="shims\generated\*.csproj" />
-      <_BuildMangedProjects Include="Native\native-binplace.proj" />
-      <_BuildMangedProjects Include="src.builds" />
-      <_BuildMangedProjects Include="shims\manual\*.csproj" />
-      <_BuildMangedProjects Condition="'$(DotNetBuildFromSource)' != 'true'" Include="shims\ApiCompat.proj" />
-      <_BuildMangedProjects Condition="'$(DotNetBuildFromSource)' != 'true' and '$(BuildAllConfigurations)' != 'true'" Include="pretest.proj" />
+      <_BuildMangedProjects Include="$(SourceDir)ref.builds" />
+      <_BuildMangedProjects Include="$(SourceDir)shims\generated\*.csproj" />
+      <_BuildMangedProjects Include="$(SourceDir)Native\native-binplace.proj" />
+      <_BuildMangedProjects Include="$(SourceDir)src.builds" />
+      <_BuildMangedProjects Include="$(SourceDir)shims\manual\*.csproj" />
+      <_BuildMangedProjects Condition="'$(DotNetBuildFromSource)' != 'true'" Include="$(SourceDir)shims\ApiCompat.proj" />
+      <_BuildMangedProjects Condition="'$(DotNetBuildFromSource)' != 'true' and '$(BuildAllConfigurations)' != 'true'" Include="$(SourceDir)pretest.proj" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(DirectoryToBuild)' != ''">
-      <_BuildMangedProjects Include="ref.builds" />
-      <_BuildMangedProjects Include="src.builds" />
+      <_BuildMangedProjects Include="$(SourceDir)ref.builds" />
+      <_BuildMangedProjects Include="$(SourceDir)src.builds" />
     </ItemGroup>
 
     <!-- To Serialize we use msbuild's batching functionality '%' to force it to batch all similar projects with the same identity
