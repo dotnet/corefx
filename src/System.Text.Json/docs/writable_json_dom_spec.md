@@ -221,13 +221,17 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 * Would escaped characters be supported for creating `JsonNumber` from string? 
 * Is the API for `JsonNode` and `JsonElement` interactions sufficient? 
 * Do we want to support duplicate and order preservation/control when adding/removing values in `JsonArray`/`JsonObject`?
-* Let's say someone else passes a JsonNode to me, what can I do with it?
 * Should nodes track their own position in the JSON graph? Do we want to allow properties like Parent, Next and Previous?
 
     | Solution | Pros | Cons |
     |----------|:-------------|--------|
     |current API| - no additional checks need to be made | - creating recursive loop by the user may be problematic |
     |tracking nodes | - handles recursive loop problem | - when node is added to a parent, it needs to be checked <br>  if it already has a parent  and make a copy if it has |
+* Do we want to change `JsonNumber`'s backing field to something different than `string`?     
+    Suggestions: 
+    - `Span<byte>` or array of `Utf8String`/`Char8` (once they come online in the future) / `byte`  
+    - internal types that inherit from `JsonNumber`  
+* Do we want to support creating `JsonNumber` from `BigInterger` without changing it to string?
 
 ## Useful links
 
