@@ -182,7 +182,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return obj != null && Marshal.IsComObject(obj);
         }
 
-#if ENABLECOMBINDER
         /////////////////////////////////////////////////////////////////////////////////
 
         // Try to determine if this object represents a WindowsRuntime object - i.e. it either
@@ -210,7 +209,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return false;
         }
-#endif
+
         /////////////////////////////////////////////////////////////////////////////////
 
         private static bool IsTransparentProxy(object obj)

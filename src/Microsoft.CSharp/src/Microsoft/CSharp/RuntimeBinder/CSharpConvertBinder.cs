@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Numerics.Hashing;
+using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Semantics;
 
 namespace Microsoft.CSharp.RuntimeBinder
@@ -121,7 +122,13 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 return com;
             }
+#else
+            if (!BinderHelper.IsWindowsRuntimeObject(target) && target.LimitType.IsCOMObject)
+            {
+                throw ErrorHandling.Error(ErrorCode.ERR_DynamicBindingComUnsupported);
+            }
 #endif
+
             BinderHelper.ValidateBindArgument(target, nameof(target));
             return BinderHelper.Bind(this, _binder, new[] { target }, null, errorSuggestion);
         }
