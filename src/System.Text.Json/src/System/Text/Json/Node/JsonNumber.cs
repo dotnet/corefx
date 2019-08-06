@@ -177,16 +177,8 @@ namespace System.Text.Json
         /// <remarks> 
         ///   Allows scientific mode.
         /// </remarks> 
-        public float GetSingle()
-        {
-            if (float.TryParse(_value, out float value))
-            {
-                return value;
-            }
-
-            return float.Parse(_value, NumberStyles.AllowExponent, GetJsonCulture());
-        }
-
+        public float GetSingle() => float.Parse(_value);
+        
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="double"/> equivalent.
         /// </summary>
@@ -206,15 +198,7 @@ namespace System.Text.Json
         /// <remarks> 
         ///   Allows scientific mode.
         /// </remarks>
-        public double GetDouble()
-        {
-            if (double.TryParse(_value, out double value))
-            {
-                return value;
-            }
-
-            return double.Parse(_value, NumberStyles.AllowExponent, GetJsonCulture());
-        }
+        public double GetDouble() => double.Parse(_value);
 
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="sbyte"/> equivalent.
@@ -354,15 +338,7 @@ namespace System.Text.Json
         ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
         ///   <see cref="float.NegativeInfinity"/>) is emitted. 
         /// </remarks> 
-        public bool TryGetSingle(out float value)
-        {
-            if (float.TryParse(_value, out value))
-            {
-                return true;
-            }
-
-            return float.TryParse(_value, NumberStyles.AllowExponent, GetJsonCulture(), out value);
-        }
+        public bool TryGetSingle(out float value) => float.TryParse(_value, out value);
 
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="double"/> equivalent.
@@ -382,15 +358,7 @@ namespace System.Text.Json
         ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
         ///   <see cref="float.NegativeInfinity"/>) is emitted. 
         /// </remarks> 
-        public bool TryGetDouble(out double value)
-        {
-            if (double.TryParse(_value, out value))
-            {
-                return true;
-            }
-
-            return double.TryParse(_value, NumberStyles.AllowExponent, GetJsonCulture(), out value);
-        }
+        public bool TryGetDouble(out double value) => double.TryParse(_value, out value);
 
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="sbyte"/> equivalent.
@@ -692,16 +660,5 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         public static bool operator !=(JsonNumber left, JsonNumber right) => left?._value != right?._value;
-
-        /// <summary>
-        /// Returns <see cref="CultureInfo"/> object with number decimal separator set to `.`
-        /// </summary>
-        /// <returns></returns>
-        private CultureInfo GetJsonCulture()
-        {
-            CultureInfo jsonCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
-            jsonCulture.NumberFormat.NumberDecimalSeparator = ".";
-            return jsonCulture;
-        }
     }
 }

@@ -3,21 +3,20 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using Xunit;
 
 namespace System.Text.Json.Tests
 {
     public static class JsonNumberTests
     {
-        private const int Precision = 5;
-
         private delegate bool TryGetValue<T>(JsonNumber number, out T result);
 
         private static void TestInitialization<T>(
                 T value,
                 Func<T, JsonNumber> ctor,
                 Action<JsonNumber, T> setter,
-                Func<JsonNumber, T> getter, 
+                Func<JsonNumber, T> getter,
                 TryGetValue<T> tryGetter,
                 Func<T, JsonNumber> implicitCaster)
         {
@@ -31,23 +30,18 @@ namespace System.Text.Json.Tests
             AssertValue(value, number, getter, tryGetter);
 
             // String constructor:
-            number = new JsonNumber(value.ToString().Replace(',','.'));
+            number = value switch
+            {
+                double doubleValue => new JsonNumber(doubleValue.ToString(CultureInfo.InvariantCulture)),
+                float floatValue => new JsonNumber(floatValue.ToString(CultureInfo.InvariantCulture)),
+                decimal decimalValue => new JsonNumber(decimalValue.ToString(CultureInfo.InvariantCulture)),
+                _ => new JsonNumber(value.ToString()),
+            };
             AssertValue(value, number, getter, tryGetter);
             
             // Implicit cast:
             number = implicitCaster(value);
             AssertValue(value, number, getter, tryGetter);
-        }
-
-        private static void AssertWithPrecision<T>(
-            double value, 
-            JsonNumber number, 
-            Func<JsonNumber, T> getter, 
-            TryGetValue<T> tryGetter)
-        {
-            Assert.Equal(value, Convert.ToDouble(getter(number)), Precision);
-            Assert.True(tryGetter(number, out T tryGetterResult));
-            Assert.Equal(value, Convert.ToDouble(tryGetterResult), Precision);
         }
 
         private static void AssertValue<T>(
@@ -56,24 +50,9 @@ namespace System.Text.Json.Tests
                 Func<JsonNumber, T> getter,
                 TryGetValue<T> tryGetter)
         {
-
-            switch (value)
-            {
-                case double doubleValue:
-                    AssertWithPrecision(doubleValue, number, getter, tryGetter);
-                    return;
-                case float floatValue:
-                    AssertWithPrecision(Convert.ToDouble(floatValue), number, getter, tryGetter);
-                    return;
-                case decimal decimalValue:
-                    AssertWithPrecision(Convert.ToDouble(decimalValue), number, getter, tryGetter);
-                    return;
-                default:
-                    Assert.Equal(value, getter(number));
-                    Assert.True(tryGetter(number, out T result));
-                    Assert.Equal(value, result);
-                    return;
-            }            
+                Assert.Equal(value, getter(number));
+                Assert.True(tryGetter(number, out T result));
+                Assert.Equal(value, result);      
         }
 
         [Fact]
@@ -173,10 +152,12 @@ namespace System.Text.Json.Tests
         [InlineData(-17)]
         [InlineData(3.14)]
         [InlineData(-15.5)]
+#if BUILDING_INBOX_LIBRARY
         [InlineData(float.MinValue)]
         [InlineData(float.MaxValue)]
         [InlineData(ulong.MinValue)]
         [InlineData(ulong.MaxValue)]
+#endif
         public static void TestFloat(float value)
         {
             TestInitialization(
@@ -194,6 +175,7 @@ namespace System.Text.Json.Tests
         [InlineData(-17)]
         [InlineData(3.14)]
         [InlineData(-15.5)]
+#if BUILDING_INBOX_LIBRARY
         [InlineData(float.MinValue)]
         [InlineData(float.MaxValue)]
         [InlineData(float.MinValue - 1.0)]
@@ -202,6 +184,7 @@ namespace System.Text.Json.Tests
         [InlineData(double.MaxValue)]
         [InlineData(ulong.MinValue)]
         [InlineData(ulong.MaxValue)]
+#endif
         public static void TestDouble(double value)
         {
             TestInitialization(
@@ -402,14 +385,19 @@ namespace System.Text.Json.Tests
             Assert.True(jsonNumber.TryGetInt64(out long longResult));
             Assert.Equal(value, longResult);
 
+#if BUILDING_INBOX_LIBRARY
             Assert.Equal(value, jsonNumber.GetSingle());
             Assert.True(jsonNumber.TryGetSingle(out float floatResult));
-            Assert.Equal(value, floatResult, Precision);
+            Assert.Equal(value, floatResult);
 
             Assert.Equal(value, jsonNumber.GetDouble());
             Assert.True(jsonNumber.TryGetDouble(out double doubleResult));
-            Assert.Equal(value, doubleResult, Precision);
+            Assert.Equal(value, doubleResult);
 
+            Assert.Equal(value, jsonNumber.GetDecimal());
+            Assert.True(jsonNumber.TryGetDecimal(out decimal decimalResult));
+            Assert.Equal(value, decimalResult);
+#endif
             Assert.Equal(value, (byte)jsonNumber.GetSByte());
             Assert.True(jsonNumber.TryGetSByte(out sbyte sbyteResult));
             Assert.Equal(value, (byte)sbyteResult);
@@ -425,10 +413,6 @@ namespace System.Text.Json.Tests
             Assert.Equal(value, jsonNumber.GetUInt64());
             Assert.True(jsonNumber.TryGetUInt64(out ulong ulongResult));
             Assert.Equal(value, ulongResult);
-
-            Assert.Equal(value, jsonNumber.GetDecimal());
-            Assert.True(jsonNumber.TryGetDecimal(out decimal decimalResult));
-            Assert.Equal(value, decimalResult, Precision);
         }
 
         [Fact]
@@ -504,7 +488,7 @@ namespace System.Text.Json.Tests
 
             Assert.False(jsonNumber.TryGetUInt64(out ulong ulongResult));
             Assert.Throws<FormatException>(() => jsonNumber.GetUInt64());
-
+#if BUILDING_INBOX_LIBRARY
             jsonNumber = new JsonNumber(double.MaxValue);
             Assert.Equal(float.PositiveInfinity, jsonNumber.GetSingle());
             Assert.Throws<FormatException>(() => jsonNumber.GetDecimal());
@@ -513,6 +497,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(float.PositiveInfinity, jsonNumber.GetSingle());
             Assert.Equal(double.PositiveInfinity, jsonNumber.GetSingle());
             Assert.Throws<FormatException>(() => jsonNumber.GetDecimal());
+#endif
         }
 
         [InlineData(float.PositiveInfinity)]
@@ -531,25 +516,27 @@ namespace System.Text.Json.Tests
             Assert.Throws<FormatException > (() => new JsonNumber(value));
         }
 
+#if BUILDING_INBOX_LIBRARY
         [Fact]
         public static void TestScientificNotation()
         {
             var jsonNumber = new JsonNumber("5e6");
-            Assert.Equal(5000000, jsonNumber.GetSingle(), Precision);
-            Assert.Equal(5000000, jsonNumber.GetDouble(), Precision);
+            Assert.Equal(5000000f, jsonNumber.GetSingle());
+            Assert.Equal(5000000, jsonNumber.GetDouble());
 
             jsonNumber = new JsonNumber("3.14e0");
-            Assert.Equal(3.14, jsonNumber.GetSingle(), Precision);
-            Assert.Equal(3.14, jsonNumber.GetDouble(), Precision);
+            Assert.Equal(3.14f, jsonNumber.GetSingle());
+            Assert.Equal(3.14, jsonNumber.GetDouble());
 
             jsonNumber = new JsonNumber("7e-3");
-            Assert.Equal(0.007, jsonNumber.GetSingle(), Precision);
-            Assert.Equal(0.007, jsonNumber.GetDouble(), Precision);
+            Assert.Equal(0.007f, jsonNumber.GetSingle());
+            Assert.Equal(0.007, jsonNumber.GetDouble());
 
             jsonNumber = new JsonNumber("-7e-3");
-            Assert.Equal(-0.007, jsonNumber.GetSingle(), Precision);
-            Assert.Equal(-0.007, jsonNumber.GetDouble(), Precision);
+            Assert.Equal(-0.007f, jsonNumber.GetSingle());
+            Assert.Equal(-0.007, jsonNumber.GetDouble());
         }
+#endif
 
         [Fact]
         public static void TestChangingTypes()
