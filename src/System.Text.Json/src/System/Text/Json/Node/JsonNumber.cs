@@ -453,7 +453,7 @@ namespace System.Text.Json
                 {
                     throw new ArgumentNullException(nameof(value));
                 }
-                throw new ArgumentException("Expected number, but instead got empty string.", nameof(value));
+                throw new ArgumentException(SR.EmptyStringToInitializeNumber, nameof(value));
             }              
             
             JsonWriterHelper.ValidateNumber(Encoding.UTF8.GetBytes(value).AsSpan());
@@ -492,7 +492,7 @@ namespace System.Text.Json
         {
             if (value.Equals(float.PositiveInfinity) || value.Equals(float.NegativeInfinity))
             {
-                throw new FormatException("Provided value does not represent legal JSON number.");
+                throw new FormatException(SR.IllegalNumberFormat);
             }
             _value = value.ToString();
         }
@@ -504,7 +504,7 @@ namespace System.Text.Json
         {
             if(value.Equals(double.PositiveInfinity) || value.Equals(double.NegativeInfinity))
             {
-                throw new FormatException("Provided value does not represent legal JSON number.");
+                throw new FormatException(SR.IllegalNumberFormat);
             }
             _value = value.ToString();
         }

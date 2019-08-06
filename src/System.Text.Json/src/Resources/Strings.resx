@@ -423,4 +423,10 @@
   <data name="FormatUInt16" xml:space="preserve">
     <value>Either the JSON value is not in a supported format, or is out of bounds for a UInt16.</value>
   </data>
+  <data name="EmptyStringToInitializeNumber" xml:space="preserve">
+    <value>Expected number, but instead got empty string.</value>
+  </data>
+  <data name="IllegalNumberFormat" xml:space="preserve">
+    <value>Provided value does not represent legal JSON number.</value>
+  </data>
 </root>
