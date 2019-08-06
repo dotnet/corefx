@@ -329,16 +329,16 @@ namespace HttpStress
                 {
                     int N = latencies.Length;
                     double n = (N - 1) * percentile + 1;
-                    if (n == 1) return rnd(latencies[0]);
-                    else if (n == N) return rnd(latencies[N - 1]);
+                    if (n == 1) return Rnd(latencies[0]);
+                    else if (n == N) return Rnd(latencies[N - 1]);
                     else
                     {
                         int k = (int)n;
                         double d = n - k;
-                        return rnd(latencies[k - 1] + d * (latencies[k] - latencies[k - 1]));
+                        return Rnd(latencies[k - 1] + d * (latencies[k] - latencies[k - 1]));
                     }
 
-                    double rnd(double value) => Math.Round(value, 2);
+                    double Rnd(double value) => Math.Round(value, 2);
                 }
             }
 
