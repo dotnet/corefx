@@ -498,6 +498,15 @@ namespace System.Text.Json.Tests
 
             Assert.False(jsonNumber.TryGetUInt64(out ulong ulongResult));
             Assert.Throws<FormatException>(() => jsonNumber.GetUInt64());
+
+            jsonNumber = new JsonNumber(double.MaxValue);
+            Assert.Equal(float.PositiveInfinity, jsonNumber.GetSingle());
+            Assert.Throws<FormatException>(() => jsonNumber.GetDecimal());
+
+            jsonNumber = new JsonNumber("1e100");
+            Assert.Equal(float.PositiveInfinity, jsonNumber.GetSingle());
+            Assert.Equal(double.PositiveInfinity, jsonNumber.GetSingle());
+            Assert.Throws<FormatException>(() => jsonNumber.GetDecimal());
         }
 
         [InlineData(float.PositiveInfinity)]
