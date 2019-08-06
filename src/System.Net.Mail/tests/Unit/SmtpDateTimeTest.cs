@@ -76,17 +76,11 @@ namespace System.Net.Mime.Tests
         }
 
         [Theory]
-        [InlineData(ValidCompleteDateString, 2009, 5, 17, 15, 34, 7, "GMT", DateTimeKind.Unspecified)]
-        [InlineData(ValidDateStringWithKnownShortHandTimeZone, 2009, 5, 17, 15, 34, 7, "GMT", DateTimeKind.Unspecified)]
-        [InlineData(ValidDateStringWithNoDayOfWeek, 2009, 5, 17, 15, 34, 7, "GMT", DateTimeKind.Unspecified)]
-        [InlineData(ValidDateStringWithOnlyTabsAsWhitespace, 2009, 5, 17, 15, 34, 7, "GMT", DateTimeKind.Unspecified)]
-        [InlineData(ValidDateStringWithTrailingWhitespaceAndCommentAfterTimeZone, 2009, 5, 17, 15, 34, 7, "GMT", DateTimeKind.Unspecified)]
-        [InlineData(ValidDateStringWithMixedTabsAndSpacesAsWhitespace, 2009, 5, 17, 15, 34, 7, "GMT", DateTimeKind.Unspecified)]
+        [InlineData(2009, 5, 17, 15, 34, 7, "GMT")]
         public void SmtpDateTime_CreatedFromDateTimeString_ShouldParseCorrectly(
-            string input,
             int expectedYear, int expectedMonth, int expectedDay,
             int expectedHour, int expectedMinut, int expectedSecond,
-            string expectedTimeZoneOffset, DateTimeKind expectedKind)
+            string expectedTimeZoneOffset)
         {
             var smtpDt = new SmtpDateTime(DateTime.Now);
 
