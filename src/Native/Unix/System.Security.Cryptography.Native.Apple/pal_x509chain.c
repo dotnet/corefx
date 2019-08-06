@@ -173,6 +173,8 @@ static void MergeStatusCodes(CFTypeRef key, CFTypeRef value, void* context)
         *pStatus |= PAL_X509ChainRevocationStatusUnknown;
     else if (CFEqual(keyString, CFSTR("MissingIntermediate")))
         *pStatus |= PAL_X509ChainPartialChain;
+    else if (CFEqual(keyString, CFSTR("UnparseableExtension")))
+        *pStatus |= PAL_X509ChainInvalidExtension;
     else if (CFEqual(keyString, CFSTR("WeakLeaf")) || CFEqual(keyString, CFSTR("WeakIntermediates")) ||
              CFEqual(keyString, CFSTR("WeakRoot")) || CFEqual(keyString, CFSTR("WeakKeySize")))
     {
@@ -189,7 +191,7 @@ static void MergeStatusCodes(CFTypeRef key, CFTypeRef value, void* context)
         // just ignore it for now.
     }
     else if (CFEqual(keyString, CFSTR("NonEmptySubject")) || CFEqual(keyString, CFSTR("GrayListedKey")) ||
-             CFEqual(keyString, CFSTR("CTRequired")) || CFEqual(keyString, CFSTR("UnparseableExtension")))
+             CFEqual(keyString, CFSTR("CTRequired")))
     {
         // Not a "problem" that we report.
     }
