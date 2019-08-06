@@ -40,7 +40,7 @@ namespace System.Text.Json
         {
             int maxRequired = JsonConstants.MaximumFormatDateTimeOffsetLength + 3; // 2 quotes, and optionally, 1 list separator
 
-            if (_memory.Length - _currentIndex < maxRequired)
+            if (_memory.Length - BytesPending < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -49,19 +49,19 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[_currentIndex++] = JsonConstants.ListSeparator;
+                output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
 
             Span<byte> tempSpan = stackalloc byte[JsonConstants.MaximumFormatDateTimeOffsetLength];
             bool result = Utf8Formatter.TryFormat(value, tempSpan, out int bytesWritten, s_dateTimeStandardFormat);
             Debug.Assert(result);
             JsonWriterHelper.TrimDateTimeOffset(tempSpan.Slice(0, bytesWritten), out bytesWritten);
-            tempSpan.Slice(0, bytesWritten).CopyTo(output.Slice(_currentIndex));
-            _currentIndex += bytesWritten;
+            tempSpan.Slice(0, bytesWritten).CopyTo(output.Slice(BytesPending));
+            BytesPending += bytesWritten;
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
         }
 
         private void WriteStringValueIndented(DateTime value)
@@ -72,7 +72,7 @@ namespace System.Text.Json
             // 2 quotes, and optionally, 1 list separator and 1-2 bytes for new line
             int maxRequired = indent + JsonConstants.MaximumFormatDateTimeOffsetLength + 3 + s_newLineLength;
 
-            if (_memory.Length - _currentIndex < maxRequired)
+            if (_memory.Length - BytesPending < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -81,7 +81,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[_currentIndex++] = JsonConstants.ListSeparator;
+                output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.PropertyName)
@@ -90,20 +90,20 @@ namespace System.Text.Json
                 {
                     WriteNewLine(output);
                 }
-                JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
-                _currentIndex += indent;
+                JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
+                BytesPending += indent;
             }
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
 
             Span<byte> tempSpan = stackalloc byte[JsonConstants.MaximumFormatDateTimeOffsetLength];
             bool result = Utf8Formatter.TryFormat(value, tempSpan, out int bytesWritten, s_dateTimeStandardFormat);
             Debug.Assert(result);
             JsonWriterHelper.TrimDateTimeOffset(tempSpan.Slice(0, bytesWritten), out bytesWritten);
-            tempSpan.Slice(0, bytesWritten).CopyTo(output.Slice(_currentIndex));
-            _currentIndex += bytesWritten;
+            tempSpan.Slice(0, bytesWritten).CopyTo(output.Slice(BytesPending));
+            BytesPending += bytesWritten;
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
         }
 
         private static readonly StandardFormat s_dateTimeStandardFormat = new StandardFormat('O');

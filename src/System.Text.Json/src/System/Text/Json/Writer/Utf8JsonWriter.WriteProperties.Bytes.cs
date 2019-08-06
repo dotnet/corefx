@@ -215,7 +215,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, and up to 3x growth when transcoding.
             int maxRequired = (escapedPropertyName.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + encodedLength + 6;
 
-            if (_memory.Length - _currentIndex < maxRequired)
+            if (_memory.Length - BytesPending < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -224,20 +224,20 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[_currentIndex++] = JsonConstants.ListSeparator;
+                output[BytesPending++] = JsonConstants.ListSeparator;
             }
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedPropertyName, output);
 
-            output[_currentIndex++] = JsonConstants.Quote;
-            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
+            output[BytesPending++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.KeyValueSeperator;
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
 
             Base64EncodeAndWrite(bytes, output, encodedLength);
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
         }
 
         private void WriteBase64Minimized(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<byte> bytes)
@@ -250,7 +250,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator.
             int maxRequired = escapedPropertyName.Length + encodedLength + 6;
 
-            if (_memory.Length - _currentIndex < maxRequired)
+            if (_memory.Length - BytesPending < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -259,21 +259,21 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[_currentIndex++] = JsonConstants.ListSeparator;
+                output[BytesPending++] = JsonConstants.ListSeparator;
             }
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
 
-            escapedPropertyName.CopyTo(output.Slice(_currentIndex));
-            _currentIndex += escapedPropertyName.Length;
+            escapedPropertyName.CopyTo(output.Slice(BytesPending));
+            BytesPending += escapedPropertyName.Length;
 
-            output[_currentIndex++] = JsonConstants.Quote;
-            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
+            output[BytesPending++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.KeyValueSeperator;
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
 
             Base64EncodeAndWrite(bytes, output, encodedLength);
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
         }
 
         private void WriteBase64Indented(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<byte> bytes)
@@ -289,7 +289,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, 1-2 bytes for new line, and up to 3x growth when transcoding.
             int maxRequired = indent + (escapedPropertyName.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + encodedLength + 7 + s_newLineLength;
 
-            if (_memory.Length - _currentIndex < maxRequired)
+            if (_memory.Length - BytesPending < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -298,7 +298,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[_currentIndex++] = JsonConstants.ListSeparator;
+                output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
             Debug.Assert(_options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
@@ -308,22 +308,22 @@ namespace System.Text.Json
                 WriteNewLine(output);
             }
 
-            JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
-            _currentIndex += indent;
+            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
+            BytesPending += indent;
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
 
             TranscodeAndWrite(escapedPropertyName, output);
 
-            output[_currentIndex++] = JsonConstants.Quote;
-            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
-            output[_currentIndex++] = JsonConstants.Space;
+            output[BytesPending++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.KeyValueSeperator;
+            output[BytesPending++] = JsonConstants.Space;
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
 
             Base64EncodeAndWrite(bytes, output, encodedLength);
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
         }
 
         private void WriteBase64Indented(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<byte> bytes)
@@ -339,7 +339,7 @@ namespace System.Text.Json
             // Optionally, 1 list separator, and 1-2 bytes for new line.
             int maxRequired = indent + escapedPropertyName.Length + encodedLength + 7 + s_newLineLength;
 
-            if (_memory.Length - _currentIndex < maxRequired)
+            if (_memory.Length - BytesPending < maxRequired)
             {
                 Grow(maxRequired);
             }
@@ -348,7 +348,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                output[_currentIndex++] = JsonConstants.ListSeparator;
+                output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
             Debug.Assert(_options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
@@ -358,23 +358,23 @@ namespace System.Text.Json
                 WriteNewLine(output);
             }
 
-            JsonWriterHelper.WriteIndentation(output.Slice(_currentIndex), indent);
-            _currentIndex += indent;
+            JsonWriterHelper.WriteIndentation(output.Slice(BytesPending), indent);
+            BytesPending += indent;
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
 
-            escapedPropertyName.CopyTo(output.Slice(_currentIndex));
-            _currentIndex += escapedPropertyName.Length;
+            escapedPropertyName.CopyTo(output.Slice(BytesPending));
+            BytesPending += escapedPropertyName.Length;
 
-            output[_currentIndex++] = JsonConstants.Quote;
-            output[_currentIndex++] = JsonConstants.KeyValueSeperator;
-            output[_currentIndex++] = JsonConstants.Space;
+            output[BytesPending++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.KeyValueSeperator;
+            output[BytesPending++] = JsonConstants.Space;
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
 
             Base64EncodeAndWrite(bytes, output, encodedLength);
 
-            output[_currentIndex++] = JsonConstants.Quote;
+            output[BytesPending++] = JsonConstants.Quote;
         }
     }
 }
