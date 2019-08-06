@@ -39,11 +39,28 @@
   </Target>
 
   <Target Name="BuildManaged">
-    <ItemGroup>
-      <_BuildMangedProjects Include="src\dirs.proj" />
+    <ItemGroup Condition="'$(DirectoryToBuild)' == ''">
+      <_BuildMangedProjects Include="ref.builds" />
+      <_BuildMangedProjects Include="shims\generated\*.csproj" />
+      <_BuildMangedProjects Include="Native\native-binplace.proj" />
+      <_BuildMangedProjects Include="src.builds" />
+      <_BuildMangedProjects Include="shims\manual\*.csproj" />
+      <_BuildMangedProjects Condition="'$(DotNetBuildFromSource)' != 'true'" Include="shims\ApiCompat.proj" />
+      <_BuildMangedProjects Condition="'$(DotNetBuildFromSource)' != 'true' and '$(BuildAllConfigurations)' != 'true'" Include="pretest.proj" />
     </ItemGroup>
 
-    <MSBuild Projects="@(_BuildMangedProjects)" Properties="$(ProjectProperties)" />
+    <ItemGroup Condition="'$(DirectoryToBuild)' != ''">
+      <_BuildMangedProjects Include="ref.builds" />
+      <_BuildMangedProjects Include="src.builds" />
+    </ItemGroup>
+
+    <!-- To Serialize we use msbuild's batching functionality '%' to force it to batch all similar projects with the same identity
+         however since the project names are unique it will essentially force each to run in its own batch -->
+    <MSBuild Targets="$(MSBuildProjectDefaultTargets)"
+             Condition="'%(Identity)' != ''"
+             Projects="@(_BuildMangedProjects)"
+             Properties="BuildAllProjects=true;BuildConfiguration=$(BuildConfiguration);%(Project.AdditionalProperties)"
+             ContinueOnError="ErrorAndStop" />
   </Target>
 
   <Target Name="BuildTests">

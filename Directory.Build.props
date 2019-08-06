@@ -333,9 +333,9 @@
     <PackageConflictPlatformManifests Include="$(PlatformManifestFile)" />
   </ItemGroup>
 
-  <!-- AOT only asset that we currently don't support. -->
   <ItemGroup>
-    <ProjectExclusions Include="$(SourceDir)System.Private.Reflection.Metadata.Ecma335/**/*.csproj" />
+    <!-- AOT only asset that we currently don't support. -->
+    <ProjectExclusions Include="$(SourceDir)System.Private.Reflection.Metadata.Ecma335\**\*.csproj" />
   </ItemGroup>
 
   <!-- Specify the default constants for each target group -->
