@@ -32,6 +32,7 @@ namespace Microsoft.Framework.WebEncoders
             Span<char> destination = new char[12];
             OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
                 "\U0001f4a9".AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+
             Assert.Equal(OperationStatus.Done, status);
             Assert.Equal(2, charsConsumed);
             Assert.Equal(12, charsWritten);
@@ -48,6 +49,7 @@ namespace Microsoft.Framework.WebEncoders
             // Pass in destination + 100 to check for underwrite.
             OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
                 "\U0001f4a9".AsSpan(), destination.Slice(100, 12), out int charsConsumed, out int charsWritten, isFinalBlock: true);
+
             Assert.Equal(OperationStatus.Done, status);
             Assert.Equal(2, charsConsumed);
             Assert.Equal(12, charsWritten);
@@ -64,6 +66,7 @@ namespace Microsoft.Framework.WebEncoders
             // Overlap behavior is undefined but documented that it is not valid. Here we don't expect any issues.
             OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
                 destination.Slice(0, 2), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+
             Assert.Equal(OperationStatus.Done, status);
             Assert.Equal(2, charsConsumed);
             Assert.Equal(12, charsWritten);
@@ -75,6 +78,7 @@ namespace Microsoft.Framework.WebEncoders
             Span<char> destination = new char[11];
             OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
                 "\U0001f4a9".AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+
             Assert.Equal(OperationStatus.DestinationTooSmall, status);
             Assert.Equal(0, charsConsumed);
             Assert.Equal(0, charsWritten);
@@ -115,6 +119,7 @@ namespace Microsoft.Framework.WebEncoders
             Span<char> destination = new char[12];
             OperationStatus status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
                 "".AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
+
             Assert.Equal(OperationStatus.Done, status);
             Assert.Equal(0, charsConsumed);
             Assert.Equal(0, charsWritten);
@@ -123,6 +128,7 @@ namespace Microsoft.Framework.WebEncoders
             destination = null; // null doesn't throw is no characters to encode
             status = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
                 "".AsSpan(), destination, out charsConsumed, out charsWritten, isFinalBlock: true);
+
             Assert.Equal(OperationStatus.Done, status);
             Assert.Equal(0, charsConsumed);
             Assert.Equal(0, charsWritten);
@@ -368,16 +374,16 @@ namespace Microsoft.Framework.WebEncoders
         }
 
         [Fact]
-        public void JavaScriptEncoder_HighSurrogatesReplaced()
+        public void JavaScriptEncoder_UnpairedSurrogatesReplaced()
         {
             // Arrange
             JavaScriptEncoder encoder = JavaScriptEncoder.Create(UnicodeRanges.All); // allow all codepoints
 
-            // "a<unpaired leading>"
-            const string Input = "a\uD800";
-            const string Expected = "a\uFFFD";
+            // "a<unpaired leading low><unpaired leading high><unpaired leading high>"
+            const string Input = "a\uDFFF\uD800\uD800";
+            const string Expected = "a\uFFFD\uFFFD\uFFFD";
 
-            Assert.Equal(2, Input.Length);
+            Assert.Equal(4, Input.Length);
 
             // String-based Encode()
             string retVal = encoder.Encode(Input);
@@ -388,8 +394,8 @@ namespace Microsoft.Framework.WebEncoders
             Span<char> destination = new char[100];
             status = encoder.Encode(Input.AsSpan(), destination, out int charsConsumed, out int charsWritten, isFinalBlock: true);
             Assert.Equal(OperationStatus.Done, status);
-            Assert.Equal(2, charsConsumed);
-            Assert.Equal(2, charsWritten);
+            Assert.Equal(4, charsConsumed);
+            Assert.Equal(4, charsWritten);
             Assert.Equal(Expected, new string(destination.Slice(0, charsWritten).ToArray()));
         }
 
@@ -407,7 +413,7 @@ namespace Microsoft.Framework.WebEncoders
 
             OperationStatus status;
 
-            // Just pass in the first two characters, making uD800 a high unpaired surrogate. Set isFinalBlock=false so we get NeedMoreData.
+            // Just pass in the first two characters, making uD800 an unpaired high surrogate. Set isFinalBlock=false so we get NeedMoreData.
             status = encoder.Encode(Input.AsSpan(0, 2), destination, out int charsConsumed1, out int charsWritten1, isFinalBlock: false);
             Assert.Equal(OperationStatus.NeedMoreData, status);
             Assert.Equal(1, charsConsumed1);
@@ -421,7 +427,7 @@ namespace Microsoft.Framework.WebEncoders
             Assert.Equal(12, charsWritten2);
             Assert.Equal(Expected, new string(destination.Slice(0, charsWritten1 + charsWritten2).ToArray()));
 
-            // Ensure isFinalBlock=true has the same result since there is no longer a trailing high unpaired surrogate.
+            // Ensure isFinalBlock=true has the same result since there is no longer a trailing unpaired high surrogate.
             status = encoder.Encode(Input.AsSpan(charsConsumed1, 2), destination.Slice(charsWritten1), out charsConsumed2, out charsWritten2, isFinalBlock: true);
             Assert.Equal(OperationStatus.Done, status);
             Assert.Equal(2, charsConsumed2);

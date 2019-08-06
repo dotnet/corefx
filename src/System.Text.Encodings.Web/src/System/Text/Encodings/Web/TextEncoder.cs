@@ -583,10 +583,9 @@ namespace System.Text.Encodings.Web
             unsafe
             {
                 fixed (char* sourcePtr = source)
-                fixed (char* destinationPtr = destination)
                 {
                     int firstCharacterToEncode;
-                    if (sourcePtr == null || (firstCharacterToEncode = FindFirstCharacterToEncode(sourcePtr, source.Length)) == -1)
+                    if (source.IsEmpty || (firstCharacterToEncode = FindFirstCharacterToEncode(sourcePtr, source.Length)) == -1)
                     {
                         if (source.TryCopyTo(destination))
                         {
@@ -607,7 +606,10 @@ namespace System.Text.Encodings.Web
                         return OperationStatus.DestinationTooSmall;
                     }
 
-                    return EncodeIntoBuffer(destinationPtr, destination.Length, sourcePtr, source.Length, out charsConsumed, out charsWritten, firstCharacterToEncode, isFinalBlock);
+                    fixed (char* destinationPtr = destination)
+                    {
+                        return EncodeIntoBuffer(destinationPtr, destination.Length, sourcePtr, source.Length, out charsConsumed, out charsWritten, firstCharacterToEncode, isFinalBlock);
+                    }
                 }
             }
         }
