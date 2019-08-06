@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 // See THIRD-PARTY-NOTICES.TXT in the project root for license information.
 
+using System.Diagnostics;
 using System.Text;
 
 namespace System.Net.Http.HPack
@@ -13,6 +14,8 @@ namespace System.Net.Http.HPack
 
         public HeaderField(ReadOnlySpan<byte> name, ReadOnlySpan<byte> value)
         {
+            Debug.Assert(name.Length > 0);
+
             // TODO: We're allocating here on every new table entry.
             // That means a poorly-behaved server could cause us to allocate repeatedly.
             // We should revisit our allocation strategy here so we don't need to allocate per entry
@@ -35,9 +38,9 @@ namespace System.Net.Http.HPack
 
         public override string ToString()
         {
-            if (Name?.Length > 0)
+            if (Name != null)
             {
-                return Encoding.ASCII.GetString(Name) + ": " + Encoding.ASCII.GetString(Value ?? Array.Empty<byte>());
+                return Encoding.ASCII.GetString(Name) + ": " + Encoding.ASCII.GetString(Value);
             }
             else
             {

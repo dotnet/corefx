@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Net.Http.HPack;
 using System.Reflection;
 using System.Text;
+using System.Linq;
 using Xunit;
 
 namespace System.Net.Http.Unit.Tests.HPack
@@ -98,16 +99,11 @@ namespace System.Net.Http.Unit.Tests.HPack
 
         public static IEnumerable<object[]> CreateResizeData()
         {
-            for (int initialMaxSize = 128; initialMaxSize <= 512; initialMaxSize += 128)
-            {
-                for (int finalMaxSize = 128; finalMaxSize <= 512; finalMaxSize += 128)
-                {
-                    for (int insertSize = 128; insertSize <= 512; insertSize += 128)
-                    {
-                        yield return new object[] { initialMaxSize, finalMaxSize, insertSize };
-                    }
-                }
-            }
+            var values = new[] { 128, 256, 384, 512 };
+            return from initialMaxSize in values
+                   from finalMaxSize in values
+                   from insertSize in values
+                   select new object[] { initialMaxSize, finalMaxSize, insertSize };
         }
     }
 }

@@ -98,12 +98,11 @@ namespace System.Net.Http.HPack
             while (_count > 0 && _maxSize - _size < available)
             {
                 ref HeaderField field = ref _buffer[_removeIndex];
-
                 _size -= field.Length;
+                field = default;
+
                 _count--;
                 _removeIndex = (_removeIndex + 1) % _buffer.Length;
-
-                field = default;
             }
         }
     }
