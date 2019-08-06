@@ -1158,6 +1158,103 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Null(dictionaryLast.Dict);
         }
 
+        [Fact]
+        public static void SerializeDictionaryWithNullValues()
+        {
+            Dictionary<string, string> StringVals = new Dictionary<string, string>()
+            {
+                ["key"] = null,
+            };
+            Assert.Equal(@"{""key"":null}", JsonSerializer.Serialize(StringVals));
+
+            Dictionary<string, object> ObjVals = new Dictionary<string, object>()
+            {
+                ["key"] = null,
+            };
+            Assert.Equal(@"{""key"":null}", JsonSerializer.Serialize(ObjVals));
+
+            Dictionary<string, Dictionary<string, string>> StringDictVals = new Dictionary<string, Dictionary<string, string>>()
+            {
+                ["key"] = null,
+            };
+            Assert.Equal(@"{""key"":null}", JsonSerializer.Serialize(StringDictVals));
+
+            Dictionary<string, Dictionary<string, object>> ObjectDictVals = new Dictionary<string, Dictionary<string, object>>()
+            {
+                ["key"] = null,
+            };
+            Assert.Equal(@"{""key"":null}", JsonSerializer.Serialize(ObjectDictVals));
+        }
+
+        [Fact]
+        public static void DeserializeDictionaryWithNullValues()
+        {
+            {
+                Dictionary<string, string> dict = JsonSerializer.Deserialize<Dictionary<string, string>>(@"{""key"":null}");
+                Assert.Null(dict["key"]);
+            }
+
+            {
+                Dictionary<string, object> dict = JsonSerializer.Deserialize<Dictionary<string, object>>(@"{""key"":null}");
+                Assert.Null(dict["key"]);
+            }
+
+            {
+                Dictionary<string, Dictionary<string, string>> dict = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(@"{""key"":null}");
+                Assert.Null(dict["key"]);
+            }
+
+            {
+                Dictionary<string, Dictionary<string, object>> dict = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object>>>(@"{""key"":null}");
+                Assert.Null(dict["key"]);
+            }
+        }
+
+        // https://github.com/dotnet/corefx/issues/39808
+        [Fact]
+        public static void Regression39808_NullValuesShouldSerializeAsNull()
+        {
+            var value = new SimpleClassWithDictionaries()
+            {
+                StringVals = new Dictionary<string, string>()
+                {
+                    ["key"] = null,
+                },
+                ObjectVals = new Dictionary<string, object>()
+                {
+                    ["key"] = null,
+                },
+                StringDictVals = new Dictionary<string, Dictionary<string, string>>()
+                {
+                    ["key"] = null,
+                },
+                ObjectDictVals = new Dictionary<string, Dictionary<string, object>>()
+                {
+                    ["key"] = null,
+                },
+                ClassVals = new Dictionary<string, SimpleClassWithDictionaries>()
+                {
+                    ["key"] = null,
+                }
+            };
+
+            const string expectedJson = @"{""StringVals"":{""key"":null},""ObjectVals"":{""key"":null},""StringDictVals"":{""key"":null},""ObjectDictVals"":{""key"":null},""ClassVals"":{""key"":null}}";
+            Assert.Equal(expectedJson, JsonSerializer.Serialize(value));
+        }
+
+        [Fact]
+        public static void NullDictionaryValuesShouldDeserializeAsNull()
+        {
+            const string json = @"{""StringVals"":{""key"":null},""ObjectVals"":{""key"":null},""StringDictVals"":{""key"":null},""ObjectDictVals"":{""key"":null},""ClassVals"":{""key"":null}}";
+
+            SimpleClassWithDictionaries obj = JsonSerializer.Deserialize<SimpleClassWithDictionaries>(json);
+            Assert.Null(obj.StringVals["key"]);
+            Assert.Null(obj.ObjectVals["key"]);
+            Assert.Null(obj.StringDictVals["key"]);
+            Assert.Null(obj.ObjectDictVals["key"]);
+            Assert.Null(obj.ClassVals["key"]);
+        }
+
         public class ClassWithNotSupportedDictionary
         {
             public Dictionary<int, int> MyDictionary { get; set; }
@@ -1211,6 +1308,15 @@ namespace System.Text.Json.Serialization.Tests
         {
             public Dictionary<string, string> Dict { get; set; }
             public string Test { get; set; }
+        }
+
+        public class SimpleClassWithDictionaries
+        {
+            public Dictionary<string, string> StringVals { get; set; }
+            public Dictionary<string, object> ObjectVals { get; set; }
+            public Dictionary<string, Dictionary<string, string>> StringDictVals { get; set; }
+            public Dictionary<string, Dictionary<string, object>> ObjectDictVals { get; set; }
+            public Dictionary<string, SimpleClassWithDictionaries> ClassVals { get; set; }
         }
     }
 }

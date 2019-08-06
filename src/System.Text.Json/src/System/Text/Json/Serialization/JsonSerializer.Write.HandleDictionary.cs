@@ -28,7 +28,12 @@ namespace System.Text.Json
                     if (!state.Current.JsonPropertyInfo.IgnoreNullValues)
                     {
                         // Write a null object or enumerable.
-                        state.Current.WriteObjectOrArrayStart(ClassType.Enumerable, writer, writeNull: true);
+                        state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer, writeNull: true);
+                    }
+
+                    if (state.Current.PopStackOnEndCollection)
+                    {
+                        state.Pop();
                     }
 
                     return true;

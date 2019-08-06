@@ -17,6 +17,12 @@ namespace System.Text.Json
             // Write the start.
             if (!state.Current.StartObjectWritten)
             {
+                if (state.Current.CurrentValue == null)
+                {
+                    state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, writeNull: true);
+                    return WriteEndObject(ref state);
+                }
+
                 state.Current.WriteObjectOrArrayStart(ClassType.Object, writer);
                 state.Current.PropertyEnumerator = state.Current.JsonClassInfo.PropertyCache.GetEnumerator();
                 state.Current.PropertyEnumeratorActive = true;
@@ -49,7 +55,11 @@ namespace System.Text.Json
             }
 
             writer.WriteEndObject();
+            return WriteEndObject(ref state);
+        }
 
+        private static bool WriteEndObject(ref WriteStack state)
+        {
             if (state.Current.PopStackOnEndObject)
             {
                 state.Pop();
