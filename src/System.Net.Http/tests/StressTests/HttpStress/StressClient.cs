@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.Concurrent;
@@ -167,7 +168,7 @@ namespace HttpStress
             private long _reuseAddressFailures = 0;
             private long _lastTotal = -1;
 
-            private readonly ConcurrentDictionary<(Type exception, string errorMessage), StressFailureType> _failureTypes;
+            private readonly ConcurrentDictionary<(Type exception, string message, string callSite)[], StressFailureType> _failureTypes;
             private readonly ConcurrentBag<double> _latencies = new ConcurrentBag<double>();
 
             public StressResultAggregator((string name, Func<RequestContext, Task>)[] operations)
@@ -176,7 +177,7 @@ namespace HttpStress
                 _successes = new long[operations.Length];
                 _cancellations = new long[operations.Length];
                 _failures = new long[operations.Length];
-                _failureTypes = new ConcurrentDictionary<(Type exception, string errorMessage), StressFailureType>();
+                _failureTypes = new ConcurrentDictionary<(Type, string, string)[], StressFailureType>(new StructuralEqualityComparer<(Type, string, string)[]>());
             }
 
             public void RecordSuccess(int operationIndex, TimeSpan elapsed)
@@ -208,7 +209,7 @@ namespace HttpStress
                 // record exception according to failure type classification
                 void RecordFailureType()
                 {
-                    (Type exception, string errorMessage) key = ClassifyFailure(exn);
+                    (Type, string, string)[] key = ClassifyFailure(exn);
 
                     _failureTypes.AddOrUpdate(key, Add, Update);
 
@@ -223,13 +224,17 @@ namespace HttpStress
                         return new StressFailureType(current.ErrorText, current.Failures.SetItem(operationIndex, failureCount + 1));
                     }
 
-                    (Type exception, string errorMessage) ClassifyFailure(Exception exn)
+                    (Type exception, string message, string callSite)[] ClassifyFailure(Exception exn)
                     {
-                        Exception inner = exn;
-                        while (inner.InnerException != null)
-                            inner = inner.InnerException;
+                        var acc = new List<(Type exception, string message, string callSite)>();
 
-                        return (inner.GetType(), inner.Message);
+                        while (exn != null)
+                        {
+                            acc.Add((exn.GetType(), exn.Message, new StackTrace(exn, true).GetFrame(0).ToString()));
+                            exn = exn.InnerException;
+                        }
+
+                        return acc.ToArray();
                     }
                 }
 
@@ -377,6 +382,13 @@ namespace HttpStress
                     Console.WriteLine();
                 }
             }
+        }
+
+
+        private class StructuralEqualityComparer<T> : IEqualityComparer<T> where T : IStructuralEquatable
+        {
+            public bool Equals(T left, T right) => left.Equals(right, StructuralComparisons.StructuralEqualityComparer);
+            public int GetHashCode(T value) => value.GetHashCode(StructuralComparisons.StructuralEqualityComparer);
         }
     }
 }
