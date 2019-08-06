@@ -45,14 +45,19 @@ namespace System.IO.Ports
                     }
             }
 
-            // Query Interop QueryDosDevice()
-            //            
-            // Is GUID class ID for COM ports https://docs.microsoft.com/en-us/windows-hardware/drivers/install/guid-devinterface-comport
-            // Typical DosDevice serial port name 'USB#VID_1B4F&PID_214F&MI_00#6&381731fd&0&0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}'
-            //
-            foreach (string dosName in QueryDosDeviceComPorts("86e0d1e0-8089-11d0-9ce4-08003e301f73"))
+            // If running on Windows IoT, search and add the Serial Devices from QueryDosDevice
+            // If this is allowed to happen on Windows devices where port detection happens normally, duplicate Serial Port names are added.
+            // This causes issues with System.IO.Ports.Tests
+            // Port detection broken on Windows IoT
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.Arm)
             {
-                resultPortNames.Add(dosName.ToLower());
+                // Query Interop QueryDosDevice()
+                //            
+                // Is GUID class ID for COM ports https://docs.microsoft.com/en-us/windows-hardware/drivers/install/guid-devinterface-comport
+                // Typical DosDevice serial port name 'USB#VID_1B4F&PID_214F&MI_00#6&381731fd&0&0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}'
+                //
+                foreach (string dosName in QueryDosDeviceComPorts("86e0d1e0-8089-11d0-9ce4-08003e301f73"))
+                    resultPortNames.Add(dosName.ToLower());
             }
 
             string[] result = new string[resultPortNames.Count];
