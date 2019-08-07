@@ -50,7 +50,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
         public void GenericNameMatchesPredefined()
         {
             dynamic d = 3;
-            dynamic v = new Value<int> {Quantity = d};
+            dynamic v = new Value<int> { Quantity = d };
             dynamic r = v.Quantity;
             Assert.Equal(3, r);
             dynamic h = new Holder();
@@ -141,7 +141,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
 
         interface ITestDerived : ITestInterface
         {
-            
+
         }
 
         class TestImpl : ITestDerived
@@ -393,50 +393,24 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             Assert.Equal(message, Assert.Throws<RuntimeBinderException>(() => target2(getter, null)).Message);
         }
 
+        // This is not the defined COM interface for IKnownFolderManager.
+        // We need a registered COM interface and CoClass to validate the behavior with dynamic and COM.
+        // The real IKnownFolderManager interface is available on Windows Vista+, so it is on all platforms that we're testing.
         [ComImport]
         [Guid("8BE2D872-86AA-4d47-B776-32CCA40C7018")]
-        interface IKnownFolderManager
+        interface Not_IKnownFolderManager
         {
-            void FolderIdFromCsidl(
-                int nCsidl, out Guid pfid);
-            void FolderIdToCsidl(
-                [MarshalAs(UnmanagedType.LPStruct)] Guid rfid,
-                out int pnCsidl);
-            void GetFolderIds(
-                out Guid[] ppKFId,
-                out uint pCount);
-            void GetFolder(
-                [MarshalAs(UnmanagedType.LPStruct)] Guid rfid,
-                out object ppkf);
-            void GetFolderByName(
-                string pszCanonicalName,
-                out object ppkf);
-            void RegisterFolder(
-                [MarshalAs(UnmanagedType.LPStruct)] Guid rfid,
-                IntPtr pKFD);
-            void UnregisterFolder(
-                [MarshalAs(UnmanagedType.LPStruct)] Guid rfid);
-            void FindFolderFromPath(
-                string pszPath,
-                int mode,
-                out object ppkf);
-            void FindFolderFromIDList(
-                IntPtr pidl,
-                out object ppkf);
-            void Redirect(
-                [MarshalAs(UnmanagedType.LPStruct)] Guid rfid,
-                IntPtr hwnd,
-                int flags,
-                string pszTargetPath,
-                uint cFolters,
-                Guid[] pExclusion,
-                out string error);
+            void MethodCall();
+
+            int this[int i] { get; set; }
+
+            int Property { get; set; }
         }
 
         [CoClass(typeof(KnownFolderManagerClass))]
         [ComImport]
         [Guid("8BE2D872-86AA-4d47-B776-32CCA40C7018")]
-        interface KnownFolderManager : IKnownFolderManager { }
+        interface KnownFolderManager : Not_IKnownFolderManager { }
 
         [Guid("4df0c730-df9d-4ae3-9153-aa6b82e9795a")]
         class KnownFolderManagerClass { }
@@ -450,7 +424,31 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             {
                 var a = new { Manager = new KnownFolderManagerClass() };
                 dynamic d = a;
-                d.Manager.GetFolderByName(string.Empty, out object knownFolder);
+                d.Manager.MethodCall();
+            });
+            Assert.Throws<RuntimeBinderException>(() =>
+            {
+                var a = new { Manager = new KnownFolderManagerClass() };
+                dynamic d = a;
+                return d.Manager[0];
+            });
+            Assert.Throws<RuntimeBinderException>(() =>
+            {
+                var a = new { Manager = new KnownFolderManagerClass() };
+                dynamic d = a;
+                d.Manager[0] = 1;
+            });
+            Assert.Throws<RuntimeBinderException>(() =>
+            {
+                var a = new { Manager = new KnownFolderManagerClass() };
+                dynamic d = a;
+                d.Manager.Property = 1;
+            });
+            Assert.Throws<RuntimeBinderException>(() =>
+            {
+                var a = new { Manager = new KnownFolderManagerClass() };
+                dynamic d = a;
+                d.Manager.Property = 1;
             });
         }
     }
