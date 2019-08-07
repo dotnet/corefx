@@ -19,9 +19,12 @@ namespace System.IO.Ports.Tests
             DosDevices dosDevices = new DosDevices();
             Regex comPortNameRegex = new Regex(@"com\d{1,3}", RegexOptions.IgnoreCase);
 
+            // This test enumerates all DosDevices and attempts to open them, expecting an exception.
+            // However, some non true Serial devices can successfully open!
+            // Added check in SerialPort.Open() to throw exception if not a valid PortName & Also added condition check for valid ports below
             foreach (KeyValuePair<string, string> keyValuePair in dosDevices)
             {
-                if (!string.IsNullOrEmpty(keyValuePair.Key) && !comPortNameRegex.IsMatch(keyValuePair.Key))
+                if (!string.IsNullOrEmpty(keyValuePair.Key) && !comPortNameRegex.IsMatch(keyValuePair.Key) && !keyValuePair.Key.Contains("86e0d1e0-8089-11d0-9ce4-08003e301f73"))
                 {
                     using (SerialPort com1 = new SerialPort(keyValuePair.Key))
                     {
@@ -30,7 +33,7 @@ namespace System.IO.Ports.Tests
                     }
                 }
 
-                if (!string.IsNullOrEmpty(keyValuePair.Value) && !comPortNameRegex.IsMatch(keyValuePair.Key))
+                if (!string.IsNullOrEmpty(keyValuePair.Value) && !comPortNameRegex.IsMatch(keyValuePair.Key) && !keyValuePair.Key.Contains("86e0d1e0-8089-11d0-9ce4-08003e301f73"))
                 {
                     using (SerialPort com1 = new SerialPort(keyValuePair.Value))
                     {

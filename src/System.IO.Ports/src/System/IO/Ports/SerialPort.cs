@@ -598,6 +598,11 @@ namespace System.IO.Ports
             if (IsOpen)
                 throw new InvalidOperationException(SR.Port_already_open);
 
+            // Check its a valid Serial Port name
+            if (!_portName.Contains("COM") && !_portName.Contains("86e0d1e0-8089-11d0-9ce4-08003e301f73"))
+                throw new ArgumentException(SR.Format(SR.Arg_InvalidSerialPort, _portName), nameof(_portName));
+
+
             _internalSerialStream = new SerialStream(_portName, _baudRate, _parity, _dataBits, _stopBits, _readTimeout,
                 _writeTimeout, _handshake, _dtrEnable, _rtsEnable, _discardNull, _parityReplace);
 

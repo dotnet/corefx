@@ -30,26 +30,13 @@ namespace System.IO.Ports
 
             HashSet<string> resultPortNames = new HashSet<string>();
 
-            // Query registry register COM[x] ports
-            //
-            using (RegistryKey serialKey = Registry.LocalMachine.OpenSubKey(@"HARDWARE\DEVICEMAP\SERIALCOMM"))
-            {
-                if (serialKey != null)
-                    foreach (string valueName in serialKey.GetValueNames())
-                    {
-                        string portName = ((string)serialKey.GetValue(valueName)).ToUpper();
-
-                        // Add the key's value (portname) if it is valid (Win10IoT places garbage in this Reg Key)
-                        if (portName.StartsWith("COM")) // Filters corrupt chars for COM[x] devices in Registry on Win10IoT 
-                            resultPortNames.Add(portName);
-                    }
-            }
-
             // If running on Windows IoT, search and add the Serial Devices from QueryDosDevice
             // If this is allowed to happen on Windows devices where port detection happens normally, duplicate Serial Port names are added.
             // This causes issues with System.IO.Ports.Tests
-            // Port detection broken on Windows IoT
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.Arm)
+            // Port detection broken on Windows IoT (Does not initialise regitry with COM port names), so use QueryDosDevice
+            //
+            // ToDO: Be good to Limit this to Win10IoT only, not just check for ARM arch!!
+            if (RuntimeInformation.OSArchitecture == Architecture.Arm || RuntimeInformation.OSArchitecture == Architecture.Arm64) 
             {
                 // Query Interop QueryDosDevice()
                 //            
@@ -58,6 +45,23 @@ namespace System.IO.Ports
                 //
                 foreach (string dosName in QueryDosDeviceComPorts("86e0d1e0-8089-11d0-9ce4-08003e301f73"))
                     resultPortNames.Add(dosName.ToLower());
+            }
+            else
+            {
+                // Query registry register COM[x] ports
+                //
+                using (RegistryKey serialKey = Registry.LocalMachine.OpenSubKey(@"HARDWARE\DEVICEMAP\SERIALCOMM"))
+                {
+                    if (serialKey != null)
+                        foreach (string valueName in serialKey.GetValueNames())
+                        {
+                            string portName = ((string)serialKey.GetValue(valueName)).ToUpper();
+
+                            // Add the key's value (portname) if it is valid (Win10IoT places garbage in this Reg Key)
+                            if (portName.StartsWith("COM")) // Filters corrupt chars for COM[x] devices in Registry on Win10IoT 
+                                resultPortNames.Add(portName);
+                        }
+                }
             }
 
             string[] result = new string[resultPortNames.Count];
