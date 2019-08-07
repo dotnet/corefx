@@ -7,7 +7,7 @@ namespace System.Text.Json
     /// <summary>
     ///   Represents a text JSON value.
     /// </summary>
-    public partial class JsonString : JsonNode, IEquatable<JsonString>
+    public class JsonString : JsonNode, IEquatable<JsonString>
     {
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonString"/> class representing the empty value.
