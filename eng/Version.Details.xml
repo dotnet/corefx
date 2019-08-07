@@ -1,16 +1,16 @@
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview8.19379.2">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview9.19407.2">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>ac25be694a5385a6a1496db40de932df0689b742</Sha>
+      <Sha>7259ed2b3676930cbe6c274fd71af9701ca69fe3</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.0.0-preview8.19379.2">
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.0.0-preview9.19407.2">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>ac25be694a5385a6a1496db40de932df0689b742</Sha>
+      <Sha>7259ed2b3676930cbe6c274fd71af9701ca69fe3</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-preview8.19379.2">
+    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-preview9.19407.2">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>ac25be694a5385a6a1496db40de932df0689b742</Sha>
+      <Sha>7259ed2b3676930cbe6c274fd71af9701ca69fe3</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
