@@ -638,6 +638,15 @@ namespace System.Text.Json.Tests
             jsonNumber = new JsonNumber();
             Assert.True(jsonNumber.Equals(new JsonNumber()));
             Assert.False(jsonNumber.Equals(new JsonNumber(5)));
+
+            Assert.False(jsonNumber.Equals(new Exception()));
+
+            JsonNumber jsonNumberNull = null;
+            Assert.False(jsonNumber == jsonNumberNull);
+            Assert.False(jsonNumberNull == jsonNumber);
+
+            Assert.True(jsonNumber != jsonNumberNull);
+            Assert.True(jsonNumberNull != jsonNumber);
         }
 
         [Fact]
