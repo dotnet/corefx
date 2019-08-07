@@ -30,7 +30,7 @@ The user should be able to:
 ## Example scenarios
 ### Collection initialization
 
-One of the aims in designing this API was the take an advantage of C# language features and make it easy and natural for delevopers to create instances of `JsonObject`s without calling too many `new` instructions. Below example shows how to initialize JSON object with different types of properties:
+One of the aims in designing this API was the take advantage of C# language features and make it easy and natural for delevopers to create instances of `JsonObject`s without calling too many `new` instructions. Below example shows how to initialize JSON object with different types of properties:
 
 ```csharp
 var developer = new JsonObject
@@ -42,7 +42,7 @@ var developer = new JsonObject
 };
 ```
 
-JSON object can be nested within other JSON object or include a JSON array: 
+JSON object can be nested within other JSON objects or include a JSON array: 
 
 ```csharp
 var person = new JsonObject
