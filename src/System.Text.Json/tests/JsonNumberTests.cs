@@ -32,6 +32,7 @@ namespace System.Text.Json.Tests
             // String constructor:
             number = value switch
             {
+                // Adding CultureInfo.InvariantCulture to support tests on plantforms where `,` is a  default decimal separator instead of `.`
                 double doubleValue => new JsonNumber(doubleValue.ToString(CultureInfo.InvariantCulture)),
                 float floatValue => new JsonNumber(floatValue.ToString(CultureInfo.InvariantCulture)),
                 decimal decimalValue => new JsonNumber(decimalValue.ToString(CultureInfo.InvariantCulture)),
@@ -182,7 +183,6 @@ namespace System.Text.Json.Tests
         [InlineData(float.MaxValue + 1.0)]
         [InlineData(double.MinValue)]
         [InlineData(double.MaxValue)]
-        [InlineData(ulong.MinValue)]
         [InlineData(ulong.MaxValue)]
 #endif
         public static void TestDouble(double value)
@@ -385,7 +385,6 @@ namespace System.Text.Json.Tests
             Assert.True(jsonNumber.TryGetInt64(out long longResult));
             Assert.Equal(value, longResult);
 
-#if BUILDING_INBOX_LIBRARY
             Assert.Equal(value, jsonNumber.GetSingle());
             Assert.True(jsonNumber.TryGetSingle(out float floatResult));
             Assert.Equal(value, floatResult);
@@ -397,7 +396,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(value, jsonNumber.GetDecimal());
             Assert.True(jsonNumber.TryGetDecimal(out decimal decimalResult));
             Assert.Equal(value, decimalResult);
-#endif
+
             Assert.Equal(value, (byte)jsonNumber.GetSByte());
             Assert.True(jsonNumber.TryGetSByte(out sbyte sbyteResult));
             Assert.Equal(value, (byte)sbyteResult);
@@ -488,24 +487,45 @@ namespace System.Text.Json.Tests
 
             Assert.False(jsonNumber.TryGetUInt64(out ulong ulongResult));
             Assert.Throws<FormatException>(() => jsonNumber.GetUInt64());
-#if BUILDING_INBOX_LIBRARY
-            jsonNumber = new JsonNumber(double.MaxValue);
-            Assert.Equal(float.PositiveInfinity, jsonNumber.GetSingle());
-            Assert.Throws<FormatException>(() => jsonNumber.GetDecimal());
 
-            jsonNumber = new JsonNumber("1e100");
-            Assert.Equal(float.PositiveInfinity, jsonNumber.GetSingle());
-            Assert.Equal(double.PositiveInfinity, jsonNumber.GetSingle());
-            Assert.Throws<FormatException>(() => jsonNumber.GetDecimal());
-#endif
+            jsonNumber = new JsonNumber(double.MaxValue);
+
+            if (PlatformDetection.IsFullFramework)
+            {
+                // Full framework throws for overflow rather than returning Infinity 
+                // This was fixed for .NET Core 3.0 in order to be IEEE 754 compliant 
+                Assert.Throws<OverflowException>(() => jsonNumber.GetSingle());
+                // Getting double fails as well
+                Assert.Throws<OverflowException>(() => jsonNumber.GetDouble());
+            }
+            else
+            {
+                Assert.Equal(float.PositiveInfinity, jsonNumber.GetSingle());
+            }         
+            Assert.Throws<OverflowException>(() => jsonNumber.GetDecimal());
+
+            jsonNumber = new JsonNumber("5e500");
+
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Throws<OverflowException>(() => jsonNumber.GetSingle());
+                Assert.Throws<OverflowException>(() => jsonNumber.GetDouble());
+            }
+            else
+            {
+                Assert.Equal(float.PositiveInfinity, jsonNumber.GetSingle());
+                Assert.Equal(double.PositiveInfinity, jsonNumber.GetDouble());
+            }
+
+            Assert.Throws<OverflowException>(() => jsonNumber.GetDecimal());
         }
 
         [InlineData(float.PositiveInfinity)]
         [InlineData(float.NegativeInfinity)]
         [Theory]
-        public static void TestFloatninities(float value)
+        public static void TestFloatInfinities(float value)
         {
-            Assert.Throws<FormatException>(() => new JsonNumber(value));
+            Assert.Throws<ArgumentException>(() => new JsonNumber(value));
         }
 
         [InlineData(double.PositiveInfinity)]
@@ -513,10 +533,9 @@ namespace System.Text.Json.Tests
         [Theory]
         public static void TestDoubleIninities(double value)
         {
-            Assert.Throws<FormatException > (() => new JsonNumber(value));
+            Assert.Throws<ArgumentException> (() => new JsonNumber(value));
         }
 
-#if BUILDING_INBOX_LIBRARY
         [Fact]
         public static void TestScientificNotation()
         {
@@ -536,7 +555,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(-0.007f, jsonNumber.GetSingle());
             Assert.Equal(-0.007, jsonNumber.GetDouble());
         }
-#endif
+
 
         [Fact]
         public static void TestChangingTypes()

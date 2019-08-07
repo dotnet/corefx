@@ -59,12 +59,18 @@ namespace System.Text.Json
         ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="float"/> value.
         /// </summary>
         /// <param name="value">A value to represent as a JSON number.</param>
+        /// <exception cref="ArgumentException">
+        ///   Provided value is not in a legal JSON number format.
+        /// </exception>
         public JsonNumber(float value) => SetSingle(value);
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="double"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
+        /// <exception cref="ArgumentException">
+        ///   Provided value is not in a legal JSON number format.
+        /// </exception>
         public JsonNumber(double value) => SetDouble(value);
 
         /// <summary>
@@ -177,7 +183,7 @@ namespace System.Text.Json
         /// <remarks> 
         ///   Allows scientific mode.
         /// </remarks> 
-        public float GetSingle() => float.Parse(_value);
+        public float GetSingle() => float.Parse(_value, NumberStyles.Float, CultureInfo.InvariantCulture);
         
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="double"/> equivalent.
@@ -198,7 +204,7 @@ namespace System.Text.Json
         /// <remarks> 
         ///   Allows scientific mode.
         /// </remarks>
-        public double GetDouble() => double.Parse(_value);
+        public double GetDouble() => double.Parse(_value, NumberStyles.Float, CultureInfo.InvariantCulture);
 
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="sbyte"/> equivalent.
@@ -262,7 +268,7 @@ namespace System.Text.Json
         /// <exception cref="FormatException">
         ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="decimal"/>.
         /// </exception>
-        public decimal GetDecimal() => decimal.Parse(_value);
+        public decimal GetDecimal() => decimal.Parse(_value, NumberStyles.Float, CultureInfo.InvariantCulture);
 
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="byte"/> equivalent.
@@ -338,7 +344,7 @@ namespace System.Text.Json
         ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
         ///   <see cref="float.NegativeInfinity"/>) is emitted. 
         /// </remarks> 
-        public bool TryGetSingle(out float value) => float.TryParse(_value, out value);
+        public bool TryGetSingle(out float value) => float.TryParse(_value, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
 
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="double"/> equivalent.
@@ -358,7 +364,7 @@ namespace System.Text.Json
         ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
         ///   <see cref="float.NegativeInfinity"/>) is emitted. 
         /// </remarks> 
-        public bool TryGetDouble(out double value) => double.TryParse(_value, out value);
+        public bool TryGetDouble(out double value) => double.TryParse(_value, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
 
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="sbyte"/> equivalent.
@@ -432,7 +438,7 @@ namespace System.Text.Json
         ///  <see langword="true"/> if instance was converted successfully; 
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetDecimal(out decimal value) => decimal.TryParse(_value, out value);
+        public bool TryGetDecimal(out decimal value) => decimal.TryParse(_value, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
 
         /// <summary>
         ///   Changes the numeric value of this instance to represent a specified value.
@@ -488,25 +494,25 @@ namespace System.Text.Json
         ///   Changes the numeric value of this instance to represent a specified <see cref="float"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
+        /// <exception cref="ArgumentException">
+        ///   Provided value is not in a legal JSON number format.
+        /// </exception>
         public void SetSingle(float value)
         {
-            if (value.Equals(float.PositiveInfinity) || value.Equals(float.NegativeInfinity))
-            {
-                throw new FormatException(SR.IllegalNumberFormat);
-            }
-            _value = value.ToString();
+            JsonWriterHelper.ValidateSingle(value);
+            _value = value.ToString(CultureInfo.InvariantCulture);
         }
         /// <summary>
         ///   Changes the numeric value of this instance to represent a specified <see cref="double"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
+        /// <exception cref="ArgumentException">
+        ///   Provided value is not in a legal JSON number format.
+        /// </exception>
         public void SetDouble(double value)
         {
-            if(value.Equals(double.PositiveInfinity) || value.Equals(double.NegativeInfinity))
-            {
-                throw new FormatException(SR.IllegalNumberFormat);
-            }
-            _value = value.ToString();
+            JsonWriterHelper.ValidateDouble(value);
+            _value = value.ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -541,7 +547,8 @@ namespace System.Text.Json
         ///   Changes the numeric value of this instance to represent a specified <see cref="decimal"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
-        public void SetDecimal(decimal value) => _value = value.ToString();
+        public void SetDecimal(decimal value) => _value = value.ToString(CultureInfo.InvariantCulture);
+        
 
         /// <summary>
         ///   Converts a <see cref="byte"/> to a JSON number.
@@ -571,12 +578,18 @@ namespace System.Text.Json
         ///    Converts a <see cref="float"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
+        /// <exception cref="ArgumentException">
+        ///   Provided value is not in a legal JSON number format.
+        /// </exception>
         public static implicit operator JsonNumber(float value) => new JsonNumber(value);
 
         /// <summary>
         ///    Converts a <see cref="double"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
+        /// <exception cref="ArgumentException">
+        ///   Provided value is not in a legal JSON number format.
+        /// </exception>
         public static implicit operator JsonNumber(double value) => new JsonNumber(value);
 
         /// <summary>
