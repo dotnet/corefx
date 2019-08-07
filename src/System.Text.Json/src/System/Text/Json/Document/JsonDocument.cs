@@ -795,7 +795,7 @@ namespace System.Text.Json
                     WriteComplexElement(index, writer);
                     return;
                 case JsonTokenType.String:
-                    WriteString(row, writer);
+                    WriteString(ref row, writer);
                     return;
                 case JsonTokenType.Number:
                     writer.WriteNumberValue(_utf8Json.Slice(row.Location, row.SizeOrLength).Span);
@@ -826,7 +826,7 @@ namespace System.Text.Json
                 switch (row.TokenType)
                 {
                     case JsonTokenType.String:
-                        WriteString(row, writer);
+                        WriteString(ref row, writer);
                         continue;
                     case JsonTokenType.Number:
                         writer.WriteNumberValue(_utf8Json.Slice(row.Location, row.SizeOrLength).Span);
@@ -865,7 +865,7 @@ namespace System.Text.Json
                             switch (propertyValue.TokenType)
                             {
                                 case JsonTokenType.String:
-                                    WriteString(propertyName, propertyValue, writer);
+                                    WriteString(propertyName, ref propertyValue, writer);
                                     continue;
                                 case JsonTokenType.Number:
                                     writer.WriteNumber(
@@ -898,7 +898,7 @@ namespace System.Text.Json
             }
         }
 
-        private ReadOnlySpan<byte> UnescapeString(in DbRow row, out ArraySegment<byte> rented)
+        private ReadOnlySpan<byte> UnescapeString(ref DbRow row, out ArraySegment<byte> rented)
         {
             Debug.Assert(row.TokenType == JsonTokenType.String);
             int loc = row.Location;
@@ -931,7 +931,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteString(ReadOnlySpan<byte> propertyName, in DbRow row, Utf8JsonWriter writer)
+        private void WriteString(ReadOnlySpan<byte> propertyName, ref DbRow row, Utf8JsonWriter writer)
         {
             ArraySegment<byte> rented = default;
 
@@ -939,7 +939,7 @@ namespace System.Text.Json
             {
                 writer.WriteString(
                     propertyName,
-                    UnescapeString(row, out rented));
+                    UnescapeString(ref row, out rented));
             }
             finally
             {
@@ -947,13 +947,13 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteString(in DbRow row, Utf8JsonWriter writer)
+        private void WriteString(ref DbRow row, Utf8JsonWriter writer)
         {
             ArraySegment<byte> rented = default;
 
             try
             {
-                writer.WriteStringValue(UnescapeString(row, out rented));
+                writer.WriteStringValue(UnescapeString(ref row, out rented));
             }
             finally
             {
@@ -964,7 +964,7 @@ namespace System.Text.Json
 
         private static void Parse(
             ReadOnlySpan<byte> utf8JsonSpan,
-            Utf8JsonReader reader,
+            JsonReaderOptions readerOptions,
             ref MetadataDb database,
             ref StackRowStack stack)
         {
@@ -972,6 +972,11 @@ namespace System.Text.Json
             int arrayItemsCount = 0;
             int numberOfRowsForMembers = 0;
             int numberOfRowsForValues = 0;
+
+            Utf8JsonReader reader = new Utf8JsonReader(
+                utf8JsonSpan,
+                isFinalBlock: true,
+                new JsonReaderState(options: readerOptions));
 
             while (reader.Read())
             {
