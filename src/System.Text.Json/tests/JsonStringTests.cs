@@ -15,11 +15,28 @@ namespace System.Text.Json.Tests
             Assert.Equal("", jsonString.Value);
         }
 
-        [Fact]
-        public static void TestValueCtor()
+        [InlineData("value")]
+        [InlineData("value with some spaces")]
+        [InlineData("     training spaces")]
+        [InlineData("new lines\r\n")]
+        [InlineData("tabs\ttabs\t")]
+        [InlineData("\\u003e\\u003e\\u003e\\u003e\\u003e")]
+        [InlineData("zażółć gęślą jaźń")]
+        [InlineData("汉字 漢字")]
+        [InlineData("Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str")]
+        [InlineData("Hello / a / b / c \\/ \\r\\b\\n\\f\\t\\/")]
+        [Theory]
+        public static void TestInitialization(string value)
         {
-            var jsonString = new JsonString("property value");
-            Assert.Equal("property value", jsonString.Value);
+            var jsonString = new JsonString(value);
+            Assert.Equal(value, jsonString.Value);
+
+            var defaultlyInitializedJsonString = new JsonString();
+            defaultlyInitializedJsonString.Value = value;
+            Assert.Equal(value, defaultlyInitializedJsonString.Value);
+
+            JsonString implicitlyInitializiedJsonString = value;
+            Assert.Equal(value, implicitlyInitializiedJsonString.Value);
         }
 
         [Fact]
@@ -30,6 +47,82 @@ namespace System.Text.Json.Tests
             Assert.Equal("property value", jsonString.Value);
             jsonString.Value = "different property value";
             Assert.Equal("different property value", jsonString.Value);
+        }
+
+        [Fact]
+        public static void TestEquals()
+        {
+            var jsonString = new JsonString("json property value");
+
+            Assert.True(jsonString.Equals(new JsonString("json property value")));
+            Assert.True(new JsonString("json property value").Equals(jsonString));
+
+            Assert.False(jsonString.Equals(new JsonString("jsonpropertyvalue")));
+            Assert.False(jsonString.Equals(new JsonString("Json Property Value")));
+            Assert.False(new JsonString("jsonpropertyvalue").Equals(jsonString));
+            Assert.False(new JsonString("Json Property Value").Equals(jsonString));
+
+            Assert.True(jsonString == new JsonString("json property value"));
+            Assert.True(jsonString != new JsonString("something different"));
+
+            JsonNode jsonNode = new JsonString("json property value");
+            Assert.True(jsonString.Equals(jsonNode));
+
+            IEquatable<JsonString> jsonStringIEquatable = jsonString;
+            Assert.True(jsonStringIEquatable.Equals(jsonString));
+            Assert.True(jsonString.Equals(jsonStringIEquatable));
+
+            Assert.False(jsonString.Equals(null));
+
+            object jsonStringCopy = jsonString;
+            object jsonStringObject = new JsonString("json property value");
+            Assert.True(jsonString.Equals(jsonStringObject));
+            Assert.True(jsonStringCopy.Equals(jsonStringObject));
+            Assert.True(jsonStringObject.Equals(jsonString));
+
+            jsonString = new JsonString();
+            Assert.True(jsonString.Equals(new JsonString()));
+            Assert.True(jsonString.Equals(new JsonString("")));
+            Assert.False(jsonString.Equals(new JsonString("something not empty")));
+
+            Assert.False(jsonString.Equals(new Exception()));
+            Assert.False(jsonString.Equals(new JsonBoolean()));
+            Assert.False(new JsonString("true").Equals(new JsonBoolean(true)));
+
+            JsonString jsonStringNull = null;
+            Assert.False(jsonString == jsonStringNull);
+            Assert.False(jsonStringNull == jsonString);
+
+            Assert.True(jsonString != jsonStringNull);
+            Assert.True(jsonStringNull != jsonString);
+        }
+
+        [Fact]
+        public static void TestGetHashCode()
+        {
+            var jsonString = new JsonString("json property value");
+
+            Assert.Equal(jsonString.GetHashCode(), new JsonString("json property value").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JsonString("json property value ").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JsonString("jsonpropertyvalue").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JsonString("Json Property Value").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JsonString("SOMETHING COMPLETELY DIFFERENT").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JsonString("").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JsonString().GetHashCode());
+            
+            JsonNode jsonNode = new JsonString("json property value");
+            Assert.Equal(jsonString.GetHashCode(), jsonNode.GetHashCode());
+
+            IEquatable<JsonString> jsonStringIEquatable = jsonString;
+            Assert.Equal(jsonString.GetHashCode(), jsonStringIEquatable.GetHashCode());
+
+            object jsonNumberCopy = jsonString;
+            object jsonNumberObject = new JsonString("something different");
+
+            Assert.Equal(jsonString.GetHashCode(), jsonNumberCopy.GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), jsonNumberObject.GetHashCode());
+
+            Assert.Equal(new JsonString().GetHashCode(), new JsonString().GetHashCode());
         }
     }
 }

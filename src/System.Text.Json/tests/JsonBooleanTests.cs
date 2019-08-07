@@ -26,6 +26,16 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestImplicitOperator()
+        {
+            JsonBoolean jsonBoolean = true;
+            Assert.True(jsonBoolean.Value);
+
+            jsonBoolean = false;
+            Assert.False(jsonBoolean.Value);
+        }
+
+        [Fact]
         public static void TestChangingValue()
         {
             var jsonBoolean = new JsonBoolean();
@@ -79,6 +89,15 @@ namespace System.Text.Json.Tests
             Assert.True(jsonNumberCopyFalse.Equals(jsonNumberObjectFalse));
             Assert.True(jsonNumberCopyFalse.Equals(jsonBooleanFalse));
             Assert.True(jsonNumberObjectFalse.Equals(jsonBooleanFalse));
+
+            Assert.False(jsonBooleanTrue.Equals(new Exception()));
+
+            JsonBoolean jsonBooleanNull = null;
+            Assert.False(jsonBooleanTrue == jsonBooleanNull);
+            Assert.False(jsonBooleanNull == jsonBooleanTrue);
+
+            Assert.True(jsonBooleanTrue != jsonBooleanNull);
+            Assert.True(jsonBooleanNull != jsonBooleanTrue);
         }
 
         [Fact]

@@ -15,7 +15,6 @@
     <Compile Include="DebuggerTests.cs" />
     <Compile Include="FixedSizedBufferWriter.cs" />
     <Compile Include="InvalidBufferWriter.cs" />
-    <Compile Include="JsonBooleanTests.cs" />
     <Compile Include="JsonDateTimeTestData.cs" />
     <Compile Include="JsonDocumentTests.cs" />
     <Compile Include="JsonElementCloneTests.cs" />
@@ -25,7 +24,6 @@
     <Compile Include="JsonNumberTestData.cs" />
     <Compile Include="JsonPropertyTests.cs" />
     <Compile Include="JsonReaderStateAndOptionsTests.cs" />
-    <Compile Include="JsonStringTests.cs" />
     <Compile Include="JsonTestHelper.cs" />
     <Compile Include="JsonWriterOptionsTests.cs" />
     <Compile Include="NewtonsoftTests\CamelCaseTests.cs" />
@@ -114,5 +112,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="JsonBooleanTests.cs" />
+    <Compile Include="JsonStringTests.cs" />
   </ItemGroup>
 </Project>
