@@ -795,7 +795,7 @@ namespace System.Text.Json
                     WriteComplexElement(index, writer);
                     return;
                 case JsonTokenType.String:
-                    WriteString(ref row, writer);
+                    WriteString(row, writer);
                     return;
                 case JsonTokenType.Number:
                     writer.WriteNumberValue(_utf8Json.Slice(row.Location, row.SizeOrLength).Span);
@@ -826,7 +826,7 @@ namespace System.Text.Json
                 switch (row.TokenType)
                 {
                     case JsonTokenType.String:
-                        WriteString(ref row, writer);
+                        WriteString(row, writer);
                         continue;
                     case JsonTokenType.Number:
                         writer.WriteNumberValue(_utf8Json.Slice(row.Location, row.SizeOrLength).Span);
@@ -898,7 +898,7 @@ namespace System.Text.Json
             }
         }
 
-        private ReadOnlySpan<byte> UnescapeString(ref DbRow row, out ArraySegment<byte> rented)
+        private ReadOnlySpan<byte> UnescapeString(in DbRow row, out ArraySegment<byte> rented)
         {
             Debug.Assert(row.TokenType == JsonTokenType.String);
             int loc = row.Location;
@@ -939,7 +939,7 @@ namespace System.Text.Json
             {
                 writer.WriteString(
                     propertyName,
-                    UnescapeString(ref row, out rented));
+                    UnescapeString(row, out rented));
             }
             finally
             {
@@ -947,13 +947,13 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteString(ref DbRow row, Utf8JsonWriter writer)
+        private void WriteString(in DbRow row, Utf8JsonWriter writer)
         {
             ArraySegment<byte> rented = default;
 
             try
             {
-                writer.WriteStringValue(UnescapeString(ref row, out rented));
+                writer.WriteStringValue(UnescapeString(row, out rented));
             }
             finally
             {

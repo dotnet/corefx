@@ -29,7 +29,7 @@ namespace System.Text.Json
             /// <summary>
             /// Index into the payload
             /// </summary>
-            internal int Location => _location;
+            internal readonly int Location => _location;
 
             /// <summary>
             /// length of text in JSON payload (or number of elements if its a JSON array)
