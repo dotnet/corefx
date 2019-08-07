@@ -39,12 +39,17 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(SslProtocols.None, true)]
         public async Task SetDelegate_ConnectionSucceeds(SslProtocols acceptedProtocol, bool requestOnlyThisProtocol)
         {
-            if (PlatformDetection.IsMacOsHighSierraOrHigher && acceptedProtocol == SslProtocols.Tls)
+            // Overriding flag for the same reason we skip tests on Catalina
+            // On OSX 10.13-10.14 we can override this flag to enable the scenario
+            // Issue: #22089
+            requestOnlyThisProtocol |= PlatformDetection.IsMacOsHighSierraOrHigher && acceptedProtocol == SslProtocols.Tls;
+
+            if (PlatformDetection.IsMacOsCatalinaOrHigher && acceptedProtocol == SslProtocols.Tls && IsCurlHandler)
             {
-                // Refer issue: #22089 and #39989
+                // Issue: #39989
                 // When the server uses SslProtocols.Tls, on MacOS, SecureTransport ends up picking a cipher suite
                 // for TLS1.2, even though server said it was only using TLS1.0. LibreSsl throws error that
-                // wrong cipher is used for TLs1.0.
+                // wrong cipher is used for TLS1.0.
                 throw new SkipTestException("OSX may pick future cipher suites when asked for TLS1.0");
             }
 
