@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Xunit;
 
 // IVT to "Microsoft.CSharp.RuntimeBinder.Binder", just to use IVT in a test (see: InternalsVisibleToTest below)
@@ -390,6 +391,67 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
 
             Func<CallSite, ICounterBoth, object> target2 = getter.Target;
             Assert.Equal(message, Assert.Throws<RuntimeBinderException>(() => target2(getter, null)).Message);
+        }
+
+        [ComImport]
+        [Guid("8BE2D872-86AA-4d47-B776-32CCA40C7018")]
+        interface IKnownFolderManager
+        {
+            void FolderIdFromCsidl(
+                int nCsidl, out Guid pfid);
+            void FolderIdToCsidl(
+                [MarshalAs(UnmanagedType.LPStruct)] Guid rfid,
+                out int pnCsidl);
+            void GetFolderIds(
+                out Guid[] ppKFId,
+                out uint pCount);
+            void GetFolder(
+                [MarshalAs(UnmanagedType.LPStruct)] Guid rfid,
+                out object ppkf);
+            void GetFolderByName(
+                string pszCanonicalName,
+                out object ppkf);
+            void RegisterFolder(
+                [MarshalAs(UnmanagedType.LPStruct)] Guid rfid,
+                IntPtr pKFD);
+            void UnregisterFolder(
+                [MarshalAs(UnmanagedType.LPStruct)] Guid rfid);
+            void FindFolderFromPath(
+                string pszPath,
+                int mode,
+                out object ppkf);
+            void FindFolderFromIDList(
+                IntPtr pidl,
+                out object ppkf);
+            void Redirect(
+                [MarshalAs(UnmanagedType.LPStruct)] Guid rfid,
+                IntPtr hwnd,
+                int flags,
+                string pszTargetPath,
+                uint cFolters,
+                Guid[] pExclusion,
+                out string error);
+        }
+
+        [CoClass(typeof(KnownFolderManagerClass))]
+        [ComImport]
+        [Guid("8BE2D872-86AA-4d47-B776-32CCA40C7018")]
+        interface KnownFolderManager : IKnownFolderManager { }
+
+        [Guid("4df0c730-df9d-4ae3-9153-aa6b82e9795a")]
+        class KnownFolderManagerClass { }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void DynamicComThrowsException()
+        {
+            Assert.Throws<RuntimeBinderException>(() =>
+            {
+                var a = new { Manager = new KnownFolderManagerClass() };
+                dynamic d = a;
+                d.Manager.GetFolderByName(string.Empty, out object knownFolder);
+            });
         }
     }
 }
