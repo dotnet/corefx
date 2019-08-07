@@ -63,7 +63,10 @@ int32_t AppleCryptoNative_X509ChainEvaluate(SecTrustRef chain,
     }
 
     SecTrustResultType trustResult;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     *pOSStatus = SecTrustEvaluate(chain, &trustResult);
+#pragma clang diagnostic pop
 
     // If any error is reported from the function or the trust result value indicates that
     // otherwise was a failed chain build (vs an untrusted chain, etc) return failure and
