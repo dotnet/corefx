@@ -426,7 +426,4 @@
   <data name="EmptyStringToInitializeNumber" xml:space="preserve">
     <value>Expected a number, but instead got empty string.</value>
   </data>
-  <data name="IllegalNumberFormat" xml:space="preserve">
-    <value>Provided value does not represent legal JSON number.</value>
-  </data>
 </root>

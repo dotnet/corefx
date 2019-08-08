@@ -160,7 +160,7 @@ namespace System.Text.Json
     {
         internal JsonNode() { }
     }
-    public partial class JsonNumber : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonNumber>
+    public sealed partial class JsonNumber : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonNumber>
     {
         public JsonNumber() { }
         public JsonNumber(byte value) { }

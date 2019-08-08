@@ -9,7 +9,7 @@ namespace System.Text.Json
     /// <summary>
     ///   Represents a numeric JSON value.
     /// </summary>
-    public class JsonNumber : JsonNode, IEquatable<JsonNumber>
+    public sealed class JsonNumber : JsonNode, IEquatable<JsonNumber>
     {
         private string _value;
 
@@ -661,7 +661,15 @@ namespace System.Text.Json
         ///   <see langword="true"/> if values of instances match exactly (are equal and have the same format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator ==(JsonNumber left, JsonNumber right) => left?._value == right?._value;
+        public static bool operator ==(JsonNumber left, JsonNumber right)
+        {
+            if (right is null)
+            {
+                return (left is null) ? true : false;
+            }
+
+            return right.Equals(left);
+        }
 
         /// <summary>
         ///   Compares values of two JSON numbers. 
@@ -672,6 +680,6 @@ namespace System.Text.Json
         ///   <see langword="true"/> if values of instances do not match exactly (are not equal or have different format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator !=(JsonNumber left, JsonNumber right) => left?._value != right?._value;
+        public static bool operator !=(JsonNumber left, JsonNumber right) => !(left == right);
     }
 }

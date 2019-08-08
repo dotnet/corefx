@@ -32,7 +32,7 @@ namespace System.Text.Json.Tests
             // String constructor:
             number = value switch
             {
-                // Adding CultureInfo.InvariantCulture to support tests on plantforms where `,` is a  default decimal separator instead of `.`
+                // Adding CultureInfo.InvariantCulture to support tests on platforms where `,` is a  default decimal separator instead of `.`
                 double doubleValue => new JsonNumber(doubleValue.ToString(CultureInfo.InvariantCulture)),
                 float floatValue => new JsonNumber(floatValue.ToString(CultureInfo.InvariantCulture)),
                 decimal decimalValue => new JsonNumber(decimalValue.ToString(CultureInfo.InvariantCulture)),
@@ -156,7 +156,6 @@ namespace System.Text.Json.Tests
 #if BUILDING_INBOX_LIBRARY
         [InlineData(float.MinValue)]
         [InlineData(float.MaxValue)]
-        [InlineData(ulong.MinValue)]
         [InlineData(ulong.MaxValue)]
 #endif
         public static void TestFloat(float value)
