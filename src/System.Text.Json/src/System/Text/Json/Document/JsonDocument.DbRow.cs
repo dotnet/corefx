@@ -44,7 +44,7 @@ namespace System.Text.Json
             /// Array: At least one element is an object/array.
             /// Otherwise; false
             /// </summary>
-            internal readonly bool HasComplexChildren => _sizeOrLengthUnion < 0;
+            internal bool HasComplexChildren => _sizeOrLengthUnion < 0;
 
             internal int NumberOfRows =>
                 _numberOfRowsAndTypeUnion & 0x0FFFFFFF; // Number of rows that the current JSON element occupies within the database
