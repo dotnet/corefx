@@ -28,7 +28,11 @@ namespace System.Globalization.Tests
             TextInfo ti = CultureInfo.GetCultureInfo(cultureName).TextInfo;
             Assert.Equal(lcid, ti.LCID);
             Assert.Equal(ansiCodePage, ti.ANSICodePage);
-            Assert.Equal(ebcdiCCodePage, ti.EBCDICCodePage);
+            // On Nano Server >= 1809 the EBCDICCodePage always returns 65001.
+            if (!PlatformDetection.IsWindowsNanoServer)
+            {
+                Assert.Equal(ebcdiCCodePage, ti.EBCDICCodePage);
+            }
             Assert.Equal(macCodePage, ti.MacCodePage);
             Assert.Equal(oemCodePage, ti.OEMCodePage);
             Assert.Equal(isRightToLeft, ti.IsRightToLeft);
