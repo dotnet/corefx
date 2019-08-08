@@ -18,21 +18,25 @@ namespace System.Security.Cryptography
 
         private const string ECDsaIdentifier = "ECDsa";
 
-        private static readonly Lazy<IReadOnlyDictionary<string, string>> s_lazyTypeNameToOid = new Lazy<IReadOnlyDictionary<string, string>>(CreateTypeNameToOidMapping);
-        private static readonly Lazy<IReadOnlyDictionary<string, string>> s_lazyNameToFullTypeName = new Lazy<IReadOnlyDictionary<string, string>>(CreateNameToFullTypeNameMapping);
+        /// <summary>
+        /// predefined, lazy loaded mappings: type name to full type name
+        /// </summary>
+        private static readonly Lazy<IReadOnlyDictionary<string, string>> s_lazyTypeNameToFullTypeName = new Lazy<IReadOnlyDictionary<string, string>>(CreateTypeNameToFullTypeNameMapping);
 
-        // predefined types, types added by the user and lazy loaded types from full names from different assemblies
+        /// <summary>
+        /// predefined types + types added by the application code via AddAlgorithm + lazy loaded types added to cache
+        /// </summary>
         private static readonly Lazy<ConcurrentDictionary<string, Type>> s_lazyTypeNameToType = new Lazy<ConcurrentDictionary<string, Type>>(CreateTypeNameToTypeMapping);
 
-        private static volatile Dictionary<string, string> appOidHT = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        /// <summary>
+        /// oid mappings: predefined and these added by the application code
+        /// </summary>
+        private static readonly Lazy<ConcurrentDictionary<string, string>> s_lazyOidMappings = new Lazy<ConcurrentDictionary<string, string>>(CreateTypeNameToOidMapping);
 
         private static readonly char[] SepArray = { '.' }; // valid ASN.1 separators
 
         // CoreFx does not support AllowOnlyFipsAlgorithms
         public static bool AllowOnlyFipsAlgorithms => false;
-
-        // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static object s_InternalSyncObject = new object();
 
         public static void AddAlgorithm(Type algorithm, params string[] names)
         {
@@ -123,16 +127,18 @@ namespace System.Security.Cryptography
 
         private static bool TryGetTypeFromName(string name, out Type result)
         {
+            // the lucky path: the type have been already loaded and added to the cache
             if (s_lazyTypeNameToType.Value.TryGetValue(name, out result))
             {
                 return true;
             }
 
-            if (s_lazyNameToFullTypeName.Value.TryGetValue(name, out string fullTypeName))
+            if (s_lazyTypeNameToFullTypeName.Value.TryGetValue(name, out string fullTypeName))
             {
                 // it was not registered using simple name, perhaps we can find it using the full name?
                 if (s_lazyTypeNameToType.Value.TryGetValue(fullTypeName, out result))
                 {
+                    s_lazyTypeNameToType.Value[fullTypeName] = result;
                     return true;
                 }
 
@@ -202,12 +208,11 @@ namespace System.Security.Cryptography
             if (names == null)
                 throw new ArgumentNullException(nameof(names));
 
-            string[] oidNames = new string[names.Length];
-            Array.Copy(names, 0, oidNames, 0, oidNames.Length);
+            string[] safeCopy = names.Length == 1 ? new string[1] { names[0] } : names.ToArray();
 
             // Pre-check the input names for validity, so that we don't add a few of the names and throw an
             // exception if an invalid name is found further down the array.
-            foreach (string name in oidNames)
+            foreach (string name in safeCopy)
             {
                 if (string.IsNullOrEmpty(name))
                 {
@@ -215,43 +220,33 @@ namespace System.Security.Cryptography
                 }
             }
 
-            // Everything is valid, so we're good to lock the hash table and add the application mappings
-            lock (s_InternalSyncObject)
+            // Everything is valid, so we're good to add the application mappings
+            foreach (string name in safeCopy)
             {
-                foreach (string name in oidNames)
-                {
-                    appOidHT[name] = oid;
-                }
+                s_lazyOidMappings.Value[name] = oid;
             }
         }
 
         public static string MapNameToOID(string name)
         {
             if (name == null)
+            {
                 throw new ArgumentNullException(nameof(name));
-
-            string oidName;
-
-            // Check to see if we have an application defined mapping
-            lock (s_InternalSyncObject)
-            {
-                if (!appOidHT.TryGetValue(name, out oidName))
-                {
-                    oidName = null;
-                }
             }
 
-            if (string.IsNullOrEmpty(oidName) && !s_lazyTypeNameToOid.Value.TryGetValue(name, out oidName))
+            if (s_lazyOidMappings.Value.TryGetValue(name, out string oidValue))
             {
-                try
-                {
-                    Oid oid = Oid.FromFriendlyName(name, OidGroup.All);
-                    oidName = oid.Value;
-                }
-                catch (CryptographicException) { }
+                return oidValue;
             }
 
-            return oidName;
+            try
+            {
+                Oid oid = Oid.FromFriendlyName(name, OidGroup.All);
+                oidValue = oid.Value;
+            }
+            catch (CryptographicException) { }
+
+            return oidValue;
         }
 
         public static byte[] EncodeOID(string str)
@@ -303,7 +298,7 @@ namespace System.Security.Cryptography
             return encodedOidNums;
         }
 
-        private static IReadOnlyDictionary<string, string> CreateTypeNameToOidMapping()
+        private static ConcurrentDictionary<string, string> CreateTypeNameToOidMapping()
         {
             const string OID_RSA_SMIMEalgCMS3DESwrap = "1.2.840.113549.1.9.16.3.6";
             const string OID_RSA_MD5 = "1.2.840.113549.2.5";
@@ -316,56 +311,57 @@ namespace System.Security.Cryptography
             const string OID_OIWSEC_SHA512 = "2.16.840.1.101.3.4.2.3";
             const string OID_OIWSEC_RIPEMD160 = "1.3.36.3.2.1";
 
-            return new Dictionary<string, string>(35, StringComparer.OrdinalIgnoreCase)
-            {
-                { "SHA", OID_OIWSEC_SHA1 },
-                { "SHA1", OID_OIWSEC_SHA1 },
-                { "System.Security.Cryptography.SHA1", OID_OIWSEC_SHA1 },
-                { "System.Security.Cryptography.SHA1CryptoServiceProvider", OID_OIWSEC_SHA1 },
-                { "System.Security.Cryptography.SHA1Cng", OID_OIWSEC_SHA1 },
-                { "System.Security.Cryptography.SHA1Managed", OID_OIWSEC_SHA1 },
+            ConcurrentDictionary<string, string> typeNameToOid = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                { "SHA256", OID_OIWSEC_SHA256 },
-                { "System.Security.Cryptography.SHA256", OID_OIWSEC_SHA256 },
-                { "System.Security.Cryptography.SHA256CryptoServiceProvider", OID_OIWSEC_SHA256 },
-                { "System.Security.Cryptography.SHA256Cng", OID_OIWSEC_SHA256 },
-                { "System.Security.Cryptography.SHA256Managed", OID_OIWSEC_SHA256 },
+            typeNameToOid["SHA"] = OID_OIWSEC_SHA1;
+            typeNameToOid["SHA1"] = OID_OIWSEC_SHA1;
+            typeNameToOid["System.Security.Cryptography.SHA1"] = OID_OIWSEC_SHA1;
+            typeNameToOid["System.Security.Cryptography.SHA1CryptoServiceProvider"] = OID_OIWSEC_SHA1;
+            typeNameToOid["System.Security.Cryptography.SHA1Cng"] = OID_OIWSEC_SHA1;
+            typeNameToOid["System.Security.Cryptography.SHA1Managed"] = OID_OIWSEC_SHA1;
 
-                { "SHA384", OID_OIWSEC_SHA384 },
-                { "System.Security.Cryptography.SHA384", OID_OIWSEC_SHA384 },
-                { "System.Security.Cryptography.SHA384CryptoServiceProvider", OID_OIWSEC_SHA384 },
-                { "System.Security.Cryptography.SHA384Cng", OID_OIWSEC_SHA384 },
-                { "System.Security.Cryptography.SHA384Managed", OID_OIWSEC_SHA384 },
+            typeNameToOid["SHA256"] = OID_OIWSEC_SHA256;
+            typeNameToOid["System.Security.Cryptography.SHA256"] = OID_OIWSEC_SHA256;
+            typeNameToOid["System.Security.Cryptography.SHA256CryptoServiceProvider"] = OID_OIWSEC_SHA256;
+            typeNameToOid["System.Security.Cryptography.SHA256Cng"] = OID_OIWSEC_SHA256;
+            typeNameToOid["System.Security.Cryptography.SHA256Managed"] = OID_OIWSEC_SHA256;
 
-                { "SHA512", OID_OIWSEC_SHA512 },
-                { "System.Security.Cryptography.SHA512", OID_OIWSEC_SHA512 },
-                { "System.Security.Cryptography.SHA512CryptoServiceProvider", OID_OIWSEC_SHA512 },
-                { "System.Security.Cryptography.SHA512Cng", OID_OIWSEC_SHA512 },
-                { "System.Security.Cryptography.SHA512Managed", OID_OIWSEC_SHA512 },
+            typeNameToOid["SHA384"] = OID_OIWSEC_SHA384;
+            typeNameToOid["System.Security.Cryptography.SHA384"] = OID_OIWSEC_SHA384;
+            typeNameToOid["System.Security.Cryptography.SHA384CryptoServiceProvider"] = OID_OIWSEC_SHA384;
+            typeNameToOid["System.Security.Cryptography.SHA384Cng"] = OID_OIWSEC_SHA384;
+            typeNameToOid["System.Security.Cryptography.SHA384Managed"] = OID_OIWSEC_SHA384;
 
-                { "RIPEMD160", OID_OIWSEC_RIPEMD160 },
-                { "System.Security.Cryptography.RIPEMD160", OID_OIWSEC_RIPEMD160 },
-                { "System.Security.Cryptography.RIPEMD160Managed", OID_OIWSEC_RIPEMD160 },
+            typeNameToOid["SHA512"] = OID_OIWSEC_SHA512;
+            typeNameToOid["System.Security.Cryptography.SHA512"] = OID_OIWSEC_SHA512;
+            typeNameToOid["System.Security.Cryptography.SHA512CryptoServiceProvider"] = OID_OIWSEC_SHA512;
+            typeNameToOid["System.Security.Cryptography.SHA512Cng"] = OID_OIWSEC_SHA512;
+            typeNameToOid["System.Security.Cryptography.SHA512Managed"] = OID_OIWSEC_SHA512;
 
-                { "MD5", OID_RSA_MD5 },
-                { "System.Security.Cryptography.MD5", OID_RSA_MD5 },
-                { "System.Security.Cryptography.MD5CryptoServiceProvider", OID_RSA_MD5 },
-                { "System.Security.Cryptography.MD5Managed", OID_RSA_MD5 },
+            typeNameToOid["RIPEMD160"] = OID_OIWSEC_RIPEMD160;
+            typeNameToOid["System.Security.Cryptography.RIPEMD160"] = OID_OIWSEC_RIPEMD160;
+            typeNameToOid["System.Security.Cryptography.RIPEMD160Managed"] = OID_OIWSEC_RIPEMD160;
 
-                { "TripleDESKeyWrap", OID_RSA_SMIMEalgCMS3DESwrap },
+            typeNameToOid["MD5"] = OID_RSA_MD5;
+            typeNameToOid["System.Security.Cryptography.MD5"] = OID_RSA_MD5;
+            typeNameToOid["System.Security.Cryptography.MD5CryptoServiceProvider"] = OID_RSA_MD5;
+            typeNameToOid["System.Security.Cryptography.MD5Managed"] = OID_RSA_MD5;
 
-                { "RC2", OID_RSA_RC2CBC },
-                { "System.Security.Cryptography.RC2CryptoServiceProvider", OID_RSA_RC2CBC },
+            typeNameToOid["TripleDESKeyWrap"] = OID_RSA_SMIMEalgCMS3DESwrap;
 
-                { "DES", OID_OIWSEC_desCBC },
-                { "System.Security.Cryptography.DESCryptoServiceProvider", OID_OIWSEC_desCBC },
+            typeNameToOid["RC2"] = OID_RSA_RC2CBC;
+            typeNameToOid["System.Security.Cryptography.RC2CryptoServiceProvider"] = OID_RSA_RC2CBC;
 
-                { "TripleDES", OID_RSA_DES_EDE3_CBC },
-                { "System.Security.Cryptography.TripleDESCryptoServiceProvider", OID_RSA_DES_EDE3_CBC }
-            };
+            typeNameToOid["DES"] = OID_OIWSEC_desCBC;
+            typeNameToOid["System.Security.Cryptography.DESCryptoServiceProvider"] = OID_OIWSEC_desCBC;
+
+            typeNameToOid["TripleDES"] = OID_RSA_DES_EDE3_CBC;
+            typeNameToOid["System.Security.Cryptography.TripleDESCryptoServiceProvider"] = OID_RSA_DES_EDE3_CBC;
+
+            return typeNameToOid;
         }
 
-        private static IReadOnlyDictionary<string, string> CreateNameToFullTypeNameMapping()
+        private static IReadOnlyDictionary<string, string> CreateTypeNameToFullTypeNameMapping()
         {
             const string AssemblyName_Cng = "System.Security.Cryptography.Cng";
             const string AssemblyName_Csp = "System.Security.Cryptography.Csp";
