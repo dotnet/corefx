@@ -11,10 +11,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -55,13 +55,13 @@ namespace System.Data.Tests
         private const string diff2 = diff1 + xml8;
 
         private const string schema1 = @"<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>
-	<xs:element name='Root'>
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name='Child' type='xs:string' />
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
+    <xs:element name='Root'>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name='Child' type='xs:string' />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 </xs:schema>";
         private const string schema2 = schema1 + xml8;
 
@@ -446,7 +446,7 @@ namespace System.Data.Tests
                 XmlReadMode.Fragment, XmlReadMode.Fragment,
                 "NewDataSet", 0);
 
-            // others ... kept 
+            // others ... kept
             ds = new DataSet();
             DataSetAssertion.AssertReadXml(ds, "IgnoreSchema", diff2,
                 XmlReadMode.IgnoreSchema, XmlReadMode.IgnoreSchema,
@@ -642,14 +642,14 @@ namespace System.Data.Tests
         [Fact]
         public void NameConflictDSAndTable()
         {
-            string xml = @"<PriceListDetails> 
-	<PriceListList>    
-		<Id>1</Id>
-	</PriceListList>
-	<PriceListDetails> 
-		<Id>1</Id>
-		<Status>0</Status>
-	</PriceListDetails>
+            string xml = @"<PriceListDetails>
+    <PriceListList>
+        <Id>1</Id>
+    </PriceListList>
+    <PriceListDetails>
+        <Id>1</Id>
+        <Status>0</Status>
+    </PriceListDetails>
 </PriceListDetails>";
 
             var ds = new DataSet();

@@ -11,8 +11,8 @@ namespace System.Data.OleDb
 {
     public sealed class OleDbDataAdapter : DbDataAdapter, IDbDataAdapter, ICloneable
     {
-        static private readonly object EventRowUpdated = new object();
-        static private readonly object EventRowUpdating = new object();
+        private static readonly object EventRowUpdated = new object();
+        private static readonly object EventRowUpdating = new object();
 
         private OleDbCommand _deleteCommand, _insertCommand, _selectCommand, _updateCommand;
 
@@ -45,7 +45,7 @@ namespace System.Data.OleDb
         [
         DefaultValue(null),
         ]
-        new public OleDbCommand DeleteCommand
+        public new OleDbCommand DeleteCommand
         {
             get { return _deleteCommand; }
             set { _deleteCommand = value; }
@@ -60,7 +60,7 @@ namespace System.Data.OleDb
         [
         DefaultValue(null)
         ]
-        new public OleDbCommand InsertCommand
+        public new OleDbCommand InsertCommand
         {
             get { return _insertCommand; }
             set { _insertCommand = value; }
@@ -75,7 +75,7 @@ namespace System.Data.OleDb
         [
         DefaultValue(null)
         ]
-        new public OleDbCommand SelectCommand
+        public new OleDbCommand SelectCommand
         {
             get { return _selectCommand; }
             set { _selectCommand = value; }
@@ -90,7 +90,7 @@ namespace System.Data.OleDb
         [
         DefaultValue(null)
         ]
-        new public OleDbCommand UpdateCommand
+        public new OleDbCommand UpdateCommand
         {
             get { return _updateCommand; }
             set { _updateCommand = value; }
@@ -180,7 +180,7 @@ namespace System.Data.OleDb
             return FillFromADODB((object)dataSet, ADODBRecordSet, srcTable, true);
         }
 
-        private int FillFromADODB(Object data, object adodb, string srcTable, bool multipleResults)
+        private int FillFromADODB(object data, object adodb, string srcTable, bool multipleResults)
         {
             Debug.Assert(null != data, "FillFromADODB: null data object");
             Debug.Assert(null != adodb, "FillFromADODB: null ADODB");
@@ -261,7 +261,7 @@ namespace System.Data.OleDb
                                 UnsafeNativeMethods.IErrorInfo errorInfo = null;
                                 UnsafeNativeMethods.GetErrorInfo(0, out errorInfo);
 
-                                string message = String.Empty;
+                                string message = string.Empty;
                                 if (null != errorInfo)
                                 {
                                     OleDbHResult hresult = ODB.GetErrorDescription(errorInfo, hr, out message);
@@ -309,7 +309,7 @@ namespace System.Data.OleDb
         //    return base.Fill(dataTable, dataReader);
         //}
 
-        private int FillFromRecordset(Object data, UnsafeNativeMethods.ADORecordsetConstruction recordset, string srcTable, out bool incrementResultCount)
+        private int FillFromRecordset(object data, UnsafeNativeMethods.ADORecordsetConstruction recordset, string srcTable, out bool incrementResultCount)
         {
             incrementResultCount = false;
 
@@ -370,7 +370,7 @@ namespace System.Data.OleDb
             return 0;
         }
 
-        private int FillFromRecord(Object data, UnsafeNativeMethods.ADORecordConstruction record, string srcTable)
+        private int FillFromRecord(object data, UnsafeNativeMethods.ADORecordConstruction record, string srcTable)
         {
             object result = null;
             try
@@ -435,7 +435,7 @@ namespace System.Data.OleDb
             {
                 UnsafeNativeMethods.IErrorInfo errorInfo = null;
                 UnsafeNativeMethods.GetErrorInfo(0, out errorInfo);
-                string message = String.Empty;
+                string message = string.Empty;
                 if (null != errorInfo)
                 {
                     OleDbHResult hresult = ODB.GetErrorDescription(errorInfo, hr, out message);
@@ -464,7 +464,7 @@ namespace System.Data.OleDb
             base.OnRowUpdating(value);
         }
 
-        static private string GetSourceTableName(string srcTable, int index)
+        private static string GetSourceTableName(string srcTable, int index)
         {
             //if ((null != srcTable) && (0 <= index) && (index < srcTable.Length)) {
             if (0 == index)

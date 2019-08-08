@@ -73,7 +73,7 @@ namespace System.Data.Odbc
 
             if ((ADP.PtrZero == base.handle) || (ODBC32.RetCode.SUCCESS != retcode))
             {
-                // 
+                //
                 throw ODBC.CantAllocateEnvironmentHandle(retcode);
             }
         }
@@ -151,7 +151,7 @@ namespace System.Data.Odbc
                     // Disconnect happens in OdbcConnectionHandle.ReleaseHandle
                     case ODBC32.SQL_HANDLE.ENV:
                     case ODBC32.SQL_HANDLE.STMT:
-                        ODBC32.RetCode retcode = Interop.Odbc.SQLFreeHandle(handleType, handle);
+                        Interop.Odbc.SQLFreeHandle(handleType, handle);
                         break;
 
                     case ODBC32.SQL_HANDLE.DESC:
@@ -249,4 +249,3 @@ namespace System.Data.Odbc
         }
     }
 }
-

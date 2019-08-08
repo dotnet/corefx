@@ -182,7 +182,7 @@ namespace Microsoft.Test.ModuleCore
             //plus this allows both teams to have a identical (similar as possible) queries/filters.
 
             //Xml Spec Format:
-            //	Example:
+            //    Example:
             /*
                 <TestModule Name="Functional" Created="10 October 2001" Modified="10 October 2001" Version="1">
                 <-- Owner type is an enum, "test", "dev" or "pm" -->
@@ -197,7 +197,7 @@ namespace Microsoft.Test.ModuleCore
                            <Description>Tests for FLWR expressions</description>
                         <Variation id="1" Implemented="true" Priority="2">
                             <Description>Simple 1 FLWR expression</description>
-                            <FilterCriteria>  
+                            <FilterCriteria>
                                             <!-- Recommended place for filter criteria -->
                                             <Os>NT</Os>
                                             <Language>English</Language>
@@ -206,10 +206,10 @@ namespace Microsoft.Test.ModuleCore
                                             <!-- Override global data -->
                                             <xml>http://webdata/data/mytest/specialptest.xml</xml>
                             </Data>
-                            <SoapData>  
+                            <SoapData>
                                             <!-- Additional data for SOAP tests -->
                                             <wsdl>http://webdata/data/mytest/test.wsdl</wsdl>
-                            </SoapData>  
+                            </SoapData>
                         </Variation>
                         </TestCase>
                 </TestModule>

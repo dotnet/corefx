@@ -4,7 +4,7 @@
 
 namespace System.Data.ProviderBase
 {
-    sealed internal partial class DbConnectionPoolIdentity
+    internal sealed partial class DbConnectionPoolIdentity
     {
         public static readonly DbConnectionPoolIdentity NoIdentity = new DbConnectionPoolIdentity(string.Empty, false, true);
 
@@ -53,4 +53,3 @@ namespace System.Data.ProviderBase
         }
     }
 }
-

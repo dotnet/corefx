@@ -46,7 +46,6 @@ namespace System.ComponentModel.Composition.ReflectionModel
             int genericArity = 0;
             if (type.IsGenericType && type.ContainsGenericParameters)
             {
-                List<Type> pureGenericParameters = new List<Type>();
                 TraverseGenericType(type, (Type t) =>
                 {
                     if (t.IsGenericParameter)
@@ -171,7 +170,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 return true;
             }
 
-            // where T : class 
+            // where T : class
             if ((attributes & GenericParameterAttributes.ReferenceTypeConstraint) != 0)
             {
                 if (type.IsValueType)
@@ -190,7 +189,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 }
             }
 
-            // where T : struct 
+            // where T : struct
             if ((attributes & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0)
             {
                 // must be a value type

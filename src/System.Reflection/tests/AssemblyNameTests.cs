@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -176,7 +176,7 @@ namespace System.Reflection.Tests
 
             n.CodeBase = System.IO.Directory.GetCurrentDirectory();
             Assert.NotNull(n.CodeBase);
-        }        
+        }
 
         [Fact]
         public static void Verify_EscapedCodeBase()
@@ -211,7 +211,7 @@ namespace System.Reflection.Tests
             an.VersionCompatibility = System.Configuration.Assemblies.AssemblyVersionCompatibility.SameProcess;
             Assert.Equal(System.Configuration.Assemblies.AssemblyVersionCompatibility.SameProcess, an.VersionCompatibility);
         }
-              
+
         [Fact]
         public static void Clone()
         {
@@ -243,7 +243,7 @@ namespace System.Reflection.Tests
 
             Assembly a = typeof(AssemblyNameTests).Assembly;
             Assert.Equal(new AssemblyName(a.FullName).ToString(), AssemblyName.GetAssemblyName(a.Location).ToString());
-        }        
+        }
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UWP")]
@@ -353,7 +353,7 @@ namespace System.Reflection.Tests
         {
             AssemblyName assemblyName = new AssemblyName("MyAssemblyName");
             assemblyName.Name = name;
-            Assert.Equal(name, assemblyName.Name);
+            Assert.Equal(expectedName, assemblyName.Name);
         }
 
         [Fact]
@@ -496,22 +496,21 @@ namespace System.Reflection.Tests
         {
             Assert.NotNull(expectedVersion);
 
-            Action<AssemblyName> verify =
-                an =>
+            void Verify(AssemblyName an)
+            {
+                if (expectedVersion == null)
                 {
-                    if (expectedVersion == null)
-                    {
-                        Assert.Null(an.Version);
-                    }
-                    else
-                    {
-                        Assert.Equal(expectedVersion, an.Version);
-                    }
-                };
+                    Assert.Null(an.Version);
+                }
+                else
+                {
+                    Assert.Equal(expectedVersion, an.Version);
+                }
+            }
 
             var assemblyNameFromStr = new AssemblyName("a, Version=" + versionStr);
-            verify(assemblyNameFromStr);
-            verify(new AssemblyName(assemblyNameFromStr.FullName));
+            Verify(assemblyNameFromStr);
+            Verify(new AssemblyName(assemblyNameFromStr.FullName));
 
             var versionFromStr = new Version(versionStr);
 
@@ -522,12 +521,12 @@ namespace System.Reflection.Tests
             }
 
             assemblyNameFromStr = new AssemblyName("a, Version=" + versionFromStr);
-            verify(assemblyNameFromStr);
-            verify(new AssemblyName(assemblyNameFromStr.FullName));
+            Verify(assemblyNameFromStr);
+            Verify(new AssemblyName(assemblyNameFromStr.FullName));
 
             assemblyNameFromStr = new AssemblyName() { Name = "a", Version = expectedVersion };
-            verify(assemblyNameFromStr);
-            verify(new AssemblyName(assemblyNameFromStr.FullName));
+            Verify(assemblyNameFromStr);
+            Verify(new AssemblyName(assemblyNameFromStr.FullName));
         }
 
         [Fact]
@@ -634,6 +633,7 @@ namespace System.Reflection.Tests
         [MemberData(nameof(Ctor_ProcessorArchitecture_TestData))]
         public void GetFullNameAndToString_AreEquivalentAndDoNotPreserveArchitecture(string name, ProcessorArchitecture expected)
         {
+            _ = expected;
             string originalFullName = "Test, Culture=en-US, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=" + name;
             string expectedSerializedFullName = "Test, Culture=en-US, PublicKeyToken=b77a5c561934e089";
 

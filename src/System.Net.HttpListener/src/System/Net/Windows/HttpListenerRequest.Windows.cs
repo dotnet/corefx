@@ -38,7 +38,6 @@ namespace System.Net
         private bool _isDisposed = false;
         internal const uint CertBoblSize = 1500;
         private string _serviceName;
-        private object _lock = new object();
 
         private enum SslStatus : byte
         {
@@ -106,7 +105,7 @@ namespace System.Net
 
         internal HttpListenerContext HttpListenerContext => _httpContext;
 
-        // Note: RequestBuffer may get moved in memory. If you dereference a pointer from inside the RequestBuffer, 
+        // Note: RequestBuffer may get moved in memory. If you dereference a pointer from inside the RequestBuffer,
         // you must use 'OriginalBlobAddress' below to adjust the location of the pointer to match the location of
         // RequestBuffer.
         internal IntPtr RequestBuffer

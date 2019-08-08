@@ -9,11 +9,11 @@ namespace System.Diagnostics
     partial class Activity
     {
         /// <summary>
-        /// Returns high resolution (1 DateTime tick) current UTC DateTime. 
+        /// Returns high resolution (1 DateTime tick) current UTC DateTime.
         /// </summary>
         internal static DateTime GetUtcNow()
         {
-            // DateTime.UtcNow accuracy on .NET Framework is ~16ms, this method 
+            // DateTime.UtcNow accuracy on .NET Framework is ~16ms, this method
             // uses combination of Stopwatch and DateTime to calculate accurate UtcNow.
 
             var tmp = timeSync;
@@ -42,7 +42,9 @@ namespace System.Diagnostics
         private static TimeSync timeSync = new TimeSync();
 
         // sync DateTime and Stopwatch ticks every 2 hours
-        private static Timer syncTimeUpdater = InitalizeSyncTimer();
+#pragma warning disable CA1823 // suppress unused field warning, as it's used to keep the timer alive
+        private static readonly Timer syncTimeUpdater = InitalizeSyncTimer();
+#pragma warning restore CA1823
 
         [System.Security.SecuritySafeCritical]
         private static Timer InitalizeSyncTimer()

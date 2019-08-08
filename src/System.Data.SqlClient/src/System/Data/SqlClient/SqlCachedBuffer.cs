@@ -17,7 +17,7 @@ using System.Data.Common;
 namespace System.Data.SqlClient
 {
     // Caches the bytes returned from partial length prefixed datatypes, like XML
-    sealed internal class SqlCachedBuffer : System.Data.SqlTypes.INullable
+    internal sealed class SqlCachedBuffer : System.Data.SqlTypes.INullable
     {
         public static readonly SqlCachedBuffer Null = new SqlCachedBuffer();
         private const int _maxChunkSize = 2048; // Arbitrary value for chunk size. Revisit this later for better perf
@@ -90,7 +90,7 @@ namespace System.Data.SqlClient
 
         private static void AddByteOrderMark(byte[] byteArr, List<byte[]> cachedBytes)
         {
-            // Need to find out if we should add byte order mark or not. 
+            // Need to find out if we should add byte order mark or not.
             // We need to add this if we are getting ntext xml, not if we are getting binary xml
             // Binary Xml always begins with the bytes 0xDF and 0xFF
             // If we aren't getting these, then we are getting Unicode xml

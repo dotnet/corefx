@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -208,7 +208,7 @@ namespace System.Composition.Hosting.Tests
             ContainerConfiguration configuration = new ContainerConfiguration().WithParts(new Type[] { null });
             AssertExtensions.Throws<ArgumentNullException>("type", () => configuration.CreateContainer());
         }
-        
+
         [Fact]
         public void WithAssembly_Assembly_ThrowsCompositionFailedExceptionOnCreation()
         {
@@ -275,7 +275,7 @@ namespace System.Composition.Hosting.Tests
         [Export]
         public class Derived : Base
         {
-            new public string Prop { get; set; } = "Derived";
+            public new string Prop { get; set; } = "Derived";
         }
 
         public class Base
@@ -495,7 +495,7 @@ namespace System.Composition.Hosting.Tests
         {
             ContainerConfiguration configuration = new ContainerConfiguration().WithParts(typeof(AbstractClass), typeof(StructType));
             CompositionHost container = configuration.CreateContainer();
-            
+
             Assert.Throws<CompositionFailedException>(() => container.GetExport<AbstractClass>());
             Assert.Throws<CompositionFailedException>(() => container.GetExport<StructType>());
         }

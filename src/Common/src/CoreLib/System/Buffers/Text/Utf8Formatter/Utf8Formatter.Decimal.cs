@@ -17,11 +17,11 @@ namespace System.Buffers.Text
         /// <param name="format">The standard format to use</param>
         /// <returns>
         /// true for success. "bytesWritten" contains the length of the formatted text in bytes.
-        /// false if buffer was too short. Iteratively increase the size of the buffer and retry until it succeeds. 
+        /// false if buffer was too short. Iteratively increase the size of the buffer and retry until it succeeds.
         /// </returns>
         /// <remarks>
         /// Formats supported:
-        ///     G/g  (default)  
+        ///     G/g  (default)
         ///     F/f             12.45       Fixed point
         ///     E/e             1.245000e1  Exponential
         /// </remarks>
@@ -47,9 +47,9 @@ namespace System.Buffers.Text
                         Number.NumberBuffer number = new Number.NumberBuffer(Number.NumberBufferKind.Decimal, pDigits, Number.DecimalNumberBufferLength);
 
                         Number.DecimalToNumber(ref value, ref number);
-                        if (number.Digits[0] == 0)	
-                        {	
-                            number.IsNegative = false; // For Decimals, -0 must print as normal 0.	
+                        if (number.Digits[0] == 0)
+                        {
+                            number.IsNegative = false; // For Decimals, -0 must print as normal 0.
                         }
                         bool success = TryFormatDecimalG(ref number, destination, out bytesWritten);
 #if DEBUG

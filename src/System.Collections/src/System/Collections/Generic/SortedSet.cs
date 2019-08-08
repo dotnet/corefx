@@ -62,19 +62,6 @@ namespace System.Collections.Generic
         private const string ItemsName = "Items"; // Do not rename (binary serialization)
         private const string VersionName = "Version"; // Do not rename (binary serialization)
 
-        // Needed for enumerator
-        private const string TreeName = "Tree";
-        private const string NodeValueName = "Item";
-        private const string EnumStartName = "EnumStarted";
-        private const string ReverseName = "Reverse";
-        private const string EnumVersionName = "EnumVersion";
-
-        // Needed for TreeSubset
-        private const string MinName = "Min";
-        private const string MaxName = "Max";
-        private const string LowerBoundActiveName = "lBoundActive";
-        private const string UpperBoundActiveName = "uBoundActive";
-
         internal const int StackAllocThreshold = 100;
 
         #endregion
@@ -1047,7 +1034,6 @@ namespace System.Collections.Generic
                 Enumerator theirs = asSorted.GetEnumerator();
                 bool mineEnded = !mine.MoveNext(), theirsEnded = !theirs.MoveNext();
                 T max = Max;
-                T min = Min;
 
                 while (!mineEnded && !theirsEnded && Comparer.Compare(theirs.Current, max) <= 0)
                 {
@@ -1916,8 +1902,6 @@ namespace System.Collections.Generic
         [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "not an expected scenario")]
         public struct Enumerator : IEnumerator<T>, IEnumerator, ISerializable, IDeserializationCallback
         {
-            private static readonly Node s_dummyNode = new Node(default(T)!, NodeColor.Red);
-
             private SortedSet<T> _tree;
             private int _version;
 
@@ -2080,7 +2064,7 @@ namespace System.Collections.Generic
         /// <param name="actualValue">The value from the set that the search found, or the default value of <typeparamref name="T"/> when the search yielded no match.</param>
         /// <returns>A value indicating whether the search was successful.</returns>
         /// <remarks>
-        /// This can be useful when you want to reuse a previously stored reference instead of 
+        /// This can be useful when you want to reuse a previously stored reference instead of
         /// a newly constructed one (so that more sharing of references can occur) or to look up
         /// a value that has more complete data than the value you currently have, although their
         /// comparer functions indicate they are equal.

@@ -9,14 +9,14 @@ namespace ReferencedClassLib
 {
     public class Program
     {
-        static public string Describe(string lang)
+        public static string Describe(string lang)
         {
             try
             {
                 ResourceManager rm = new ResourceManager("ReferencedClassLib.ReferencedStrings", typeof(Program).Assembly);
-    
+
                 CultureInfo ci = CultureInfo.CreateSpecificCulture(lang);
-        
+
                 return rm.GetString("Describe", ci);
             }
             catch (Exception e)

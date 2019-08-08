@@ -293,10 +293,12 @@ namespace System.IO.MemoryMappedFiles.Tests
             new FileMode[] { FileMode.Open, FileMode.OpenOrCreate },
             new string[] { null, "CreateUniqueMapName()" },
             new long[] { 1, 256, -1 /*pagesize*/, 10000 },
-            new MemoryMappedFileAccess[] { MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.CopyOnWrite })]
+            new MemoryMappedFileAccess[] { MemoryMappedFileAccess.ReadWrite })]
         public void ValidArgumentCombinationsWithPath_ModesOpenOrCreate(
             FileMode mode, string mapName, long capacity, MemoryMappedFileAccess access)
         {
+            _ = access;
+
             // Test each of the four path-based CreateFromFile overloads
 
             using (TempFile file = new TempFile(GetTestFilePath(), capacity))
@@ -394,7 +396,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// </summary>
         /// <param name="modes">The modes to yield.</param>
         /// <param name="mapNames">
-        /// The names to yield.  
+        /// The names to yield.
         /// non-null may be excluded based on platform.
         /// "CreateUniqueMapName()" will be translated to an invocation of that method.
         /// </param>
@@ -481,7 +483,7 @@ namespace System.IO.MemoryMappedFiles.Tests
         /// listed in the MemberData attribute (e.g. actual system page size instead of -1).
         /// </summary>
         /// <param name="mapNames">
-        /// The names to yield.  
+        /// The names to yield.
         /// non-null may be excluded based on platform.
         /// "CreateUniqueMapName()" will be translated to an invocation of that method.
         /// </param>

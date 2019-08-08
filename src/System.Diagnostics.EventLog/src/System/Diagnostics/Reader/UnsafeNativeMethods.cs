@@ -21,7 +21,7 @@ namespace Microsoft.Win32
 {
     internal static partial class UnsafeNativeMethods
     {
-        internal const String WEVTAPI = "wevtapi.dll";
+        internal const string WEVTAPI = "wevtapi.dll";
 
         // WinError.h codes:
 
@@ -31,8 +31,8 @@ namespace Microsoft.Win32
         internal const int ERROR_ACCESS_DENIED = 0x5;
         internal const int ERROR_INVALID_HANDLE = 0x6;
 
-        // Can occurs when filled buffers are trying to flush to disk, but disk IOs are not fast enough. 
-        // This happens when the disk is slow and event traffic is heavy. 
+        // Can occurs when filled buffers are trying to flush to disk, but disk IOs are not fast enough.
+        // This happens when the disk is slow and event traffic is heavy.
         // Eventually, there are no more free (empty) buffers and the event is dropped.
         internal const int ERROR_NOT_ENOUGH_MEMORY = 0x8;
 
@@ -61,7 +61,7 @@ namespace Microsoft.Win32
         internal const int ERROR_PIPE_LISTENING = 0x218;  // 536
         internal const int ERROR_OPERATION_ABORTED = 0x3E3;  // 995; For IO Cancellation
         internal const int ERROR_IO_PENDING = 0x3E5;  // 997
-        internal const int ERROR_NOT_FOUND = 0x490;  // 1168      
+        internal const int ERROR_NOT_FOUND = 0x490;  // 1168
 
         // The event size is larger than the allowed maximum (64k - header).
         internal const int ERROR_ARITHMETIC_OVERFLOW = 0x216;  // 534
@@ -166,9 +166,9 @@ namespace Microsoft.Win32
         internal struct EvtVariant
         {
             [FieldOffset(0)]
-            public UInt32 UInteger;
+            public uint UInteger;
             [FieldOffset(0)]
-            public Int32 Integer;
+            public int Integer;
             [FieldOffset(0)]
             public byte UInt8;
             [FieldOffset(0)]
@@ -176,19 +176,19 @@ namespace Microsoft.Win32
             [FieldOffset(0)]
             public ushort UShort;
             [FieldOffset(0)]
-            public UInt32 Bool;
+            public uint Bool;
             [FieldOffset(0)]
-            public Byte ByteVal;
+            public byte ByteVal;
             [FieldOffset(0)]
             public byte SByte;
             [FieldOffset(0)]
-            public UInt64 ULong;
+            public ulong ULong;
             [FieldOffset(0)]
-            public Int64 Long;
+            public long Long;
             [FieldOffset(0)]
-            public Single Single;
+            public float Single;
             [FieldOffset(0)]
-            public Double Double;
+            public double Double;
             [FieldOffset(0)]
             public IntPtr StringVal;
             [FieldOffset(0)]
@@ -204,15 +204,15 @@ namespace Microsoft.Win32
             [FieldOffset(0)]
             public IntPtr GuidReference;
             [FieldOffset(0)]
-            public UInt64 FileTime;
+            public ulong FileTime;
             [FieldOffset(0)]
             public IntPtr SystemTime;
             [FieldOffset(0)]
             public IntPtr SizeT;
             [FieldOffset(8)]
-            public UInt32 Count;   // number of elements (not length) in bytes.
+            public uint Count;   // number of elements (not length) in bytes.
             [FieldOffset(12)]
-            public UInt32 Type;
+            public uint Type;
         }
 
         internal enum EvtEventPropertyId
@@ -291,7 +291,7 @@ namespace Microsoft.Win32
             // EvtEventMetadataPropertyIdEND
         }
 
-        // CHANNEL CONFIGURATION 
+        // CHANNEL CONFIGURATION
         internal enum EvtChannelConfigPropertyId
         {
             EvtChannelConfigEnabled = 0,            // EvtVarTypeBoolean
@@ -337,7 +337,7 @@ namespace Microsoft.Win32
             EvtExportLogTolerateQueryErrors = 0x1000
         }
 
-        // RENDERING    
+        // RENDERING
         internal enum EvtRenderContextFlags
         {
             EvtRenderContextValues = 0,      // Render specific properties
@@ -367,9 +367,9 @@ namespace Microsoft.Win32
 
         internal enum EvtSystemPropertyId
         {
-            EvtSystemProviderName = 0,          // EvtVarTypeString             
-            EvtSystemProviderGuid,              // EvtVarTypeGuid  
-            EvtSystemEventID,                   // EvtVarTypeUInt16  
+            EvtSystemProviderName = 0,          // EvtVarTypeString
+            EvtSystemProviderGuid,              // EvtVarTypeGuid
+            EvtSystemEventID,                   // EvtVarTypeUInt16
             EvtSystemQualifiers,                // EvtVarTypeUInt16
             EvtSystemLevel,                     // EvtVarTypeUInt8
             EvtSystemTask,                      // EvtVarTypeUInt16
@@ -381,8 +381,8 @@ namespace Microsoft.Win32
             EvtSystemRelatedActivityID,         // EvtVarTypeGuid
             EvtSystemProcessID,                 // EvtVarTypeUInt32
             EvtSystemThreadID,                  // EvtVarTypeUInt32
-            EvtSystemChannel,                   // EvtVarTypeString 
-            EvtSystemComputer,                  // EvtVarTypeString 
+            EvtSystemChannel,                   // EvtVarTypeString
+            EvtSystemComputer,                  // EvtVarTypeString
             EvtSystemUserID,                    // EvtVarTypeSid
             EvtSystemVersion,                   // EvtVarTypeUInt8
             EvtSystemPropertyIdEND
@@ -586,7 +586,7 @@ namespace Microsoft.Win32
         [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
         internal static extern EventLogHandle EvtOpenChannelConfig(
                             EventLogHandle session,
-                            [MarshalAs(UnmanagedType.LPWStr)]String channelPath,
+                            [MarshalAs(UnmanagedType.LPWStr)]string channelPath,
                             int flags
                                     );
 
@@ -662,9 +662,9 @@ namespace Microsoft.Win32
         // RENDERING
         [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
         internal static extern EventLogHandle EvtCreateRenderContext(
-                            Int32 valuePathsCount,
+                            int valuePathsCount,
                             [MarshalAs(UnmanagedType.LPArray,ArraySubType = UnmanagedType.LPWStr)]
-                                String[] valuePaths,
+                                string[] valuePaths,
                             [MarshalAs(UnmanagedType.I4)]EvtRenderContextFlags flags
                                     );
 
@@ -696,9 +696,9 @@ namespace Microsoft.Win32
             [MarshalAs(UnmanagedType.LPWStr), FieldOffset(0)]
             public string StringVal;
             [FieldOffset(8)]
-            public UInt32 Count;
+            public uint Count;
             [FieldOffset(12)]
-            public UInt32 Type;
+            public uint Type;
         };
 
         [DllImport(WEVTAPI, CharSet = CharSet.Auto, SetLastError = true)]
@@ -749,6 +749,6 @@ namespace Microsoft.Win32
                                         );
         //
         // EventLog
-        // 
+        //
     }
 }

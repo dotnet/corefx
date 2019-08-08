@@ -48,8 +48,10 @@ namespace System.Xml.Xsl
         // Reader settings used when creating XmlReader from inputUri
         private static readonly XmlReaderSettings s_readerSettings = new XmlReaderSettings();
 
+#if FEATURE_COMPILED_XSL
         // Version for GeneratedCodeAttribute
         private static readonly Version s_version = typeof(XslCompiledTransform).Assembly.GetName().Version;
+#endif
 
         // Options of compilation
         private bool _enableDebug = false;
@@ -351,9 +353,9 @@ namespace System.Xml.Xsl
 
         //------------------------------------------------
         // Transform methods which take a uri
-        // SxS Note: Annotations should propagate to the caller to have him either check that 
-        // the passed URIs are SxS safe or decide that they don't have to be SxS safe and 
-        // suppress the message. 
+        // SxS Note: Annotations should propagate to the caller to have him either check that
+        // the passed URIs are SxS safe or decide that they don't have to be SxS safe and
+        // suppress the message.
         //------------------------------------------------
 
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings")]

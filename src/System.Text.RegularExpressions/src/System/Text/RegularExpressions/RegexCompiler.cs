@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -103,7 +103,6 @@ namespace System.Text.RegularExpressions
         // indices for unique code fragments
         private const int Stackpop = 0;    // pop one
         private const int Stackpop2 = 1;    // pop two
-        private const int Stackpop3 = 2;    // pop three
         private const int Capback = 3;    // uncapture
         private const int Capback2 = 4;    // uncapture 2
         private const int Branchmarkback2 = 5;    // back2 part of branchmark
@@ -124,8 +123,8 @@ namespace System.Text.RegularExpressions
             return typeof(RegexRunner).GetMethod(methname, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
         }
 
-        /* 
-         * Entry point to dynamically compile a regular expression.  The expression is compiled to 
+        /*
+         * Entry point to dynamically compile a regular expression.  The expression is compiled to
          * an in-memory assembly.
          */
         internal static RegexRunnerFactory Compile(RegexCode code, RegexOptions options)
@@ -1014,14 +1013,13 @@ namespace System.Text.RegularExpressions
          */
         private void GenerateMiddleSection()
         {
-            Label l1 = DefineLabel();
             Label[] table;
             int i;
 
             // Backtrack switch
             MarkLabel(_backtrack);
 
-            // first call EnsureStorage 
+            // first call EnsureStorage
             Mvlocfld(_trackposV, s_trackposF);
             Mvlocfld(_stackposV, s_stackposF);
             Ldthis();
@@ -1228,7 +1226,6 @@ namespace System.Text.RegularExpressions
                 Label lAdvance = DefineLabel();
                 Label lFail = DefineLabel();
                 Label lStart = DefineLabel();
-                Label lOutOfRange = DefineLabel();
                 Label lPartialMatch = DefineLabel();
 
 
@@ -1399,7 +1396,6 @@ namespace System.Text.RegularExpressions
             else
             {
                 LocalBuilder cV = _temp2V;
-                LocalBuilder chV = _tempV;
                 Label l1 = DefineLabel();
                 Label l2 = DefineLabel();
                 Label l3 = DefineLabel();
@@ -1470,7 +1466,7 @@ namespace System.Text.RegularExpressions
 
                 /*          // CURRENTLY DISABLED
                             // If for some reason we have a prefix we didn't use, use it now.
-                
+
                             if (_bmPrefix != null) {
                                 if (!_code._rightToLeft) {
                                     Ldthisfld(_textendF);
@@ -1483,7 +1479,7 @@ namespace System.Text.RegularExpressions
                                 Sub();
                                 Ldc(_bmPrefix._pattern.Length - 1);
                                 BltFar(l5);
-                                
+
                                 for (int i = 1; i < _bmPrefix._pattern.Length; i++) {
                                     Ldloc(_textV);
                                     Ldloc(_textposV);
@@ -1543,7 +1539,7 @@ namespace System.Text.RegularExpressions
         }
 
         /*
-         * Declares a local CultureInfo 
+         * Declares a local CultureInfo
          */
         private LocalBuilder DeclareCultureInfo()
         {
@@ -1601,7 +1597,7 @@ namespace System.Text.RegularExpressions
             // emit the code!
 
             // cache CultureInfo in local variable which saves excessive thread local storage accesses
-            InitLocalCultureInfo();  
+            InitLocalCultureInfo();
 
             GenerateForwardSection();
             GenerateMiddleSection();
@@ -1833,7 +1829,7 @@ namespace System.Text.RegularExpressions
 
                 case RegexCode.Branchmark:
                     //: Stackframe(1);
-                    //: 
+                    //:
                     //: if (Textpos() != Stacked(0))
                     //: {                                   // Nonempty match -> loop now
                     //:     Track(Stacked(0), Textpos());   // Save old mark, textpos
@@ -1900,13 +1896,13 @@ namespace System.Text.RegularExpressions
                 case RegexCode.Lazybranchmark:
                     //: StackPop();
                     //: int oldMarkPos = StackPeek();
-                    //: 
+                    //:
                     //: if (Textpos() != oldMarkPos) {         // Nonempty match -> next loop
                     //: {                                   // Nonempty match -> next loop
                     //:     if (oldMarkPos != -1)
                     //:         Track(Stacked(0), Textpos());   // Save old mark, textpos
                     //:     else
-                    //:         TrackPush(Textpos(), Textpos());   
+                    //:         TrackPush(Textpos(), Textpos());
                     //: }
                     //: else
                     //: {                                   // Empty match -> no loop
@@ -1943,7 +1939,7 @@ namespace System.Text.RegularExpressions
                         Br(AdvanceLabel());                 // Advance (near)
                                                             // else
                         MarkLabel(l1);
-                        ReadyPushStack();                   // push the current textPos on the stack. 
+                        ReadyPushStack();                   // push the current textPos on the stack.
                                                             // May be ignored by 'back2' or used by a true empty match.
                         Ldloc(mark);
 
@@ -2014,7 +2010,7 @@ namespace System.Text.RegularExpressions
                     //: Stackframe(2);
                     //: int mark = Stacked(0);
                     //: int count = Stacked(1);
-                    //: 
+                    //:
                     //: if (count >= Operand(1) || Textpos() == mark && count >= 0)
                     //: {                                   // Max loops or empty match -> straight now
                     //:     Track2(mark, count);            // Save old mark, count
@@ -2142,8 +2138,6 @@ namespace System.Text.RegularExpressions
                         LocalBuilder count = _tempV;
                         LocalBuilder mark = _temp2V;
                         Label l1 = DefineLabel();
-                        Label l2 = DefineLabel();
-                        Label l3 = _labels[NextCodepos()];
 
                         PopStack();
                         Stloc(count);                           // count -> temp

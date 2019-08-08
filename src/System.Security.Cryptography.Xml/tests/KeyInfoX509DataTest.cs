@@ -4,7 +4,7 @@
 // KeyInfoX509DataTest.cs - Test Cases for KeyInfoX509Data
 //
 // Author:
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // (C) 2002, 2003 Motus Technologies Inc. (http://www.motus.com)
 // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
@@ -178,7 +178,7 @@ namespace System.Security.Cryptography.Xml.Tests
             Assert.Null(data.IssuerSerials);
             Assert.Equal(1, data.SubjectKeyIds.Count);
             Assert.Null(data.SubjectNames);
-            
+
             //Comment from https://github.com/peterwurzinger
             //TODO: This is senseless, since GetXml() will call Convert.ToBase64String(null), what will throw an exception not related to the Crypto-XML-API
             //Assert.Equal("<X509Data xmlns=\"http://www.w3.org/2000/09/xmldsig#\" />", data.GetXml ().OuterXml); // May throw an exception

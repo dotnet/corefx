@@ -118,7 +118,7 @@ namespace System.Net.Http.Headers
         }
 
         // Can't use Span here as it's unsupported.
-        private unsafe readonly struct BytePtrAccessor : IHeaderNameAccessor
+        private readonly unsafe struct BytePtrAccessor : IHeaderNameAccessor
         {
             private readonly byte* _p;
             private readonly int _length;
@@ -378,7 +378,7 @@ namespace System.Net.Http.Headers
             return null;
         }
 
-        internal unsafe static KnownHeader TryGetKnownHeader(ReadOnlySpan<byte> name)
+        internal static unsafe KnownHeader TryGetKnownHeader(ReadOnlySpan<byte> name)
         {
             fixed (byte* p = &MemoryMarshal.GetReference(name))
             {

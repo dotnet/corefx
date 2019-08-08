@@ -304,11 +304,11 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="Object"/> is equal to this instance.
+        /// Determines whether the specified <see cref="object"/> is equal to this instance.
         /// </summary>
-        /// <param name="obj">The <see cref="Object"/> to compare with this instance.</param>
+        /// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="Object"/> is equal to this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [Pure]
         public override bool Equals(object obj)
@@ -423,7 +423,7 @@ namespace System.Collections.Immutable
             // if we are going to do anything with the array, we will need Length anyways
             // so touching it, and potentially causing a cache miss, is not going to be an
             // extra expense.
-            var unused = this.array.Length;
+            _ = this.array.Length;
         }
 
         /// <summary>

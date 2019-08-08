@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -139,12 +139,12 @@ namespace System.Tests
             }
         }
 
-        private unsafe static bool IsNegativeZero(float value)
+        private static unsafe bool IsNegativeZero(float value)
         {
             return (*(uint*)(&value)) == 0x80000000;
         }
 
-        private unsafe static bool IsPositiveZero(float value)
+        private static unsafe bool IsPositiveZero(float value)
         {
             return (*(uint*)(&value)) == 0x00000000;
         }
@@ -1406,7 +1406,7 @@ namespace System.Tests
 
         public static IEnumerable<object[]> Round_Digits_TestData
         {
-            get 
+            get
             {
                 yield return new object[] {float.NaN, float.NaN, 3, MidpointRounding.ToEven};
                 yield return new object[] {float.PositiveInfinity, float.PositiveInfinity, 3, MidpointRounding.ToEven};

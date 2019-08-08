@@ -39,15 +39,10 @@ namespace System.Runtime.CompilerServices
         {
             SynchronizationContext? sc = SynchronizationContext.Current;
             sc?.OperationStarted();
-#if PROJECTN
-            // ProjectN's AsyncTaskMethodBuilder.Create() currently does additional debugger-related
-            // work, so we need to delegate to it.
-            return new AsyncVoidMethodBuilder() { _synchronizationContext = sc, _builder = AsyncTaskMethodBuilder.Create() };
-#else
+
             // _builder should be initialized to AsyncTaskMethodBuilder.Create(), but on coreclr
             // that Create() is a nop, so we can just return the default here.
             return new AsyncVoidMethodBuilder() { _synchronizationContext = sc };
-#endif
         }
 
         /// <summary>Initiates the builder's execution with the associated state machine.</summary>
@@ -128,7 +123,7 @@ namespace System.Runtime.CompilerServices
 
             if (_synchronizationContext != null)
             {
-                // If we captured a synchronization context, Post the throwing of the exception to it 
+                // If we captured a synchronization context, Post the throwing of the exception to it
                 // and decrement its outstanding operation count.
                 try
                 {
@@ -174,7 +169,7 @@ namespace System.Runtime.CompilerServices
         /// Gets an object that may be used to uniquely identify this builder to the debugger.
         /// </summary>
         /// <remarks>
-        /// This property lazily instantiates the ID in a non-thread-safe manner.  
+        /// This property lazily instantiates the ID in a non-thread-safe manner.
         /// It must only be used by the debugger and AsyncCausalityTracer in a single-threaded manner.
         /// </remarks>
         internal object ObjectIdForDebugger => _builder.ObjectIdForDebugger;
@@ -192,11 +187,7 @@ namespace System.Runtime.CompilerServices
     public struct AsyncTaskMethodBuilder
     {
         /// <summary>A cached VoidTaskResult task used for builders that complete synchronously.</summary>
-#if PROJECTN
-        private static readonly Task<VoidTaskResult> s_cachedCompleted = AsyncTaskCache.CreateCacheableTask<VoidTaskResult>(default(VoidTaskResult));
-#else
         private static readonly Task<VoidTaskResult> s_cachedCompleted = AsyncTaskMethodBuilder<VoidTaskResult>.s_defaultResultTask;
-#endif
 
         /// <summary>The generic builder object to which this non-generic instance delegates.</summary>
         private AsyncTaskMethodBuilder<VoidTaskResult> m_builder; // mutable struct: must not be readonly. Debugger depends on the exact name of this field.
@@ -204,15 +195,9 @@ namespace System.Runtime.CompilerServices
         /// <summary>Initializes a new <see cref="AsyncTaskMethodBuilder"/>.</summary>
         /// <returns>The initialized <see cref="AsyncTaskMethodBuilder"/>.</returns>
         public static AsyncTaskMethodBuilder Create() =>
-#if PROJECTN
-            // ProjectN's AsyncTaskMethodBuilder<VoidTaskResult>.Create() currently does additional debugger-related
-            // work, so we need to delegate to it.
-            new AsyncTaskMethodBuilder { m_builder = AsyncTaskMethodBuilder<VoidTaskResult>.Create() };
-#else
             // m_builder should be initialized to AsyncTaskMethodBuilder<VoidTaskResult>.Create(), but on coreclr
             // that Create() is a nop, so we can just return the default here.
             default;
-#endif
 
         /// <summary>Initiates the builder's execution with the associated state machine.</summary>
         /// <typeparam name="TStateMachine">Specifies the type of the state machine.</typeparam>
@@ -265,7 +250,7 @@ namespace System.Runtime.CompilerServices
         }
 
         /// <summary>
-        /// Completes the <see cref="System.Threading.Tasks.Task"/> in the 
+        /// Completes the <see cref="System.Threading.Tasks.Task"/> in the
         /// <see cref="System.Threading.Tasks.TaskStatus">RanToCompletion</see> state.
         /// </summary>
         /// <exception cref="System.InvalidOperationException">The builder is not initialized.</exception>
@@ -273,7 +258,7 @@ namespace System.Runtime.CompilerServices
         public void SetResult() => m_builder.SetResult(s_cachedCompleted); // Using s_cachedCompleted is faster than using s_defaultResultTask.
 
         /// <summary>
-        /// Completes the <see cref="System.Threading.Tasks.Task"/> in the 
+        /// Completes the <see cref="System.Threading.Tasks.Task"/> in the
         /// <see cref="System.Threading.Tasks.TaskStatus">Faulted</see> state with the specified exception.
         /// </summary>
         /// <param name="exception">The <see cref="System.Exception"/> to use to fault the task.</param>
@@ -295,7 +280,7 @@ namespace System.Runtime.CompilerServices
         /// Gets an object that may be used to uniquely identify this builder to the debugger.
         /// </summary>
         /// <remarks>
-        /// This property lazily instantiates the ID in a non-thread-safe manner.  
+        /// This property lazily instantiates the ID in a non-thread-safe manner.
         /// It must only be used by the debugger and tracing purposes, and only in a single-threaded manner
         /// when no other threads are in the middle of accessing this property or this.Task.
         /// </remarks>
@@ -313,10 +298,8 @@ namespace System.Runtime.CompilerServices
     /// </remarks>
     public struct AsyncTaskMethodBuilder<TResult>
     {
-#if !PROJECTN
         /// <summary>A cached task for default(TResult).</summary>
-        internal readonly static Task<TResult> s_defaultResultTask = AsyncTaskCache.CreateCacheableTask<TResult>(default);
-#endif
+        internal static readonly Task<TResult> s_defaultResultTask = AsyncTaskCache.CreateCacheableTask<TResult>(default);
 
         /// <summary>The lazily-initialized built task.</summary>
         private Task<TResult> m_task; // lazily-initialized: must not be readonly. Debugger depends on the exact name of this field.
@@ -325,20 +308,10 @@ namespace System.Runtime.CompilerServices
         /// <returns>The initialized <see cref="AsyncTaskMethodBuilder"/>.</returns>
         public static AsyncTaskMethodBuilder<TResult> Create()
         {
-#if PROJECTN
-            var result = new AsyncTaskMethodBuilder<TResult>();
-            if (System.Threading.Tasks.Task.s_asyncDebuggingEnabled)
-            {
-                // This allows the debugger to access m_task directly without evaluating ObjectIdForDebugger for ProjectN
-                result.InitializeTaskAsStateMachineBox();
-            }            
-            return result;
-#else
             // NOTE: If this method is ever updated to perform more initialization,
             //       other Create methods like AsyncTaskMethodBuilder.Create and
             //       AsyncValueTaskMethodBuilder.Create must be updated to call this.
             return default;
-#endif
         }
 
         /// <summary>Initiates the builder's execution with the associated state machine.</summary>
@@ -517,10 +490,16 @@ namespace System.Runtime.CompilerServices
             box.StateMachine = stateMachine;
             box.Context = currentContext;
 
-            // Finally, log the creation of the state machine box object / task for this async method.
+            // Log the creation of the state machine box object / task for this async method.
             if (AsyncCausalityTracer.LoggingOn)
             {
                 AsyncCausalityTracer.TraceOperationCreation(box, "Async: " + stateMachine.GetType().Name);
+            }
+
+            // And if async debugging is enabled, track the task.
+            if (System.Threading.Tasks.Task.s_asyncDebuggingEnabled)
+            {
+                System.Threading.Tasks.Task.AddToActiveTasks(box);
             }
 
             return box;
@@ -618,6 +597,12 @@ namespace System.Runtime.CompilerServices
 
                 if (IsCompleted)
                 {
+                    // If async debugging is enabled, remove the task from tracking.
+                    if (System.Threading.Tasks.Task.s_asyncDebuggingEnabled)
+                    {
+                        System.Threading.Tasks.Task.RemoveFromActiveTasks(this);
+                    }
+
                     // Clear out state now that the async method has completed.
                     // This avoids keeping arbitrary state referenced by lifted locals
                     // if this Task / state machine box is held onto.
@@ -689,7 +674,7 @@ namespace System.Runtime.CompilerServices
         }
 
         /// <summary>
-        /// Completes the <see cref="System.Threading.Tasks.Task{TResult}"/> in the 
+        /// Completes the <see cref="System.Threading.Tasks.Task{TResult}"/> in the
         /// <see cref="System.Threading.Tasks.TaskStatus">RanToCompletion</see> state with the specified result.
         /// </summary>
         /// <param name="result">The result to use to complete the task.</param>
@@ -716,31 +701,14 @@ namespace System.Runtime.CompilerServices
         {
             Debug.Assert(m_task != null, "Expected non-null task");
 
-            if (AsyncCausalityTracer.LoggingOn || System.Threading.Tasks.Task.s_asyncDebuggingEnabled)
-            {
-                LogExistingTaskCompletion();
-            }
-
-            if (!m_task.TrySetResult(result))
-            {
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.TaskT_TransitionToFinal_AlreadyCompleted);
-            }
-        }
-
-        /// <summary>Handles logging for the successful completion of an operation.</summary>
-        private void LogExistingTaskCompletion()
-        {
-            Debug.Assert(m_task != null);
-
             if (AsyncCausalityTracer.LoggingOn)
             {
                 AsyncCausalityTracer.TraceOperationCompletion(m_task, AsyncCausalityStatus.Completed);
             }
 
-            // only log if we have a real task that was previously created
-            if (System.Threading.Tasks.Task.s_asyncDebuggingEnabled)
+            if (!m_task.TrySetResult(result))
             {
-                System.Threading.Tasks.Task.RemoveFromActiveTasks(m_task);
+                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.TaskT_TransitionToFinal_AlreadyCompleted);
             }
         }
 
@@ -769,7 +737,7 @@ namespace System.Runtime.CompilerServices
         }
 
         /// <summary>
-        /// Completes the <see cref="System.Threading.Tasks.Task{TResult}"/> in the 
+        /// Completes the <see cref="System.Threading.Tasks.Task{TResult}"/> in the
         /// <see cref="System.Threading.Tasks.TaskStatus">Faulted</see> state with the specified exception.
         /// </summary>
         /// <param name="exception">The <see cref="System.Exception"/> to use to fault the task.</param>
@@ -792,7 +760,7 @@ namespace System.Runtime.CompilerServices
 
             // Unlike with TaskCompletionSource, we do not need to spin here until _taskAndStateMachine is completed,
             // since AsyncTaskMethodBuilder.SetException should not be immediately followed by any code
-            // that depends on the task having completely completed.  Moreover, with correct usage, 
+            // that depends on the task having completely completed.  Moreover, with correct usage,
             // SetResult or SetException should only be called once, so the Try* methods should always
             // return true, so no spinning would be necessary anyway (the spinning in TCS is only relevant
             // if another thread completes the task first).
@@ -833,7 +801,7 @@ namespace System.Runtime.CompilerServices
         /// Gets an object that may be used to uniquely identify this builder to the debugger.
         /// </summary>
         /// <remarks>
-        /// This property lazily instantiates the ID in a non-thread-safe manner.  
+        /// This property lazily instantiates the ID in a non-thread-safe manner.
         /// It must only be used by the debugger and tracing purposes, and only in a single-threaded manner
         /// when no other threads are in the middle of accessing this or other members that lazily initialize the task.
         /// </remarks>
@@ -848,19 +816,13 @@ namespace System.Runtime.CompilerServices
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // method looks long, but for a given TResult it results in a relatively small amount of asm
         internal static Task<TResult> GetTaskForResult(TResult result)
         {
-#if PROJECTN
-            // Currently NUTC does not perform the optimization needed by this method.  The result is that
-            // every call to this method results in quite a lot of work, including many allocations, which 
-            // is the opposite of the intent.  For now, let's just return a new Task each time.
-            // Bug 719350 tracks re-optimizing this in ProjectN.
-#else
             // The goal of this function is to be give back a cached task if possible,
             // or to otherwise give back a new task.  To give back a cached task,
             // we need to be able to evaluate the incoming result value, and we need
             // to avoid as much overhead as possible when doing so, as this function
             // is invoked as part of the return path from every async method.
-            // Most tasks won't be cached, and thus we need the checks for those that are 
-            // to be as close to free as possible. This requires some trickiness given the 
+            // Most tasks won't be cached, and thus we need the checks for those that are
+            // to be as close to free as possible. This requires some trickiness given the
             // lack of generic specialization in .NET.
             //
             // Be very careful when modifying this code.  It has been tuned
@@ -869,7 +831,7 @@ namespace System.Runtime.CompilerServices
             // small tweaks can have big consequences for what does and doesn't get optimized away.
             //
             // Note that this code only ever accesses a static field when it knows it'll
-            // find a cached value, since static fields (even if readonly and integral types) 
+            // find a cached value, since static fields (even if readonly and integral types)
             // require special access helpers in this NGEN'd and domain-neutral.
 
             if (null != (object)default(TResult)!) // help the JIT avoid the value type branches for ref types // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
@@ -896,7 +858,7 @@ namespace System.Runtime.CompilerServices
                 else if (typeof(TResult) == typeof(int))
                 {
                     // Compare to constants to avoid static field access if outside of cached range.
-                    // We compare to the upper bound first, as we're more likely to cache miss on the upper side than on the 
+                    // We compare to the upper bound first, as we're more likely to cache miss on the upper side than on the
                     // lower side, due to positive values being more common than negative as return values.
                     int value = (int)(object)result!;
                     if (value < AsyncTaskCache.EXCLUSIVE_INT32_MAX &&
@@ -926,7 +888,6 @@ namespace System.Runtime.CompilerServices
             {
                 return s_defaultResultTask;
             }
-#endif
 
             // No cached task is available.  Manufacture a new one for this result.
             return new Task<TResult>(result);
@@ -936,16 +897,15 @@ namespace System.Runtime.CompilerServices
     /// <summary>Provides a cache of closed generic tasks for async methods.</summary>
     internal static class AsyncTaskCache
     {
-#if !PROJECTN
         // All static members are initialized inline to ensure type is beforefieldinit
 
         /// <summary>A cached Task{Boolean}.Result == true.</summary>
-        internal readonly static Task<bool> TrueTask = CreateCacheableTask(true);
+        internal static readonly Task<bool> TrueTask = CreateCacheableTask(true);
         /// <summary>A cached Task{Boolean}.Result == false.</summary>
-        internal readonly static Task<bool> FalseTask = CreateCacheableTask(false);
+        internal static readonly Task<bool> FalseTask = CreateCacheableTask(false);
 
         /// <summary>The cache of Task{Int32}.</summary>
-        internal readonly static Task<int>[] Int32Tasks = CreateInt32Tasks();
+        internal static readonly Task<int>[] Int32Tasks = CreateInt32Tasks();
         /// <summary>The minimum value, inclusive, for which we want a cached task.</summary>
         internal const int INCLUSIVE_INT32_MIN = -1;
         /// <summary>The maximum value, exclusive, for which we want a cached task.</summary>
@@ -961,7 +921,6 @@ namespace System.Runtime.CompilerServices
             }
             return tasks;
         }
-#endif
 
         /// <summary>Creates a non-disposable task.</summary>
         /// <typeparam name="TResult">Specifies the result type.</typeparam>
@@ -1091,9 +1050,6 @@ namespace System.Runtime.CompilerServices
 
         /// <summary>This helper routine is targeted by the debugger. Its purpose is to remove any delegate wrappers introduced by
         /// the framework that the debugger doesn't want to see.</summary>
-#if PROJECTN
-        [DependencyReductionRoot]
-#endif
         internal static Action TryGetStateMachineForDebugger(Action action) // debugger depends on this exact name/signature
         {
             object? target = action.Target;
@@ -1108,15 +1064,15 @@ namespace System.Runtime.CompilerServices
 
         /// <summary>
         /// Logically we pass just an Action (delegate) to a task for its action to 'ContinueWith' when it completes.
-        /// However debuggers and profilers need more information about what that action is. (In particular what 
-        /// the action after that is and after that.   To solve this problem we create a 'ContinuationWrapper 
+        /// However debuggers and profilers need more information about what that action is. (In particular what
+        /// the action after that is and after that.   To solve this problem we create a 'ContinuationWrapper
         /// which when invoked just does the original action (the invoke action), but also remembers other information
-        /// (like the action after that (which is also a ContinuationWrapper and thus form a linked list).  
-        ///  We also store that task if the action is associate with at task.  
+        /// (like the action after that (which is also a ContinuationWrapper and thus form a linked list).
+        ///  We also store that task if the action is associate with at task.
         /// </summary>
         private sealed class ContinuationWrapper // SOS DumpAsync command depends on this name
         {
-            private readonly Action<Action, Task> _invokeAction; // This wrapper is an action that wraps another action, this is that Action.  
+            private readonly Action<Action, Task> _invokeAction; // This wrapper is an action that wraps another action, this is that Action.
             internal readonly Action _continuation;              // This is continuation which will happen after m_invokeAction  (and is probably a ContinuationWrapper). SOS DumpAsync command depends on this name.
             internal readonly Task _innerTask;                   // If the continuation is logically going to invoke a task, this is that task (may be null)
 

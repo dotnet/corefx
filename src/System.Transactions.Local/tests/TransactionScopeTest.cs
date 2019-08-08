@@ -219,7 +219,7 @@ namespace System.Transactions.Tests
 
                 Assert.Equal(TransactionStatus.Active, Transaction.Current.TransactionInformation.Status);
                 /* Not completing outer scope
-				scope.Complete (); */
+                scope.Complete (); */
             }
 
             Assert.Null(Transaction.Current);
@@ -274,8 +274,8 @@ namespace System.Transactions.Tests
                 using (TransactionScope scope2 = new TransactionScope(TransactionScopeOption.RequiresNew))
                 {
                     irm2.Value = 20;
-                    /* Not completing 
-					 scope2.Complete();*/
+                    /* Not completing
+                     scope2.Complete();*/
                 }
 
                 /* irm2, rolled back*/
@@ -404,14 +404,14 @@ namespace System.Transactions.Tests
                    {
                        irm.Value = 4;
                        /* Not completing this, so the transaction will
-                        * get aborted 
+                        * get aborted
                        scope2.Complete (); */
                    }
 
                    using (TransactionScope scope3 = new TransactionScope())
                    {
                        /* Aborted transaction cannot be used for another
-                        * TransactionScope 
+                        * TransactionScope
                         */
                    }
                }
@@ -432,15 +432,15 @@ namespace System.Transactions.Tests
                 {
                     irm.Value = 4;
                     /* Not completing this, so the transaction will
-					 * get aborted 
-					scope2.Complete (); */
+                     * get aborted
+                    scope2.Complete (); */
                 }
 
                 using (TransactionScope scope3 = new TransactionScope(TransactionScopeOption.RequiresNew))
                 {
                     /* Using RequiresNew here, so outer transaction
-					 * being aborted doesn't matter
-					 */
+                     * being aborted doesn't matter
+                     */
                     scope3.Complete();
                 }
             }
@@ -462,7 +462,7 @@ namespace System.Transactions.Tests
                    {
                        irm.Value = 4;
                        /* Not completing this, so the transaction will
-                        * get aborted 
+                        * get aborted
                        scope2.Complete (); */
                    }
 
@@ -491,8 +491,8 @@ namespace System.Transactions.Tests
                     irm3.Value = 24;
 
                     /* Make second RM fail to prepare, this should throw
-					 * TransactionAbortedException when the scope ends 
-					 */
+                     * TransactionAbortedException when the scope ends
+                     */
                     irm2.FailPrepare = true;
                     scope.Complete();
                 }
@@ -524,9 +524,9 @@ namespace System.Transactions.Tests
                     irm3.Value = 24;
 
                     /* irm2 won't call Prepared or ForceRollback in
-					 * its Prepare (), so TransactionManager will timeout
-					 * waiting for it 
-					 */
+                     * its Prepare (), so TransactionManager will timeout
+                     * waiting for it
+                     */
                     irm2.IgnorePrepare = true;
                     scope.Complete();
                 }
@@ -691,9 +691,9 @@ namespace System.Transactions.Tests
             CommittableTransaction ct = new CommittableTransaction();
             Transaction oldTransaction = Transaction.Current;
 
-            /* Not setting ambient transaction 
-			 Transaction.Current = ct; 
-			 */
+            /* Not setting ambient transaction
+             Transaction.Current = ct;
+             */
 
             IntResourceManager irm = new IntResourceManager(1);
 
@@ -723,9 +723,9 @@ namespace System.Transactions.Tests
             CommittableTransaction ct = new CommittableTransaction();
             Transaction oldTransaction = Transaction.Current;
 
-            /* Not setting ambient transaction 
-			 Transaction.Current = ct; 
-			 */
+            /* Not setting ambient transaction
+             Transaction.Current = ct;
+             */
 
             IntResourceManager irm = new IntResourceManager(1);
 
@@ -736,7 +736,7 @@ namespace System.Transactions.Tests
                 irm.Value = 2;
 
                 /* Not completing this scope
-				scope.Complete (); */
+                scope.Complete (); */
             }
 
             Assert.Equal(oldTransaction, Transaction.Current);
@@ -772,7 +772,7 @@ namespace System.Transactions.Tests
                 irm.Value = 2;
                 ct.Commit();
 
-                /* Using an already committed transaction in a new 
+                /* Using an already committed transaction in a new
                  * TransactionScope
                  */
                 TransactionScope scope = new TransactionScope(ct);

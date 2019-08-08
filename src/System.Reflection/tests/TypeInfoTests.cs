@@ -528,7 +528,7 @@ namespace System.Reflection.Tests
         [InlineData(typeof(IDisposable), typeof(Stream), true)]
         [InlineData(typeof(IList), typeof(ArrayList), true)]
         [InlineData(typeof(object), typeof(int), true)]
-        [InlineData(typeof(object), typeof(string), true)]        
+        [InlineData(typeof(object), typeof(string), true)]
         // Null
         [InlineData(typeof(BaseClassWithInterface1Interface2), null, false)]
         // Lists and arrays
@@ -1610,21 +1610,21 @@ namespace System.Reflection.Tests
         public TI_SubClass(string s) { }
         public TI_SubClass(short i2) { }
 
-        public new event EventHandler EventPublic; // Overrides event				
+        public new event EventHandler EventPublic; // Overrides event
         public event EventHandler EventPublicNew; // New event
 
-        public new static string[] s_arrayField = new string[10];
+        public static new string[] s_arrayField = new string[10];
         public new string _field2 = "";
         public new readonly string _readonlyField = "";
         public new volatile string _volatileField = "";
-        public new static string s_field = "";
-        public new static readonly string s_readonlyField = "";
-        public new static volatile string s_volatileField = "";
+        public static new string s_field = "";
+        public static new readonly string s_readonlyField = "";
+        public static new volatile string s_volatileField = "";
 
         public new void VoidMethodReturningVoid2() { }
         public new virtual void VirtualVoidMethodReturningVoid1() { }
         public override void VirtualVoidMethodReturningVoid2() { }
-        public new static void StaticVoidMethodReturningVoid() { }
+        public static new void StaticVoidMethodReturningVoid() { }
 
         public new class PublicNestedClass1 { }
         public class NestPublic3 { }
@@ -1633,7 +1633,7 @@ namespace System.Reflection.Tests
 
         public new string StringProperty1 { get { return ""; } set { } }
         public new virtual string VirtualStringProperty { get { return ""; } set { } }
-        public new static string StaticStringProperty { get { return ""; } set { } }
+        public static new string StaticStringProperty { get { return ""; } set { } }
     }
 
     public interface TI_NonGenericInterface1 { }

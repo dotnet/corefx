@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -78,7 +78,7 @@ namespace System.Security.AccessControl.Tests
         [MemberData(nameof(DiscretionaryACL_AddAccess))]
         public static void AddAccess(bool isContainer, bool isDS, int accessControlType, string sid, int accessMask, int inheritanceFlags, int propagationFlags, string initialRawAclStr, string verifierRawAclStr)
         {
-            RawAcl rawAcl = Utils.CreateRawAclFromString(verifierRawAclStr);
+            RawAcl rawAcl = Utils.CreateRawAclFromString(initialRawAclStr);
             DiscretionaryAcl discretionaryAcl = new DiscretionaryAcl(isContainer, isDS, rawAcl);
             rawAcl = Utils.CreateRawAclFromString(verifierRawAclStr);
 
@@ -251,7 +251,7 @@ namespace System.Security.AccessControl.Tests
             });
 
 
-            //Case 10, add Ace of NOT(AccessControlType.Allow |AccessControlType.Denied) to the DiscretionaryAcl with no ACE, 
+            //Case 10, add Ace of NOT(AccessControlType.Allow |AccessControlType.Denied) to the DiscretionaryAcl with no ACE,
             // should throw appropriate exception for wrong parameter, bug#287188
 
             Assert.Throws<ArgumentOutOfRangeException>(() =>

@@ -162,7 +162,7 @@ namespace System.Data
             SetIndex(Sort, RowState, newFilter);
         }
 
-        internal DataView(DataTable table, System.Predicate<DataRow> predicate, System.Comparison<DataRow> comparison, DataViewRowState RowState) 
+        internal DataView(DataTable table, System.Predicate<DataRow> predicate, System.Comparison<DataRow> comparison, DataViewRowState RowState)
         {
             GC.SuppressFinalize(this);
             DataCommonEventSource.Log.Trace("<ds.DataView.DataView|API> %d#, table=%d, RowState=%d{ds.DataViewRowState}\n",
@@ -1599,8 +1599,6 @@ namespace System.Data
                     {
                         return;
                     }
-
-                    DataTable table = _index != null ? _index.Table : newIndex.Table;
 
                     if (_index != null)
                     {

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -14,7 +14,7 @@ namespace System
         // RFC 5952 Section 4.2.3
         // Longest consecutive sequence of zero segments, minimum 2.
         // On equal, first sequence wins. <-1, -1> for no compression.
-        internal unsafe static (int longestSequenceStart, int longestSequenceLength) FindCompressionRange(
+        internal static unsafe (int longestSequenceStart, int longestSequenceLength) FindCompressionRange(
             ReadOnlySpan<ushort> numbers)
         {
             int longestSequenceLength = 0, longestSequenceStart = -1, currentSequenceLength = 0;
@@ -43,7 +43,7 @@ namespace System
 
         // Returns true if the IPv6 address should be formatted with an embedded IPv4 address:
         // ::192.168.1.1
-        internal unsafe static bool ShouldHaveIpv4Embedded(ReadOnlySpan<ushort> numbers)
+        internal static unsafe bool ShouldHaveIpv4Embedded(ReadOnlySpan<ushort> numbers)
         {
             // 0:0 : 0:0 : x:x : x.x.x.x
             if (numbers[0] == 0 && numbers[1] == 0 && numbers[2] == 0 && numbers[3] == 0 && numbers[6] != 0)
@@ -74,7 +74,7 @@ namespace System
         //   *  an optional string of a ScopeID delimited by '%'
         //   *  the last 32 bits in an address can be represented as an IPv4 address
         //
-        //  Difference between IsValid() and IsValidStrict() is that IsValid() expects part of the string to 
+        //  Difference between IsValid() and IsValidStrict() is that IsValid() expects part of the string to
         //  be ipv6 address where as IsValidStrict() expects strict ipv6 address.
         //
         // Inputs:
@@ -96,7 +96,7 @@ namespace System
 
         //  Remarks: MUST NOT be used unless all input indexes are verified and trusted.
         //           start must be next to '[' position, or error is reported
-        internal unsafe static bool IsValidStrict(char* name, int start, ref int end)
+        internal static unsafe bool IsValidStrict(char* name, int start, ref int end)
         {
             int sequenceCount = 0;
             int sequenceLength = 0;
@@ -111,7 +111,7 @@ namespace System
                 start++;
                 needsClosingBracket = true;
 
-                // IsValidStrict() is only called if there is a ':' in the name string, i.e. 
+                // IsValidStrict() is only called if there is a ':' in the name string, i.e.
                 // it is a possible IPv6 address. So, if the string starts with a '[' and
                 // the pointer is advanced here there are still more characters to parse.
                 Debug.Assert(start < end);

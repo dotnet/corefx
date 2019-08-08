@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -21,10 +21,9 @@ namespace System.Text.Json
         private static readonly JsonDictionaryConverter s_jsonDerivedDictionaryConverter = new DefaultDerivedDictionaryConverter();
         private static readonly JsonDictionaryConverter s_jsonIDictionaryConverter = new DefaultIDictionaryConverter();
         private static readonly JsonDictionaryConverter s_jsonImmutableDictionaryConverter = new DefaultImmutableDictionaryConverter();
-        
+
         public static readonly JsonPropertyInfo s_missingProperty = new JsonPropertyInfoNotNullable<object, object, object, object>();
 
-        private Type _elementType;
         private JsonClassInfo _elementClassInfo;
         private JsonClassInfo _runtimeClassInfo;
         private JsonClassInfo _declaredTypeClassInfo;
@@ -131,7 +130,7 @@ namespace System.Text.Json
                 // We serialize if there is a getter + not ignoring readonly properties.
                 ShouldSerialize = HasGetter && (HasSetter || !Options.IgnoreReadOnlyProperties);
 
-                // We deserialize if there is a setter. 
+                // We deserialize if there is a setter.
                 ShouldDeserialize = HasSetter;
             }
             else
@@ -209,23 +208,30 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Return the JsonClassInfo for the element type, or null if the the property is not an enumerable or dictionary.
+        /// Return the JsonClassInfo for the element type, or null if the property is not an enumerable or dictionary.
         /// </summary>
+        /// <remarks>
+        /// This should not be called during warm-up (initial creation of JsonClassInfos) to avoid recursive behavior
+        /// which could result in a StackOverflowException.
+        /// </remarks>
         public JsonClassInfo ElementClassInfo
         {
             get
             {
-                if (_elementClassInfo == null && _elementType != null)
+                if (_elementClassInfo == null && ElementType != null)
                 {
                     Debug.Assert(ClassType == ClassType.Enumerable ||
                         ClassType == ClassType.Dictionary ||
                         ClassType == ClassType.IDictionaryConstructible);
-                    _elementClassInfo = Options.GetOrAddClass(_elementType);
+
+                    _elementClassInfo = Options.GetOrAddClass(ElementType);
                 }
 
                 return _elementClassInfo;
             }
         }
+
+        public Type ElementType { get; set; }
 
         public JsonEnumerableConverter EnumerableConverter { get; private set; }
         public JsonDictionaryConverter DictionaryConverter { get; private set; }
@@ -269,7 +275,7 @@ namespace System.Text.Json
             RuntimePropertyType = runtimePropertyType;
             ImplementedPropertyType = implementedPropertyType;
             PropertyInfo = propertyInfo;
-            _elementType = elementType;
+            ElementType = elementType;
             Options = options;
             IsNullableType = runtimePropertyType.IsGenericType && runtimePropertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
             CanBeNull = IsNullableType || !runtimePropertyType.IsValueType;

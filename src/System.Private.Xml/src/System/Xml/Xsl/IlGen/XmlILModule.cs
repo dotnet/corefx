@@ -30,8 +30,6 @@ namespace System.Xml.Xsl.IlGen
         private Hashtable _methods;
         private bool _useLRE, _emitSymbols;
 
-        private static readonly Guid s_languageGuid = new Guid(0x462d4a3e, 0xb257, 0x4aee, 0x97, 0xcd, 0x59, 0x18, 0xc7, 0x53, 0x17, 0x58);
-        private static readonly Guid s_vendorGuid = new Guid(0x994b45c4, 0xe6e9, 0x11d2, 0x90, 0x3f, 0x00, 0xc0, 0x4f, 0xa3, 0x02, 0xa1);
         private const string RuntimeName = "{" + XmlReservedNs.NsXslDebug + "}" + "runtime";
 
         private static ModuleBuilder CreateLREModule()
@@ -69,9 +67,9 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        // SxS note: AssemblyBuilder.DefineDynamicModule() below may be using name which is not SxS safe. 
-        // This file is written only for internal tracing/debugging purposes. In retail builds persistAsm 
-        // will be always false and the file should never be written. As a result it's fine just to suppress 
+        // SxS note: AssemblyBuilder.DefineDynamicModule() below may be using name which is not SxS safe.
+        // This file is written only for internal tracing/debugging purposes. In retail builds persistAsm
+        // will be always false and the file should never be written. As a result it's fine just to suppress
         // the SxS warning.
         public XmlILModule(bool useLRE, bool emitSymbols)
         {

@@ -4,7 +4,7 @@
 // DataReferenceTest.cs
 //
 // Author:
-//	Atsushi Enomoto  <atsushi@ximian.com>
+//  Atsushi Enomoto  <atsushi@ximian.com>
 //
 // Copyright (C) 2006 Novell, Inc.
 //
@@ -30,4 +30,3 @@ namespace System.Security.Cryptography.Xml.Tests
         }
     }
 }
-

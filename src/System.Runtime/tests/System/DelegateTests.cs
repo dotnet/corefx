@@ -165,7 +165,7 @@ namespace System.Tests
             Delegate d = new EnumEnumDelegate(EnumEnumMethod);
             d.DynamicInvoke(o1, o2);
         }
-        
+
         [Fact]
         public static void DynamicInvoke_SizePreservingNonVauePreservingConversion_ThrowsArgumentException()
         {
@@ -1157,7 +1157,7 @@ namespace System.Tests
             {
             }
 
-            public new static int DoRun(C x)
+            public static new int DoRun(C x)
             {
                 return 107;
             }

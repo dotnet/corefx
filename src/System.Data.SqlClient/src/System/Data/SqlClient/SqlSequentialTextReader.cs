@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace System.Data.SqlClient
 {
-    sealed internal class SqlSequentialTextReader : System.IO.TextReader
+    internal sealed class SqlSequentialTextReader : System.IO.TextReader
     {
         private SqlDataReader _reader;  // The SqlDataReader that we are reading data from
         private int _columnIndex;       // The index of out column in the table
@@ -476,13 +476,13 @@ namespace System.Data.SqlClient
         }
     }
 
-    sealed internal class SqlUnicodeEncoding : UnicodeEncoding
+    internal sealed class SqlUnicodeEncoding : UnicodeEncoding
     {
         private static SqlUnicodeEncoding s_singletonEncoding = new SqlUnicodeEncoding();
 
         private SqlUnicodeEncoding() : base(bigEndian: false, byteOrderMark: false, throwOnInvalidBytes: false)
         { }
-        
+
         public override Decoder GetDecoder()
         {
             return new SqlUnicodeDecoder();
@@ -499,7 +499,7 @@ namespace System.Data.SqlClient
             get { return s_singletonEncoding; }
         }
 
-        sealed private class SqlUnicodeDecoder : Decoder
+        private sealed class SqlUnicodeDecoder : Decoder
         {
             public override int GetCharCount(byte[] bytes, int index, int count)
             {

@@ -33,7 +33,7 @@ namespace System.Globalization.Tests
         [InlineData("fr-CA")]
         public void CurrencyNegativePattern_Get_ReturnsExpected(string locale)
         {
-            CultureInfo culture; 
+            CultureInfo culture;
             try
             {
                 culture = CultureInfo.GetCultureInfo(locale);
@@ -42,7 +42,7 @@ namespace System.Globalization.Tests
             {
                 return; // ignore unsupported culture
             }
-            
+
             NumberFormatInfo format = culture.NumberFormat;
             Assert.Contains(format.CurrencyNegativePattern, NumberFormatInfoData.GetCurrencyNegativePatterns(locale));
         }
@@ -64,7 +64,7 @@ namespace System.Globalization.Tests
         public void CurrencyNegativePattern_SetInvalid_ThrowsArgumentOutOfRangeException(int value)
         {
             var format = new NumberFormatInfo();
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", "CurrencyNegativePattern", () => format.CurrencyNegativePattern = -1);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", "CurrencyNegativePattern", () => format.CurrencyNegativePattern = value);
         }
 
         [Fact]

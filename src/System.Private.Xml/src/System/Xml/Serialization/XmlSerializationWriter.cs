@@ -1432,7 +1432,6 @@ namespace System.Xml.Serialization
 
     internal static class DynamicAssemblies
     {
-        private static ArrayList s_assembliesInConfig = new ArrayList();
         private static volatile Hashtable s_nameToAssemblyMap = new Hashtable();
         private static volatile Hashtable s_assemblyToNameMap = new Hashtable();
         private static Hashtable s_tableIsTypeDynamic = Hashtable.Synchronized(new Hashtable());
@@ -1882,12 +1881,12 @@ namespace System.Xml.Serialization
                 string memberInfoName = GetReflectionVariable(typeFullName, memberName);
                 if (memberInfoName != null)
                     return memberInfoName + "[" + obj + "]";
-                // member may be part of the basetype 
+                // member may be part of the basetype
                 typeDesc = typeDesc.BaseTypeDesc;
                 if (typeDesc != null && !typeDesc.UseReflection)
                     return "((" + typeDesc.CSharpName + ")" + obj + ").@" + memberName;
             }
-            //throw GetReflectionVariableException(saveTypeDesc.CSharpName,memberName); 
+            //throw GetReflectionVariableException(saveTypeDesc.CSharpName,memberName);
             // NOTE, sowmys:Must never happen. If it does let the code
             // gen continue to help debugging what's gone wrong.
             // Eventually the compilation will fail.
@@ -2179,7 +2178,7 @@ namespace System.Xml.Serialization
     }}
 ";
     }
-    
+
     internal class XmlSerializationWriterCodeGen : XmlSerializationCodeGen
     {
         internal XmlSerializationWriterCodeGen(IndentedWriter writer, TypeScope[] scopes, string access, string className) : base(writer, scopes, access, className)
@@ -2550,7 +2549,7 @@ namespace System.Xml.Serialization
                 Writer.WriteLine("TopLevelElement();");
             }
 
-            // in the top-level method add check for the parameters length, 
+            // in the top-level method add check for the parameters length,
             // because visual basic does not have a concept of an <out> parameter it uses <ByRef> instead
             // so sometime we think that we have more parameters then supplied
             Writer.WriteLine("int pLength = p.Length;");
@@ -3206,7 +3205,7 @@ namespace System.Xml.Serialization
         private bool CanOptimizeWriteListSequence(TypeDesc listElementTypeDesc)
         {
             // check to see if we can write values of the attribute sequentially
-            // currently we have only one data type (XmlQualifiedName) that we can not write "inline", 
+            // currently we have only one data type (XmlQualifiedName) that we can not write "inline",
             // because we need to output xmlns:qx="..." for each of the qnames
 
             return (listElementTypeDesc != null && listElementTypeDesc != QnameTypeDesc);
@@ -4212,7 +4211,7 @@ namespace System.Xml.Serialization
                     Writer.Write('\'');
                 }
                 else if (type == typeof(int))
-                    Writer.Write(((Int32)value).ToString(null, NumberFormatInfo.InvariantInfo));
+                    Writer.Write(((int)value).ToString(null, NumberFormatInfo.InvariantInfo));
                 else if (type == typeof(double))
                 {
                     if (double.IsNaN((double)value))
@@ -4229,7 +4228,7 @@ namespace System.Xml.Serialization
                     }
                     else
                     {
-                        Writer.Write(((Double)value).ToString("R", NumberFormatInfo.InvariantInfo));
+                        Writer.Write(((double)value).ToString("R", NumberFormatInfo.InvariantInfo));
                     }
                 }
                 else if (type == typeof(bool))
@@ -4259,13 +4258,13 @@ namespace System.Xml.Serialization
                     }
                     else
                     {
-                        Writer.Write(((Single)value).ToString("R", NumberFormatInfo.InvariantInfo));
+                        Writer.Write(((float)value).ToString("R", NumberFormatInfo.InvariantInfo));
                         Writer.Write("f");
                     }
                 }
                 else if (type == typeof(decimal))
                 {
-                    Writer.Write(((Decimal)value).ToString(null, NumberFormatInfo.InvariantInfo));
+                    Writer.Write(((decimal)value).ToString(null, NumberFormatInfo.InvariantInfo));
                     Writer.Write("m");
                 }
                 else if (type == typeof(DateTime))

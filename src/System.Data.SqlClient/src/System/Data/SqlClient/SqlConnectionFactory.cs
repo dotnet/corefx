@@ -12,11 +12,8 @@ using System.IO;
 
 namespace System.Data.SqlClient
 {
-    sealed internal class SqlConnectionFactory : DbConnectionFactory
+    internal sealed class SqlConnectionFactory : DbConnectionFactory
     {
-
-        private const string _metaDataXml = "MetaDataXml";
-
         private SqlConnectionFactory() : base() { }
 
         public static readonly SqlConnectionFactory SingletonInstance = new SqlConnectionFactory();
@@ -92,7 +89,7 @@ namespace System.Data.SqlClient
                     {
                         // We throw an exception in case of a failure
                         // NOTE: Cloning connection option opt to set 'UserInstance=True' and 'Enlist=False'
-                        //       This first connection is established to SqlExpress to get the instance name 
+                        //       This first connection is established to SqlExpress to get the instance name
                         //       of the UserInstance.
                         SqlConnectionString sseopt = new SqlConnectionString(opt, opt.DataSource, userInstance: true, setEnlistValue: false);
                         sseConnection = new SqlInternalConnectionTds(identity, sseopt, key.Credential, null, "", null, false, applyTransientFaultHandling: applyTransientFaultHandling);
@@ -273,10 +270,10 @@ namespace System.Data.SqlClient
         protected override DbMetaDataFactory CreateMetaDataFactory(DbConnectionInternal internalConnection, out bool cacheMetaDataFactory)
         {
             Debug.Assert(internalConnection != null, "internalConnection may not be null.");
-            
+
             Stream xmlStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("System.Data.SqlClient.SqlMetaData.xml");
             cacheMetaDataFactory = true;
-            
+
             Debug.Assert(xmlStream != null, nameof(xmlStream) + " may not be null.");
 
             return new SqlMetaDataFactory(xmlStream,
@@ -285,4 +282,3 @@ namespace System.Data.SqlClient
         }
     }
 }
-

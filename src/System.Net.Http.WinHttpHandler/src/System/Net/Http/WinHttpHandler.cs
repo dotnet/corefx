@@ -951,7 +951,7 @@ namespace System.Net.Http
             uint optionData = 0;
             SslProtocols sslProtocols =
                 (_sslProtocols == SslProtocols.None) ? SecurityProtocol.DefaultSecurityProtocols : _sslProtocols;
-            
+
 #pragma warning disable 0618 // SSL2/SSL3 are deprecated
             if ((sslProtocols & SslProtocols.Ssl2) != 0)
             {
@@ -1393,10 +1393,10 @@ namespace System.Net.Http
             using (var requestStream = new WinHttpRequestStream(state, chunkedModeForSend))
             {
                 await state.RequestMessage.Content.CopyToAsync(
-                    requestStream,
-                    state.TransportContext
 #if HTTP_DLL
-                    , state.CancellationToken
+                    requestStream, state.TransportContext, state.CancellationToken
+#else
+                    requestStream, state.TransportContext
 #endif
                     ).ConfigureAwait(false);
                 await requestStream.EndUploadAsync(state.CancellationToken).ConfigureAwait(false);
