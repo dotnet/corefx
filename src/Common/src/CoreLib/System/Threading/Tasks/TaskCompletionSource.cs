@@ -79,7 +79,7 @@ namespace System.Threading.Tasks
         /// Creates a <see cref="TaskCompletionSource{TResult}"/>
         /// with the specified state.
         /// </summary>
-        /// <param name="state">The state to use as the underlying 
+        /// <param name="state">The state to use as the underlying
         /// <see cref="T:System.Threading.Tasks.Task{TResult}"/>'s AsyncState.</param>
         public TaskCompletionSource(object? state)
             : this(state, TaskCreationOptions.None)
@@ -92,7 +92,7 @@ namespace System.Threading.Tasks
         /// </summary>
         /// <param name="creationOptions">The options to use when creating the underlying
         /// <see cref="T:System.Threading.Tasks.Task{TResult}"/>.</param>
-        /// <param name="state">The state to use as the underlying 
+        /// <param name="state">The state to use as the underlying
         /// <see cref="T:System.Threading.Tasks.Task{TResult}"/>'s AsyncState.</param>
         /// <exception cref="T:System.ArgumentOutOfRangeException">
         /// The <paramref name="creationOptions"/> represent options invalid for use
@@ -130,17 +130,17 @@ namespace System.Threading.Tasks
 
         /// <summary>
         /// Attempts to transition the underlying
-        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the 
+        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>
         /// state.
         /// </summary>
-        /// <param name="exception">The exception to bind to this <see 
+        /// <param name="exception">The exception to bind to this <see
         /// cref="T:System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <returns>True if the operation was successful; otherwise, false.</returns>
-        /// <remarks>This operation will return false if the 
+        /// <remarks>This operation will return false if the
         /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> is already in one
         /// of the three final states:
-        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>, 
+        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>,
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>, or
         /// <see cref="System.Threading.Tasks.TaskStatus.Canceled">Canceled</see>.
         /// </remarks>
@@ -150,24 +150,24 @@ namespace System.Threading.Tasks
         {
             if (exception == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.exception);
 
-            bool rval = _task.TrySetException(exception!); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            bool rval = _task.TrySetException(exception);
             if (!rval && !_task.IsCompleted) SpinUntilCompleted();
             return rval;
         }
 
         /// <summary>
         /// Attempts to transition the underlying
-        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the 
+        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>
         /// state.
         /// </summary>
-        /// <param name="exceptions">The collection of exceptions to bind to this <see 
+        /// <param name="exceptions">The collection of exceptions to bind to this <see
         /// cref="T:System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <returns>True if the operation was successful; otherwise, false.</returns>
-        /// <remarks>This operation will return false if the 
+        /// <remarks>This operation will return false if the
         /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> is already in one
         /// of the three final states:
-        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>, 
+        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>,
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>, or
         /// <see cref="System.Threading.Tasks.TaskStatus.Canceled">Canceled</see>.
         /// </remarks>
@@ -180,11 +180,11 @@ namespace System.Threading.Tasks
             if (exceptions == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.exceptions);
 
             List<Exception> defensiveCopy = new List<Exception>();
-            foreach (Exception e in exceptions!) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            foreach (Exception e in exceptions)
             {
                 if (e == null)
                     ThrowHelper.ThrowArgumentException(ExceptionResource.TaskCompletionSourceT_TrySetException_NullException, ExceptionArgument.exceptions);
-                defensiveCopy.Add(e!); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                defensiveCopy.Add(e);
             }
 
             if (defensiveCopy.Count == 0)
@@ -197,17 +197,17 @@ namespace System.Threading.Tasks
 
         /// <summary>
         /// Transitions the underlying
-        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the 
+        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>
         /// state.
         /// </summary>
-        /// <param name="exception">The exception to bind to this <see 
+        /// <param name="exception">The exception to bind to this <see
         /// cref="T:System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="exception"/> argument is null.</exception>
         /// <exception cref="T:System.InvalidOperationException">
         /// The underlying <see cref="T:System.Threading.Tasks.Task{TResult}"/> is already in one
         /// of the three final states:
-        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>, 
+        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>,
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>, or
         /// <see cref="System.Threading.Tasks.TaskStatus.Canceled">Canceled</see>.
         /// </exception>
@@ -216,7 +216,7 @@ namespace System.Threading.Tasks
         {
             if (exception == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.exception);
 
-            if (!TrySetException(exception!)) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (!TrySetException(exception))
             {
                 ThrowHelper.ThrowInvalidOperationException(ExceptionResource.TaskT_TransitionToFinal_AlreadyCompleted);
             }
@@ -224,18 +224,18 @@ namespace System.Threading.Tasks
 
         /// <summary>
         /// Transitions the underlying
-        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the 
+        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>
         /// state.
         /// </summary>
-        /// <param name="exceptions">The collection of exceptions to bind to this <see 
+        /// <param name="exceptions">The collection of exceptions to bind to this <see
         /// cref="T:System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="exceptions"/> argument is null.</exception>
         /// <exception cref="T:System.ArgumentException">There are one or more null elements in <paramref name="exceptions"/>.</exception>
         /// <exception cref="T:System.InvalidOperationException">
         /// The underlying <see cref="T:System.Threading.Tasks.Task{TResult}"/> is already in one
         /// of the three final states:
-        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>, 
+        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>,
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>, or
         /// <see cref="System.Threading.Tasks.TaskStatus.Canceled">Canceled</see>.
         /// </exception>
@@ -251,17 +251,17 @@ namespace System.Threading.Tasks
 
         /// <summary>
         /// Attempts to transition the underlying
-        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the 
+        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the
         /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>
         /// state.
         /// </summary>
-        /// <param name="result">The result value to bind to this <see 
+        /// <param name="result">The result value to bind to this <see
         /// cref="T:System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <returns>True if the operation was successful; otherwise, false.</returns>
-        /// <remarks>This operation will return false if the 
+        /// <remarks>This operation will return false if the
         /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> is already in one
         /// of the three final states:
-        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>, 
+        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>,
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>, or
         /// <see cref="System.Threading.Tasks.TaskStatus.Canceled">Canceled</see>.
         /// </remarks>
@@ -275,16 +275,16 @@ namespace System.Threading.Tasks
 
         /// <summary>
         /// Transitions the underlying
-        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the 
+        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the
         /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>
         /// state.
         /// </summary>
-        /// <param name="result">The result value to bind to this <see 
+        /// <param name="result">The result value to bind to this <see
         /// cref="T:System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <exception cref="T:System.InvalidOperationException">
         /// The underlying <see cref="T:System.Threading.Tasks.Task{TResult}"/> is already in one
         /// of the three final states:
-        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>, 
+        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>,
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>, or
         /// <see cref="System.Threading.Tasks.TaskStatus.Canceled">Canceled</see>.
         /// </exception>
@@ -297,15 +297,15 @@ namespace System.Threading.Tasks
 
         /// <summary>
         /// Attempts to transition the underlying
-        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the 
+        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the
         /// <see cref="System.Threading.Tasks.TaskStatus.Canceled">Canceled</see>
         /// state.
         /// </summary>
         /// <returns>True if the operation was successful; otherwise, false.</returns>
-        /// <remarks>This operation will return false if the 
+        /// <remarks>This operation will return false if the
         /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> is already in one
         /// of the three final states:
-        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>, 
+        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>,
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>, or
         /// <see cref="System.Threading.Tasks.TaskStatus.Canceled">Canceled</see>.
         /// </remarks>
@@ -325,14 +325,14 @@ namespace System.Threading.Tasks
 
         /// <summary>
         /// Transitions the underlying
-        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the 
+        /// <see cref="T:System.Threading.Tasks.Task{TResult}"/> into the
         /// <see cref="System.Threading.Tasks.TaskStatus.Canceled">Canceled</see>
         /// state.
         /// </summary>
         /// <exception cref="T:System.InvalidOperationException">
         /// The underlying <see cref="T:System.Threading.Tasks.Task{TResult}"/> is already in one
         /// of the three final states:
-        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>, 
+        /// <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>,
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">Faulted</see>, or
         /// <see cref="System.Threading.Tasks.TaskStatus.Canceled">Canceled</see>.
         /// </exception>

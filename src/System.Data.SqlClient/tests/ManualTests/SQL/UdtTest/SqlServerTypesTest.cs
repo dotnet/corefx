@@ -255,21 +255,21 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
                     // Validate Microsoft.SqlServer.Types.SqlHierarchyId, Microsoft.SqlServer.Types, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91
                     column = columns[0];
-                    Assert.Equal(column.ColumnName, "col0");
+                    Assert.Equal("col0", column.ColumnName);
                     Assert.True(column.DataTypeName.EndsWith(".hierarchyid"), $"Unexpected DataTypeName \"{column.DataTypeName}\"");
                     Assert.NotNull(column.UdtAssemblyQualifiedName);
                     AssertSqlUdtAssemblyQualifiedName(column.UdtAssemblyQualifiedName, "Microsoft.SqlServer.Types.SqlHierarchyId");
 
                     // Validate Microsoft.SqlServer.Types.SqlGeometry, Microsoft.SqlServer.Types, Version = 11.0.0.0, Culture = neutral, PublicKeyToken = 89845dcd8080cc91
                     column = columns[1];
-                    Assert.Equal(column.ColumnName, "col1");
+                    Assert.Equal("col1", column.ColumnName);
                     Assert.True(column.DataTypeName.EndsWith(".geometry"), $"Unexpected DataTypeName \"{column.DataTypeName}\"");
                     Assert.NotNull(column.UdtAssemblyQualifiedName);
                     AssertSqlUdtAssemblyQualifiedName(column.UdtAssemblyQualifiedName, "Microsoft.SqlServer.Types.SqlGeometry");
 
                     // Validate Microsoft.SqlServer.Types.SqlGeography, Microsoft.SqlServer.Types, Version = 11.0.0.0, Culture = neutral, PublicKeyToken = 89845dcd8080cc91
                     column = columns[2];
-                    Assert.Equal(column.ColumnName, "col2");
+                    Assert.Equal("col2", column.ColumnName);
                     Assert.True(column.DataTypeName.EndsWith(".geography"), $"Unexpected DataTypeName \"{column.DataTypeName}\"");
                     Assert.NotNull(column.UdtAssemblyQualifiedName);
                     AssertSqlUdtAssemblyQualifiedName(column.UdtAssemblyQualifiedName, "Microsoft.SqlServer.Types.SqlGeography");
@@ -357,9 +357,9 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
             Assert.Equal(expectedType, type);
             Assert.Equal("Microsoft.SqlServer.Types", assembly);
-            Assert.True(version.StartsWith("Version"));
-            Assert.True(culture.StartsWith("Culture"));
-            Assert.True(token.StartsWith("PublicKeyToken"));
+            Assert.StartsWith("Version", version);
+            Assert.StartsWith("Culture", culture);
+            Assert.StartsWith("PublicKeyToken", token);
         }
 
         private static string ToHexString(byte[] bytes)

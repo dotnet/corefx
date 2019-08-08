@@ -701,7 +701,7 @@ namespace System.Globalization
             {
                 // Always map the "C" locale to Invariant to avoid mapping it to en_US_POSIX on Linux because POSIX
                 // locale collation doesn't support case insensitive comparisons.
-                // We do the same mapping on Windows for the sake of consistency. 
+                // We do the same mapping on Windows for the sake of consistency.
                 return CultureData.Invariant;
             }
 
@@ -1576,22 +1576,11 @@ namespace System.Globalization
                         shortTimes = DeriveShortTimesFromLong();
                     }
 
-                    /* The above logic doesn't make sense on Mac, since the OS can provide us a "short time pattern".
-                     * currently this is the 4th element in the array returned by LongTimes.  We'll add this to our array
-                     * if it doesn't exist.
-                     */
-                    shortTimes = AdjustShortTimesForMac(shortTimes);
-
                     // Found short times, use them
                     _saShortTimes = shortTimes;
                 }
                 return _saShortTimes;
             }
-        }
-
-        private string[] AdjustShortTimesForMac(string[] shortTimes)
-        {
-            return shortTimes;
         }
 
         private string[] DeriveShortTimesFromLong()

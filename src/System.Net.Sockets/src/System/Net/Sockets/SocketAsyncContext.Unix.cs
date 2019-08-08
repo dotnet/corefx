@@ -18,7 +18,7 @@ namespace System.Net.Sockets
     // If this completes (i.e. does not return EWOULDBLOCK), then we return the results immediately
     // for both success (SocketError.Success) or failure.
     // No callback will happen; callers are expected to handle these synchronous completions themselves.
-    // (2) If EWOULDBLOCK is returned, or the queue is not empty, then we enqueue an operation to the 
+    // (2) If EWOULDBLOCK is returned, or the queue is not empty, then we enqueue an operation to the
     // appropriate queue and return SocketError.IOPending.
     // Enqueuing itself may fail because the socket is closed before the operation can be enqueued;
     // in this case, we return SocketError.OperationAborted (which matches what Winsock would return in this case).
@@ -228,16 +228,15 @@ namespace System.Net.Sockets
 
                         case State.Cancelled:
                             // Someone else cancelled the operation.
-                            // Just return true to indicate the operation was cancelled.
                             // The previous canceller will have fired the completion, etc.
                             Trace("Exit, previously cancelled");
-                            return true;
+                            return false;
                     }
                 }
 
                 Trace("Cancelled, processing completion");
 
-                // The operation successfully cancelled.  
+                // The operation successfully cancelled.
                 // It's our responsibility to set the error code and queue the completion.
                 DoAbort();
 
@@ -326,7 +325,7 @@ namespace System.Net.Sockets
 
         // These two abstract classes differentiate the operations that go in the
         // read queue vs the ones that go in the write queue.
-        private abstract class ReadOperation : AsyncOperation, IThreadPoolWorkItem 
+        private abstract class ReadOperation : AsyncOperation, IThreadPoolWorkItem
         {
             public ReadOperation(SocketAsyncContext context) : base(context) { }
 
@@ -537,7 +536,7 @@ namespace System.Net.Sockets
             public int BytesTransferred;
             public SocketFlags ReceivedFlags;
             public IList<ArraySegment<byte>> Buffers;
-            
+
             public bool IsIPv4;
             public bool IsIPv6;
             public IPPacketInformation IPPacketInformation;
@@ -676,13 +675,13 @@ namespace System.Net.Sockets
             where TOperation : AsyncOperation
         {
             // Quick overview:
-            // 
+            //
             // When attempting to perform an IO operation, the caller first checks IsReady,
             // and if true, attempts to perform the operation itself.
             // If this returns EWOULDBLOCK, or if the queue was not ready, then the operation
             // is enqueued by calling StartAsyncOperation and the state becomes Waiting.
             // When an epoll notification is received, we check if the state is Waiting,
-            // and if so, change the state to Processing and enqueue a workitem to the threadpool 
+            // and if so, change the state to Processing and enqueue a workitem to the threadpool
             // to try to perform the enqueued operations.
             // If an operation is successfully performed, we remove it from the queue,
             // enqueue another threadpool workitem to process the next item in the queue (if any),
@@ -696,10 +695,10 @@ namespace System.Net.Sockets
                                     // Queue must be empty.
                 Waiting = 1,        // Indicates that data is definitely not available on the socket.
                                     // Queue must not be empty.
-                Processing = 2,     // Indicates that a thread pool item has been scheduled (and may 
+                Processing = 2,     // Indicates that a thread pool item has been scheduled (and may
                                     // be executing) to process the IO operations in the queue.
                                     // Queue must not be empty.
-                Stopped = 3,        // Indicates that the queue has been stopped because the 
+                Stopped = 3,        // Indicates that the queue has been stopped because the
                                     // socket has been closed.
                                     // Queue must be empty.
             }
@@ -736,7 +735,7 @@ namespace System.Net.Sockets
                 using (Lock())
                 {
                     observedSequenceNumber = _sequenceNumber;
-                    bool isReady = (_state == QueueState.Ready);
+                    bool isReady = (_state == QueueState.Ready) || (_state == QueueState.Stopped);
 
                     Trace(context, $"{isReady}");
 
@@ -869,7 +868,7 @@ namespace System.Net.Sockets
                 // Dispatch the op so we can try to process it.
                 op.Dispatch();
             }
-            
+
             internal void ProcessAsyncOperation(TOperation op)
             {
                 OperationResult result = ProcessQueuedOperation(op);
@@ -924,7 +923,7 @@ namespace System.Net.Sockets
                 bool wasCompleted = false;
                 while (true)
                 {
-                    // Try to change the op state to Running.  
+                    // Try to change the op state to Running.
                     // If this fails, it means the operation was previously cancelled,
                     // and we should just remove it from the queue without further processing.
                     if (!op.TrySetRunning())
@@ -1032,7 +1031,7 @@ namespace System.Net.Sockets
                             // We're the head of the queue
                             if (op == _tail)
                             {
-                                // No more operations 
+                                // No more operations
                                 _tail = null;
                             }
                             else
@@ -1087,8 +1086,10 @@ namespace System.Net.Sockets
             }
 
             // Called when the socket is closed.
-            public void StopAndAbort(SocketAsyncContext context)
+            public bool StopAndAbort(SocketAsyncContext context)
             {
+                bool aborted = false;
+
                 // We should be called exactly once, by SafeSocketHandle.
                 Debug.Assert(_state != QueueState.Stopped);
 
@@ -1105,7 +1106,7 @@ namespace System.Net.Sockets
                         AsyncOperation op = _tail;
                         do
                         {
-                            op.TryCancel();
+                            aborted |= op.TryCancel();
                             op = op.Next;
                         } while (op != _tail);
                     }
@@ -1114,6 +1115,8 @@ namespace System.Net.Sockets
 
                     Trace(context, $"Exit");
                 }
+
+                return aborted;
             }
 
             [Conditional("SOCKETASYNCCONTEXT_TRACE")]
@@ -1177,18 +1180,22 @@ namespace System.Net.Sockets
             }
         }
 
-        public void Close()
+        public bool StopAndAbort()
         {
+            bool aborted = false;
+
             // Drain queues
-            _sendQueue.StopAndAbort(this);
-            _receiveQueue.StopAndAbort(this);
+            aborted |= _sendQueue.StopAndAbort(this);
+            aborted |= _receiveQueue.StopAndAbort(this);
 
             lock (_registerLock)
-            { 
+            {
                 // Freeing the token will prevent any future event delivery.  This socket will be unregistered
                 // from the event port automatically by the OS when it's closed.
                 _asyncEngineToken.Free();
             }
+
+            return aborted;
         }
 
         public void SetNonBlocking()
@@ -1359,8 +1366,8 @@ namespace System.Net.Sockets
             Debug.Assert(socketAddressLen > 0, $"Unexpected socketAddressLen: {socketAddressLen}");
 
             // Connect is different than the usual "readiness" pattern of other operations.
-            // We need to call TryStartConnect to initiate the connect with the OS, 
-            // before we try to complete it via epoll notification. 
+            // We need to call TryStartConnect to initiate the connect with the OS,
+            // before we try to complete it via epoll notification.
             // Thus, always call TryStartConnect regardless of readiness.
             SocketError errorCode;
             int observedSequenceNumber;
@@ -1391,7 +1398,7 @@ namespace System.Net.Sockets
             SetNonBlocking();
 
             // Connect is different than the usual "readiness" pattern of other operations.
-            // We need to initiate the connect before we try to complete it. 
+            // We need to initiate the connect before we try to complete it.
             // Thus, always call TryStartConnect regardless of readiness.
             SocketError errorCode;
             int observedSequenceNumber;
@@ -1795,7 +1802,7 @@ namespace System.Net.Sockets
                 ReturnOperation(operation);
                 return errorCode;
             }
-                
+
             return SocketError.IOPending;
         }
 

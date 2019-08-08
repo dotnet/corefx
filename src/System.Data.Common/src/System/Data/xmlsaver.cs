@@ -2206,7 +2206,6 @@ namespace System.Data
         /// </summary>
         /// <param name="root"></param>
         /// <param name="type">non-special type to resolve</param>
-        /// <returns>type.AssemblyQualifiedName or targeted to a different version</returns>
         /// <exception cref="DataException">if multipleTargetConverter throws or returns an empty result</exception>
         private void SetMSDataAttribute(XmlElement root, Type type)
         {
@@ -2615,7 +2614,7 @@ namespace System.Data
                                 {
                                     string xsdTypeName = Keywords.XSD_PREFIXCOLON + XmlTreeGen.XmlDataTypeName(valuesType);
                                     _xmlw.WriteAttributeString(Keywords.XSI, Keywords.TYPE, Keywords.XSINS, xsdTypeName);
-                                    _xmlw.WriteAttributeString(Keywords.XMLNS_XSD, Keywords.XSDNS);
+                                    _xmlw.WriteAttributeString(Keywords.XSD_PREFIX, Keywords.XMLNS, Keywords.XSDNS, xsdTypeName);
                                 }
                                 if (!DataStorage.IsSqlType(valuesType))
                                 {
@@ -2934,9 +2933,6 @@ namespace System.Data
                 }
             }
 
-
-
-
             //write the attribute columns first, if any
             foreach (DataColumn col in row.Table.Columns)
             {
@@ -3044,7 +3040,7 @@ namespace System.Data
                                 {
                                     string xsdTypeName = Keywords.XSD_PREFIXCOLON + XmlTreeGen.XmlDataTypeName(valuesType);
                                     _xmlw.WriteAttributeString(Keywords.XSI, Keywords.TYPE, Keywords.XSINS, xsdTypeName);
-                                    _xmlw.WriteAttributeString(Keywords.XMLNS_XSD, Keywords.XSDNS);
+                                    _xmlw.WriteAttributeString(Keywords.XSD_PREFIX, Keywords.XMLNS, Keywords.XSDNS, xsdTypeName);
                                 }
                                 if (!DataStorage.IsSqlType(valuesType))
                                 {

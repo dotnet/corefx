@@ -869,7 +869,7 @@ namespace System.Resources
                     // Skip over the array of nameHashes.
                     _ums.Seek(seekPos, SeekOrigin.Current);
                     // get the position pointer once more to check that the whole table is within the stream
-                    byte* junk = _ums.PositionPointer;
+                    _ = _ums.PositionPointer;
                 }
             }
 
@@ -901,7 +901,7 @@ namespace System.Resources
                     // Skip over the array of namePositions.
                     _ums.Seek(seekPos, SeekOrigin.Current);
                     // get the position pointer once more to check that the whole table is within the stream
-                    byte* junk = _ums.PositionPointer;
+                    _ = _ums.PositionPointer;
                 }
             }
 
@@ -1030,9 +1030,7 @@ namespace System.Resources
                 }
             }
 
-#pragma warning disable CS8612 // TODO-NULLABLE: Covariance in interfaces (https://github.com/dotnet/roslyn/issues/35227)
             public object Current => Entry;
-#pragma warning restore CS8612
 
             // Warning: This requires that you call the Key or Entry property FIRST before calling it!
             internal int DataPosition => _dataPosition;

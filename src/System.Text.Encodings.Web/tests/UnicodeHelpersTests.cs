@@ -23,9 +23,9 @@ namespace Microsoft.Framework.WebEncoders
         private static readonly UTF8Encoding _utf8EncodingThrowOnInvalidBytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         // To future refactorers:
-        // The following GetScalarValueFromUtf16_* tests must not be done as a [Theory].  If done via [InlineData], the invalid 
-        // code points will get sanitized with replacement characters before they even reach the test, as the strings are parsed 
-        // from the attributes in reflection.  And if done via [MemberData], the XmlWriter used by xunit will throw exceptions 
+        // The following GetScalarValueFromUtf16_* tests must not be done as a [Theory].  If done via [InlineData], the invalid
+        // code points will get sanitized with replacement characters before they even reach the test, as the strings are parsed
+        // from the attributes in reflection.  And if done via [MemberData], the XmlWriter used by xunit will throw exceptions
         // when it attempts to write out the test arguments, due to the invalid text.
 
         [Fact]
@@ -178,6 +178,10 @@ namespace Microsoft.Framework.WebEncoders
                 {
                     retVal[codePoint] = true; // we allow U+0020 SPACE as our only valid Zs (whitespace) char
                 }
+                else if (codePoint == 0xFEFF)
+                {
+                    retVal[codePoint] = false; // we explicitly forbid U+FEFF ZERO WIDTH NO-BREAK SPACE because it's also the byte order mark (BOM)
+                }
                 else
                 {
                     string category = splitLine[2];
@@ -186,11 +190,11 @@ namespace Microsoft.Framework.WebEncoders
                     {
                         retVal[codePoint] = true; // chars in this category are allowable
                         seenCategories.Add(category);
-                        
+
                         if (splitLine[1].EndsWith("First>"))
                         {
                             startSpanCodepoint = codePoint;
-                        } 
+                        }
                         else if (splitLine[1].EndsWith("Last>"))
                         {
                             for (uint spanCounter = startSpanCodepoint; spanCounter < codePoint; spanCounter++)
@@ -198,7 +202,7 @@ namespace Microsoft.Framework.WebEncoders
                                 retVal[spanCounter] = true; // chars in this category are allowable
                             }
                         }
-                        
+
                     }
                 }
             }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{C427CE0D-0740-41F3-9C3A-552BEA3DDB0D}</ProjectGuid>
     <AssemblyName>System.Private.Xml</AssemblyName>
@@ -739,6 +739,7 @@
     <Compile Include="System\Xml\Xsl\XsltOld\IfAction.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\InputScope.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\InputScopeManager.cs" />
+    <Compile Include="System\Xml\Xsl\XsltOld\IRecordOutput.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\MessageAction.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\NamespaceDecl.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\NameSpaceEvent.cs" />
@@ -754,7 +755,6 @@
     <Compile Include="System\Xml\Xsl\XsltOld\Processor.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\ReaderOutput.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\RecordBuilder.cs" />
-    <Compile Include="System\Xml\Xsl\XsltOld\RecordOutput.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\RootAction.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\SequentialOutput.cs" />
     <Compile Include="System\Xml\Xsl\XsltOld\SortAction.cs" />

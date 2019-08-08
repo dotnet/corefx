@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -103,7 +103,7 @@ namespace System.Net.Tests
         public void CopyTo_NonZeroLowerBoundArray_ThrowsIndexOutOfRangeException()
         {
             var listener = new HttpListener();
-            
+
             // No exception thrown when empty.
             Array array = Array.CreateInstance(typeof(object), new int[] { 1 }, new int[] { 1 });
             listener.Prefixes.CopyTo(array, 0);
@@ -265,7 +265,7 @@ namespace System.Net.Tests
                 yield return new object[] { "+" };
             }
         }
-        
+
         [Theory]
         [MemberData(nameof(Hosts_TestData))]
         public void Add_SamePortDifferentPathDifferentListenerNotStarted_Works(string host)
@@ -394,7 +394,6 @@ namespace System.Net.Tests
         [InlineData("http://[[]/")]
         [InlineData("http://localhost:9200")]
         [InlineData("http://localhost/path")]
-        [InlineData("http://::/")]
         [InlineData("http://::/")]
         public void Add_InvalidPrefix_ThrowsArgumentException(string uriPrefix)
         {

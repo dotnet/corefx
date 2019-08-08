@@ -186,7 +186,7 @@ namespace System.Net.Sockets.Tests
         [InlineData(500, 21, 18)]
         [InlineData(5, 128000, 64000)]
         public async Task Socket_SendReceiveAsync_PropagateToStream_Success(int iterations, int writeBufferSize, int readBufferSize)
-        {             
+        {
             var writeBuffer = new byte[writeBufferSize * iterations];
             new Random().NextBytes(writeBuffer);
             var readData = new MemoryStream();
@@ -330,10 +330,10 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ArgumentNullException>(() => new UnixDomainSocketEndPoint(null));
             Assert.Throws<ArgumentOutOfRangeException>(() => new UnixDomainSocketEndPoint(string.Empty));
 
-            int maxNativeSize = (int)typeof(UnixDomainSocketEndPoint)
-                .GetField("s_nativePathLength", BindingFlags.Static | BindingFlags.NonPublic)
-                .GetValue(null);
+            FieldInfo fi = typeof(UnixDomainSocketEndPoint).GetField("s_nativePathLength", BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(fi);
 
+            int maxNativeSize = (int)fi.GetValue(null);
             string invalidLengthString = new string('a', maxNativeSize + 1);
             Assert.Throws<ArgumentOutOfRangeException>(() => new UnixDomainSocketEndPoint(invalidLengthString));
         }

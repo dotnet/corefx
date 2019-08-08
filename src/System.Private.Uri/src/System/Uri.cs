@@ -93,7 +93,7 @@ namespace System
 
             UserDrivenParsing = 0x01000000,
             CanonicalDnsHost = 0x02000000,
-            ErrorOrParsingRecursion = 0x04000000,   // Used to signal a default parser error and also to confirm Port 
+            ErrorOrParsingRecursion = 0x04000000,   // Used to signal a default parser error and also to confirm Port
                                                     // and Host values in case of a custom user Parser
             DosPath = 0x08000000,
             UncPath = 0x10000000,
@@ -126,7 +126,7 @@ namespace System
             public string? String;
             public Offset Offset;
             public string? DnsSafeHost;    // stores dns safe host when idn is on and we have unicode or idn host
-            public MoreInfo? MoreInfo;       // Multi-threading: This field must be always accessed through a _local_ 
+            public MoreInfo? MoreInfo;       // Multi-threading: This field must be always accessed through a _local_
                                             // stack copy of m_Info.
         };
 
@@ -1905,21 +1905,21 @@ namespace System
 
         //
         // http://www.ietf.org/rfc/rfc3986.txt
-        // 
+        //
         // 3.3.  Path
-        // In addition, a URI reference (Section 4.1) may be a relative-path reference, in which case the  first 
+        // In addition, a URI reference (Section 4.1) may be a relative-path reference, in which case the  first
         // path segment cannot contain a colon (":") character.
-        // 
+        //
         // 4.2.  Relative Reference
-        // A path segment that contains a colon character (e.g., "this:that") cannot be used as the first segment 
-        // of a relative-path reference, as it would be mistaken for a scheme name.  Such a segment must be   
+        // A path segment that contains a colon character (e.g., "this:that") cannot be used as the first segment
+        // of a relative-path reference, as it would be mistaken for a scheme name.  Such a segment must be
         // preceded by a dot-segment (e.g., "./this:that") to make a relative-path reference.
-        // 
-        // 5.4.2. Abnormal Examples 
+        //
+        // 5.4.2. Abnormal Examples
         // http:(relativeUri) may be considered a valid relative Uri.
-        // 
+        //
         // Returns true if a colon is found in the first path segment, false otherwise
-        // 
+        //
 
         // Check for anything that may terminate the first regular path segment
         // or an illegal colon
@@ -2466,7 +2466,7 @@ namespace System
             {
                 lock (_info)
                 {
-                    // ATTN: Avoid possible recursion through 
+                    // ATTN: Avoid possible recursion through
                     // CreateHostString->Syntax.GetComponents->Uri.GetComponentsHelper->CreateHostString
                     if (NotAny(Flags.ErrorOrParsingRecursion))
                     {
@@ -2819,7 +2819,7 @@ namespace System
                             if (NotAny(Flags.UserEscaped))
                             {
                                 chars = UriHelper.EscapeString(_string, _info.Offset.User, _info.Offset.Host, chars,
-                                    ref count, true, '?', '#', '%')!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                                    ref count, true, '?', '#', '%')!; // TODO-NULLABLE: Remove ! when [NotNullIfNotNull] respected
                             }
                             else
                             {
@@ -2895,7 +2895,7 @@ namespace System
                                 stemp = DomainNameHelper.UnicodeEquivalent(
                                     hostPtr, 0, stemp.Length, ref allAscii, ref atLeastOneValidIdn)!;
                             }
-                            // The host may be invalid punycode (www.xn--?-pck.com), 
+                            // The host may be invalid punycode (www.xn--?-pck.com),
                             // but we shouldn't throw after the constructor.
                             catch (UriFormatException) { }
                         }
@@ -2986,7 +2986,7 @@ namespace System
                             //Can Assert IsImplicitfile == false
                             if (NotAny(Flags.UserEscaped))
                                 chars = UriHelper.EscapeString(_string, delimiterAwareIndex, _info.Offset.Fragment, chars,
-                                    ref count, true, '#', c_DummyChar, '%')!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                                    ref count, true, '#', c_DummyChar, '%')!; // TODO-NULLABLE: Remove ! when [NotNullIfNotNull] respected
                             else
                             {
                                 UriHelper.UnescapeString(_string, delimiterAwareIndex, _info.Offset.Fragment, chars,
@@ -3039,7 +3039,7 @@ namespace System
                         case UriFormat.UriEscaped:
                             if (NotAny(Flags.UserEscaped))
                                 chars = UriHelper.EscapeString(_string, delimiterAwareIndex, _info.Offset.End, chars,
-                                    ref count, true, c_DummyChar, c_DummyChar, '%')!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                                    ref count, true, c_DummyChar, c_DummyChar, '%')!; // TODO-NULLABLE: Remove ! when [NotNullIfNotNull] respected
                             else
                             {
                                 UriHelper.UnescapeString(_string, delimiterAwareIndex, _info.Offset.End, chars,
@@ -3618,7 +3618,7 @@ namespace System
 
                     length = (ushort)_string.Length;
                     // we don't need to check _originalUnicodeString == _string because # is last part
-                    GetLengthWithoutTrailingSpaces(_string, ref length, idx);                    
+                    GetLengthWithoutTrailingSpaces(_string, ref length, idx);
                 }
             }
 
@@ -4689,7 +4689,7 @@ namespace System
 
                     // The check above validates only that we have valid IRI characters, which is not enough to
                     // conclude that we have a valid canonical IRI.
-                    // If we have an IRI with Flags.HasUnicode, we need to set Check.NotIriCanonical so that the 
+                    // If we have an IRI with Flags.HasUnicode, we need to set Check.NotIriCanonical so that the
                     // path, query, and fragment will be validated.
                     if ((_flags & Flags.HasUnicode) != 0 && _iriParsing)
                     {
@@ -4767,7 +4767,7 @@ namespace System
                     _string.CopyTo(_info.Offset.Path, dest, end, _info.Offset.Query - _info.Offset.Path);
                     end += (_info.Offset.Query - _info.Offset.Path);
 
-                    // If the path was found as needed compression and contains escaped characters, unescape only 
+                    // If the path was found as needed compression and contains escaped characters, unescape only
                     // interesting characters (safe)
 
                     if (_syntax.InFact(UriSyntaxFlags.UnEscapeDotsAndSlashes) && InFact(Flags.PathNotCanonical)
@@ -4794,7 +4794,7 @@ namespace System
                             str = str.Insert(dosPathIdx + _info.Offset.Path - 1, ":");
                         }
                         dest = UriHelper.EscapeString(str, _info.Offset.Path, _info.Offset.Query, dest, ref end, true,
-                            '?', '#', IsImplicitFile ? c_DummyChar : '%')!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                            '?', '#', IsImplicitFile ? c_DummyChar : '%')!; // TODO-NULLABLE: Remove ! when [NotNullIfNotNull] respected
                     }
                     else
                     {
@@ -4807,7 +4807,7 @@ namespace System
                 if (!IsWindowsSystem && InFact(Flags.BackslashInPath) && _syntax.NotAny(UriSyntaxFlags.ConvertPathSlashes) && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && !IsImplicitFile)
                 {
                     string str = new string(dest, pos, end - pos);
-                    dest = UriHelper.EscapeString(str, 0, str.Length, dest, ref pos, true, '\\', c_DummyChar, '%')!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                    dest = UriHelper.EscapeString(str, 0, str.Length, dest, ref pos, true, '\\', c_DummyChar, '%')!; // TODO-NULLABLE: Remove ! when [NotNullIfNotNull] respected
                     end = pos;
                 }
             }
@@ -4818,7 +4818,7 @@ namespace System
 
                 if (InFact(Flags.ShouldBeCompressed))
                 {
-                    // If the path was found as needed compression and contains escaped characters, 
+                    // If the path was found as needed compression and contains escaped characters,
                     // unescape only interesting characters (safe)
 
                     if (_syntax.InFact(UriSyntaxFlags.UnEscapeDotsAndSlashes) && InFact(Flags.PathNotCanonical)
@@ -4857,7 +4857,7 @@ namespace System
                     //Note: Flags.UserEscaped check is solely based on trusting the user
                     string srcString = new string(dest, pos, end - pos);
                     dest = UriHelper.EscapeString(srcString, 0, end - pos, dest, ref pos, true, '?', '#',
-                        IsImplicitFile ? c_DummyChar : '%')!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                        IsImplicitFile ? c_DummyChar : '%')!; // TODO-NULLABLE: Remove ! when [NotNullIfNotNull] respected
                     end = pos;
                 }
             }
@@ -5039,7 +5039,7 @@ namespace System
 
                         //
                         // Cases:
-                        // /./                  = remove this segment 
+                        // /./                  = remove this segment
                         // /../                 = remove this segment, mark next for removal
                         // /....x               = DO NOT TOUCH, leave as is
                         // x.../                = DO NOT TOUCH, leave as is, except for V2 legacy mode

@@ -25,7 +25,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </summary>
         /// <param name="catalog">The catalog.</param>
         /// <param name="filter">The filter.</param>
-        public FilteredCatalog(ComposablePartCatalog catalog, Func<ComposablePartDefinition, bool> filter) : 
+        public FilteredCatalog(ComposablePartCatalog catalog, Func<ComposablePartDefinition, bool> filter) :
             this(catalog, filter, null)
         {
         }
@@ -139,13 +139,13 @@ namespace System.ComponentModel.Composition.Hosting
         /// by <paramref name="definition"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// 	<paramref name="definition"/> is <see langword="null"/>.
+        /// <paramref name="definition"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// The <see cref="ComposablePartCatalog"/> has been disposed of.
         /// </exception>
         /// <remarks>
-        /// 	<note type="inheritinfo">
+        /// <note type="inheritinfo">
         /// Overriders of this property should never return <see langword="null"/>, if no
         /// <see cref="ExportDefinition"/> match the conditions defined by
         /// <paramref name="definition"/>, return an empty <see cref="IEnumerable{T}"/>.
@@ -179,7 +179,7 @@ namespace System.ComponentModel.Composition.Hosting
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changing;
 
 /// <summary>
-        /// Raises the <see cref="E:Changed"/> event.
+        /// Raises the <see cref="Changed"/> event.
         /// </summary>
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
         protected virtual void OnChanged(ComposablePartCatalogChangeEventArgs e)
@@ -192,7 +192,7 @@ namespace System.ComponentModel.Composition.Hosting
         }
 
         /// <summary>
-        /// Raises the <see cref="E:Changing"/> event.
+        /// Raises the <see cref="Changing"/> event.
         /// </summary>
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
         protected virtual void OnChanging(ComposablePartCatalogChangeEventArgs e)

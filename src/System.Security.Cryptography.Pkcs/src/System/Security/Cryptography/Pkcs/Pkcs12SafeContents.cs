@@ -49,7 +49,7 @@ namespace System.Security.Cryptography.Pkcs
                     break;
                 case Oids.Pkcs7Data:
                     ConfidentialityMode = Pkcs12ConfidentialityMode.None;
-                    _bags = ReadBags(PkcsHelpers.DecodeOctetString(contentInfoAsn.Content));
+                    _bags = ReadBags(PkcsHelpers.DecodeOctetStringAsMemory(contentInfoAsn.Content));
                     break;
                 default:
                     throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
@@ -237,7 +237,7 @@ namespace System.Security.Cryptography.Pkcs
 
             List<Pkcs12SafeBag> bags;
             int encryptedValueLength = encryptedData.EncryptedContentInfo.EncryptedContent.Value.Length;
-            
+
             // Don't use the array pool because the parsed bags are going to have ReadOnlyMemory projections
             // over this data.
             byte[] destination = new byte[encryptedValueLength];

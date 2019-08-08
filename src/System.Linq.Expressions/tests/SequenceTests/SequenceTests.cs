@@ -24,7 +24,9 @@ namespace System.Linq.Expressions.Tests
             Assert.NotNull(v);
         }
 
+#pragma warning disable xUnit1013 // needs to be public for reflection-based test
         public void Add(ref int i)
+#pragma warning restore xUnit1013
         {
         }
 
@@ -87,12 +89,12 @@ namespace System.Linq.Expressions.Tests
             Expression<Func<int, int[]>> exp1 = i => new int[i];
             NewArrayExpression aex1 = exp1.Body as NewArrayExpression;
             Assert.NotNull(aex1);
-            Assert.Equal(aex1.NodeType, ExpressionType.NewArrayBounds);
+            Assert.Equal(ExpressionType.NewArrayBounds, aex1.NodeType);
 
             Expression<Func<int[], int>> exp2 = (i) => i.Length;
             UnaryExpression uex2 = exp2.Body as UnaryExpression;
             Assert.NotNull(uex2);
-            Assert.Equal(uex2.NodeType, ExpressionType.ArrayLength);
+            Assert.Equal(ExpressionType.ArrayLength, uex2.NodeType);
         }
 
         private void Method3<T, U, V>()
@@ -113,32 +115,32 @@ namespace System.Linq.Expressions.Tests
             Expression<Func<int, int, int>> exp = (a, b) => unchecked(a + b);
             BinaryExpression bex = exp.Body as BinaryExpression;
             Assert.NotNull(bex);
-            Assert.Equal(bex.NodeType, ExpressionType.Add);
+            Assert.Equal(ExpressionType.Add, bex.NodeType);
 
             exp = (a, b) => checked(a + b);
             bex = exp.Body as BinaryExpression;
             Assert.NotNull(bex);
-            Assert.Equal(bex.NodeType, ExpressionType.AddChecked);
+            Assert.Equal(ExpressionType.AddChecked, bex.NodeType);
 
             exp = (a, b) => unchecked(a * b);
             bex = exp.Body as BinaryExpression;
             Assert.NotNull(bex);
-            Assert.Equal(bex.NodeType, ExpressionType.Multiply);
+            Assert.Equal(ExpressionType.Multiply, bex.NodeType);
 
             exp = (a, b) => checked(a * b);
             bex = exp.Body as BinaryExpression;
             Assert.NotNull(bex);
-            Assert.Equal(bex.NodeType, ExpressionType.MultiplyChecked);
+            Assert.Equal(ExpressionType.MultiplyChecked, bex.NodeType);
 
             Expression<Func<double, int>> exp2 = (a) => unchecked((int)a);
             UnaryExpression uex = exp2.Body as UnaryExpression;
             Assert.NotNull(uex);
-            Assert.Equal(uex.NodeType, ExpressionType.Convert);
+            Assert.Equal(ExpressionType.Convert, uex.NodeType);
 
             exp2 = (a) => checked((int)a);
             uex = exp2.Body as UnaryExpression;
             Assert.NotNull(uex);
-            Assert.Equal(uex.NodeType, ExpressionType.ConvertChecked);
+            Assert.Equal(ExpressionType.ConvertChecked, uex.NodeType);
         }
 
         protected virtual int Foo(int x)
@@ -217,7 +219,7 @@ namespace System.Linq.Expressions.Tests
             return type;
         }
 
-        public static void TestUserDefinedMathOperators<X, Y>()
+        private static void TestUserDefinedMathOperators<X, Y>()
         {
             ParameterExpression x = Expression.Parameter(typeof(X), "x");
             ParameterExpression y = Expression.Parameter(typeof(Y), "y");
@@ -252,7 +254,7 @@ namespace System.Linq.Expressions.Tests
             AssertIsOp(Expression.NegateChecked(x, nnX.GetMethod("op_OnesComplement")), "op_OnesComplement");
         }
 
-        public static void TestUserDefinedComparisonOperators<X, Y>()
+        private static void TestUserDefinedComparisonOperators<X, Y>()
         {
             ParameterExpression x = Expression.Parameter(typeof(X), "x");
             ParameterExpression y = Expression.Parameter(typeof(Y), "y");
@@ -289,7 +291,7 @@ namespace System.Linq.Expressions.Tests
             AssertIsOp(Expression.NotEqual(x, y, true, nnX.GetMethod("op_Equality")), "op_Equality");
         }
 
-        public static void TestUserDefinedBitwiseOperators<X, Y>()
+        private static void TestUserDefinedBitwiseOperators<X, Y>()
         {
             ParameterExpression x = Expression.Parameter(typeof(X), "x");
             ParameterExpression y = Expression.Parameter(typeof(Y), "y");
@@ -308,7 +310,7 @@ namespace System.Linq.Expressions.Tests
             AssertIsOp(Expression.Not(x, nnX.GetMethod("op_UnaryNegation")), "op_UnaryNegation");
         }
 
-        public static void TestUserDefinedLogicalOperators<X, Y>()
+        private static void TestUserDefinedLogicalOperators<X, Y>()
         {
             ParameterExpression x = Expression.Parameter(typeof(X), "x");
             ParameterExpression y = Expression.Parameter(typeof(Y), "y");
@@ -327,13 +329,13 @@ namespace System.Linq.Expressions.Tests
             AssertIsOp(Expression.Not(x, nnX.GetMethod("op_UnaryNegation")), "op_UnaryNegation");
         }
 
-        public static void AssertIsOp(BinaryExpression b, string opName)
+        private static void AssertIsOp(BinaryExpression b, string opName)
         {
             Assert.NotNull(b.Method);
             Assert.Equal(opName, b.Method.Name);
         }
 
-        public static void AssertIsOp(UnaryExpression u, string opName)
+        private static void AssertIsOp(UnaryExpression u, string opName)
         {
             Assert.NotNull(u.Method);
             Assert.Equal(opName, u.Method.Name);
@@ -349,7 +351,7 @@ namespace System.Linq.Expressions.Tests
             TestUserDefinedCoercion<M?, N?>();
         }
 
-        public static void TestUserDefinedCoercion<X, Y>()
+        private static void TestUserDefinedCoercion<X, Y>()
         {
             ParameterExpression x = Expression.Parameter(typeof(X), "x");
             ParameterExpression y = Expression.Parameter(typeof(Y), "y");
@@ -376,7 +378,7 @@ namespace System.Linq.Expressions.Tests
             AssertIsCoercion(Expression.Convert(y, typeof(X), nnY.GetMethod("Bar")), "Bar", typeof(X));
         }
 
-        public static void AssertIsCoercion(UnaryExpression u, string opName, Type expected)
+        private static void AssertIsCoercion(UnaryExpression u, string opName, Type expected)
         {
             Debug.WriteLine("Convert: {0} -> {1}", u.Operand.Type, u.Type);
             Assert.NotNull(u.Method);
@@ -704,7 +706,7 @@ namespace System.Linq.Expressions.Tests
 
             Func<TC1?> f1 = e1.Compile(useInterpreter);
             Assert.NotNull(f1());
-            Assert.Equal(f1().Value.Name, "And");
+            Assert.Equal("And", f1().Value.Name);
 
             BinaryExpression resultOr = (BinaryExpression)Expression.OrElse(left, right);
             Expression<Func<TC1?>> e2 = Expression.Lambda<Func<TC1?>>(
@@ -715,7 +717,7 @@ namespace System.Linq.Expressions.Tests
 
             Func<TC1?> f2 = e2.Compile(useInterpreter);
             Assert.NotNull(f2());
-            Assert.Equal(f2().Value.Name, "lhs");
+            Assert.Equal("lhs", f2().Value.Name);
 
             ConstantExpression constant = Expression.Constant(1.0, typeof(double));
             AssertExtensions.Throws<ArgumentException>(null, () => Expression.Lambda<Func<double?>>(constant, null));
@@ -825,7 +827,7 @@ namespace System.Linq.Expressions.Tests
                  null);
             Func<string> f = e.Compile(useInterpreter);
             string r = f();
-            Assert.Equal(a.m_x, "Changed");
+            Assert.Equal("Changed", a.m_x);
 
             Expression<Func<Customer>> e2 = Expression.Lambda<Func<Customer>>(
                  Expression.Call(
@@ -868,7 +870,7 @@ namespace System.Linq.Expressions.Tests
             Assert.True((comp1.x == comp.x + 1 && comp1.y == comp.y + 1));
 
             Expression<Func<Complex, Complex>> testExpr = (x) => +x;
-            Assert.Equal(testExpr.ToString(), "x => +x");
+            Assert.Equal("x => +x", testExpr.ToString());
             Func<Complex, Complex> v = testExpr.Compile(useInterpreter);
         }
 
@@ -1751,7 +1753,7 @@ namespace System.Linq.Expressions.Tests
             Func<object, bool> compiled = f.Compile(useInterpreter);
             Expression<Func<object, bool>> lambda = x => compiled(x);
             Func<object, bool> d = lambda.Compile(useInterpreter);
-            Assert.Equal(true, d(Type.Missing));
+            Assert.True(d(Type.Missing));
         }
 
         [Theory]
@@ -2782,7 +2784,7 @@ namespace System.Linq.Expressions.Tests
         {
             // Using an unchecked cast to ensure that a Convert expression is used (and not ConvertChecked)
             Expression<Func<int, int?>> f = x => unchecked((int?)x);
-            Assert.Equal(f.Body.NodeType, ExpressionType.Convert);
+            Assert.Equal(ExpressionType.Convert, f.Body.NodeType);
             Func<int, int?> d = f.Compile(useInterpreter);
             Assert.Equal(2, d(2));
         }

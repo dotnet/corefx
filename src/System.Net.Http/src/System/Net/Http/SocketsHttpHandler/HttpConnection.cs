@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -548,20 +548,34 @@ namespace System.Net.Http
                     ParseStatusLine(await ReadNextResponseHeaderLineAsync().ConfigureAwait(false), response);
                 }
 
-                // If we sent an Expect: 100-continue header, and didn't receive a 100-continue. Handle the final response accordingly.
-                // Note that the developer may have added an Expect: 100-continue header even if there is no Content.
+                // Parse the response headers.  Logic after this point depends on being able to examine headers in the response object.
+                while (true)
+                {
+                    ArraySegment<byte> line = await ReadNextResponseHeaderLineAsync(foldedHeadersAllowed: true).ConfigureAwait(false);
+                    if (IsLineEmpty(line))
+                    {
+                        break;
+                    }
+                    ParseHeaderNameValue(this, line, response);
+                }
+
                 if (allowExpect100ToContinue != null)
                 {
+                    // If we sent an Expect: 100-continue header, and didn't receive a 100-continue. Handle the final response accordingly.
+                    // Note that the developer may have added an Expect: 100-continue header even if there is no Content.
                     if ((int)response.StatusCode >= 300 &&
                         request.Content != null &&
-                        (request.Content.Headers.ContentLength == null || request.Content.Headers.ContentLength.GetValueOrDefault() > Expect100ErrorSendThreshold))
+                        (request.Content.Headers.ContentLength == null || request.Content.Headers.ContentLength.GetValueOrDefault() > Expect100ErrorSendThreshold) &&
+                        !AuthenticationHelper.IsSessionAuthenticationChallenge(response))
                     {
                         // For error final status codes, try to avoid sending the payload if its size is unknown or if it's known to be "big".
                         // If we already sent a header detailing the size of the payload, if we then don't send that payload, the server may wait
                         // for it and assume that the next request on the connection is actually this request's payload.  Thus we mark the connection
                         // to be closed.  However, we may have also lost a race condition with the Expect: 100-continue timeout, so if it turns out
                         // we've already started sending the payload (we weren't able to cancel it), then we don't need to force close the connection.
+                        // We also must not clone connection if we do NTLM or Negotiate authentication.
                         allowExpect100ToContinue.TrySetResult(false);
+
                         if (!allowExpect100ToContinue.Task.Result) // if Result is true, the timeout already expired and we started sending content
                         {
                             _connectionClose = true;
@@ -569,10 +583,17 @@ namespace System.Net.Http
                     }
                     else
                     {
-                        // For any success status codes or for errors when the request content length is known to be small, send the payload
+                        // For any success status codes, for errors when the request content length is known to be small,
+                        // or for session-based authentication challenges, send the payload
                         // (if there is one... if there isn't, Content is null and thus allowExpect100ToContinue is also null, we won't get here).
                         allowExpect100ToContinue.TrySetResult(true);
                     }
+                }
+
+                // Determine whether we need to force close the connection when the request/response has completed.
+                if (response.Headers.ConnectionClose.GetValueOrDefault())
+                {
+                    _connectionClose = true;
                 }
 
                 // Now that we've received our final status line, wait for the request content to fully send.
@@ -587,23 +608,6 @@ namespace System.Net.Http
 
                 // Now we are sure that the request was fully sent.
                 if (NetEventSource.IsEnabled) Trace("Request is fully sent.");
-
-                // Parse the response headers.
-                while (true)
-                {
-                    ArraySegment<byte> line = await ReadNextResponseHeaderLineAsync(foldedHeadersAllowed: true).ConfigureAwait(false);
-                    if (IsLineEmpty(line))
-                    {
-                        break;
-                    }
-                    ParseHeaderNameValue(this, line, response);
-                }
-
-                // Determine whether we need to force close the connection when the request/response has completed.
-                if (response.Headers.ConnectionClose.GetValueOrDefault())
-                {
-                    _connectionClose = true;
-                }
 
                 // We're about to create the response stream, at which point responsibility for canceling
                 // the remainder of the response lies with the stream.  Thus we dispose of our registration
@@ -813,7 +817,7 @@ namespace System.Net.Http
             // We expect a response version of the form 1.X, where X is a single digit as per RFC.
 
             // Validate the beginning of the status line and set the response version.
-            const int MinStatusLineLength = 12; // "HTTP/1.x 123" 
+            const int MinStatusLineLength = 12; // "HTTP/1.x 123"
             if (line.Length < MinStatusLineLength || line[8] != ' ')
             {
                 throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_status_line, Encoding.ASCII.GetString(line)));
@@ -1469,7 +1473,7 @@ namespace System.Net.Http
                 }
             }
 
-            // No data in read buffer. 
+            // No data in read buffer.
             // Do an unbuffered read directly against the underlying stream.
             Debug.Assert(_readAheadTask == null, "Read ahead task should have been consumed as part of the headers.");
             int count = _stream.Read(destination);
@@ -1497,7 +1501,7 @@ namespace System.Net.Http
                 }
             }
 
-            // No data in read buffer. 
+            // No data in read buffer.
             // Do an unbuffered read directly against the underlying stream.
             Debug.Assert(_readAheadTask == null, "Read ahead task should have been consumed as part of the headers.");
             int count = await _stream.ReadAsync(destination).ConfigureAwait(false);
@@ -1526,7 +1530,7 @@ namespace System.Net.Http
                 }
             }
 
-            // No data in read buffer. 
+            // No data in read buffer.
             _readOffset = _readLength = 0;
 
             // Do a buffered read directly against the underlying stream.
@@ -1572,7 +1576,7 @@ namespace System.Net.Http
                 }
             }
 
-            // No data in read buffer. 
+            // No data in read buffer.
             _readOffset = _readLength = 0;
 
             // Do a buffered read directly against the underlying stream.

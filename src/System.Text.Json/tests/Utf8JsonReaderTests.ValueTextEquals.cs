@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -137,8 +137,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.PropertyName)
                 {
-                    if (json.ValueTextEquals(lookup) && 
-                        json.ValueTextEquals(lookUpString) && 
+                    if (json.ValueTextEquals(lookup) &&
+                        json.ValueTextEquals(lookUpString) &&
                         json.ValueTextEquals(lookUpString.AsSpan()))
                     {
                         found = true;
@@ -236,8 +236,8 @@ namespace System.Text.Json.Tests
                 {
                     if (json.TokenType == JsonTokenType.String)
                     {
-                        if (json.ValueTextEquals(lookupSpan) && 
-                            json.ValueTextEquals(lookupChars) && 
+                        if (json.ValueTextEquals(lookupSpan) &&
+                            json.ValueTextEquals(lookupChars) &&
                             json.ValueTextEquals(new string(lookupChars.ToArray())))
                         {
                             found = true;
@@ -256,8 +256,8 @@ namespace System.Text.Json.Tests
                 {
                     if (json.TokenType == JsonTokenType.String)
                     {
-                        if (json.ValueTextEquals(lookupSpan) && 
-                            json.ValueTextEquals(lookupChars) && 
+                        if (json.ValueTextEquals(lookupSpan) &&
+                            json.ValueTextEquals(lookupChars) &&
                             json.ValueTextEquals(new string(lookupChars.ToArray())))
                         {
                             found = true;
@@ -322,8 +322,8 @@ namespace System.Text.Json.Tests
                     {
                         if (json.TokenType == JsonTokenType.String)
                         {
-                            if (json.ValueTextEquals(lookup) || 
-                                json.ValueTextEquals(lookupChars) || 
+                            if (json.ValueTextEquals(lookup) ||
+                                json.ValueTextEquals(lookupChars) ||
                                 json.ValueTextEquals(new string(lookupChars.ToArray())))
                             {
                                 found = true;
@@ -342,7 +342,7 @@ namespace System.Text.Json.Tests
                     {
                         if (json.TokenType == JsonTokenType.String)
                         {
-                            if (json.ValueTextEquals(lookup) || 
+                            if (json.ValueTextEquals(lookup) ||
                                 json.ValueTextEquals(lookupChars) ||
                                 json.ValueTextEquals(new string(lookupChars.ToArray())))
                             {
@@ -371,8 +371,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.ValueTextEquals(new byte[] { (byte)'a' }) || 
-                        json.ValueTextEquals(new char[] { 'a' }) || 
+                    if (json.ValueTextEquals(new byte[] { (byte)'a' }) ||
+                        json.ValueTextEquals(new char[] { 'a' }) ||
                         json.ValueTextEquals("a"))
                     {
                         found = true;
@@ -391,8 +391,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.ValueTextEquals(new byte[] { (byte)'a' }) || 
-                        json.ValueTextEquals(new char[] { 'a' }) || 
+                    if (json.ValueTextEquals(new byte[] { (byte)'a' }) ||
+                        json.ValueTextEquals(new char[] { 'a' }) ||
                         json.ValueTextEquals("a"))
                     {
                         found = true;
@@ -420,8 +420,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) || 
-                        json.ValueTextEquals(lookupString.AsSpan()) || 
+                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) ||
+                        json.ValueTextEquals(lookupString.AsSpan()) ||
                         json.ValueTextEquals(lookupString))
                     {
                         found = true;
@@ -440,8 +440,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) || 
-                        json.ValueTextEquals(lookupString.AsSpan()) || 
+                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) ||
+                        json.ValueTextEquals(lookupString.AsSpan()) ||
                         json.ValueTextEquals(lookupString))
                     {
                         found = true;
@@ -467,8 +467,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) || 
-                        json.ValueTextEquals(lookupString.AsSpan()) || 
+                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) ||
+                        json.ValueTextEquals(lookupString.AsSpan()) ||
                         json.ValueTextEquals(lookupString))
                     {
                         found = true;
@@ -487,8 +487,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) || 
-                        json.ValueTextEquals(lookupString.AsSpan()) || 
+                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) ||
+                        json.ValueTextEquals(lookupString.AsSpan()) ||
                         json.ValueTextEquals(lookupString))
                     {
                         found = true;
@@ -514,8 +514,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) || 
-                        json.ValueTextEquals(lookupString.AsSpan()) || 
+                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) ||
+                        json.ValueTextEquals(lookupString.AsSpan()) ||
                         json.ValueTextEquals(lookupString))
                     {
                         found = true;
@@ -534,7 +534,7 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) || 
+                    if (json.ValueTextEquals(Encoding.UTF8.GetBytes(lookupString)) ||
                         json.ValueTextEquals(lookupString.AsSpan()) ||
                         json.ValueTextEquals(lookupString))
                     {
@@ -564,8 +564,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.ValueTextEquals(lookup) || 
-                        json.ValueTextEquals("Hello, \"Ahson\"".AsSpan()) || 
+                    if (json.ValueTextEquals(lookup) ||
+                        json.ValueTextEquals("Hello, \"Ahson\"".AsSpan()) ||
                         json.ValueTextEquals("Hello, \"Ahson\""))
                     {
                         found = true;
@@ -628,6 +628,11 @@ namespace System.Text.Json.Tests
             Assert.False(json.ValueTextEquals(lookup));
         }
 
+        // NOTE: LookupOverflow test is constrained to run on Windows and MacOSX because it causes
+        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        //       time the memory is accessed which triggers the full memory allocation.
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         [ConditionalFact(nameof(IsX64))]
         [OuterLoop]
         public static void LookupOverflow()

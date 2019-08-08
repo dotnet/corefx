@@ -432,7 +432,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void ParseJson_Stream_ThrowsOn_ArrayPoolRent_CodeCoverage()
         {
-            using (Stream stream = new ThrowOnCanSeekStream (new byte[] { 1 }))
+            using (Stream stream = new ThrowOnCanSeekStream(new byte[] { 1 }))
             {
                 Assert.Throws<InsufficientMemoryException>(() => JsonDocument.Parse(stream));
             }
@@ -441,7 +441,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void ParseJson_Stream_Async_ThrowsOn_ArrayPoolRent_CodeCoverage()
         {
-            using (Stream stream = new ThrowOnCanSeekStream (new byte[] { 1 }))
+            using (Stream stream = new ThrowOnCanSeekStream(new byte[] { 1 }))
             {
                 Assert.ThrowsAsync<InsufficientMemoryException>(async () => await JsonDocument.ParseAsync(stream));
             }
@@ -751,8 +751,8 @@ namespace System.Text.Json.Tests
                 JsonElement parsedObject = doc.RootElement;
                 bool first = parsedObject[0].GetBoolean();
                 bool second = parsedObject[1].GetBoolean();
-                Assert.Equal(true, first);
-                Assert.Equal(false, second);
+                Assert.True(first);
+                Assert.False(second);
             }
         }
 
@@ -1728,9 +1728,11 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void CheckUseAfterDispose()
         {
-            using (JsonDocument doc = JsonDocument.Parse("true", default))
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            using (JsonDocument doc = JsonDocument.Parse("{\"First\":1}", default))
             {
                 JsonElement root = doc.RootElement;
+                JsonProperty property = root.EnumerateObject().First();
                 doc.Dispose();
 
                 Assert.Throws<ObjectDisposedException>(() => root.ValueKind);
@@ -1767,26 +1769,20 @@ namespace System.Text.Json.Tests
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = default;
-                    root.WriteValue(writer);
+                    using var writer = new Utf8JsonWriter(buffer);
+                    root.WriteTo(writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = default;
-                    root.WriteProperty(ReadOnlySpan<char>.Empty, writer);
+                    using var writer = new Utf8JsonWriter(buffer);
+                    doc.WriteTo(writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = default;
-                    root.WriteProperty(ReadOnlySpan<byte>.Empty, writer);
-                });
-
-                Assert.Throws<ObjectDisposedException>(() =>
-                {
-                    Utf8JsonWriter writer = default;
-                    root.WriteProperty(JsonEncodedText.Encode(ReadOnlySpan<byte>.Empty), writer);
+                    using var writer = new Utf8JsonWriter(buffer);
+                    property.WriteTo(writer);
                 });
             }
         }
@@ -1834,21 +1830,19 @@ namespace System.Text.Json.Tests
 
             Assert.Throws<InvalidOperationException>(() =>
             {
-                Utf8JsonWriter writer = default;
-                root.WriteValue(writer);
+                var buffer = new ArrayBufferWriter<byte>(1024);
+                using var writer = new Utf8JsonWriter(buffer);
+                root.WriteTo(writer);
             });
+        }
 
-            Assert.Throws<InvalidOperationException>(() =>
+        [Fact]
+        public static void CheckByPassingNullWriter()
+        {
+            using (JsonDocument doc = JsonDocument.Parse("true", default))
             {
-                Utf8JsonWriter writer = default;
-                root.WriteProperty(ReadOnlySpan<char>.Empty, writer);
-            });
-
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                Utf8JsonWriter writer = default;
-                root.WriteProperty(ReadOnlySpan<byte>.Empty, writer);
-            });
+                AssertExtensions.Throws<ArgumentNullException>("writer", () => doc.WriteTo(null));
+            }
         }
 
         [Fact]
@@ -2056,7 +2050,7 @@ namespace System.Text.Json.Tests
                 void assertOdd(JsonElement elem)
                 {
                     Assert.Equal(JsonValueKind.False, elem.ValueKind);
-                    Assert.Equal(false, elem.GetBoolean());
+                    Assert.False(elem.GetBoolean());
                 }
 
                 Assert.True(root.TryGetProperty(PascalString, out JsonElement pascal));
@@ -2243,7 +2237,7 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData(-1)]
-        [InlineData(JsonCommentHandling.Allow)]
+        [InlineData((int)JsonCommentHandling.Allow)]
         [InlineData(3)]
         [InlineData(byte.MaxValue)]
         [InlineData(byte.MaxValue + 3)] // Other values, like byte.MaxValue + 1 overflows to 0 (i.e. JsonCommentHandling.Disallow), which is valid.
@@ -2435,7 +2429,7 @@ namespace System.Text.Json.Tests
   ""number"": 1.02e+4,
   ""bool"": false,
   ""n\u0075ll"": null,
-  ""multiLineArray"": 
+  ""multiLineArray"":
 
 [
 
@@ -2446,7 +2440,7 @@ namespace System.Text.Json.Tests
     3
 
 ],
-  ""string"": 
+  ""string"":
 
 ""Aren't string just the greatest?\r\nNot a terminating quote: \""     \r   \n   \t  \\   ""
 }";
@@ -3605,49 +3599,6 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void NameEquals_GivenPropertyAndValue_TrueForPropertyName()
-        {
-            string jsonString = $"{{ \"aPropertyName\" : \"itsValue\" }}";
-            using (JsonDocument doc = JsonDocument.Parse(jsonString))
-            {
-                JsonElement jElement = doc.RootElement;
-                JsonProperty property = jElement.EnumerateObject().First();
-
-                string text = "aPropertyName";
-                byte[] expectedGetBytes = Encoding.UTF8.GetBytes(text);
-                Assert.True(property.NameEquals(text));
-                Assert.True(property.NameEquals(text.AsSpan()));
-                Assert.True(property.NameEquals(expectedGetBytes));
-
-                text = "itsValue";
-                expectedGetBytes = Encoding.UTF8.GetBytes(text);
-                Assert.False(property.NameEquals(text));
-                Assert.False(property.NameEquals(text.AsSpan()));
-                Assert.False(property.NameEquals(expectedGetBytes));
-            }
-        }
-
-        [Theory]
-        [InlineData("conne\\u0063tionId", "connectionId")]
-        [InlineData("connectionId", "connectionId")]
-        [InlineData("123", "123")]
-        [InlineData("My name is \\\"Ahson\\\"", "My name is \"Ahson\"")]
-        public static void NameEquals_UseGoodMatches_True(string propertyName, string otherText)
-        {
-            string jsonString = $"{{ \"{propertyName}\" : \"itsValue\" }}";
-            using (JsonDocument doc = JsonDocument.Parse(jsonString))
-            {
-                JsonElement jElement = doc.RootElement;
-                JsonProperty property = jElement.EnumerateObject().First();
-
-                byte[] expectedGetBytes = Encoding.UTF8.GetBytes(otherText);
-                Assert.True(property.NameEquals(otherText));
-                Assert.True(property.NameEquals(otherText.AsSpan()));
-                Assert.True(property.NameEquals(expectedGetBytes));
-            }
-        }
-
-        [Fact]
         public static void NameEquals_Empty_Throws()
         {
             const string jsonString = "{\"\" : \"some-value\"}";
@@ -3660,20 +3611,6 @@ namespace System.Text.Json.Tests
                 AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(ThrowsAnyway.AsSpan()), ErrorMessage);
                 AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)), ErrorMessage);
             }
-        }
-
-        [Theory]
-        [InlineData("hello")]
-        [InlineData("")]
-        [InlineData(null)]
-        public static void NameEquals_InvalidInstance_Throws(string text)
-        {
-            const string ErrorMessage = "Operation is not valid due to the current state of the object.";
-            JsonProperty prop = default;
-            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(text), ErrorMessage);
-            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(text.AsSpan()), ErrorMessage);
-            byte[] expectedGetBytes = text == null ? null : Encoding.UTF8.GetBytes(text);
-            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(expectedGetBytes), ErrorMessage);
         }
 
         private static void BuildSegmentedReader(
@@ -3740,6 +3677,41 @@ namespace System.Text.Json.Tests
 
             return s_compactJson[testCaseType] = existing;
         }
+
+        [Fact]
+        public static void WriteNumberTooLargeScientific()
+        {
+            // This value is a reference "potential interoperability problem" from
+            // https://tools.ietf.org/html/rfc7159#section-6
+            const string OneQuarticGoogol = "1e400";
+
+            // This just validates we write the literal number 1e400 even though it is too
+            // large to be represented by System.Double and would be converted to
+            // PositiveInfinity instead (or throw if using double.Parse on frameworks
+            // older than .NET Core 3.0).
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            var expectedNonIndentedJson = $"[{OneQuarticGoogol}]";
+            using (JsonDocument doc = JsonDocument.Parse($"[ {OneQuarticGoogol} ]"))
+            {
+                using var writer = new Utf8JsonWriter(buffer, default);
+                doc.WriteTo(writer);
+                writer.Flush();
+
+                AssertContents(expectedNonIndentedJson, buffer);
+            }
+        }
+
+        private static void AssertContents(string expectedValue, ArrayBufferWriter<byte> buffer)
+        {
+            Assert.Equal(
+                expectedValue,
+                Encoding.UTF8.GetString(
+                    buffer.WrittenSpan
+#if netfx
+                        .ToArray()
+#endif
+                    ));
+        }
     }
 
     public class ThrowOnReadStream : MemoryStream
@@ -3756,7 +3728,7 @@ namespace System.Text.Json.Tests
 
     public class ThrowOnCanSeekStream : MemoryStream
     {
-        public ThrowOnCanSeekStream (byte[] bytes) : base(bytes)
+        public ThrowOnCanSeekStream(byte[] bytes) : base(bytes)
         {
         }
 

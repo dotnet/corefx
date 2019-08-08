@@ -37,7 +37,7 @@ public static class XmlDictionaryWriterTest
             actual = sr.ReadToEnd();
         }
 
-        Assert.StrictEqual(expect, actual);
+        Assert.Equal(expect, actual);
     }
 
     [Fact]
@@ -58,8 +58,8 @@ public static class XmlDictionaryWriterTest
             var sr = new StreamReader(ms);
             actual = sr.ReadToEnd();
         }
-        
-        Assert.StrictEqual(expect, actual);
+
+        Assert.Equal(expect, actual);
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public static class XmlDictionaryWriterTest
         string expect = GetExpectString(bytes, byteSize);
         string lastCompletedOperation = null;
         try
-        {            
+        {
             using (var ms = new AsyncMemoryStream())
             {
                 var writer = XmlDictionaryWriter.CreateTextWriter(ms);
@@ -111,7 +111,7 @@ public static class XmlDictionaryWriterTest
             Assert.True(false, sb.ToString());
         }
 
-        Assert.StrictEqual(expect, actual);
+        Assert.Equal(expect, actual);
 
     }
 
@@ -139,7 +139,7 @@ public static class XmlDictionaryWriterTest
             actual = sr.ReadToEnd();
         }
 
-        Assert.StrictEqual(expect, actual);
+        Assert.Equal(expect, actual);
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public static class XmlDictionaryWriterTest
             writer.WriteEndElement();
             writer.WriteEndDocument();
             writer.Flush();
-            ms.Position = 0;            
+            ms.Position = 0;
         }
     }
 

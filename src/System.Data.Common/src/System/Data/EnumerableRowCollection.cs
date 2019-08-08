@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -162,7 +162,7 @@ namespace System.Data
                 finalPredicate =
                     (DataRow row) =>
                     {
-                        if (!Object.ReferenceEquals(row, _selector((TRow)(object)row)))
+                        if (!object.ReferenceEquals(row, _selector((TRow)(object)row)))
                         {
                             throw DataSetUtil.NotSupported(SR.ToLDVUnsupported);
                         }
@@ -182,7 +182,7 @@ namespace System.Data
                 finalPredicate =
                     (DataRow row) =>
                     {
-                        if (!Object.ReferenceEquals(row, _selector((TRow)(object)row)))
+                        if (!object.ReferenceEquals(row, _selector((TRow)(object)row)))
                         {
                             throw DataSetUtil.NotSupported(SR.ToLDVUnsupported);
                         }
@@ -208,12 +208,12 @@ namespace System.Data
 
             #region Evaluate Filter/Sort
             //  All of this complexity below is because we want to create index only once.
-            // 
+            //
 
             //  If we only have filter, we set _view.Predicate       - 1 index creation
             //  If we only have sort, we set _view.SortExpression()  - 1 index creation
             //  If we have BOTH, we set them through the constructor - 1 index creation
-            // 
+            //
 
 
             // Filter AND Sort

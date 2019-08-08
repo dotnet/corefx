@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -205,7 +205,7 @@ namespace System.Data.SqlClient
         private List<EventContextPair> _eventList = new List<EventContextPair>();
         private object _eventHandlerLock = new object(); // Lock for event serialization.
         // Track the time that this dependency should time out. If the server didn't send a change
-        // notification or a time-out before this point then the client will perform a client-side 
+        // notification or a time-out before this point then the client will perform a client-side
         // timeout.
         private DateTime _expirationTime = DateTime.MaxValue;
         // Used for invalidation of dependencies based on which servers they rely upon.
@@ -216,15 +216,12 @@ namespace System.Data.SqlClient
 
         private static object s_startStopLock = new object();
         private static readonly string s_appDomainKey = Guid.NewGuid().ToString();
-        // Hashtable containing all information to match from a server, user, database triple to the service started for that 
-        // triple.  For each server, there can be N users.  For each user, there can be N databases.  For each server, user, 
+        // Hashtable containing all information to match from a server, user, database triple to the service started for that
+        // triple.  For each server, there can be N users.  For each user, there can be N databases.  For each server, user,
         // database, there can only be one service.
         private static Dictionary<string, Dictionary<IdentityUserNamePair, List<DatabaseServicePair>>> s_serverUserHash =
                    new Dictionary<string, Dictionary<IdentityUserNamePair, List<DatabaseServicePair>>>(StringComparer.OrdinalIgnoreCase);
         private static SqlDependencyProcessDispatcher s_processDispatcher = null;
-        // The following two strings are used for AppDomain.CreateInstance.
-        private static readonly string s_assemblyName = (typeof(SqlDependencyProcessDispatcher)).Assembly.FullName;
-        private static readonly string s_typeName = (typeof(SqlDependencyProcessDispatcher)).FullName;
 
         // Constructors
 
@@ -661,7 +658,7 @@ namespace System.Data.SqlClient
 
         internal static string GetDefaultComposedOptions(string server, string failoverServer, IdentityUserNamePair identityUser, string database)
         {
-            // Server must be an exact match, but user and database only needs to match exactly if there is more than one 
+            // Server must be an exact match, but user and database only needs to match exactly if there is more than one
             // for the given user or database passed.  That is ambiguious and we must fail.
             string result;
 
@@ -747,7 +744,7 @@ namespace System.Data.SqlClient
 
         // Internal Methods
 
-        // Called by SqlCommand upon execution of a SqlNotificationRequest class created by this dependency.  We 
+        // Called by SqlCommand upon execution of a SqlNotificationRequest class created by this dependency.  We
         // use this list for a reverse lookup based on server.
         internal void AddToServerList(string server)
         {
@@ -846,8 +843,6 @@ namespace System.Data.SqlClient
         {
             if (cmd != null)
             {
-                SqlConnection connection = cmd.Connection;
-
                 if (cmd.Notification != null)
                 {
                     // Fail if cmd has notification that is not already associated with this dependency.

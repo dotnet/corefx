@@ -3,10 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Net.Http.Functional.Tests;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Authentication;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace System.Net.Test.Common
     {
         private Socket _connectionSocket;
         private Stream _connectionStream;
-        private bool _ignoreSettingsAck;
+        private TaskCompletionSource<bool> _ignoredSettingsAckPromise;
         private bool _ignoreWindowUpdates;
         public static TimeSpan Timeout => Http2LoopbackServer.Timeout;
         private int _lastStreamId;
@@ -145,9 +146,10 @@ namespace System.Net.Test.Common
                 throw new Exception("Connection stream closed while attempting to read frame body.");
             }
 
-            if (_ignoreSettingsAck && header.Type == FrameType.Settings && header.Flags == FrameFlags.Ack)
+            if (_ignoredSettingsAckPromise != null && header.Type == FrameType.Settings && header.Flags == FrameFlags.Ack)
             {
-                _ignoreSettingsAck = false;
+                _ignoredSettingsAckPromise.TrySetResult(false);
+                _ignoredSettingsAckPromise = null;
                 return await ReadFrameAsync(cancellationToken).ConfigureAwait(false);
             }
 
@@ -185,19 +187,27 @@ namespace System.Net.Test.Common
             Stream oldStream = _connectionStream;
             _connectionSocket = null;
             _connectionStream = null;
-            _ignoreSettingsAck = false;
+            _ignoredSettingsAckPromise = null;
 
             return (oldSocket, oldStream);
         }
 
-        public void ExpectSettingsAck()
+        // Set up loopback server to silently ignore the next inbound settings ack frame.
+        // If there already is a pending ack frame, wait until it has been read.
+        public async Task ExpectSettingsAckAsync(int timeoutMs = 5000)
         {
             // The timing of when we receive the settings ack is not guaranteed.
             // To simplify frame processing, just record that we are expecting one,
             // and then filter it out in ReadFrameAsync above.
 
-            Assert.False(_ignoreSettingsAck);
-            _ignoreSettingsAck = true;
+            Task currentTask = _ignoredSettingsAckPromise?.Task;
+            if (currentTask != null)
+            {
+                var timeout = TimeSpan.FromMilliseconds(timeoutMs);
+                await currentTask.TimeoutAfter(timeout);
+            }
+
+            _ignoredSettingsAckPromise = new TaskCompletionSource<bool>();
         }
 
         public void IgnoreWindowUpdates()
@@ -205,25 +215,38 @@ namespace System.Net.Test.Common
             _ignoreWindowUpdates = true;
         }
 
-        public void ShutdownSend()
+        public async Task ReadRstStreamAsync(int streamId)
         {
-            _connectionSocket.Shutdown(SocketShutdown.Send);
+            Frame frame = await ReadFrameAsync(Timeout);
+
+            if (frame == null)
+            {
+                throw new Exception($"Expected RST_STREAM, saw EOF");
+            }
+
+            if (frame.Type != FrameType.RstStream)
+            {
+                throw new Exception($"Expected RST_STREAM, saw {frame.Type}");
+            }
+
+            if (frame.StreamId != streamId)
+            {
+                throw new Exception($"Expected RST_STREAM on stream {streamId}, actual streamId={frame.StreamId}");
+            }
         }
 
-        // This will wait for the client to close the connection,
-        // and ignore any meaningless frames -- i.e. WINDOW_UPDATE or expected SETTINGS ACK --
-        // that we see while waiting for the client to close.
-        // Only call this after sending a GOAWAY.
-        public async Task WaitForConnectionShutdownAsync()
+        // Wait for the client to close the connection, e.g. after the HttpClient is disposed.
+        public async Task WaitForClientDisconnectAsync(bool ignoreUnexpectedFrames = false)
         {
-            // Shutdown our send side, so the client knows there won't be any more frames coming.
-            ShutdownSend();
-
             IgnoreWindowUpdates();
+
             Frame frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
             if (frame != null)
             {
-                throw new Exception($"Unexpected frame received while waiting for client shutdown: {frame}");
+                if (!ignoreUnexpectedFrames)
+                {
+                    throw new Exception($"Unexpected frame received while waiting for client disconnect: {frame}");
+                }
             }
 
             _connectionStream.Close();
@@ -231,18 +254,34 @@ namespace System.Net.Test.Common
             _connectionSocket = null;
             _connectionStream = null;
 
-            _ignoreSettingsAck = false;
+            _ignoredSettingsAckPromise = null;
             _ignoreWindowUpdates = false;
+        }
+
+        public void ShutdownSend()
+        {
+            _connectionSocket.Shutdown(SocketShutdown.Send);
+        }
+
+        // This will cause a server-initiated shutdown of the connection.
+        // For normal operation, you should send a GOAWAY and complete any remaining streams
+        // before calling this method.
+        public async Task WaitForConnectionShutdownAsync(bool ignoreUnexpectedFrames = false)
+        {
+            // Shutdown our send side, so the client knows there won't be any more frames coming.
+            ShutdownSend();
+
+            await WaitForClientDisconnectAsync(ignoreUnexpectedFrames: ignoreUnexpectedFrames);
         }
 
         // This is similar to WaitForConnectionShutdownAsync but will send GOAWAY for you
         // and will ignore any errors if client has already shutdown
-        public async Task ShutdownIgnoringErrorsAsync(int lastStreamId)
+        public async Task ShutdownIgnoringErrorsAsync(int lastStreamId, ProtocolErrors errorCode = ProtocolErrors.NO_ERROR)
         {
             try
             {
-                await SendGoAway(lastStreamId).ConfigureAwait(false);
-                await WaitForConnectionShutdownAsync().ConfigureAwait(false);
+                await SendGoAway(lastStreamId, errorCode).ConfigureAwait(false);
+                await WaitForConnectionShutdownAsync(ignoreUnexpectedFrames: true).ConfigureAwait(false);
             }
             catch (IOException)
             {
@@ -267,6 +306,20 @@ namespace System.Net.Test.Common
             return frame.StreamId;
         }
 
+        public async Task<HeadersFrame> ReadRequestHeaderFrameAsync()
+        {
+            // Receive HEADERS frame for request.
+            Frame frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
+            if (frame == null)
+            {
+                throw new IOException("Failed to read Headers frame.");
+            }
+
+            Assert.Equal(FrameType.Headers, frame.Type);
+            Assert.Equal(FrameFlags.EndHeaders | FrameFlags.EndStream, frame.Flags);
+            return (HeadersFrame)frame;
+        }
+
         private static (int bytesConsumed, int value) DecodeInteger(ReadOnlySpan<byte> headerBlock, byte prefixMask)
         {
             int value = headerBlock[0] & prefixMask;
@@ -281,34 +334,6 @@ namespace System.Net.Test.Common
                 throw new Exception("long integers currently not supported");
             }
             return (2, prefixMask + b);
-        }
-
-        private static int EncodeInteger(int value, byte prefix, byte prefixMask, Span<byte> headerBlock)
-        {
-            byte prefixLimit = (byte)(~prefixMask);
-
-            if (value < prefixLimit)
-            {
-                headerBlock[0] = (byte)(prefix | value);
-                return 1;
-            }
-
-            headerBlock[0] = (byte)(prefix | prefixLimit);
-            int bytesGenerated = 1;
-
-            value -= prefixLimit;
-
-            while (value >= 0x80)
-            {
-                headerBlock[bytesGenerated] = (byte)((value & 0x7F) | 0x80);
-                value = value >> 7;
-                bytesGenerated++;
-            }
-
-            headerBlock[bytesGenerated] = (byte)value;
-            bytesGenerated++;
-
-            return bytesGenerated;
         }
 
         private static (int bytesConsumed, string value) DecodeString(ReadOnlySpan<byte> headerBlock)
@@ -327,36 +352,6 @@ namespace System.Net.Test.Common
                 string value = Encoding.ASCII.GetString(headerBlock.Slice(bytesConsumed, stringLength));
                 return (bytesConsumed + stringLength, value);
             }
-        }
-
-        private static int EncodeString(string value, Span<byte> headerBlock, bool huffmanEncode)
-        {
-            byte[] data = Encoding.ASCII.GetBytes(value);
-            byte prefix;
-
-            if (!huffmanEncode)
-            {
-                prefix = 0;
-            }
-            else
-            {
-                int len = HuffmanEncoder.GetEncodedLength(data);
-
-                byte[] huffmanData = new byte[len];
-                HuffmanEncoder.Encode(data, huffmanData);
-
-                data = huffmanData;
-                prefix = 0x80;
-            }
-
-            int bytesGenerated = 0;
-
-            bytesGenerated += EncodeInteger(data.Length, prefix, 0x80, headerBlock);
-
-            data.AsSpan().CopyTo(headerBlock.Slice(bytesGenerated));
-            bytesGenerated += data.Length;
-
-            return bytesGenerated;
         }
 
         private static readonly HttpHeaderData[] s_staticTable = new HttpHeaderData[]
@@ -484,15 +479,6 @@ namespace System.Net.Test.Common
             }
         }
 
-        public static int EncodeHeader(HttpHeaderData headerData, Span<byte> headerBlock)
-        {
-            // Always encode as literal, no indexing.
-            int bytesGenerated = EncodeInteger(0, 0, 0b11110000, headerBlock);
-            bytesGenerated += EncodeString(headerData.Name, headerBlock.Slice(bytesGenerated), headerData.HuffmanEncoded);
-            bytesGenerated += EncodeString(headerData.Value, headerBlock.Slice(bytesGenerated), headerData.HuffmanEncoded);
-            return bytesGenerated;
-        }
-
         public async Task<byte[]> ReadBodyAsync()
         {
             byte[] body = null;
@@ -576,21 +562,24 @@ namespace System.Net.Test.Common
             return (streamId, requestData);
         }
 
-        public async Task SendGoAway(int lastStreamId)
+        public async Task SendGoAway(int lastStreamId, ProtocolErrors errorCode = ProtocolErrors.NO_ERROR)
         {
-            GoAwayFrame frame = new GoAwayFrame(lastStreamId, 0, new byte[] { }, 0);
+            GoAwayFrame frame = new GoAwayFrame(lastStreamId, (int)errorCode, new byte[] { }, 0);
             await WriteFrameAsync(frame).ConfigureAwait(false);
         }
 
         public async Task PingPong()
         {
-            PingFrame ping = new PingFrame(new byte[8] { 1, 2, 3, 4, 50, 60, 70, 80 }, FrameFlags.None, 0);
+            byte[] pingData = new byte[8] { 1, 2, 3, 4, 50, 60, 70, 80 };
+            PingFrame ping = new PingFrame(pingData, FrameFlags.None, 0);
             await WriteFrameAsync(ping).ConfigureAwait(false);
-            Frame pingAck = await ReadFrameAsync(Timeout).ConfigureAwait(false);
-            if (pingAck.Type != FrameType.Ping || !pingAck.AckFlag)
+            PingFrame pingAck = (PingFrame)await ReadFrameAsync(Timeout).ConfigureAwait(false);
+            if (pingAck == null || pingAck.Type != FrameType.Ping || !pingAck.AckFlag)
             {
                 throw new Exception("Expected PING ACK");
             }
+
+            Assert.Equal(pingData, pingAck.Data);
         }
 
         public async Task SendDefaultResponseHeadersAsync(int streamId)
@@ -618,14 +607,14 @@ namespace System.Net.Test.Common
             if (!isTrailingHeader)
             {
                 string statusCodeString = ((int)statusCode).ToString();
-                bytesGenerated += EncodeHeader(new HttpHeaderData(":status", statusCodeString), headerBlock.AsSpan());
+                bytesGenerated += HPackEncoder.EncodeHeader(":status", statusCodeString, HPackFlags.None, headerBlock.AsSpan());
             }
 
             if (headers != null)
             {
                 foreach (HttpHeaderData headerData in headers)
                 {
-                    bytesGenerated += EncodeHeader(headerData, headerBlock.AsSpan().Slice(bytesGenerated));
+                    bytesGenerated += HPackEncoder.EncodeHeader(headerData.Name, headerData.Value, headerData.HuffmanEncoded ? HPackFlags.HuffmanEncode : HPackFlags.None, headerBlock.AsSpan(bytesGenerated));
                 }
             }
 
@@ -687,10 +676,39 @@ namespace System.Net.Test.Common
             return SendResponseHeadersAsync(streamId, endStream : isFinal, statusCode, isTrailingHeader : false, endHeaders : endHeaders, headers);
         }
 
+        public override Task SendResponseHeadersAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, int requestId = 0)
+        {
+            int streamId = requestId == 0 ? _lastStreamId : requestId;
+            return SendResponseHeadersAsync(streamId, endStream: false, statusCode, isTrailingHeader: false, endHeaders: true, headers);
+        }
+
         public override Task SendResponseBodyAsync(byte[] body, bool isFinal = true, int requestId = 0)
         {
             int streamId = requestId == 0 ? _lastStreamId : requestId;
             return SendResponseBodyAsync(streamId, body, isFinal);
+        }
+
+        public override async Task WaitForCancellationAsync(bool ignoreIncomingData = true, int requestId = 0)
+        {
+            int streamId = requestId == 0 ? _lastStreamId : requestId;
+
+            Frame frame;
+            do
+            {
+                frame = await ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds));
+                Assert.NotNull(frame); // We should get Rst before closing connection.
+                Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
+                if (ignoreIncomingData)
+                {
+                    Assert.True(frame.Type == FrameType.Data || frame.Type == FrameType.RstStream, $"Expected Data or RstStream, got {frame.Type}");
+                }
+                else
+                {
+                    Assert.Equal(FrameType.RstStream, frame.Type);
+                }
+            } while (frame.Type != FrameType.RstStream);
+
+            Assert.Equal(streamId, frame.StreamId);
         }
     }
 }

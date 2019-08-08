@@ -104,8 +104,6 @@ namespace System.Xml.Serialization
         private string _guidID;
         private string _timeSpanID;
 
-        private static bool s_checkDeserializeAdvances=false;
-
         protected abstract void InitIDs();
 
         // this method must be called before any generated deserialization methods are called
@@ -262,7 +260,7 @@ namespace System.Xml.Serialization
             return ToXmlQualifiedName(type, false);
         }
 
-        // throwOnUnknown flag controls whether this method throws an exception or just returns 
+        // throwOnUnknown flag controls whether this method throws an exception or just returns
         // null if typeName.Namespace is unknown. the method still throws if typeName.Namespace
         // is recognized but typeName.Name isn't.
         private Type GetPrimitiveType(XmlQualifiedName typeName, bool throwOnUnknown)
@@ -1375,14 +1373,6 @@ namespace System.Xml.Serialization
             return b;
         }
 
-        // 0x6018
-        private static uint s_isTextualNodeBitmap = (1 << (int)XmlNodeType.Text) | (1 << (int)XmlNodeType.CDATA) | (1 << (int)XmlNodeType.Whitespace) | (1 << (int)XmlNodeType.SignificantWhitespace);
-
-        private static bool IsTextualNode(XmlNodeType nodeType)
-        {
-            return 0 != (s_isTextualNodeBitmap & (1 << (int)nodeType));
-        }
-
         protected string ReadString(string value)
         {
             return ReadString(value, false);
@@ -2049,7 +2039,6 @@ namespace System.Xml.Serialization
         private Hashtable _createMethods = new Hashtable();
         private int _nextCreateMethodNumber = 0;
         private int _nextIdNumber = 0;
-        private int _nextWhileLoopIndex = 0;
 
         internal Hashtable Enums
         {

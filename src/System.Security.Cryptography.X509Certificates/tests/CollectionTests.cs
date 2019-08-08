@@ -653,7 +653,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             TestExportSingleCert(X509ContentType.Cert);
         }
-        
+
         [Fact]
         public static void ExportCert_SecureString()
         {
@@ -915,6 +915,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        [Fact]
         public static void X509ChainElementCollection_CopyTo_NonZeroLowerBound_ThrowsIndexOutOfRangeException()
         {
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
@@ -1431,7 +1432,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Null(byFriendlyName);
             }
         }
-        
+
         private static void TestExportSingleCert_SecureStringPassword(X509ContentType ct)
         {
             using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.CreatePfxDataPasswordSecureString(), Cert.EphemeralIfPossible))

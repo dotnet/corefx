@@ -45,14 +45,12 @@ namespace System.Runtime.Serialization
 
         private XmlObjectSerializerReadContext _context;
 
-        private static Hashtable s_nsToPrefixTable;
+        private static readonly Hashtable s_nsToPrefixTable = new Hashtable();
 
-        private static Hashtable s_prefixToNsTable;
+        private static readonly Hashtable s_prefixToNsTable = new Hashtable();
 
         static ExtensionDataReader()
         {
-            s_nsToPrefixTable = new Hashtable();
-            s_prefixToNsTable = new Hashtable();
             AddPrefix(Globals.XsiPrefix, Globals.SchemaInstanceNamespace);
             AddPrefix(Globals.SerPrefix, Globals.SerializationNamespace);
             AddPrefix(string.Empty, string.Empty);
@@ -483,12 +481,12 @@ namespace System.Runtime.Serialization
         {
             ns = ns ?? string.Empty;
             string prefix = (string)s_nsToPrefixTable[ns];
-            if (prefix == null) 
+            if (prefix == null)
             {
                 lock (s_prefixLock)
                 {
                     prefix = (string)s_nsToPrefixTable[ns];
-                    if (prefix == null) 
+                    if (prefix == null)
                     {
                         prefix = (ns == null || ns.Length == 0) ? string.Empty : "p" + s_nsToPrefixTable.Count;
                         AddPrefix(prefix, ns);

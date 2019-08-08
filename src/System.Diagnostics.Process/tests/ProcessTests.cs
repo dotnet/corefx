@@ -762,7 +762,7 @@ namespace System.Diagnostics.Tests
 
             DateTime startTime = DateTime.UtcNow;
             TimeSpan processorTimeBeforeSpin = Process.GetCurrentProcess().TotalProcessorTime;
-           
+
             // Perform loop to occupy cpu, takes less than a second.
             int i = int.MaxValue / 16;
             while (i > 0)
@@ -836,7 +836,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)]
         [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void ProcessStartTime_Deterministic_Across_Instances()
         {
@@ -917,10 +916,10 @@ namespace System.Diagnostics.Tests
             try
             {
                 _process.PriorityClass = ProcessPriorityClass.High;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.High);
+                Assert.Equal(ProcessPriorityClass.High, _process.PriorityClass);
 
                 _process.PriorityClass = ProcessPriorityClass.Normal;
-                Assert.Equal(_process.PriorityClass, ProcessPriorityClass.Normal);
+                Assert.Equal(ProcessPriorityClass.Normal, _process.PriorityClass);
             }
             finally
             {
@@ -950,7 +949,7 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
-            // Process.ProcessName drops the extension when it's exe. 
+            // Process.ProcessName drops the extension when it's exe.
             string processName = RemoteExecutor.HostRunner.EndsWith(".exe") ?_process.ProcessName : Path.GetFileNameWithoutExtension(_process.ProcessName);
             Assert.Equal(Path.GetFileNameWithoutExtension(RemoteExecutor.HostRunner), processName, StringComparer.OrdinalIgnoreCase);
         }
@@ -1088,22 +1087,27 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void GetProcesses_RemoteMachinePath_ReturnsExpected()
         {
+            string computerDomain = null;
             try
             {
-                Process[] processes = Process.GetProcesses(Environment.MachineName + "." + Domain.GetComputerDomain());
+                computerDomain = Domain.GetComputerDomain().Name;
+            }
+            catch
+            {
+                // Ignore all exceptions - this test is not testing GetComputerDomain.
+                // This path is taken when the executing machine is not domain-joined or DirectoryServices are unavailable.
+                return;
+            }
+
+            try
+            {
+                Process[] processes = Process.GetProcesses(Environment.MachineName + "." + computerDomain);
                 Assert.NotEmpty(processes);
             }
-            catch (ActiveDirectoryObjectNotFoundException)
+            catch (InvalidOperationException)
             {
-                //This will be thrown when the executing machine is not domain-joined, i.e. in CI
-            }
-            catch (TypeInitializationException tie) when (tie.InnerException is ActiveDirectoryOperationException)
-            {
-                //Thrown if the ActiveDirectory module is unavailable
-            }
-            catch (PlatformNotSupportedException)
-            {
-                //System.DirectoryServices is not supported on all platforms
+                // As we can't detect reliably if performance counters are enabled
+                // we let possible InvalidOperationExceptions pass silently.
             }
         }
 
@@ -1146,7 +1150,7 @@ namespace System.Diagnostics.Tests
                     }
                     builder.AppendLine();
                 }
-                
+
                 builder.AppendFormat("Current process id: {0} Process name: '{1}'", currentProcess.Id, currentProcess.ProcessName);
                 return builder.ToString();
             }
@@ -1340,16 +1344,6 @@ namespace System.Diagnostics.Tests
         {
             var process = new Process();
             Assert.Throws<InvalidOperationException>(() => process.StandardInput);
-        }
-
-        // [Fact] // uncomment for diagnostic purposes to list processes to console
-        public void TestDiagnosticsWithConsoleWriteLine()
-        {
-            foreach (var p in Process.GetProcesses().OrderBy(p => p.Id))
-            {
-                Console.WriteLine("{0} : \"{1}\" (Threads: {2})", p.Id, p.ProcessName, p.Threads.Count);
-                p.Dispose();
-            }
         }
 
         [Fact]

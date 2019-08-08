@@ -1,6 +1,5 @@
 <Project>
   <Import Project="..\Directory.Build.props" />
-  <Import Project="$(NuGetPackageRoot)/$(PublishSymbolsPackage.ToLower())/$(PublishSymbolsPackageVersion)/build/PublishSymbols.targets" />
 
   <!-- We need to import Directory.Build.targets at the beginning because there is where we import the restored tools targets, in 
   this case we need Microsoft.DotNet.Build.Tasks.Feed targets to be imported. -->
@@ -24,20 +23,28 @@
     <SymbolsPublishExperimentalPattern>$(SymbolsOutputRoot)*Experimental*.nupkg</SymbolsPublishExperimentalPattern>
   </PropertyGroup>
 
+  <!-- List of packages/symbol packages to exclude from nuget.org publishing -->
+  <!-- We can't use the `IsShippingPackage` metadata since CoreFx doesn't output packages
+  to shipping/nonshipping directories -->
+  <ItemGroup>
+    <NonShippingPackages Include="$(PackageOutputRoot)*System.Numerics.Tensors*.nupkg" />
+
+    <NonShippingSymbolPackages Include="$(SymbolsOutputRoot)*System.Numerics.Tensors*.nupkg" />
+  </ItemGroup>
 
   <ItemGroup Condition="'$(PackagesGlob)' != ''">
     <PackagesToPublish Include="$(PackagesGlob)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(PackagesGlob)' == ''">
-    <PackagesToPublish Include="$(FinalPublishPrivatePattern);$(FinalPublishExperimentalPattern)">
+    <PackagesToPublish Include="$(FinalPublishPrivatePattern);$(FinalPublishExperimentalPattern);@(NonShippingPackages)">
       <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
     </PackagesToPublish>
     <PackagesToPublish Include="$(FinalPublishPattern)" Exclude="@(PackagesToPublish)" />
   </ItemGroup>
 
   <ItemGroup>
-    <SymbolPackagesToPublish  Include="$(SymbolsPublishPrivatePattern);$(SymbolsPublishExperimentalPattern)">
+    <SymbolPackagesToPublish  Include="$(SymbolsPublishPrivatePattern);$(SymbolsPublishExperimentalPattern);@(NonShippingSymbolPackages)">
       <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
     </SymbolPackagesToPublish>
     <SymbolPackagesToPublish Include="$(SymbolsPublishPattern)" Exclude="@(SymbolPackagesToPublish)" />

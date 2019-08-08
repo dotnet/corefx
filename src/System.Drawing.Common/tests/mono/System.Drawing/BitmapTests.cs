@@ -4,9 +4,9 @@
 // Bitmap class testing unit
 //
 // Authors:
-// 	Jordi Mas i Hernàndez (jmas@softcatala.org>
-//	Jonathan Gilbert <logic@deltaq.org>
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Jordi Mas i Hernàndez (jmas@softcatala.org>
+//  Jonathan Gilbert <logic@deltaq.org>
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // (C) 2004 Ximian, Inc.  http://www.ximian.com
 // Copyright (C) 2004,2006-2007 Novell, Inc (http://www.novell.com)
@@ -18,10 +18,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -52,7 +52,7 @@ namespace MonoTests.System.Drawing
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TestPixels()
         {
-            // Tests GetSetPixel/SetPixel			
+            // Tests GetSetPixel/SetPixel
             Bitmap bmp = new Bitmap(100, 100, PixelFormat.Format32bppRgb);
             bmp.SetPixel(0, 0, Color.FromArgb(255, 128, 128, 128));
             Color color = bmp.GetPixel(0, 0);
@@ -64,6 +64,7 @@ namespace MonoTests.System.Drawing
             Assert.Equal(Color.FromArgb(255, 255, 0, 155), color2);
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20884)]
         public void LockBits_IndexedWrite_NonIndexed()
         {
@@ -74,6 +75,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20884)]
         public void LockBits_NonIndexedWrite_ToIndexed()
         {
@@ -295,6 +297,7 @@ namespace MonoTests.System.Drawing
             FormatTest(PixelFormat.Format32bppArgb);
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20884)]
         public void Format32bppRgb()
         {
@@ -505,38 +508,22 @@ namespace MonoTests.System.Drawing
         // Rotate 1- and 4-bit bitmaps in different ways and check the
         // resulting pixels using MD5
         [ConditionalTheory(Helpers.IsDrawingSupported)]
-        [InlineData("1bit.png", RotateFlipType.RotateNoneFlipNone, "A4DAF507C92BDE10626BC7B34FEFE5")]
-        [InlineData("1bit.png", RotateFlipType.Rotate180FlipXY, "A4DAF507C92BDE10626BC7B34FEFE5")]
-        [InlineData("1bit.png", RotateFlipType.Rotate90FlipNone, "C0975EAFD2FC1CC9CC7AF20B92FC9F")]
-        [InlineData("1bit.png", RotateFlipType.Rotate270FlipXY, "C0975EAFD2FC1CC9CC7AF20B92FC9F")]
         [InlineData("1bit.png", RotateFlipType.Rotate180FlipNone, "64AE60858A02228F7B1B18C7812FB6")]
-        [InlineData("1bit.png", RotateFlipType.RotateNoneFlipXY, "64AE60858A02228F7B1B18C7812FB6")]
-        [InlineData("1bit.png", RotateFlipType.Rotate270FlipNone, "E96D3390938350F9DE2608C4364424")]
-        [InlineData("1bit.png", RotateFlipType.Rotate90FlipXY, "E96D3390938350F9DE2608C4364424")]
-        [InlineData("1bit.png", RotateFlipType.RotateNoneFlipX, "23947CE822C1DDE6BEA69C01F8D0D9")]
-        [InlineData("1bit.png", RotateFlipType.Rotate180FlipY, "23947CE822C1DDE6BEA69C01F8D0D9")]
-        [InlineData("1bit.png", RotateFlipType.Rotate90FlipX, "BE45F685BDEBD7079AA1B2CBA46723")]
-        [InlineData("1bit.png", RotateFlipType.Rotate270FlipY, "BE45F685BDEBD7079AA1B2CBA46723")]
         [InlineData("1bit.png", RotateFlipType.Rotate180FlipX, "353E937CFF31B1BF6C3DD0A031ACB5")]
-        [InlineData("1bit.png", RotateFlipType.RotateNoneFlipY, "353E937CFF31B1BF6C3DD0A031ACB5")]
+        [InlineData("1bit.png", RotateFlipType.Rotate180FlipXY, "A4DAF507C92BDE10626BC7B34FEFE5")]
+        [InlineData("1bit.png", RotateFlipType.Rotate180FlipY, "23947CE822C1DDE6BEA69C01F8D0D9")]
+        [InlineData("1bit.png", RotateFlipType.Rotate270FlipNone, "E96D3390938350F9DE2608C4364424")]
         [InlineData("1bit.png", RotateFlipType.Rotate270FlipX, "AEA18A770A845E25B6A8CE28DD6DCB")]
-        [InlineData("1bit.png", RotateFlipType.Rotate90FlipY, "AEA18A770A845E25B6A8CE28DD6DCB")]
-        [InlineData("4bit.png", RotateFlipType.RotateNoneFlipNone, "3CC874B571902366AACED5D619E87D")]
-        [InlineData("4bit.png", RotateFlipType.Rotate180FlipXY, "3CC874B571902366AACED5D619E87D")]
-        [InlineData("4bit.png", RotateFlipType.Rotate90FlipNone, "8DE25C7E1BE4A3B535DB5D83198D83")]
-        [InlineData("4bit.png", RotateFlipType.Rotate270FlipXY, "8DE25C7E1BE4A3B535DB5D83198D83")]
+        [InlineData("1bit.png", RotateFlipType.Rotate270FlipXY, "C0975EAFD2FC1CC9CC7AF20B92FC9F")]
+        [InlineData("1bit.png", RotateFlipType.Rotate270FlipY, "BE45F685BDEBD7079AA1B2CBA46723")]
         [InlineData("4bit.png", RotateFlipType.Rotate180FlipNone, "27CF5E9CE70BE9EBC47FB996721B95")]
-        [InlineData("4bit.png", RotateFlipType.RotateNoneFlipXY, "27CF5E9CE70BE9EBC47FB996721B95")]
-        [InlineData("4bit.png", RotateFlipType.Rotate270FlipNone, "A919CCB8F97CAD7DC1F01026D11A5D")]
-        [InlineData("4bit.png", RotateFlipType.Rotate90FlipXY, "A919CCB8F97CAD7DC1F01026D11A5D")]
-        [InlineData("4bit.png", RotateFlipType.RotateNoneFlipX, "545876C99ACF833E69FBFFBF436034")]
-        [InlineData("4bit.png", RotateFlipType.Rotate180FlipY, "545876C99ACF833E69FBFFBF436034")]
-        [InlineData("4bit.png", RotateFlipType.Rotate90FlipX, "5DB56687757CDEFC52D89C77CA9223")]
-        [InlineData("4bit.png", RotateFlipType.Rotate270FlipY, "5DB56687757CDEFC52D89C77CA9223")]
         [InlineData("4bit.png", RotateFlipType.Rotate180FlipX, "05A77EDDCDF20D5B0AC0169E95D7D7")]
-        [InlineData("4bit.png", RotateFlipType.RotateNoneFlipY, "05A77EDDCDF20D5B0AC0169E95D7D7")]
+        [InlineData("4bit.png", RotateFlipType.Rotate180FlipXY, "3CC874B571902366AACED5D619E87D")]
+        [InlineData("4bit.png", RotateFlipType.Rotate180FlipY, "545876C99ACF833E69FBFFBF436034")]
+        [InlineData("4bit.png", RotateFlipType.Rotate270FlipNone, "A919CCB8F97CAD7DC1F01026D11A5D")]
         [InlineData("4bit.png", RotateFlipType.Rotate270FlipX, "B6B6245796C836923ABAABDF368B29")]
-        [InlineData("4bit.png", RotateFlipType.Rotate90FlipY, "B6B6245796C836923ABAABDF368B29")]
+        [InlineData("4bit.png", RotateFlipType.Rotate270FlipXY, "8DE25C7E1BE4A3B535DB5D83198D83")]
+        [InlineData("4bit.png", RotateFlipType.Rotate270FlipY, "5DB56687757CDEFC52D89C77CA9223")]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void Rotate1bit4bit(string file, RotateFlipType type, string md5)
         {
@@ -669,6 +656,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20884)]
         public void LockBitmap_Format32bppArgb_Format32bppRgb_ReadWrite_Whole()
         {
@@ -723,6 +711,7 @@ namespace MonoTests.System.Drawing
             }
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20884)]
         public void LockBitmap_Format32bppArgb_Format32bppRgb_ReadWrite_Partial()
         {
@@ -911,6 +900,7 @@ namespace MonoTests.System.Drawing
             return new BinaryFormatter().Deserialize(s);
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20844)]
         public void Serialize_Icon()
         {
@@ -1560,4 +1550,3 @@ namespace MonoTests.System.Drawing
         }
     }
 }
-

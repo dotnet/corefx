@@ -17,7 +17,7 @@ namespace System.Numerics.Tests
             RunTests(seed);
         }
 
-        public static void RunTests(int seed)
+        private static void RunTests(int seed)
         {
             Random random = new Random(seed);
 
@@ -219,7 +219,7 @@ namespace System.Numerics.Tests
 
             // One Larger (BigInteger), Int64.MaxValue
             VerifyComparison((BigInteger)long.MaxValue + 1, long.MaxValue, 1);
-            
+
 
             //1 Random Inputs
             // Random BigInteger only differs by sign
@@ -229,7 +229,7 @@ namespace System.Numerics.Tests
                 do
                 {
                     byteArray = GetRandomByteArray(random);
-                } 
+                }
                 while (MyBigIntImp.IsZero(byteArray));
 
                 BigInteger b2 = new BigInteger(byteArray);
@@ -293,7 +293,7 @@ namespace System.Numerics.Tests
             do
             {
                 byteArray = GetRandomByteArray(random);
-            } 
+            }
             while (MyBigIntImp.IsZero(byteArray));
 
             isNegative = 0 == random.Next(0, 2);
@@ -340,7 +340,7 @@ namespace System.Numerics.Tests
             do
             {
                 byteArray = GetRandomByteArray(random);
-            } 
+            }
             while (MyBigIntImp.IsZero(byteArray));
 
             BigInteger b1 = new BigInteger(byteArray);
@@ -350,16 +350,16 @@ namespace System.Numerics.Tests
         private static void RunNegativeTests(Random random)
         {
             // BigInteger.Zero, 0
-            Assert.Equal(false, BigInteger.Zero.Equals((object)0));
+            Assert.False(BigInteger.Zero.Equals((object)0));
 
             // BigInteger.Zero, null
-            Assert.Equal(false, BigInteger.Zero.Equals((object)null));
+            Assert.False(BigInteger.Zero.Equals((object)null));
 
             // BigInteger.Zero, string
-            Assert.Equal(false, BigInteger.Zero.Equals((object)"0"));
+            Assert.False(BigInteger.Zero.Equals((object)"0"));
         }
 
-        public static void IComparable_Invalid(string paramName)
+        private static void IComparable_Invalid(string paramName)
         {
             IComparable comparable = new BigInteger();
             Assert.Equal(1, comparable.CompareTo(null));
@@ -444,7 +444,7 @@ namespace System.Numerics.Tests
                 Assert.Equal(x.GetHashCode(), ((BigInteger)y).GetHashCode());
                 Assert.Equal(x.ToString(), ((BigInteger)y).ToString());
             }
-            
+
             Assert.Equal(x.GetHashCode(), x.GetHashCode());
             Assert.Equal(((BigInteger)y).GetHashCode(), ((BigInteger)y).GetHashCode());
 
@@ -637,7 +637,7 @@ namespace System.Numerics.Tests
             Assert.Equal(expectedGreaterThan || expectedEquals, x >= y);
             Assert.Equal(expectedLessThan || expectedEquals, y >= x);
         }
-        
+
         private static void VerifyCompareResult(int expected, int actual, string message)
         {
             if (0 == expected)

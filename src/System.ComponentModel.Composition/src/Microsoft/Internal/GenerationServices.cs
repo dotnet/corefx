@@ -67,7 +67,6 @@ namespace Microsoft.Internal
         /// Everything else cannot be represented as literals
         /// <param name="ilGenerator"></param>
         /// <param name="value"></param>
-        /// <returns></returns>
         public static void LoadValue(this ILGenerator ilGenerator, object value)
         {
             Debug.Assert(ilGenerator != null);
@@ -129,7 +128,7 @@ namespace Microsoft.Internal
             else if (valueType == GenerationServices.UInt32Type)
             {
                 // NOTE : This one is a bit tricky. Ldc.I4 takes an Int32 as an argument, although it really treats it as a 32bit number
-                // That said, some UInt32 values are larger that Int32.MaxValue, so the Convert call above will fail, which is why 
+                // That said, some UInt32 values are larger that Int32.MaxValue, so the Convert call above will fail, which is why
                 // we need to treat this case individually and cast to uint, and then - unchecked - to int.
                 ilGenerator.LoadInt(unchecked((int)((uint)rawValue)));
             }
@@ -164,7 +163,6 @@ namespace Microsoft.Internal
         /// <param name="dictionary"></param>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        /// <returns></returns>
         public static void AddItemToLocalDictionary(this ILGenerator ilGenerator, LocalBuilder dictionary, object key, object value)
         {
             Debug.Assert(ilGenerator != null);
@@ -195,7 +193,6 @@ namespace Microsoft.Internal
         /// <param name="dictionary"></param>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        /// <returns></returns>
         public static void AddLocalToLocalDictionary(this ILGenerator ilGenerator, LocalBuilder dictionary, object key, LocalBuilder value)
         {
             Debug.Assert(ilGenerator != null);
@@ -225,7 +222,6 @@ namespace Microsoft.Internal
         /// <param name="ilGenerator"></param>
         /// <param name="exception"></param>
         /// <param name="dataStore"></param>
-        /// <returns></returns>
         public static void GetExceptionDataAndStoreInLocal(this ILGenerator ilGenerator, LocalBuilder exception, LocalBuilder dataStore)
         {
             Debug.Assert(ilGenerator != null);

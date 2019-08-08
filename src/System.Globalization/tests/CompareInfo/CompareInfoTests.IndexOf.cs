@@ -100,7 +100,7 @@ namespace System.Globalization.Tests
             yield return new object[] { s_currentCompare, "\u0131", "\u0131", 0, 1, CompareOptions.Ordinal, 0 };
             yield return new object[] { s_currentCompare, "\u0130", "\u0131", 0, 1, CompareOptions.Ordinal, -1 };
             yield return new object[] { s_currentCompare, "\u0131", "\u0130", 0, 1, CompareOptions.Ordinal, -1 };
-            
+
             // Platform differences
             yield return new object[] { s_hungarianCompare, "foobardzsdzs", "rddzs", 0, 12, CompareOptions.None, PlatformDetection.IsWindows ? 5 : -1};
         }
@@ -178,7 +178,7 @@ namespace System.Globalization.Tests
             Assert.Equal(expected, compareInfo.IndexOf(source, value, startIndex, count, options));
         }
 
-        public void IndexOf_Char(CompareInfo compareInfo, string source, char value, int startIndex, int count, CompareOptions options, int expected)
+        private static void IndexOf_Char(CompareInfo compareInfo, string source, char value, int startIndex, int count, CompareOptions options, int expected)
         {
             if (options == CompareOptions.None)
             {
@@ -209,7 +209,7 @@ namespace System.Globalization.Tests
         [Fact]
         public void IndexOf_UnassignedUnicode()
         {
-            bool isWindows = PlatformDetection.IsWindows; 
+            bool isWindows = PlatformDetection.IsWindows;
             IndexOf_String(s_invariantCompare, "FooBar", "Foo\uFFFFBar", 0, 6, CompareOptions.None, isWindows ? 0 : -1);
             IndexOf_String(s_invariantCompare, "~FooBar", "Foo\uFFFFBar", 0, 7, CompareOptions.IgnoreNonSpace, isWindows ? 1 : -1);
         }

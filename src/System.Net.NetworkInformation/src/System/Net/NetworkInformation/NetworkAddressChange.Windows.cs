@@ -70,7 +70,7 @@ namespace System.Net.NetworkInformation
                     NetworkAvailabilityEventArgs args = isAvailable ? s_availableEventArgs : s_notAvailableEventArgs;
                     ContextCallback callbackContext = isAvailable ? s_runHandlerAvailable : s_runHandlerNotAvailable;
 
-                    foreach (KeyValuePair<NetworkAvailabilityChangedEventHandler, ExecutionContext> 
+                    foreach (KeyValuePair<NetworkAvailabilityChangedEventHandler, ExecutionContext>
                         subscriber in availabilityChangedSubscribers)
                     {
                         NetworkAvailabilityChangedEventHandler handler = subscriber.Key;
@@ -240,7 +240,7 @@ namespace System.Net.NetworkInformation
                                 true);
 
                             SocketError errorCode = Interop.Winsock.WSAIoctl_Blocking(
-                                s_ipv4Socket.Handle,
+                                s_ipv4Socket.SafeHandle,
                                 (int)IOControlCode.AddressListChange,
                                 null, 0, null, 0,
                                 out int length,
@@ -276,7 +276,7 @@ namespace System.Net.NetworkInformation
                                 true);
 
                             SocketError errorCode = Interop.Winsock.WSAIoctl_Blocking(
-                                s_ipv6Socket.Handle,
+                                s_ipv6Socket.SafeHandle,
                                 (int)IOControlCode.AddressListChange,
                                 null, 0, null, 0,
                                 out int length,

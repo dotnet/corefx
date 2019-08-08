@@ -53,8 +53,8 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 | [System.Composition](https://github.com/dotnet/corefx/labels/area-System.Composition)         | **[@maryamariyan](https://github.com/maryamariyan)**, [@ViktorHofer](https://github.com/ViktorHofer) |  |
 | [System.Configuration](https://github.com/dotnet/corefx/labels/area-System.Configuration)     | **[@maryamariyan](https://github.com/maryamariyan)**, [@safern](https://github.com/safern) |  |
 | [System.Console](https://github.com/dotnet/corefx/labels/area-System.Console)                 | [@wtgodbe](https://github.com/wtgodbe) |  |
-| [System.Data](https://github.com/dotnet/corefx/labels/area-System.Data)                       | **[@divega](https://github.com/divega)**, [@ajcvickers](https://github.com/ajcvickers), [@afsanehr](https://github.com/afsanehr), [@david-engel](https://github.com/david-engel), [@Gary-Zh ](https://github.com/Gary-Zh) | <ul><li>Odbc, OleDb - [@saurabh](https://github.com/saurabh)</li></ul> |
-| [System.Data.SqlClient](https://github.com/dotnet/corefx/labels/area-System.Data.SqlClient)   | **[@afsanehr](https://github.com/afsanehr)**, [@Gary-Zh ](https://github.com/Gary-Zh), [@david-engel](https://github.com/david-engel) | |
+| [System.Data](https://github.com/dotnet/corefx/labels/area-System.Data)                       | **[@divega](https://github.com/divega)**, [@ajcvickers](https://github.com/ajcvickers),[@cheenamalhotra](https://github.com/cheenamalhotra), [@david-engel](https://github.com/david-engel), [@Gary-Zh ](https://github.com/Gary-Zh) | <ul><li>Odbc, OleDb - [@saurabh](https://github.com/saurabh)</li></ul> |
+| [System.Data.SqlClient](https://github.com/dotnet/corefx/labels/area-System.Data.SqlClient)   | **[@cheenamalhotra](https://github.com/cheenamalhotra)**, [@Gary-Zh ](https://github.com/Gary-Zh), [@david-engel](https://github.com/david-engel) | |
 | [System.Diagnostics](https://github.com/dotnet/corefx/labels/area-System.Diagnostics)         | **[@wtgodbe](https://github.com/wtgodbe)**, [@krwq](https://github.com/krwq) | <ul><li>System.Diagnostics.EventLog - [@Anipik](https://github.com/Anipik)</li></ul> |
 | [System.Diagnostics.Process](https://github.com/dotnet/corefx/labels/area-System.Diagnostics.Process) | **[@wtgodbe](https://github.com/wtgodbe)**, [@krwq](https://github.com/krwq) |  |
 | [System.Diagnostics.Tracing](https://github.com/dotnet/corefx/labels/area-System.Diagnostics.Tracing) | [@noahfalk](https://github.com/noahfalk), [@tommcdon](https://github.com/tommcdon), [@Anipik](https://github.com/Anipik) | Packages:<ul><li>System.Diagnostics.DiagnosticSource</li><li>System.Diagnostics.PerformanceCounter - [@Anipik](https://github.com/Anipik)</li><li>System.Diagnostics.Tracing</li><li>System.Diagnostics.TraceSource - [@Anipik](https://github.com/Anipik)</li></ul><br/> |
@@ -71,11 +71,11 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 | [System.Linq.Parallel](https://github.com/dotnet/corefx/labels/area-System.Linq.Parallel)     | **[@tarekgh](https://github.com/tarekgh)**, [@kouvel](https://github.com/kouvel) |  |
 | [System.Management](https://github.com/dotnet/corefx/labels/area-System.Management)           | [@Anipik](https://github.com/Anipik) | WMI |
 | [System.Memory](https://github.com/dotnet/corefx/labels/area-System.Memory)                   | [@ahsonkhan](https://github.com/ahsonkhan) |  |
-| [System.Net](https://github.com/dotnet/corefx/labels/area-System.Net)                         | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@scalablecory](https://github.com/scalablecory), [@karelz](https://github.com/karelz) | Included:<ul><li>System.Uri - [@wtgodbe](https://github.com/wtgodbe)</li></ul> |
-| [System.Net.Http](https://github.com/dotnet/corefx/labels/area-System.Net.Http)               | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@scalablecory](https://github.com/scalablecory), [@karelz](https://github.com/karelz) |  |
-| [System.Net.Http.SocketsHttpHandler](https://github.com/dotnet/corefx/labels/area-System.Net.Http.SocketsHttpHandler) | [@geoffkizer](https://github.com/geoffkizer), [@wfurt](https://github.com/wfurt), [@davidsh](https://github.com/davidsh), [@scalablecory](https://github.com/scalablecory), [@karelz](https://github.com/karelz) |  |
-| [System.Net.Security](https://github.com/dotnet/corefx/labels/area-System.Net.Security)       | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@scalablecory](https://github.com/scalablecory), [@karelz](https://github.com/karelz) |  |
-| [System.Net.Sockets](https://github.com/dotnet/corefx/labels/area-System.Net.Sockets)         | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@scalablecory](https://github.com/scalablecory), [@karelz](https://github.com/karelz) |  |
+| [System.Net](https://github.com/dotnet/corefx/labels/area-System.Net)                         | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@scalablecory](https://github.com/scalablecory), [@eiriktsarpalis](https://github.com/eiriktsarpalis), [@karelz](https://github.com/karelz) | Included:<ul><li>System.Uri - [@wtgodbe](https://github.com/wtgodbe)</li></ul> |
+| [System.Net.Http](https://github.com/dotnet/corefx/labels/area-System.Net.Http)               | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@scalablecory](https://github.com/scalablecory), [@eiriktsarpalis](https://github.com/eiriktsarpalis), [@karelz](https://github.com/karelz) |  |
+| [System.Net.Http.SocketsHttpHandler](https://github.com/dotnet/corefx/labels/area-System.Net.Http.SocketsHttpHandler) | [@geoffkizer](https://github.com/geoffkizer), [@wfurt](https://github.com/wfurt), [@davidsh](https://github.com/davidsh), [@scalablecory](https://github.com/scalablecory), [@eiriktsarpalis](https://github.com/eiriktsarpalis), [@karelz](https://github.com/karelz) |  |
+| [System.Net.Security](https://github.com/dotnet/corefx/labels/area-System.Net.Security)       | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@scalablecory](https://github.com/scalablecory), [@eiriktsarpalis](https://github.com/eiriktsarpalis), [@karelz](https://github.com/karelz) |  |
+| [System.Net.Sockets](https://github.com/dotnet/corefx/labels/area-System.Net.Sockets)         | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@scalablecory](https://github.com/scalablecory), [@eiriktsarpalis](https://github.com/eiriktsarpalis), [@karelz](https://github.com/karelz) |  |
 | [System.Numerics](https://github.com/dotnet/corefx/labels/area-System.Numerics)               | [@tannergooding](https://github.com/tannergooding), [@ViktorHofer](https://github.com/ViktorHofer) |  |
 | [System.Numerics.Tensors](https://github.com/dotnet/corefx/labels/area-System.Numerics.Tensors) | [@tannergooding](https://github.com/tannergooding) |  |
 | [System.Reflection](https://github.com/dotnet/corefx/labels/area-System.Reflection)           | [@steveharter](https://github.com/steveharter), [@GrabYourPitchforks](https://github.com/GrabYourPitchforks) |  |
@@ -140,6 +140,7 @@ Feel free to use other labels if it helps your triage efforts (e.g. **needs more
     * Motivation: Helps communicate desire/timeline to community. Can spark further priority/impact discussion.
 1. Each issue has exactly one "*issue type*" label (**bug**, **enhancement**, **api-needs-work**, **test bug**, **test enhancement**, **question**, **documentation**, etc.)
     * Don't be afraid to be wrong when deciding 'bug' vs. 'test bug' (flip a coin if you must). The most useful values for tracking are 'api-&#42;' vs. 'enhancement', 'question', and 'documentation'.
+    * Note: The **api-\*** labels are important for tracking API approvals, the other *issue type* labels are in practice optional.
 1. Don't be afraid to say no, or close issues - just explain why and be polite
 1. Don't be afraid to be wrong - just be flexible when new information appears
 
@@ -148,9 +149,10 @@ Feel free to use other labels if it helps your triage efforts (e.g. **needs more
 1. Each PR has exactly one **area-\*** label
     * Movitation: Area owners will get email notification about new issue in their area.
 1. PR has **Assignee** set to author of the PR, if it is non-CoreFX engineer, then area owners are co-assignees
-    * Motivation: Area owners are responsible to do code reviews for PRs from external contributors. CoreFX engineers know how to get code reviews from others.
-1. [Optional] Set milestone according to the branch (master = 2.1, release/2.0.0 = 2.0, release/1.0.0 = 1.0.x, release/1.1.0 = 1.1.x)
-    * Motivation: Easier to track where which fix ended and if it needs to be ported into another branch
+    * Motivation #1: Area owners are responsible to do code reviews for PRs from external contributors. CoreFX engineers know how to get code reviews from others.
+    * Motivation #2: Assignees will get notifications for anything happening on the PR.
+1. [Optional] Set milestone according to the branch the PR is against (master = 5.0, release/3.0 = 3.0, release/2.1 = 2.1.x, etc.)
+    * Motivation: Easier to track and audit where which fix ended up and if it needs to be ported into another branch (hence reflecting branch the specific PR ended up and not the abstract issue).
     * Note: This is easily done after merge via simple queries & bulk-edits, you don't have to do this one.
 1. Any other labels on PRs are superfluous and not needed (exceptions: **blocked**, **NO MERGE**)
     * Motivation: All the important info (*issue type* label, api approval label, OS label, etc.) is already captured on the associated issue.

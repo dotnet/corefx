@@ -11,7 +11,7 @@ namespace System.Collections.Generic
         [return: MaybeNull]
         public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key) where TKey : notnull
         {
-            return dictionary.GetValueOrDefault(key, default(TValue)!); // TODO-NULLABLE: Remove ! when nullable attributes are respected
+            return dictionary.GetValueOrDefault(key, default);
         }
 
         [return: MaybeNull]
@@ -22,7 +22,7 @@ namespace System.Collections.Generic
                 throw new ArgumentNullException(nameof(dictionary));
             }
 
-            TValue value;            
+            TValue value;
             return dictionary.TryGetValue(key, out value) ? value : defaultValue;
         }
 

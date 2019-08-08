@@ -4,7 +4,7 @@
 // Metafile class unit tests
 //
 // Authors:
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // Copyright (C) 2007 Novell, Inc (http://www.novell.com)
 //
@@ -15,10 +15,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -56,7 +56,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        static public void Check_MetaHeader_WmfPlaceable(MetaHeader mh)
+        private static void Check_MetaHeader_WmfPlaceable(MetaHeader mh)
         {
             Assert.Equal(9, mh.HeaderSize);
             Assert.Equal(98, mh.MaxRecord);
@@ -67,7 +67,7 @@ namespace MonoTests.System.Drawing.Imaging
             Assert.Equal(0x300, mh.Version);
         }
 
-        public static void Check_MetafileHeader_WmfPlaceable(MetafileHeader header)
+        private static void Check_MetafileHeader_WmfPlaceable(MetafileHeader header)
         {
             Assert.Equal(MetafileType.WmfPlaceable, header.Type);
             Assert.Equal(0x300, header.Version);
@@ -148,7 +148,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        public static void Check_MetafileHeader_Emf(MetafileHeader header)
+        private static void Check_MetafileHeader_Emf(MetafileHeader header)
         {
             Assert.Equal(MetafileType.Emf, header.Type);
             Assert.Equal(65536, header.Version);
@@ -371,18 +371,21 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20844)]
         public void CreateFilename_SingleGraphics_EmfOnly()
         {
             CreateFilename(EmfType.EmfOnly, true);
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20844)]
         public void CreateFilename_SingleGraphics_EmfPlusDual()
         {
             CreateFilename(EmfType.EmfPlusDual, true);
         }
 
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         [ActiveIssue(20844)]
         public void CreateFilename_SingleGraphics_EmfPlusOnly()
         {

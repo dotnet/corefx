@@ -13,7 +13,7 @@ namespace System.Collections.Concurrent
     /// <summary>
     /// Provides a multi-producer, multi-consumer thread-safe bounded segment.  When the queue is full,
     /// enqueues fail and return false.  When the queue is empty, dequeues fail and return null.
-    /// These segments are linked together to form the unbounded <see cref="ConcurrentQueue{T}"/>. 
+    /// These segments are linked together to form the unbounded <see cref="ConcurrentQueue{T}"/>.
     /// </summary>
     [DebuggerDisplay("Capacity = {Capacity}")]
     internal sealed class ConcurrentQueueSegment<T>
@@ -131,7 +131,7 @@ namespace System.Collections.Concurrent
         public bool TryDequeue([MaybeNullWhen(false)] out T item)
         {
             Slot[] slots = _slots;
-            
+
             // Loop in case of contention...
             var spinner = new SpinWait();
             while (true)
@@ -166,7 +166,7 @@ namespace System.Collections.Concurrent
                             // If we're preserving, though, we don't zero out the slot, as we need it for
                             // enumerations, peeking, ToArray, etc.  And we don't update the sequence number,
                             // so that an enqueuer will see it as full and be forced to move to a new segment.
-                            slots[slotsIndex].Item = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                            slots[slotsIndex].Item = default;
                             Volatile.Write(ref slots[slotsIndex].SequenceNumber, currentHead + slots.Length);
                         }
                         return true;

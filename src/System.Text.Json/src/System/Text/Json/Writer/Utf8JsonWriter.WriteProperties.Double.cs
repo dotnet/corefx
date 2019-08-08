@@ -13,21 +13,20 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the pre-encoded property name and <see cref="double"/> value (as a JSON number) as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The JSON encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
+        /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
-        /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
+        /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (that is, 'G').
         /// </remarks>
         public void WriteNumber(JsonEncodedText propertyName, double value)
             => WriteNumberHelper(propertyName.EncodedUtf8Bytes, value);
 
         private void WriteNumberHelper(ReadOnlySpan<byte> utf8PropertyName, double value)
         {
-            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxUnescapedTokenSize);
 
             JsonWriterHelper.ValidateDouble(value);
 
@@ -40,34 +39,37 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the property name and <see cref="double"/> value (as a JSON number) as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
+        /// <param name="propertyName">The name of the property to write.</param>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="propertyName"/> parameter is <see langword="null"/>.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (that is, 'G').
         /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(string propertyName, double value)
-            => WriteNumber(propertyName.AsSpan(), value);
+            => WriteNumber((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan(), value);
 
         /// <summary>
         /// Writes the property name and <see cref="double"/> value (as a JSON number) as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
+        /// <param name="propertyName">The name of the property to write.</param>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (that is, 'G').
         /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, double value)
@@ -84,16 +86,16 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the property name and <see cref="double"/> value (as a JSON number) as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
-        /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
+        /// <param name="utf8PropertyName">The UTF-8 encoded name of the property to write.</param>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (that is, 'G').
         /// The property name is escaped before writing.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> utf8PropertyName, double value)
@@ -109,7 +111,7 @@ namespace System.Text.Json
 
         private void WriteNumberEscape(ReadOnlySpan<char> propertyName, double value)
         {
-            int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
+            int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName, _options.Encoder);
 
             Debug.Assert(propertyIdx >= -1 && propertyIdx < propertyName.Length);
 
@@ -125,7 +127,7 @@ namespace System.Text.Json
 
         private void WriteNumberEscape(ReadOnlySpan<byte> utf8PropertyName, double value)
         {
-            int propertyIdx = JsonWriterHelper.NeedsEscaping(utf8PropertyName);
+            int propertyIdx = JsonWriterHelper.NeedsEscaping(utf8PropertyName, _options.Encoder);
 
             Debug.Assert(propertyIdx >= -1 && propertyIdx < utf8PropertyName.Length);
 
@@ -152,7 +154,7 @@ namespace System.Text.Json
                 stackalloc char[length] :
                 (propertyArray = ArrayPool<char>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+            JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, _options.Encoder, out int written);
 
             WriteNumberByOptions(escapedPropertyName.Slice(0, written), value);
 
@@ -175,7 +177,7 @@ namespace System.Text.Json
                 stackalloc byte[length] :
                 (propertyArray = ArrayPool<byte>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+            JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, _options.Encoder, out int written);
 
             WriteNumberByOptions(escapedPropertyName.Slice(0, written), value);
 
@@ -188,7 +190,7 @@ namespace System.Text.Json
         private void WriteNumberByOptions(ReadOnlySpan<char> propertyName, double value)
         {
             ValidateWritingProperty();
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteNumberIndented(propertyName, value);
             }
@@ -201,7 +203,7 @@ namespace System.Text.Json
         private void WriteNumberByOptions(ReadOnlySpan<byte> utf8PropertyName, double value)
         {
             ValidateWritingProperty();
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteNumberIndented(utf8PropertyName, value);
             }
@@ -296,7 +298,7 @@ namespace System.Text.Json
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
-            Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
+            Debug.Assert(_options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
 
             if (_tokenType != JsonTokenType.None)
             {
@@ -341,7 +343,7 @@ namespace System.Text.Json
                 output[BytesPending++] = JsonConstants.ListSeparator;
             }
 
-            Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
+            Debug.Assert(_options.SkipValidation || _tokenType != JsonTokenType.PropertyName);
 
             if (_tokenType != JsonTokenType.None)
             {

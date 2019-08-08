@@ -226,7 +226,7 @@ namespace System.Text.RegularExpressions.Tests
             yield return new object[] { "[^abcd-[^abcd]]+", "abcxyzABCXYZ`!@#$%^&*()_-+= \t\n", RegexOptions.None, 0, 30, false, string.Empty };
             yield return new object[] { "[^1234-[^1234]]+", "abcxyzABCXYZ`!@#$%^&*()_-+= \t\n", RegexOptions.None, 0, 30, false, string.Empty };
 
-            // No Negation        
+            // No Negation
             yield return new object[] { "[a-z-[a-z]]+", "abcxyzABCXYZ`!@#$%^&*()_-+= \t\n", RegexOptions.None, 0, 30, false, string.Empty };
             yield return new object[] { "[0-9-[0-9]]+", "abcxyzABCXYZ`!@#$%^&*()_-+= \t\n", RegexOptions.None, 0, 30, false, string.Empty };
 
@@ -345,7 +345,7 @@ namespace System.Text.RegularExpressions.Tests
             VerifyMatch(new Regex(pattern, options).Match(input, beginning, length), expectedSuccess, expectedValue);
         }
 
-        public static void VerifyMatch(Match match, bool expectedSuccess, string expectedValue)
+        private static void VerifyMatch(Match match, bool expectedSuccess, string expectedValue)
         {
             Assert.Equal(expectedSuccess, match.Success);
             Assert.Equal(expectedValue, match.Value);
@@ -733,7 +733,7 @@ namespace System.Text.RegularExpressions.Tests
             }
         }
 
-        public static void VerifyMatch(Match match, bool expectedSuccess, CaptureData[] expected)
+        private static void VerifyMatch(Match match, bool expectedSuccess, CaptureData[] expected)
         {
             Assert.Equal(expectedSuccess, match.Success);
 

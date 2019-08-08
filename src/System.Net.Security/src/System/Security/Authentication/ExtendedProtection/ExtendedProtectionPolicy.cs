@@ -10,16 +10,11 @@ using System.Text;
 namespace System.Security.Authentication.ExtendedProtection
 {
     /// <summary>
-    /// This class contains the necessary settings for specifying how Extended Protection 
+    /// This class contains the necessary settings for specifying how Extended Protection
     /// should behave. Use one of the Build* methods to create an instance of this type.
     /// </summary>
     public class ExtendedProtectionPolicy : ISerializable
     {
-        private const string policyEnforcementName = "policyEnforcement";
-        private const string protectionScenarioName = "protectionScenario";
-        private const string customServiceNamesName = "customServiceNames";
-        private const string customChannelBindingName = "customChannelBinding";
-
         private ServiceNameCollection _customServiceNames;
         private PolicyEnforcement _policyEnforcement;
         private ProtectionScenario _protectionScenario;

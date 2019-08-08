@@ -162,7 +162,7 @@ namespace System.IO.Tests
                                 default: createDestinationStream = s => File.Create(s); break;
                             }
 
-                            // Various exposeHandle (whether the SafeFileHandle was publicly accessed), 
+                            // Various exposeHandle (whether the SafeFileHandle was publicly accessed),
                             // preWrite, bufferSize, writeSize, and numWrites combinations
                             yield return new object[] { createDestinationStream, useAsync, preRead, false, false, cancelable, 0x1000, 0x100, 100 };
                             yield return new object[] { createDestinationStream, useAsync, preRead, false, false, cancelable, 0x1, 0x1, 1000 };
@@ -253,7 +253,8 @@ namespace System.IO.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)] // Uses P/Invokes to create async pipe handle
-        [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Out of current directory operation.")]
+        [Fact]
         public async Task NamedPipeViaFileStream_CancellationRequested_OperationCanceled()
         {
             string name = Guid.NewGuid().ToString("N");
@@ -300,7 +301,7 @@ namespace System.IO.Tests
         {
             private readonly Action _readAsyncInvoked;
 
-            internal FileStreamThatOverridesReadAsync(string path, bool useAsync, Action readAsyncInvoked) : 
+            internal FileStreamThatOverridesReadAsync(string path, bool useAsync, Action readAsyncInvoked) :
                 base(path, FileMode.Open, FileAccess.Read, FileShare.Read, 0x1000, useAsync)
             {
                 _readAsyncInvoked = readAsyncInvoked;

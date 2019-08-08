@@ -66,7 +66,7 @@ namespace System.Drawing
         /// </summary>
         public FontFamily(string name, FontCollection fontCollection) => CreateFontFamily(name, fontCollection);
 
-        // Creates the native font family object.  
+        // Creates the native font family object.
         // Note: GDI+ creates singleton font family objects (from the corresponding font file) and reference count them.
         private void CreateFontFamily(string name, FontCollection fontCollection)
         {
@@ -160,7 +160,7 @@ namespace System.Drawing
                 try
                 {
 #if DEBUG
-                    int status =
+                    int status = !Gdip.Initialized ? Gdip.Ok :
 #endif
                     Gdip.GdipDeleteFontFamily(new HandleRef(this, _nativeFamily));
 #if DEBUG

@@ -20,7 +20,7 @@ namespace System.Data.ProviderBase
         private const int PruningPeriod = 30 * 1000;           // thirty seconds
 
 
-        // s_pendingOpenNonPooled is an array of tasks used to throttle creation of non-pooled connections to 
+        // s_pendingOpenNonPooled is an array of tasks used to throttle creation of non-pooled connections to
         // a maximum of Environment.ProcessorCount at a time.
         private static uint s_pendingOpenNonPooledNext = 0;
         private static Task<DbConnectionInternal>[] s_pendingOpenNonPooled = new Task<DbConnectionInternal>[Environment.ProcessorCount];
@@ -35,7 +35,7 @@ namespace System.Data.ProviderBase
         }
 
 
-        abstract public DbProviderFactory ProviderFactory
+        public abstract DbProviderFactory ProviderFactory
         {
             get;
         }
@@ -114,7 +114,7 @@ namespace System.Data.ProviderBase
             return newConnection;
         }
 
-        virtual internal DbConnectionPoolGroupProviderInfo CreateConnectionPoolGroupProviderInfo(DbConnectionOptions connectionOptions)
+        internal virtual DbConnectionPoolGroupProviderInfo CreateConnectionPoolGroupProviderInfo(DbConnectionOptions connectionOptions)
         {
             return null;
         }
@@ -369,7 +369,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        virtual protected DbConnectionInternal CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, object poolGroupProviderInfo, DbConnectionPool pool, DbConnection owningConnection, DbConnectionOptions userOptions)
+        protected virtual DbConnectionInternal CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, object poolGroupProviderInfo, DbConnectionPool pool, DbConnection owningConnection, DbConnectionOptions userOptions)
         {
             return CreateConnection(options, poolKey, poolGroupProviderInfo, pool, owningConnection);
         }
@@ -404,24 +404,24 @@ namespace System.Data.ProviderBase
             throw ADP.NotSupported();
         }
 
-        abstract protected DbConnectionInternal CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, object poolGroupProviderInfo, DbConnectionPool pool, DbConnection owningConnection);
+        protected abstract DbConnectionInternal CreateConnection(DbConnectionOptions options, DbConnectionPoolKey poolKey, object poolGroupProviderInfo, DbConnectionPool pool, DbConnection owningConnection);
 
-        abstract protected DbConnectionOptions CreateConnectionOptions(string connectionString, DbConnectionOptions previous);
+        protected abstract DbConnectionOptions CreateConnectionOptions(string connectionString, DbConnectionOptions previous);
 
-        abstract protected DbConnectionPoolGroupOptions CreateConnectionPoolGroupOptions(DbConnectionOptions options);
+        protected abstract DbConnectionPoolGroupOptions CreateConnectionPoolGroupOptions(DbConnectionOptions options);
 
-        abstract internal DbConnectionPoolGroup GetConnectionPoolGroup(DbConnection connection);
+        internal abstract DbConnectionPoolGroup GetConnectionPoolGroup(DbConnection connection);
 
-        abstract internal DbConnectionInternal GetInnerConnection(DbConnection connection);
+        internal abstract DbConnectionInternal GetInnerConnection(DbConnection connection);
 
-        abstract internal void PermissionDemand(DbConnection outerConnection);
+        internal abstract void PermissionDemand(DbConnection outerConnection);
 
-        abstract internal void SetConnectionPoolGroup(DbConnection outerConnection, DbConnectionPoolGroup poolGroup);
+        internal abstract void SetConnectionPoolGroup(DbConnection outerConnection, DbConnectionPoolGroup poolGroup);
 
-        abstract internal void SetInnerConnectionEvent(DbConnection owningObject, DbConnectionInternal to);
+        internal abstract void SetInnerConnectionEvent(DbConnection owningObject, DbConnectionInternal to);
 
-        abstract internal bool SetInnerConnectionFrom(DbConnection owningObject, DbConnectionInternal to, DbConnectionInternal from);
+        internal abstract bool SetInnerConnectionFrom(DbConnection owningObject, DbConnectionInternal to, DbConnectionInternal from);
 
-        abstract internal void SetInnerConnectionTo(DbConnection owningObject, DbConnectionInternal to);
+        internal abstract void SetInnerConnectionTo(DbConnection owningObject, DbConnectionInternal to);
     }
 }

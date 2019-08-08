@@ -10,7 +10,7 @@ using Internal.Runtime.CompilerServices;
 namespace System
 {
     // The BitConverter class contains methods for
-    // converting an array of bytes to one of the base data 
+    // converting an array of bytes to one of the base data
     // types, as well as for converting a base data type to an
     // array of bytes.
     public static class BitConverter
@@ -81,7 +81,7 @@ namespace System
             return true;
         }
 
-        // Converts an int into an array of bytes with length 
+        // Converts an int into an array of bytes with length
         // four.
         public static byte[] GetBytes(int value)
         {
@@ -100,7 +100,7 @@ namespace System
             return true;
         }
 
-        // Converts a long into an array of bytes with length 
+        // Converts a long into an array of bytes with length
         // eight.
         public static byte[] GetBytes(long value)
         {
@@ -182,7 +182,7 @@ namespace System
             return true;
         }
 
-        // Converts a float into an array of bytes with length 
+        // Converts a float into an array of bytes with length
         // four.
         public static byte[] GetBytes(float value)
         {
@@ -201,7 +201,7 @@ namespace System
             return true;
         }
 
-        // Converts a double into an array of bytes with length 
+        // Converts a double into an array of bytes with length
         // eight.
         public static byte[] GetBytes(double value)
         {
@@ -220,7 +220,7 @@ namespace System
             return true;
         }
 
-        // Converts an array of bytes into a char.  
+        // Converts an array of bytes into a char.
         public static char ToChar(byte[] value, int startIndex) => unchecked((char)ToInt16(value, startIndex));
 
         // Converts a Span into a char
@@ -231,12 +231,12 @@ namespace System
             return Unsafe.ReadUnaligned<char>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into a short.  
+        // Converts an array of bytes into a short.
         public static short ToInt16(byte[] value, int startIndex)
         {
             if (value == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-            if (unchecked((uint)startIndex) >= unchecked((uint)value!.Length)) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (unchecked((uint)startIndex) >= unchecked((uint)value.Length))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
             if (startIndex > value.Length - sizeof(short))
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall, ExceptionArgument.value);
@@ -252,12 +252,12 @@ namespace System
             return Unsafe.ReadUnaligned<short>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into an int.  
+        // Converts an array of bytes into an int.
         public static int ToInt32(byte[] value, int startIndex)
         {
             if (value == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-            if (unchecked((uint)startIndex) >= unchecked((uint)value!.Length)) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (unchecked((uint)startIndex) >= unchecked((uint)value.Length))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
             if (startIndex > value.Length - sizeof(int))
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall, ExceptionArgument.value);
@@ -273,12 +273,12 @@ namespace System
             return Unsafe.ReadUnaligned<int>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into a long.  
+        // Converts an array of bytes into a long.
         public static long ToInt64(byte[] value, int startIndex)
         {
             if (value == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-            if (unchecked((uint)startIndex) >= unchecked((uint)value!.Length)) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (unchecked((uint)startIndex) >= unchecked((uint)value.Length))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
             if (startIndex > value.Length - sizeof(long))
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall, ExceptionArgument.value);
@@ -295,7 +295,7 @@ namespace System
         }
 
         // Converts an array of bytes into an ushort.
-        // 
+        //
         [CLSCompliant(false)]
         public static ushort ToUInt16(byte[] value, int startIndex) => unchecked((ushort)ToInt16(value, startIndex));
 
@@ -309,7 +309,7 @@ namespace System
         }
 
         // Converts an array of bytes into an uint.
-        // 
+        //
         [CLSCompliant(false)]
         public static uint ToUInt32(byte[] value, int startIndex) => unchecked((uint)ToInt32(value, startIndex));
 
@@ -323,7 +323,7 @@ namespace System
         }
 
         // Converts an array of bytes into an unsigned long.
-        // 
+        //
         [CLSCompliant(false)]
         public static ulong ToUInt64(byte[] value, int startIndex) => unchecked((ulong)ToInt64(value, startIndex));
 
@@ -336,7 +336,7 @@ namespace System
             return Unsafe.ReadUnaligned<ulong>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into a float.  
+        // Converts an array of bytes into a float.
         public static float ToSingle(byte[] value, int startIndex) => Int32BitsToSingle(ToInt32(value, startIndex));
 
         // Converts a Span into a float
@@ -347,7 +347,7 @@ namespace System
             return Unsafe.ReadUnaligned<float>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into a double.  
+        // Converts an array of bytes into a double.
         public static double ToDouble(byte[] value, int startIndex) => Int64BitsToDouble(ToInt64(value, startIndex));
 
         // Converts a Span into a double
@@ -358,16 +358,16 @@ namespace System
             return Unsafe.ReadUnaligned<double>(ref MemoryMarshal.GetReference(value));
         }
 
-        // Converts an array of bytes into a String.  
+        // Converts an array of bytes into a String.
         public static string ToString(byte[] value, int startIndex, int length)
         {
             if (value == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-            if (startIndex < 0 || startIndex >= value!.Length && startIndex > 0) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (startIndex < 0 || startIndex >= value.Length && startIndex > 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
             if (length < 0)
                 throw new ArgumentOutOfRangeException(nameof(length), SR.ArgumentOutOfRange_GenericPositive);
-            if (startIndex > value!.Length - length) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (startIndex > value.Length - length)
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall, ExceptionArgument.value);
 
             if (length == 0)
@@ -404,38 +404,38 @@ namespace System
             });
         }
 
-        // Converts an array of bytes into a String.  
+        // Converts an array of bytes into a String.
         public static string ToString(byte[] value)
         {
             if (value == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-            return ToString(value!, 0, value!.Length); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return ToString(value, 0, value.Length);
         }
 
-        // Converts an array of bytes into a String.  
+        // Converts an array of bytes into a String.
         public static string ToString(byte[] value, int startIndex)
         {
             if (value == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
-            return ToString(value!, startIndex, value!.Length - startIndex); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return ToString(value, startIndex, value.Length - startIndex);
         }
 
         /*==================================ToBoolean===================================
-        **Action:  Convert an array of bytes to a boolean value.  We treat this array 
+        **Action:  Convert an array of bytes to a boolean value.  We treat this array
         **         as if the first 4 bytes were an Int4 an operate on this value.
         **Returns: True if the Int4 value of the first 4 bytes is non-zero.
         **Arguments: value -- The byte array
         **           startIndex -- The position within the array.
         **Exceptions: See ToInt4.
         ==============================================================================*/
-        // Converts an array of bytes into a boolean.  
+        // Converts an array of bytes into a boolean.
         public static bool ToBoolean(byte[] value, int startIndex)
         {
             if (value == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value);
             if (startIndex < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index);
-            if (startIndex > value!.Length - 1) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (startIndex > value.Length - 1)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.startIndex, ExceptionResource.ArgumentOutOfRange_Index); // differs from other overloads, which throw base ArgumentException
 
             return value[startIndex] != 0;

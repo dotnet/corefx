@@ -26,6 +26,7 @@ namespace System.Text.Json
         public static System.Threading.Tasks.Task<System.Text.Json.JsonDocument> ParseAsync(System.IO.Stream utf8Json, System.Text.Json.JsonDocumentOptions options = default(System.Text.Json.JsonDocumentOptions), System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public static System.Text.Json.JsonDocument ParseValue(ref System.Text.Json.Utf8JsonReader reader) { throw null; }
         public static bool TryParseValue(ref System.Text.Json.Utf8JsonReader reader, out System.Text.Json.JsonDocument document) { throw null; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer) { }
     }
     public partial struct JsonDocumentOptions
     {
@@ -95,11 +96,7 @@ namespace System.Text.Json
         public bool ValueEquals(System.ReadOnlySpan<byte> utf8Text) { throw null; }
         public bool ValueEquals(System.ReadOnlySpan<char> text) { throw null; }
         public bool ValueEquals(string text) { throw null; }
-        public void WriteProperty(System.ReadOnlySpan<byte> utf8PropertyName, System.Text.Json.Utf8JsonWriter writer) { }
-        public void WriteProperty(System.ReadOnlySpan<char> propertyName, System.Text.Json.Utf8JsonWriter writer) { }
-        public void WriteProperty(string propertyName, System.Text.Json.Utf8JsonWriter writer) { }
-        public void WriteProperty(System.Text.Json.JsonEncodedText propertyName, System.Text.Json.Utf8JsonWriter writer) { }
-        public void WriteValue(System.Text.Json.Utf8JsonWriter writer) { }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer) { }
         public partial struct ArrayEnumerator : System.Collections.Generic.IEnumerable<System.Text.Json.JsonElement>, System.Collections.Generic.IEnumerator<System.Text.Json.JsonElement>, System.Collections.IEnumerable, System.Collections.IEnumerator, System.IDisposable
         {
             private object _dummy;
@@ -131,9 +128,9 @@ namespace System.Text.Json
     {
         private readonly object _dummy;
         public System.ReadOnlySpan<byte> EncodedUtf8Bytes { get { throw null; } }
-        public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<byte> utf8Value) { throw null; }
-        public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<char> value) { throw null; }
-        public static System.Text.Json.JsonEncodedText Encode(string value) { throw null; }
+        public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<byte> utf8Value, System.Text.Encodings.Web.JavaScriptEncoder encoder = null) { throw null; }
+        public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<char> value, System.Text.Encodings.Web.JavaScriptEncoder encoder = null) { throw null; }
+        public static System.Text.Json.JsonEncodedText Encode(string value, System.Text.Encodings.Web.JavaScriptEncoder encoder = null) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Text.Json.JsonEncodedText other) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -168,6 +165,7 @@ namespace System.Text.Json
         public bool NameEquals(System.ReadOnlySpan<char> text) { throw null; }
         public bool NameEquals(string text) { throw null; }
         public override string ToString() { throw null; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer) { }
     }
     public partial struct JsonReaderOptions
     {
@@ -187,20 +185,20 @@ namespace System.Text.Json
     {
         public static object Deserialize(System.ReadOnlySpan<byte> utf8Json, System.Type returnType, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
         public static object Deserialize(string json, System.Type returnType, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
-        public static TValue Deserialize<TValue>(System.ReadOnlySpan<byte> utf8Json, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
-        public static TValue Deserialize<TValue>(string json, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
+        public static object Deserialize(ref System.Text.Json.Utf8JsonReader reader, System.Type returnType, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
         public static System.Threading.Tasks.ValueTask<object> DeserializeAsync(System.IO.Stream utf8Json, System.Type returnType, System.Text.Json.JsonSerializerOptions options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public static System.Threading.Tasks.ValueTask<TValue> DeserializeAsync<TValue>(System.IO.Stream utf8Json, System.Text.Json.JsonSerializerOptions options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
-        public static object Deserialize(ref System.Text.Json.Utf8JsonReader reader, System.Type returnType, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
+        public static TValue Deserialize<TValue>(System.ReadOnlySpan<byte> utf8Json, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
+        public static TValue Deserialize<TValue>(string json, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
         public static TValue Deserialize<TValue>(ref System.Text.Json.Utf8JsonReader reader, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
-        public static string Serialize(object value, System.Type inputType, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
-        public static string Serialize<TValue>(TValue value, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
-        public static byte[] SerializeToUtf8Bytes(object value, System.Type inputType, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
-        public static byte[] SerializeToUtf8Bytes<TValue>(TValue value, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
-        public static System.Threading.Tasks.Task SerializeAsync(System.IO.Stream utf8Json, object value, System.Type inputType, System.Text.Json.JsonSerializerOptions options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
+        public static string Serialize(object value, System.Type type, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
+        public static void Serialize(System.Text.Json.Utf8JsonWriter writer, object value, System.Type type, System.Text.Json.JsonSerializerOptions options = null) { }
+        public static System.Threading.Tasks.Task SerializeAsync(System.IO.Stream utf8Json, object value, System.Type type, System.Text.Json.JsonSerializerOptions options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public static System.Threading.Tasks.Task SerializeAsync<TValue>(System.IO.Stream utf8Json, TValue value, System.Text.Json.JsonSerializerOptions options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
-        public static void Serialize(System.Text.Json.Utf8JsonWriter writer, object value, System.Type inputType, System.Text.Json.JsonSerializerOptions options = null) { }
+        public static byte[] SerializeToUtf8Bytes(object value, System.Type type, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
+        public static byte[] SerializeToUtf8Bytes<TValue>(TValue value, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
         public static void Serialize<TValue>(System.Text.Json.Utf8JsonWriter writer, TValue value, System.Text.Json.JsonSerializerOptions options = null) { }
+        public static string Serialize<TValue>(TValue value, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
     }
     public sealed partial class JsonSerializerOptions
     {
@@ -209,6 +207,7 @@ namespace System.Text.Json
         public System.Collections.Generic.IList<System.Text.Json.Serialization.JsonConverter> Converters { get { throw null; } }
         public int DefaultBufferSize { get { throw null; } set { } }
         public System.Text.Json.JsonNamingPolicy DictionaryKeyPolicy { get { throw null; } set { } }
+        public System.Text.Encodings.Web.JavaScriptEncoder Encoder { get { throw null; } set { } }
         public bool IgnoreNullValues { get { throw null; } set { } }
         public bool IgnoreReadOnlyProperties { get { throw null; } set { } }
         public int MaxDepth { get { throw null; } set { } }
@@ -246,7 +245,9 @@ namespace System.Text.Json
     }
     public partial struct JsonWriterOptions
     {
+        private object _dummy;
         private int _dummyPrimitive;
+        public System.Text.Encodings.Web.JavaScriptEncoder Encoder { readonly get { throw null; } set { } }
         public bool Indented { get { throw null; } set { } }
         public bool SkipValidation { get { throw null; } set { } }
     }
@@ -458,7 +459,7 @@ namespace System.Text.Json.Serialization
         internal JsonConverter() { }
         public abstract bool CanConvert(System.Type typeToConvert);
     }
-    [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Property | System.AttributeTargets.Struct, AllowMultiple=false)]
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Enum | System.AttributeTargets.Property | System.AttributeTargets.Struct, AllowMultiple=false)]
     public partial class JsonConverterAttribute : System.Text.Json.Serialization.JsonAttribute
     {
         protected JsonConverterAttribute() { }
@@ -468,8 +469,8 @@ namespace System.Text.Json.Serialization
     }
     public abstract partial class JsonConverterFactory : System.Text.Json.Serialization.JsonConverter
     {
-        protected internal JsonConverterFactory() { }
-        protected abstract System.Text.Json.Serialization.JsonConverter CreateConverter(System.Type typeToConvert);
+        protected JsonConverterFactory() { }
+        public abstract System.Text.Json.Serialization.JsonConverter CreateConverter(System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options);
     }
     public abstract partial class JsonConverter<T> : System.Text.Json.Serialization.JsonConverter
     {
@@ -499,6 +500,6 @@ namespace System.Text.Json.Serialization
         public JsonStringEnumConverter() { }
         public JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy namingPolicy = null, bool allowIntegerValues = true) { }
         public override bool CanConvert(System.Type typeToConvert) { throw null; }
-        protected override System.Text.Json.Serialization.JsonConverter CreateConverter(System.Type typeToConvert) { throw null; }
+        public override System.Text.Json.Serialization.JsonConverter CreateConverter(System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options) { throw null; }
     }
 }

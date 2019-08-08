@@ -63,8 +63,10 @@ namespace System.Tests
                     scenario = nameof(memoryInfo2.HighMemoryLoadThresholdBytes);
                     Assert.Equal(memoryInfo2.HighMemoryLoadThresholdBytes, memoryInfo1.HighMemoryLoadThresholdBytes);
 
+                    // Even though we have allocated, the overall load may decrease or increase depending what other processes are doing.
+                    // It cannot go above total available though.
                     scenario = nameof(memoryInfo2.MemoryLoadBytes);
-                    Assert.InRange(memoryInfo2.MemoryLoadBytes, memoryInfo1.MemoryLoadBytes, long.MaxValue);
+                    Assert.InRange(memoryInfo2.MemoryLoadBytes, 1, memoryInfo1.TotalAvailableMemoryBytes);
 
                     scenario = nameof(memoryInfo2.TotalAvailableMemoryBytes);
                     Assert.Equal(memoryInfo2.TotalAvailableMemoryBytes, memoryInfo1.TotalAvailableMemoryBytes);

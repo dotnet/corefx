@@ -1,11 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 //
 // ICO Codec class testing unit
 //
 // Authors:
-// 	Jordi Mas i Hernàndez (jordi@ximian.com)
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Jordi Mas i Hernàndez (jordi@ximian.com)
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // Copyright (C) 2006-2007 Novell, Inc (http://www.novell.com)
 //
@@ -16,10 +16,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -148,6 +148,7 @@ namespace MonoTests.System.Drawing.Imaging
 
         [PlatformSpecific(TestPlatforms.Windows)]
         [ConditionalFact(Helpers.IsDrawingSupported)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Flaky - ArgumentException")]
         public void Bitmap16Features_Palette_Entries_Windows()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico");
@@ -2034,7 +2035,7 @@ namespace MonoTests.System.Drawing.Imaging
         {
             string sOutFile = $"linerect-{expected}.ico";
 
-            // Save		
+            // Save
             Bitmap bmp = new Bitmap(100, 100, original);
             Graphics gr = Graphics.FromImage(bmp);
 
@@ -2046,7 +2047,7 @@ namespace MonoTests.System.Drawing.Imaging
 
             try
             {
-                // there's no encoder, so we're not saving a ICO but the alpha 
+                // there's no encoder, so we're not saving a ICO but the alpha
                 // bit get sets so it's not like saving a bitmap either
                 bmp.Save(sOutFile, ImageFormat.Icon);
 

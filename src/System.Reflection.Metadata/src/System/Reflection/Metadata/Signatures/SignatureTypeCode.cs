@@ -22,67 +22,67 @@ namespace System.Reflection.Metadata
         Void = CorElementType.ELEMENT_TYPE_VOID,
 
         /// <summary>
-        /// Represents <see cref="System.Boolean"/> in signatures.
+        /// Represents <see cref="bool"/> in signatures.
         /// </summary>
         Boolean = CorElementType.ELEMENT_TYPE_BOOLEAN,
 
         /// <summary>
-        /// Represents <see cref="System.Char"/> in signatures.
+        /// Represents <see cref="char"/> in signatures.
         /// </summary>
         Char = CorElementType.ELEMENT_TYPE_CHAR,
 
         /// <summary>
-        /// Represents <see cref="System.SByte"/> in signatures.
+        /// Represents <see cref="sbyte"/> in signatures.
         /// </summary>
         SByte = CorElementType.ELEMENT_TYPE_I1,
 
         /// <summary>
-        /// Represents <see cref="System.Byte"/> in signatures.
+        /// Represents <see cref="byte"/> in signatures.
         /// </summary>
         Byte = CorElementType.ELEMENT_TYPE_U1,
 
         /// <summary>
-        /// Represents <see cref="System.Int16"/> in signatures.
+        /// Represents <see cref="short"/> in signatures.
         /// </summary>
         Int16 = CorElementType.ELEMENT_TYPE_I2,
 
         /// <summary>
-        /// Represents <see cref="System.UInt16"/> in signatures.
+        /// Represents <see cref="ushort"/> in signatures.
         /// </summary>
         UInt16 = CorElementType.ELEMENT_TYPE_U2,
 
         /// <summary>
-        /// Represents <see cref="System.Int32"/> in signatures.
+        /// Represents <see cref="int"/> in signatures.
         /// </summary>
         Int32 = CorElementType.ELEMENT_TYPE_I4,
 
         /// <summary>
-        /// Represents <see cref="System.UInt32"/> in signatures.
+        /// Represents <see cref="uint"/> in signatures.
         /// </summary>
         UInt32 = CorElementType.ELEMENT_TYPE_U4,
 
         /// <summary>
-        /// Represents <see cref="System.Int64"/> in signatures.
+        /// Represents <see cref="long"/> in signatures.
         /// </summary>
         Int64 = CorElementType.ELEMENT_TYPE_I8,
 
         /// <summary>
-        /// Represents <see cref="System.UInt64"/> in signatures.
+        /// Represents <see cref="ulong"/> in signatures.
         /// </summary>
         UInt64 = CorElementType.ELEMENT_TYPE_U8,
 
         /// <summary>
-        /// Represents <see cref="System.Single"/> in signatures.
+        /// Represents <see cref="float"/> in signatures.
         /// </summary>
         Single = CorElementType.ELEMENT_TYPE_R4,
 
         /// <summary>
-        /// Represents <see cref="System.Double"/> in signatures.
+        /// Represents <see cref="double"/> in signatures.
         /// </summary>
         Double = CorElementType.ELEMENT_TYPE_R8,
 
         /// <summary>
-        /// Represents <see cref="System.String"/> in signatures.
+        /// Represents <see cref="string"/> in signatures.
         /// </summary>
         String = CorElementType.ELEMENT_TYPE_STRING,
 
@@ -103,7 +103,7 @@ namespace System.Reflection.Metadata
         // ELEMENT_TYPE_VALUETYPE (0x11) and ELEMENT_TYPE_CLASS (0x12) are unified to ELEMENT_TYPE_HANDLE.
 
         /// <summary>
-        /// Represents a generic type parameter used within a signature. 
+        /// Represents a generic type parameter used within a signature.
         /// </summary>
         GenericTypeParameter = CorElementType.ELEMENT_TYPE_VAR,        // a class type variable VAR <U1>
 
@@ -133,12 +133,12 @@ namespace System.Reflection.Metadata
         UIntPtr = CorElementType.ELEMENT_TYPE_U,
 
         /// <summary>
-        /// Represents function pointer types in signatures. 
+        /// Represents function pointer types in signatures.
         /// </summary>
         FunctionPointer = CorElementType.ELEMENT_TYPE_FNPTR,           // FNPTR <complete sig for the function including calling convention>
 
         /// <summary>
-        /// Represents <see cref="System.Object"/>
+        /// Represents <see cref="object"/>
         /// </summary>
         Object = CorElementType.ELEMENT_TYPE_OBJECT,
 
@@ -150,13 +150,13 @@ namespace System.Reflection.Metadata
         // SZARRAY <type>
 
         /// <summary>
-        /// Represents a generic method parameter used within a signature. 
+        /// Represents a generic method parameter used within a signature.
         /// </summary>
         GenericMethodParameter = CorElementType.ELEMENT_TYPE_MVAR,     // a method type variable MVAR <U1>
 
         // This is only for binding
         /// <summary>
-        /// Represents a custom modifier applied to a type within a signature that the caller must understand. 
+        /// Represents a custom modifier applied to a type within a signature that the caller must understand.
         /// </summary>
         RequiredModifier = CorElementType.ELEMENT_TYPE_CMOD_REQD,      // required C modifier : E_T_CMOD_REQD <mdTypeRef/mdTypeDef>
 
@@ -177,7 +177,7 @@ namespace System.Reflection.Metadata
         TypeHandle = CorElementType.ELEMENT_TYPE_HANDLE,               // CLASS | VALUETYPE <class Token>
 
         /// <summary>
-        /// Represents a marker to indicate the end of fixed arguments and the beginning of variable arguments. 
+        /// Represents a marker to indicate the end of fixed arguments and the beginning of variable arguments.
         /// </summary>
         Sentinel = CorElementType.ELEMENT_TYPE_SENTINEL,
 

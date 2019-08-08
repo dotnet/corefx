@@ -30,13 +30,13 @@ namespace System.Text.Tests
             Ctor_Bool_Bool_Bool(bigEndian, byteOrderMark, throwOnInvalidBytes: false);
         }
 
-        public void Ctor_Bool_Bool_Bool(bool bigEndian, bool byteOrderMark, bool throwOnInvalidBytes)
+        private static void Ctor_Bool_Bool_Bool(bool bigEndian, bool byteOrderMark, bool throwOnInvalidBytes)
         {
             UnicodeEncoding encoding = new UnicodeEncoding(bigEndian, byteOrderMark, throwOnInvalidBytes);
             VerifyUnicodeEncoding(encoding, bigEndian, byteOrderMark, throwOnInvalidBytes);
         }
 
-        public static void VerifyUnicodeEncoding(UnicodeEncoding encoding, bool bigEndian, bool byteOrderMark, bool throwOnInvalidBytes)
+        private static void VerifyUnicodeEncoding(UnicodeEncoding encoding, bool bigEndian, bool byteOrderMark, bool throwOnInvalidBytes)
         {
             if (byteOrderMark)
             {
@@ -99,22 +99,25 @@ namespace System.Text.Tests
 
         [Theory]
         [MemberData(nameof(Encodings_TestData))]
-        public void EncodingName(UnicodeEncoding encoding, string _)
+        public void EncodingName(UnicodeEncoding encoding, string description)
         {
+            _ = description;
             Assert.NotEmpty(encoding.EncodingName); // Unicode (UTF-16) in en-US
         }
 
         [Theory]
         [MemberData(nameof(Encodings_TestData))]
-        public void IsSingleByte(UnicodeEncoding encoding, string _)
+        public void IsSingleByte(UnicodeEncoding encoding, string description)
         {
+            _ = description;
             Assert.False(encoding.IsSingleByte);
         }
 
         [Theory]
         [MemberData(nameof(Encodings_TestData))]
-        public void Clone(UnicodeEncoding encoding, string _)
+        public void Clone(UnicodeEncoding encoding, string description)
         {
+            _ = description;
             UnicodeEncoding clone = (UnicodeEncoding)encoding.Clone();
             Assert.NotSame(encoding, clone);
             Assert.Equal(encoding, clone);

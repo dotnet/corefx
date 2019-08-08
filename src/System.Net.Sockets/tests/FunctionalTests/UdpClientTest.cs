@@ -382,6 +382,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // localhost on Windows resolves to both IPV4/6, but doesn't on all Unix
         public void Send_InvalidArguments_StringInt_Throws()
         {
@@ -419,7 +420,7 @@ namespace System.Net.Sockets.Tests
                 AssertExtensions.Throws<ArgumentNullException>("endPoint", () => udpClient.Connect(null));
             }
         }
-        
+
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task ConnectAsync_StringHost_Success()
@@ -517,7 +518,8 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // "localhost" resolves to IPv4 & IPV6 on Windows, but may resolve to only one of those on Unix 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // "localhost" resolves to IPv4 & IPV6 on Windows, but may resolve to only one of those on Unix
         [OuterLoop] // TODO: Issue #11345
         public void Send_Receive_Connected_Success()
         {
@@ -579,7 +581,8 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // "localhost" resolves to IPv4 & IPV6 on Windows, but may resolve to only one of those on Unix 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // "localhost" resolves to IPv4 & IPV6 on Windows, but may resolve to only one of those on Unix
         [OuterLoop] // TODO: Issue #11345
         public void BeginEndSend_BeginEndReceive_Connected_Success()
         {
@@ -615,14 +618,14 @@ namespace System.Net.Sockets.Tests
                 }
 
                 UdpReceiveResult result = await receiver.ReceiveAsync();
-                Assert.NotNull(result);
                 Assert.NotNull(result.RemoteEndPoint);
                 Assert.NotNull(result.Buffer);
                 Assert.InRange(result.Buffer.Length, 1, int.MaxValue);
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // "localhost" resolves to IPv4 & IPV6 on Windows, but may resolve to only one of those on Unix 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // "localhost" resolves to IPv4 & IPV6 on Windows, but may resolve to only one of those on Unix
         [OuterLoop] // TODO: Issue #11345
         public async Task SendAsync_ReceiveAsync_Connected_Success()
         {
@@ -635,7 +638,6 @@ namespace System.Net.Sockets.Tests
                 }
 
                 UdpReceiveResult result = await receiver.ReceiveAsync();
-                Assert.NotNull(result);
                 Assert.NotNull(result.RemoteEndPoint);
                 Assert.NotNull(result.Buffer);
                 Assert.InRange(result.Buffer.Length, 1, int.MaxValue);

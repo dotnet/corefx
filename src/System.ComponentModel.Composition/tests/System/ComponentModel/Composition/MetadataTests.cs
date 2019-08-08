@@ -104,7 +104,7 @@ namespace System.ComponentModel.Composition
 
             var export = container.GetExport<SimpleMetadataExporterWithNullReferenceValue, ISimpleMetadataView>();
 
-            Assert.Equal(null, export.Metadata.String);
+            Assert.Null(export.Metadata.String);
             Assert.Equal(42, export.Metadata.Int);
             Assert.Equal(42.0f, export.Metadata.Float);
             Assert.Equal(SimpleEnum.First, export.Metadata.Enum);
@@ -260,7 +260,7 @@ namespace System.ComponentModel.Composition
                 var metadata = export.Metadata;
             });
 
-            Assert.True(ex.Message.Contains("DuplicateMetadataName"));
+            Assert.Contains("DuplicateMetadataName", ex.Message);
         }
 
         [PartNotDiscoverable]
@@ -283,7 +283,7 @@ namespace System.ComponentModel.Composition
                 var metadata = export.Metadata;
             });
 
-            Assert.True(ex.Message.Contains("DuplicateMetadataName"));
+            Assert.Contains("DuplicateMetadataName", ex.Message);
         }
 
         [Export]
@@ -353,7 +353,7 @@ namespace System.ComponentModel.Composition
                 var metadata = export.Metadata;
             });
 
-            Assert.True(ex.Message.Contains(CompositionConstants.PartCreationPolicyMetadataName));
+            Assert.Contains(CompositionConstants.PartCreationPolicyMetadataName, ex.Message);
         }
 
         #endregion
@@ -581,7 +581,7 @@ namespace System.ComponentModel.Composition
             SelectiveImportBySTMThroughCatalog1(container);
         }
 
-        public void SelectiveImportBySTMThroughCatalog1(CompositionContainer container)
+        private static void SelectiveImportBySTMThroughCatalog1(CompositionContainer container)
         {
             Assert.NotNull(container.GetExport<IMyExporter, IMetadataView>());
             var result2 = container.GetExports<IMyExporter, IMetadataView>();
@@ -595,7 +595,7 @@ namespace System.ComponentModel.Composition
             SelectiveImportBySTMThroughCatalog2(container);
         }
 
-        public void SelectiveImportBySTMThroughCatalog2(CompositionContainer container)
+        private static void SelectiveImportBySTMThroughCatalog2(CompositionContainer container)
         {
             throw new NotImplementedException();
 
@@ -661,7 +661,7 @@ namespace System.ComponentModel.Composition
             var exports = container.GetExports<OptionalFooIsInt, IMetadataView>();
             Assert.Equal(1, exports.Count());
             var export = exports.Single();
-            Assert.Equal(null, export.Metadata.OptionalFoo);
+            Assert.Null(export.Metadata.OptionalFoo);
         }
 
         #endregion

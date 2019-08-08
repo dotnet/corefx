@@ -12,19 +12,16 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the pre-encoded text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The JSON encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
-        /// <remarks>
-        /// The value should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
-        /// </remarks>
+        /// <param name="value">The JSON-encoded value to write.</param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
         public void WriteStringValue(JsonEncodedText value)
             => WriteStringValueHelper(value.EncodedUtf8Bytes);
 
         private void WriteStringValueHelper(ReadOnlySpan<byte> utf8Value)
         {
-            Debug.Assert(utf8Value.Length <= JsonConstants.MaxTokenSize);
+            Debug.Assert(utf8Value.Length <= JsonConstants.MaxUnescapedTokenSize);
 
             WriteStringByOptions(utf8Value);
 
@@ -35,32 +32,46 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the string text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
-        /// <remarks>
-        /// The value is escaped before writing.
-        /// </remarks>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// <para>
+        /// The value is escaped before writing.</para>
+        /// <para>
+        /// If <paramref name="value"/> is <see langword="null"/> the JSON null value is written,
+        /// as if <see cref="WriteNullValue"/> was called.
+        /// </para>
+        /// </remarks>
         public void WriteStringValue(string value)
-           => WriteStringValue(value.AsSpan());
+        {
+            if (value == null)
+            {
+                WriteNullValue();
+            }
+            else
+            {
+                WriteStringValue(value.AsSpan());
+            }
+        }
 
         /// <summary>
         /// Writes the text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
-        /// <remarks>
-        /// The value is escaped before writing.
-        /// </remarks>
+        /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The value is escaped before writing.
+        /// </remarks>
         public void WriteStringValue(ReadOnlySpan<char> value)
         {
             JsonWriterHelper.ValidateValue(value);
@@ -73,7 +84,7 @@ namespace System.Text.Json
 
         private void WriteStringEscape(ReadOnlySpan<char> value)
         {
-            int valueIdx = JsonWriterHelper.NeedsEscaping(value);
+            int valueIdx = JsonWriterHelper.NeedsEscaping(value, _options.Encoder);
 
             Debug.Assert(valueIdx >= -1 && valueIdx < value.Length);
 
@@ -90,7 +101,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<char> value)
         {
             ValidateWritingValue();
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteStringIndented(value);
             }
@@ -181,7 +192,7 @@ namespace System.Text.Json
                 stackalloc char[length] :
                 (valueArray = ArrayPool<char>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, out int written);
+            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, _options.Encoder, out int written);
 
             WriteStringByOptions(escapedValue.Slice(0, written));
 
@@ -195,15 +206,15 @@ namespace System.Text.Json
         /// Writes the UTF-8 text value (as a JSON string) as an element of a JSON array.
         /// </summary>
         /// <param name="utf8Value">The UTF-8 encoded value to be written as a JSON string element of a JSON array.</param>
-        /// <remarks>
-        /// The value is escaped before writing.
-        /// </remarks>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// The value is escaped before writing.
+        /// </remarks>
         public void WriteStringValue(ReadOnlySpan<byte> utf8Value)
         {
             JsonWriterHelper.ValidateValue(utf8Value);
@@ -216,7 +227,7 @@ namespace System.Text.Json
 
         private void WriteStringEscape(ReadOnlySpan<byte> utf8Value)
         {
-            int valueIdx = JsonWriterHelper.NeedsEscaping(utf8Value);
+            int valueIdx = JsonWriterHelper.NeedsEscaping(utf8Value, _options.Encoder);
 
             Debug.Assert(valueIdx >= -1 && valueIdx < utf8Value.Length);
 
@@ -233,7 +244,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<byte> utf8Value)
         {
             ValidateWritingValue();
-            if (Options.Indented)
+            if (_options.Indented)
             {
                 WriteStringIndented(utf8Value);
             }
@@ -324,7 +335,7 @@ namespace System.Text.Json
                 stackalloc byte[length] :
                 (valueArray = ArrayPool<byte>.Shared.Rent(length));
 
-            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, out int written);
+            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, _options.Encoder, out int written);
 
             WriteStringByOptions(escapedValue.Slice(0, written));
 

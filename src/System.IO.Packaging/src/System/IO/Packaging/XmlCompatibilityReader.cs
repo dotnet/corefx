@@ -257,7 +257,7 @@ namespace System.IO.Packaging
                 }
             }
 
-            // if the element is empty (e.g. "<a ... />" and we pushed a scope then we need to set a flag 
+            // if the element is empty (e.g. "<a ... />" and we pushed a scope then we need to set a flag
             // to get rid of the scope when we hit the next element.
             // We also need to store the current elementDepth.
             if (isEmpty)
@@ -426,9 +426,6 @@ namespace System.IO.Packaging
         /// <param name="i">
         /// The index of the attribute. The index is zero-based. (The first attribute has index 0.)
         /// </param>
-        /// <returns>
-        /// true if the attribute is found; otherwise, false. If false, the reader's position does not change.
-        /// </returns>
         public override void MoveToAttribute(int i)
         {
             if (_ignoredAttributeCount == 0)

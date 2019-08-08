@@ -8,26 +8,26 @@ namespace System.IO.Tests
 {
     public class DirectoryInfo_GetSetTimes : InfoGetSetTimes<DirectoryInfo>
     {
-        public override DirectoryInfo GetExistingItem() => Directory.CreateDirectory(GetTestFilePath());
+        protected override DirectoryInfo GetExistingItem() => Directory.CreateDirectory(GetTestFilePath());
 
-        public override DirectoryInfo GetMissingItem() => new DirectoryInfo(GetTestFilePath());
+        protected override DirectoryInfo GetMissingItem() => new DirectoryInfo(GetTestFilePath());
 
-        public override string GetItemPath(DirectoryInfo item) => item.FullName;
+        protected override string GetItemPath(DirectoryInfo item) => item.FullName;
 
-        public override void InvokeCreate(DirectoryInfo item) => item.Create();
+        protected override void InvokeCreate(DirectoryInfo item) => item.Create();
 
         public override IEnumerable<TimeFunction> TimeFunctions(bool requiresRoundtripping = false)
         {
             if (IOInputs.SupportsGettingCreationTime && (!requiresRoundtripping || IOInputs.SupportsSettingCreationTime))
             {
                 yield return TimeFunction.Create(
-                    ((testDir, time) => {testDir.CreationTime = time; }), 
-                    ((testDir) => testDir.CreationTime), 
+                    ((testDir, time) => {testDir.CreationTime = time; }),
+                    ((testDir) => testDir.CreationTime),
                     DateTimeKind.Local);
                 yield return TimeFunction.Create(
                     ((testDir, time) => {testDir.CreationTimeUtc = time; }),
                     ((testDir) => testDir.CreationTimeUtc),
-                    DateTimeKind.Unspecified); 
+                    DateTimeKind.Unspecified);
                 yield return TimeFunction.Create(
                      ((testDir, time) => { testDir.CreationTimeUtc = time; }),
                      ((testDir) => testDir.CreationTimeUtc),

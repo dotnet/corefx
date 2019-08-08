@@ -110,7 +110,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [MemberData(nameof(FromUInt16_TestData))]
         [MemberData(nameof(FromUInt32_TestData))]
         [MemberData(nameof(FromUInt64_TestData))]
-        public void FromObject_NotSupported(object value, string expected)
+        public void FromObject_NotSupported(object value)
         {
             Assert.Throws<InvalidCastException>(() => StringType.FromObject(value));
         }
@@ -144,7 +144,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             Assert.Equal(expected, StringType.FromSingle(value, format));
         }
 
-        private static IEnumerable<object[]> FromByte_TestData()
+        public static IEnumerable<object[]> FromByte_TestData()
         {
             yield return new object[] { byte.MinValue, "0" };
             yield return new object[] { (byte)1, "1" };
@@ -154,31 +154,31 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (ByteEnum)byte.MaxValue, "255" };
         }
 
-        private static IEnumerable<object[]> FromSByte_TestData()
+        public static IEnumerable<object[]> FromSByte_TestData()
         {
-            yield return new object[] { sbyte.MinValue, "-128" };
-            yield return new object[] { (sbyte)(-1), "-1" };
-            yield return new object[] { (sbyte)0, "0" };
-            yield return new object[] { (sbyte)1, "1" };
-            yield return new object[] { sbyte.MaxValue, "127" };
-            yield return new object[] { (SByteEnum)sbyte.MinValue, "-128" };
-            yield return new object[] { (SByteEnum)(-1), "-1" };
-            yield return new object[] { (SByteEnum)0, "0" };
-            yield return new object[] { (SByteEnum)1, "1" };
-            yield return new object[] { (SByteEnum)sbyte.MaxValue, "127" };
+            yield return new object[] { sbyte.MinValue };
+            yield return new object[] { (sbyte)(-1) };
+            yield return new object[] { (sbyte)0 };
+            yield return new object[] { (sbyte)1 };
+            yield return new object[] { sbyte.MaxValue };
+            yield return new object[] { (SByteEnum)sbyte.MinValue };
+            yield return new object[] { (SByteEnum)(-1) };
+            yield return new object[] { (SByteEnum)0 };
+            yield return new object[] { (SByteEnum)1 };
+            yield return new object[] { (SByteEnum)sbyte.MaxValue };
         }
 
-        private static IEnumerable<object[]> FromUInt16_TestData()
+        public static IEnumerable<object[]> FromUInt16_TestData()
         {
-            yield return new object[] { ushort.MinValue, "0" };
-            yield return new object[] { (ushort)1, "1" };
-            yield return new object[] { ushort.MaxValue, "65535" };
-            yield return new object[] { (UShortEnum)ushort.MinValue, "0" };
-            yield return new object[] { (UShortEnum)1, "1" };
-            yield return new object[] { (UShortEnum)ushort.MaxValue, "65535" };
+            yield return new object[] { ushort.MinValue };
+            yield return new object[] { (ushort)1 };
+            yield return new object[] { ushort.MaxValue };
+            yield return new object[] { (UShortEnum)ushort.MinValue };
+            yield return new object[] { (UShortEnum)1 };
+            yield return new object[] { (UShortEnum)ushort.MaxValue };
         }
 
-        private static IEnumerable<object[]> FromInt16_TestData()
+        public static IEnumerable<object[]> FromInt16_TestData()
         {
             yield return new object[] { short.MinValue, "-32768" };
             yield return new object[] { (short)(-1), "-1" };
@@ -192,17 +192,17 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (ShortEnum)short.MaxValue, "32767" };
         }
 
-        private static IEnumerable<object[]> FromUInt32_TestData()
+        public static IEnumerable<object[]> FromUInt32_TestData()
         {
-            yield return new object[] { uint.MinValue, "0" };
-            yield return new object[] { (uint)1, "1" };
-            yield return new object[] { uint.MaxValue, "4294967295" };
-            yield return new object[] { (UIntEnum)uint.MinValue, "0" };
-            yield return new object[] { (UIntEnum)1, "1" };
-            yield return new object[] { (UIntEnum)uint.MaxValue, "4294967295" };
+            yield return new object[] { uint.MinValue };
+            yield return new object[] { (uint)1 };
+            yield return new object[] { uint.MaxValue };
+            yield return new object[] { (UIntEnum)uint.MinValue };
+            yield return new object[] { (UIntEnum)1 };
+            yield return new object[] { (UIntEnum)uint.MaxValue };
         }
 
-        private static IEnumerable<object[]> FromInt32_TestData()
+        public static IEnumerable<object[]> FromInt32_TestData()
         {
             yield return new object[] { int.MinValue, "-2147483648" };
             yield return new object[] { -1, "-1" };
@@ -216,17 +216,17 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (IntEnum)int.MaxValue, "2147483647" };
         }
 
-        private static IEnumerable<object[]> FromUInt64_TestData()
+        public static IEnumerable<object[]> FromUInt64_TestData()
         {
-            yield return new object[] { ulong.MinValue, "0" };
-            yield return new object[] { (ulong)1, "1" };
-            yield return new object[] { ulong.MaxValue, "18446744073709551615" };
-            yield return new object[] { (ULongEnum)ulong.MinValue, "0" };
-            yield return new object[] { (ULongEnum)1, "1" };
-            yield return new object[] { (ULongEnum)ulong.MaxValue, "18446744073709551615" };
+            yield return new object[] { ulong.MinValue };
+            yield return new object[] { (ulong)1 };
+            yield return new object[] { ulong.MaxValue };
+            yield return new object[] { (ULongEnum)ulong.MinValue };
+            yield return new object[] { (ULongEnum)1 };
+            yield return new object[] { (ULongEnum)ulong.MaxValue };
         }
 
-        private static IEnumerable<object[]> FromInt64_TestData()
+        public static IEnumerable<object[]> FromInt64_TestData()
         {
             yield return new object[] { long.MinValue, "-9223372036854775808" };
             yield return new object[] { (long)(-1), "-1" };
@@ -240,7 +240,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { (LongEnum)long.MaxValue, "9223372036854775807" };
         }
 
-        private static IEnumerable<object[]> FromSingle_TestData()
+        public static IEnumerable<object[]> FromSingle_TestData()
         {
             yield return new object[] { (float)(-1), "-1" };
             yield return new object[] { (float)0, "0" };
@@ -250,7 +250,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { float.NaN, "NaN" };
         }
 
-        private static IEnumerable<object[]> FromDouble_TestData()
+        public static IEnumerable<object[]> FromDouble_TestData()
         {
             yield return new object[] { (double)(-1), "-1" };
             yield return new object[] { (double)0, "0" };
@@ -260,7 +260,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { double.NaN, "NaN" };
         }
 
-        private static IEnumerable<object[]> FromDecimal_TestData()
+        public static IEnumerable<object[]> FromDecimal_TestData()
         {
             yield return new object[] { decimal.MinValue, decimal.MinValue.ToString() };
             yield return new object[] { (decimal)(-1), "-1" };
@@ -269,24 +269,24 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { decimal.MaxValue, decimal.MaxValue.ToString() };
         }
 
-        private static IEnumerable<object[]> FromBoolean_TestData()
+        public static IEnumerable<object[]> FromBoolean_TestData()
         {
             yield return new object[] { true, "True" };
             yield return new object[] { false, "False" };
         }
 
-        private static IEnumerable<object[]> FromString_TestData()
+        public static IEnumerable<object[]> FromString_TestData()
         {
             yield return new object[] { "", "" };
             yield return new object[] { "abc", "abc" };
         }
 
-        private static IEnumerable<object[]> FromNull_TestData()
+        public static IEnumerable<object[]> FromNull_TestData()
         {
             yield return new object[] { null, (string)null };
         }
 
-        private static IEnumerable<object[]> FromChar_TestData()
+        public static IEnumerable<object[]> FromChar_TestData()
         {
             yield return new object[] { char.MinValue, "\0" };
             yield return new object[] { (char)1, "\u0001" };
@@ -294,36 +294,36 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { char.MaxValue, char.MaxValue.ToString() };
         }
 
-        private static IEnumerable<object[]> FromCharArray_TestData()
+        public static IEnumerable<object[]> FromCharArray_TestData()
         {
             yield return new object[] { new char[0], "" };
             yield return new object[] { new char[] { (char)0 }, "\0" };
             yield return new object[] { new char[] { 'A', 'B' }, "AB" };
         }
 
-        private static IEnumerable<object[]> FromDateTime_TestData()
+        public static IEnumerable<object[]> FromDateTime_TestData()
         {
             yield return new object[] { new DateTime(10), new DateTime(10).ToString("T", null) };
         }
 
-        private static IEnumerable<object[]> FromObject_TestData()
+        public static IEnumerable<object[]> FromObject_TestData()
         {
             yield return new object[] { new object() };
         }
 
-        private static IEnumerable<object[]> FromSingle_Format_TestData()
+        public static IEnumerable<object[]> FromSingle_Format_TestData()
         {
             yield return new object[] { (float)(-1), default(NumberFormatInfo), "-1" };
             yield return new object[] { (float)(-1), new NumberFormatInfo() { NegativeSign = "#" }, "#1" };
         }
 
-        private static IEnumerable<object[]> FromDouble_Format_TestData()
+        public static IEnumerable<object[]> FromDouble_Format_TestData()
         {
             yield return new object[] { (double)(-1), default(NumberFormatInfo), "-1" };
             yield return new object[] { (double)(-1), new NumberFormatInfo() { NegativeSign = "#" }, "#1" };
         }
 
-        private static IEnumerable<object[]> FromDecimal_Format_TestData()
+        public static IEnumerable<object[]> FromDecimal_Format_TestData()
         {
             yield return new object[] { (decimal)(-1), default(NumberFormatInfo), "-1" };
             yield return new object[] { (decimal)(-1), new NumberFormatInfo() { NegativeSign = "#" }, "#1" };

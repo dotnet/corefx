@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -49,7 +49,7 @@ namespace System.Security.AccessControl.Tests
                 if (!Utils.IsBinaryFormEqual(dAclBinaryForm, rAclBinaryForm))
                     result = false;
 
-                //redundant index check					
+                //redundant index check
                 for (int i = 0; i < discretionaryAcl.Count; i++)
                 {
                     if (!Utils.IsAceEqual(discretionaryAcl[i], rawAcl[i]))
@@ -69,7 +69,7 @@ namespace System.Security.AccessControl.Tests
         [MemberData(nameof(DiscretionaryACL_RemoveAccessSpecific))]
         public static void RemoveAccessSpecific(bool isContainer, bool isDS, int accessControlType, string sid, int accessMask, int inheritanceFlags, int propagationFlags, string initialRawAclStr, string verifierRawAclStr)
         {
-            RawAcl rawAcl = Utils.CreateRawAclFromString(verifierRawAclStr);
+            RawAcl rawAcl = Utils.CreateRawAclFromString(initialRawAclStr);
             DiscretionaryAcl discretionaryAcl = new DiscretionaryAcl(isContainer, isDS, rawAcl);
             rawAcl = Utils.CreateRawAclFromString(verifierRawAclStr);
 
@@ -196,7 +196,7 @@ namespace System.Security.AccessControl.Tests
 
             });
 
-            //Case 7, Remove Specific Ace of NOT(AccessControlType.Allow |AccessControlType.Denied) to the DiscretionaryAcl with no ACE, 
+            //Case 7, Remove Specific Ace of NOT(AccessControlType.Allow |AccessControlType.Denied) to the DiscretionaryAcl with no ACE,
             // should throw appropriate exception for wrong parameter, bug#287188
 
             Assert.Throws<ArgumentOutOfRangeException>(() =>

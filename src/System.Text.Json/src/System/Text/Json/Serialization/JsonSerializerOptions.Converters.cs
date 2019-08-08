@@ -77,7 +77,7 @@ namespace System.Text.Json
 
                 if (converterAttribute != null)
                 {
-                    converter = GetConverterFromAttribute(converterAttribute, runtimePropertyType, parentClassType, propertyInfo);
+                    converter = GetConverterFromAttribute(converterAttribute, typeToConvert: runtimePropertyType, classTypeAttributeIsOn: parentClassType, propertyInfo);
                 }
             }
 
@@ -88,7 +88,7 @@ namespace System.Text.Json
 
             if (converter is JsonConverterFactory factory)
             {
-                converter = factory.GetConverterInternal(runtimePropertyType);
+                converter = factory.GetConverterInternal(runtimePropertyType, this);
             }
 
             return converter;
@@ -127,7 +127,7 @@ namespace System.Text.Json
 
                 if (converterAttribute != null)
                 {
-                    converter = GetConverterFromAttribute(converterAttribute, typeToConvert, typeToConvert, propertyInfo: null);
+                    converter = GetConverterFromAttribute(converterAttribute, typeToConvert: typeToConvert, classTypeAttributeIsOn: typeToConvert, propertyInfo: null);
                 }
             }
 
@@ -152,12 +152,12 @@ namespace System.Text.Json
             }
 
             // Allow redirection for generic types or the enum converter.
-            if (converter is JsonConverterFactory binder)
+            if (converter is JsonConverterFactory factory)
             {
-                converter = binder.GetConverterInternal(typeToConvert);
+                converter = factory.GetConverterInternal(typeToConvert, this);
                 if (converter == null || converter.TypeToConvert == null)
                 {
-                    throw new ArgumentNullException("typeToConvert");
+                    throw new ArgumentNullException(nameof(typeToConvert));
                 }
             }
 
@@ -189,7 +189,7 @@ namespace System.Text.Json
             return GetConverter(typeToConvert) != null;
         }
 
-        private JsonConverter GetConverterFromAttribute(JsonConverterAttribute converterAttribute, Type typeToConvert, Type classType, PropertyInfo propertyInfo)
+        private JsonConverter GetConverterFromAttribute(JsonConverterAttribute converterAttribute, Type typeToConvert, Type classTypeAttributeIsOn, PropertyInfo propertyInfo)
         {
             JsonConverter converter;
 
@@ -200,7 +200,7 @@ namespace System.Text.Json
                 converter = converterAttribute.CreateConverter(typeToConvert);
                 if (converter == null)
                 {
-                    ThrowHelper.ThrowInvalidOperationException_SerializationConverterOnAttributeNotCompatible(classType, propertyInfo);
+                    ThrowHelper.ThrowInvalidOperationException_SerializationConverterOnAttributeNotCompatible(classTypeAttributeIsOn, propertyInfo, typeToConvert);
                 }
             }
             else
@@ -208,7 +208,7 @@ namespace System.Text.Json
                 ConstructorInfo ctor = type.GetConstructor(Type.EmptyTypes);
                 if (!typeof(JsonConverter).IsAssignableFrom(type) || !ctor.IsPublic)
                 {
-                    ThrowHelper.ThrowInvalidOperationException_SerializationConverterOnAttributeInvalid(classType, propertyInfo);
+                    ThrowHelper.ThrowInvalidOperationException_SerializationConverterOnAttributeInvalid(classTypeAttributeIsOn, propertyInfo);
                 }
 
                 converter = (JsonConverter)Activator.CreateInstance(type);
@@ -216,7 +216,7 @@ namespace System.Text.Json
 
             if (!converter.CanConvert(typeToConvert))
             {
-                ThrowHelper.ThrowInvalidOperationException_SerializationConverterOnAttributeNotCompatible(classType, propertyInfo);
+                ThrowHelper.ThrowInvalidOperationException_SerializationConverterOnAttributeNotCompatible(classTypeAttributeIsOn, propertyInfo, typeToConvert);
             }
 
             return converter;

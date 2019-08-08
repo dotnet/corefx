@@ -47,12 +47,10 @@ namespace System.Security.Cryptography.Pkcs
             if (rawData == null)
                 return null;
 
-            string contentTypeValue = PkcsPal.Instance.DecodeOid(rawData);
+            string contentTypeValue = PkcsHelpers.DecodeOid(rawData);
             return new Oid(contentTypeValue);
         }
 
         private volatile Oid _lazyContentType = null;
     }
 }
-
-

@@ -52,9 +52,6 @@ namespace System.IO
         private RenamedEventHandler _onRenamedHandler = null;
         private ErrorEventHandler _onErrorHandler = null;
 
-        // To validate the input for "path"
-        private static readonly char[] s_wildcards = new char[] { '?', '*' };
-
         private const int c_notifyFiltersValidMask = (int)(NotifyFilters.Attributes |
                                                            NotifyFilters.CreationTime |
                                                            NotifyFilters.DirectoryName |
@@ -656,7 +653,7 @@ namespace System.IO
                 base.Site = value;
 
                 // set EnableRaisingEvents to true at design time so the user
-                // doesn't have to manually. 
+                // doesn't have to manually.
                 if (Site != null && Site.DesignMode)
                     EnableRaisingEvents = true;
             }

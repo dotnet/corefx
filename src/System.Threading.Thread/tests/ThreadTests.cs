@@ -196,7 +196,7 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)] 
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public static void ApartmentState_NoAttributePresent_DefaultState_Unix()
         {
             RemoteExecutor.Invoke(() =>
@@ -207,18 +207,18 @@ namespace System.Threading.Threads.Tests
         }
 
         // Thread is always initialized as MTA irrespective of the attribute present.
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWindowsNanoServer))]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWindowsNanoServer))]
         public static void ApartmentState_NoAttributePresent_DefaultState_Nano()
         {
             RemoteExecutor.Invoke(() =>
             {
                 Assert.Throws<InvalidOperationException>(() => Thread.CurrentThread.SetApartmentState(ApartmentState.STA));
-                Assert.Equal(ApartmentState.MTA, Thread.CurrentThread.GetApartmentState());                
+                Assert.Equal(ApartmentState.MTA, Thread.CurrentThread.GetApartmentState());
             }).Dispose();
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)] 
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public static void ApartmentState_NoAttributePresent_STA_Unix()
         {
             RemoteExecutor.Invoke(() =>
@@ -249,7 +249,7 @@ namespace System.Threading.Threads.Tests
             });
         }
 
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] 
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(ApartmentStateTest_MemberData))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior differs on Unix and Windows
         public static void ApartmentStateTest_ChangeBeforeThreadStarted_Windows(
@@ -271,8 +271,8 @@ namespace System.Threading.Threads.Tests
             Assert.Equal(ApartmentState.STA, apartmentStateInThread);
         }
 
-        
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWindowsNanoServer))] 
+
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsWindowsNanoServer))]
         [MemberData(nameof(ApartmentStateTest_MemberData))]
         public static void ApartmentStateTest_ChangeBeforeThreadStarted_Windows_Nano_Server(
             Func<Thread, ApartmentState> getApartmentState,
@@ -287,11 +287,11 @@ namespace System.Threading.Threads.Tests
             Assert.Equal(ApartmentState.STA, getApartmentState(t));
             Assert.Equal(setType == 0 ? 0 : 2, setApartmentState(t, ApartmentState.MTA)); // cannot be changed more than once
             Assert.Equal(ApartmentState.STA, getApartmentState(t));
-            
+
             Assert.Throws<ThreadStartException>(() => t.Start()); // Windows Nano Server does not support starting threads in the STA.
         }
 
-        
+
 
         [Theory]
         [MemberData(nameof(ApartmentStateTest_MemberData))]
@@ -441,7 +441,7 @@ namespace System.Threading.Threads.Tests
 
                     Assert.IsType<ClaimsPrincipal>(Thread.CurrentPrincipal);
 
-                    await Task.Run(async() => 
+                    await Task.Run(async() =>
                     {
                         Assert.IsType<ClaimsPrincipal>(Thread.CurrentPrincipal);
 
@@ -475,7 +475,7 @@ namespace System.Threading.Threads.Tests
                 {
                     Assert.True(ExecutionContext.IsFlowSuppressed());
 
-                    task = Task.Run(() => 
+                    task = Task.Run(() =>
                     {
                         Assert.Null(Thread.CurrentPrincipal);
                         Assert.False(ExecutionContext.IsFlowSuppressed());

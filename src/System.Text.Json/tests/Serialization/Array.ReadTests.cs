@@ -168,7 +168,6 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, i.Length);
         }
 
-        [ActiveIssue(38435)]
         [Fact]
         public static void ReadInitializedArrayTest()
         {
@@ -198,7 +197,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<List<int?>>(Encoding.UTF8.GetBytes(@"[1,""a""]")));
 
             // Multidimensional arrays currently not supported
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<int[,]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]")));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<int[,]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]")));
         }
 
         public static IEnumerable<object[]> ReadNullJson
@@ -349,6 +348,7 @@ namespace System.Text.Json.Serialization.Tests
             TestClassWithGenericICollection obj = JsonSerializer.Deserialize<TestClassWithGenericICollection>(TestClassWithGenericICollection.s_data);
         }
 
+        [Fact]
         public static void ReadClassWithObjectISetT()
         {
             TestClassWithObjectISetT obj = JsonSerializer.Deserialize<TestClassWithObjectISetT>(TestClassWithObjectISetT.s_data);
@@ -411,16 +411,32 @@ namespace System.Text.Json.Serialization.Tests
             obj.Verify();
         }
 
-        public static void ClassWithNoSetter()
+        public class ClassWithPopulatedListAndNoSetter
         {
-            string json = @"{""MyList"":[1]}";
-            ClassWithListButNoSetter obj = JsonSerializer.Deserialize<ClassWithListButNoSetter>(json);
-            Assert.Equal(1, obj.MyList[0]);
+            public List<int> MyList { get; } = new List<int>() { 1 };
         }
 
-        public class ClassWithListButNoSetter
+        [Fact]
+        public static void ClassWithNoSetter()
         {
-            public List<int> MyList { get; } = new List<int>();
+            // We replace the contents of this collection; we don't attempt to add items to the existing collection instance.
+            string json = @"{""MyList"":[1,2]}";
+            ClassWithPopulatedListAndNoSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedListAndNoSetter>(json);
+            Assert.Equal(1, obj.MyList.Count);
+        }
+
+        public class ClassWithPopulatedListAndSetter
+        {
+            public List<int> MyList { get; set;  } = new List<int>() { 1 };
+        }
+
+        [Fact]
+        public static void ClassWithPopulatedList()
+        {
+            // We replace the contents of this collection; we don't attempt to add items to the existing collection instance.
+            string json = @"{""MyList"":[2,3]}";
+            ClassWithPopulatedListAndSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedListAndSetter>(json);
+            Assert.Equal(2, obj.MyList.Count);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace System.Runtime.CompilerServices.Tests
 
             string value;
             Assert.True(cwt.TryGetValue(key, out value));
-            Assert.Equal(value, "value1");
+            Assert.Equal("value1", value);
             Assert.Equal(value, cwt.GetOrCreateValue(key));
             Assert.Equal(value, cwt.GetValue(key, k => "value1"));
 
@@ -29,7 +29,7 @@ namespace System.Runtime.CompilerServices.Tests
 
             cwt.AddOrUpdate(key, "value2");
             Assert.True(cwt.TryGetValue(key, out value));
-            Assert.Equal(value, "value2");
+            Assert.Equal("value2", value);
             Assert.Equal(value, cwt.GetOrCreateValue(key));
             Assert.Equal(value, cwt.GetValue(key, k => "value1"));
         }
@@ -114,15 +114,15 @@ namespace System.Runtime.CompilerServices.Tests
             GC.KeepAlive(value1);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void GetEnumerator_CollectedItemsNotEnumerated()
         {
             var cwt = new ConditionalWeakTable<object, object>();
             var enumerable = (IEnumerable<KeyValuePair<object, object>>)cwt;
 
-            // Delegate to add collectible items to the table, separated out 
+            // Delegate to add collectible items to the table, separated out
             // to avoid the JIT extending the lifetimes of the temporaries
-            Action<ConditionalWeakTable<object, object>> addItem = 
+            Action<ConditionalWeakTable<object, object>> addItem =
                 t => t.Add(new object(), new object());
 
             for (int i = 0; i < 10; i++) addItem(cwt);

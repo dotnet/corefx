@@ -10,7 +10,7 @@ using System.Threading;
 namespace System.Collections.Concurrent
 {
     /// <summary>
-    /// Represents a thread-safe, unordered collection of objects. 
+    /// Represents a thread-safe, unordered collection of objects.
     /// </summary>
     /// <typeparam name="T">Specifies the type of elements in the bag.</typeparam>
     /// <remarks>
@@ -20,7 +20,7 @@ namespace System.Collections.Concurrent
     /// scenarios where the same thread will be both producing and consuming data stored in the bag.
     /// </para>
     /// <para>
-    /// <see cref="ConcurrentBag{T}"/> accepts null reference (Nothing in Visual Basic) as a valid 
+    /// <see cref="ConcurrentBag{T}"/> accepts null reference (Nothing in Visual Basic) as a valid
     /// value for reference types.
     /// </para>
     /// <para>
@@ -82,7 +82,7 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// Attempts to add an object to the <see cref="ConcurrentBag{T}"/>.
         /// </summary>
-        /// <param name="item">The object to be added to the 
+        /// <param name="item">The object to be added to the
         /// <see cref="ConcurrentBag{T}"/>. The value can be a null reference
         /// (Nothing in Visual Basic) for reference types.</param>
         /// <returns>Always returns true</returns>
@@ -251,13 +251,13 @@ namespace System.Collections.Concurrent
 
         /// <summary>
         /// Copies the <see cref="ConcurrentBag{T}"/> elements to an existing
-        /// one-dimensional <see cref="T:System.Array">Array</see>, starting at the specified array
+        /// one-dimensional <see cref="System.Array">Array</see>, starting at the specified array
         /// index.
         /// </summary>
-        /// <param name="array">The one-dimensional <see cref="T:System.Array">Array</see> that is the
+        /// <param name="array">The one-dimensional <see cref="System.Array">Array</see> that is the
         /// destination of the elements copied from the
         /// <see cref="ConcurrentBag{T}"/>. The <see
-        /// cref="T:System.Array">Array</see> must have zero-based indexing.</param>
+        /// cref="System.Array">Array</see> must have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying
         /// begins.</param>
         /// <exception cref="ArgumentNullException"><paramref name="array"/> is a null reference (Nothing in
@@ -330,14 +330,14 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Copies the elements of the <see cref="T:System.Collections.ICollection"/> to an <see
-        /// cref="T:System.Array"/>, starting at a particular
-        /// <see cref="T:System.Array"/> index.
+        /// Copies the elements of the <see cref="System.Collections.ICollection"/> to an <see
+        /// cref="System.Array"/>, starting at a particular
+        /// <see cref="System.Array"/> index.
         /// </summary>
-        /// <param name="array">The one-dimensional <see cref="T:System.Array">Array</see> that is the
+        /// <param name="array">The one-dimensional <see cref="System.Array">Array</see> that is the
         /// destination of the elements copied from the
         /// <see cref="ConcurrentBag{T}"/>. The <see
-        /// cref="T:System.Array">Array</see> must have zero-based indexing.</param>
+        /// cref="System.Array">Array</see> must have zero-based indexing.</param>
         /// <param name="index">The zero-based index in <paramref name="array"/> at which copying
         /// begins.</param>
         /// <exception cref="ArgumentNullException"><paramref name="array"/> is a null reference (Nothing in
@@ -348,10 +348,10 @@ namespace System.Collections.Concurrent
         /// <paramref name="array"/> is multidimensional. -or-
         /// <paramref name="array"/> does not have zero-based indexing. -or-
         /// <paramref name="index"/> is equal to or greater than the length of the <paramref name="array"/>
-        /// -or- The number of elements in the source <see cref="T:System.Collections.ICollection"/> is
+        /// -or- The number of elements in the source <see cref="System.Collections.ICollection"/> is
         /// greater than the available space from <paramref name="index"/> to the end of the destination
         /// <paramref name="array"/>. -or- The type of the source <see
-        /// cref="T:System.Collections.ICollection"/> cannot be cast automatically to the type of the
+        /// cref="System.Collections.ICollection"/> cannot be cast automatically to the type of the
         /// destination <paramref name="array"/>.
         /// </exception>
         void ICollection.CopyTo(Array array, int index)
@@ -459,7 +459,7 @@ namespace System.Collections.Concurrent
         /// cref="ConcurrentBag{T}"/>.</returns>
         /// <remarks>
         /// The enumeration represents a moment-in-time snapshot of the contents
-        /// of the bag.  It does not reflect any updates to the collection after 
+        /// of the bag.  It does not reflect any updates to the collection after
         /// <see cref="GetEnumerator"/> was called.  The enumerator is safe to use
         /// concurrently with reads from and writes to the bag.
         /// </remarks>
@@ -473,7 +473,7 @@ namespace System.Collections.Concurrent
         /// cref="ConcurrentBag{T}"/>.</returns>
         /// <remarks>
         /// The items enumerated represent a moment-in-time snapshot of the contents
-        /// of the bag.  It does not reflect any update to the collection after 
+        /// of the bag.  It does not reflect any update to the collection after
         /// <see cref="GetEnumerator"/> was called.
         /// </remarks>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -484,7 +484,7 @@ namespace System.Collections.Concurrent
         /// <value>The number of elements contained in the <see cref="ConcurrentBag{T}"/>.</value>
         /// <remarks>
         /// The count returned represents a moment-in-time snapshot of the contents
-        /// of the bag.  It does not reflect any updates to the collection after 
+        /// of the bag.  It does not reflect any updates to the collection after
         /// <see cref="GetEnumerator"/> was called.
         /// </remarks>
         public int Count
@@ -583,19 +583,19 @@ namespace System.Collections.Concurrent
         }
 
         /// <summary>
-        /// Gets a value indicating whether access to the <see cref="T:System.Collections.ICollection"/> is
+        /// Gets a value indicating whether access to the <see cref="System.Collections.ICollection"/> is
         /// synchronized with the SyncRoot.
         /// </summary>
-        /// <value>true if access to the <see cref="T:System.Collections.ICollection"/> is synchronized
+        /// <value>true if access to the <see cref="System.Collections.ICollection"/> is synchronized
         /// with the SyncRoot; otherwise, false. For <see cref="ConcurrentBag{T}"/>, this property always
         /// returns false.</value>
         bool ICollection.IsSynchronized => false;
 
         /// <summary>
         /// Gets an object that can be used to synchronize access to the <see
-        /// cref="T:System.Collections.ICollection"/>. This property is not supported.
+        /// cref="System.Collections.ICollection"/>. This property is not supported.
         /// </summary>
-        /// <exception cref="T:System.NotSupportedException">The SyncRoot property is not supported.</exception>
+        /// <exception cref="System.NotSupportedException">The SyncRoot property is not supported.</exception>
         object ICollection.SyncRoot
         {
             get { throw new NotSupportedException(SR.ConcurrentCollection_SyncRoot_NotSupported); }
@@ -1082,7 +1082,7 @@ namespace System.Collections.Concurrent
         private sealed class Enumerator : IEnumerator<T>
         {
             private readonly T[] _array;
-            [AllowNull] private T _current = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+            [AllowNull] private T _current = default;
             private int _index;
 
             public Enumerator(T[] array)
@@ -1120,7 +1120,7 @@ namespace System.Collections.Concurrent
             public void Reset()
             {
                 _index = 0;
-                _current = default(T)!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                _current = default;
             }
 
             public void Dispose() { }

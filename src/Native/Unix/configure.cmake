@@ -369,6 +369,11 @@ check_symbol_exists(
     "sys/types.h;sys/event.h"
     HAVE_KQUEUE)
 
+check_symbol_exists(
+    disconnectx
+    "sys/socket.h"
+    HAVE_DISCONNECTX)
+
 set(CMAKE_REQUIRED_FLAGS "-Werror -Wsign-conversion")
 check_c_source_compiles(
      "
@@ -438,11 +443,6 @@ check_symbol_exists(
     mach_absolute_time
     mach/mach_time.h
     HAVE_MACH_ABSOLUTE_TIME)
-
-check_symbol_exists(
-    mach_timebase_info
-    mach/mach_time.h
-    HAVE_MACH_TIMEBASE_INFO)
 
 check_function_exists(
     futimes

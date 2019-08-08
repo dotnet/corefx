@@ -5,7 +5,7 @@
 // for System.Configuration.CallbackValidator.
 //
 // Author:
-//	Chris Toshok  <toshok@ximian.com>
+//  Chris Toshok  <toshok@ximian.com>
 //
 // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
 //
@@ -16,10 +16,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -44,16 +44,6 @@ namespace MonoTests.System.Configuration
             Assert.False(v.CanValidate(typeof(string)));
             Assert.True(v.CanValidate(typeof(int)));
             Assert.False(v.CanValidate(typeof(object)));
-        }
-
-        public void NullCallback()
-        {
-            CallbackValidator v = new CallbackValidator(typeof(int), null);
-        }
-
-        public void NullType()
-        {
-            CallbackValidator v = new CallbackValidator(null, success);
         }
 
         bool hit_success;
@@ -104,4 +94,3 @@ namespace MonoTests.System.Configuration
         }
     }
 }
-

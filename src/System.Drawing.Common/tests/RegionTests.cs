@@ -1,6 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
-// 
+//
 // Copyright (C) 2004-2008 Novell, Inc (http://www.novell.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -367,7 +367,7 @@ namespace System.Drawing.Tests
         public void Complement_Region_Success(Region region, RectangleF[] rectangles, RectangleF[] expectedScans)
         {
             using (region)
-            { 
+            {
                 foreach (RectangleF rect in rectangles)
                 {
                     using (var other = new Region(rect))
@@ -586,22 +586,22 @@ namespace System.Drawing.Tests
 
         public static IEnumerable<object[]> Equals_TestData()
         {
-            Func<Region> empty = () =>
+            static Region Empty()
             {
                 var emptyRegion = new Region();
                 emptyRegion.MakeEmpty();
                 return emptyRegion;
-            };
+            }
 
             var createdRegion = new Region();
             yield return new object[] { createdRegion, createdRegion, true };
             yield return new object[] { new Region(), new Region(), true };
-            yield return new object[] { new Region(), empty(), false };
+            yield return new object[] { new Region(), Empty(), false };
             yield return new object[] { new Region(), new Region(new Rectangle(1, 2, 3, 4)), false };
 
-            yield return new object[] { empty(), empty(), true };
-            yield return new object[] { empty(), new Region(new Rectangle(0, 0, 0, 0)), true };
-            yield return new object[] { empty(), new Region(new Rectangle(1, 2, 3, 3)), false };
+            yield return new object[] { Empty(), Empty(), true };
+            yield return new object[] { Empty(), new Region(new Rectangle(0, 0, 0, 0)), true };
+            yield return new object[] { Empty(), new Region(new Rectangle(1, 2, 3, 3)), false };
 
             yield return new object[] { new Region(new Rectangle(1, 2, 3, 4)), new Region(new Rectangle(1, 2, 3, 4)), true };
             yield return new object[] { new Region(new Rectangle(1, 2, 3, 4)), new Region(new RectangleF(1, 2, 3, 4)), true };
@@ -643,7 +643,7 @@ namespace System.Drawing.Tests
         {
             using (region)
             using (other)
-            { 
+            {
                     Assert.Equal(expected, region.Equals(other, s_graphic));
             }
         }
@@ -2020,11 +2020,11 @@ namespace System.Drawing.Tests
         }
 
         [ConditionalTheory(Helpers.IsDrawingSupported)]
-        [InlineData(1, 2, 0, 0, 0)]
-        [InlineData(0, 0, 2, 2, 0)]
-        [InlineData(0, 0, 0.5, 0.5, 0)]
-        [InlineData(0, 0, 1, 1, 45)]
-        public void Transform_Infinity_Nop(int x, int y, float scaleX, float scaleY, int angle)
+        [InlineData(0, 0, 0)]
+        [InlineData(2, 2, 0)]
+        [InlineData(0.5, 0.5, 0)]
+        [InlineData(1, 1, 45)]
+        public void Transform_Infinity_Nop(float scaleX, float scaleY, int angle)
         {
             using (var region = new Region())
             using (var matrix = new Matrix())
@@ -2033,7 +2033,7 @@ namespace System.Drawing.Tests
                 matrix.Translate(10, 11);
                 matrix.Scale(scaleX, scaleY);
                 matrix.Rotate(angle);
-                
+
                 region.Transform(matrix);
                 Assert.True(region.IsInfinite(s_graphic));
                 Assert.Equal(new RectangleF[] { new RectangleF(-4194304, -4194304, 8388608, 8388608) }, region.GetRegionScans(emptyMatrix));

@@ -184,9 +184,9 @@ namespace System.Text
             this.SetDefaultFallbacks();
         }
 
-        // This constructor is needed to allow any sub-classing implementation to provide encoder/decoder fallback objects 
-        // because the encoding object is always created as read-only object and don't allow setting encoder/decoder fallback 
-        // after the creation is done. 
+        // This constructor is needed to allow any sub-classing implementation to provide encoder/decoder fallback objects
+        // because the encoding object is always created as read-only object and don't allow setting encoder/decoder fallback
+        // after the creation is done.
         protected Encoding(int codePage, EncoderFallback? encoderFallback, DecoderFallback? decoderFallback)
         {
             // Validate code page
@@ -370,7 +370,7 @@ namespace System.Text
         // Returns the name for this encoding that can be used with mail agent body tags.
         // If the encoding may not be used, the string is empty.
 
-        public virtual string? BodyName
+        public virtual string BodyName
         {
             get
             {
@@ -383,7 +383,7 @@ namespace System.Text
         }
 
         // Returns the human-readable description of the encoding ( e.g. Hebrew (DOS)).
-        public virtual string? EncodingName
+        public virtual string EncodingName
         {
             get
             {
@@ -391,7 +391,7 @@ namespace System.Text
                 {
                     GetDataItem();
                 }
-                
+
                 return _dataItem!.DisplayName;
             }
         }
@@ -399,7 +399,7 @@ namespace System.Text
         // Returns the name for this encoding that can be used with mail agent header
         // tags.  If the encoding may not be used, the string is empty.
 
-        public virtual string? HeaderName
+        public virtual string HeaderName
         {
             get
             {
@@ -412,7 +412,7 @@ namespace System.Text
         }
 
         // Returns the IANA preferred name for this encoding.
-        public virtual string? WebName
+        public virtual string WebName
         {
             get
             {
@@ -1247,7 +1247,7 @@ namespace System.Text
             {
                 _encoding = encoding;
             }
-            
+
             public object GetRealObject(StreamingContext context)
             {
                 throw new PlatformNotSupportedException();

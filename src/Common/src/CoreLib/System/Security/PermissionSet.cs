@@ -9,9 +9,6 @@ using System.Runtime.Serialization;
 
 namespace System.Security
 {
-#if PROJECTN
-    [Internal.Runtime.CompilerServices.RelocatedType("System.Runtime.Extensions")]
-#endif
     public partial class PermissionSet : ICollection, IEnumerable, IDeserializationCallback, ISecurityEncodable, IStackWalk
     {
         public PermissionSet(PermissionState state) { }
@@ -48,7 +45,7 @@ namespace System.Security
         public static void RevertAssert() { }
         public IPermission? SetPermission(IPermission? perm) { return SetPermissionImpl(perm); }
         protected virtual IPermission? SetPermissionImpl(IPermission? perm) { return default(IPermission); }
-        void IDeserializationCallback.OnDeserialization(object sender) { }
+        void IDeserializationCallback.OnDeserialization(object? sender) { }
         public override string ToString() => base.ToString()!;
         public virtual SecurityElement? ToXml() { return default(SecurityElement); }
         public PermissionSet? Union(PermissionSet? other) { return default(PermissionSet); }

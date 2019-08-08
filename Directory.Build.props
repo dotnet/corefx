@@ -87,7 +87,7 @@
   </PropertyGroup>
 
   <Import Sdk="Microsoft.DotNet.Build.Tasks.Configuration" Project="Sdk.props" />
-  <Import Sdk="Microsoft.DotNet.CoreFxTesting" Project="Sdk.props" />
+  <Import Sdk="Microsoft.DotNet.CoreFxTesting" Project="Sdk.props" Condition="'$(DotNetBuildFromSource)' != 'true' and '$(BuildAllConfigurations)' != 'true'" />
 
   <PropertyGroup>    
     <EnableProjectRestore Condition="'$(IsTestProject)' == 'true'">true</EnableProjectRestore>
@@ -104,20 +104,6 @@
 
     <!-- Use msbuild path functions as that property is used in bash scripts. -->
     <SourceDir>$([MSBuild]::NormalizeDirectory('$(RepoRoot)', 'src'))</SourceDir>
-  </PropertyGroup>
-
-  <!-- list of nuget package sources passed to nuget restore -->
-  <!-- Example to consume local CoreCLR package:
-       /p:OverridePackageSource=C:\coreclr\bin\Product\Windows_NT.x64.Debug\.nuget\pkg
-       -->
-  <PropertyGroup>
-    <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
-      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
-      https://dotnetfeed.blob.core.windows.net/dotnet-coreclr/index.json;
-      https://api.nuget.org/v3/index.json;
-      $(OverridePackageSource);
-      $(RestoreSources)
-    </RestoreSources>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -216,6 +202,9 @@
     
     <!-- Workaround for codecov issue https://github.com/tonerdo/coverlet/issues/312 -->
     <EnableSourceLink Condition="'$(ContinuousIntegrationBuild)' != 'true' and '$(OfficialBuildId)' == ''">false</EnableSourceLink>
+
+    <!-- TODO-NULLABLE: Remove once netstandard has annotations for Debug.Assert, string.IsNullOrEmpty, etc. -->
+    <NoWarn Condition="'$(TargetsNetFx)' == 'true' OR '$(TargetsNetStandard)' == 'true'">$(NoWarn);nullable</NoWarn>
   </PropertyGroup>
     
   <!-- Set up Default symbol and optimization for Configuration -->
@@ -243,7 +232,8 @@
     <NoStdLib>true</NoStdLib>
     <NoExplicitReferenceToStdLib>true</NoExplicitReferenceToStdLib>
     <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
-    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <!-- Enable the target framework attribute on test assemblies as vstest relies on that property. -->
+    <GenerateTargetFrameworkAttribute Condition="'$(IsTestProject)' != 'true'">false</GenerateTargetFrameworkAttribute>
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <!-- Don't reference implicit framework packages, all projects in this repo must be explicit -->
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
@@ -256,9 +246,7 @@
     <!-- default to allowing all language features -->
     <LangVersion>latest</LangVersion>
     <LangVersion Condition="'$(Language)' == 'C#'">preview</LangVersion>
-    <!-- Enables Strict mode for Roslyn compiler -->
-    <Features>strict</Features>
-    <Features Condition="'$(IsTestProject)' != 'true'">$(Features);nullablePublicOnly</Features>
+    <Features>strict;nullablePublicOnly</Features>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Deterministic>true</Deterministic>
@@ -306,7 +294,7 @@
     <TestArchiveRuntimeRoot>$(TestArchiveRoot)runtime/</TestArchiveRuntimeRoot>
 
     <!-- project file to use when resolving ReferenceFromRuntime items -->
-    <RuntimeProjectFile Condition="'$(RuntimeProjectFile)' == ''">$(RepoRoot)\external\runtime\runtime.depproj</RuntimeProjectFile>
+    <RuntimeProjectFile Condition="'$(RuntimeProjectFile)' == ''">$(RepositoryEngineeringDir)restore\runtime\runtime.depproj</RuntimeProjectFile>
 
     <!-- Paths to binplace package content -->
     <NETCoreAppPackageRefPath>$(ArtifactsBinDir)pkg\netcoreapp\ref</NETCoreAppPackageRefPath>
@@ -330,7 +318,6 @@
     <BinPlaceUAPFramework Condition="'$(_bc_TargetGroup)' == 'uap'">true</BinPlaceUAPFramework>
     <BinPlaceNETFXRuntime Condition="'$(_bc_TargetGroup)' == 'netfx'">true</BinPlaceNETFXRuntime>
 
-    <NETCoreAppTestHostFxrPath>$([MSBuild]::NormalizeDirectory('$(TestHostRootPath)', 'host', 'fxr', '$(ProductVersion)'))</NETCoreAppTestHostFxrPath>
     <NETCoreAppTestSharedFrameworkPath>$([MSBuild]::NormalizeDirectory('$(TestHostRootPath)', 'shared', 'Microsoft.NETCore.App', '$(ProductVersion)'))</NETCoreAppTestSharedFrameworkPath>
     <!-- For UAP, we'll produce the layout and hard-link this into each test's directory -->
     <UAPTestSharedFrameworkPath>$([MSBuild]::NormalizeDirectory('$(TestHostRootPath)', 'UAPLayout'))</UAPTestSharedFrameworkPath>
@@ -364,7 +351,7 @@
 
   <PropertyGroup>
     <!-- F5 and debugging support for netcoreapp and netfx inside VS. -->
-    <EnableLaunchSettings Condition="'$(EnableLaunchSettings)' == ''AND '$(DotNetBuildFromSource)' != 'true'">true</EnableLaunchSettings>
+    <EnableLaunchSettings Condition="'$(EnableLaunchSettings)' == '' and '$(DotNetBuildFromSource)' != 'true'">true</EnableLaunchSettings>
   </PropertyGroup>
 
   <!-- Test properties for full build. -->
@@ -385,7 +372,7 @@
   <!-- Additional optimizations -->
   <PropertyGroup>
     <!-- Clear the init locals flag on all src projects, except those in VB, where we can't use spans. -->
-    <ILLinkClearInitLocals Condition="'$(IsSourceProject)' == 'true' AND '$(Language)' != 'VB'">true</ILLinkClearInitLocals>
+    <ILLinkClearInitLocals Condition="'$(IsSourceProject)' == 'true' and '$(Language)' != 'VB'">true</ILLinkClearInitLocals>
   </PropertyGroup>
 
 </Project>

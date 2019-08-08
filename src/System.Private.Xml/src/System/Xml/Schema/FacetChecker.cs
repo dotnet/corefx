@@ -505,7 +505,7 @@ namespace System.Xml.Schema
                         throw new XmlSchemaException(SR.Sch_MinLengthGtMaxLength, string.Empty);
                     }
                 }
-                
+
                 if (
                     (_derivedRestriction.Flags & RestrictionFlags.MinInclusive) != 0 &&
                     (_derivedRestriction.Flags & RestrictionFlags.MaxInclusive) != 0
@@ -988,7 +988,6 @@ namespace System.Xml.Schema
 
     internal class Numeric10FacetsChecker : FacetsChecker
     {
-        private static readonly char[] s_signs = new char[] { '+', '-' };
         private decimal _maxValue;
         private decimal _minValue;
 

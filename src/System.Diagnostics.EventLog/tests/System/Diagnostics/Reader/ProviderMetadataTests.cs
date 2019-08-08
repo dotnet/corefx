@@ -30,7 +30,7 @@ namespace System.Diagnostics.Tests
                 try
                 {
                     EventLog.CreateEventSource(source, log);
-                    
+
                     string providerName = noProviderName ? "" : source;
                     using (var providerMetadata = new ProviderMetadata(providerName))
                     {
@@ -99,7 +99,6 @@ namespace System.Diagnostics.Tests
                             foreach (var keyword in providerMetadata.Keywords)
                             {
                                 Assert.NotEmpty(keyword.Name);
-                                Assert.NotNull(keyword.Value);
                             }
                             foreach (var logLink in providerMetadata.LogLinks)
                             {

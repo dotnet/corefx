@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -74,13 +74,13 @@ namespace System.Text.Json
                 state.Current.CurrentValue = value;
 
                 bool isFinalBlock;
-
                 int flushThreshold;
+
                 do
                 {
                     flushThreshold = (int)(bufferWriter.Capacity * .9); //todo: determine best value here
 
-                    isFinalBlock = Write(writer, flushThreshold, options, ref state);
+                    isFinalBlock = Write(writer, originalWriterDepth: 0, flushThreshold, options, ref state);
                     writer.Flush();
 
                     await bufferWriter.WriteToStreamAsync(utf8Json, cancellationToken).ConfigureAwait(false);
@@ -88,7 +88,7 @@ namespace System.Text.Json
                     bufferWriter.Clear();
                 } while (!isFinalBlock);
             }
-            
+
             // todo: verify that we do want to call FlushAsync here (or above). It seems like leaving it to the caller would be best.
         }
     }

@@ -154,9 +154,9 @@ namespace System.Reflection.Tests
         }
 
         [Theory]
-        //Verify two same MethodInfo objects are equal 
+        //Verify two same MethodInfo objects are equal
         [InlineData("DummyMethod1", "DummyMethod1", true)]
-        //Verify two different MethodInfo objects are not equal 
+        //Verify two different MethodInfo objects are not equal
         [InlineData("DummyMethod1", "DummyMethod2", false)]
 
         public void Equality1(string str1, string str2, bool expected)
@@ -170,9 +170,9 @@ namespace System.Reflection.Tests
 
         public static IEnumerable<object[]> TestEqualityMethodData2()
         {
-            //Verify two different MethodInfo objects with same name from two different classes are not equal 
+            //Verify two different MethodInfo objects with same name from two different classes are not equal
             yield return new object[] { typeof(Sample), typeof(SampleG<>), "Method1", "Method1", false};
-            //Verify two different MethodInfo objects with same name from two different classes are not equal 
+            //Verify two different MethodInfo objects with same name from two different classes are not equal
             yield return new object[] { typeof(Sample), typeof(SampleG<string>), "Method2", "Method2", false };
         }
 
@@ -185,7 +185,7 @@ namespace System.Reflection.Tests
 
             Assert.Equal(expected, mi1 == mi2);
             Assert.NotEqual(expected, mi1 != mi2);
-        }        
+        }
 
         [Theory]
         [InlineData(typeof(MethodInfoBaseDefinitionBaseClass), "InterfaceMethod1", typeof(MethodInfoBaseDefinitionBaseClass))]
@@ -384,7 +384,7 @@ namespace System.Reflection.Tests
         {
             MethodInfo methodInfo = GetMethod(typeof(MI_SubClass), "ReturnVoidMethod");
             MethodAttributes attributes = methodInfo.Attributes;
-            Assert.NotNull(attributes);
+            Assert.True(attributes.HasFlag(MethodAttributes.Public));
         }
 
         [Fact]
@@ -392,7 +392,7 @@ namespace System.Reflection.Tests
         {
             MethodInfo methodInfo = GetMethod(typeof(MI_SubClass), "ReturnVoidMethod");
             CallingConventions callingConvention = methodInfo.CallingConvention;
-            Assert.NotNull(callingConvention);
+            Assert.True(callingConvention.HasFlag(CallingConventions.HasThis));
         }
 
         [Theory]
@@ -561,14 +561,15 @@ namespace System.Reflection.Tests
             Assert.Equal(expected, methodInfo.ToString());
         }
 
-        //Methods for Reflection Metadata  
-        public void DummyMethod1(string str, int iValue, long lValue)
+
+        //Methods for Reflection Metadata
+        private void DummyMethod1(string str, int iValue, long lValue)
         {
         }
 
-        public void DummyMethod2()
+        private void DummyMethod2()
         {
-        }        
+        }
 
         private static MethodInfo GetMethod(Type type, string name)
         {
@@ -582,7 +583,7 @@ namespace System.Reflection.Tests
         int IMethod();
         int IMethodNew();
     }
-    
+
     public class MI_BaseClass : MI_Interface
     {
         public int IMethod() => 10;
@@ -613,7 +614,7 @@ namespace System.Reflection.Tests
         public new int IMethodNew() => 200;
 
         public override int VirtualMethod() => 1;
-        
+
         public void ReturnVoidMethod(DateTime dt) { }
         public virtual string[] VirtualReturnStringArrayMethod() => new string[0];
         public virtual bool VirtualReturnBoolMethod() => true;
@@ -808,6 +809,6 @@ namespace System.Reflection.Tests
         {
             return t2;
         }
-    }    
+    }
 #pragma warning restore 0414
 }

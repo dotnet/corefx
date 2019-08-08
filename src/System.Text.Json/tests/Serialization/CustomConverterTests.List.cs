@@ -35,7 +35,7 @@ namespace System.Text.Json.Serialization.Tests
                     arg == typeof(long);
             }
 
-            protected override JsonConverter CreateConverter(Type type)
+            public override JsonConverter CreateConverter(Type type, JsonSerializerOptions options)
             {
                 Type elementType = type.GetGenericArguments()[0];
 
@@ -232,6 +232,9 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(13, contraVariantList[2]);
 
             string jsonSerialized = JsonSerializer.Serialize(list, options);
+            Assert.Equal(json, jsonSerialized);
+
+            jsonSerialized = JsonSerializer.Serialize(contraVariantList, options);
             Assert.Equal(json, jsonSerialized);
         }
     }

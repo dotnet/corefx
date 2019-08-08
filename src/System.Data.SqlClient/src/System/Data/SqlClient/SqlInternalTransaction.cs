@@ -30,7 +30,7 @@ namespace System.Data.SqlClient
         Context = 5,     // only valid in proc.
     };
 
-    sealed internal class SqlInternalTransaction
+    internal sealed class SqlInternalTransaction
     {
         internal const long NullTransactionId = 0;
 
@@ -488,7 +488,7 @@ namespace System.Data.SqlClient
             // Number 1 needs to be done whenever a SqlTransaction object is completed.  Number
             // 2 is only done when a transaction is actually completed.  Since users can begin
             // transactions both in and outside of the API, and since nested begins are not actual
-            // transactions we need to distinguish between #1 and #2.  
+            // transactions we need to distinguish between #1 and #2.
 
             ZombieParent();
 

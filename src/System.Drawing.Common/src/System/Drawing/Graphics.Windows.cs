@@ -42,7 +42,7 @@ namespace System.Drawing
 
         private static readonly object s_syncObject = new object();
 
-        // Object reference used for printing; it could point to a PrintPreviewGraphics to obtain the VisibleClipBounds, or 
+        // Object reference used for printing; it could point to a PrintPreviewGraphics to obtain the VisibleClipBounds, or
         // a DeviceContext holding a printer DC.
         private object _printingHelper;
 
@@ -97,7 +97,7 @@ namespace System.Drawing
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public static Graphics FromHdcInternal(IntPtr hdc)
         {
-            Gdip.CheckStatus(Gdip.GdipCreateFromHDC(new HandleRef(null, hdc), out IntPtr nativeGraphics));
+            Gdip.CheckStatus(Gdip.GdipCreateFromHDC(hdc, out IntPtr nativeGraphics));
             return new Graphics(nativeGraphics);
         }
 
@@ -107,11 +107,7 @@ namespace System.Drawing
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public static Graphics FromHdc(IntPtr hdc, IntPtr hdevice)
         {
-            Gdip.CheckStatus(Gdip.GdipCreateFromHDC2(
-                new HandleRef(null, hdc),
-                new HandleRef(null, hdevice),
-                out IntPtr nativeGraphics));
-
+            Gdip.CheckStatus(Gdip.GdipCreateFromHDC2(hdc, hdevice, out IntPtr nativeGraphics));
             return new Graphics(nativeGraphics);
         }
 
@@ -124,7 +120,7 @@ namespace System.Drawing
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public static Graphics FromHwndInternal(IntPtr hwnd)
         {
-            Gdip.CheckStatus(Gdip.GdipCreateFromHWND(new HandleRef(null, hwnd), out IntPtr nativeGraphics));
+            Gdip.CheckStatus(Gdip.GdipCreateFromHWND(hwnd, out IntPtr nativeGraphics));
             return new Graphics(nativeGraphics);
         }
 
@@ -148,7 +144,8 @@ namespace System.Drawing
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void ReleaseHdcInternal(IntPtr hdc)
         {
-            Gdip.CheckStatus(Gdip.GdipReleaseDC(new HandleRef(this, NativeGraphics), new HandleRef(null, hdc)));
+            Gdip.CheckStatus(!Gdip.Initialized ? Gdip.Ok :
+                Gdip.GdipReleaseDC(new HandleRef(this, NativeGraphics), hdc));
             _nativeHdc = IntPtr.Zero;
         }
 
@@ -194,7 +191,7 @@ namespace System.Drawing
                     }
 
 #if DEBUG
-                    int status =
+                    int status = !Gdip.Initialized ? Gdip.Ok :
 #endif
                     Gdip.GdipDeleteGraphics(new HandleRef(this, NativeGraphics));
 
@@ -294,15 +291,23 @@ namespace System.Drawing
             using (DeviceContext dc = DeviceContext.FromHwnd(IntPtr.Zero))
             {
                 // The DC of the screen.
-                HandleRef screenDC = new HandleRef(null, dc.Hdc);
+                IntPtr screenDC = dc.Hdc;
 
                 // The DC of the current graphics object.
-                HandleRef targetDC = new HandleRef(null, GetHdc());
+                IntPtr targetDC = GetHdc();
 
                 try
                 {
-                    int result = SafeNativeMethods.BitBlt(
-                        targetDC, destinationX, destinationY, destWidth, destHeight, screenDC, sourceX, sourceY, (int)copyPixelOperation);
+                    int result = Interop.Gdi32.BitBlt(
+                        targetDC,
+                        destinationX,
+                        destinationY,
+                        destWidth,
+                        destHeight,
+                        screenDC,
+                        sourceX,
+                        sourceY,
+                        (Interop.Gdi32.RasterOp)copyPixelOperation);
 
                     //a zero result indicates a win32 exception has been thrown
                     if (result == 0)
@@ -1691,7 +1696,7 @@ namespace System.Drawing
         //       destPoints[2] <=> bottom-left corner
         //  destPoints.Length = 4: rect => quad
         // destPoints[3] <=> bottom-right corner
-        // 
+        //
         //  @notes Perspective blt only works for bitmap images.
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
@@ -1790,7 +1795,7 @@ namespace System.Drawing
                 srcUnit,
                 NativeMethods.NullHandleRef,
                 null,
-                NativeMethods.NullHandleRef);
+                IntPtr.Zero);
 
             IgnoreMetafileErrors(image, ref status);
             CheckErrorStatus(status);
@@ -1810,7 +1815,7 @@ namespace System.Drawing
                 srcUnit,
                 NativeMethods.NullHandleRef,
                 null,
-                NativeMethods.NullHandleRef);
+                IntPtr.Zero);
 
             IgnoreMetafileErrors(image, ref status);
             CheckErrorStatus(status);
@@ -1838,7 +1843,7 @@ namespace System.Drawing
                     srcUnit,
                     NativeMethods.NullHandleRef,
                     null,
-                    NativeMethods.NullHandleRef);
+                    IntPtr.Zero);
 
                 IgnoreMetafileErrors(image, ref status);
                 CheckErrorStatus(status);
@@ -1892,7 +1897,7 @@ namespace System.Drawing
                     srcUnit,
                     new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero),
                     callback,
-                    new HandleRef(null, (IntPtr)callbackData));
+                    (IntPtr)callbackData);
 
                 IgnoreMetafileErrors(image, ref status);
                 CheckErrorStatus(status);
@@ -1957,7 +1962,7 @@ namespace System.Drawing
                     srcUnit,
                     new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero),
                     callback,
-                    new HandleRef(null, (IntPtr)callbackData));
+                    (IntPtr)callbackData);
 
                 IgnoreMetafileErrors(image, ref status);
                 CheckErrorStatus(status);
@@ -2031,7 +2036,7 @@ namespace System.Drawing
                 srcUnit,
                 new HandleRef(imageAttrs, imageAttrs?.nativeImageAttributes ?? IntPtr.Zero),
                 callback,
-                new HandleRef(null, callbackData));
+                callbackData);
 
             IgnoreMetafileErrors(image, ref status);
             CheckErrorStatus(status);
@@ -2103,7 +2108,7 @@ namespace System.Drawing
                 srcUnit,
                 new HandleRef(imageAttrs, imageAttrs?.nativeImageAttributes ?? IntPtr.Zero),
                 callback,
-                new HandleRef(null, callbackData));
+                callbackData);
 
             IgnoreMetafileErrors(image, ref status);
             CheckErrorStatus(status);
@@ -2135,7 +2140,7 @@ namespace System.Drawing
                 new HandleRef(metafile, metafile?.nativeImage ?? IntPtr.Zero),
                 ref destPoint,
                 callback,
-                new HandleRef(null, callbackData),
+                callbackData,
                 new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
         }
 
@@ -2165,7 +2170,7 @@ namespace System.Drawing
                 new HandleRef(metafile, metafile?.nativeImage ?? IntPtr.Zero),
                 ref destPoint,
                 callback,
-                new HandleRef(null, callbackData),
+                callbackData,
                 new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
         }
 
@@ -2195,7 +2200,7 @@ namespace System.Drawing
                 new HandleRef(metafile, metafile?.nativeImage ?? IntPtr.Zero),
                 ref destRect,
                 callback,
-                new HandleRef(null, callbackData),
+                callbackData,
                 new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
         }
 
@@ -2225,7 +2230,7 @@ namespace System.Drawing
                 new HandleRef(metafile, metafile?.nativeImage ?? IntPtr.Zero),
                 ref destRect,
                 callback,
-                new HandleRef(null, callbackData),
+                callbackData,
                 new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
         }
 
@@ -2266,7 +2271,7 @@ namespace System.Drawing
                     new HandleRef(metafile, metafile?.nativeImage ?? IntPtr.Zero),
                     p, destPoints.Length,
                     callback,
-                    new HandleRef(null, callbackData),
+                    callbackData,
                     new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
             }
         }
@@ -2304,7 +2309,7 @@ namespace System.Drawing
                     new HandleRef(metafile, metafile?.nativeImage ?? IntPtr.Zero),
                     p, destPoints.Length,
                     callback,
-                    new HandleRef(null, callbackData),
+                    callbackData,
                     new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
             }
         }
@@ -2350,7 +2355,7 @@ namespace System.Drawing
                 ref srcRect,
                 unit,
                 callback,
-                new HandleRef(null, callbackData),
+                callbackData,
                 new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
         }
 
@@ -2395,7 +2400,7 @@ namespace System.Drawing
                 ref srcRect,
                 unit,
                 callback,
-                new HandleRef(null, callbackData),
+                callbackData,
                 new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
         }
 
@@ -2440,7 +2445,7 @@ namespace System.Drawing
                 ref srcRect,
                 unit,
                 callback,
-                new HandleRef(null, callbackData),
+                callbackData,
                 new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
         }
 
@@ -2485,7 +2490,7 @@ namespace System.Drawing
                 ref srcRect,
                 unit,
                 callback,
-                new HandleRef(null, callbackData),
+                callbackData,
                 new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
         }
 
@@ -2537,7 +2542,7 @@ namespace System.Drawing
                     ref srcRect,
                     unit,
                     callback,
-                    new HandleRef(null, callbackData),
+                    callbackData,
                     new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
             }
         }
@@ -2590,7 +2595,7 @@ namespace System.Drawing
                     ref srcRect,
                     unit,
                     callback,
-                    new HandleRef(null, callbackData),
+                    callbackData,
                     new HandleRef(imageAttr, imageAttr?.nativeImageAttributes ?? IntPtr.Zero)));
             }
         }
@@ -2600,7 +2605,7 @@ namespace System.Drawing
         /// When BeginContainer() is called, a copy of the current context is pushed into the GDI+ context stack, it keeps track of the
         /// absolute clipping and transform but reset the public properties so it looks like a brand new context.
         /// When Save() is called, a copy of the current context is also pushed in the GDI+ stack but the public clipping and transform
-        /// properties are not reset (cumulative). Consecutive Save context are ignored with the exception of the top one which contains 
+        /// properties are not reset (cumulative). Consecutive Save context are ignored with the exception of the top one which contains
         /// all previous information.
         /// The return value is an object array where the first element contains the cumulative clip region and the second the cumulative
         /// translate transform matrix.
@@ -2849,15 +2854,15 @@ namespace System.Drawing
 
         /// <summary>
         /// GDI+ will return a 'generic error' with specific win32 last error codes when
-        /// a terminal server session has been closed, minimized, etc... We don't want 
+        /// a terminal server session has been closed, minimized, etc... We don't want
         /// to throw when this happens, so we'll guard against this by looking at the
         /// 'last win32 error code' and checking to see if it is either 1) access denied
         /// or 2) proc not found and then ignore it.
-        /// 
-        /// The problem is that when you lock the machine, the secure desktop is enabled and 
-        /// rendering fails which is expected (since the app doesn't have permission to draw 
-        /// on the secure desktop). Not sure if there's anything you can do, short of catching 
-        /// the desktop switch message and absorbing all the exceptions that get thrown while 
+        ///
+        /// The problem is that when you lock the machine, the secure desktop is enabled and
+        /// rendering fails which is expected (since the app doesn't have permission to draw
+        /// on the secure desktop). Not sure if there's anything you can do, short of catching
+        /// the desktop switch message and absorbing all the exceptions that get thrown while
         /// it's the secure desktop.
         /// </summary>
         private void CheckErrorStatus(int status)
@@ -2882,8 +2887,8 @@ namespace System.Drawing
         }
 
         /// <summary>
-        /// GDI+ will return a 'generic error' when we attempt to draw an Emf 
-        /// image with width/height == 1. Here, we will hack around this by 
+        /// GDI+ will return a 'generic error' when we attempt to draw an Emf
+        /// image with width/height == 1. Here, we will hack around this by
         /// resetting the errorstatus. Note that we don't do simple arg checking
         /// for height || width == 1 here because transforms can be applied to
         /// the Graphics object making it difficult to identify this scenario.

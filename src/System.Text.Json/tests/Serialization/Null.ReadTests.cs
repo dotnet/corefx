@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -18,7 +18,7 @@ namespace System.Text.Json.Serialization.Tests
 
         [Fact]
         public static void RootObjectIsNull()
-        { 
+        {
             {
                 TestClassWithNull obj = JsonSerializer.Deserialize<TestClassWithNull>("null");
                 Assert.Null(obj);
@@ -69,10 +69,10 @@ namespace System.Text.Json.Serialization.Tests
         public static void DefaultIgnoreNullValuesOnRead()
         {
             TestClassWithInitializedProperties obj = JsonSerializer.Deserialize<TestClassWithInitializedProperties>(TestClassWithInitializedProperties.s_null_json);
-            Assert.Equal(null, obj.MyString);
-            Assert.Equal(null, obj.MyInt);
-            Assert.Equal(null, obj.MyIntArray);
-            Assert.Equal(null, obj.MyIntList);
+            Assert.Null(obj.MyString);
+            Assert.Null(obj.MyInt);
+            Assert.Null(obj.MyIntArray);
+            Assert.Null(obj.MyIntList);
         }
 
         [Fact]

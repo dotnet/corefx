@@ -53,7 +53,7 @@ namespace System.Linq.Expressions.Tests
             ConstantExpression[] args = Enumerable.Range(0, N).Select(i => Expression.Constant(i)).ToArray();
 
             MethodCallExpression expr = Expression.Call(obj, typeof(MS).GetMethod("I" + N), args);
-            
+
             Assert.Equal("InstanceMethodCallExpressionN", expr.GetType().Name);
             Assert.Same(obj, expr.Object);
 
@@ -182,7 +182,7 @@ namespace System.Linq.Expressions.Tests
 
             var visitedArgs = (MethodCallExpression)new VisitorArgs().Visit(expr);
             Assert.NotSame(expr, visitedArgs);
-            Assert.Same(null, visitedArgs.Object);
+            Assert.Null(visitedArgs.Object);
             Assert.NotSame(arguments, visitedArgs.Arguments);
         }
 

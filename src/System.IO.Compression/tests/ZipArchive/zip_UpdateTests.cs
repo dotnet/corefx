@@ -44,6 +44,7 @@ namespace System.IO.Compression.Tests
             }
         }
 
+        [Theory]
         [InlineData("normal")]
         [InlineData("empty")]
         [InlineData("unicode")]
@@ -339,4 +340,3 @@ namespace System.IO.Compression.Tests
         }
     }
 }
-

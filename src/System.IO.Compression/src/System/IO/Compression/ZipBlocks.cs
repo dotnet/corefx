@@ -440,7 +440,7 @@ namespace System.IO.Compression
             if (reader.BaseStream.Length < reader.BaseStream.Position + OffsetToFilename)
                 return false;
 
-            uint minimumVersion = reader.ReadUInt16();
+            reader.BaseStream.Seek(2, SeekOrigin.Current); // skipping minimum version (using min version from central directory header)
             uint dataDescriptorBit = reader.ReadUInt16() & (uint)ZipArchiveEntry.BitFlagValues.DataDescriptor;
             reader.BaseStream.Seek(10, SeekOrigin.Current); // skipping bytes used for Compression method (2 bytes), last modification time and date (4 bytes) and CRC (4 bytes)
             long compressedSize = reader.ReadUInt32();
@@ -453,7 +453,7 @@ namespace System.IO.Compression
 
             reader.BaseStream.Seek(filenameLength, SeekOrigin.Current);  // skipping Filename
             long endExtraFields = reader.BaseStream.Position + extraFieldLength;
-            
+
             if (dataDescriptorBit == 0)
             {
                 bool isUncompressedSizeInZip64 = uncompressedSize == ZipHelper.Mask32Bit;
@@ -485,7 +485,7 @@ namespace System.IO.Compression
                     return false;
                 }
 
-                reader.BaseStream.Seek(extraFieldLength + entry.CompressedLength, SeekOrigin.Current); // seek to end of compressed file from which Data descriptor starts             
+                reader.BaseStream.Seek(extraFieldLength + entry.CompressedLength, SeekOrigin.Current); // seek to end of compressed file from which Data descriptor starts
                 uint dataDescriptorSignature = reader.ReadUInt32();
                 bool wasDataDescriptorSignatureRead = false;
                 int seekSize = 0;
@@ -495,7 +495,7 @@ namespace System.IO.Compression
                     seekSize = 4;
                 }
 
-                bool is64bit = minimumVersion > (uint)ZipVersionNeededValues.Zip64;
+                bool is64bit = entry._versionToExtract >= ZipVersionNeededValues.Zip64;
                 seekSize += (is64bit ? 8 : 4) * 2;   // if Zip64 read by 8 bytes else 4 bytes 2 times (compressed and uncompressed size)
 
                 if (reader.BaseStream.Length < reader.BaseStream.Position + seekSize)

@@ -12,7 +12,7 @@ namespace System.Data.OleDb
 {
     // SafeHandle wrapper around 'DataLinks' object which pools the native OLE DB providers.
     // expect 1 per app-domain
-    sealed internal class OleDbServicesWrapper : WrappedIUnknown
+    internal sealed class OleDbServicesWrapper : WrappedIUnknown
     {
         // we expect to store IDataInitialize instance pointer in base.handle
 
@@ -88,7 +88,7 @@ namespace System.Data.OleDb
 
     // SafeHandle wrapper around 'Data Source' object which represents the connection
     // expect 1 per OleDbConnectionInternal
-    sealed internal class DataSourceWrapper : WrappedIUnknown
+    internal sealed class DataSourceWrapper : WrappedIUnknown
     {
         // we expect to store IDBInitialize instance pointer in base.handle
 
@@ -219,7 +219,7 @@ namespace System.Data.OleDb
 
     // SafeHandle wrapper around 'Session' object which represents the session on the connection
     // expect 1 per OleDbConnectionInternal
-    sealed internal class SessionWrapper : WrappedIUnknown
+    internal sealed class SessionWrapper : WrappedIUnknown
     {
         // base.handle will either reference the IUnknown interface or IDBCreateCommand interface
         // if OleDbConnectionString.DangerousIDBCreateCommandCreateCommand exists
@@ -250,8 +250,8 @@ namespace System.Data.OleDb
             // If constr.HaveQueriedForCreateCommand is true, we have already tried to query for IDBCreateCommand on a previous call to this method, but based on that alone,
             //     we don't know if another thread set the flag, or if the provider really doesn't support commands.
             // If constr.HaveQueriedForCreateCommand is true and constr.DangerousIDBCreateCommandCreateCommand is not null, that means that another thread has set it after we
-            //     determined we needed to call QueryInterfaceIDBCreateCommand -- otherwise we would have called VerifyIDBCreateCommand instead 
-            // In that case, we still need to set our local DangerousIDBCreateCommandCreateCommand, so we want to go through the if block even though the cache has been set on constr already            
+            //     determined we needed to call QueryInterfaceIDBCreateCommand -- otherwise we would have called VerifyIDBCreateCommand instead
+            // In that case, we still need to set our local DangerousIDBCreateCommandCreateCommand, so we want to go through the if block even though the cache has been set on constr already
             if (!constr.HaveQueriedForCreateCommand || (null != constr.DangerousIDBCreateCommandCreateCommand))
             {
                 IntPtr idbCreateCommand = IntPtr.Zero;

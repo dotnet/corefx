@@ -197,7 +197,7 @@ namespace System.Collections.Generic
             {
                 ThrowForEmptyStack();
             }
-            
+
             return array[size];
         }
 
@@ -221,15 +221,15 @@ namespace System.Collections.Generic
         {
             int size = _size - 1;
             T[] array = _array;
-            
+
             // if (_size == 0) is equivalent to if (size == -1), and this case
-            // is covered with (uint)size, thus allowing bounds check elimination 
+            // is covered with (uint)size, thus allowing bounds check elimination
             // https://github.com/dotnet/coreclr/pull/9773
             if ((uint)size >= (uint)array.Length)
             {
                 ThrowForEmptyStack();
             }
-            
+
             _version++;
             _size = size;
             T item = array[size];
@@ -278,7 +278,7 @@ namespace System.Collections.Generic
                 PushWithResize(item);
             }
         }
-        
+
         // Non-inline from Stack.Push to improve its code quality as uncommon path
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void PushWithResize(T item)
@@ -324,7 +324,7 @@ namespace System.Collections.Generic
                 _stack = stack;
                 _version = stack._version;
                 _index = -2;
-                _currentElement = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                _currentElement = default;
             }
 
             public void Dispose()
@@ -353,7 +353,7 @@ namespace System.Collections.Generic
                 if (retval)
                     _currentElement = _stack._array[_index];
                 else
-                    _currentElement = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                    _currentElement = default;
                 return retval;
             }
 
@@ -366,13 +366,13 @@ namespace System.Collections.Generic
                     return _currentElement;
                 }
             }
-            
+
             private void ThrowEnumerationNotStartedOrEnded()
             {
                 Debug.Assert(_index == -1 || _index == -2);
                 throw new InvalidOperationException(_index == -2 ? SR.InvalidOperation_EnumNotStarted : SR.InvalidOperation_EnumEnded);
             }
-            
+
             object? System.Collections.IEnumerator.Current
             {
                 get { return Current; }
@@ -382,7 +382,7 @@ namespace System.Collections.Generic
             {
                 if (_version != _stack._version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 _index = -2;
-                _currentElement = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                _currentElement = default;
             }
         }
     }

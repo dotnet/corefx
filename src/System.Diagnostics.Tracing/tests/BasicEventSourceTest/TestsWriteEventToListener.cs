@@ -296,7 +296,7 @@ namespace BasicEventSourceTests
                 log = new EventSource(esName);
                 log2 = new EventSource(esName2);
 
-                
+
                 using (var listener = new EventListenerListener())
                 {
                     List<EventSource> eventSourceNotificationsReceived = new List<EventSource>();
@@ -315,8 +315,8 @@ namespace BasicEventSourceTests
 
                     Thread.Sleep(1000);
 
-                    Assert.Equal(true, esNameHit);
-                    Assert.Equal(true, esName2Hit);
+                    Assert.True(esNameHit);
+                    Assert.True(esName2Hit);
                 }
             }
             finally
@@ -377,8 +377,8 @@ namespace BasicEventSourceTests
 
                     Thread.Sleep(1000);
 
-                    Assert.Equal(true, esNameHit);
-                    Assert.Equal(true, esName2Hit);
+                    Assert.True(esNameHit);
+                    Assert.True(esName2Hit);
                 }
             }
             finally

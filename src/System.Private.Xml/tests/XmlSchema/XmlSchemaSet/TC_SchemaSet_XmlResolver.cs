@@ -23,13 +23,13 @@ namespace System.Xml.Tests
 
         public bool bErrorCallback;
 
-        public void Initialize()
+        private void Initialize()
         {
             bWarningCallback = bErrorCallback = false;
         }
 
         //hook up validaton callback
-        public void ValidationCallback(object sender, ValidationEventArgs args)
+        private void ValidationCallback(object sender, ValidationEventArgs args)
         {
             if (args.Severity == XmlSeverityType.Warning)
             {
@@ -47,8 +47,7 @@ namespace System.Xml.Tests
 
         //-----------------------------------------------------------------------------------
         //[Variation(Desc = "v1 - Resolver=NULL, add with URL", Priority = 1)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v1()
         {
             try
@@ -67,8 +66,7 @@ namespace System.Xml.Tests
         }
 
         //[Variation(Desc = "v2 - Resolver=NULL, add schema which imports schema on internet", Priority = 1)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v2()
         {
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -80,8 +78,7 @@ namespace System.Xml.Tests
         }
 
         //[Variation(Desc = "v3 - Resolver=Default, add schema which imports schema on internet", Priority = 1)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void v3()
         {
             XmlSchemaSet sc = new XmlSchemaSet();

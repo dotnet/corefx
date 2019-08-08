@@ -15,8 +15,8 @@ namespace System.Reflection
 {
     public abstract partial class Assembly : ICustomAttributeProvider, ISerializable
     {
-        private readonly static Dictionary<string, Assembly> s_loadfile = new Dictionary<string, Assembly>();
-        private readonly static List<string> s_loadFromAssemblyList = new List<string>();
+        private static readonly Dictionary<string, Assembly> s_loadfile = new Dictionary<string, Assembly>();
+        private static readonly List<string> s_loadFromAssemblyList = new List<string>();
         private static bool s_loadFromHandlerSet;
         private static int s_cachedSerializationSwitch;
 
@@ -117,7 +117,7 @@ namespace System.Reflection
             return Activator.CreateInstance(t, bindingAttr, binder, args, culture, activationAttributes);
         }
 
-        public virtual event ModuleResolveEventHandler ModuleResolve { add { throw NotImplemented.ByDesign; } remove { throw NotImplemented.ByDesign; } }
+        public virtual event ModuleResolveEventHandler? ModuleResolve { add { throw NotImplemented.ByDesign; } remove { throw NotImplemented.ByDesign; } }
 
         public virtual Module ManifestModule { get { throw NotImplemented.ByDesign; } }
         public virtual Module? GetModule(string name) { throw NotImplemented.ByDesign; }
@@ -296,7 +296,7 @@ namespace System.Reflection
         {
             if (assemblyFile == null)
                 throw new ArgumentNullException(nameof(assemblyFile));
-            
+
             string fullPath = Path.GetFullPath(assemblyFile);
 
             if (!s_loadFromHandlerSet)

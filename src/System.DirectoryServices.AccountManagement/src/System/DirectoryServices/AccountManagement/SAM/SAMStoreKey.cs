@@ -45,10 +45,9 @@ namespace System.DirectoryServices.AccountManagement
             return Utils.AreBytesEqual(_sid, that._sid);
         }
 
-        override public int GetHashCode()
+        public override int GetHashCode()
         {
             return _machineName.GetHashCode() ^ _sid.GetHashCode();
         }
     }
 }
-

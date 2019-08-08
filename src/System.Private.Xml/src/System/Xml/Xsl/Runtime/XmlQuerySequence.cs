@@ -24,8 +24,6 @@ namespace System.Xml.Xsl.Runtime
     {
         public static readonly XmlQuerySequence<T> Empty = new XmlQuerySequence<T>();
 
-        private static readonly Type s_XPathItemType = typeof(XPathItem);
-
         private T[] _items;
         private int _size;
 
@@ -424,7 +422,7 @@ namespace System.Xml.Xsl.Runtime
     [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class XmlQueryItemSequence : XmlQuerySequence<XPathItem>
     {
-        public new static readonly XmlQueryItemSequence Empty = new XmlQueryItemSequence();
+        public static new readonly XmlQueryItemSequence Empty = new XmlQueryItemSequence();
 
         /// <summary>
         /// If "seq" is non-null, then clear it and reuse it.  Otherwise, create a new XmlQueryItemSequence.
@@ -496,7 +494,7 @@ namespace System.Xml.Xsl.Runtime
     [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class XmlQueryNodeSequence : XmlQuerySequence<XPathNavigator>, IList<XPathItem>
     {
-        public new static readonly XmlQueryNodeSequence Empty = new XmlQueryNodeSequence();
+        public static new readonly XmlQueryNodeSequence Empty = new XmlQueryNodeSequence();
 
         private XmlQueryNodeSequence _docOrderDistinct;
 
@@ -762,4 +760,3 @@ namespace System.Xml.Xsl.Runtime
         }
     }
 }
-

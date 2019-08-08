@@ -38,9 +38,10 @@ namespace System.Net.Tests
                 Assert.Equal(initialCount, GetModuleCount());
 
                 return RemoteExecutor.SuccessExitCode;
-            }).Dispose();           
+            }).Dispose();
         }
 
+        [Fact]
         public void Register_UnregisterByScheme_ModuleCountUnchanged()
         {
             RemoteExecutor.Invoke(() =>
@@ -100,7 +101,7 @@ namespace System.Net.Tests
                 Assert.Equal(0, AuthenticationManager.CustomTargetNameDictionary.Count);
 
                 return RemoteExecutor.SuccessExitCode;
-            }).Dispose();            
+            }).Dispose();
         }
 
         private static int GetModuleCount()
@@ -144,6 +145,6 @@ namespace System.Net.Tests
             {
                 throw new NotImplementedException();
             }
-        }    
-    }    
+        }
+    }
 }

@@ -11,10 +11,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -66,13 +66,13 @@ namespace System.Data.Tests
    <child_after_significant_space />
 </root>";
         // This is useless ... since xml:space becomes a DataColumn here.
-        //		string xml12 = "<root xml:space='preserve'>     </root>";
+        //        string xml12 = "<root xml:space='preserve'>     </root>";
         // The result is silly under MS.NET. It never ignores comment, so
         // They differ:
         //   1) <root>simple string.</root>
         //   2) <root>simple <!-- comment -->string.</root>
         // The same applies to PI.
-        //		string xml13 = "<root><tab><col>test <!-- out --> comment</col></tab></root>";
+        //        string xml13 = "<root><tab><col>test <!-- out --> comment</col></tab></root>";
 
         // simple namespace/prefix support
         private string _xml14 = "<p:root xmlns:p='urn:foo'>test string</p:root>";
@@ -311,7 +311,7 @@ namespace System.Data.Tests
         [Fact]
         public void SignificantWhitespaceIgnored()
         {
-            // Note that 1) significant whitespace is ignored, and 
+            // Note that 1) significant whitespace is ignored, and
             // 2) xml:space is treated as column (and also note namespaces).
             DataSet ds = GetDataSet(_xml11, null);
             DataSetAssertion.AssertDataSet("ds", ds, "NewDataSet", 1, 0);
@@ -427,7 +427,7 @@ namespace System.Data.Tests
             Assert.Throws<DataException>(() =>
            {
                // attribute "data" becomes DataTable, and when column "data"
-               // appears, it cannot be DataColumn, since the name is 
+               // appears, it cannot be DataColumn, since the name is
                // already allocated for DataTable.
                DataSet ds = GetDataSet(_xml21, null);
            });

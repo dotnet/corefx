@@ -8,11 +8,11 @@ namespace System.Text.Json.Serialization.Converters
 {
     internal sealed class DefaultIDictionaryConverter : JsonDictionaryConverter
     {
-        public override IDictionary CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
+        public override object CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
         {
             Type dictionaryType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
-            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+            Type elementType = state.Current.JsonPropertyInfo.ElementType;
+            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementType, options);
             return propertyInfo.CreateIDictionaryInstance(dictionaryType, sourceDictionary, state.JsonPath, options);
         }
     }

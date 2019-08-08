@@ -72,6 +72,7 @@ namespace System.Net.WebSockets
             Receive = 2,
         }
 
+#pragma warning disable CA1810 // explicit static cctor
         static WebSocketProtocolComponent()
         {
             s_webSocketDllHandle = Interop.Kernel32.LoadLibraryExW(Interop.Libraries.WebSocket, IntPtr.Zero, 0);
@@ -120,6 +121,7 @@ namespace System.Net.WebSockets
                 };
             }
         }
+#pragma warning restore CA1810
 
         internal static string SupportedVersion
         {
@@ -480,8 +482,8 @@ namespace System.Net.WebSockets
             //   NameLength = uint*
             //   Value = string*
             //   ValueLength = uint*
-            // NOTE - All fields in the object are pointers to the actual value, hence the use of 
-            //        n * IntPtr.Size to get to the correct place in the object. 
+            // NOTE - All fields in the object are pointers to the actual value, hence the use of
+            //        n * IntPtr.Size to get to the correct place in the object.
             int valueOffset = 2 * IntPtr.Size;
             int lengthOffset = 3 * IntPtr.Size;
 
@@ -513,8 +515,8 @@ namespace System.Net.WebSockets
             //   NameLength = uint*
             //   Value = string*
             //   ValueLength = uint*
-            // NOTE - All fields in the object are pointers to the actual value, hence the use of 
-            //        4 * IntPtr.Size to get to the next header. 
+            // NOTE - All fields in the object are pointers to the actual value, hence the use of
+            //        4 * IntPtr.Size to get to the next header.
             int httpHeaderStructSize = 4 * IntPtr.Size;
 
             for (int i = 0; i < nativeHeaderCount; i++)

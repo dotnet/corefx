@@ -46,14 +46,14 @@ namespace System.Drawing
                     s_shield = new Icon(typeof(SystemIcons), "ShieldIcon.ico");
                     Debug.Assert(s_shield != null, "ShieldIcon.ico must be present as an embedded resource in System.Drawing.Common.");
                 }
-                
+
                 return s_shield;
             }
         }
 
         private static Icon GetIcon(ref Icon icon, int iconId)
         {
-            return icon ?? (icon = new Icon(SafeNativeMethods.LoadIcon(NativeMethods.NullHandleRef, iconId)));
+            return icon ?? (icon = new Icon(SafeNativeMethods.LoadIcon(NativeMethods.NullHandleRef, (IntPtr)iconId)));
         }
     }
 }

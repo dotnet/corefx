@@ -10,12 +10,12 @@ namespace System.ComponentModel.Composition
 {
     public class CompositionServiceExportFactoryTests
     {
-        public interface IFoo 
+        public interface IFoo
         {
             void DoWork();
             Child FooChild { get; set; }
         }
-    
+
         [Export(typeof(IFoo))]
         class Foo1 : IFoo
         {
@@ -23,17 +23,17 @@ namespace System.ComponentModel.Composition
             {
                 Console.WriteLine("HelloWorld : {0}", FooChild.FooValue);
             }
-    
+
             [Import("FooChild")]
             public Child FooChild { get; set; }
         }
-    
+
         [Export("FooChild")]
         public class Child
         {
             public int FooValue { get; set; }
         }
-    
+
         [Export]
         public class App
         {
@@ -60,9 +60,9 @@ namespace System.ComponentModel.Composition
             e2.Value.FooChild.FooValue = 20;
             e3.Value.FooChild.FooValue = 30;
 
-            Assert.Equal<int>(e1.Value.FooChild.FooValue, 30);
-            Assert.Equal<int>(e2.Value.FooChild.FooValue, 30);
-            Assert.Equal<int>(e3.Value.FooChild.FooValue, 30);
+            Assert.Equal<int>(30, e1.Value.FooChild.FooValue);
+            Assert.Equal<int>(30, e2.Value.FooChild.FooValue);
+            Assert.Equal<int>(30, e3.Value.FooChild.FooValue);
         }
 
         [Fact]
@@ -84,9 +84,9 @@ namespace System.ComponentModel.Composition
             e2.Value.FooChild.FooValue = 20;
             e3.Value.FooChild.FooValue = 30;
 
-            Assert.Equal<int>(e1.Value.FooChild.FooValue, 10);
-            Assert.Equal<int>(e2.Value.FooChild.FooValue, 20);
-            Assert.Equal<int>(e3.Value.FooChild.FooValue, 30);
+            Assert.Equal<int>(10, e1.Value.FooChild.FooValue);
+            Assert.Equal<int>(20, e2.Value.FooChild.FooValue);
+            Assert.Equal<int>(30, e3.Value.FooChild.FooValue);
         }
 
         [Fact]
@@ -108,9 +108,9 @@ namespace System.ComponentModel.Composition
             e2.Value.FooChild.FooValue = 20;
             e3.Value.FooChild.FooValue = 30;
 
-            Assert.Equal<int>(e1.Value.FooChild.FooValue, 10);
-            Assert.Equal<int>(e2.Value.FooChild.FooValue, 20);
-            Assert.Equal<int>(e3.Value.FooChild.FooValue, 30);
+            Assert.Equal<int>(10, e1.Value.FooChild.FooValue);
+            Assert.Equal<int>(20, e2.Value.FooChild.FooValue);
+            Assert.Equal<int>(30, e3.Value.FooChild.FooValue);
         }
 
         [Fact]
@@ -118,7 +118,7 @@ namespace System.ComponentModel.Composition
         public void ComposeAppInRootScope_ShouldSucceed()
         {
             var catalog = new TypeCatalog(typeof(Foo1), typeof(Child));
- 
+
             var cs = catalog.CreateCompositionService();
             var app = new App();
 
@@ -131,9 +131,9 @@ namespace System.ComponentModel.Composition
             e2.Value.FooChild.FooValue = 20;
             e3.Value.FooChild.FooValue = 30;
 
-            Assert.Equal<int>(e1.Value.FooChild.FooValue, 30);
-            Assert.Equal<int>(e2.Value.FooChild.FooValue, 30);
-            Assert.Equal<int>(e3.Value.FooChild.FooValue, 30);
+            Assert.Equal<int>(30, e1.Value.FooChild.FooValue);
+            Assert.Equal<int>(30, e2.Value.FooChild.FooValue);
+            Assert.Equal<int>(30, e3.Value.FooChild.FooValue);
         }
     }
 }

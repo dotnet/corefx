@@ -171,7 +171,7 @@ public class WindowAndCursorProps
         }
     }
 
-    [Fact] 
+    [Fact]
     [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
     [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] //CI system makes it difficult to run things in a non-redirected environments.
     public static void NonRedirectedCursorVisible()
@@ -268,16 +268,6 @@ public class WindowAndCursorProps
             }
             return RemoteExecutor.SuccessExitCode;
         }, lengthOfTitle.ToString()).Dispose();
-    }
-
-    public static void Title_GetWindowsUap_ThrowsIOException()
-    {
-        Assert.Throws<IOException>(() => Console.Title);
-    }
-
-    public static void Title_SetWindowsUap_ThrowsIOException(int lengthOfTitle)
-    {
-        Assert.Throws<IOException>(() => Console.Title = "x");
     }
 
     [Fact]
@@ -403,7 +393,7 @@ public class WindowAndCursorProps
         else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Assert.Equal(0, Console.CursorLeft);
-        }   
+        }
     }
 
     [Theory]
@@ -437,7 +427,7 @@ public class WindowAndCursorProps
         else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Assert.Equal(0, Console.CursorTop);
-        }   
+        }
     }
 
     [Theory]

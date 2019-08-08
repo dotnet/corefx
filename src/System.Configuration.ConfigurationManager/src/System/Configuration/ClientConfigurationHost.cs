@@ -138,7 +138,7 @@ namespace System.Configuration
 
                 Host.Init(configRoot, hostInitParams);
 
-                // Do not complete initialization in runtime config, to avoid expense of 
+                // Do not complete initialization in runtime config, to avoid expense of
                 // loading user.config files that may not be required.
                 _initComplete = configRoot.IsDesignTime;
 
@@ -193,7 +193,7 @@ namespace System.Configuration
 
         public override void RequireCompleteInit(IInternalConfigRecord record)
         {
-            // Loading information about user.config files is expensive, 
+            // Loading information about user.config files is expensive,
             // so do it just once by locking.
             lock (this)
             {
@@ -209,7 +209,7 @@ namespace System.Configuration
                     _configPaths = null;
 
                     // Force loading of user.config file information under lock.
-                    ClientConfigPaths configPaths = ConfigPaths;
+                    _ = ConfigPaths;
                 }
             }
         }

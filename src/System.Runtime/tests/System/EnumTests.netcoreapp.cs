@@ -29,17 +29,17 @@ namespace System.Tests
 
             Assert.Equal(expected, Enum.Parse<T>(value, ignoreCase));
         }
-        
+
         [Theory]
         [MemberData(nameof(Parse_Invalid_TestData))]
         public static void Parse_Invalid_NetCoreApp11(Type enumType, string value, bool ignoreCase, Type exceptionType)
         {
             Type typeArgument = enumType == null || !enumType.IsValueType ? typeof(SimpleEnum) : enumType;
-            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid_NetCoreApp11)).MakeGenericMethod(typeArgument);
+            MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid_NetCoreApp11), BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeArgument);
             parseMethod.Invoke(null, new object[] { enumType, value, ignoreCase, exceptionType });
         }
 
-        public static void Parse_Generic_Invalid_NetCoreApp11<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
+        private static void Parse_Generic_Invalid_NetCoreApp11<T>(Type enumType, string value, bool ignoreCase, Type exceptionType) where T : struct
         {
             object result = null;
             if (!ignoreCase)

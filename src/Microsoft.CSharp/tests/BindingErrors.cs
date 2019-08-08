@@ -416,7 +416,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             Assert.ThrowsAny<ArgumentException>(() => binder.Bind(args, parameters, target));
         }
 
-        public static void DoStuff<T>(IEnumerable<T> x)
+        private static void DoStuff<T>(IEnumerable<T> x)
         {
             // Don't actually do stuff!
         }
@@ -516,7 +516,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Tests
             dFirst.DoNothing();
             dynamic d = new DerivedOuterHidingNested();
             Assert.Equal(42, d.Inner());
-		}
+        }
 
         [Fact]
         public void CannotCallOperatorDirectly()

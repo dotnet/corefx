@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -111,21 +111,21 @@ namespace System.Buffers
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the <see cref="T:T[]"/>.
+        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the array.
         /// </summary>
         public ReadOnlySequence(T[] array)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
 
-            _startObject = array!; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
-            _endObject = array!; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            _startObject = array;
+            _endObject = array;
             _startInteger = ReadOnlySequence.ArrayToSequenceStart(0);
             _endInteger = ReadOnlySequence.ArrayToSequenceEnd(array!.Length); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the <see cref="T:T[]"/>, start and index.
+        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the array, start, and index.
         /// </summary>
         public ReadOnlySequence(T[] array, int start, int length)
         {
@@ -146,7 +146,7 @@ namespace System.Buffers
         /// </summary>
         public ReadOnlySequence(ReadOnlyMemory<T> memory)
         {
-#pragma warning disable CS8631 // TODO-NULLABLE: Unexpected compiler error: https://github.com/dotnet/corefx/pull/38983#issuecomment-506757237
+#pragma warning disable CS8631 // TODO-NULLABLE: ILLink rewriter removing some necessary metadata (https://github.com/dotnet/corefx/pull/38983#issuecomment-506757237)
             if (MemoryMarshal.TryGetMemoryManager(memory, out MemoryManager<T>? manager, out int index, out int length))
 #pragma warning restore CS8631
             {
@@ -286,7 +286,7 @@ namespace System.Buffers
                 sliceEndObject = _startObject;
                 sliceEndIndex = startIndex;
             }
-            
+
             // Single-Segment Sequence
             if (startObject == endObject)
             {

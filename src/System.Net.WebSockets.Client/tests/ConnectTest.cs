@@ -84,55 +84,33 @@ namespace System.Net.WebSockets.Client.Tests
 
                 Assert.Equal(WebSocketMessageType.Text, recvResult.MessageType);
                 string headers = WebSocketData.GetTextFromBuffer(new ArraySegment<byte>(buffer, 0, recvResult.Count));
-                Assert.True(headers.Contains("X-CustomHeader1:Value1"));
-                Assert.True(headers.Contains("X-CustomHeader2:Value2"));
+                Assert.Contains("X-CustomHeader1:Value1", headers);
+                Assert.Contains("X-CustomHeader2:Value2", headers);
 
                 await cws.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
             }
         }
 
-        [OuterLoop("Uses external servers")]
-        [ConditionalTheory(nameof(WebSocketsSupported))]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public async Task ConnectAsync_AddHostHeader_Success()
         {
-            Uri server = System.Net.Test.Common.Configuration.WebSockets.RemoteEchoServer;
-
-            // Send via the physical address such as "corefx-net.cloudapp.net"
-            // Set the Host header to logical address like "subdomain.corefx-net.cloudapp.net"
-            // Verify the scenario works and the remote server received "Host: subdomain.corefx-net.cloudapp.net"
-            string logicalHost = "subdomain." + server.Host;
-
-            using (var cws = new ClientWebSocket())
+            string expectedHost = null;
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                // Set the Host header to the logical address
-                cws.Options.SetRequestHeader("Host", logicalHost);
+                expectedHost = "subdomain." + uri.Host;
+                using (var cws = new ClientWebSocket())
                 using (var cts = new CancellationTokenSource(TimeOutMilliseconds))
                 {
-                    // Connect using the physical address
-                    Task taskConnect = cws.ConnectAsync(server, cts.Token);
-                    Assert.True(
-                        (cws.State == WebSocketState.None) ||
-                        (cws.State == WebSocketState.Connecting) ||
-                        (cws.State == WebSocketState.Open),
-                        "State immediately after ConnectAsync incorrect: " + cws.State);
-                    await taskConnect;
+                    cws.Options.SetRequestHeader("Host", expectedHost);
+                    await cws.ConnectAsync(uri, cts.Token);
                 }
-
-                Assert.Equal(WebSocketState.Open, cws.State);
-
-                byte[] buffer = new byte[65536];
-                WebSocketReceiveResult recvResult;
-                using (var cts = new CancellationTokenSource(TimeOutMilliseconds))
-                {
-                    recvResult = await ReceiveEntireMessageAsync(cws, new ArraySegment<byte>(buffer), cts.Token);
-                }
-
-                Assert.Equal(WebSocketMessageType.Text, recvResult.MessageType);
-                string headers = WebSocketData.GetTextFromBuffer(new ArraySegment<byte>(buffer, 0, recvResult.Count));
-                Assert.Contains($"Host:{logicalHost}", headers, StringComparison.Ordinal);
-
-                await cws.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-            }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                Dictionary<string, string> headers = await LoopbackHelper.WebSocketHandshakeAsync(connection);
+                Assert.NotNull(headers);
+                Assert.True(headers.TryGetValue("Host", out string host));
+                Assert.Equal(expectedHost, host);
+            }), new LoopbackServer.Options { WebSocketEndpoint = true });
         }
 
         [OuterLoop("Uses external servers")]
@@ -176,8 +154,8 @@ namespace System.Net.WebSockets.Client.Tests
                 Assert.Equal(WebSocketMessageType.Text, recvResult.MessageType);
                 string headers = WebSocketData.GetTextFromBuffer(new ArraySegment<byte>(buffer, 0, recvResult.Count));
 
-                Assert.True(headers.Contains("Cookies=Are Yummy"));
-                Assert.True(headers.Contains("Especially=Chocolate Chip"));
+                Assert.Contains("Cookies=Are Yummy", headers);
+                Assert.Contains("Especially=Chocolate Chip", headers);
                 Assert.Equal(server.Scheme == "wss", headers.Contains("Occasionally=Raisin"));
 
                 await cws.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
@@ -244,7 +222,7 @@ namespace System.Net.WebSockets.Client.Tests
                 }
             }, server => server.AcceptConnectionAsync(async connection =>
             {
-                Assert.True(await LoopbackHelper.WebSocketHandshakeAsync(connection));
+                Assert.NotNull(await LoopbackHelper.WebSocketHandshakeAsync(connection));
             }), new LoopbackServer.Options { WebSocketEndpoint = true });
         }
 

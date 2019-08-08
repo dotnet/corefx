@@ -12,7 +12,7 @@ namespace System.IO.Packaging
 {
     internal static class PackagingUtilities
     {
-        internal static readonly string RelationshipNamespaceUri = "http://schemas.openxmlformats.org/package/2006/relationships";
+        internal const string RelationshipNamespaceUri = "http://schemas.openxmlformats.org/package/2006/relationships";
         internal static readonly ContentType RelationshipPartContentType
             = new ContentType("application/vnd.openxmlformats-package.relationships+xml");
 
@@ -27,7 +27,6 @@ namespace System.IO.Packaging
         /// UTF-16 (Little Endian and Big Endian)
         /// </summary>
         /// <param name="reader">XmlReader</param>
-        /// <returns>throws an exception if the encoding is not UTF-8 or UTF-16</returns>
         internal static void PerformInitialReadAndVerifyEncoding(XmlReader reader)
         {
             Debug.Assert(reader != null && reader.ReadState == ReadState.Initial);
@@ -110,7 +109,7 @@ namespace System.IO.Packaging
         }
 
         #endregion Internal Methods
-        
+
         /// <summary>
         /// Synchronize access to IsolatedStorage methods that can step on each-other
         /// </summary>

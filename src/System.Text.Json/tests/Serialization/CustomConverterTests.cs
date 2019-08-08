@@ -15,7 +15,7 @@ namespace System.Text.Json.Serialization.Tests
 
             var options = new JsonSerializerOptions();
             options.Converters.Add(new MyBoolEnumConverter());
-            options.Converters.Add(new PersonConverter());
+            options.Converters.Add(new PersonConverterWithTypeDiscriminator());
 
             Customer customer = new Customer();
             customer.CreditLimit = 100;
@@ -30,6 +30,40 @@ namespace System.Text.Json.Serialization.Tests
             JsonElement jsonElement = JsonSerializer.Deserialize<JsonElement>(json, options);
             string jsonElementString = jsonElement.ToString();
             Assert.Equal(expectedJson, jsonElementString);
+        }
+
+        [Fact]
+        public static void OptionsArePassedToCreateConverter()
+        {
+            TestFactory factory = new TestFactory();
+            JsonSerializerOptions options = new JsonSerializerOptions { Converters = { factory } };
+            string json = JsonSerializer.Serialize("Test", options);
+            Assert.Equal(@"""Test""", json);
+            Assert.Same(options, factory.Options);
+        }
+
+        public class TestFactory : JsonConverterFactory
+        {
+            public JsonSerializerOptions Options { get; private set; }
+
+            public override bool CanConvert(Type typeToConvert) => true;
+
+            public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+            {
+                Options = options;
+                return new SimpleConverter();
+            }
+
+            public class SimpleConverter : JsonConverter<string>
+            {
+                public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+                    => writer.WriteStringValue(value);
+            }
         }
     }
 }
