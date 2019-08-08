@@ -63,13 +63,13 @@
 
     <WriteSigningRequired
         Condition="'@(NetFxContracts)' != '' and '$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
-        AuthenticodeSig="Microsoft"
+        AuthenticodeSig="Microsoft400"
         StrongNameSig="%(NetFxContracts.StrongNameSig)"
         MarkerFile="$(GenFacadesOutputPath)%(NetFxContracts.Filename)%(NetFxContracts.Extension).requires_signing" />
 
     <WriteSigningRequired
         Condition="'@(NETStandardContracts)' != '' and '$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
-        AuthenticodeSig="Microsoft"
+        AuthenticodeSig="Microsoft400"
         StrongNameSig="Open"
         MarkerFile="$(GenFacadesOutputPath)%(NETStandardContracts.Filename)%(NETStandardContracts.Extension).requires_signing" />
 
