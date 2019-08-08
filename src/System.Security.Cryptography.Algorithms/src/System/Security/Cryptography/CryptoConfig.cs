@@ -19,20 +19,10 @@ namespace System.Security.Cryptography
 
         private const BindingFlags ConstructorDefault = BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance;
 
-        private const string OID_RSA_SMIMEalgCMS3DESwrap = "1.2.840.113549.1.9.16.3.6";
-        private const string OID_RSA_MD5 = "1.2.840.113549.2.5";
-        private const string OID_RSA_RC2CBC = "1.2.840.113549.3.2";
-        private const string OID_RSA_DES_EDE3_CBC = "1.2.840.113549.3.7";
-        private const string OID_OIWSEC_desCBC = "1.3.14.3.2.7";
-        private const string OID_OIWSEC_SHA1 = "1.3.14.3.2.26";
-        private const string OID_OIWSEC_SHA256 = "2.16.840.1.101.3.4.2.1";
-        private const string OID_OIWSEC_SHA384 = "2.16.840.1.101.3.4.2.2";
-        private const string OID_OIWSEC_SHA512 = "2.16.840.1.101.3.4.2.3";
-        private const string OID_OIWSEC_RIPEMD160 = "1.3.36.3.2.1";
-
         private const string ECDsaIdentifier = "ECDsa";
 
-        private static volatile Dictionary<string, string> s_defaultOidHT = null;
+        private static readonly Lazy<Dictionary<string, string>> s_lazyDefaultTypeNameToOid = new Lazy<Dictionary<string, string>>(CreateDefaultTypeNameToOidMapping);
+
         private static volatile Dictionary<string, object> s_defaultNameHT = null;
         private static volatile Dictionary<string, Type> appNameHT = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
         private static volatile Dictionary<string, string> appOidHT = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -44,67 +34,6 @@ namespace System.Security.Cryptography
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
         private static object s_InternalSyncObject = new object();
-
-        private static Dictionary<string, string> DefaultOidHT
-        {
-            get
-            {
-                if (s_defaultOidHT != null)
-                {
-                    return s_defaultOidHT;
-                }
-
-                Dictionary<string, string> ht = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-                ht.Add("SHA", OID_OIWSEC_SHA1);
-                ht.Add("SHA1", OID_OIWSEC_SHA1);
-                ht.Add("System.Security.Cryptography.SHA1", OID_OIWSEC_SHA1);
-                ht.Add("System.Security.Cryptography.SHA1CryptoServiceProvider", OID_OIWSEC_SHA1);
-                ht.Add("System.Security.Cryptography.SHA1Cng", OID_OIWSEC_SHA1);
-                ht.Add("System.Security.Cryptography.SHA1Managed", OID_OIWSEC_SHA1);
-
-                ht.Add("SHA256", OID_OIWSEC_SHA256);
-                ht.Add("System.Security.Cryptography.SHA256", OID_OIWSEC_SHA256);
-                ht.Add("System.Security.Cryptography.SHA256CryptoServiceProvider", OID_OIWSEC_SHA256);
-                ht.Add("System.Security.Cryptography.SHA256Cng", OID_OIWSEC_SHA256);
-                ht.Add("System.Security.Cryptography.SHA256Managed", OID_OIWSEC_SHA256);
-
-                ht.Add("SHA384", OID_OIWSEC_SHA384);
-                ht.Add("System.Security.Cryptography.SHA384", OID_OIWSEC_SHA384);
-                ht.Add("System.Security.Cryptography.SHA384CryptoServiceProvider", OID_OIWSEC_SHA384);
-                ht.Add("System.Security.Cryptography.SHA384Cng", OID_OIWSEC_SHA384);
-                ht.Add("System.Security.Cryptography.SHA384Managed", OID_OIWSEC_SHA384);
-
-                ht.Add("SHA512", OID_OIWSEC_SHA512);
-                ht.Add("System.Security.Cryptography.SHA512", OID_OIWSEC_SHA512);
-                ht.Add("System.Security.Cryptography.SHA512CryptoServiceProvider", OID_OIWSEC_SHA512);
-                ht.Add("System.Security.Cryptography.SHA512Cng", OID_OIWSEC_SHA512);
-                ht.Add("System.Security.Cryptography.SHA512Managed", OID_OIWSEC_SHA512);
-
-                ht.Add("RIPEMD160", OID_OIWSEC_RIPEMD160);
-                ht.Add("System.Security.Cryptography.RIPEMD160", OID_OIWSEC_RIPEMD160);
-                ht.Add("System.Security.Cryptography.RIPEMD160Managed", OID_OIWSEC_RIPEMD160);
-
-                ht.Add("MD5", OID_RSA_MD5);
-                ht.Add("System.Security.Cryptography.MD5", OID_RSA_MD5);
-                ht.Add("System.Security.Cryptography.MD5CryptoServiceProvider", OID_RSA_MD5);
-                ht.Add("System.Security.Cryptography.MD5Managed", OID_RSA_MD5);
-
-                ht.Add("TripleDESKeyWrap", OID_RSA_SMIMEalgCMS3DESwrap);
-
-                ht.Add("RC2", OID_RSA_RC2CBC);
-                ht.Add("System.Security.Cryptography.RC2CryptoServiceProvider", OID_RSA_RC2CBC);
-
-                ht.Add("DES", OID_OIWSEC_desCBC);
-                ht.Add("System.Security.Cryptography.DESCryptoServiceProvider", OID_OIWSEC_desCBC);
-
-                ht.Add("TripleDES", OID_RSA_DES_EDE3_CBC);
-                ht.Add("System.Security.Cryptography.TripleDESCryptoServiceProvider", OID_RSA_DES_EDE3_CBC);
-
-                s_defaultOidHT = ht;
-                return s_defaultOidHT;
-            }
-        }
 
         private static Dictionary<string, object> DefaultNameHT
         {
@@ -499,7 +428,7 @@ namespace System.Security.Cryptography
                 }
             }
 
-            if (string.IsNullOrEmpty(oidName) && !DefaultOidHT.TryGetValue(name, out oidName))
+            if (string.IsNullOrEmpty(oidName) && !s_lazyDefaultTypeNameToOid.Value.TryGetValue(name, out oidName))
             {
                 try
                 {
@@ -559,6 +488,68 @@ namespace System.Security.Cryptography
             encodedOidNums[1] = (byte)(encodedOidNumsIndex - 2);
 
             return encodedOidNums;
+        }
+
+        private static Dictionary<string, string> CreateDefaultTypeNameToOidMapping()
+        {
+            const string OID_RSA_SMIMEalgCMS3DESwrap = "1.2.840.113549.1.9.16.3.6";
+            const string OID_RSA_MD5 = "1.2.840.113549.2.5";
+            const string OID_RSA_RC2CBC = "1.2.840.113549.3.2";
+            const string OID_RSA_DES_EDE3_CBC = "1.2.840.113549.3.7";
+            const string OID_OIWSEC_desCBC = "1.3.14.3.2.7";
+            const string OID_OIWSEC_SHA1 = "1.3.14.3.2.26";
+            const string OID_OIWSEC_SHA256 = "2.16.840.1.101.3.4.2.1";
+            const string OID_OIWSEC_SHA384 = "2.16.840.1.101.3.4.2.2";
+            const string OID_OIWSEC_SHA512 = "2.16.840.1.101.3.4.2.3";
+            const string OID_OIWSEC_RIPEMD160 = "1.3.36.3.2.1";
+
+            return new Dictionary<string, string>(35, StringComparer.OrdinalIgnoreCase)
+            {
+                { "SHA", OID_OIWSEC_SHA1 },
+                { "SHA1", OID_OIWSEC_SHA1 },
+                { "System.Security.Cryptography.SHA1", OID_OIWSEC_SHA1 },
+                { "System.Security.Cryptography.SHA1CryptoServiceProvider", OID_OIWSEC_SHA1 },
+                { "System.Security.Cryptography.SHA1Cng", OID_OIWSEC_SHA1 },
+                { "System.Security.Cryptography.SHA1Managed", OID_OIWSEC_SHA1 },
+
+                { "SHA256", OID_OIWSEC_SHA256 },
+                { "System.Security.Cryptography.SHA256", OID_OIWSEC_SHA256 },
+                { "System.Security.Cryptography.SHA256CryptoServiceProvider", OID_OIWSEC_SHA256 },
+                { "System.Security.Cryptography.SHA256Cng", OID_OIWSEC_SHA256 },
+                { "System.Security.Cryptography.SHA256Managed", OID_OIWSEC_SHA256 },
+
+                { "SHA384", OID_OIWSEC_SHA384 },
+                { "System.Security.Cryptography.SHA384", OID_OIWSEC_SHA384 },
+                { "System.Security.Cryptography.SHA384CryptoServiceProvider", OID_OIWSEC_SHA384 },
+                { "System.Security.Cryptography.SHA384Cng", OID_OIWSEC_SHA384 },
+                { "System.Security.Cryptography.SHA384Managed", OID_OIWSEC_SHA384 },
+
+                { "SHA512", OID_OIWSEC_SHA512 },
+                { "System.Security.Cryptography.SHA512", OID_OIWSEC_SHA512 },
+                { "System.Security.Cryptography.SHA512CryptoServiceProvider", OID_OIWSEC_SHA512 },
+                { "System.Security.Cryptography.SHA512Cng", OID_OIWSEC_SHA512 },
+                { "System.Security.Cryptography.SHA512Managed", OID_OIWSEC_SHA512 },
+
+                { "RIPEMD160", OID_OIWSEC_RIPEMD160 },
+                { "System.Security.Cryptography.RIPEMD160", OID_OIWSEC_RIPEMD160 },
+                { "System.Security.Cryptography.RIPEMD160Managed", OID_OIWSEC_RIPEMD160 },
+
+                { "MD5", OID_RSA_MD5 },
+                { "System.Security.Cryptography.MD5", OID_RSA_MD5 },
+                { "System.Security.Cryptography.MD5CryptoServiceProvider", OID_RSA_MD5 },
+                { "System.Security.Cryptography.MD5Managed", OID_RSA_MD5 },
+
+                { "TripleDESKeyWrap", OID_RSA_SMIMEalgCMS3DESwrap },
+
+                { "RC2", OID_RSA_RC2CBC },
+                { "System.Security.Cryptography.RC2CryptoServiceProvider", OID_RSA_RC2CBC },
+
+                { "DES", OID_OIWSEC_desCBC },
+                { "System.Security.Cryptography.DESCryptoServiceProvider", OID_OIWSEC_desCBC },
+
+                { "TripleDES", OID_RSA_DES_EDE3_CBC },
+                { "System.Security.Cryptography.TripleDESCryptoServiceProvider", OID_RSA_DES_EDE3_CBC }
+            };
         }
 
         private static void EncodeSingleOidNum(uint value, byte[] destination, ref int index)
