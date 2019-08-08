@@ -28,7 +28,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Provided value is not in a legal JSON number format.
         /// </exception>
-        /// <remarks>Provided value is stored in the same format as passed.</remarks> 
+        /// <remarks>Provided value is stored in the same format as passed.</remarks>
         public JsonNumber(string value) => SetFormattedValue(value);
 
         /// <summary>
@@ -111,9 +111,9 @@ namespace System.Text.Json
         ///   Converts the numeric value of this instance to its equivalent string representation.
         /// </summary>
         /// <returns>The string representation of the value of this instance.</returns>
-        /// <remarks> 
-        ///   Returns exactly the same value as it was set using  <see cref="SetFormattedValue(string)"/>. 
-        /// </remarks> 
+        /// <remarks>
+        ///   Returns exactly the same value as it was set using  <see cref="SetFormattedValue(string)"/>.
+        /// </remarks>
         public override string ToString() => _value;
 
         /// <summary>
@@ -174,17 +174,17 @@ namespace System.Text.Json
         /// <exception cref="FormatException">
         ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="float"/>.
         /// </exception>
-        /// <remarks> 
-        ///   On .NET Core this method does not return <see langword="false"/> for values larger than 
-        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>), 
-        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
-        ///   <see cref="float.NegativeInfinity"/>) is emitted. 
-        /// </remarks> 
-        /// <remarks> 
+        /// <remarks>
+        ///   On .NET Core this method does not return <see langword="false"/> for values larger than
+        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>),
+        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or
+        ///   <see cref="float.NegativeInfinity"/>) is emitted.
+        /// </remarks>
+        /// <remarks>
         ///   Allows scientific mode.
-        /// </remarks> 
+        /// </remarks>
         public float GetSingle() => float.Parse(_value, NumberStyles.Float, CultureInfo.InvariantCulture);
-        
+
         /// <summary>
         ///   Converts the numeric value of this instance to its <see cref="double"/> equivalent.
         /// </summary>
@@ -195,13 +195,13 @@ namespace System.Text.Json
         /// <exception cref="FormatException">
         ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="double"/>.
         /// </exception>
-        /// <remarks> 
-        ///   On .NET Core this method does not return <see langword="false"/> for values larger than 
-        ///   <see cref="double.MaxValue"/> (or smaller than <see cref="double.MinValue"/>), 
-        ///   instead <see langword="true"/> is returned and <see cref="double.PositiveInfinity"/> (or 
-        ///   <see cref="double.NegativeInfinity"/>) is emitted. 
-        /// </remarks> 
-        /// <remarks> 
+        /// <remarks>
+        ///   On .NET Core this method does not return <see langword="false"/> for values larger than
+        ///   <see cref="double.MaxValue"/> (or smaller than <see cref="double.MinValue"/>),
+        ///   instead <see langword="true"/> is returned and <see cref="double.PositiveInfinity"/> (or
+        ///   <see cref="double.NegativeInfinity"/>) is emitted.
+        /// </remarks>
+        /// <remarks>
         ///   Allows scientific mode.
         /// </remarks>
         public double GetDouble() => double.Parse(_value, NumberStyles.Float, CultureInfo.InvariantCulture);
@@ -279,7 +279,7 @@ namespace System.Text.Json
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetByte(out byte value) => byte.TryParse(_value, out value);
@@ -293,7 +293,7 @@ namespace System.Text.Json
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetInt16(out short value) => short.TryParse(_value, out value);
@@ -307,7 +307,7 @@ namespace System.Text.Json
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetInt32(out int value) => int.TryParse(_value, out value);
@@ -321,7 +321,7 @@ namespace System.Text.Json
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetInt64(out long value) => long.TryParse(_value, out value);
@@ -335,15 +335,15 @@ namespace System.Text.Json
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        /// <remarks> 
-        ///   On .NET Core this method does not return <see langword="false"/> for values larger than 
-        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>), 
-        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
-        ///   <see cref="float.NegativeInfinity"/>) is emitted. 
-        /// </remarks> 
+        /// <remarks>
+        ///   On .NET Core this method does not return <see langword="false"/> for values larger than
+        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>),
+        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or
+        ///   <see cref="float.NegativeInfinity"/>) is emitted.
+        /// </remarks>
         public bool TryGetSingle(out float value) => float.TryParse(_value, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
 
         /// <summary>
@@ -355,15 +355,15 @@ namespace System.Text.Json
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        /// <remarks> 
-        ///   On .NET Core this method does not return <see langword="false"/> for values larger than 
-        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>), 
-        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or 
-        ///   <see cref="float.NegativeInfinity"/>) is emitted. 
-        /// </remarks> 
+        /// <remarks>
+        ///   On .NET Core this method does not return <see langword="false"/> for values larger than
+        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>),
+        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or
+        ///   <see cref="float.NegativeInfinity"/>) is emitted.
+        /// </remarks>
         public bool TryGetDouble(out double value) => double.TryParse(_value, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace System.Text.Json
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
         [CLSCompliant(false)]
@@ -390,7 +390,7 @@ namespace System.Text.Json
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
         [CLSCompliant(false)]
@@ -405,7 +405,7 @@ namespace System.Text.Json
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
         [CLSCompliant(false)]
@@ -420,7 +420,7 @@ namespace System.Text.Json
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
         [CLSCompliant(false)]
@@ -435,7 +435,7 @@ namespace System.Text.Json
         ///   if the conversion succeeded, or zero if the conversion failed.
         /// </param>
         /// <returns>
-        ///  <see langword="true"/> if instance was converted successfully; 
+        ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
         public bool TryGetDecimal(out decimal value) => decimal.TryParse(_value, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
@@ -450,7 +450,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Provided value is not in a legal JSON number format.
         /// </exception>
-        /// <remarks>Provided value is stored in the same format as passed.</remarks> 
+        /// <remarks>Provided value is stored in the same format as passed.</remarks>
         public void SetFormattedValue(string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -460,8 +460,8 @@ namespace System.Text.Json
                     throw new ArgumentNullException(nameof(value));
                 }
                 throw new ArgumentException(SR.EmptyStringToInitializeNumber, nameof(value));
-            }              
-            
+            }
+
             JsonWriterHelper.ValidateNumber(Encoding.UTF8.GetBytes(value).AsSpan());
             _value = value;
         }
@@ -548,7 +548,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
         public void SetDecimal(decimal value) => _value = value.ToString(CultureInfo.InvariantCulture);
-        
+
 
         /// <summary>
         ///   Converts a <see cref="byte"/> to a JSON number.
@@ -627,7 +627,7 @@ namespace System.Text.Json
         public static implicit operator JsonNumber(decimal value) => new JsonNumber(value);
 
         /// <summary>
-        ///   Compares <paramref name="obj"/> to the value of this instance. 
+        ///   Compares <paramref name="obj"/> to the value of this instance.
         /// </summary>
         /// <param name="obj">The object to compare against.</param>
         /// <returns>
@@ -643,7 +643,7 @@ namespace System.Text.Json
         public override int GetHashCode() => _value.GetHashCode();
 
         /// <summary>
-        ///   Compares other JSON number to the value of this instance. 
+        ///   Compares other JSON number to the value of this instance.
         /// </summary>
         /// <param name="other">The JSON number to compare against.</param>
         /// <returns>
@@ -653,7 +653,7 @@ namespace System.Text.Json
         public bool Equals(JsonNumber other) => !(other is null) && _value == other._value;
 
         /// <summary>
-        ///   Compares values of two JSON numbers. 
+        ///   Compares values of two JSON numbers.
         /// </summary>
         /// <param name="left">The JSON number to compare.</param>
         /// <param name="right">The JSON number to compare.</param>
@@ -672,7 +672,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Compares values of two JSON numbers. 
+        ///   Compares values of two JSON numbers.
         /// </summary>
         /// <param name="left">The JSON number to compare.</param>
         /// <param name="right">The JSON number to compare.</param>
