@@ -143,7 +143,7 @@ namespace HttpStress
             }
         }
 
-        // generates a random expected response content length and adds it to the request headers
+        // Generates a random expected response content length and adds it to the request headers
         public int SetExpectedResponseContentLengthHeader(HttpRequestHeaders headers, int minLength = 0)
         {
             int expectedResponseContentLength = _random.Next(minLength, Math.Max(minLength, MaxContentLength));
