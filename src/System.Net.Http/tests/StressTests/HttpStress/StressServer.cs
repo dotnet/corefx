@@ -298,7 +298,7 @@ namespace HttpStress
             {
                 if (ctx.Request.Headers.TryGetValue(ExpectedResponseContentLength, out StringValues values) && 
                     values.Count == 1 &&
-                    Int32.TryParse(values[0], out int result))
+                    int.TryParse(values[0], out int result))
                 {
                     return result;
                 }
