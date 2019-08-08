@@ -29,7 +29,7 @@ namespace HttpStress
 {
     public class StressServer : IDisposable
     {
-        // header indicating expected response content length to be returned by the server
+        // Header indicating expected response content length to be returned by the server
         public const string ExpectedResponseContentLength = "Expected-Response-Content-Length";
 
         private EventListener _eventListener;
