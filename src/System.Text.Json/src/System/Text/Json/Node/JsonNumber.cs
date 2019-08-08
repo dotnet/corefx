@@ -634,7 +634,7 @@ namespace System.Text.Json
         ///   <see langword="true"/> if the value of this instance matches <paramref name="obj"/> exactly (is equal and has the same format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public override bool Equals(object obj) => obj is JsonNumber number && _value == number._value;
+        public override bool Equals(object obj) => obj is JsonNumber jsonNumber && Equals(jsonNumber);
 
         /// <summary>
         ///   Calculates a hash code of this instance.
