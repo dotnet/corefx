@@ -31,7 +31,7 @@ namespace System.Text.Json
         public static implicit operator JsonBoolean(bool value) => new JsonBoolean(value);
 
         /// <summary>
-        ///   Compares <paramref name="obj"/> to the value of this instance. 
+        ///   Compares <paramref name="obj"/> to the value of this instance.
         /// </summary>
         /// <param name="obj">The object to compare against.</param>
         /// <returns>
@@ -47,7 +47,7 @@ namespace System.Text.Json
         public override int GetHashCode() => Value.GetHashCode();
 
         /// <summary>
-        ///   Compares other JSON boolean to the value of this instance. 
+        ///   Compares other JSON boolean to the value of this instance.
         /// </summary>
         /// <param name="other">The JSON boolean to compare against.</param>
         /// <returns>
@@ -57,7 +57,7 @@ namespace System.Text.Json
         public bool Equals(JsonBoolean other) => !(other is null) && Value == other.Value;
 
         /// <summary>
-        ///   Compares values of two JSON booleans. 
+        ///   Compares values of two JSON booleans.
         /// </summary>
         /// <param name="left">The JSON boolean to compare.</param>
         /// <param name="right">The JSON boolean to compare.</param>
@@ -68,7 +68,7 @@ namespace System.Text.Json
         public static bool operator ==(JsonBoolean left, JsonBoolean right) => left?.Value == right?.Value;
 
         /// <summary>
-        ///   Compares values of two JSON booleans. 
+        ///   Compares values of two JSON booleans.
         /// </summary>
         /// <param name="left">The JSON boolean to compare.</param>
         /// <param name="right">The JSON boolean to compare.</param>
