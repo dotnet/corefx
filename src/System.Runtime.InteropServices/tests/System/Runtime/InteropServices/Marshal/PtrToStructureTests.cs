@@ -152,7 +152,7 @@ namespace System.Runtime.InteropServices.Tests
             AssertExtensions.Throws<ArgumentException>("structure", () => Marshal.PtrToStructure((IntPtr)1, o));
             AssertExtensions.Throws<ArgumentException>("structure", () => Marshal.PtrToStructure<object>((IntPtr)1, o));
         }
-        
+
         public static IEnumerable<object[]> PtrToStructure_ObjectNotValueClass_TestData()
         {
             yield return new object[] { new NonGenericStruct() };
@@ -192,8 +192,8 @@ namespace System.Runtime.InteropServices.Tests
             yield return new object[] { typeof(GenericClass<>) };
             yield return new object[] { typeof(GenericStruct<string>) };
             yield return new object[] { typeof(GenericStruct<>) };
-            yield return new object[] { typeof(GenericInterface<string>) };
-            yield return new object[] { typeof(GenericInterface<>) };
+            yield return new object[] { typeof(IGenericInterface<string>) };
+            yield return new object[] { typeof(IGenericInterface<>) };
         }
 
         [Theory]

@@ -42,7 +42,7 @@ internal static partial class Interop
         private const int KERN_PROC = 14;
         private const int KERN_PROC_PATHNAME = 12;
         private const int KERN_PROC_PROC = 8;
-        private const int KERN_PROC_ALL = 0; 
+        private const int KERN_PROC_ALL = 0;
         private const int KERN_PROC_PID  = 1;
         private const int KERN_PROC_INC_THREAD = 16;
 
@@ -315,7 +315,7 @@ internal static partial class Interop
                 kinfo = (kinfo_proc*)pBuffer;
                 if (kinfo->ki_structsize != sizeof(kinfo_proc))
                 {
-                    // failed consistency check 
+                    // failed consistency check
                     throw new ArgumentOutOfRangeException(nameof(pid));
                 }
 
@@ -367,7 +367,7 @@ internal static partial class Interop
                 info.BasePriority = kinfo->ki_nice;
                 info.VirtualBytes = (long)kinfo->ki_size;
                 info.WorkingSet = kinfo->ki_rssize;
-                info.SessionId = kinfo ->ki_sid;
+                info.SessionId = kinfo->ki_sid;
 
                 for(int i = 0; i < process.Length; i++)
                 {

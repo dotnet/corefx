@@ -17,9 +17,6 @@ using System.Threading;
 
 namespace System
 {
-#if PROJECTN
-    [Internal.Runtime.CompilerServices.RelocatedType("System.Runtime.Extensions")]
-#endif
     public sealed partial class AppDomain : MarshalByRefObject
     {
         private static readonly AppDomain s_domain = new AppDomain();
@@ -326,20 +323,20 @@ namespace System
 
         public object? CreateInstanceAndUnwrap(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder? binder, object?[]? args, System.Globalization.CultureInfo? culture, object?[]? activationAttributes)
         {
-            ObjectHandle? oh = CreateInstance(assemblyName, 
-                                             typeName, 
-                                             ignoreCase, 
+            ObjectHandle? oh = CreateInstance(assemblyName,
+                                             typeName,
+                                             ignoreCase,
                                              bindingAttr,
-                                             binder, 
-                                             args, 
-                                             culture, 
-                                             activationAttributes); 
+                                             binder,
+                                             args,
+                                             culture,
+                                             activationAttributes);
             return oh?.Unwrap();
         }
 
         public object? CreateInstanceAndUnwrap(string assemblyName, string typeName, object?[]? activationAttributes)
         {
-            ObjectHandle? oh = CreateInstance(assemblyName, typeName, activationAttributes);            
+            ObjectHandle? oh = CreateInstance(assemblyName, typeName, activationAttributes);
             return oh?.Unwrap();
         }
 
@@ -373,20 +370,20 @@ namespace System
 
         public object? CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder? binder, object?[]? args, System.Globalization.CultureInfo? culture, object?[]? activationAttributes)
         {
-            ObjectHandle? oh = CreateInstanceFrom(assemblyFile, 
-                                                 typeName, 
-                                                 ignoreCase, 
+            ObjectHandle? oh = CreateInstanceFrom(assemblyFile,
+                                                 typeName,
+                                                 ignoreCase,
                                                  bindingAttr,
-                                                 binder, 
-                                                 args, 
-                                                 culture, 
+                                                 binder,
+                                                 args,
+                                                 culture,
                                                  activationAttributes);
             return oh?.Unwrap();
         }
 
         public object? CreateInstanceFromAndUnwrap(string assemblyFile, string typeName, object?[]? activationAttributes)
         {
-            ObjectHandle? oh = CreateInstanceFrom(assemblyFile, typeName, activationAttributes);            
+            ObjectHandle? oh = CreateInstanceFrom(assemblyFile, typeName, activationAttributes);
             return oh?.Unwrap();
         }
 

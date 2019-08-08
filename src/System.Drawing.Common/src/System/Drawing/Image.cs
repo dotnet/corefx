@@ -23,7 +23,7 @@ namespace System.Drawing
 #endif
     public abstract partial class Image : MarshalByRefObject, IDisposable, ICloneable, ISerializable
     {
-        // The signature of this delegate is incorrect. The signature of the corresponding 
+        // The signature of this delegate is incorrect. The signature of the corresponding
         // native callback function is:
         // extern "C" {
         //     typedef BOOL (CALLBACK * ImageAbort)(VOID *);
@@ -307,10 +307,7 @@ namespace System.Drawing
         /// </summary>
         public static Bitmap FromHbitmap(IntPtr hbitmap, IntPtr hpalette)
         {
-            IntPtr bitmap = IntPtr.Zero;
-            int status = Gdip.GdipCreateBitmapFromHBITMAP(new HandleRef(null, hbitmap), new HandleRef(null, hpalette), out bitmap);
-            Gdip.CheckStatus(status);
-
+            Gdip.CheckStatus(Gdip.GdipCreateBitmapFromHBITMAP(hbitmap, hpalette, out IntPtr bitmap));
             return new Bitmap(bitmap);
         }
 
@@ -462,4 +459,3 @@ namespace System.Drawing
         }
     }
 }
-

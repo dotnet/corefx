@@ -62,6 +62,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         [InlineData("Too-long BER length", "3005")]
         public static void DecodeInvalid(string description, string inputHex)
         {
+            _ = description;
             byte[] inputData = inputHex.HexToByteArray();
 
             SignedCms cms = new SignedCms();
@@ -1248,7 +1249,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             {
                 EnvelopedCms envelopedCms = new EnvelopedCms(new ContentInfo(new byte[] { 3 }));
                 envelopedCms.Encrypt(new CmsRecipient(signerType, cert));
-                
+
                 SignedCms signedCms = new SignedCms(
                     new ContentInfo(new Oid(Oids.Pkcs7Enveloped), envelopedCms.Encode()));
 

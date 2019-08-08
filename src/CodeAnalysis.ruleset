@@ -88,14 +88,11 @@
     <Rule Id="SA1012" Action="None" /> <!-- Opening brace should be followed by a space -->
     <Rule Id="SA1013" Action="None" /> <!-- Closing brace should be preceded by a space -->
     <Rule Id="SA1015" Action="None" /> <!-- Closing generic bracket should not be followed by a space -->
-    <Rule Id="SA1019" Action="None" /> <!-- Member access symbol '.' should not be preceded by a space -->
-    <Rule Id="SA1020" Action="None" /> <!-- Increment symbol '++' should not be preceded by a space -->
     <Rule Id="SA1021" Action="None" /> <!-- Negative sign should be preceded by a space -->
     <Rule Id="SA1023" Action="None" /> <!-- Dereference symbol '*' should not be preceded by a space." -->
     <Rule Id="SA1024" Action="None" /> <!-- Colon should be followed by a space -->
     <Rule Id="SA1025" Action="None" /> <!-- Code should not contain multiple whitespace characters in a row -->
     <Rule Id="SA1026" Action="None" /> <!-- The keyword 'new' should not be followed by a space or a blank line -->
-    <Rule Id="SA1028" Action="None" /> <!-- Code should not contain trailing whitespace -->
     <Rule Id="SA1100" Action="None" /> <!-- Do not prefix calls with base unless local implementation exists -->
     <Rule Id="SA1101" Action="None" /> <!-- Prefix local calls with this -->
     <Rule Id="SA1106" Action="None" /> <!-- Code should not contain empty statements -->
@@ -103,10 +100,7 @@
     <Rule Id="SA1108" Action="None" /> <!-- Block statements should not contain embedded comments -->
     <Rule Id="SA1110" Action="None" /> <!-- Opening parenthesis or bracket should be on declaration line -->
     <Rule Id="SA1111" Action="None" /> <!-- Closing parenthesis should be on line of last parameter -->
-    <Rule Id="SA1112" Action="None" /> <!-- Closing parenthesis should be on line of opening parenthesis -->
-    <Rule Id="SA1113" Action="None" /> <!-- Comma should be on the same line as previous parameter -->
     <Rule Id="SA1114" Action="None" /> <!-- Parameter list should follow declaration -->
-    <Rule Id="SA1115" Action="None" /> <!-- The parameter should begin on the line after the previous parameter -->
     <Rule Id="SA1116" Action="None" /> <!-- Split parameters should start on line after declaration -->
     <Rule Id="SA1117" Action="None" /> <!-- Parameters should be on same line or separate lines -->
     <Rule Id="SA1118" Action="None" /> <!-- Parameter should not span multiple lines -->
@@ -141,7 +135,6 @@
     <Rule Id="SA1214" Action="None" /> <!-- Readonly fields should appear before non-readonly fields -->
     <Rule Id="SA1216" Action="None" /> <!-- Using static directives should be placed at the correct location -->
     <Rule Id="SA1300" Action="None" /> <!-- Element should begin with an uppercase letter -->
-    <Rule Id="SA1302" Action="None" /> <!-- Interface names should begin with I -->
     <Rule Id="SA1303" Action="None" /> <!-- Const field names should begin with upper-case letter -->
     <Rule Id="SA1304" Action="None" /> <!-- Non-private readonly fields should begin with upper-case letter -->
     <Rule Id="SA1306" Action="None" /> <!-- Field should begin with lower-case letter -->
@@ -179,8 +172,6 @@
     <Rule Id="SA1514" Action="None" /> <!-- Element documentation header should be preceded by blank line -->
     <Rule Id="SA1515" Action="None" /> <!-- Single-line comment should be preceded by blank line -->
     <Rule Id="SA1516" Action="None" /> <!-- Elements should be separated by blank line -->
-    <Rule Id="SA1517" Action="None" /> <!-- Code should not contain blank lines at start of file -->
-    <Rule Id="SA1518" Action="None" /> <!-- Code should not contain blank lines at the end of the file -->
     <Rule Id="SA1519" Action="None" /> <!-- Braces should not be omitted from multi-line child statement -->
     <Rule Id="SA1520" Action="None" /> <!-- Use braces consistently -->
     <Rule Id="SA1600" Action="None" /> <!-- Elements should be documented -->
@@ -213,7 +204,6 @@
   <Rules AnalyzerId="xunit.analyzers" RuleNamespace="xunit.analyzers">
     <Rule Id="xUnit1019" Action="None" /> <!-- MemberData must reference a member providing a valid data type -->
     <Rule Id="xUnit1024" Action="None" /> <!-- Test methods cannot have overloads -->
-    <Rule Id="xUnit1026" Action="None" /> <!-- Theory methods should use all of their parameters -->
     <Rule Id="xUnit2013" Action="None" /> <!-- Do not use equality check to check for collection size. -->
     <Rule Id="xUnit2017" Action="None" /> <!-- Do not use Contains() to check if a value exists in a collection -->
   </Rules>
