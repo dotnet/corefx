@@ -7,7 +7,7 @@
 
 namespace System.Text.Json
 {
-    public partial class JsonBoolean : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonBoolean>
+    public sealed partial class JsonBoolean : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonBoolean>
     {
         public JsonBoolean() { }
         public JsonBoolean(bool value) { }
@@ -18,6 +18,7 @@ namespace System.Text.Json
         public static bool operator ==(System.Text.Json.JsonBoolean left, System.Text.Json.JsonBoolean right) { throw null; }
         public static implicit operator System.Text.Json.JsonBoolean (bool value) { throw null; }
         public static bool operator !=(System.Text.Json.JsonBoolean left, System.Text.Json.JsonBoolean right) { throw null; }
+        public override string ToString() { throw null; }
     }
     public enum JsonCommentHandling : byte
     {
@@ -233,9 +234,10 @@ namespace System.Text.Json
         public bool WriteIndented { get { throw null; } set { } }
         public System.Text.Json.Serialization.JsonConverter GetConverter(System.Type typeToConvert) { throw null; }
     }
-    public partial class JsonString : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonString>
+    public sealed partial class JsonString : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonString>
     {
         public JsonString() { }
+        public JsonString(System.ReadOnlySpan<char> value) { }
         public JsonString(string value) { }
         public string Value { get { throw null; } set { } }
         public override bool Equals(object obj) { throw null; }
@@ -244,6 +246,7 @@ namespace System.Text.Json
         public static bool operator ==(System.Text.Json.JsonString left, System.Text.Json.JsonString right) { throw null; }
         public static implicit operator System.Text.Json.JsonString (string value) { throw null; }
         public static bool operator !=(System.Text.Json.JsonString left, System.Text.Json.JsonString right) { throw null; }
+        public override string ToString() { throw null; }
     }
     public enum JsonTokenType : byte
     {

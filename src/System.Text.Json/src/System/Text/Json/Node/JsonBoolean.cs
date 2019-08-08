@@ -90,6 +90,6 @@ namespace System.Text.Json
         ///   <see langword="true"/> if values of instances do not match,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator !=(JsonBoolean left, JsonBoolean right) => !(left != right);
+        public static bool operator !=(JsonBoolean left, JsonBoolean right) => !(left == right);
     }
 }
