@@ -2173,7 +2173,7 @@ static int32_t TryChangeSocketEventRegistrationInner(
 
     assert(currentEvents != newEvents);
 
-    int32_t changes = currentEvents ^ newEvents;
+    int32_t changes = (int32_t)(currentEvents ^ newEvents);
     int8_t readChanged = (changes & SocketEvents_SA_READ) != 0;
     int8_t writeChanged = (changes & SocketEvents_SA_WRITE) != 0;
 
@@ -2235,7 +2235,7 @@ static int32_t WaitForSocketEventsInner(int32_t port, struct SocketEvent* buffer
         struct kevent evt = events[i];
         memset(&buffer[i], 0, sizeof(struct SocketEvent));
         buffer[i].Data = GetSocketEventData(evt.udata);
-        buffer[i].Events = GetSocketEvents(GetKeventFilter(evt.filter), GetKeventFlags(evt.flags));
+        buffer[i].Events = (int32_t)(GetSocketEvents(GetKeventFilter(evt.filter), GetKeventFlags(evt.flags)));
     }
 
     *count = numEvents;
