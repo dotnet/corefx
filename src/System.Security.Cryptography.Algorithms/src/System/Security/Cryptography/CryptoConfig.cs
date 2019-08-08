@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -23,8 +24,11 @@ namespace System.Security.Cryptography
 
         private static readonly Lazy<Dictionary<string, string>> s_lazyDefaultTypeNameToOid = new Lazy<Dictionary<string, string>>(CreateDefaultTypeNameToOidMapping);
 
+        // this is the only dictionary that can be mutated by the user
+        private static readonly ConcurrentDictionary<string, Type> s_applicationDefinedMappings = new ConcurrentDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+
         private static volatile Dictionary<string, object> s_defaultNameHT = null;
-        private static volatile Dictionary<string, Type> appNameHT = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+        
         private static volatile Dictionary<string, string> appOidHT = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly char[] SepArray = { '.' }; // valid ASN.1 separators
@@ -231,12 +235,12 @@ namespace System.Security.Cryptography
             if (names == null)
                 throw new ArgumentNullException(nameof(names));
 
-            string[] algorithmNames = new string[names.Length];
-            Array.Copy(names, 0, algorithmNames, 0, algorithmNames.Length);
+            string[] safeCopy = new string[names.Length];
+            Array.Copy(names, 0, safeCopy, 0, safeCopy.Length);
 
             // Pre-check the algorithm names for validity so that we don't add a few of the names and then
             // throw an exception if we find an invalid name partway through the list.
-            foreach (string name in algorithmNames)
+            foreach (string name in safeCopy)
             {
                 if (string.IsNullOrEmpty(name))
                 {
@@ -244,13 +248,10 @@ namespace System.Security.Cryptography
                 }
             }
 
-            // Everything looks valid, so we're safe to take the table lock and add the name mappings.
-            lock (s_InternalSyncObject)
+            // Everything looks valid, so we're safe to add the name mappings
+            foreach (string name in safeCopy)
             {
-                foreach (string name in algorithmNames)
-                {
-                    appNameHT[name] = algorithm;
-                }
+                s_applicationDefinedMappings[name] = algorithm;
             }
         }
 
@@ -259,16 +260,11 @@ namespace System.Security.Cryptography
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
+            Type type = GetTypeFromName(name);
+
             Type retvalType = null;
 
-            // Check to see if we have an application defined mapping
-            lock (s_InternalSyncObject)
-            {
-                if (!appNameHT.TryGetValue(name, out retvalType))
-                {
-                    retvalType = null;
-                }
-            }
+            
 
             // We allow the default table to Types and Strings
             // Types get used for types in .Algorithms assembly.
@@ -375,6 +371,13 @@ namespace System.Security.Cryptography
             }
 
             return retval;
+        }
+
+        private static Type GetTypeFromName(string name)
+        {
+            // Check to see if we have an application defined mapping
+            if (s_applicationDefinedMappings.TryGetValue(name, out Type result))
+                return result;
         }
 
         public static object CreateFromName(string name)
