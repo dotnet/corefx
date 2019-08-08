@@ -46,7 +46,7 @@
 
     <AppXRunnerVersion>1.0.3-prerelease-00921-01</AppXRunnerVersion>
     <XunitPerfAnalysisPackageVersion>1.0.0-beta-build0019</XunitPerfAnalysisPackageVersion>
-    <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion
+    <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
     <XunitNetcoreExtensionsVersion>2.2.0-preview1-04230-02</XunitNetcoreExtensionsVersion>
 
     <!-- Roslyn optimization data package version -->
@@ -55,7 +55,7 @@
 
   <!-- Package versions used as toolsets -->
   <PropertyGroup>
-    <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage
+    <FeedTasksPackage>Microsoft.DotNet.Build.Tasks.Feed</FeedTasksPackage>
     <FeedTasksPackageVersion>2.2.0-preview1-04230-02</FeedTasksPackageVersion>
   </PropertyGroup>
 
