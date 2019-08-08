@@ -58,6 +58,8 @@ namespace System.Text.Json.Tests
             Assert.True(new JsonBoolean(false).Equals(jsonBooleanFalse));
             Assert.True(new JsonBoolean().Equals(jsonBooleanFalse));
             Assert.False(new JsonBoolean().Equals(jsonBooleanTrue));
+            Assert.False(jsonBooleanFalse.Equals(jsonBooleanTrue));
+            Assert.False(jsonBooleanTrue.Equals(jsonBooleanFalse));
 
             Assert.True(jsonBooleanTrue == new JsonBoolean(true));
             Assert.True(jsonBooleanTrue != jsonBooleanFalse);
@@ -106,7 +108,9 @@ namespace System.Text.Json.Tests
             var jsonBooleanTrue = new JsonBoolean(true);
             var jsonBooleanFalse = new JsonBoolean(false);
 
+            Assert.Equal(jsonBooleanTrue.GetHashCode(), jsonBooleanTrue.GetHashCode());
             Assert.Equal(jsonBooleanTrue.GetHashCode(), new JsonBoolean(true).GetHashCode());
+            Assert.Equal(jsonBooleanFalse.GetHashCode(), jsonBooleanFalse.GetHashCode());
             Assert.Equal(jsonBooleanFalse.GetHashCode(), new JsonBoolean(false).GetHashCode());
             Assert.Equal(jsonBooleanFalse.GetHashCode(), new JsonBoolean().GetHashCode());
             Assert.NotEqual(jsonBooleanTrue.GetHashCode(), new JsonBoolean().GetHashCode());
@@ -131,6 +135,9 @@ namespace System.Text.Json.Tests
             object jsonNumberObjectFalse = new JsonBoolean(false);
             Assert.Equal(jsonNumberCopyFalse.GetHashCode(), jsonBooleanFalse.GetHashCode());
             Assert.Equal(jsonNumberObjectFalse.GetHashCode(), jsonBooleanFalse.GetHashCode());
+
+            Assert.Equal(0, jsonBooleanFalse.GetHashCode());
+            Assert.Equal(1, jsonBooleanTrue.GetHashCode());
         }
     }
 }

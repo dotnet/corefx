@@ -9,23 +9,42 @@ namespace System.Text.Json
     /// </summary>
     public sealed class JsonString : JsonNode, IEquatable<JsonString>
     {
+        private string _value;
+
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonString"/> class representing the empty value.
         /// </summary>
-        public JsonString() => Value = "";
+        public JsonString() => Value = string.Empty;
+
+        /// <summary>
+        ///  Initializes a new instance of the <see cref="JsonString"/> class representing a specified value.
+        /// </summary>
+        /// <param name="value">The value to represent as a JSON string.</param>
+        public JsonString(string value) => Value = value;
 
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonString"/> class representing a specified value.
         /// </summary>
-        public JsonString(string value) => Value = value ?? throw new ArgumentNullException();
+        /// <param name="value">The value to represent as a JSON string.</param>
+        public JsonString(ReadOnlySpan<char> value) => Value = value.ToString();
 
         /// <summary>
         ///   Gets or sets the text value represented by the instance.
         /// </summary>
-        public string Value { get; set; }
+        public string Value
+        {
+            get => _value;
+            set => _value = value ?? throw new ArgumentNullException();
+        }
 
         /// <summary>
-        ///   Converts a <see cref="string"/> to a JSON string.
+        ///   Returns the text value represented by the instance.
+        /// </summary>
+        /// <returns>The value represented by this instance.</returns>
+        public override string ToString() => _value;
+
+        /// <summary>
+        ///   Converts a <see cref="string"/> to a <see cref="JsonString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonString(string value) => new JsonString(value);
@@ -38,7 +57,7 @@ namespace System.Text.Json
         ///   <see langword="true"/> if the text value of this instance matches <paramref name="obj"/>,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public override bool Equals(object obj) => obj is JsonString jsonString && Value == jsonString.Value;
+        public override bool Equals(object obj) => obj is JsonString jsonString && Equals(jsonString);
 
         /// <summary>
         ///   Calculates a hash code of this instance.
@@ -65,7 +84,16 @@ namespace System.Text.Json
         ///   <see langword="true"/> if values of instances match,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator ==(JsonString left, JsonString right) => left?.Value == right?.Value;
+        public static bool operator ==(JsonString left, JsonString right)
+        {
+            if (right is null)
+            {
+                return (left is null) ? true : false;
+            }
+
+            return right.Equals(left);
+        }
+
 
         /// <summary>
         ///   Compares values of two JSON strings.
@@ -76,6 +104,6 @@ namespace System.Text.Json
         ///   <see langword="true"/> if values of instances do not match,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator !=(JsonString left, JsonString right) => left?.Value != right?.Value;
+        public static bool operator !=(JsonString left, JsonString right) => !(left == right);
     }
 }

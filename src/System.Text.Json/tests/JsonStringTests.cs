@@ -17,12 +17,14 @@ namespace System.Text.Json.Tests
 
         [InlineData("value")]
         [InlineData("value with some spaces")]
-        [InlineData("     training spaces")]
+        [InlineData("     leading spaces")]
+        [InlineData("trailing spaces"     )]
         [InlineData("new lines\r\n")]
         [InlineData("tabs\ttabs\t")]
         [InlineData("\\u003e\\u003e\\u003e\\u003e\\u003e")]
         [InlineData("zażółć gęślą jaźń")]
-        [InlineData("汉字 漢字")]
+        [InlineData("\u6f22\u5b57 \u6f22\u5b57")]
+        [InlineData(">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>")]
         [InlineData("Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str")]
         [InlineData("Hello / a / b / c \\/ \\r\\b\\n\\f\\t\\/")]
         [Theory]
@@ -102,7 +104,8 @@ namespace System.Text.Json.Tests
         {
             var jsonString = new JsonString("json property value");
 
-            Assert.Equal(jsonString.GetHashCode(), new JsonString("json property value").GetHashCode());
+            int expectedHashCode = jsonString.GetHashCode();
+            Assert.Equal(expectedHashCode, new JsonString("json property value").GetHashCode());
             Assert.NotEqual(jsonString.GetHashCode(), new JsonString("json property value ").GetHashCode());
             Assert.NotEqual(jsonString.GetHashCode(), new JsonString("jsonpropertyvalue").GetHashCode());
             Assert.NotEqual(jsonString.GetHashCode(), new JsonString("Json Property Value").GetHashCode());

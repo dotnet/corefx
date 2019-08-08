@@ -25,7 +25,13 @@ namespace System.Text.Json
         public bool Value { get; set; }
 
         /// <summary>
-        ///   Converts a <see cref="bool"/> to a JSON boolean.
+        ///   Converts the value represented by the instance to the string in JSON format.
+        /// </summary>
+        /// <returns>The string representation of the value of this instance.</returns>
+        public override string ToString() => Value ? "true" : "false";
+
+        /// <summary>
+        ///   Converts a <see cref="bool"/> to a <see cref="JsonBoolean"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonBoolean(bool value) => new JsonBoolean(value);
@@ -38,7 +44,7 @@ namespace System.Text.Json
         ///   <see langword="true"/> if the boolean value of this instance matches <paramref name="obj"/>,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public override bool Equals(object obj) => obj is JsonBoolean jsonBoolean && Value == jsonBoolean.Value;
+        public override bool Equals(object obj) => obj is JsonBoolean jsonBoolean && Equals(jsonBoolean);
 
         /// <summary>
         ///   Calculates a hash code of this instance.
@@ -65,7 +71,15 @@ namespace System.Text.Json
         ///   <see langword="true"/> if values of instances match,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator ==(JsonBoolean left, JsonBoolean right) => left?.Value == right?.Value;
+        public static bool operator ==(JsonBoolean left, JsonBoolean right)
+        {
+            if (right is null)
+            {
+                return (left is null) ? true : false;
+            }
+
+            return right.Equals(left);
+        }
 
         /// <summary>
         ///   Compares values of two JSON booleans.
@@ -76,6 +90,6 @@ namespace System.Text.Json
         ///   <see langword="true"/> if values of instances do not match,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator !=(JsonBoolean left, JsonBoolean right) => left?.Value != right?.Value;
+        public static bool operator !=(JsonBoolean left, JsonBoolean right) => !(left != right);
     }
 }
