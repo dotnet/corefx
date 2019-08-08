@@ -1,4 +1,4 @@
-# Writable JSON Document Object Model (DOM) for s`ystem.Text.Json`
+# Writable JSON Document Object Model (DOM) for System.Text.Json`
 
 ## Introduction
 
