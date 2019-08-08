@@ -401,7 +401,7 @@ namespace System.Text.Json.Serialization.Tests
             GenericConverterTestHelper<DateTimeOffset>("JsonConverterDateTimeOffset", new DateTimeOffset(new DateTime(2018, 12, 3, 00, 00, 00, DateTimeKind.Utc)), "\"2018-12-03T00:00:00+00:00\"", options);
             Guid testGuid = new Guid();
             GenericConverterTestHelper<Guid>("JsonConverterGuid", testGuid, $"\"{testGuid.ToString()}\"", options);
-            GenericConverterTestHelper<KeyValuePair<string, string>>("JsonKeyValuePairConverter`2", KeyValuePair.Create<string, string>("key", "value"), @"{""Key"":""key"",""Value"":""value""}", options);
+            GenericConverterTestHelper<KeyValuePair<string, string>>("JsonKeyValuePairConverter`2", new KeyValuePair<string, string>("key", "value"), @"{""Key"":""key"",""Value"":""value""}", options);
             GenericConverterTestHelper<Uri>("JsonConverterUri", new Uri("http://test.com"), "\"http://test.com\"", options);
             
         }
