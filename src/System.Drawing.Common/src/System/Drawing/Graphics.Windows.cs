@@ -314,7 +314,7 @@ namespace System.Drawing
                     p, points.Length));
             }
         }
-        
+
         /// <summary>
         /// Draws a series of cubic Bezier curves from an array of points.
         /// </summary>

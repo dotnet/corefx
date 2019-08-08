@@ -1705,7 +1705,7 @@ namespace System.Drawing
         //       destPoints[2] <=> bottom-left corner
         //  destPoints.Length = 4: rect => quad
         // destPoints[3] <=> bottom-right corner
-        // 
+        //
         //  @notes Perspective blt only works for bitmap images.
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
@@ -2464,15 +2464,15 @@ namespace System.Drawing
 
         /// <summary>
         /// GDI+ will return a 'generic error' with specific win32 last error codes when
-        /// a terminal server session has been closed, minimized, etc... We don't want 
+        /// a terminal server session has been closed, minimized, etc... We don't want
         /// to throw when this happens, so we'll guard against this by looking at the
         /// 'last win32 error code' and checking to see if it is either 1) access denied
         /// or 2) proc not found and then ignore it.
-        /// 
-        /// The problem is that when you lock the machine, the secure desktop is enabled and 
-        /// rendering fails which is expected (since the app doesn't have permission to draw 
-        /// on the secure desktop). Not sure if there's anything you can do, short of catching 
-        /// the desktop switch message and absorbing all the exceptions that get thrown while 
+        ///
+        /// The problem is that when you lock the machine, the secure desktop is enabled and
+        /// rendering fails which is expected (since the app doesn't have permission to draw
+        /// on the secure desktop). Not sure if there's anything you can do, short of catching
+        /// the desktop switch message and absorbing all the exceptions that get thrown while
         /// it's the secure desktop.
         /// </summary>
         private void CheckErrorStatus(int status)
@@ -2497,8 +2497,8 @@ namespace System.Drawing
         }
 
         /// <summary>
-        /// GDI+ will return a 'generic error' when we attempt to draw an Emf 
-        /// image with width/height == 1. Here, we will hack around this by 
+        /// GDI+ will return a 'generic error' when we attempt to draw an Emf
+        /// image with width/height == 1. Here, we will hack around this by
         /// resetting the errorstatus. Note that we don't do simple arg checking
         /// for height || width == 1 here because transforms can be applied to
         /// the Graphics object making it difficult to identify this scenario.
