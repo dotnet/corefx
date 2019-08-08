@@ -663,8 +663,11 @@ namespace System.Text.Json
         /// </returns>
         public static bool operator ==(JsonNumber left, JsonNumber right)
         {
+            // Test "right" first to allow branch elimination when inlined for null checks (== null)
+            // so it can become a simple test
             if (right is null)
             {
+                // return true/false not the test result https://github.com/dotnet/coreclr/issues/914
                 return (left is null) ? true : false;
             }
 
