@@ -9,7 +9,6 @@ namespace MS.Internal.Xml.XPath
     internal class XPathDescendantIterator : XPathAxisIterator
     {
         private int _level = 0;
-        private bool _done = false;
 
         public XPathDescendantIterator(XPathNavigator nav, XPathNodeType type, bool matchSelf) : base(nav, type, matchSelf) { }
         public XPathDescendantIterator(XPathNavigator nav, string name, string namespaceURI, bool matchSelf) : base(nav, name, namespaceURI, matchSelf) { }
@@ -17,7 +16,6 @@ namespace MS.Internal.Xml.XPath
         public XPathDescendantIterator(XPathDescendantIterator it) : base(it)
         {
             _level = it._level;
-            _done = it._done;
         }
 
         public override XPathNodeIterator Clone()
@@ -27,8 +25,9 @@ namespace MS.Internal.Xml.XPath
 
         public override bool MoveNext()
         {
-            if (_done)
+            if (_level == -1)
             {
+                // We can only get here when we already iterated over all descendants
                 return false;
             }
 
@@ -54,7 +53,11 @@ namespace MS.Internal.Xml.XPath
                     {
                         if (_level == 0)
                         {
-                            _done = true;
+                            // In an attempt to find next descendant we ended up being back in the root node
+                            // which means we are done iterating descendants.
+                            // If we have called this method again MoveToFirstChild would cause iteration to start over.
+                            // We will use _level == -1 to mark that we are already done iterating.
+                            _level = -1;
                             return false;
                         }
                         if (nav.MoveToNext())
