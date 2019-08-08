@@ -865,7 +865,7 @@ namespace System.Text.Json
                             switch (propertyValue.TokenType)
                             {
                                 case JsonTokenType.String:
-                                    WriteString(propertyName, ref propertyValue, writer);
+                                    WriteString(propertyName, propertyValue, writer);
                                     continue;
                                 case JsonTokenType.Number:
                                     writer.WriteNumber(
@@ -931,7 +931,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteString(ReadOnlySpan<byte> propertyName, ref DbRow row, Utf8JsonWriter writer)
+        private void WriteString(ReadOnlySpan<byte> propertyName, in DbRow row, Utf8JsonWriter writer)
         {
             ArraySegment<byte> rented = default;
 

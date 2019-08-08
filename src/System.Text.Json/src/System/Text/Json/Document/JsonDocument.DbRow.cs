@@ -10,15 +10,15 @@ namespace System.Text.Json
     public sealed partial class JsonDocument
     {
         [StructLayout(LayoutKind.Sequential)]
-        internal struct DbRow
+        internal readonly struct DbRow
         {
             internal const int Size = 12;
 
             // Sign bit is currently unassigned
-            private int _location;
+            private readonly int _location;
 
             // Sign bit is used for "HasComplexChildren" (StartArray)
-            private int _sizeOrLengthUnion;
+            private readonly int _sizeOrLengthUnion;
 
             // Top nybble is JsonTokenType
             // remaining nybbles are the number of rows to skip to get to the next value
@@ -29,7 +29,7 @@ namespace System.Text.Json
             /// <summary>
             /// Index into the payload
             /// </summary>
-            internal readonly int Location => _location;
+            internal int Location => _location;
 
             /// <summary>
             /// length of text in JSON payload (or number of elements if its a JSON array)
@@ -44,7 +44,7 @@ namespace System.Text.Json
             /// Array: At least one element is an object/array.
             /// Otherwise; false
             /// </summary>
-            internal bool HasComplexChildren => _sizeOrLengthUnion < 0;
+            internal readonly bool HasComplexChildren => _sizeOrLengthUnion < 0;
 
             internal int NumberOfRows =>
                 _numberOfRowsAndTypeUnion & 0x0FFFFFFF; // Number of rows that the current JSON element occupies within the database
