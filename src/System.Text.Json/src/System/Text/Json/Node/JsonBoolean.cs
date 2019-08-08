@@ -7,7 +7,7 @@ namespace System.Text.Json
     /// <summary>
     ///   Represents a boolean JSON value.
     /// </summary>
-    public class JsonBoolean : JsonNode, IEquatable<JsonBoolean>
+    public sealed class JsonBoolean : JsonNode, IEquatable<JsonBoolean>
     {
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonBoolean"/> class representing the value <see langword="false"/>.

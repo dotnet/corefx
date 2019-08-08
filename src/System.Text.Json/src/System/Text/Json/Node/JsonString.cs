@@ -7,7 +7,7 @@ namespace System.Text.Json
     /// <summary>
     ///   Represents a text JSON value.
     /// </summary>
-    public class JsonString : JsonNode, IEquatable<JsonString>
+    public sealed class JsonString : JsonNode, IEquatable<JsonString>
     {
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonString"/> class representing the empty value.
@@ -17,7 +17,7 @@ namespace System.Text.Json
         /// <summary>
         ///   Initializes a new instance of the <see cref="JsonString"/> class representing a specified value.
         /// </summary>
-        public JsonString(string value) => Value = value;
+        public JsonString(string value) => Value = value ?? throw new ArgumentNullException();
 
         /// <summary>
         ///   Gets or sets the text value represented by the instance.
