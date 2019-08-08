@@ -109,7 +109,7 @@ namespace System.Net.Primitives.Functional.Tests
         {
             foreach (AddressFamily family in Enum.GetValues(typeof(AddressFamily)))
             {
-                if ((int)family > (int)AddressFamily.Max)
+                if (family == AddressFamily.Netlink || family == AddressFamily.Packet || family == AddressFamily.ControllerAreaNetwork)
                 {
                     // Skip Linux specific protocols.
                     continue;
