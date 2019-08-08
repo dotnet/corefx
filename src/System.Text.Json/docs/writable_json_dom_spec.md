@@ -1,4 +1,4 @@
-# Writable JSON Document Object Model (DOM) for `System.Text.Json`
+# Writable JSON Document Object Model (DOM) for s`ystem.Text.Json`
 
 ## Introduction
 
@@ -30,7 +30,7 @@ The user should be able to:
 ## Example scenarios
 ### Collection initialization
 
-One of the aims in designing this API was the take advantage of C# language features and make it easy and natural for delevopers to create instances of `JsonObject`s without calling too many `new` instructions. Below example shows how to initialize JSON object with different types of properties:
+One of the aims in designing this API was the take advantage of C# language features and make it easy and natural for delevopers to create instances of `JsonObjects` without calling too many `new` instructions. Below example shows how to initialize JSON object with different types of properties:
 
 ```csharp
 var developer = new JsonObject
@@ -113,10 +113,30 @@ One may change the existing property to have a different value:
 Add a value to existing JSON array or property to existing JSON object:
 ```csharp
 var bestEmployees = new JsonObject(EmployeesDatabase.GetTenBestEmployees());
-bestEmployees.Add(EmployeesDatabase.GetManager());
+bestEmployees.Add("manager", EmployeesDatabase.GetManager());
+
+
+var employeesIds = new JsonArray();
+foreach (KeyValuePair<string, JsonNode> employee in EmployeesDatabase.GetTenBestEmployees())
+{
+    employeesIds.Add(employee.Key);
+}
 ```
 
-Or modify the exisitng property name:
+Easily access nested objects:
+```csharp
+var issues = new JsonObject()
+{
+    { "features", new JsonArray{ "new functionality 1", "new functionality 2" } },
+    { "bugs", new JsonArray{ "bug 123", "bug 4566", "bug 821" } },
+    { "tests", new JsonArray{ "code coverage" } },
+};
+
+issues.GetJsonArrayProperty("bugs").Add("bug 12356");
+((JsonString)issues.GetJsonArrayProperty("features")[0]).Value = "feature 1569";
+```
+
+And modify the exisitng property name:
 ```csharp
 JsonObject manager = EmployeesDatabase.GetManager();
 JsonObject reportingEmployees = manager.GetJsonObjectProperty("reporting employees");
@@ -164,7 +184,11 @@ string jsonString = @"
 }";
 
 JsonObject employees = JsonNode.Parse(jsonString) as JsonObject;
-employees.Add(EmployeesDatabase.GetNextEmployee());
+
+var newEmployee = new JsonObject({"name", "Bob"});
+var nextId = employees.Count + 1;
+
+employees.Add("employee"+nextId.ToString(), newEmployee);
 Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 ```
 
@@ -176,7 +200,7 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 * Support for LINQ style quering capability.
 * `null` reference to node instead of `JsonNull` class.
 
-* Initializing JsonArray with additional constructors accepting `IEnumerable`s of all primary types (bool, string, int, double,  long...).
+* Initializing JsonArray with additional constructors accepting `IEnumerables` of all primary types (bool, string, int, double,  long...).
 
     Considered solutions:
 
@@ -202,14 +226,14 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
     | 3 | - accepts IEnumerable <br> - does not accept collection of  types not deriving from `JsonNode` <br> - no checks in runtime <br> - IntelliSense | - a lot of additional methods <br> - does not accept a collection of different types | gives less possibilities than {1,2}, but requiers no additional checks |
 
 * Implicit operators for `JsonString`, `JsonBoolean` and `JsonNumber` as an additional feature.
-* `Sort` not implemented for `JsonArray`, beacuse there is no right way to compare `JsonObject`s. If user wants to sort `JsonArray` of `JsonNumber`s, `JsonBooleans`s or `JsonStrings` he/she now needs to do the following: convert `JsonArray` to regular array (by iterating through all elements), calling sort (and converting back to `JsonArray` if needed).
-* No support for duplicates of property names. Possibly, adding an option for user to choose from: "first value", "last value", or throw-on-duplicate.
+* `Sort` not implemented for `JsonArray`, beacuse there is no right way to compare `JsonObjects`. If a user wants to sort a `JsonArray` of `JsonNumbers`, `JsonBooleans` or `JsonStrings` they now needs to do the following: convert the `JsonArray` to a regular array (by iterating through all elements), call sort (and convert back to `JsonArray` if needed).
+* No support for duplicates of property names. Possibly, adding an option for theuser to choose from: "first value", "last value", or throw-on-duplicate.
 * No support for escaped characters when creating `JsonNumber` from string.
 * Transformation API:
     * `DeepCopy` method in JsonElement allowing to change JsonElement into JsonNode recursively transforming all of the elements
     * `AsJsonElement` method in JsonNode allowing to change JsonNode into JsonElement with IsImmutable property set to false
     * `IsImmutable` property informing if JsonElement is keeping JsonDocument or JsonNode underneath
-    * `Parse(string)` in JsonNode to be able to parse Json string right into JsonNode if user knows he/she wants mutable version
+    * `Parse(string)` in JsonNode to be able to parse a Json string right into JsonNode if the user knows they wants mutable version
     * `DeepCopy` in JsonNode to make a copy of the whole tree
     * `GetNode` and TryGetNode in JsonNode allowing to retrieve it from JsonElement
     * `WriteTo(Utf8JsonWriter)` in JsonNode for writing a JsonNode to a Utf8JsonWriter without having to go through JsonElement
@@ -217,7 +241,7 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 
 ## Open questions
 * Do we want to add recursive equals on `JsonArray` and `JsonObject`?
-* Do we want to make `JsonNode`s derived types (and which) implement `IComparable`?
+* Do we want to make `JsonNode` derived types implement `IComparable` (which ones)?
 * Would escaped characters be supported for creating `JsonNumber` from string? 
 * Is the API for `JsonNode` and `JsonElement` interactions sufficient? 
 * Do we want to support duplicate and order preservation/control when adding/removing values in `JsonArray`/`JsonObject`?
@@ -230,8 +254,12 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 * Do we want to change `JsonNumber`'s backing field to something different than `string`?     
     Suggestions: 
     - `Span<byte>` or array of `Utf8String`/`Char8` (once they come online in the future) / `byte`  
-    - internal types that inherit from `JsonNumber`  
+    - Internal types that are specific to each numeric type in .NET with factories to create JsonNumber 
+    - Internal struct field which has all the supported numeric types
+    - Unsigned long field accompanying string to store types that are <= 8 bytes long
 * Do we want to support creating `JsonNumber` from `BigInterger` without changing it to string?
+* Should `ToString` on `JsonBoolean` and `JsonString` return the .NET or JSON representation?
+* Do we want to keep implicict cast operators (even though for `JsonNumber` it would mean throwing in some cases, which is against FDG)?
 
 ## Useful links
 
@@ -244,7 +272,6 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 `JsonElement` and `JsonDocument` from `System.Json.Text` API:
 * video: https://channel9.msdn.com/Shows/On-NET/Try-the-new-SystemTextJson-APIs
 * blogpost: https://devblogs.microsoft.com/dotnet/try-the-new-system-text-json-apis/
-* spans: https://msdn.microsoft.com/en-us/magazine/mt814808.aspx
 
 `Json.NET` and its advantages:
 * XPath: https://goessner.net/articles/JsonPath/
