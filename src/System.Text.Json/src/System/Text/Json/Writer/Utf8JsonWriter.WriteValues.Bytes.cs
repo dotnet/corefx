@@ -12,7 +12,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the raw bytes value as base 64 encoded JSON string as an element of a JSON array.
         /// </summary>
-        /// <param name="bytes">The binary data to write as Base64-encoded text.</param>
+        /// <param name="bytes">The binary data to write as a Base64-encoded text.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
