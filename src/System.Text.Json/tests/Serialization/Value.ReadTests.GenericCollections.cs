@@ -1068,7 +1068,42 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadClassWithNullKeyValuePairValues()
         {
-            string json = @"{""KvpWStrVal"":{""Key"":""key"",""Value"":null},""KvpWObjVal"":{""Key"":""key"",""Value"":null},""KvpWClassVal"":{""Key"":""key"",""Value"":null},""KvpWStrKvpVal"":{""Key"":""key"",""Value"":{""Key"":""key"",""Value"":null}},""KvpWObjKvpVal"":{""Key"":""key"",""Value"":{""Key"":""key"",""Value"":null}},""KvpWClassKvpVal"":{""Key"":""key"",""Value"":{""Key"":""key"",""Value"":null}}}";
+            string json =
+                    @"{" +
+                        @"""KvpWStrVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":null" +
+                        @"}," +
+                        @"""KvpWObjVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":null" +
+                        @"}," +
+                        @"""KvpWClassVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":null" +
+                        @"}," +
+                        @"""KvpWStrKvpVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":{" +
+                                @"""Key"":""key""," +
+                                @"""Value"":null" +
+                            @"}" +
+                        @"}," +
+                        @"""KvpWObjKvpVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":{" +
+                                @"""Key"":""key""," +
+                                @"""Value"":null" +
+                            @"}" +
+                        @"}," +
+                        @"""KvpWClassKvpVal"":{" +
+                            @"""Key"":""key""," +
+                            @"""Value"":{" +
+                                @"""Key"":""key""," +
+                                @"""Value"":null" +
+                            @"}" +
+                        @"}" +
+                    @"}";
             SimpleClassWithKeyValuePairs obj = JsonSerializer.Deserialize<SimpleClassWithKeyValuePairs>(json);
 
             Assert.Equal("key", obj.KvpWStrVal.Key);

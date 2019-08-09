@@ -17,6 +17,8 @@ namespace System.Text.Json
             // Write the start.
             if (!state.Current.StartObjectWritten)
             {
+                // If true, we are writing a root object or a value that doesn't belong
+                // to an object e.g. a dictionary value.
                 if (state.Current.CurrentValue == null)
                 {
                     state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, writeNull: true);
@@ -132,7 +134,8 @@ namespace System.Text.Json
                 return endOfEnumerable;
             }
 
-            // A property that returns an immutable dictionary keeps the same stack frame.
+            // A property that returns a type that is deserialized by passing an
+            // IDictionary to its constructor keeps the same stack frame.
             if (jsonPropertyInfo.ClassType == ClassType.IDictionaryConstructible)
             {
                 state.Current.IsIDictionaryConstructibleProperty = true;

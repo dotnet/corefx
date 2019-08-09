@@ -1212,7 +1212,7 @@ namespace System.Text.Json.Serialization.Tests
 
         // https://github.com/dotnet/corefx/issues/39808
         [Fact]
-        public static void Regression39808_NullValuesShouldSerializeAsNull()
+        public static void NullValuesShouldSerializeAsNull()
         {
             var value = new SimpleClassWithDictionaries()
             {
@@ -1238,14 +1238,96 @@ namespace System.Text.Json.Serialization.Tests
                 }
             };
 
-            const string expectedJson = @"{""StringVals"":{""key"":null},""ObjectVals"":{""key"":null},""StringDictVals"":{""key"":null},""ObjectDictVals"":{""key"":null},""ClassVals"":{""key"":null}}";
+            const string expectedJson =
+                    @"{" +
+                        @"""StringVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ObjectVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""StringDictVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ObjectDictVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ClassVals"":{" +
+                            @"""key"":null" +
+                        @"}" +
+                    @"}";
             Assert.Equal(expectedJson, JsonSerializer.Serialize(value));
+        }
+
+        [Fact]
+        public static void NullDictionaryValuesShouldBeWritten_OnIgnorePropertyNull()
+        {
+            var value = new SimpleClassWithDictionaries()
+            {
+                StringVals = new Dictionary<string, string>()
+                {
+                    ["key"] = null,
+                },
+                ObjectVals = new Dictionary<string, object>()
+                {
+                    ["key"] = null,
+                },
+                StringDictVals = new Dictionary<string, Dictionary<string, string>>()
+                {
+                    ["key"] = null,
+                },
+                ObjectDictVals = new Dictionary<string, Dictionary<string, object>>()
+                {
+                    ["key"] = null,
+                },
+                ClassVals = new Dictionary<string, SimpleClassWithDictionaries>()
+                {
+                    ["key"] = null,
+                }
+            };
+
+            const string expectedJson =
+                    @"{" +
+                        @"""StringVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ObjectVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""StringDictVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ObjectDictVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ClassVals"":{" +
+                            @"""key"":null" +
+                        @"}" +
+                    @"}";
+            Assert.Equal(expectedJson, JsonSerializer.Serialize(value, new JsonSerializerOptions { IgnoreNullValues = true }));
         }
 
         [Fact]
         public static void NullDictionaryValuesShouldDeserializeAsNull()
         {
-            const string json = @"{""StringVals"":{""key"":null},""ObjectVals"":{""key"":null},""StringDictVals"":{""key"":null},""ObjectDictVals"":{""key"":null},""ClassVals"":{""key"":null}}";
+            const string json =
+                    @"{" +
+                        @"""StringVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ObjectVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""StringDictVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ObjectDictVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ClassVals"":{" +
+                            @"""key"":null" +
+                        @"}" +
+                    @"}";
 
             SimpleClassWithDictionaries obj = JsonSerializer.Deserialize<SimpleClassWithDictionaries>(json);
             Assert.Null(obj.StringVals["key"]);

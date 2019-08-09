@@ -93,6 +93,7 @@ namespace System.Text.Json.Serialization.Converters
             T k;
 
             // Attempt to use existing converter first before re-entering through JsonSerializer.Deserialize().
+            // The default converter for objects does not parse null objects as null, so it is not used here.
             if (typeToConvert != typeof(object) && (options.GetConverter(typeToConvert) is JsonConverter<T> keyConverter))
             {
                 reader.Read();
@@ -113,6 +114,7 @@ namespace System.Text.Json.Serialization.Converters
             writer.WritePropertyName(name);
 
             // Attempt to use existing converter first before re-entering through JsonSerializer.Serialize().
+            // The default converter for object does not support writing.
             if (typeToConvert != typeof(object) && (options.GetConverter(typeToConvert) is JsonConverter<T> keyConverter))
             {
                 keyConverter.Write(writer, value, options);

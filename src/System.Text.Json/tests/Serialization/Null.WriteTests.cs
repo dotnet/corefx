@@ -38,6 +38,12 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.Serialize(obj, options);
             Assert.Equal(@"{}", json);
+
+            var parentObj = new WrapperForTestClassWithInitializedProperties();
+            parentObj.MyClass = obj;
+
+            json = JsonSerializer.Serialize(parentObj, options);
+            Assert.Equal(@"{""MyClass"":{}}", json);
         }
 
         [Fact]
@@ -105,6 +111,11 @@ namespace System.Text.Json.Serialization.Tests
                 string output = JsonSerializer.Serialize<string>(null, null);
                 Assert.Equal("null", output);
             }
+        }
+
+        class WrapperForTestClassWithInitializedProperties
+        {
+            public TestClassWithInitializedProperties MyClass { get; set; }
         }
     }
 }
