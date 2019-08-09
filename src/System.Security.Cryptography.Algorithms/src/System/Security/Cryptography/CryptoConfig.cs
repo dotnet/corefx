@@ -96,33 +96,43 @@ namespace System.Security.Cryptography
 
             if (args == null)
             {
-                args = Array.Empty<object>();
-            }
+                // fast path for default parameterless ctor
+                ConstructorInfo constructorInfo = type.GetConstructor(ConstructorDefault, null, Type.EmptyTypes, null);
 
-            if (!TryGetConstructors(type, args, out MethodBase[] cons))
-            {
+                if (constructorInfo != null && !typeof(Delegate).IsAssignableFrom(constructorInfo.DeclaringType))
+                {
+                    return constructorInfo.Invoke(null);
+                }
+
                 return null;
             }
-
-            // Bind to matching ctor.
-            ConstructorInfo rci = Type.DefaultBinder.BindToMethod(ConstructorDefault, cons, ref args, null, null, null, out object state) as ConstructorInfo;
-
-            // Check for ctor we don't like (non-existent, delegate or decorated with declarative linktime demand).
-            if (rci == null || typeof(Delegate).IsAssignableFrom(rci.DeclaringType))
+            else
             {
-                return null;
+                if (!TryGetConstructors(type, args, out MethodBase[] cons))
+                {
+                    return null;
+                }
+
+                // Bind to matching ctor.
+                ConstructorInfo rci = Type.DefaultBinder.BindToMethod(ConstructorDefault, cons, ref args, null, null, null, out object state) as ConstructorInfo;
+
+                // Check for ctor we don't like (non-existent, delegate or decorated with declarative linktime demand).
+                if (rci == null || typeof(Delegate).IsAssignableFrom(rci.DeclaringType))
+                {
+                    return null;
+                }
+
+                // Ctor invoke and allocation.
+                object retval = rci.Invoke(ConstructorDefault, Type.DefaultBinder, args, null);
+
+                // Reset any parameter re-ordering performed by the binder.
+                if (state != null)
+                {
+                    Type.DefaultBinder.ReorderArgumentArray(ref args, state);
+                }
+
+                return retval;
             }
-
-            // Ctor invoke and allocation.
-            object retval = rci.Invoke(ConstructorDefault, Type.DefaultBinder, args, null);
-
-            // Reset any parameter re-ordering performed by the binder.
-            if (state != null)
-            {
-                Type.DefaultBinder.ReorderArgumentArray(ref args, state);
-            }
-
-            return retval;
         }
 
         private static bool TryGetTypeFromName(string name, out Type result)
