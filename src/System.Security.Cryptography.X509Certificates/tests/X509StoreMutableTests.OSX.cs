@@ -23,7 +23,13 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 const int errSecWrPerm = -61;
                 const int errSecInteractionNotAllowed = -25308;
 
-                if (e.HResult == errSecWrPerm || e.HResult == errSecInteractionNotAllowed)
+                if (e.HResult == errSecInteractionNotAllowed)
+                {
+                    Console.WriteLine("Run 'security unlock-keychain' to make tests runable.");
+                    return false;
+                }
+
+                if (e.HResult == errSecWrPerm)
                 {
                     return false;
                 }
