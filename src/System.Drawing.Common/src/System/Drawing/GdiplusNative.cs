@@ -1352,10 +1352,10 @@ namespace System.Drawing
             internal static extern int GdipLoadImageFromFile(string filename, out IntPtr image);
 
             [DllImport(LibraryName, ExactSpelling = true)]
-            internal static extern int GdipGetEncoderParameterListSize(IntPtr image, ref Guid encoder, out uint size);
+            internal static extern int GdipGetEncoderParameterListSize(HandleRef image, ref Guid encoder, out int size);
 
             [DllImport(LibraryName, ExactSpelling = true)]
-            internal static extern int GdipGetEncoderParameterList(IntPtr image, ref Guid encoder, uint size, IntPtr buffer);
+            internal static extern int GdipGetEncoderParameterList(HandleRef image, ref Guid encoder, int size, IntPtr buffer);
         }
 
         [StructLayout(LayoutKind.Sequential)]
