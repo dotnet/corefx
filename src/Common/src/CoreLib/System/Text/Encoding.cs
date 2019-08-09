@@ -97,54 +97,10 @@ namespace System.Text
         private const int CodePageNoSymbol = 42;       // Symbol code page not supported
         private const int CodePageUnicode = 1200;     // Unicode
         private const int CodePageBigEndian = 1201;     // Big Endian Unicode
-        private const int CodePageWindows1252 = 1252;     // Windows 1252 code page
-
-        // 20936 has same code page as 10008, so we'll special case it
-        private const int CodePageMacGB2312 = 10008;
-        private const int CodePageGB2312 = 20936;
-        private const int CodePageMacKorean = 10003;
-        private const int CodePageDLLKorean = 20949;
-
-        // ISO 2022 Code Pages
-        private const int ISO2022JP = 50220;
-        private const int ISO2022JPESC = 50221;
-        private const int ISO2022JPSISO = 50222;
-        private const int ISOKorean = 50225;
-        private const int ISOSimplifiedCN = 50227;
-        private const int EUCJP = 51932;
-        private const int ChineseHZ = 52936;    // HZ has ~}~{~~ sequences
-
-        // 51936 is the same as 936
-        private const int DuplicateEUCCN = 51936;
-        private const int EUCCN = 936;
-
-        private const int EUCKR = 51949;
 
         // Latin 1 & ASCII Code Pages
         internal const int CodePageASCII = 20127;    // ASCII
         internal const int ISO_8859_1 = 28591;    // Latin1
-
-        // ISCII
-        private const int ISCIIAssemese = 57006;
-        private const int ISCIIBengali = 57003;
-        private const int ISCIIDevanagari = 57002;
-        private const int ISCIIGujarathi = 57010;
-        private const int ISCIIKannada = 57008;
-        private const int ISCIIMalayalam = 57009;
-        private const int ISCIIOriya = 57007;
-        private const int ISCIIPanjabi = 57011;
-        private const int ISCIITamil = 57004;
-        private const int ISCIITelugu = 57005;
-
-        // GB18030
-        private const int GB18030 = 54936;
-
-        // Other
-        private const int ISO_8859_8I = 38598;
-        private const int ISO_8859_8_Visual = 28598;
-
-        // 50229 is currently unsupported // "Chinese Traditional (ISO-2022)"
-        private const int ENC50229 = 50229;
 
         // Special code pages
         private const int CodePageUTF7 = 65000;
@@ -1266,7 +1222,7 @@ namespace System.Text
                 return _encoding.GetByteCount(chars, index, count);
             }
 
-            public unsafe override int GetByteCount(char* chars, int count, bool flush)
+            public override unsafe int GetByteCount(char* chars, int count, bool flush)
             {
                 return _encoding.GetByteCount(chars, count);
             }
@@ -1297,7 +1253,7 @@ namespace System.Text
                 return _encoding.GetBytes(chars, charIndex, charCount, bytes, byteIndex);
             }
 
-            public unsafe override int GetBytes(char* chars, int charCount,
+            public override unsafe int GetBytes(char* chars, int charCount,
                                                  byte* bytes, int byteCount, bool flush)
             {
                 return _encoding.GetBytes(chars, charCount, bytes, byteCount);
@@ -1335,7 +1291,7 @@ namespace System.Text
                 return _encoding.GetCharCount(bytes, index, count);
             }
 
-            public unsafe override int GetCharCount(byte* bytes, int count, bool flush)
+            public override unsafe int GetCharCount(byte* bytes, int count, bool flush)
             {
                 // By default just call the encoding version, no flush by default
                 return _encoding.GetCharCount(bytes, count);
@@ -1370,7 +1326,7 @@ namespace System.Text
                 return _encoding.GetChars(bytes, byteIndex, byteCount, chars, charIndex);
             }
 
-            public unsafe override int GetChars(byte* bytes, int byteCount,
+            public override unsafe int GetChars(byte* bytes, int byteCount,
                                                   char* chars, int charCount, bool flush)
             {
                 // By default just call the encoding's version

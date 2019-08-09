@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 
+#pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
 #if BIT64
 using nuint = System.UInt64;
 #else
@@ -68,7 +69,7 @@ namespace System
             info.AddValue("value", ToUInt64());
         }
 
-        public unsafe override bool Equals(object? obj)
+        public override unsafe bool Equals(object? obj)
         {
             if (obj is UIntPtr)
             {
@@ -82,7 +83,7 @@ namespace System
             return _value == other._value;
         }
 
-        public unsafe override int GetHashCode()
+        public override unsafe int GetHashCode()
         {
 #if BIT64
             ulong l = (ulong)_value;
@@ -213,7 +214,7 @@ namespace System
             return _value;
         }
 
-        public unsafe override string ToString()
+        public override unsafe string ToString()
         {
             return ((nuint)_value).ToString(CultureInfo.InvariantCulture);
         }

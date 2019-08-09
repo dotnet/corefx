@@ -11,9 +11,12 @@ namespace System.Threading.Tasks
     /// <summary>Provides an event source for tracing TPL information.</summary>
     [EventSource(
         Name = "System.Threading.Tasks.TplEventSource",
-        Guid = "2e5dba47-a3d2-4d16-8ee0-6671ffdcd7b5"
+        Guid = "2e5dba47-a3d2-4d16-8ee0-6671ffdcd7b5",
+        LocalizationResources =
 #if CORECLR
-        ,LocalizationResources = "System.Private.CoreLib.Resources.Strings"
+            "System.Private.CoreLib.Resources.Strings"
+#else
+            null
 #endif
         )]
     internal sealed class TplEventSource : EventSource
@@ -143,26 +146,10 @@ namespace System.Threading.Tasks
             public const EventKeywords DebugActivityId = (EventKeywords)0x40000;
         }
 
-        /// <summary>Enabled for all keywords.</summary>
-        private const EventKeywords ALL_KEYWORDS = (EventKeywords)(-1);
-
         //-----------------------------------------------------------------------------------
         //
         // TPL Event IDs (must be unique)
         //
-
-        /// <summary>The beginning of a parallel loop.</summary>
-        private const int PARALLELLOOPBEGIN_ID = 1;
-        /// <summary>The ending of a parallel loop.</summary>
-        private const int PARALLELLOOPEND_ID = 2;
-        /// <summary>The beginning of a parallel invoke.</summary>
-        private const int PARALLELINVOKEBEGIN_ID = 3;
-        /// <summary>The ending of a parallel invoke.</summary>
-        private const int PARALLELINVOKEEND_ID = 4;
-        /// <summary>A task entering a fork/join construct.</summary>
-        private const int PARALLELFORK_ID = 5;
-        /// <summary>A task leaving a fork/join construct.</summary>
-        private const int PARALLELJOIN_ID = 6;
 
         /// <summary>A task is scheduled to a task scheduler.</summary>
         private const int TASKSCHEDULED_ID = 7;

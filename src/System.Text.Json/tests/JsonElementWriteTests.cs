@@ -12,17 +12,11 @@ namespace System.Text.Json.Tests
 {
     public static class JsonElementWriteTests
     {
-        private const string CompiledNewline = @"
-";
-
         private static readonly JsonDocumentOptions s_options =
             new JsonDocumentOptions
             {
                 CommentHandling = JsonCommentHandling.Skip,
             };
-
-        private static readonly bool s_replaceNewlines =
-            !StringComparer.Ordinal.Equals(CompiledNewline, Environment.NewLine);
 
         [Fact]
         public static void CheckByPassingNullWriter()
@@ -310,14 +304,14 @@ namespace System.Text.Json.Tests
 6                       , 0
 
 
-, 1       ]",
+, 1       ]".NormalizeLineEndings(),
                 @"[
   2,
   4,
   6,
   0,
   1
-]",
+]".NormalizeLineEndings(),
                 "[2,4,6,0,1]");
         }
 
@@ -332,12 +326,30 @@ namespace System.Text.Json.Tests
 // Comments make everything more interesting.
             ""d"":
 2
-}",
+}".NormalizeLineEndings(),
                 @"{
   ""r"": 2,
   ""d"": 2
-}",
+}".NormalizeLineEndings(),
                 "{\"r\":2,\"d\":2}");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteSimpleObjectNeedsEscaping(bool indented)
+        {
+            WriteComplexValue(
+                indented,
+                @"{ ""prop><erty""   : 3,
+            ""> This is one long & unusual property name. <"":
+4
+}",
+                @"{
+  ""prop\u003E\u003Certy"": 3,
+  ""\u003E This is one long \u0026 unusual property name. \u003C"": 4
+}",
+                "{\"prop\\u003E\\u003Certy\":3,\"\\u003E This is one long \\u0026 unusual property name. \\u003C\":4}");
         }
 
         [Theory]
@@ -347,7 +359,7 @@ namespace System.Text.Json.Tests
         {
             WriteComplexValue(
                 indented,
-                @"
+                (@"
 
 [
         ""Once upon a midnight dreary"",
@@ -374,7 +386,7 @@ null,
 
 ], ""more deep"": false },
 12 ], ""second property"": null }]
-",
+").NormalizeLineEndings(),
                 @"[
   ""Once upon a midnight dreary"",
   42,
@@ -413,7 +425,7 @@ null,
     ],
     ""second property"": null
   }
-]",
+]".NormalizeLineEndings(),
                 "[\"Once upon a midnight dreary\",42,1e400,3.141592653589793238462643383279," +
                     "false,true,null,\"Escaping is not required\"," +
                     "\"Some things get lost in the m\\u00eal\\u00e9e\",[2,3,5,7,11]," +
@@ -469,7 +481,7 @@ null,
       11
     ]
   }
-}",
+}".NormalizeLineEndings(),
                 "{\"int\":42,\"quadratic googol\":1e400,\"precisePi\":3.141592653589793238462643383279," +
                     "\"lit0\":null,\"lit1\":false,\"lit2\":true,\"ascii\":\"pizza\",\"escaped\":\"pizza\"," +
                     "\"utf8\":\"p\\u00cdzza\",\"utf8ExtraEscape\":\"p\\u00cdzza\"," +
@@ -488,7 +500,7 @@ null,
                 "42",
                 @"{
   ""ectoplasm"": 42
-}",
+}".NormalizeLineEndings(),
                 "{\"ectoplasm\":42}");
         }
 
@@ -506,9 +518,9 @@ null,
                 indented,
                 propertyName,
                 "42",
-                @"{
+                (@"{
   ""\u00EA" + propertyName.Substring(1) + @""": 42
-}",
+}").NormalizeLineEndings(),
                 $"{{\"\\u00EA{propertyName.Substring(1)}\":42}}");
         }
 
@@ -523,7 +535,7 @@ null,
                 "1e6",
                 @"{
   ""m\u00eal\u00e9e"": 1e6
-}",
+}".NormalizeLineEndings(),
                 "{\"m\\u00eal\\u00e9e\":1e6}");
         }
 
@@ -573,7 +585,7 @@ null,
                 "3.141592653589793238462643383279",
                 @"{
   ""test property"": 3.141592653589793238462643383279
-}",
+}".NormalizeLineEndings(),
                 "{\"test property\":3.141592653589793238462643383279}");
         }
 
@@ -589,7 +601,7 @@ null,
                 "1e400",
                 @"{
   ""\u0643\u0628\u064A\u0631"": 1e400
-}",
+}".NormalizeLineEndings(),
                 "{\"\\u0643\\u0628\\u064A\\u0631\":1e400}");
         }
 
@@ -604,7 +616,7 @@ null,
                 "\"pizza\"",
                 @"{
   ""dinner"": ""pizza""
-}",
+}".NormalizeLineEndings(),
                 "{\"dinner\":\"pizza\"}");
         }
 
@@ -619,7 +631,7 @@ null,
                 "\"p\\u0069zza\"",
                 @"{
   ""dinner"": ""pizza""
-}",
+}".NormalizeLineEndings(),
                 "{\"dinner\":\"pizza\"}");
         }
 
@@ -634,7 +646,7 @@ null,
                 "\"p\u00CDzza\"",
                 @"{
   ""lunch"": ""p\u00cdzza""
-}",
+}".NormalizeLineEndings(),
                 "{\"lunch\":\"p\\u00cdzza\"}");
         }
 
@@ -649,7 +661,7 @@ null,
                 "\"p\u00CDz\\u007Aa\"",
                 @"{
   ""lunch"": ""p\u00cdzza""
-}",
+}".NormalizeLineEndings(),
                 "{\"lunch\":\"p\\u00cdzza\"}");
         }
 
@@ -664,7 +676,7 @@ null,
                 "true",
                 @"{
   "" boolean "": true
-}",
+}".NormalizeLineEndings(),
                 "{\" boolean \":true}");
         }
 
@@ -679,7 +691,7 @@ null,
                 "false",
                 @"{
   "" boolean "": false
-}",
+}".NormalizeLineEndings(),
                 "{\" boolean \":false}");
         }
 
@@ -694,7 +706,7 @@ null,
                 "null",
                 @"{
   ""someProp"": null
-}",
+}".NormalizeLineEndings(),
                 "{\"someProp\":null}");
         }
 
@@ -709,7 +721,7 @@ null,
                 "[        ]",
                 @"{
   ""arr"": []
-}",
+}".NormalizeLineEndings(),
                 "{\"arr\":[]}");
         }
 
@@ -724,7 +736,7 @@ null,
                 "{       }",
                 @"{
   ""obj"": {}
-}",
+}".NormalizeLineEndings(),
                 "{\"obj\":{}}");
         }
 
@@ -739,7 +751,7 @@ null,
                 "[   /* 5 */     ]",
                 @"{
   ""arr"": []
-}",
+}".NormalizeLineEndings(),
                 "{\"arr\":[]}");
         }
 
@@ -754,7 +766,7 @@ null,
                 "{ /* Technically empty */ }",
                 @"{
   ""obj"": {}
-}",
+}".NormalizeLineEndings(),
                 "{\"obj\":{}}");
         }
 
@@ -775,7 +787,7 @@ null,
     0,
     1
   ]
-}",
+}".NormalizeLineEndings(),
                 "{\"valjean\":[2,4,6,0,1]}");
         }
 
@@ -791,13 +803,13 @@ null,
 // Comments make everything more interesting.
             ""d"":
 2
-}",
+}".NormalizeLineEndings(),
                 @"{
   ""bestMinorCharacter"": {
     ""r"": 2,
     ""d"": 2
   }
-}",
+}".NormalizeLineEndings(),
                 "{\"bestMinorCharacter\":{\"r\":2,\"d\":2}}");
         }
 
@@ -877,7 +889,7 @@ null,
       ""second property"": null
     }
   ]
-}",
+}".NormalizeLineEndings(),
 
                 "{\"data\":[\"Once upon a midnight dreary\",42,1e400,3.141592653589793238462643383279," +
                     "false,true,null,\"Escaping is not required\"," +
@@ -937,7 +949,7 @@ null,
       ]
     }
   }
-}",
+}".NormalizeLineEndings(),
                 "{\"data\":" +
                     "{\"int\":42,\"quadratic googol\":1e400,\"precisePi\":3.141592653589793238462643383279," +
                     "\"lit0\":null,\"lit1\":false,\"lit2\":true,\"ascii\":\"pizza\",\"escaped\":\"pizza\"," +
@@ -1175,20 +1187,13 @@ null,
 
                 var options = new JsonWriterOptions
                 {
-                    Indented = indented,
+                    Indented = indented
                 };
 
                 using var writer = new Utf8JsonWriter(buffer, options);
 
                 target.WriteTo(writer);
                 writer.Flush();
-
-                if (indented && s_replaceNewlines)
-                {
-                    JsonTestHelper.AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
-                }
 
                 JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
@@ -1256,13 +1261,6 @@ null,
                 writer.WriteEndObject();
                 writer.Flush();
 
-                if (indented && s_replaceNewlines)
-                {
-                    JsonTestHelper.AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
-                }
-
                 JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
         }
@@ -1291,13 +1289,6 @@ null,
                 target.WriteTo(writer);
                 writer.WriteEndObject();
                 writer.Flush();
-
-                if (indented && s_replaceNewlines)
-                {
-                    JsonTestHelper.AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
-                }
 
                 JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
@@ -1328,13 +1319,6 @@ null,
                 writer.WriteEndObject();
                 writer.Flush();
 
-                if (indented && s_replaceNewlines)
-                {
-                    JsonTestHelper.AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
-                }
-
                 JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
         }
@@ -1364,16 +1348,8 @@ null,
                 writer.WriteEndObject();
                 writer.Flush();
 
-                if (indented && s_replaceNewlines)
-                {
-                    JsonTestHelper.AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
-                }
-
                 JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
         }
-
     }
 }
