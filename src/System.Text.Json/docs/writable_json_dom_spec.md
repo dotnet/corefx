@@ -30,7 +30,7 @@ The user should be able to:
 ## Example scenarios
 ### Collection initialization
 
-One of the aims in designing this API was the take advantage of C# language features and make it easy and natural for delevopers to create instances of `JsonObjects` without calling too many `new` instructions. Below example shows how to initialize JSON object with different types of properties:
+One of the aims in designing this API was to take advantage of C# language features and make it easy and natural for delevopers to create instances of `JsonObjects` without calling too many `new` instructions. Below example shows how to initialize JSON object with different types of properties:
 
 ```csharp
 var developer = new JsonObject
@@ -186,7 +186,7 @@ string jsonString = @"
 JsonObject employees = JsonNode.Parse(jsonString) as JsonObject;
 
 var newEmployee = new JsonObject({"name", "Bob"});
-var nextId = employees.Count + 1;
+int nextId = employees.PropertyNames.Count + 1;
 
 employees.Add("employee"+nextId.ToString(), newEmployee);
 Mailbox.SendAllEmployeesData(employees.AsJsonElement());
@@ -227,13 +227,13 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 
 * Implicit operators for `JsonString`, `JsonBoolean` and `JsonNumber` as an additional feature.
 * `Sort` not implemented for `JsonArray`, beacuse there is no right way to compare `JsonObjects`. If a user wants to sort a `JsonArray` of `JsonNumbers`, `JsonBooleans` or `JsonStrings` they now needs to do the following: convert the `JsonArray` to a regular array (by iterating through all elements), call sort (and convert back to `JsonArray` if needed).
-* No support for duplicates of property names. Possibly, adding an option for theuser to choose from: "first value", "last value", or throw-on-duplicate.
+* No support for duplicates of property names. Possibly, adding an option for the user to choose from: "first value", "last value", or throw-on-duplicate.
 * No support for escaped characters when creating `JsonNumber` from string.
 * Transformation API:
     * `DeepCopy` method in JsonElement allowing to change JsonElement into JsonNode recursively transforming all of the elements
     * `AsJsonElement` method in JsonNode allowing to change JsonNode into JsonElement with IsImmutable property set to false
     * `IsImmutable` property informing if JsonElement is keeping JsonDocument or JsonNode underneath
-    * `Parse(string)` in JsonNode to be able to parse a Json string right into JsonNode if the user knows they wants mutable version
+    * `Parse(string)` in JsonNode to be able to parse a JSON string right into JsonNode if the user knows they wants mutable version
     * `DeepCopy` in JsonNode to make a copy of the whole tree
     * `GetNode` and TryGetNode in JsonNode allowing to retrieve it from JsonElement
     * `WriteTo(Utf8JsonWriter)` in JsonNode for writing a JsonNode to a Utf8JsonWriter without having to go through JsonElement
@@ -259,7 +259,7 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
     - Unsigned long field accompanying string to store types that are <= 8 bytes long
 * Do we want to support creating `JsonNumber` from `BigInterger` without changing it to string?
 * Should `ToString` on `JsonBoolean` and `JsonString` return the .NET or JSON representation?
-* Do we want to keep implicict cast operators (even though for `JsonNumber` it would mean throwing in some cases, which is against FDG)?
+* Do we want to keep implicit cast operators (even though for `JsonNumber` it would mean throwing in some cases, which is against FDG)?
 
 ## Useful links
 
