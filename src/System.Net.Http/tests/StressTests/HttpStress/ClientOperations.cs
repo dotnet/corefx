@@ -205,7 +205,7 @@ namespace HttpStress
                     // Validate that request headers are being echoed
                     foreach (KeyValuePair<string, IEnumerable<string>> reqHeader in req.Headers)
                     {
-                        if (!res.Headers.TryGetValues(reqHeader.Key, out var values))
+                        if (!res.Headers.TryGetValues(reqHeader.Key, out IEnumerable<string> values))
                         {
                             throw new Exception($"Expected response header name {reqHeader.Key} missing.");
                         }
