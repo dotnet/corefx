@@ -2105,9 +2105,6 @@ namespace System.Drawing.Imaging
         public static readonly System.Drawing.Imaging.Encoder ScanMethod;
         public static readonly System.Drawing.Imaging.Encoder Transformation;
         public static readonly System.Drawing.Imaging.Encoder Version;
-        public static readonly System.Drawing.Imaging.Encoder ColorSpace;
-        public static readonly System.Drawing.Imaging.Encoder ImageItems;
-        public static readonly System.Drawing.Imaging.Encoder SaveAsCmyk;
         public Encoder(System.Guid guid) { }
         public System.Guid Guid { get { throw null; } }
     }
