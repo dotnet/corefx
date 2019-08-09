@@ -157,9 +157,8 @@ namespace System.Net.Sockets
         Irda = 26,
         NetworkDesigners = 28,
         Max = 29,
-        Netlink = 65536,
-        Packet = 65537,
-        ControllerAreaNetwork = 65538,
+        Packet = 65536,
+        ControllerAreaNetwork = 65537,
     }
     public enum ProtocolType
     {

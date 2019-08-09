@@ -41,8 +41,7 @@ namespace System.Net.Sockets
         // Unix specific values are past Uint16.MaxValue to avoid conflicts with Windows values.
         // On Windows we pass values straight to OS and if we add new protocol supported by Windows,
         // we should use actual OS value.
-        Netlink = 65536,        // Netlink protocol
-        Packet = 65537,         // Linux Packet
-        ControllerAreaNetwork = 65538, // Controller Area Network automotive bus protocol
+        Packet = 65536,         // Linux Packet
+        ControllerAreaNetwork = 65537, // Controller Area Network automotive bus protocol
     }
 }

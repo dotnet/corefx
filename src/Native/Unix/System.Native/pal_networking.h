@@ -53,7 +53,7 @@ typedef enum
  *
  * NOTE: these values are taken from System.Net.AddressFamily. If you add
  *       new entries, be sure that the values are chosen accordingly.
- *       Unix specific value have distinct offset to avoid conflict with
+ *       Unix specific values have distinct offset to avoid conflict with
  *       Windows values.
  */
 typedef enum
@@ -62,9 +62,8 @@ typedef enum
     AddressFamily_AF_UNIX = 1,     // System.Net.AddressFamily.Unix
     AddressFamily_AF_INET = 2,     // System.Net.AddressFamily.InterNetwork
     AddressFamily_AF_INET6 = 23,   // System.Net.AddressFamily.InterNetworkV6
-    AddressFamily_AF_NETLINK = 65536, // System.Net.AddressFamily.Netlink
-    AddressFamily_AF_PACKET = 65537,  // System.Net.AddressFamily.Packet
-    AddressFamily_AF_CAN = 65538,     // System.Net.AddressFamily.ControllerAreaNetwork
+    AddressFamily_AF_PACKET = 65536,  // System.Net.AddressFamily.Packet
+    AddressFamily_AF_CAN = 65537,     // System.Net.AddressFamily.ControllerAreaNetwork
 } AddressFamily;
 
 /*

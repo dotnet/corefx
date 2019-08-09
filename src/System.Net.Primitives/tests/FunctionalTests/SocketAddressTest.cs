@@ -98,7 +98,6 @@ namespace System.Net.Primitives.Functional.Tests
 
         [Theory]
         [InlineData(AddressFamily.Packet)]
-        [InlineData(AddressFamily.Netlink)]
         [InlineData(AddressFamily.ControllerAreaNetwork)]
         [PlatformSpecific(~TestPlatforms.Linux)]
         public static void ToString_UnsupportedFamily_Throws(AddressFamily family)
@@ -122,7 +121,7 @@ namespace System.Net.Primitives.Functional.Tests
         {
             foreach (AddressFamily family in Enum.GetValues(typeof(AddressFamily)))
             {
-                if (family == AddressFamily.Netlink || family == AddressFamily.Packet || family == AddressFamily.ControllerAreaNetwork)
+                if (family == AddressFamily.Packet || family == AddressFamily.ControllerAreaNetwork)
                 {
                     // Skip Linux specific protocols.
                     continue;
