@@ -76,11 +76,19 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Theory]
-        [InlineData((AddressFamily)12345, -1)]
-        [InlineData((AddressFamily)12345, 16)]
+        [InlineData((AddressFamily)123456, -1)]
+        [InlineData((AddressFamily)123456, 16)]
         public static void ToString_UnknownFamily_Throws(AddressFamily family, int size)
         {
             Assert.Throws<PlatformNotSupportedException>(() => size >= 0 ? new SocketAddress(family, size) : new SocketAddress(family));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void ToString_LegacyUnknownFamily_Success()
+        {
+            var sa = new SocketAddress((AddressFamily)125);
+            Assert.NotNull(sa.ToString());
         }
 
         [Theory]
