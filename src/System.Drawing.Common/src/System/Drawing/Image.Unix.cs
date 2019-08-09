@@ -54,23 +54,6 @@ namespace System.Drawing
         // public methods
         // static
 
-        public static Image FromFile(string filename, bool useEmbeddedColorManagement)
-        {
-            IntPtr imagePtr;
-            int st;
-
-            if (!File.Exists(filename))
-                throw new FileNotFoundException(filename);
-
-            if (useEmbeddedColorManagement)
-                st = Gdip.GdipLoadImageFromFileICM(filename, out imagePtr);
-            else
-                st = Gdip.GdipLoadImageFromFile(filename, out imagePtr);
-            Gdip.CheckStatus(st);
-
-            return CreateFromHandle(imagePtr);
-        }
-
         // See http://support.microsoft.com/default.aspx?scid=kb;en-us;831419 for performance discussion
         public static Image FromStream(Stream stream, bool useEmbeddedColorManagement, bool validateImageData)
         {
@@ -105,72 +88,6 @@ namespace System.Drawing
             }
         }
 
-        public static int GetPixelFormatSize(PixelFormat pixfmt)
-        {
-            int result = 0;
-            switch (pixfmt)
-            {
-                case PixelFormat.Format16bppArgb1555:
-                case PixelFormat.Format16bppGrayScale:
-                case PixelFormat.Format16bppRgb555:
-                case PixelFormat.Format16bppRgb565:
-                    result = 16;
-                    break;
-                case PixelFormat.Format1bppIndexed:
-                    result = 1;
-                    break;
-                case PixelFormat.Format24bppRgb:
-                    result = 24;
-                    break;
-                case PixelFormat.Format32bppArgb:
-                case PixelFormat.Format32bppPArgb:
-                case PixelFormat.Format32bppRgb:
-                    result = 32;
-                    break;
-                case PixelFormat.Format48bppRgb:
-                    result = 48;
-                    break;
-                case PixelFormat.Format4bppIndexed:
-                    result = 4;
-                    break;
-                case PixelFormat.Format64bppArgb:
-                case PixelFormat.Format64bppPArgb:
-                    result = 64;
-                    break;
-                case PixelFormat.Format8bppIndexed:
-                    result = 8;
-                    break;
-            }
-            return result;
-        }
-
-        public static bool IsAlphaPixelFormat(PixelFormat pixfmt)
-        {
-            bool result = false;
-            switch (pixfmt)
-            {
-                case PixelFormat.Format16bppArgb1555:
-                case PixelFormat.Format32bppArgb:
-                case PixelFormat.Format32bppPArgb:
-                case PixelFormat.Format64bppArgb:
-                case PixelFormat.Format64bppPArgb:
-                    result = true;
-                    break;
-                case PixelFormat.Format16bppGrayScale:
-                case PixelFormat.Format16bppRgb555:
-                case PixelFormat.Format16bppRgb565:
-                case PixelFormat.Format1bppIndexed:
-                case PixelFormat.Format24bppRgb:
-                case PixelFormat.Format32bppRgb:
-                case PixelFormat.Format48bppRgb:
-                case PixelFormat.Format4bppIndexed:
-                case PixelFormat.Format8bppIndexed:
-                    result = false;
-                    break;
-            }
-            return result;
-        }
-
         private protected static IntPtr InitializeFromStream(Stream stream)
         {
             if (stream == null)
@@ -201,31 +118,6 @@ namespace System.Drawing
             Gdip.CheckStatus(status);
 
             return source;
-        }
-
-        public EncoderParameters GetEncoderParameterList(Guid encoder)
-        {
-            int status;
-            uint sz;
-
-            status = Gdip.GdipGetEncoderParameterListSize(nativeImage, ref encoder, out sz);
-            Gdip.CheckStatus(status);
-
-            IntPtr rawEPList = Marshal.AllocHGlobal((int)sz);
-            EncoderParameters eps;
-
-            try
-            {
-                status = Gdip.GdipGetEncoderParameterList(nativeImage, ref encoder, sz, rawEPList);
-                eps = EncoderParameters.ConvertFromMemory(rawEPList);
-                Gdip.CheckStatus(status);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(rawEPList);
-            }
-
-            return eps;
         }
 
         public PropertyItem GetPropertyItem(int propid)

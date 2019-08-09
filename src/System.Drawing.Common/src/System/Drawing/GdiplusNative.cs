@@ -1344,6 +1344,18 @@ namespace System.Drawing
 
             [DllImport(LibraryName, ExactSpelling = true)]
             internal static extern int GdipTransformPointsI(HandleRef graphics, int destSpace, int srcSpace, Point* points, int count);
+
+            [DllImport(LibraryName, ExactSpelling = true, CharSet = CharSet.Unicode)]
+            internal static extern int GdipLoadImageFromFileICM(string filename, out IntPtr image);
+
+            [DllImport(LibraryName, ExactSpelling = true, CharSet = CharSet.Unicode)]
+            internal static extern int GdipLoadImageFromFile(string filename, out IntPtr image);
+
+            [DllImport(LibraryName, ExactSpelling = true)]
+            internal static extern int GdipGetEncoderParameterListSize(IntPtr image, ref Guid encoder, out uint size);
+
+            [DllImport(LibraryName, ExactSpelling = true)]
+            internal static extern int GdipGetEncoderParameterList(IntPtr image, ref Guid encoder, uint size, IntPtr buffer);
         }
 
         [StructLayout(LayoutKind.Sequential)]
