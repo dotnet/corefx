@@ -81,7 +81,7 @@ namespace System.Net.Primitives.Functional.Tests
         [InlineData((AddressFamily)1_000_000, -1)]
         public static void ToString_UnknownFamily_Throws(AddressFamily family, int size)
         {
-            // Values above last know value should throw.
+            // Values above last known value should throw.
             Assert.Throws<PlatformNotSupportedException>(() => size >= 0 ? new SocketAddress(family, size) : new SocketAddress(family));
         }
 
