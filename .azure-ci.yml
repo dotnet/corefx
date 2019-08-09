@@ -43,19 +43,7 @@ resources:
   - container: ubuntu_1604_arm_cross_container
     image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-ef0ac75-20175511035548
 
-variables:
-  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
-    - group: DotNet-Blob-Feed
-    - name: _dotnetFeedUrl
-      value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
-    - name: _PublishUsingPipelines
-      value: true
-    - name: _DotNetArtifactsCategory
-      value: .NETCore
-    - name: _DotNetValidationArtifactsCategory
-      value: .NETCore
-
-stages:
+jobs:
   # Windows legs
   - template: /eng/pipelines/windows.yml
     parameters:
@@ -80,19 +68,14 @@ stages:
     #     isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
     #     fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
 
-  # Publish and validation steps. Only run in official builds
+  # Publish step. Only run in official builds
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
-    - template: /eng/pipelines/pre-publish.yml
+    - template: /eng/pipelines/publish.yml
       parameters:
         dependsOn:
-          - WindowsStage
-          - LinuxStage
-          - MacOSStage
+          - WindowsTest
+          - WindowsNoTest
+          - AllConfigurations
+          - LinuxTest
+          - MacOS
           # - FreeBSD
-
-    - template: eng\common\templates\post-build\post-build.yml
-      parameters:
-        dependsOn:
-          - PrePublish
-        enableSymbolValidation: false # https://github.com/dotnet/arcade/issues/2871
-        enableSourceLinkValidation: false # https://github.com/dotnet/arcade/issues/3603
