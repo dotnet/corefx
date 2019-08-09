@@ -21,7 +21,7 @@ namespace System.Globalization.Tests
             yield return new object[] { "he-IL", 0x40d, 0x4e7, 0x1f4, 0x2715, 0x35e, true };
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // OS changes
         [MemberData(nameof(TextInfo_TestData))]
         public void MiscTest(string cultureName, int lcid, int ansiCodePage, int ebcdiCCodePage, int macCodePage, int oemCodePage, bool isRightToLeft)
         {
@@ -29,11 +29,7 @@ namespace System.Globalization.Tests
             Assert.Equal(lcid, ti.LCID);
             Assert.Equal(ansiCodePage, ti.ANSICodePage);
             Assert.Equal(ebcdiCCodePage, ti.EBCDICCodePage);
-            // On Nano Server >= 1809 the MacCodePage always returns 65001.
-            if (!PlatformDetection.IsWindowsNanoServer)
-            {
-                Assert.Equal(macCodePage, ti.MacCodePage);
-            }
+            Assert.Equal(macCodePage, ti.MacCodePage);
             Assert.Equal(oemCodePage, ti.OEMCodePage);
             Assert.Equal(isRightToLeft, ti.IsRightToLeft);
         }
