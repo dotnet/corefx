@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Reflection;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -30,15 +31,31 @@ namespace System.Text.Json.Tests
         [Theory]
         public static void TestInitialization(string value)
         {
-            var jsonString = new JsonString(value);
-            Assert.Equal(value, jsonString.Value);
-
+            // Default constructor:
             var defaultlyInitializedJsonString = new JsonString();
             defaultlyInitializedJsonString.Value = value;
             Assert.Equal(value, defaultlyInitializedJsonString.Value);
 
+            // To string:
+            Assert.Equal(value, defaultlyInitializedJsonString.ToString());
+
+            // Value constructor:
+            Assert.Equal(value, new JsonString(value).Value);
+
+            // Implicit operator:            
             JsonString implicitlyInitializiedJsonString = value;
             Assert.Equal(value, implicitlyInitializiedJsonString.Value);
+
+            // Casted to span:            
+            ReadOnlySpan<char> spanValue = value;
+            Assert.Equal(value, new JsonString(spanValue).Value);
+        }
+
+        [Fact]
+        public static void TestNulls()
+        {
+            Assert.Throws<ArgumentNullException>(() => new JsonString(null));
+            Assert.Throws<ArgumentNullException>(() => new JsonString().Value = null);
         }
 
         [Fact]
@@ -90,6 +107,7 @@ namespace System.Text.Json.Tests
             Assert.False(jsonString.Equals(new Exception()));
             Assert.False(jsonString.Equals(new JsonBoolean()));
             Assert.False(new JsonString("true").Equals(new JsonBoolean(true)));
+            Assert.False(new JsonString("123").Equals(new JsonNumber("123")));
 
             JsonString jsonStringNull = null;
             Assert.False(jsonString == jsonStringNull);
@@ -97,6 +115,9 @@ namespace System.Text.Json.Tests
 
             Assert.True(jsonString != jsonStringNull);
             Assert.True(jsonStringNull != jsonString);
+
+            JsonString otherJsonStringNull = null;
+            Assert.True(jsonStringNull == otherJsonStringNull);
         }
 
         [Fact]

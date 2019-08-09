@@ -46,6 +46,13 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestToString()
+        {
+            Assert.Equal("true", new JsonBoolean(true).ToString());
+            Assert.Equal("false", new JsonBoolean(false).ToString());
+        }
+
+        [Fact]
         public static void TestEquals()
         {
             var jsonBooleanTrue = new JsonBoolean(true);
@@ -100,6 +107,9 @@ namespace System.Text.Json.Tests
 
             Assert.True(jsonBooleanTrue != jsonBooleanNull);
             Assert.True(jsonBooleanNull != jsonBooleanTrue);
+
+            JsonBoolean otherJsonBooleanNull = null;
+            Assert.True(jsonBooleanNull == otherJsonBooleanNull);
         }
 
         [Fact]
@@ -119,6 +129,8 @@ namespace System.Text.Json.Tests
             Assert.Equal(jsonBooleanTrue.GetHashCode(), jsonNodeTrue.GetHashCode());
             JsonNode jsonNodeFalse = new JsonBoolean(false);
             Assert.Equal(jsonBooleanFalse.GetHashCode(), jsonNodeFalse.GetHashCode());
+
+            Assert.NotEqual(jsonBooleanTrue.GetHashCode(), jsonBooleanFalse.GetHashCode());
 
             IEquatable<JsonBoolean> jsonBooleanIEquatableTrue = jsonBooleanTrue;
             Assert.Equal(jsonBooleanIEquatableTrue.GetHashCode(), jsonBooleanTrue.GetHashCode());
