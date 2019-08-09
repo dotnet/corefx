@@ -445,9 +445,6 @@ namespace System.Drawing.Imaging
                 case EncoderParameterValueType.ValueTypeRationalRange:
                     size = 2 * 2 * 4;
                     break;
-                case EncoderParameterValueType.ValueTypePointer:
-                    size = IntPtr.Size;
-                    break;
                 default:
                     throw Gdip.StatusException(Gdip.WrongState);
             }

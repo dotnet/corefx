@@ -2151,8 +2151,7 @@ namespace System.Drawing.Imaging
         ValueTypeRational = 5,
         ValueTypeLongRange = 6,
         ValueTypeUndefined = 7,
-        ValueTypeRationalRange = 8,
-        ValueTypePointer = 9,
+        ValueTypeRationalRange = 8
     }
     public enum EncoderValue
     {
