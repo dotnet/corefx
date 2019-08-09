@@ -171,12 +171,11 @@ namespace System.Security.Cryptography
 
         private static bool TryGetConstructors(Type type, object[] arguments, out MethodBase[] match)
         {
-            match = null;
-
             // Locate all constructors.
             MethodBase[] constructors = type.GetConstructors(ConstructorDefault);
             if (constructors == null || constructors.Length == 0)
             {
+                match = null;
                 return false;
             }
 
@@ -190,23 +189,20 @@ namespace System.Security.Cryptography
                 }
             }
 
-            if (candidates.Count == 0)
-            {
-                return false;
-            }
-            else
-            {
-                match = candidates.ToArray();
-                return true;
-            }
+            match = candidates.Count != 0 ? candidates.ToArray() : null;
+            return candidates.Count != 0;
         }
 
         public static void AddOID(string oid, params string[] names)
         {
             if (oid == null)
+            {
                 throw new ArgumentNullException(nameof(oid));
+            }
             if (names == null)
+            {
                 throw new ArgumentNullException(nameof(names));
+            }
 
             string[] safeCopy = names.Length == 1 ? new string[1] { names[0] } : names.ToArray();
 
@@ -252,7 +248,9 @@ namespace System.Security.Cryptography
         public static byte[] EncodeOID(string str)
         {
             if (str == null)
+            {
                 throw new ArgumentNullException(nameof(str));
+            }
 
             string[] oidString = str.Split(SepArray);
             uint[] oidNums = new uint[oidString.Length];
@@ -263,7 +261,9 @@ namespace System.Security.Cryptography
 
             // Handle the first two oidNums special
             if (oidNums.Length < 2)
+            {
                 throw new CryptographicUnexpectedOperationException(SR.Cryptography_InvalidOID);
+            }
 
             uint firstTwoOidNums = unchecked((oidNums[0] * 40) + oidNums[1]);
 
@@ -290,12 +290,94 @@ namespace System.Security.Cryptography
 
             // Final return value is 06 <length> encodedOidNums[]
             if (encodedOidNumsIndex - 2 > 0x7f)
+            {
                 throw new CryptographicUnexpectedOperationException(SR.Cryptography_Config_EncodedOIDError);
+            }
 
             encodedOidNums[0] = (byte)0x06;
             encodedOidNums[1] = (byte)(encodedOidNumsIndex - 2);
 
             return encodedOidNums;
+        }
+
+        private static void EncodeSingleOidNum(uint value, byte[] destination, ref int index)
+        {
+            // Write directly to destination starting at index, and update index based on how many bytes written.
+            // If destination is null, just return updated index.
+            if (unchecked((int)value) < 0x80)
+            {
+                if (destination != null)
+                {
+                    destination[index++] = unchecked((byte)value);
+                }
+                else
+                {
+                    index += 1;
+                }
+            }
+            else if (value < 0x4000)
+            {
+                if (destination != null)
+                {
+                    destination[index++] = (byte)((value >> 7) | 0x80);
+                    destination[index++] = (byte)(value & 0x7f);
+                }
+                else
+                {
+                    index += 2;
+                }
+            }
+            else if (value < 0x200000)
+            {
+                if (destination != null)
+                {
+                    unchecked
+                    {
+                        destination[index++] = (byte)((value >> 14) | 0x80);
+                        destination[index++] = (byte)((value >> 7) | 0x80);
+                        destination[index++] = (byte)(value & 0x7f);
+                    }
+                }
+                else
+                {
+                    index += 3;
+                }
+            }
+            else if (value < 0x10000000)
+            {
+                if (destination != null)
+                {
+                    unchecked
+                    {
+                        destination[index++] = (byte)((value >> 21) | 0x80);
+                        destination[index++] = (byte)((value >> 14) | 0x80);
+                        destination[index++] = (byte)((value >> 7) | 0x80);
+                        destination[index++] = (byte)(value & 0x7f);
+                    }
+                }
+                else
+                {
+                    index += 4;
+                }
+            }
+            else
+            {
+                if (destination != null)
+                {
+                    unchecked
+                    {
+                        destination[index++] = (byte)((value >> 28) | 0x80);
+                        destination[index++] = (byte)((value >> 21) | 0x80);
+                        destination[index++] = (byte)((value >> 14) | 0x80);
+                        destination[index++] = (byte)((value >> 7) | 0x80);
+                        destination[index++] = (byte)(value & 0x7f);
+                    }
+                }
+                else
+                {
+                    index += 5;
+                }
+            }
         }
 
         private static ConcurrentDictionary<string, string> CreateTypeNameToOidMapping()
@@ -368,40 +450,40 @@ namespace System.Security.Cryptography
             const string AssemblyName_Pkcs = "System.Security.Cryptography.Pkcs";
             const string AssemblyName_X509Certificates = "System.Security.Cryptography.X509Certificates";
 
-            string SHA1CryptoServiceProviderType = "System.Security.Cryptography.SHA1CryptoServiceProvider, " + AssemblyName_Csp;
-            string MD5CryptoServiceProviderType = "System.Security.Cryptography.MD5CryptoServiceProvider," + AssemblyName_Csp;
-            string RSACryptoServiceProviderType = "System.Security.Cryptography.RSACryptoServiceProvider, " + AssemblyName_Csp;
-            string DSACryptoServiceProviderType = "System.Security.Cryptography.DSACryptoServiceProvider, " + AssemblyName_Csp;
-            string DESCryptoServiceProviderType = "System.Security.Cryptography.DESCryptoServiceProvider, " + AssemblyName_Csp;
-            string TripleDESCryptoServiceProviderType = "System.Security.Cryptography.TripleDESCryptoServiceProvider, " + AssemblyName_Csp;
-            string RC2CryptoServiceProviderType = "System.Security.Cryptography.RC2CryptoServiceProvider, " + AssemblyName_Csp;
-            string RNGCryptoServiceProviderType = "System.Security.Cryptography.RNGCryptoServiceProvider, " + AssemblyName_Csp;
-            string AesCryptoServiceProviderType = "System.Security.Cryptography.AesCryptoServiceProvider, " + AssemblyName_Csp;
+            string SHA1CryptoServiceProviderFullTypeName = "System.Security.Cryptography.SHA1CryptoServiceProvider, " + AssemblyName_Csp;
+            string MD5CryptoServiceProviderFullTypeName = "System.Security.Cryptography.MD5CryptoServiceProvider," + AssemblyName_Csp;
+            string RSACryptoServiceProviderFullTypeName = "System.Security.Cryptography.RSACryptoServiceProvider, " + AssemblyName_Csp;
+            string DSACryptoServiceProviderFullTypeName = "System.Security.Cryptography.DSACryptoServiceProvider, " + AssemblyName_Csp;
+            string DESCryptoServiceProviderFullTypeName = "System.Security.Cryptography.DESCryptoServiceProvider, " + AssemblyName_Csp;
+            string TripleDESCryptoServiceProviderFullTypeName = "System.Security.Cryptography.TripleDESCryptoServiceProvider, " + AssemblyName_Csp;
+            string RC2CryptoServiceProviderFullTypeName = "System.Security.Cryptography.RC2CryptoServiceProvider, " + AssemblyName_Csp;
+            string RNGCryptoServiceProviderFullTypeName = "System.Security.Cryptography.RNGCryptoServiceProvider, " + AssemblyName_Csp;
+            string AesCryptoServiceProviderFullTypeName = "System.Security.Cryptography.AesCryptoServiceProvider, " + AssemblyName_Csp;
 
             string ECDsaCngType = "System.Security.Cryptography.ECDsaCng, " + AssemblyName_Cng;
 
             Dictionary<string, string> nameToFullTypeName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             // Random number generator
-            nameToFullTypeName.Add("RandomNumberGenerator", RNGCryptoServiceProviderType);
-            nameToFullTypeName.Add("System.Security.Cryptography.RandomNumberGenerator", RNGCryptoServiceProviderType);
+            nameToFullTypeName.Add("RandomNumberGenerator", RNGCryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("System.Security.Cryptography.RandomNumberGenerator", RNGCryptoServiceProviderFullTypeName);
 
             // Hash functions
-            nameToFullTypeName.Add("SHA", SHA1CryptoServiceProviderType);
-            nameToFullTypeName.Add("SHA1", SHA1CryptoServiceProviderType);
-            nameToFullTypeName.Add("System.Security.Cryptography.SHA1", SHA1CryptoServiceProviderType);
-            nameToFullTypeName.Add("System.Security.Cryptography.HashAlgorithm", SHA1CryptoServiceProviderType);
+            nameToFullTypeName.Add("SHA", SHA1CryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("SHA1", SHA1CryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("System.Security.Cryptography.SHA1", SHA1CryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("System.Security.Cryptography.HashAlgorithm", SHA1CryptoServiceProviderFullTypeName);
 
-            nameToFullTypeName.Add("MD5", MD5CryptoServiceProviderType);
-            nameToFullTypeName.Add("System.Security.Cryptography.MD5", MD5CryptoServiceProviderType);
+            nameToFullTypeName.Add("MD5", MD5CryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("System.Security.Cryptography.MD5", MD5CryptoServiceProviderFullTypeName);
 
             // Asymmetric algorithms
-            nameToFullTypeName.Add("RSA", RSACryptoServiceProviderType);
-            nameToFullTypeName.Add("System.Security.Cryptography.RSA", RSACryptoServiceProviderType);
-            nameToFullTypeName.Add("System.Security.Cryptography.AsymmetricAlgorithm", RSACryptoServiceProviderType);
+            nameToFullTypeName.Add("RSA", RSACryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("System.Security.Cryptography.RSA", RSACryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("System.Security.Cryptography.AsymmetricAlgorithm", RSACryptoServiceProviderFullTypeName);
 
-            nameToFullTypeName.Add("DSA", DSACryptoServiceProviderType);
-            nameToFullTypeName.Add("System.Security.Cryptography.DSA", DSACryptoServiceProviderType);
+            nameToFullTypeName.Add("DSA", DSACryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("System.Security.Cryptography.DSA", DSACryptoServiceProviderFullTypeName);
 
             // Windows will register the public ECDsaCng type.  Non-Windows gets a special handler.
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -413,29 +495,29 @@ namespace System.Security.Cryptography
             nameToFullTypeName.Add("System.Security.Cryptography.ECDsaCng", ECDsaCngType);
 
             // Symmetric algorithms
-            nameToFullTypeName.Add("DES", DESCryptoServiceProviderType);
-            nameToFullTypeName.Add("System.Security.Cryptography.DES", DESCryptoServiceProviderType);
+            nameToFullTypeName.Add("DES", DESCryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("System.Security.Cryptography.DES", DESCryptoServiceProviderFullTypeName);
 
-            nameToFullTypeName.Add("3DES", TripleDESCryptoServiceProviderType);
-            nameToFullTypeName.Add("TripleDES", TripleDESCryptoServiceProviderType);
-            nameToFullTypeName.Add("Triple DES", TripleDESCryptoServiceProviderType);
-            nameToFullTypeName.Add("System.Security.Cryptography.TripleDES", TripleDESCryptoServiceProviderType);
+            nameToFullTypeName.Add("3DES", TripleDESCryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("TripleDES", TripleDESCryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("Triple DES", TripleDESCryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("System.Security.Cryptography.TripleDES", TripleDESCryptoServiceProviderFullTypeName);
 
-            nameToFullTypeName.Add("RC2", RC2CryptoServiceProviderType);
-            nameToFullTypeName.Add("System.Security.Cryptography.RC2", RC2CryptoServiceProviderType);
+            nameToFullTypeName.Add("RC2", RC2CryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("System.Security.Cryptography.RC2", RC2CryptoServiceProviderFullTypeName);
 
-            nameToFullTypeName.Add("AES", AesCryptoServiceProviderType);
-            nameToFullTypeName.Add("AesCryptoServiceProvider", AesCryptoServiceProviderType);
-            nameToFullTypeName.Add("System.Security.Cryptography.AesCryptoServiceProvider", AesCryptoServiceProviderType);
+            nameToFullTypeName.Add("AES", AesCryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("AesCryptoServiceProvider", AesCryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("System.Security.Cryptography.AesCryptoServiceProvider", AesCryptoServiceProviderFullTypeName);
 
             // Xml Dsig/ Enc Hash algorithms
-            nameToFullTypeName.Add("http://www.w3.org/2000/09/xmldsig#sha1", SHA1CryptoServiceProviderType);
+            nameToFullTypeName.Add("http://www.w3.org/2000/09/xmldsig#sha1", SHA1CryptoServiceProviderFullTypeName);
             // Add the other hash algorithms introduced with XML Encryption
 
             // Xml Encryption symmetric keys
-            nameToFullTypeName.Add("http://www.w3.org/2001/04/xmlenc#des-cbc", DESCryptoServiceProviderType);
-            nameToFullTypeName.Add("http://www.w3.org/2001/04/xmlenc#tripledes-cbc", TripleDESCryptoServiceProviderType);
-            nameToFullTypeName.Add("http://www.w3.org/2001/04/xmlenc#kw-tripledes", TripleDESCryptoServiceProviderType);
+            nameToFullTypeName.Add("http://www.w3.org/2001/04/xmlenc#des-cbc", DESCryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("http://www.w3.org/2001/04/xmlenc#tripledes-cbc", TripleDESCryptoServiceProviderFullTypeName);
+            nameToFullTypeName.Add("http://www.w3.org/2001/04/xmlenc#kw-tripledes", TripleDESCryptoServiceProviderFullTypeName);
 
             // X509 Extensions (custom decoders)
             // Basic Constraints OID value
@@ -556,86 +638,6 @@ namespace System.Security.Cryptography
             // Type RSAPKCS1SHA256SignatureDescriptionType = typeof(System.Security.Cryptography.RSAPKCS1SHA256SignatureDescription);
             // Type RSAPKCS1SHA384SignatureDescriptionType = typeof(System.Security.Cryptography.RSAPKCS1SHA384SignatureDescription);
             // Type RSAPKCS1SHA512SignatureDescriptionType = typeof(System.Security.Cryptography.RSAPKCS1SHA512SignatureDescription);
-        }
-
-        private static void EncodeSingleOidNum(uint value, byte[] destination, ref int index)
-        {
-            // Write directly to destination starting at index, and update index based on how many bytes written.
-            // If destination is null, just return updated index.
-            if (unchecked((int)value) < 0x80)
-            {
-                if (destination != null)
-                {
-                    destination[index++] = unchecked((byte)value);
-                }
-                else
-                {
-                    index += 1;
-                }
-            }
-            else if (value < 0x4000)
-            {
-                if (destination != null)
-                {
-                    destination[index++] = (byte)((value >> 7) | 0x80);
-                    destination[index++] = (byte)(value & 0x7f);
-                }
-                else
-                {
-                    index += 2;
-                }
-            }
-            else if (value < 0x200000)
-            {
-                if (destination != null)
-                {
-                    unchecked
-                    {
-                        destination[index++] = (byte)((value >> 14) | 0x80);
-                        destination[index++] = (byte)((value >> 7) | 0x80);
-                        destination[index++] = (byte)(value & 0x7f);
-                    }
-                }
-                else
-                {
-                    index += 3;
-                }
-            }
-            else if (value < 0x10000000)
-            {
-                if (destination != null)
-                {
-                    unchecked
-                    {
-                        destination[index++] = (byte)((value >> 21) | 0x80);
-                        destination[index++] = (byte)((value >> 14) | 0x80);
-                        destination[index++] = (byte)((value >> 7) | 0x80);
-                        destination[index++] = (byte)(value & 0x7f);
-                    }
-                }
-                else
-                {
-                    index += 4;
-                }
-            }
-            else
-            {
-                if (destination != null)
-                {
-                    unchecked
-                    {
-                        destination[index++] = (byte)((value >> 28) | 0x80);
-                        destination[index++] = (byte)((value >> 21) | 0x80);
-                        destination[index++] = (byte)((value >> 14) | 0x80);
-                        destination[index++] = (byte)((value >> 7) | 0x80);
-                        destination[index++] = (byte)(value & 0x7f);
-                    }
-                }
-                else
-                {
-                    index += 5;
-                }
-            }
         }
     }
 }
