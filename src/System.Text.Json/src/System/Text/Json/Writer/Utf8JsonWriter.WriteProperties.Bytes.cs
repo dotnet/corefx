@@ -14,7 +14,7 @@ namespace System.Text.Json
         /// Writes the pre-encoded property name and raw bytes value (as a base 64 encoded JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
-        /// <param name="bytes">The Base64-encoded data to write.</param>
+        /// <param name="bytes">The binary data to write as Base64-encoded text.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
@@ -37,7 +37,7 @@ namespace System.Text.Json
         /// Writes the property name and raw bytes value (as a Base64 encoded JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The name of the property to write.</param>
-        /// <param name="bytes">The Base64-encoded data to write.</param>
+        /// <param name="bytes">The binary data to write as Base64-encoded text.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -57,7 +57,7 @@ namespace System.Text.Json
         /// Writes the property name and raw bytes value (as a base 64 encoded JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The name of the property to write.</param>
-        /// <param name="bytes">The Base64-encoded data to write.</param>
+        /// <param name="bytes">The binary data to write as Base64-encoded text.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -81,7 +81,7 @@ namespace System.Text.Json
         /// Writes the property name and raw bytes value (as a base 64 encoded JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="utf8PropertyName">The UTF-8 encoded name of the property to write.</param>
-        /// <param name="bytes">The Base64-encoded data to write.</param>
+        /// <param name="bytes">The binary data to write as Base64-encoded text.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
