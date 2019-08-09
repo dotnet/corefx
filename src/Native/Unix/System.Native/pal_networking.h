@@ -53,6 +53,8 @@ typedef enum
  *
  * NOTE: these values are taken from System.Net.AddressFamily. If you add
  *       new entries, be sure that the values are chosen accordingly.
+ *       Unix specific value have distinct offset to avoid conflict with
+ *       Windows values.
  */
 typedef enum
 {

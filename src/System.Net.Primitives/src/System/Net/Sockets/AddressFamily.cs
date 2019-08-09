@@ -38,6 +38,9 @@ namespace System.Net.Sockets
         Irda = 26,              // IrDA
         NetworkDesigners = 28,  // Network Designers OSI & gateway enabled protocols
         Max = 29,               // Max
+        // Unix specific values are past Uint16.MaxValue to avoid conflicts with Windows values.
+        // On Windows we pass values straight to OS and if we add new protocol supported by Windows,
+        // we should use actual OS value.
         Netlink = 65536,        // Netlink protocol
         Packet = 65537,         // Linux Packet
         ControllerAreaNetwork = 65538, // Controller Area Network automotive bus protocol
