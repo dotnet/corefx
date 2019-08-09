@@ -20,6 +20,9 @@ namespace System.Text.Json
         ///  Initializes a new instance of the <see cref="JsonString"/> class representing a specified value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided value is null.
+        /// </exception>
         public JsonString(string value) => Value = value;
 
         /// <summary>
@@ -31,6 +34,9 @@ namespace System.Text.Json
         /// <summary>
         ///   Gets or sets the text value represented by the instance.
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided value is null.
+        /// </exception>
         public string Value
         {
             get => _value;
@@ -86,14 +92,16 @@ namespace System.Text.Json
         /// </returns>
         public static bool operator ==(JsonString left, JsonString right)
         {
+            // Test "right" first to allow branch elimination when inlined for null checks (== null)
+            // so it can become a simple test
             if (right is null)
             {
+                // return true/false not the test result https://github.com/dotnet/coreclr/issues/914
                 return (left is null) ? true : false;
             }
 
             return right.Equals(left);
         }
-
 
         /// <summary>
         ///   Compares values of two JSON strings.
