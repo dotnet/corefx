@@ -239,6 +239,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     X509Chain chain = new X509Chain();
                     Assert.False(chain.Build(ee));
                     Assert.Equal(1, chain.ChainElements.Count);
+                    Assert.Contains(chain.ChainStatus, (status) => status.Status.HasFlag(X509ChainStatusFlags.OfflineRevocation));
                 }
             }
         }
