@@ -76,18 +76,23 @@ namespace System.Net.Primitives.Functional.Tests
         }
 
         [Theory]
-        [InlineData((AddressFamily)123456, -1)]
-        [InlineData((AddressFamily)123456, 16)]
+        [InlineData((AddressFamily)65539, -1)]
+        [InlineData((AddressFamily)65539, 16)]
+        [InlineData((AddressFamily)1_000_000, -1)]
         public static void ToString_UnknownFamily_Throws(AddressFamily family, int size)
         {
+            // Values above last know value should throw.
             Assert.Throws<PlatformNotSupportedException>(() => size >= 0 ? new SocketAddress(family, size) : new SocketAddress(family));
         }
 
-        [Fact]
+        [Theory]
+        [InlineData((AddressFamily)125)]
+        [InlineData((AddressFamily)65535)]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public static void ToString_LegacyUnknownFamily_Success()
+        public static void ToString_LegacyUnknownFamily_Success(AddressFamily family)
         {
-            var sa = new SocketAddress((AddressFamily)125);
+            // For legacy reasons, unknown values in ushort range don't throw on Windows.
+            var sa = new SocketAddress(family);
             Assert.NotNull(sa.ToString());
         }
 
