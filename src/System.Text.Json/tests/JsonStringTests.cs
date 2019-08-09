@@ -47,17 +47,35 @@ namespace System.Text.Json.Tests
             Assert.Equal(value, implicitlyInitializiedJsonString.Value);
 
             // Casted to span:            
+#if BUILDING_INBOX_LIBRARY
             ReadOnlySpan<char> spanValue = value;
             Assert.Equal(value, new JsonString(spanValue).Value);
+#endif
         }
 
         [Fact]
         public static void TestNulls()
         {
+#if BUILDING_INBOX_LIBRARY
             Assert.Throws<ArgumentNullException>(() => new JsonString(null));
+#endif
             Assert.Throws<ArgumentNullException>(() => new JsonString().Value = null);
         }
 
+#if !BUILDING_INBOX_LIBRARY
+        [Fact]
+        public static void TestReadonlySpan()
+        {
+            var spanValue = new ReadOnlySpan<char>(new char[] { 's', 'p', 'a', 'n'});
+            Assert.Equal("span", new JsonString(spanValue).Value);
+
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                ReadOnlySpan<char> spanValue = null;
+                var jsonString = new JsonString(spanValue);
+            });
+        }
+#endif
         [Fact]
         public static void TestChangingValue()
         {
