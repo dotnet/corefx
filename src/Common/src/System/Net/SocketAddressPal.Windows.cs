@@ -18,7 +18,7 @@ namespace System.Net
 
         public static unsafe void SetAddressFamily(byte[] buffer, AddressFamily family)
         {
-            if ((int)(family) > UInt16.MaxValue)
+            if ((int)(family) > ushort.MaxValue)
             {
                 // For legacy values family maps directly to Winsock value.
                 // Other values will need new mapping if/when supported.
