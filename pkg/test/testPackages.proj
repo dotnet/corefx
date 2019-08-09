@@ -147,8 +147,7 @@
   <Target Name="CopyProducedPackages">
     <!-- Copy over package local cache to our helix runtime path -->
     <ItemGroup>
-     <_localPackages Include="$(ArtifactsShippingPackagesDir)*.nupkg"/>
-     <_localPackages Include="$(ArtifactsNonShippingPackagesDir)*.nupkg"/>
+     <_localPackages Include="$(PackageOutputPath)*.nupkg" />
     </ItemGroup>
 
     <Copy SourceFiles="@(_localPackages)"
