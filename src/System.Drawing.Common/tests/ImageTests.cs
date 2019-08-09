@@ -181,7 +181,7 @@ namespace System.Drawing.Tests
         [MemberData(nameof(GetEncoderParameterList_ReturnsExpected_TestData))]
         public void GetEncoderParameterList_ReturnsExpected(ImageFormat format, Guid[] expectedParameters, bool skipOnNetFx)
         {
-            if (skipOnNetfx && PlatformDetection.IsFullFramework)
+            if (skipOnNetFx && PlatformDetection.IsFullFramework)
             {
                 return;
             }
