@@ -7,6 +7,12 @@
 
 namespace System.Text.Json
 {
+    public enum DuplicatePropertyNameHandling
+    {
+        Replace = 0,
+        Ignore = 1,
+        Error = 2,
+    }
     public sealed partial class JsonBoolean : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonBoolean>
     {
         public JsonBoolean() { }
@@ -259,6 +265,43 @@ namespace System.Text.Json
         public bool TryGetUInt32(out uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public bool TryGetUInt64(out ulong value) { throw null; }
+    }
+    public sealed partial class JsonObject : System.Text.Json.JsonNode, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>>, System.Collections.IEnumerable
+    {
+        public JsonObject(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties, System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { }
+        public JsonObject(System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { }
+        public System.Text.Json.JsonNode this[string key] { get { throw null; } set { } }
+        public System.Collections.Generic.ICollection<string> PropertyNames { get { throw null; } }
+        public System.Collections.Generic.ICollection<System.Text.Json.JsonNode> Values { get { throw null; } }
+        public void Add(System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode> jsonProperty) { }
+        public void Add(string propertyName, bool propertyValue) { }
+        public void Add(string propertyName, byte propertyValue) { }
+        public void Add(string propertyName, decimal propertyValue) { }
+        public void Add(string propertyName, double propertyValue) { }
+        public void Add(string propertyName, short propertyValue) { }
+        public void Add(string propertyName, int propertyValue) { }
+        public void Add(string propertyName, long propertyValue) { }
+        [System.CLSCompliantAttribute(false)]
+        public void Add(string propertyName, sbyte propertyValue) { }
+        public void Add(string propertyName, float propertyValue) { }
+        public void Add(string propertyName, string propertyValue) { }
+        public void Add(string propertyName, System.Text.Json.JsonNode propertyValue) { }
+        [System.CLSCompliantAttribute(false)]
+        public void Add(string propertyName, ushort propertyValue) { }
+        [System.CLSCompliantAttribute(false)]
+        public void Add(string propertyName, uint propertyValue) { }
+        [System.CLSCompliantAttribute(false)]
+        public void Add(string propertyName, ulong propertyValue) { }
+        public void AddRange(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties) { }
+        public bool ContainsProperty(string propertyName) { throw null; }
+        public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> GetEnumerator() { throw null; }
+        public System.Text.Json.JsonObject GetJsonObjectProperty(string propertyName) { throw null; }
+        public System.Text.Json.JsonNode GetProperty(string propertyName) { throw null; }
+        public void ModifyPropertyName(string oldName, string newName) { }
+        public bool Remove(string propertyName) { throw null; }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
+        public bool TryGetJsonObjectProperty(string propertyName, out System.Text.Json.JsonObject jsonObject) { throw null; }
+        public bool TryGetProperty(string propertyName, out System.Text.Json.JsonNode jsonNode) { throw null; }
     }
     public readonly partial struct JsonProperty
     {

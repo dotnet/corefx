@@ -429,4 +429,13 @@
   <data name="EmptyStringToInitializeNumber" xml:space="preserve">
     <value>Expected a number, but instead got empty string.</value>
   </data>
+  <data name="JsonObjectDuplicateKey" xml:space="preserve">
+    <value>Provided property name already exists.</value>
+  </data>
+  <data name="PropertyNotFound" xml:space="preserve">
+    <value>Property with specified name not found</value>
+  </data>
+  <data name="PropertyTypeMismatch" xml:space="preserve">
+    <value>Property with specified name has a diffent type than expected</value>
+  </data>
 </root>
