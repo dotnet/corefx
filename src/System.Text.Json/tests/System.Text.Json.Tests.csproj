@@ -21,8 +21,6 @@
     <Compile Include="JsonElementWriteTests.cs" />
     <Compile Include="JsonEncodedTextTests.cs" />
     <Compile Include="JsonGuidTestData.cs" />
-    <Compile Include="JsonNumberTestData.cs" />
-    <Compile Include="JsonObjectTests.cs" />
     <Compile Include="JsonPropertyTests.cs" />
     <Compile Include="JsonReaderStateAndOptionsTests.cs" />
     <Compile Include="JsonTestHelper.cs" />
@@ -112,14 +110,19 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="JsonNumberTests.cs" />
-    <Compile Include="JsonObjectTests.TestData.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="JsonBooleanTests.cs" />
+    <Compile Include="JsonNumberTests.cs" />
+    <Compile Include="JsonNumberTestData.cs" />
+    <Compile Include="JsonObjectTests.cs" />
+    <Compile Include="JsonObjectTests.TestData.cs" />
     <Compile Include="JsonStringTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="NewtonsoftTests\ILLinkTrim.xml">
+      <LogicalName>$(AssemblyName).xml</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
