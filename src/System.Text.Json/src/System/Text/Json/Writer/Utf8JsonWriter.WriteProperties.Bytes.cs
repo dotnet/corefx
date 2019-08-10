@@ -34,7 +34,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Writes the property name and raw bytes value (base 64 encoded JSON string) as part of a name/value pair of a JSON object.
+        /// Writes the property name and raw bytes value (as a base 64 encoded JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <param name="bytes">The binary data to write as a base 64 encoded text.</param>
