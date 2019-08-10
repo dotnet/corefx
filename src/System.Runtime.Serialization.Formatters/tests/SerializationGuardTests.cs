@@ -66,7 +66,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         private static void TryPayload(object payload)
-        {   
+        {
             MemoryStream ms = new MemoryStream();
             BinaryFormatter writer = new BinaryFormatter();
             writer.Serialize(ms, payload);
