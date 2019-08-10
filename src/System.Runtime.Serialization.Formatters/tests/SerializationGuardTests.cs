@@ -66,15 +66,15 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         private static void TryPayload(object payload)
-        {
+        {   
             MemoryStream ms = new MemoryStream();
             BinaryFormatter writer = new BinaryFormatter();
             writer.Serialize(ms, payload);
             ms.Position = 0;
 
             BinaryFormatter reader = new BinaryFormatter();
-            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => reader.Deserialize(ms));
-            Assert.IsAssignableFrom<SerializationException>(tie.InnerException);
+            SerializationException tie = Assert.Throws<SerializationException>(() => reader.Deserialize(ms));
+            Assert.IsAssignableFrom<TargetInvocationException>(tie.InnerException);
         }
     }
 
