@@ -1150,6 +1150,7 @@ namespace System.Drawing.Tests
         }
 
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
+        [ActiveIssue(40224, TestPlatforms.Windows)]
         [MemberData(nameof(LockBits_TestData))]
         public void LockBits_Invoke_Success(Bitmap bitmap, Rectangle rectangle, ImageLockMode lockMode, PixelFormat pixelFormat, int expectedStride, int expectedReserved)
         {
