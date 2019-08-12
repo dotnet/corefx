@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
@@ -24,7 +27,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     }
                 );
 
-
                 RunCommands(destinationConnection,
                     new[]
                     {
@@ -32,7 +34,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         "create table dbo.__SqlBulkCopyBug_Destination (floatVal decimal(18,10) null,realVal decimal(18,10) null)"
                     }
                 );
-
 
                 Exception error = null;
                 try
@@ -67,7 +68,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
 
                 Assert.Null(error);
-
             }
         }
 
