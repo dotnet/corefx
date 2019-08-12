@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
@@ -24,8 +25,9 @@ namespace System.Text.Json
         // The properties on a POCO keyed on property name.
         public volatile Dictionary<string, JsonPropertyInfo> PropertyCache;
 
-        // Cache of properties by first JSON ordering. Use an array for highest performance.
-        private volatile PropertyRef[] _propertyRefsSorted = null;
+        // Cache of properties by first JSON ordering. Use an array (instead of List<T>) for highest performance.
+        private PropertyRef[] _propertyRefsSorted = null;
+        private object _cacheLock = new object();
 
         public delegate object ConstructorDelegate();
         public ConstructorDelegate CreateObject { get; private set; }
@@ -70,22 +72,31 @@ namespace System.Text.Json
 
         public void UpdateSortedPropertyCache(ref ReadStackFrame frame)
         {
-            // Check if we are trying to build the sorted cache.
-            if (frame.PropertyRefCache == null)
-            {
-                return;
-            }
+            Debug.Assert(frame.PropertyRefCache != null);
 
-            List<PropertyRef> newList;
-            if (_propertyRefsSorted != null)
+            lock (_cacheLock)
             {
-                newList = new List<PropertyRef>(_propertyRefsSorted);
-                newList.AddRange(frame.PropertyRefCache);
-                _propertyRefsSorted = newList.ToArray();
-            }
-            else
-            {
-                _propertyRefsSorted = frame.PropertyRefCache.ToArray();
+                if (_propertyRefsSorted != null)
+                {
+                    List<PropertyRef> replacementList = new List<PropertyRef>(_propertyRefsSorted);
+                    Debug.Assert(replacementList.Count <= PropertyNameCountCacheThreshold);
+
+                    // Verify replacementList will not become too large. This could occur in race conditions.
+                    List<PropertyRef> listToAppend = frame.PropertyRefCache;
+                    while (replacementList.Count + listToAppend.Count > PropertyNameCountCacheThreshold)
+                    {
+                        listToAppend.RemoveAt(listToAppend.Count - 1);
+                    }
+
+                    // Add the new items; we don't check for duplicates so in a race condition duplicates are possible
+                    // however that is tolerated during property lookup.
+                    replacementList.AddRange(listToAppend);
+                    _propertyRefsSorted = replacementList.ToArray();
+                }
+                else
+                {
+                    _propertyRefsSorted = frame.PropertyRefCache.ToArray();
+                }
             }
 
             frame.PropertyRefCache = null;
@@ -255,7 +266,7 @@ namespace System.Text.Json
                 // First try sorted lookup.
                 int propertyIndex = frame.PropertyIndex;
 
-                // This .Length is consistent no matter what json data intialized _propertyRefsSorted.
+                // Cache the .Length in case it changes by another thread. It may become longer but never shorter (thus IndexOutOfRangeException avoided).
                 int count = _propertyRefsSorted.Length;
                 if (count != 0)
                 {
@@ -284,14 +295,13 @@ namespace System.Text.Json
                 }
             }
 
-            // Try the main list which has all of the properties in a consistent order.
-            // We could get here even when hasPropertyCache==true if there is a race condition with different json
-            // property ordering and _propertyRefsSorted is re-assigned while in the loop above.
+            // No cached item was found. Try the main list which has all of the properties.
 
             string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
             if (PropertyCache.TryGetValue(stringPropertyName, out info))
             {
-                // For performance, only add to cache up to a threshold and then just use the dictionary.
+                // Check if we should add this to the cache.
+                // Only cache up to a threshold length and then just use the dictionary when an item is not found in the cache.
                 int count;
                 if (_propertyRefsSorted != null)
                 {
@@ -305,6 +315,7 @@ namespace System.Text.Json
                 // Do a quick check for the stable (after warm-up) case.
                 if (count < PropertyNameCountCacheThreshold)
                 {
+                    // Do a slower check for the warm-up case.
                     if (frame.PropertyRefCache != null)
                     {
                         count += frame.PropertyRefCache.Count;
