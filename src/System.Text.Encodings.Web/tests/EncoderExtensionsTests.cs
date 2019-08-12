@@ -2,13 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Framework.WebEncoders;
+using newHtmlEncoder = System.Text.Encodings.Web.HtmlEncoder;
+using newUrlEncoder = System.Text.Encodings.Web.UrlEncoder;
 using System;
 using System.IO;
 using Xunit;
 using System.Text.Unicode;
 
-namespace System.Text.Encodings.Web
+namespace System.Text.Encodings.Web.Tests
 {
     public class EncoderExtensionsTests
     {
@@ -22,7 +23,7 @@ namespace System.Text.Encodings.Web
         public void HtmlEncode_PositiveTestCase()
         {
             // Arrange
-            HtmlEncoder encoder = HtmlEncoder.Create(UnicodeRanges.All);
+            newHtmlEncoder encoder = newHtmlEncoder.Create(UnicodeRanges.All);
             StringWriter writer = new StringWriter();
 
             // Act
@@ -37,7 +38,7 @@ namespace System.Text.Encodings.Web
         {
             // Arrange
             TextEncoderSettings settings = new TextEncoderSettings(UnicodeRanges.All);
-            HtmlEncoder encoder = HtmlEncoder.Create(settings);
+            newHtmlEncoder encoder = newHtmlEncoder.Create(settings);
             StringWriter writer = new StringWriter();
 
             // Act
@@ -50,20 +51,20 @@ namespace System.Text.Encodings.Web
         [Fact]
         public void HtmlEncode_CreateNullRanges()
         {
-            Assert.Throws<ArgumentNullException>("allowedRanges", () => HtmlEncoder.Create(default(UnicodeRange[])));
+            Assert.Throws<ArgumentNullException>("allowedRanges", () => newHtmlEncoder.Create(default(UnicodeRange[])));
         }
 
         [Fact]
         public void HtmlEncode_CreateNullSettings()
         {
-            Assert.Throws<ArgumentNullException>("settings", () => HtmlEncoder.Create(default(TextEncoderSettings)));
+            Assert.Throws<ArgumentNullException>("settings", () => newHtmlEncoder.Create(default(TextEncoderSettings)));
         }
 
 
         [Fact]
         public unsafe void TryEncodeUnicodeScalar_Null_Buffer()
         {
-            Assert.Throws<ArgumentNullException>("buffer", () => HtmlEncoder.Default.TryEncodeUnicodeScalar(2, null, 1, out int _));
+            Assert.Throws<ArgumentNullException>("buffer", () => newHtmlEncoder.Default.TryEncodeUnicodeScalar(2, null, 1, out int _));
         }
 
         [Fact]
@@ -71,7 +72,7 @@ namespace System.Text.Encodings.Web
         {
             char* buffer = stackalloc char[1];
             int numberWritten;
-            Assert.False(HtmlEncoder.Default.TryEncodeUnicodeScalar(0x10000, buffer, 1, out numberWritten));
+            Assert.False(newHtmlEncoder.Default.TryEncodeUnicodeScalar(0x10000, buffer, 1, out numberWritten));
             Assert.Equal(0, numberWritten);
         }
 
@@ -105,7 +106,7 @@ namespace System.Text.Encodings.Web
         public void UrlEncode_PositiveTestCase()
         {
             // Arrange
-            UrlEncoder encoder = UrlEncoder.Create(UnicodeRanges.All);
+            newUrlEncoder encoder = newUrlEncoder.Create(UnicodeRanges.All);
             StringWriter writer = new StringWriter();
 
             // Act

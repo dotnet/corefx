@@ -10,7 +10,7 @@ using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     /// <summary>
     /// A class which can perform HTML encoding given an allow list of characters which

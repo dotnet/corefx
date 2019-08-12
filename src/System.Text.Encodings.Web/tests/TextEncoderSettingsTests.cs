@@ -11,7 +11,7 @@ using System.Text.Internal;
 using System.Text.Unicode;
 using Xunit;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     internal static class TextEncoderSettingsExtensions
     {

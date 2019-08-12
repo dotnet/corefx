@@ -11,7 +11,7 @@ using System.Text.Encodings.Web;
 using System.Text.Internal;
 using System.Text.Unicode;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     internal unsafe abstract class UnicodeEncoderBase
     {
