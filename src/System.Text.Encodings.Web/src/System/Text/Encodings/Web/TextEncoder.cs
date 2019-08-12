@@ -819,7 +819,7 @@ namespace System.Text.Encodings.Web
 
         private static void ThrowArgumentException_MaxOutputCharsPerInputChar()
         {
-            throw new ArgumentException(SR.ArgumentEncoderDoesNotImplementMaxOutputCharsPerInputChar);
+            throw new ArgumentException(SR.TextEncoderDoesNotImplementMaxOutputCharsPerInputChar);
         }
     }
 }
