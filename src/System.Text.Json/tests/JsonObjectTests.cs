@@ -255,12 +255,12 @@ namespace System.Text.Json.Tests
             };
 
             string prevId = "";
-            foreach ((string id, JsonNode employee) in employees)
+            foreach (KeyValuePair <string,JsonNode> employee in employees)
             {
-                Assert.NotEqual(prevId, id);
-                prevId = id;
+                Assert.NotEqual(prevId, employee.Key);
+                prevId = employee.Key;
 
-                Assert.IsType<JsonObject>(employee);
+                Assert.IsType<JsonObject>(employee.Value);
             }
         }
 
@@ -274,12 +274,12 @@ namespace System.Text.Json.Tests
             }
 
             string prevId = "";
-            foreach ((string id, JsonNode employee) in employees)
+            foreach (KeyValuePair<string, JsonNode> employee in employees)
             {
-                Assert.NotEqual(prevId, id);
-                prevId = id;
+                Assert.NotEqual(prevId, employee.Key);
+                prevId = employee.Key;
 
-                Assert.IsType<JsonObject>(employee);
+                Assert.IsType<JsonObject>(employee.Value);
             }
         }
 
@@ -289,12 +289,12 @@ namespace System.Text.Json.Tests
             var employees = new JsonObject(EmployeesDatabase.GetTenBestEmployees());
 
             string prevId = "";
-            foreach ((string id, JsonNode employee) in employees)
+            foreach (KeyValuePair<string, JsonNode> employee in employees)
             {
-                Assert.NotEqual(prevId, id);
-                prevId = id;
+                Assert.NotEqual(prevId, employee.Key);
+                prevId = employee.Key;
 
-                Assert.IsType<JsonObject>(employee);
+                Assert.IsType<JsonObject>(employee.Value);
             }
         }
 
@@ -305,12 +305,12 @@ namespace System.Text.Json.Tests
             employees.AddRange(EmployeesDatabase.GetTenBestEmployees());
 
             string prevId = "";
-            foreach ((string id, JsonNode employee) in employees)
+            foreach (KeyValuePair<string, JsonNode> employee in employees)
             {
-                Assert.NotEqual(prevId, id);
-                prevId = id;
+                Assert.NotEqual(prevId, employee.Key);
+                prevId = employee.Key;
 
-                Assert.IsType<JsonObject>(employee);
+                Assert.IsType<JsonObject>(employee.Value);
             }
         }
 
