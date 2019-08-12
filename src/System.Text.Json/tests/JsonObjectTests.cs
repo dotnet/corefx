@@ -60,6 +60,10 @@ namespace System.Text.Json.Tests
             string expectedString = expected == ExpectedValue.Previous ? previousValue : newValue;
 
             Assert.Equal(expectedString, (jsonObject["property"] as JsonString).Value);
+
+            // with indexer, property should change no matter which duplicates handling option is chosen:
+            jsonObject["property"] = (JsonString)"indexer value";
+            Assert.Equal("indexer value", (JsonString)jsonObject["property"]);
         }
 
 
@@ -76,6 +80,10 @@ namespace System.Text.Json.Tests
         public static void TestDuplicatesError()
         {
             Assert.Throws<ArgumentException>(() => TestDuplicates(DuplicatePropertyNameHandling.Error));
+
+            JsonObject jsonObject = new JsonObject(DuplicatePropertyNameHandling.Error) { { "property", "" } };
+            jsonObject["property"] = (JsonString) "indexer value";
+            Assert.Equal("indexer value", (JsonString) jsonObject["property"]);
         }
 
         [Fact]
@@ -586,6 +594,44 @@ namespace System.Text.Json.Tests
 
             Assert.False(jsonObject.TryGetJsonObjectPropertyValue("other", out property));
             Assert.Null(property);
+        }
+
+        [Fact]
+        public static void TestArgumentNullValidation()
+        {
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, ""));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, new JsonObject()));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, (byte)17));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, (short)17));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, 17));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, (long)17));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, 3.14f));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, 3.14));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, decimal.One));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, (sbyte)17));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, (ushort)17));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, (uint)17));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(null, (ulong)17));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Add(new KeyValuePair<string, JsonNode>(null, new JsonObject())));
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                var property = new KeyValuePair<string, JsonNode>(null, new JsonObject());
+                new JsonObject().AddRange(new List<KeyValuePair<string, JsonNode>>() { property });
+            });
+            Assert.Throws<ArgumentNullException>(() => new JsonObject()[null] = new JsonString());
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                var jsonObject = new JsonObject();
+                JsonNode x = jsonObject[null];
+            });
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().Remove(null));
+            Assert.Throws<ArgumentNullException>(() => new JsonObject().ContainsProperty(null));
+        }
+
+        [Fact]
+        public static void TestDuplicatesEnumOutOfRange()
+        {
+            Assert.Throws<ArgumentException>(() => new JsonObject((DuplicatePropertyNameHandling)123));
         }
     }
 }
