@@ -125,7 +125,6 @@
     <Rule Id="SA1202" Action="None" /> <!-- Elements should be ordered by access -->
     <Rule Id="SA1203" Action="None" /> <!-- Constants should appear before fields -->
     <Rule Id="SA1204" Action="None" /> <!-- Static elements should appear before instance elements -->
-    <Rule Id="SA1205" Action="None" /> <!-- Partial elements should declare an access modifier -->
     <Rule Id="SA1208" Action="None" /> <!-- Using directive ordering -->
     <Rule Id="SA1209" Action="None" /> <!-- Using alias directives should be placed after all using namespace directives -->
     <Rule Id="SA1210" Action="None" /> <!-- Using directives should be ordered alphabetically by the namespaces -->

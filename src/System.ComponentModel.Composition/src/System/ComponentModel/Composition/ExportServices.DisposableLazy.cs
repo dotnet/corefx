@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace System.ComponentModel.Composition
 {
-    partial class ExportServices
+    internal partial class ExportServices
     {
         private sealed class DisposableLazy<T, TMetadataView> : Lazy<T, TMetadataView>, IDisposable
         {
