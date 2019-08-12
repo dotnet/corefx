@@ -362,7 +362,7 @@ namespace Microsoft.Reflection
 #if ES_BUILD_STANDALONE
 internal static partial class Interop
 {
-    [SuppressUnmanagedCodeSecurityAttribute()]
+    [SuppressUnmanagedCodeSecurityAttribute]
     internal static partial class Kernel32
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
