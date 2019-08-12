@@ -22,7 +22,7 @@ namespace System.Net
             {
                 // For legacy values family maps directly to Winsock value.
                 // Other values will need mapping if/when supported.
-                // Currently, that is Netlink, Packet and ControllerAreaNetwork, neither of them supported on Windows.
+                // Currently, that is Packet and ControllerAreaNetwork, neither of them supported on Windows.
                 throw new PlatformNotSupportedException();
             }
 
