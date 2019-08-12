@@ -95,7 +95,6 @@ namespace HttpStress
                 // Set up how each request should be handled by the server.
                 .Configure(app =>
                 {
-                    var head = new[] { "HEAD" };
                     app.UseRouting();
                     app.UseEndpoints(MapRoutes);
                 });
@@ -136,8 +135,7 @@ namespace HttpStress
             {
                 (string name, StringValues values)[] headersToEcho =
                         context.Request.Headers
-                        // filter the pseudo-headers surfaced by Kestrel
-                        .Where(h => !h.Key.StartsWith(':'))
+                        .Where(h => h.Key.StartsWith("header-"))
                         // kestrel does not seem to be splitting comma separated header values, handle here
                         .Select(h => (h.Key, new StringValues(h.Value.SelectMany(v => v.Split(',')).Select(x => x.Trim()).ToArray())))
                         .ToArray();
@@ -151,6 +149,10 @@ namespace HttpStress
 
                 if (context.Response.SupportsTrailers())
                 {
+                    // send back a checksum of all the echoed headers
+                    uint checksum = Crc32Helpers.CalculateHeaderChecksum(headersToEcho);
+                    context.Response.AppendTrailer("crc32", checksum.ToString());
+
                     // just add variations of already echoed headers as trailers
                     foreach ((string name, StringValues values) in headersToEcho)
                     {
@@ -196,9 +198,16 @@ namespace HttpStress
             {
                 // Echos back the requested content in a full duplex manner, but one byte at a time.
                 var buffer = new byte[1];
+                uint hashAcc = 0;
                 while ((await context.Request.Body.ReadAsync(buffer)) != 0)
                 {
+                    Crc32Helpers.Append(buffer, ref hashAcc);
                     await context.Response.Body.WriteAsync(buffer);
+                }
+
+                if (context.Response.SupportsTrailers())
+                {
+                    context.Response.AppendTrailer("crc32", hashAcc.ToString());
                 }
             });
             endpoints.MapMethods("/", head, context =>

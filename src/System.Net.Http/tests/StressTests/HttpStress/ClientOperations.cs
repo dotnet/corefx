@@ -137,7 +137,7 @@ namespace HttpStress
 
             for (int i = 0; i < numHeaders; i++)
             {
-                string name = $"Header-{i}";
+                string name = $"header-{i}";
                 IEnumerable<string> values = Enumerable.Range(0, _random.Next(0, 5)).Select(_ => HttpUtility.UrlEncode(GetRandomString(0, 30, alphaNumericOnly: false)));
                 headers.Add(name, values);
             }
@@ -201,6 +201,17 @@ namespace HttpStress
 
                     ValidateHttpVersion(res, ctx.HttpVersion);
                     ValidateStatusCode(res);
+
+                    // check server-side header checksum has expected value
+                    if (res.TrailingHeaders.TryGetValues("crc32", out IEnumerable<string> crcValues) &&
+                        uint.TryParse(crcValues.First(), out uint hash))
+                    {
+                        uint expectedHash = Crc32Helpers.CalculateHeaderChecksum(req.Headers.Select(x => (x.Key, x.Value)));
+                        if (expectedHash != hash)
+                        {
+                            throw new Exception($"Server reported unexpected header hash.");
+                        }
+                    }
 
                     // Validate that request headers are being echoed
                     foreach (KeyValuePair<string, IEnumerable<string>> reqHeader in req.Headers)
@@ -318,13 +329,25 @@ namespace HttpStress
                 async ctx =>
                 {
                     string content = ctx.GetRandomString(0, ctx.MaxContentLength);
+                    byte[] byteContent = Encoding.ASCII.GetBytes(content);
+                    uint checksum = 0;
+                    Crc32Helpers.Append(byteContent, ref checksum);
 
-                    using var req = new HttpRequestMessage(HttpMethod.Post, "/duplexSlow") { Content = new ByteAtATimeNoLengthContent(Encoding.ASCII.GetBytes(content)) };
+                    using var req = new HttpRequestMessage(HttpMethod.Post, "/duplexSlow") { Content = new ByteAtATimeNoLengthContent(byteContent) };
                     using HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
 
                     ValidateHttpVersion(m, ctx.HttpVersion);
                     ValidateStatusCode(m);
-                    ValidateContent(content, await m.Content.ReadAsStringAsync());
+                    var response = await m.Content.ReadAsStringAsync();
+
+                    if (m.TrailingHeaders.TryGetValues("crc32", out IEnumerable<string> values) && 
+                        uint.TryParse(values.First(), out uint serverChecksum) &&
+                        serverChecksum != checksum)
+                    {
+                        throw new Exception($"Server reported unexpected checksum.");
+                    }
+
+                    ValidateContent(content, response);
                 }),
 
                 ("POST Duplex Dispose",
