@@ -242,6 +242,7 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 ## Open questions
 * Do we want to add recursive equals on `JsonArray` and `JsonObject`?
 * Do we want to make `JsonNode` derived types implement `IComparable` (which ones)?
+* Do we want `JsonObject` to implement `IDictionary` and `JsonArray` to implement `IList` (currently JsonArray does, but JsonObject not)? 
 * Would escaped characters be supported for creating `JsonNumber` from string? 
 * Is the API for `JsonNode` and `JsonElement` interactions sufficient? 
 * Do we want to support duplicate and order preservation/control when adding/removing values in `JsonArray`/`JsonObject`?
