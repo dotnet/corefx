@@ -871,7 +871,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Type windowsRuntimeMarshalType = SymbolTable.WindowsRuntimeMarshalType;
             SymbolTable.PopulateSymbolTableWithName(methodName, new List<Type> { evtType }, windowsRuntimeMarshalType);
             ExprClass marshalClass = ExprFactory.CreateClass(SymbolTable.GetCTypeFromType(windowsRuntimeMarshalType));
-            ExprMemberGroup addEventGrp = CreateMemberGroupExpr(methodName, new [] { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
+            ExprMemberGroup addEventGrp = CreateMemberGroupExpr(methodName, new[] { evtType }, marshalClass, SYMKIND.SK_MethodSymbol);
             return _binder.BindMethodGroupToArguments(
                 BindingFlag.BIND_RVALUEREQUIRED | BindingFlag.BIND_STMTEXPRONLY,
                 addEventGrp,
