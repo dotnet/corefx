@@ -14,7 +14,7 @@ namespace System.Text.Json.Tests
         {
             var jsonObject = new JsonObject();
             Assert.Equal(0, jsonObject.PropertyNames.Count);
-            Assert.Equal(0, jsonObject.Values.Count);
+            Assert.Equal(0, jsonObject.PropertyValues.Count);
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace System.Text.Json.Tests
             Assert.True((jsonObject["boolean"] as JsonBoolean).Value);
         }
 
-        private enum ExpectedValue
+        public enum ExpectedValue
         {
             Previous,
             New
@@ -57,28 +57,19 @@ namespace System.Text.Json.Tests
             jsonObject.Add("property", new JsonString(newValue));
             Assert.IsType<JsonString>(jsonObject["property"]);
 
-            var expectedString = expected == ExpectedValue.Previous ? previousValue : newValue;
+            string expectedString = expected == ExpectedValue.Previous ? previousValue : newValue;
 
             Assert.Equal(expectedString, (jsonObject["property"] as JsonString).Value);
         }
 
-        [Fact]
-        public static void TestDuplicatesReplace()
-        {
-            TestDuplicates(DuplicatePropertyNameHandling.Replace, ExpectedValue.New);
-        }
 
-        [Fact]
-        public static void TestDuplicatesReplaceDefault()
+        [Theory]
+        [InlineData(DuplicatePropertyNameHandling.Replace, ExpectedValue.New)]
+        [InlineData(DuplicatePropertyNameHandling.Replace, ExpectedValue.New, false)]
+        [InlineData(DuplicatePropertyNameHandling.Ignore, ExpectedValue.Previous)]
+        public static void TestDuplicatesReplaceAndIgnore(DuplicatePropertyNameHandling duplicatePropertyNameHandling, ExpectedValue expected = default, bool valueConstructor = true)
         {
-            TestDuplicates(DuplicatePropertyNameHandling.Replace, ExpectedValue.New, false);
-        }
-
-
-        [Fact]
-        public static void TestDuplicatesIgnore()
-        {
-            TestDuplicates(DuplicatePropertyNameHandling.Ignore, ExpectedValue.Previous);
+            TestDuplicates(duplicatePropertyNameHandling, expected, valueConstructor);
         }
 
         [Fact]
@@ -324,12 +315,8 @@ namespace System.Text.Json.Tests
                 { "ssn", "123456789" },
             };
 
-            if (person.ContainsProperty("ssn"))
-            {
-                EmployeesDatabase.CheckSSN(((JsonString)person["ssn"]).Value);
-            }
-
             Assert.True(person.ContainsProperty("ssn"));
+            Assert.Equal("123456789", (JsonString)person["ssn"]);
             Assert.False(person.ContainsProperty("surname"));
         }
 
@@ -337,10 +324,10 @@ namespace System.Text.Json.Tests
         public static void TestAquiringAllValues()
         {
             var employees = new JsonObject(EmployeesDatabase.GetTenBestEmployees());
-            ICollection<JsonNode> employeesWithoutId = employees.Values;
+            ICollection<JsonNode> employeesWithoutId = employees.PropertyValues;
 
             Assert.Equal(10, employees.PropertyNames.Count);
-            Assert.Equal(10, employees.Values.Count);
+            Assert.Equal(10, employees.PropertyValues.Count);
 
             foreach (JsonNode employee in employeesWithoutId)
             {
@@ -398,7 +385,7 @@ namespace System.Text.Json.Tests
         public static void TestModifyingJsonObjectKeyRemoveAdd()
         {
             JsonObject manager = EmployeesDatabase.GetManager();
-            JsonObject reportingEmployees = manager.GetJsonObjectProperty("reporting employees");
+            JsonObject reportingEmployees = manager.GetJsonObjectPropertyValue("reporting employees");
 
             static void ModifyProperty(JsonObject jsonObject, string previousName, string newName)
             {
@@ -424,7 +411,7 @@ namespace System.Text.Json.Tests
         public static void TestModifyingJsonObjectKeyModifyMethod()
         {
             JsonObject manager = EmployeesDatabase.GetManager();
-            JsonObject reportingEmployees = manager.GetJsonObjectProperty("reporting employees");
+            JsonObject reportingEmployees = manager.GetJsonObjectPropertyValue("reporting employees");
 
             Assert.True(reportingEmployees.ContainsProperty("software developers"));
             JsonNode previousValue = reportingEmployees["software developers"];
@@ -437,29 +424,24 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestAccesingNestedJsonObjectCastWithAs()
+        public static void TestAccessingNestedJsonObjectCastWithAs()
         {
             JsonObject manager = EmployeesDatabase.GetManager();
 
-            // Should not throw any exceptions:
-
             var reportingEmployees = manager["reporting employees"] as JsonObject;
-            if (reportingEmployees == null)
-                throw new InvalidCastException();
+            Assert.NotNull(reportingEmployees);
 
             var softwareDevelopers = reportingEmployees["software developers"] as JsonObject;
-            if (softwareDevelopers == null)
-                throw new InvalidCastException();
+            Assert.NotNull(softwareDevelopers);
 
             var internDevelopers = softwareDevelopers["intern employees"] as JsonObject;
-            if (internDevelopers == null)
-                throw new InvalidCastException();
+            Assert.NotNull(internDevelopers);
 
             internDevelopers.Add(EmployeesDatabase.GetNextEmployee());
         }
 
         [Fact]
-        public static void TestAccesingNestedJsonObjectCastWithIs()
+        public static void TestAccessingNestedJsonObjectCastWithIs()
         {
             JsonObject manager = EmployeesDatabase.GetManager();
 
@@ -485,7 +467,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestAccesingNestedJsonObjectExplicitCast()
+        public static void TestAccessingNestedJsonObjectExplicitCast()
         {
             JsonObject manager = EmployeesDatabase.GetManager();
 
@@ -494,30 +476,30 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestAccesingNestedJsonObjectGetPropertyMethod()
+        public static void TestAccessingNestedJsonObjectGetPropertyMethod()
         {
             JsonObject manager = EmployeesDatabase.GetManager();
 
             // Should not throw any exceptions:
 
-            JsonObject internDevelopers = manager.GetJsonObjectProperty("reporting employees")
-                                          .GetJsonObjectProperty("software developers")
-                                          .GetJsonObjectProperty("intern employees");
+            JsonObject internDevelopers = manager.GetJsonObjectPropertyValue("reporting employees")
+                                          .GetJsonObjectPropertyValue("software developers")
+                                          .GetJsonObjectPropertyValue("intern employees");
             internDevelopers.Add(EmployeesDatabase.GetNextEmployee());
         }
 
         [Fact]
-        public static void TestAccesingNestedJsonObjectTryGetPropertyMethod()
+        public static void TestAccessingNestedJsonObjectTryGetPropertyMethod()
         {
             JsonObject manager = EmployeesDatabase.GetManager();
 
             static bool AddEmployee(JsonObject manager)
             {
-                if (manager.TryGetJsonObjectProperty("reporting employees", out JsonObject reportingEmployees))
+                if (manager.TryGetJsonObjectPropertyValue("reporting employees", out JsonObject reportingEmployees))
                 {
-                    if (reportingEmployees.TryGetJsonObjectProperty("software developers", out JsonObject softwareDevelopers))
+                    if (reportingEmployees.TryGetJsonObjectPropertyValue("software developers", out JsonObject softwareDevelopers))
                     {
-                        if (softwareDevelopers.TryGetJsonObjectProperty("full time employees", out JsonObject fullTimeEmployees))
+                        if (softwareDevelopers.TryGetJsonObjectPropertyValue("full time employees", out JsonObject fullTimeEmployees))
                         {
                             fullTimeEmployees.Add(EmployeesDatabase.GetNextEmployee());
                             return true;
@@ -558,7 +540,7 @@ namespace System.Text.Json.Tests
                     { "name", "value" }
                 };
 
-                jsonObject.GetProperty("different name");
+                jsonObject.GetPropertyValue("different name");
             });
         }
 
@@ -570,10 +552,10 @@ namespace System.Text.Json.Tests
                 { "name", "value" }
             };
 
-            Assert.True(jsonObject.TryGetProperty("name", out JsonNode property));
+            Assert.True(jsonObject.TryGetPropertyValue("name", out JsonNode property));
             Assert.IsType<JsonString>(property);
             Assert.Equal("value", property as JsonString);
-            Assert.False(jsonObject.TryGetProperty("other", out property));
+            Assert.False(jsonObject.TryGetPropertyValue("other", out property));
             Assert.Null(property);
         }
 
@@ -587,7 +569,7 @@ namespace System.Text.Json.Tests
                     { "name", "value" }
                 };
 
-                jsonObject.GetJsonObjectProperty("name");
+                jsonObject.GetJsonObjectPropertyValue("name");
             });
         }
 
@@ -599,10 +581,10 @@ namespace System.Text.Json.Tests
                 { "name", "value" }
             };
 
-            Assert.False(jsonObject.TryGetJsonObjectProperty("name", out JsonObject property));
+            Assert.False(jsonObject.TryGetJsonObjectPropertyValue("name", out JsonObject property));
             Assert.Null(property);
 
-            Assert.False(jsonObject.TryGetJsonObjectProperty("other", out property));
+            Assert.False(jsonObject.TryGetJsonObjectPropertyValue("other", out property));
             Assert.Null(property);
         }
     }

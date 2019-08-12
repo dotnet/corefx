@@ -14,7 +14,7 @@
         /// </summary>
         Ignore,
         /// <summary>
-        /// Throw a <exception cref="ArgumentException"/> when a duplicate property is encountered.
+        /// Throw an <exception cref="ArgumentException"/> when a duplicate property is encountered.
         /// </summary>
         Error
     }

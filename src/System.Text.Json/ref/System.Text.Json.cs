@@ -270,9 +270,9 @@ namespace System.Text.Json
     {
         public JsonObject(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties, System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { }
         public JsonObject(System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { }
-        public System.Text.Json.JsonNode this[string key] { get { throw null; } set { } }
+        public System.Text.Json.JsonNode this[string propertyName] { get { throw null; } set { } }
         public System.Collections.Generic.ICollection<string> PropertyNames { get { throw null; } }
-        public System.Collections.Generic.ICollection<System.Text.Json.JsonNode> Values { get { throw null; } }
+        public System.Collections.Generic.ICollection<System.Text.Json.JsonNode> PropertyValues { get { throw null; } }
         public void Add(System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode> jsonProperty) { }
         public void Add(string propertyName, bool propertyValue) { }
         public void Add(string propertyName, byte propertyValue) { }
@@ -295,13 +295,13 @@ namespace System.Text.Json
         public void AddRange(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties) { }
         public bool ContainsProperty(string propertyName) { throw null; }
         public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> GetEnumerator() { throw null; }
-        public System.Text.Json.JsonObject GetJsonObjectProperty(string propertyName) { throw null; }
-        public System.Text.Json.JsonNode GetProperty(string propertyName) { throw null; }
+        public System.Text.Json.JsonObject GetJsonObjectPropertyValue(string propertyName) { throw null; }
+        public System.Text.Json.JsonNode GetPropertyValue(string propertyName) { throw null; }
         public void ModifyPropertyName(string oldName, string newName) { }
         public bool Remove(string propertyName) { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
-        public bool TryGetJsonObjectProperty(string propertyName, out System.Text.Json.JsonObject jsonObject) { throw null; }
-        public bool TryGetProperty(string propertyName, out System.Text.Json.JsonNode jsonNode) { throw null; }
+        public bool TryGetJsonObjectPropertyValue(string propertyName, out System.Text.Json.JsonObject jsonObject) { throw null; }
+        public bool TryGetPropertyValue(string propertyName, out System.Text.Json.JsonNode jsonNode) { throw null; }
     }
     public readonly partial struct JsonProperty
     {

@@ -433,9 +433,12 @@
     <value>Provided property name already exists.</value>
   </data>
   <data name="PropertyNotFound" xml:space="preserve">
-    <value>Property with specified name not found</value>
+    <value>Property with name {0} not found.</value>
   </data>
   <data name="PropertyTypeMismatch" xml:space="preserve">
-    <value>Property with specified name has a diffent type than expected</value>
+    <value>Property with specified name has a different type than expected</value>
+  </data>
+  <data name="InvalidDuplicatePropertyNameHandling" xml:space="preserve">
+    <value>Provided manner of handling duplicates does not exist.</value>
   </data>
 </root>

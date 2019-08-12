@@ -212,7 +212,7 @@
     <Compile Include="System\Text\Json\Node\DuplicatePropertyNameHandling.cs" />
     <Compile Include="System\Text\Json\Node\JsonBoolean.cs" />
     <Compile Include="System\Text\Json\Node\JsonNode.cs" />
-	  <Compile Include="System\Text\Json\Node\JsonNumber.cs" />
+    <Compile Include="System\Text\Json\Node\JsonNumber.cs" />
     <Compile Include="System\Text\Json\Node\JsonObject.cs" />
     <Compile Include="System\Text\Json\Node\JsonString.cs" />
   </ItemGroup>

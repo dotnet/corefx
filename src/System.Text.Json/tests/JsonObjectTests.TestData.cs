@@ -99,8 +99,6 @@ namespace System.Text.Json.Tests
 
                 return manager;
             }
-
-            public static bool CheckSSN(string ssnNumber) => true;
             public static void PerformHeavyOperations(JsonElement employee) { }
         }
 

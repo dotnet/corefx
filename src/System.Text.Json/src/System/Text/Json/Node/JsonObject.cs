@@ -19,8 +19,16 @@ namespace System.Text.Json
         ///   Initializes a new instance of the <see cref="JsonObject"/> class representing the empty object.
         /// </summary>
         /// <param name="duplicatePropertyNameHandling">Specifies the way of handling duplicate property names.</param>
+        /// <exception cref="ArgumentException">
+        ///   Provided manner of handling duplicates does not exist.
+        /// </exception>
         public JsonObject(DuplicatePropertyNameHandling duplicatePropertyNameHandling = default)
         {
+            if(!Enum.IsDefined(typeof(DuplicatePropertyNameHandling), duplicatePropertyNameHandling))
+            {
+                throw new ArgumentException(SR.InvalidDuplicatePropertyNameHandling);
+            }
+
             _dictionary = new Dictionary<string, JsonNode>();
             _duplicatePropertyNameHandling = duplicatePropertyNameHandling;
         }
@@ -41,10 +49,13 @@ namespace System.Text.Json
         ///   Gets or sets the value of the specified property.
         /// </summary>
         /// <param name="propertyName">The property name of the value to get or set.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
         public JsonNode this[string propertyName]
         {
-            get => GetProperty(propertyName);
-            set => _dictionary[propertyName] = value;
+            get => propertyName != null ? GetPropertyValue(propertyName) : throw new ArgumentNullException(nameof(propertyName));
+            set => _dictionary[propertyName] = value ?? throw new ArgumentNullException(nameof(propertyName));
         }
 
         /// <summary>
@@ -70,11 +81,22 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue">Value of the property to add.</param>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
+        /// <remarks>
+        ///   Null property value is allowed and represents a null JSON node.
+        /// </remarks>
         public void Add(string propertyName, JsonNode propertyValue)
         {
+            if(propertyName == null)
+            {
+                throw new ArgumentNullException(nameof(propertyName));
+            }
+
             if (_duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Replace)
             {
                 _dictionary[propertyName] = propertyValue;
@@ -102,9 +124,9 @@ namespace System.Text.Json
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///   Provided value is null.
+        ///   Provided value or property name is null.
         /// </exception>
-        public void Add(string propertyName, string propertyValue) => _dictionary.Add(propertyName, new JsonString(propertyValue));
+        public void Add(string propertyName, string propertyValue) => Add(propertyName, new JsonString(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonBoolean"/> to the JSON object.
@@ -114,7 +136,10 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
-        public void Add(string propertyName, bool propertyValue) => _dictionary.Add(propertyName, new JsonBoolean(propertyValue));
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, bool propertyValue) => Add(propertyName, new JsonBoolean(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
@@ -124,7 +149,10 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
-        public void Add(string propertyName, byte propertyValue) => _dictionary.Add(propertyName, new JsonNumber(propertyValue));
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, byte propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
@@ -134,7 +162,10 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
-        public void Add(string propertyName, short propertyValue) => _dictionary.Add(propertyName, new JsonNumber(propertyValue));
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, short propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
@@ -144,7 +175,10 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
-        public void Add(string propertyName, int propertyValue) => _dictionary.Add(propertyName, new JsonNumber(propertyValue));
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, int propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
@@ -154,7 +188,10 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
-        public void Add(string propertyName, long propertyValue) => _dictionary.Add(propertyName, new JsonNumber(propertyValue));
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, long propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
@@ -167,7 +204,10 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Provided value is not in a legal JSON number format.
         /// </exception>
-        public void Add(string propertyName, float propertyValue) => _dictionary.Add(propertyName, new JsonNumber(propertyValue));
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, float propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
@@ -180,7 +220,10 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Provided value is not in a legal JSON number format.
         /// </exception>
-        public void Add(string propertyName, double propertyValue) => _dictionary.Add(propertyName, new JsonNumber(propertyValue));
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, double propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
@@ -190,8 +233,11 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
         [CLSCompliant(false)]
-        public void Add(string propertyName, sbyte propertyValue) => _dictionary.Add(propertyName, new JsonNumber(propertyValue));
+        public void Add(string propertyName, sbyte propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
@@ -201,8 +247,11 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
         [CLSCompliant(false)]
-        public void Add(string propertyName, ushort propertyValue) => _dictionary.Add(propertyName, new JsonNumber(propertyValue));
+        public void Add(string propertyName, ushort propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
@@ -212,8 +261,11 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
         [CLSCompliant(false)]
-        public void Add(string propertyName, uint propertyValue) => _dictionary.Add(propertyName, new JsonNumber(propertyValue));
+        public void Add(string propertyName, uint propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
@@ -223,8 +275,11 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
         [CLSCompliant(false)]
-        public void Add(string propertyName, ulong propertyValue) => _dictionary.Add(propertyName, new JsonNumber(propertyValue));
+        public void Add(string propertyName, ulong propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
@@ -234,7 +289,10 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
-        public void Add(string propertyName, decimal propertyValue) => _dictionary.Add(propertyName, new JsonNumber(propertyValue));
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, decimal propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
         /// <summary>
         ///   Adds the properties from the specified collection to the JSON object.
@@ -242,6 +300,9 @@ namespace System.Text.Json
         /// <param name="jsonProperties">Properties to add.</param>
         /// <exception cref="ArgumentException">
         ///   Provided collection contains duplicates if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///   Some of property names are null.
         /// </exception>
         public void AddRange(IEnumerable<KeyValuePair<string, JsonNode>> jsonProperties)
         {
@@ -255,18 +316,27 @@ namespace System.Text.Json
         ///   Removes the property with the specified name.
         /// </summary>
         /// <param name="propertyName"></param>
-        /// <returns></returns>
-        public bool Remove(string propertyName) => _dictionary.Remove(propertyName);
+        /// <returns>
+        ///   <see langword="true"/> if the property is successfully found in a JSON object and removed,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public bool Remove(string propertyName) => propertyName != null ? _dictionary.Remove(propertyName) : throw new ArgumentNullException(nameof(propertyName));
 
         /// <summary>
         ///   Determines whether a property is in a JSON object.
         /// </summary>
         /// <param name="propertyName">Name of the property to check.</param>
         /// <returns>
-        ///   <see langword="true"/> if the property is found in a JSON object,
+        ///   <see langword="true"/> if the property is successfully found in a JSON object,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public bool ContainsProperty(string propertyName) => _dictionary.ContainsKey(propertyName);
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public bool ContainsProperty(string propertyName) => propertyName != null ? _dictionary.ContainsKey(propertyName) : throw new ArgumentNullException(nameof(propertyName));
 
         /// <summary>
         ///   Modifies the name of specified property.
@@ -279,10 +349,13 @@ namespace System.Text.Json
         /// <exception cref="KeyNotFoundException">
         ///   Property with specified name is not found in JSON object.
         /// </exception>
+        /// <remnark>
+        ///   Does not guarantee keeping the order the same.
+        /// </remnark>
         public void ModifyPropertyName(string oldName, string newName)
         {
             if (!_dictionary.ContainsKey(oldName))
-                throw new KeyNotFoundException(SR.PropertyNotFound);
+                throw new KeyNotFoundException(string.Format(SR.PropertyNotFound, oldName));
 
             JsonNode previousValue = _dictionary[oldName];
             _dictionary.Remove(oldName);
@@ -290,25 +363,25 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Returns the property with the specified name.
+        ///   Returns the value of a property with the specified name.
         /// </summary>
         /// <param name="propertyName">Name of the property to return.</param>
         /// <returns>Value of the property with the specified name.</returns>
         /// <exception cref="KeyNotFoundException">
         ///   Property with specified name is not found in JSON object.
         /// </exception>
-        public JsonNode GetProperty(string propertyName)
+        public JsonNode GetPropertyValue(string propertyName)
         {
-            if (!TryGetProperty(propertyName, out JsonNode jsonNode))
+            if (!TryGetPropertyValue(propertyName, out JsonNode jsonNode))
             {
-                throw new KeyNotFoundException(SR.PropertyNotFound);
+                throw new KeyNotFoundException(string.Format(SR.PropertyNotFound, propertyName));
             }
 
             return jsonNode;
         }
 
         /// <summary>
-        ///   Returns the property with the specified name.
+        ///   Returns the value of a property with the specified name.
         /// </summary>
         /// <param name="propertyName">Name of the property to return.</param>
         /// <param name="jsonNode">Value of the property with specified name.</param>
@@ -316,7 +389,11 @@ namespace System.Text.Json
         ///  <see langword="true"/> if property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetProperty(string propertyName, out JsonNode jsonNode)
+        /// <remarks>
+        ///   When returns <see langword="false"/>, the value of <paramref name="jsonNode"/> is meaningless.
+        ///   Null <paramref name="jsonNode"/> doesn't mean the property value was "null" unless <see langword="true"/> is returned.
+        /// </remarks>
+        public bool TryGetPropertyValue(string propertyName, out JsonNode jsonNode)
         {
             if (!_dictionary.ContainsKey(propertyName))
             {
@@ -329,19 +406,19 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Returns the JSON object property with the specified name.
+        ///   Returns the JSON object value of a property with the specified name.
         /// </summary>
         /// <param name="propertyName">Name of the property to return.</param>
-        /// <returns>JSON object property with the specified name.</returns>
+        /// <returns>JSON objectvalue of a property with the specified name.</returns>
         /// <exception cref="KeyNotFoundException">
         ///   Property with specified name is not found in JSON object.
         /// </exception>
         /// <exception cref="InvalidCastException">
         ///   Property with specified name is not a JSON object.
         /// </exception>
-        public JsonObject GetJsonObjectProperty(string propertyName)
+        public JsonObject GetJsonObjectPropertyValue(string propertyName)
         {
-            if(GetProperty(propertyName) is JsonObject jsonObject)
+            if (GetPropertyValue(propertyName) is JsonObject jsonObject)
             {
                 return jsonObject;
             }
@@ -350,17 +427,17 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Returns the JSON object property with the specified name.
+        ///   Returns the JSON object value of a property with the specified name.
         /// </summary>
         /// <param name="propertyName">Name of the property to return.</param>
-        /// <param name="jsonObject">JSON objec of the property with specified name.</param>
+        /// <param name="jsonObject">JSON object value of the property with specified name.</param>
         /// <returns>
         ///  <see langword="true"/> if JSON object property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetJsonObjectProperty(string propertyName, out JsonObject jsonObject)
+        public bool TryGetJsonObjectPropertyValue(string propertyName, out JsonObject jsonObject)
         {
-            if (TryGetProperty(propertyName, out JsonNode jsonNode))
+            if (TryGetPropertyValue(propertyName, out JsonNode jsonNode))
             {
                 if (jsonNode is JsonObject jsonNodeCasted)
                 {
@@ -381,7 +458,7 @@ namespace System.Text.Json
         /// <summary>
         ///  A collection containing the property values of JSON object.
         /// </summary>
-        public ICollection<JsonNode> Values => _dictionary.Values;
+        public ICollection<JsonNode> PropertyValues => _dictionary.Values;
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.

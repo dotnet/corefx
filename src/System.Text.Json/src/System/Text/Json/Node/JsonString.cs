@@ -40,7 +40,7 @@ namespace System.Text.Json
         public string Value
         {
             get => _value;
-            set => _value = value ?? throw new ArgumentNullException();
+            set => _value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         /// <summary>
