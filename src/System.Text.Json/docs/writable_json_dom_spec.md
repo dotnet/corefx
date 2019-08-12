@@ -260,6 +260,8 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
 * Do we want to support creating `JsonNumber` from `BigInterger` without changing it to string?
 * Should `ToString` on `JsonBoolean` and `JsonString` return the .NET or JSON representation?
 * Do we want to keep implicit cast operators (even though for `JsonNumber` it would mean throwing in some cases, which is against FDG)?
+* Do we want overloads that take a `StringComparison` enum for methods retrieving properties? It would make API easier to use where case is not important.
+* Where do we want to enable user to set handling properties manner?
 
 ## Useful links
 
