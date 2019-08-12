@@ -550,7 +550,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             // If we have a constructor, only find its type.
             bool bIsConstructor = name == NameManager.GetPredefinedName(PredefinedName.PN_CTOR);
-            foreach(AggregateType t in callingType.TypeHierarchy)
+            foreach (AggregateType t in callingType.TypeHierarchy)
             {
                 if (SymbolTable.AggregateContainsMethod(t.OwningAggregate, Name, mask) && distinctCallingTypes.Add(t))
                 {
@@ -964,7 +964,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             if (pArg is ExprList list)
             {
-                for(;;)
+                for (;;)
                 {
                     list.OptionalElement = StripNamedArgument(list.OptionalElement);
 

@@ -310,7 +310,7 @@ namespace Microsoft.Reflection
         public static Type? GetNestedType(this Type type, string nestedTypeName)
         {
             TypeInfo? ti = null;
-            foreach(var nt in type.GetTypeInfo().DeclaredNestedTypes)
+            foreach (var nt in type.GetTypeInfo().DeclaredNestedTypes)
             {
                 if (nt.Name == nestedTypeName)
                 {
