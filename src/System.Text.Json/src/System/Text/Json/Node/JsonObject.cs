@@ -97,13 +97,7 @@ namespace System.Text.Json
                 throw new ArgumentNullException(nameof(propertyName));
             }
 
-            if (_duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Replace)
-            {
-                _dictionary[propertyName] = propertyValue;
-                return;
-            }
-
-            if (!_dictionary.TryAdd(propertyName, propertyValue))
+            if (_dictionary.ContainsKey(propertyName))
             {
                 switch (_duplicatePropertyNameHandling)
                 {
@@ -113,6 +107,8 @@ namespace System.Text.Json
                         throw new ArgumentException(SR.JsonObjectDuplicateKey);
                 }
             }
+
+            _dictionary[propertyName] = propertyValue;
         }
 
         /// <summary>
