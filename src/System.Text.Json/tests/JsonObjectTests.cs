@@ -243,6 +243,18 @@ namespace System.Text.Json.Tests
             Assert.IsType<JsonObject>(employee);
         }
 
+        private static void CheckEmployeesAreDifferent(JsonObject employees)
+        {
+            string prevId = "";
+            foreach (KeyValuePair<string, JsonNode> employee in employees)
+            {
+                Assert.NotEqual(prevId, employee.Key);
+                prevId = employee.Key;
+
+                Assert.IsType<JsonObject>(employee.Value);
+            }
+        }
+
         [Fact]
         public static void TestAddingKeyValuePair()
         {
@@ -254,14 +266,7 @@ namespace System.Text.Json.Tests
                 EmployeesDatabase.GetNextEmployee(),
             };
 
-            string prevId = "";
-            foreach (KeyValuePair <string,JsonNode> employee in employees)
-            {
-                Assert.NotEqual(prevId, employee.Key);
-                prevId = employee.Key;
-
-                Assert.IsType<JsonObject>(employee.Value);
-            }
+            CheckEmployeesAreDifferent(employees);
         }
 
         [Fact]
@@ -273,14 +278,7 @@ namespace System.Text.Json.Tests
                 employees.Add(employee);
             }
 
-            string prevId = "";
-            foreach (KeyValuePair<string, JsonNode> employee in employees)
-            {
-                Assert.NotEqual(prevId, employee.Key);
-                prevId = employee.Key;
-
-                Assert.IsType<JsonObject>(employee.Value);
-            }
+            CheckEmployeesAreDifferent(employees);
         }
 
         [Fact]
@@ -288,14 +286,7 @@ namespace System.Text.Json.Tests
         {
             var employees = new JsonObject(EmployeesDatabase.GetTenBestEmployees());
 
-            string prevId = "";
-            foreach (KeyValuePair<string, JsonNode> employee in employees)
-            {
-                Assert.NotEqual(prevId, employee.Key);
-                prevId = employee.Key;
-
-                Assert.IsType<JsonObject>(employee.Value);
-            }
+            CheckEmployeesAreDifferent(employees);
         }
 
         [Fact]
@@ -304,14 +295,7 @@ namespace System.Text.Json.Tests
             var employees = new JsonObject();
             employees.AddRange(EmployeesDatabase.GetTenBestEmployees());
 
-            string prevId = "";
-            foreach (KeyValuePair<string, JsonNode> employee in employees)
-            {
-                Assert.NotEqual(prevId, employee.Key);
-                prevId = employee.Key;
-
-                Assert.IsType<JsonObject>(employee.Value);
-            }
+            CheckEmployeesAreDifferent(employees);
         }
 
         [Fact]
