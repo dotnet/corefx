@@ -109,20 +109,6 @@ namespace System.Drawing
             }
         }
 
-        internal static Image CreateImageObject(IntPtr nativeImage)
-        {
-            Gdip.CheckStatus(Gdip.GdipGetImageType(nativeImage, out int type));
-            switch ((ImageType)type)
-            {
-                case ImageType.Bitmap:
-                    return new Bitmap(nativeImage);
-                case ImageType.Metafile:
-                    return Metafile.FromGDIplus(nativeImage);
-                default:
-                    throw new ArgumentException(SR.InvalidImage);
-            }
-        }
-
         /// <summary>
         /// Saves this <see cref='Image'/> to the specified file in the specified format.
         /// </summary>

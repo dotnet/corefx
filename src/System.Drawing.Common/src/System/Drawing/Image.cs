@@ -450,6 +450,20 @@ namespace System.Drawing
             return (pixfmt & PixelFormat.Alpha) != 0;
         }
 
+        internal static Image CreateImageObject(IntPtr nativeImage)
+        {
+            Gdip.CheckStatus(Gdip.GdipGetImageType(nativeImage, out int type));
+            switch ((ImageType)type)
+            {
+                case ImageType.Bitmap:
+                    return new Bitmap(nativeImage);
+                case ImageType.Metafile:
+                    return new Metafile(nativeImage);
+                default:
+                    throw new ArgumentException(SR.InvalidImage);
+            }
+        }
+
         internal static unsafe void EnsureSave(Image image, string filename, Stream dataStream)
         {
             if (image.RawFormat.Equals(ImageFormat.Gif))

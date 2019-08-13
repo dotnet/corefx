@@ -65,27 +65,8 @@ namespace System.Drawing
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            Image img = CreateFromHandle(InitializeFromStream(stream));
+            Image img = CreateImageObject(InitializeFromStream(stream));
             return img;
-        }
-
-        internal static Image CreateImageObject(IntPtr nativeImage)
-        {
-            return CreateFromHandle(nativeImage);
-        }
-
-        internal static Image CreateFromHandle(IntPtr handle)
-        {
-            Gdip.CheckStatus(Gdip.GdipGetImageType(handle, out int type));
-            switch ((ImageType)type)
-            {
-                case ImageType.Bitmap:
-                    return new Bitmap(handle);
-                case ImageType.Metafile:
-                    return new Metafile(handle);
-                default:
-                    throw new NotSupportedException("Unknown image type.");
-            }
         }
 
         private protected static IntPtr InitializeFromStream(Stream stream)
