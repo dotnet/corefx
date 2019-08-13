@@ -25,7 +25,7 @@ namespace System.Text.Json
         /// </exception>
         public JsonObject(DuplicatePropertyNameHandling duplicatePropertyNameHandling = DuplicatePropertyNameHandling.Replace)
         {
-            if(!Enum.IsDefined(typeof(DuplicatePropertyNameHandling), duplicatePropertyNameHandling))
+            if (!Enum.IsDefined(typeof(DuplicatePropertyNameHandling), duplicatePropertyNameHandling))
             {
                 throw new ArgumentOutOfRangeException(SR.InvalidDuplicatePropertyNameHandling);
             }
