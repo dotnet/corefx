@@ -4,7 +4,6 @@
 
 using System;
 using System.IO;
-using System.Text.Encodings.Web;
 using System.Text.Unicode;
 
 namespace System.Text.Encodings.Web.Tests

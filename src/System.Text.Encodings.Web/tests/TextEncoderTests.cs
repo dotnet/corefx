@@ -7,7 +7,6 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Encodings.Web;
 using Xunit;
 
 namespace System.Text.Encodings.Web.Tests
