@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -1143,15 +1144,15 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveStringCollection_Throws()
         {
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringCollection>(@"[""1"", ""2""]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringCollection>(@"[""1"", ""2""]"));
         }
 
         [Fact]
         public static void ReadReadOnlyCollections_Throws()
         {
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ReadOnlyStringIListWrapper>(@"[""1"", ""2""]"));
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper>(@"[""1"", ""2""]"));
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper>(@"{""Key"":""key"",""Value"":""value""}"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringIListWrapper>(@"[""1"", ""2""]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper>(@"[""1"", ""2""]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper>(@"{""Key"":""key"",""Value"":""value""}"));
         }
     }
 }

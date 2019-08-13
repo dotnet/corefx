@@ -18,14 +18,14 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static NotSupportedException GetNotSupportedException_SerializationNotSupportedCollection(Type propertyType, Type parentType, MemberInfo memberInfo)
+        public static NotSupportedException GetNotSupportedException_SerializationNotSupportedCollection(Type propertyType, Type parentType, MemberInfo memberInfo, Exception innerException = null)
         {
             if (parentType != null && parentType != typeof(object) && memberInfo != null)
             {
-                return new NotSupportedException(SR.Format(SR.SerializationNotSupportedCollection, propertyType, $"{parentType}.{memberInfo.Name}"));
+                return new NotSupportedException(SR.Format(SR.SerializationNotSupportedCollection, propertyType, $"{parentType}.{memberInfo.Name}"), innerException);
             }
 
-            return new NotSupportedException(SR.Format(SR.SerializationNotSupportedCollectionType, propertyType));
+            return new NotSupportedException(SR.Format(SR.SerializationNotSupportedCollectionType, propertyType), innerException);
         }
 
         public static void ThrowInvalidOperationException_SerializerCycleDetected(int maxDepth)

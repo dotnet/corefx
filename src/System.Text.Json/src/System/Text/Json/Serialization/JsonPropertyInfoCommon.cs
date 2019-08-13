@@ -164,8 +164,11 @@ namespace System.Text.Json
 
             // TODO: Use reflection to support types implementing Stack or Queue.
 
-            ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionPropertyInfo.DeclaredPropertyType, jsonPath, exception);
-            return null;
+            throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                collectionPropertyInfo.DeclaredPropertyType,
+                collectionPropertyInfo.ParentClassType,
+                collectionPropertyInfo.PropertyInfo,
+                exception);
         }
 
         public override object CreateDerivedDictionaryInstance(JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
@@ -200,8 +203,11 @@ namespace System.Text.Json
             // TODO: Use reflection to support types implementing SortedList and maybe immutable dictionaries.
 
             // Types implementing SortedList and immutable dictionaries will fail here.
-            ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionPropertyInfo.DeclaredPropertyType, jsonPath, exception);
-            return null;
+            throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                collectionPropertyInfo.DeclaredPropertyType,
+                collectionPropertyInfo.ParentClassType,
+                collectionPropertyInfo.PropertyInfo,
+                exception);
         }
 
         public override IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options)
