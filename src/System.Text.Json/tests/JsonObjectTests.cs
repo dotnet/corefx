@@ -27,14 +27,9 @@ namespace System.Text.Json.Tests
 
             var jsonObject = new JsonObject(jsonProperties);
 
-            Assert.IsType<JsonNumber>(jsonObject["number"]);
-            Assert.Equal(17, (jsonObject["number"] as JsonNumber).GetInt32());
-
-            Assert.IsType<JsonString>(jsonObject["string"]);
-            Assert.Equal("property value", (jsonObject["string"] as JsonString).Value);
-
-            Assert.IsType<JsonBoolean>(jsonObject["boolean"]);
-            Assert.True((jsonObject["boolean"] as JsonBoolean).Value);
+            Assert.Equal(17, ((JsonNumber)jsonObject["number"]).GetInt32());
+            Assert.Equal("property value", ((JsonString)jsonObject["string"]).Value);
+            Assert.True(((JsonBoolean)jsonObject["boolean"]).Value);
         }
 
         public enum ExpectedValue
@@ -51,14 +46,10 @@ namespace System.Text.Json.Tests
             JsonObject jsonObject = valueConstructor ? new JsonObject(duplicatePropertyNameHandling) : new JsonObject();
             jsonObject.Add("property", new JsonString(previousValue));
 
-            Assert.IsType<JsonString>(jsonObject["property"]);
-            Assert.Equal(previousValue, (jsonObject["property"] as JsonString).Value);
-
-            jsonObject.Add("property", new JsonString(newValue));
-            Assert.IsType<JsonString>(jsonObject["property"]);
+            Assert.Equal(previousValue, ((JsonString)jsonObject["property"]).Value);
 
             string expectedString = expected == ExpectedValue.Previous ? previousValue : newValue;
-            Assert.Equal(expectedString, (jsonObject["property"] as JsonString).Value);
+            Assert.Equal(expectedString, ((JsonString) jsonObject["property"]).Value);
 
             // with indexer, property should change no matter which duplicates handling option is chosen:
             jsonObject["property"] = (JsonString)"indexer value";
@@ -91,47 +82,36 @@ namespace System.Text.Json.Tests
             var jsonObject = new JsonObject();
 
             jsonObject.Add("byte", byte.MaxValue);
-            Assert.IsType<JsonNumber>(jsonObject["byte"]);
             Assert.Equal(byte.MaxValue, ((JsonNumber)jsonObject["byte"]).GetByte());
 
             jsonObject.Add("short", short.MaxValue);
-            Assert.IsType<JsonNumber>(jsonObject["short"]);
             Assert.Equal(short.MaxValue, ((JsonNumber)jsonObject["short"]).GetInt16());
 
             jsonObject.Add("int", int.MaxValue);
-            Assert.IsType<JsonNumber>(jsonObject["int"]);
             Assert.Equal(int.MaxValue, ((JsonNumber)jsonObject["int"]).GetInt32());
 
             jsonObject.Add("long", long.MaxValue);
-            Assert.IsType<JsonNumber>(jsonObject["long"]);
             Assert.Equal(long.MaxValue, ((JsonNumber)jsonObject["long"]).GetInt64());
 
             jsonObject.Add("float", 3.14f);
-            Assert.IsType<JsonNumber>(jsonObject["float"]);
             Assert.Equal(3.14f, ((JsonNumber)jsonObject["float"]).GetSingle());
 
             jsonObject.Add("double", 3.14);
-            Assert.IsType<JsonNumber>(jsonObject["double"]);
             Assert.Equal(3.14, ((JsonNumber)jsonObject["double"]).GetDouble());
 
             jsonObject.Add("sbyte", sbyte.MaxValue);
-            Assert.IsType<JsonNumber>(jsonObject["sbyte"]);
             Assert.Equal(sbyte.MaxValue, ((JsonNumber)jsonObject["sbyte"]).GetSByte());
 
             jsonObject.Add("ushort", ushort.MaxValue);
-            Assert.IsType<JsonNumber>(jsonObject["ushort"]);
             Assert.Equal(ushort.MaxValue, ((JsonNumber)jsonObject["ushort"]).GetUInt16());
 
             jsonObject.Add("uint", uint.MaxValue);
-            Assert.IsType<JsonNumber>(jsonObject["uint"]);
             Assert.Equal(uint.MaxValue, ((JsonNumber)jsonObject["uint"]).GetUInt32());
 
             jsonObject.Add("ulong", ulong.MaxValue);
-            Assert.IsType<JsonNumber>(jsonObject["ulong"]);
             Assert.Equal(ulong.MaxValue, ((JsonNumber)jsonObject["ulong"]).GetUInt64());
 
             jsonObject.Add("decimal", decimal.One);
-            Assert.IsType<JsonNumber>(jsonObject["decimal"]);
             Assert.Equal(decimal.One, ((JsonNumber)jsonObject["decimal"]).GetDecimal());
         }
 
@@ -147,22 +127,10 @@ namespace System.Text.Json.Tests
                 { "null property", (JsonNode) null }
             };
 
-            Assert.IsType<JsonString>(developer["name"]);
-            var developerNameCasted = developer["name"] as JsonString;
-            Assert.Equal("Kasia", developerNameCasted.Value);
-
-            Assert.IsType<JsonString>(developer["n\\u0061me"]);
-            developerNameCasted = developer["n\\u0061me"] as JsonString;
-            Assert.Equal("Kasia", developerNameCasted.Value);
-
-            Assert.IsType<JsonNumber>(developer["age"]);
-            var developerAgeCasted = developer["age"] as JsonNumber;
-            Assert.Equal(22, developerAgeCasted.GetInt32());
-
-            Assert.IsType<JsonBoolean>(developer["is developer"]);
-            var isDeveloperCasted = developer["is developer"] as JsonBoolean;
-            Assert.True(isDeveloperCasted.Value);
-
+            Assert.Equal("Kasia", ((JsonString)developer["name"]).Value);
+            Assert.Equal("Kasia", ((JsonString)developer["n\\u0061me"]).Value);
+            Assert.Equal(22, ((JsonNumber)developer["age"]).GetInt32());
+            Assert.True(((JsonBoolean)developer["is developer"]).Value);
             Assert.Null(developer["null property"]);
         }
 
@@ -176,17 +144,9 @@ namespace System.Text.Json.Tests
                 { "is developer", new JsonBoolean(true) }
             };
 
-            Assert.IsType<JsonString>(developer["name"]);
-            var developerNameCasted = developer["name"] as JsonString;
-            Assert.Equal("Kasia", developerNameCasted.Value);
-
-            Assert.IsType<JsonNumber>(developer["age"]);
-            var developerAgeCasted = developer["age"] as JsonNumber;
-            Assert.Equal(22, developerAgeCasted.GetInt32());
-
-            Assert.IsType<JsonBoolean>(developer["is developer"]);
-            var isDeveloperCasted = developer["is developer"] as JsonBoolean;
-            Assert.True(isDeveloperCasted.Value);
+            Assert.Equal("Kasia", ((JsonString)developer["name"]).Value);
+            Assert.Equal("Kasia", ((JsonString)developer["n\\u0061me"]).Value);
+            Assert.Equal(22, ((JsonNumber)developer["age"]).GetInt32());
         }
 
         [Fact]
@@ -344,21 +304,18 @@ namespace System.Text.Json.Tests
             // Assign by creating a new instance of primary Json type
             person1["name"] = new JsonString("Bob");
 
-            Assert.IsType<JsonString>(person1["name"]);
-            Assert.Equal("Bob", person1["name"] as JsonString);
+            Assert.Equal("Bob", (JsonString)person1["name"]);
 
             // Assign by using an implicit operator on primary Json type
             JsonNumber newAge = 55;
             person1["age"] = newAge;
 
-            Assert.IsType<JsonNumber>(person1["age"]);
-            Assert.Equal(55, person1["age"] as JsonNumber);
+            Assert.Equal(55, (JsonNumber)person1["age"]);
 
             // Assign by explicit cast from Json primary type
             person1["is_married"] = (JsonBoolean)false;
 
-            Assert.IsType<JsonBoolean>(person1["is_married"]);
-            Assert.Equal(false, person1["is_married"] as JsonBoolean);
+            Assert.Equal(false, (JsonBoolean) person1["is_married"]);
 
             var person2 = new JsonObject
             {
@@ -370,8 +327,7 @@ namespace System.Text.Json.Tests
             // Copy property from another JsonObject
             person1["age"] = person2["age"];
 
-            Assert.IsType<JsonNumber>(person1["age"]);
-            Assert.Equal(33, person1["age"] as JsonNumber);
+            Assert.Equal(33, (JsonNumber) person1["age"]);
 
             // Copy property of different typoe
             person1["name"] = person2["name"];
@@ -401,22 +357,6 @@ namespace System.Text.Json.Tests
             Assert.False(reportingEmployees.ContainsProperty(previousName));
             Assert.True(reportingEmployees.ContainsProperty(newName));
             Assert.Equal(previousValue, reportingEmployees[newName]);
-        }
-
-        [Fact]
-        public static void TestModifyingJsonObjectKeyModifyMethod()
-        {
-            JsonObject manager = EmployeesDatabase.GetManager();
-            JsonObject reportingEmployees = manager.GetJsonObjectPropertyValue("reporting employees");
-
-            Assert.True(reportingEmployees.ContainsProperty("software developers"));
-            JsonNode previousValue = reportingEmployees["software developers"];
-
-            reportingEmployees.ModifyPropertyName("software developers", "software engineers");
-
-            Assert.False(reportingEmployees.ContainsProperty("software developers"));
-            Assert.True(reportingEmployees.ContainsProperty("software engineers"));
-            Assert.Equal(previousValue, reportingEmployees["software engineers"]);
         }
 
         [Fact]
@@ -549,8 +489,7 @@ namespace System.Text.Json.Tests
             };
 
             Assert.True(jsonObject.TryGetPropertyValue("name", out JsonNode property));
-            Assert.IsType<JsonString>(property);
-            Assert.Equal("value", property as JsonString);
+            Assert.Equal("value", (JsonString)property);
             Assert.False(jsonObject.TryGetPropertyValue("other", out property));
             Assert.Null(property);
         }

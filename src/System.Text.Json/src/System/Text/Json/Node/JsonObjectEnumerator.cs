@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace System.Text.Json.System.Text.Json.Node
+namespace System.Text.Json
 {
     /// <summary>
     ///   Supports an iteration over a JSON object.
@@ -27,7 +27,7 @@ namespace System.Text.Json.System.Text.Json.Node
         object IEnumerator.Current => _enumerator.Current;
 
         /// <summary>
-        /// 
+        ///   Releases all resources used by the <see cref="JsonObjectEnumerator"/>.
         /// </summary>
         public void Dispose() => _enumerator.Dispose();
 

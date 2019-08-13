@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace System.Text.Json
 {
@@ -116,6 +117,7 @@ namespace System.Text.Json
                 }
             }
 
+            Debug.Assert(_duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Replace);
             _dictionary[propertyName] = propertyValue;
         }
 
@@ -343,30 +345,6 @@ namespace System.Text.Json
         public bool ContainsProperty(string propertyName) => propertyName != null ? _dictionary.ContainsKey(propertyName) : throw new ArgumentNullException(nameof(propertyName));
 
         /// <summary>
-        ///   Modifies the name of specified property.
-        /// </summary>
-        /// <param name="oldName">Old name of the property to change.</param>
-        /// <param name="newName">New name of the property to change.</param>
-        /// <exception cref="ArgumentException">
-        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
-        /// </exception>
-        /// <exception cref="KeyNotFoundException">
-        ///   Property with specified name is not found in JSON object.
-        /// </exception>
-        /// <remnark>
-        ///   Does not guarantee keeping the same order.
-        /// </remnark>
-        public void ModifyPropertyName(string oldName, string newName)
-        {
-            if (!_dictionary.ContainsKey(oldName))
-                throw new KeyNotFoundException(string.Format(SR.PropertyNotFound, oldName));
-
-            JsonNode previousValue = _dictionary[oldName];
-            _dictionary.Remove(oldName);
-            _dictionary.Add(newName, previousValue);
-        }
-
-        /// <summary>
         ///   Returns the value of a property with the specified name.
         /// </summary>
         /// <param name="propertyName">Name of the property to return.</param>
@@ -397,17 +375,7 @@ namespace System.Text.Json
         ///   When returns <see langword="false"/>, the value of <paramref name="jsonNode"/> is meaningless.
         ///   Null <paramref name="jsonNode"/> doesn't mean the property value was "null" unless <see langword="true"/> is returned.
         /// </remarks>
-        public bool TryGetPropertyValue(string propertyName, out JsonNode jsonNode)
-        {
-            if (!_dictionary.ContainsKey(propertyName))
-            {
-                jsonNode = null;
-                return false;
-            }
-
-            jsonNode = _dictionary[propertyName];
-            return true;
-        }
+        public bool TryGetPropertyValue(string propertyName, out JsonNode jsonNode) => _dictionary.TryGetValue(propertyName, out jsonNode);
 
         /// <summary>
         ///   Returns the JSON object value of a property with the specified name.
