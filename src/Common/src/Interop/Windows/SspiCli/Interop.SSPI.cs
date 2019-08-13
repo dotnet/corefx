@@ -27,7 +27,12 @@ internal static partial class Interop
             public bool IsZero
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get { return dwLower == IntPtr.Zero && dwUpper == IntPtr.Zero; }
+                get
+                {
+                    // Ternary operator returning true/false prevents redundant asm generation:
+                    // https://github.com/dotnet/coreclr/issues/914
+                    return dwLower == IntPtr.Zero && dwUpper == IntPtr.Zero ? true : false;
+                }
             }
 
             internal void SetToInvalid()

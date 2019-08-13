@@ -37,7 +37,9 @@ namespace System.Net.Security
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                return IsClosed || _handle.IsZero;
+                // Ternary operator returning true/false prevents redundant asm generation:
+                // https://github.com/dotnet/coreclr/issues/914
+                return IsClosed || _handle.IsZero ? true : false;
             }
         }
 
