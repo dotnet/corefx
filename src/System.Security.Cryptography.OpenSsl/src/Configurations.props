@@ -1,9 +1,13 @@
 ﻿<Project DefaultTargets="Build">
   <PropertyGroup>
+    <PackageConfigurations>
+      netcoreapp3.0-Unix;
+      netcoreapp3.0;
+      netstandard;
+    </PackageConfigurations>
     <BuildConfigurations>
       netcoreapp-Unix;
       netcoreapp;
-      netstandard;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
