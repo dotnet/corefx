@@ -18,6 +18,7 @@ namespace System.Net.Http
         private static readonly TimeSpan s_defaultTimeout = TimeSpan.FromSeconds(100);
         private static readonly TimeSpan s_maxTimeout = TimeSpan.FromMilliseconds(int.MaxValue);
         private static readonly TimeSpan s_infiniteTimeout = Threading.Timeout.InfiniteTimeSpan;
+        private static readonly Func<Exception, bool> NoTimeoutPredicate = _ => false;
         private const HttpCompletionOption defaultCompletionOption = HttpCompletionOption.ResponseContentRead;
 
         private volatile bool _operationStarted;
@@ -479,19 +480,26 @@ namespace System.Net.Http
             CancellationTokenSource cts;
             bool disposeCts;
             bool hasTimeout = _timeout != s_infiniteTimeout;
+            CancellationTokenSource pendingRequestsCts = _pendingRequestsCts;
+            Func<Exception, bool> isTimeout = NoTimeoutPredicate;
             if (hasTimeout || cancellationToken.CanBeCanceled)
             {
                 disposeCts = true;
-                cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _pendingRequestsCts.Token);
+                cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, pendingRequestsCts.Token);
                 if (hasTimeout)
                 {
+                    isTimeout = e =>
+                        e is OperationCanceledException
+                        && cts.IsCancellationRequested
+                        && !pendingRequestsCts.IsCancellationRequested
+                        && !cancellationToken.IsCancellationRequested;
                     cts.CancelAfter(_timeout);
                 }
             }
             else
             {
                 disposeCts = false;
-                cts = _pendingRequestsCts;
+                cts = pendingRequestsCts;
             }
 
             // Initiate the send.
@@ -507,12 +515,12 @@ namespace System.Net.Http
             }
 
             return completionOption == HttpCompletionOption.ResponseContentRead && !string.Equals(request.Method.Method, "HEAD", StringComparison.OrdinalIgnoreCase) ?
-                FinishSendAsyncBuffered(sendTask, request, cts, disposeCts) :
-                FinishSendAsyncUnbuffered(sendTask, request, cts, disposeCts);
+                FinishSendAsyncBuffered(sendTask, request, cts, disposeCts, isTimeout) :
+                FinishSendAsyncUnbuffered(sendTask, request, cts, disposeCts, isTimeout);
         }
 
         private async Task<HttpResponseMessage> FinishSendAsyncBuffered(
-            Task<HttpResponseMessage> sendTask, HttpRequestMessage request, CancellationTokenSource cts, bool disposeCts)
+            Task<HttpResponseMessage> sendTask, HttpRequestMessage request, CancellationTokenSource cts, bool disposeCts, Func<Exception, bool> isTimeout)
         {
             HttpResponseMessage response = null;
             try
@@ -533,6 +541,11 @@ namespace System.Net.Http
                 if (NetEventSource.IsEnabled) NetEventSource.ClientSendCompleted(this, response, request);
                 return response;
             }
+            catch (OperationCanceledException e) when (isTimeout(e))
+            {
+                HandleFinishSendAsyncError(e, cts);
+                throw new TimeoutException(SR.net_http_timeout, e);
+            }
             catch (Exception e)
             {
                 response?.Dispose();
@@ -546,7 +559,7 @@ namespace System.Net.Http
         }
 
         private async Task<HttpResponseMessage> FinishSendAsyncUnbuffered(
-            Task<HttpResponseMessage> sendTask, HttpRequestMessage request, CancellationTokenSource cts, bool disposeCts)
+            Task<HttpResponseMessage> sendTask, HttpRequestMessage request, CancellationTokenSource cts, bool disposeCts, Func<Exception, bool> isTimeout)
         {
             try
             {
@@ -558,6 +571,11 @@ namespace System.Net.Http
 
                 if (NetEventSource.IsEnabled) NetEventSource.ClientSendCompleted(this, response, request);
                 return response;
+            }
+            catch (OperationCanceledException e) when (isTimeout(e))
+            {
+                HandleFinishSendAsyncError(e, cts);
+                throw new TimeoutException(SR.net_http_timeout, e);
             }
             catch (Exception e)
             {

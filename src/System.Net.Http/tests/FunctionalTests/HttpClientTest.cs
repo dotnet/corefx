@@ -382,14 +382,16 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
-        public void Timeout_TooShort_AllPendingOperationsCanceled()
+        [Theory]
+        [InlineData(HttpCompletionOption.ResponseHeadersRead)]
+        [InlineData(HttpCompletionOption.ResponseContentRead)]
+        public void Timeout_TooShort_AllPendingOperationsTimedOut(HttpCompletionOption completionOption)
         {
             using (var client = new HttpClient(new CustomResponseHandler((r, c) => WhenCanceled<HttpResponseMessage>(c))))
             {
                 client.Timeout = TimeSpan.FromMilliseconds(1);
-                Task<HttpResponseMessage>[] tasks = Enumerable.Range(0, 3).Select(_ => client.GetAsync(CreateFakeUri())).ToArray();
-                Assert.All(tasks, task => Assert.Throws<TaskCanceledException>(() => task.GetAwaiter().GetResult()));
+                Task<HttpResponseMessage>[] tasks = Enumerable.Range(0, 3).Select(_ => client.GetAsync(CreateFakeUri(), completionOption)).ToArray();
+                Assert.All(tasks, task => Assert.Throws<TimeoutException>(() => task.GetAwaiter().GetResult()));
             }
         }
 
