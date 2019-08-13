@@ -144,7 +144,7 @@ namespace System.Data.Tests.SqlTypes
 
             Assert.True(testInt4000.CompareTo(testInt10) > 0);
             Assert.True(testInt10.CompareTo(testInt4000) < 0);
-            Assert.True(testInt4000II.CompareTo(testInt4000) == 0);
+            Assert.Equal(0, testInt4000II.CompareTo(testInt4000));
             Assert.True(testInt4000II.CompareTo(SqlInt64.Null) > 0);
 
             Assert.Throws<ArgumentException>(() => testInt10.CompareTo(testString));

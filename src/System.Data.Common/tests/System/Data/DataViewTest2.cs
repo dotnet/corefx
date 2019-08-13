@@ -67,7 +67,7 @@ namespace System.Data.Tests
             Assert.Equal(dt.Rows.Count, CountTable + 1);
 
             // AddNew - new row != null
-            Assert.True(drv != null);
+            Assert.NotNull(drv);
 
             // AddNew - check table
             Assert.Equal(dt, drv.Row.Table);
@@ -469,7 +469,7 @@ namespace System.Data.Tests
 
             // GetEnumerator != null
             ienm = dv.GetEnumerator();
-            Assert.True(ienm != null);
+            Assert.NotNull(ienm);
 
             int i = 0;
             while (ienm.MoveNext())
@@ -1155,7 +1155,7 @@ namespace System.Data.Tests
             // AutoIncrement state is maintained by ms.net
             Assert.True(table.Columns[2].AutoIncrement);
 
-            Assert.False(ds.Tables[0] == table);
+            Assert.NotEqual(ds.Tables[0], table);
 
             Assert.Equal(ds.Tables[0].TableName, table.TableName);
             Assert.Equal(ds.Tables[0].Columns.Count, table.Columns.Count);

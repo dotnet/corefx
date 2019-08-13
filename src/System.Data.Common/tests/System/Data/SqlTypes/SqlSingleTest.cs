@@ -117,7 +117,7 @@ namespace System.Data.Tests.SqlTypes
 
             Assert.True(test1.CompareTo(test3) > 0);
             Assert.True(test2.CompareTo(test3) < 0);
-            Assert.True(test1.CompareTo(test11) == 0);
+            Assert.Equal(0, test1.CompareTo(test11));
             Assert.True(test11.CompareTo(SqlSingle.Null) > 0);
 
             Assert.Throws<ArgumentException>(() => test1.CompareTo(testString));

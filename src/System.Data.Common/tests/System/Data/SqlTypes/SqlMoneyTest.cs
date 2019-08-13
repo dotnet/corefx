@@ -123,7 +123,7 @@ namespace System.Data.Tests.SqlTypes
         {
             Assert.True(_test1.CompareTo(_test2) < 0);
             Assert.True(_test3.CompareTo(_test1) > 0);
-            Assert.True(_test3.CompareTo(_test2) == 0);
+            Assert.Equal(0, _test3.CompareTo(_test2));
             Assert.True(_test3.CompareTo(SqlMoney.Null) > 0);
         }
 

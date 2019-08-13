@@ -1944,7 +1944,7 @@ namespace System.Data.Tests
             // Cannot find column ParentId1
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.True(ex.Message.IndexOf("ParentId1") != -1);
+            Assert.Contains("ParentId1", ex.Message);
         }
 
         [Fact]

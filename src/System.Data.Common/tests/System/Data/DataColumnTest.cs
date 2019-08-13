@@ -169,8 +169,7 @@ namespace System.Data.Tests
                 Assert.Throws<InvalidOperationException>(() => col.DateTimeMode = DataSetDateTime.Local);
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.True(ex.Message.IndexOf("DateTimeMode") != -1);
-            Assert.True(ex.Message.IndexOf("DateTime") != -1);
+            Assert.Contains("DateTimeNode", ex.Message);
         }
 
         [Fact]

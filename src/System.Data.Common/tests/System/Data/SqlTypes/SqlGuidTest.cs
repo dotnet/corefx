@@ -114,7 +114,7 @@ namespace System.Data.Tests.SqlTypes
             SqlGuid test3 = new SqlGuid("1AAAAAAA-BBBB-CCCC-DDDD-1EEEEEEEEEEE");
             Assert.True(_test1.CompareTo(_test3) < 0);
             Assert.True(_test4.CompareTo(_test1) > 0);
-            Assert.True(_test3.CompareTo(_test2) == 0);
+            Assert.Equal(0, _test3.CompareTo(_test2));
             Assert.True(_test4.CompareTo(SqlGuid.Null) > 0);
             Assert.True(test1.CompareTo(test2) > 0);
             Assert.True(test3.CompareTo(test2) < 0);
@@ -139,7 +139,7 @@ namespace System.Data.Tests.SqlTypes
         public void GetHashCodeTest()
         {
             Assert.Equal(_test1.GetHashCode(), _test1.GetHashCode());
-            Assert.True(_test1.GetHashCode() != _test2.GetHashCode());
+            Assert.NotEqual(_test1.GetHashCode(), _test2.GetHashCode());
             Assert.Equal(_test3.GetHashCode(), _test2.GetHashCode());
         }
 

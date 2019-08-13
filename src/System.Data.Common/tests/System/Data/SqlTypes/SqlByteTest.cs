@@ -122,7 +122,7 @@ namespace System.Data.Tests.SqlTypes
 
             Assert.True(testByte13.CompareTo(testByte10) > 0);
             Assert.True(testByte10.CompareTo(testByte13) < 0);
-            Assert.True(testByte10.CompareTo(testByte10II) == 0);
+            Assert.Equal(0, testByte10.CompareTo(testByte10II));
 
             Assert.Throws<ArgumentException>(() => testByte13.CompareTo(testString));
         }

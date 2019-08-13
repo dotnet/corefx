@@ -220,7 +220,7 @@ namespace System.Data.Tests.SqlTypes
         {
             Assert.True(_test1.CompareTo(_test3) < 0);
             Assert.True(_test2.CompareTo(_test1) > 0);
-            Assert.True(_test2.CompareTo(_test3) == 0);
+            Assert.Equal(0, _test2.CompareTo(_test3));
             Assert.True(_test3.CompareTo(SqlString.Null) > 0);
 
             // TODO: What's this? the values are immediately overwritten.
@@ -230,24 +230,24 @@ namespace System.Data.Tests.SqlTypes
             // IgnoreCase
             t1 = new SqlString("test", 2057, SqlCompareOptions.IgnoreCase);
             t2 = new SqlString("TEST", 2057, SqlCompareOptions.IgnoreCase);
-            Assert.True(t2.CompareTo(t1) == 0);
+            Assert.Equal(0, t2.CompareTo(t1));
 
             t1 = new SqlString("test", 2057);
             t2 = new SqlString("TEST", 2057);
-            Assert.True(t2.CompareTo(t1) == 0);
+            Assert.Equal(0, t2.CompareTo(t1));
 
             t1 = new SqlString("test", 2057, SqlCompareOptions.None);
             t2 = new SqlString("TEST", 2057, SqlCompareOptions.None);
-            Assert.True(t2.CompareTo(t1) != 0);
+            Assert.NotEqual(0, t2.CompareTo(t1));
 
             // IgnoreNonSpace
             t1 = new SqlString("TEST\xF1", 2057, SqlCompareOptions.IgnoreNonSpace);
             t2 = new SqlString("TESTn", 2057, SqlCompareOptions.IgnoreNonSpace);
-            Assert.True(t2.CompareTo(t1) == 0);
+            Assert.Equal(0, t2.CompareTo(t1));
 
             t1 = new SqlString("TEST\u00F1", 2057, SqlCompareOptions.None);
             t2 = new SqlString("TESTn", 2057, SqlCompareOptions.None);
-            Assert.True(t2.CompareTo(t1) != 0);
+            Assert.NotEqual(0, t2.CompareTo(t1));
 
             // BinarySort
             t1 = new SqlString("01_", 2057, SqlCompareOptions.BinarySort);

@@ -231,7 +231,7 @@ namespace System.Data.Tests.SqlTypes
             Assert.True((_sqlTrue.CompareTo(SqlBoolean.Null) > 0));
             Assert.True((_sqlTrue.CompareTo(_sqlFalse) > 0));
             Assert.True((_sqlFalse.CompareTo(_sqlTrue) < 0));
-            Assert.True((_sqlFalse.CompareTo(_sqlFalse) == 0));
+            Assert.Equal(0, _sqlFalse.CompareTo(_sqlFalse));
         }
 
         // Equals

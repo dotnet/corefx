@@ -625,7 +625,7 @@ namespace System.Data.Tests
                 DataView TestView = new DataView(_dataTable);
                 TestView.Delete(0);
                 DataRow r = TestView.Table.Rows[0];
-                Assert.True(!((string)r["itemId"] == "item 1"));
+                Assert.NotEqual("item 1", (string)r["itemId"]);
             });
         }
 

@@ -470,7 +470,7 @@ namespace System.Data.Tests
             t2.Rows.Add(new object[] { 10 });
 
             t1.Rows[0][0] = 20;
-            Assert.True((int)t2.Rows[0][0] == 20);
+            Assert.Equal(20, (int)t2.Rows[0][0]);
         }
 
         [Fact]

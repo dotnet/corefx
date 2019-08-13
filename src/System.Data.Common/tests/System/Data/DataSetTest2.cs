@@ -205,7 +205,7 @@ namespace System.Data.Tests
             Assert.Equal(DataProvider.GetDSSchema(ds), DataProvider.GetDSSchema(dsTarget));
 
             // Clone 2
-            Assert.False(dsTarget.GetXml() == ds.GetXml());
+            Assert.NotEqual(dsTarget.GetXml(), ds.GetXml());
         }
 
         [Fact]
@@ -228,7 +228,7 @@ namespace System.Data.Tests
             Assert.Equal(DataProvider.GetDSSchema(ds), DataProvider.GetDSSchema(dsTarget));
 
             // Copy 2
-            Assert.True(dsTarget.GetXml() == ds.GetXml());
+            Assert.Equal(dsTarget.GetXml(), ds.GetXml());
         }
 
         [Fact]
@@ -322,7 +322,7 @@ namespace System.Data.Tests
             ds.Tables[0].Rows.Add(dr);
 
             // GetChanges 2
-            Assert.True(ds.GetChanges() != null);
+            Assert.NotNull(ds.GetChanges());
 
             // GetChanges 3
             Assert.Equal(dr.ItemArray, ds.GetChanges().Tables[0].Rows[0].ItemArray);
@@ -1247,7 +1247,7 @@ namespace System.Data.Tests
 
             //SomeTable - new table
             // Merge - new table
-            Assert.True(dsTarget.Tables["SomeTable"] != null);
+            Assert.NotNull(dsTarget.Tables["SomeTable"]);
         }
 
         [Fact]
@@ -1763,7 +1763,7 @@ namespace System.Data.Tests
             Assert.Equal(dsTarget.Tables["Parent"].Columns["Indentity"].AutoIncrement, ds.Tables["Parent"].Columns["Indentity"].AutoIncrement);
 
             // check Indentity column - DefaultValue
-            Assert.True(dsTarget.Tables["Child"].Columns["String1"].DefaultValue == DBNull.Value);
+            Assert.Equal(DBNull.Value, dsTarget.Tables["Child"].Columns["String1"].DefaultValue);
 
             // check remove colum
             Assert.True(dsTarget.Tables["Child"].Columns.Contains("String2"));
@@ -1814,7 +1814,7 @@ namespace System.Data.Tests
             Assert.Equal(dsTarget.Tables["Parent"].Columns["Indentity"].AutoIncrement, ds.Tables["Parent"].Columns["Indentity"].AutoIncrement);
 
             // check Indentity column - DefaultValue
-            Assert.True(dsTarget.Tables["Child"].Columns["String1"].DefaultValue == DBNull.Value);
+            Assert.Equal(DBNull.Value, dsTarget.Tables["Child"].Columns["String1"].DefaultValue);
 
             // check remove colum
             Assert.True(dsTarget.Tables["Child"].Columns.Contains("String2"));
@@ -3000,7 +3000,7 @@ namespace System.Data.Tests
             pc = ds.ExtendedProperties;
 
             // Checking ExtendedProperties default
-            Assert.True(pc != null);
+            Assert.NotNull(pc);
 
             // Checking ExtendedProperties count
             Assert.Equal(0, pc.Count);
