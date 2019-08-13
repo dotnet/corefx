@@ -1145,5 +1145,13 @@ namespace System.Text.Json.Serialization.Tests
         {
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringCollection>(@"[""1"", ""2""]"));
         }
+
+        [Fact]
+        public static void ReadReadOnlyCollections_Throws()
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ReadOnlyStringIListWrapper>(@"[""1"", ""2""]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper>(@"[""1"", ""2""]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper>(@"{""Key"":""key"",""Value"":""value""}"));
+        }
     }
 }
