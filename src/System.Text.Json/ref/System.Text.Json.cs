@@ -276,11 +276,15 @@ namespace System.Text.Json
         public void Add(System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode> jsonProperty) { }
         public void Add(string propertyName, bool propertyValue) { }
         public void Add(string propertyName, byte propertyValue) { }
+        public void Add(string propertyName, System.DateTime propertyValue) { }
+        public void Add(string propertyName, System.DateTimeOffset propertyValue) { }
         public void Add(string propertyName, decimal propertyValue) { }
         public void Add(string propertyName, double propertyValue) { }
+        public void Add(string propertyName, System.Guid propertyValue) { }
         public void Add(string propertyName, short propertyValue) { }
         public void Add(string propertyName, int propertyValue) { }
         public void Add(string propertyName, long propertyValue) { }
+        public void Add(string propertyName, System.ReadOnlySpan<char> propertyValue) { }
         [System.CLSCompliantAttribute(false)]
         public void Add(string propertyName, sbyte propertyValue) { }
         public void Add(string propertyName, float propertyValue) { }
@@ -297,11 +301,19 @@ namespace System.Text.Json
         public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> GetEnumerator() { throw null; }
         public System.Text.Json.JsonObject GetJsonObjectPropertyValue(string propertyName) { throw null; }
         public System.Text.Json.JsonNode GetPropertyValue(string propertyName) { throw null; }
-        public void ModifyPropertyName(string oldName, string newName) { }
         public bool Remove(string propertyName) { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         public bool TryGetJsonObjectPropertyValue(string propertyName, out System.Text.Json.JsonObject jsonObject) { throw null; }
         public bool TryGetPropertyValue(string propertyName, out System.Text.Json.JsonNode jsonNode) { throw null; }
+    }
+    public partial class JsonObjectEnumerator : System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>>, System.Collections.IEnumerator, System.IDisposable
+    {
+        public JsonObjectEnumerator(System.Text.Json.JsonObject jsonObject) { }
+        public System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode> Current { get { throw null; } }
+        object System.Collections.IEnumerator.Current { get { throw null; } }
+        public void Dispose() { }
+        public bool MoveNext() { throw null; }
+        public void Reset() { }
     }
     public readonly partial struct JsonProperty
     {

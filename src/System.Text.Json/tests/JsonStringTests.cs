@@ -59,6 +59,18 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestReadonlySpan()
+        {
+            var spanValue = new ReadOnlySpan<char>(new char[] { 's', 'p', 'a', 'n' });
+            Assert.Equal("span", new JsonString(spanValue).Value);
+
+            string property = null;
+            spanValue = property.AsSpan();
+            var jsonString = new JsonString(spanValue);
+            Assert.Equal("", jsonString.Value);
+        }
+
+        [Fact]
         public static void TestGuid()
         {
             var guidString = "ca761232-ed42-11ce-bacd-00aa0057b223";
@@ -81,17 +93,6 @@ namespace System.Text.Json.Tests
             DateTimeOffset dateTimeOffset = DateTimeOffset.Now;
             var jsonString = new JsonString(dateTimeOffset);
             Assert.Equal(dateTimeOffset.ToString(), jsonString);
-        }
-
-        [Fact]
-        public static void TestReadonlySpan()
-        {
-            var spanValue = new ReadOnlySpan<char>(new char[] { 's', 'p', 'a', 'n' });
-            Assert.Equal("span", new JsonString(spanValue).Value);
-
-            string property = null;
-            spanValue = property.AsSpan();
-            var jsonString = new JsonString(spanValue);
         }
 
         [Fact]

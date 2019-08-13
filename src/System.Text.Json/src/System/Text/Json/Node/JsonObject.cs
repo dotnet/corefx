@@ -115,9 +115,10 @@ namespace System.Text.Json
                     case DuplicatePropertyNameHandling.Error:
                         throw new ArgumentException(string.Format(SR.JsonObjectDuplicateKey, propertyName));
                 }
+
+                Debug.Assert(_duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Replace);
             }
 
-            Debug.Assert(_duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Replace);
             _dictionary[propertyName] = propertyValue;
         }
 
@@ -133,6 +134,58 @@ namespace System.Text.Json
         ///   Provided value or property name is null.
         /// </exception>
         public void Add(string propertyName, string propertyValue) => Add(propertyName, new JsonString(propertyValue));
+
+        /// <summary>
+        ///   Adds the specified property as a <see cref="JsonString"/> to the JSON object.
+        /// </summary>
+        /// <param name="propertyName">Name of the property to add.</param>
+        /// <param name="propertyValue"><see cref="ReadOnlySpan{T}"/> value of the property to add.</param>
+        /// <exception cref="ArgumentException">
+        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, ReadOnlySpan<char> propertyValue) => Add(propertyName, new JsonString(propertyValue));
+
+        /// <summary>
+        ///   Adds the specified property as a <see cref="JsonString"/> to the JSON object.
+        /// </summary>
+        /// <param name="propertyName">Name of the property to add.</param>
+        /// <param name="propertyValue"><see cref="Guid"/> value of the property to add.</param>
+        /// <exception cref="ArgumentException">
+        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, Guid propertyValue) => Add(propertyName, new JsonString(propertyValue));
+
+        /// <summary>
+        ///   Adds the specified property as a <see cref="JsonString"/> to the JSON object.
+        /// </summary>
+        /// <param name="propertyName">Name of the property to add.</param>
+        /// <param name="propertyValue"><see cref="DateTime"/> value of the property to add.</param>
+        /// <exception cref="ArgumentException">
+        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, DateTime propertyValue) => Add(propertyName, new JsonString(propertyValue));
+
+        /// <summary>
+        ///   Adds the specified property as a <see cref="JsonString"/> to the JSON object.
+        /// </summary>
+        /// <param name="propertyName">Name of the property to add.</param>
+        /// <param name="propertyValue"><see cref="DateTimeOffset"/> value of the property to add.</param>
+        /// <exception cref="ArgumentException">
+        ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///   Provided property name is null.
+        /// </exception>
+        public void Add(string propertyName, DateTimeOffset propertyValue) => Add(propertyName, new JsonString(propertyValue));
 
         /// <summary>
         ///   Adds the specified property as a <see cref="JsonBoolean"/> to the JSON object.

@@ -48,6 +48,8 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(previousValue, ((JsonString)jsonObject["property"]).Value);
 
+            jsonObject.Add("property", new JsonString(newValue));
+
             string expectedString = expected == ExpectedValue.Previous ? previousValue : newValue;
             Assert.Equal(expectedString, ((JsonString) jsonObject["property"]).Value);
 
@@ -116,6 +118,46 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestReadonlySpan()
+        {
+            var jsonObject = new JsonObject();
+            
+            var spanValue = new ReadOnlySpan<char>(new char[] { 's', 'p', 'a', 'n' });
+            jsonObject.Add("span", spanValue);
+            Assert.Equal("span", (JsonString)jsonObject["span"]);
+
+            string property = null;
+            spanValue = property.AsSpan();
+            jsonObject.Add("span", spanValue);
+            Assert.Equal("", (JsonString)jsonObject["span"]);
+        }
+
+        [Fact]
+        public static void TestGuid()
+        {
+            var guidString = "ca761232-ed42-11ce-bacd-00aa0057b223";
+            Guid guid = new Guid(guidString);
+            var jsonObject = new JsonObject{ { "guid", guid } };
+            Assert.Equal(guidString, (JsonString)jsonObject["guid"]);
+        }
+
+        [Fact]
+        public static void TestDateTime()
+        {
+            DateTime dateTime = DateTime.Now;
+            var jsonObject = new JsonObject { { "dateTime", dateTime } };
+            Assert.Equal(dateTime.ToString(), (JsonString)jsonObject["dateTime"]);
+        }
+
+        [Fact]
+        public static void TestDateTimeOffset()
+        {
+            DateTimeOffset dateTimeOffset = DateTimeOffset.Now;
+            var jsonObject = new JsonObject { { "dateTimeOffset", dateTimeOffset } };
+            Assert.Equal(dateTimeOffset.ToString(), (JsonString)jsonObject["dateTimeOffset"]);
+        }
+
+        [Fact]
         public static void TestCreatingJsonObject()
         {
             var developer = new JsonObject
@@ -145,8 +187,8 @@ namespace System.Text.Json.Tests
             };
 
             Assert.Equal("Kasia", ((JsonString)developer["name"]).Value);
-            Assert.Equal("Kasia", ((JsonString)developer["n\\u0061me"]).Value);
             Assert.Equal(22, ((JsonNumber)developer["age"]).GetInt32());
+            Assert.True(((JsonBoolean)developer["is developer"]).Value);
         }
 
         [Fact]
@@ -301,21 +343,15 @@ namespace System.Text.Json.Tests
                 { "is_married", true }
             };
 
-            // Assign by creating a new instance of primary Json type
-            person1["name"] = new JsonString("Bob");
 
+            person1["name"] = new JsonString("Bob");
             Assert.Equal("Bob", (JsonString)person1["name"]);
 
-            // Assign by using an implicit operator on primary Json type
-            JsonNumber newAge = 55;
-            person1["age"] = newAge;
-
+            person1["age"] = new JsonNumber(55);
             Assert.Equal(55, (JsonNumber)person1["age"]);
 
-            // Assign by explicit cast from Json primary type
-            person1["is_married"] = (JsonBoolean)false;
-
-            Assert.Equal(false, (JsonBoolean) person1["is_married"]);
+            person1["is_married"] = new JsonBoolean(false);
+            Assert.Equal(false, (JsonBoolean)person1["is_married"]);
 
             var person2 = new JsonObject
             {
@@ -448,22 +484,6 @@ namespace System.Text.Json.Tests
 
             bool success = AddEmployee(manager);
             Assert.True(success);
-        }
-
-        [Fact]
-        public static void TestModifyPropertyNameThrows()
-        {
-            Assert.Throws<KeyNotFoundException>(() => new JsonObject().ModifyPropertyName("", ""));
-            Assert.Throws<ArgumentException>(() =>
-            {
-                var jsonObject = new JsonObject()
-                {
-                    { "oldName", "value" },
-                    { "newName", "value" }
-                };
-
-                jsonObject.ModifyPropertyName("oldName", "newName");
-            });
         }
 
         [Fact]
