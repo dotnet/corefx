@@ -196,35 +196,37 @@ namespace HttpStress
                 {
                     using var req = new HttpRequestMessage(HttpMethod.Get, "/headers");
                     ctx.PopulateWithRandomHeaders(req.Headers);
+                    uint expectedChecksum = ChecksumHelpers.ComputeHeaderChecksum(req.Headers.Select(x => (x.Key, x.Value)));
 
                     using HttpResponseMessage res = await ctx.SendAsync(req);
 
                     ValidateHttpVersion(res, ctx.HttpVersion);
                     ValidateStatusCode(res);
 
-                    // check server-side header checksum has expected value
-                    if (res.TrailingHeaders.TryGetValues("crc32", out IEnumerable<string> crcValues) &&
-                        uint.TryParse(crcValues.First(), out uint hash))
-                    {
-                        uint expectedHash = Crc32Helpers.CalculateHeaderChecksum(req.Headers.Select(x => (x.Key, x.Value)));
-                        if (expectedHash != hash)
-                        {
-                            throw new Exception($"Server reported unexpected header hash.");
-                        }
-                    }
+                    await res.Content.ReadAsStringAsync();
+
+                    bool isValidChecksum = ValidateServerChecksum(res.TrailingHeaders, expectedChecksum);
 
                     // Validate that request headers are being echoed
                     foreach (KeyValuePair<string, IEnumerable<string>> reqHeader in req.Headers)
                     {
+                        string GetFailureDetails() => isValidChecksum ? "server checksum matches client checksum" : "server checksum mismatch";
+
                         if (!res.Headers.TryGetValues(reqHeader.Key, out IEnumerable<string> values))
                         {
-                            throw new Exception($"Expected response header name {reqHeader.Key} missing.");
+                            throw new Exception($"Expected response header name {reqHeader.Key} missing. ${GetFailureDetails()}");
                         }
                         else if (!reqHeader.Value.SequenceEqual(values))
                         {
                             string FmtValues(IEnumerable<string> values) => string.Join(", ", values.Select(x => $"\"{x}\""));
-                            throw new Exception($"Unexpected values for header {reqHeader.Key}. Expected {FmtValues(reqHeader.Value)} but got {FmtValues(values)}");
+                            throw new Exception($"Unexpected values for header {reqHeader.Key}. Expected {FmtValues(reqHeader.Value)} but got {FmtValues(values)}. ${GetFailureDetails()}");
                         }
+                    }
+
+                    if (!isValidChecksum)
+                    {
+                        // Should not reach this block unless there's a bug in checksum validation logic. Do throw now
+                        throw new Exception("server checksum mismatch");
                     }
                 }),
 
@@ -330,8 +332,7 @@ namespace HttpStress
                 {
                     string content = ctx.GetRandomString(0, ctx.MaxContentLength);
                     byte[] byteContent = Encoding.ASCII.GetBytes(content);
-                    uint checksum = 0;
-                    Crc32Helpers.Append(byteContent, ref checksum);
+                    uint checksum = ChecksumHelpers.Compute(byteContent);
 
                     using var req = new HttpRequestMessage(HttpMethod.Post, "/duplexSlow") { Content = new ByteAtATimeNoLengthContent(byteContent) };
                     using HttpResponseMessage m = await ctx.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
@@ -340,14 +341,15 @@ namespace HttpStress
                     ValidateStatusCode(m);
                     var response = await m.Content.ReadAsStringAsync();
 
-                    if (m.TrailingHeaders.TryGetValues("crc32", out IEnumerable<string> values) && 
-                        uint.TryParse(values.First(), out uint serverChecksum) &&
-                        serverChecksum != checksum)
-                    {
-                        throw new Exception($"Server reported unexpected checksum.");
-                    }
+                    bool isValidChecksum = ValidateServerChecksum(m.TrailingHeaders, checksum);
 
-                    ValidateContent(content, response);
+                    ValidateContent(content, response, details: $"server checksum {(isValidChecksum ? "matches" : "does not match")} client");
+
+                    if (!isValidChecksum)
+                    {
+                        // Should not reach this block unless there's a bug in checksum validation logic. Do throw now
+                        throw new Exception("server checksum mismatch");
+                    }
                 }),
 
                 ("POST Duplex Dispose",
@@ -535,6 +537,17 @@ namespace HttpStress
 
             sb.Append("--test_boundary--\r\n");
             return (sb.ToString(), multipartContent);
+        }
+
+        private static bool ValidateServerChecksum(HttpResponseHeaders headers, uint expectedChecksum)
+        {
+            if (headers.TryGetValues("crc32", out IEnumerable<string> values) && 
+                uint.TryParse(values.First(), out uint serverChecksum))
+            {
+                return serverChecksum == expectedChecksum;
+            }
+
+            throw new Exception("could not find checksum header in server response");
         }
 
         /// <summary>HttpContent that's similar to StringContent but that can be used with HTTP/2 duplex communication.</summary>

@@ -4,24 +4,29 @@
 
 using System.Collections.Generic;
 using System.Text;
-using Force.Crc32;
+using Crc32 = Force.Crc32.Crc32Algorithm;
 
 namespace HttpStress
 {
-    public static class Crc32Helpers
+    public static class ChecksumHelpers
     {
         public static void Append(byte[] bytes, ref uint accumulator)
         {
-            accumulator = Crc32Algorithm.Append(accumulator, bytes);
+            accumulator = Crc32.Append(accumulator, bytes);
         }
 
         public static void Append(string text, ref uint accumulator, Encoding encoding = null)
         {
             if (encoding == null) encoding = Encoding.ASCII;
-            accumulator = Crc32Algorithm.Append(accumulator, encoding.GetBytes(text));
+            accumulator = Crc32.Append(accumulator, encoding.GetBytes(text));
         }
 
-        public static uint CalculateHeaderChecksum<T>(IEnumerable<(string name, T)> headers) where T : IEnumerable<string>
+        public static uint Compute(byte[] bytes)
+        {
+            return Crc32.Compute(bytes);
+        }
+
+        public static uint ComputeHeaderChecksum<T>(IEnumerable<(string name, T)> headers) where T : IEnumerable<string>
         {
             uint checksum = 0;
 

@@ -150,7 +150,7 @@ namespace HttpStress
                 if (context.Response.SupportsTrailers())
                 {
                     // send back a checksum of all the echoed headers
-                    uint checksum = Crc32Helpers.CalculateHeaderChecksum(headersToEcho);
+                    uint checksum = ChecksumHelpers.ComputeHeaderChecksum(headersToEcho);
                     context.Response.AppendTrailer("crc32", checksum.ToString());
 
                     // just add variations of already echoed headers as trailers
@@ -201,7 +201,7 @@ namespace HttpStress
                 uint hashAcc = 0;
                 while ((await context.Request.Body.ReadAsync(buffer)) != 0)
                 {
-                    Crc32Helpers.Append(buffer, ref hashAcc);
+                    ChecksumHelpers.Append(buffer, ref hashAcc);
                     await context.Response.Body.WriteAsync(buffer);
                 }
 
