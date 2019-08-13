@@ -7,7 +7,10 @@
   <ItemGroup>
     <Compile Include="System.Runtime.InteropServices.WindowsRuntime.cs" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp3.0'">
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp3.0'">
+    <Reference Include="System.Runtime" />
   </ItemGroup>
 </Project>
