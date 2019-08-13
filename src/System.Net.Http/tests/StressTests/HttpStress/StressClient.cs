@@ -148,15 +148,16 @@ namespace HttpStress
         {
             // Representative error text of stress failure
             public string ErrorText { get; }
-            public ImmutableDictionary<int, int> Failures { get; }
+            // Operation id => failure timestamps
+            public Dictionary<int, List<DateTime>> Failures { get; }
 
-            public StressFailureType(string errorText, ImmutableDictionary<int, int> failures)
+            public StressFailureType(string errorText)
             {
                 ErrorText = errorText;
-                Failures = failures;
+                Failures = new Dictionary<int, List<DateTime>>();
             }
 
-            public int FailureCount => Failures.Values.Sum();
+            public int FailureCount => Failures.Values.Select(x => x.Count).Sum();
         }
 
         private sealed class StressResultAggregator
@@ -198,6 +199,8 @@ namespace HttpStress
 
             public void RecordFailure(Exception exn, int operationIndex, TimeSpan elapsed, int taskNum, long iteration)
             {
+                DateTime timestamp = DateTime.Now;
+                
                 Interlocked.Increment(ref _totalRequests);
                 Interlocked.Increment(ref _failures[operationIndex]);
 
@@ -211,17 +214,19 @@ namespace HttpStress
                 {
                     (Type, string, string)[] key = ClassifyFailure(exn);
 
-                    _failureTypes.AddOrUpdate(key, Add, Update);
+                    StressFailureType failureType = _failureTypes.GetOrAdd(key, _ => new StressFailureType(exn.ToString()));
 
-                    StressFailureType Add<T>(T key)
+                    lock (failureType)
                     {
-                        return new StressFailureType(exn.ToString(), ImmutableDictionary<int, int>.Empty.SetItem(operationIndex, 1));
-                    }
+                        List<DateTime> timestamps;
 
-                    StressFailureType Update<T>(T key, StressFailureType current)
-                    {
-                        current.Failures.TryGetValue(operationIndex, out int failureCount);
-                        return new StressFailureType(current.ErrorText, current.Failures.SetItem(operationIndex, failureCount + 1));
+                        if(!failureType.Failures.TryGetValue(operationIndex, out timestamps))
+                        {
+                            timestamps = new List<DateTime>();
+                            failureType.Failures.Add(operationIndex, timestamps);
+                        }
+
+                        timestamps.Add(timestamp);
                     }
 
                     (Type exception, string message, string callSite)[] ClassifyFailure(Exception exn)
@@ -361,15 +366,16 @@ namespace HttpStress
                     Console.WriteLine(failure.ErrorText);
                     Console.WriteLine();
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                    foreach (KeyValuePair<int, int> operation in failure.Failures)
+                    foreach (KeyValuePair<int, List<DateTime>> operation in failure.Failures)
                     {
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.Write($"\t{_operationNames[operation.Key].PadRight(30)}");
                         Console.ResetColor();
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write($"Fail: ");
+                        Console.Write("Fail: ");
                         Console.ResetColor();
-                        Console.WriteLine(operation.Value);
+                        Console.Write(operation.Value.Count);
+                        Console.WriteLine($"\tTimestamps: {string.Join(", ", operation.Value.Select(x => x.ToString("HH:mm:ss")))}");
                     }
 
                     Console.ForegroundColor = ConsoleColor.Cyan;
