@@ -375,7 +375,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="System.Security" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'netstandard2.1'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' OR '$(TargetGroup)' == 'netstandard2.1'">
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Numerics" />
     <Reference Include="System.Collections" />
@@ -645,7 +645,7 @@
     <Compile Include="System\Security\Cryptography\Pkcs\SignerInfoCollection.cs" />
     <Compile Include="System\Security\Cryptography\Pkcs\SignerInfoEnumerator.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'netstandard2.1'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' OR '$(TargetGroup)' == 'netstandard2.1'">
     <Compile Include="$(CommonPath)\System\Security\Cryptography\KeyFormatHelper.cs">
       <Link>Common\System\Security\Cryptography\KeyFormatHelper.cs</Link>
     </Compile>

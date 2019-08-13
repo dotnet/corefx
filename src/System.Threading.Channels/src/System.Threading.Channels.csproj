@@ -40,7 +40,7 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Threading" />
-    <Reference Include="System.Threading.ThreadPool" Condition="'$(TargetGroup)' == 'netcoreapp'" />
+    <Reference Include="System.Threading.ThreadPool" Condition="'$(TargetsNetCoreApp)' == 'true'" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
