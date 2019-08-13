@@ -3712,6 +3712,43 @@ namespace System.Text.Json.Tests
 #endif
                     ));
         }
+
+        [Fact]
+        // Issue #39930
+        public static void Disposing_On_Multiple_Threads_Should_Not_Return_To_ArrayPool_Twice()
+        {
+            Action<object> disposeAction = (object document) => ((JsonDocument)document).Dispose();
+
+            // Create a bunch of parallel tasks that call Dispose several times on the same object.
+            Task[] tasks = new Task[100];
+            int count = 0;
+            for (int j = 0; j < 10; j++)
+            {
+                JsonDocument document = JsonDocument.Parse("123" + j);
+                for (int i = 0; i < 10; i++)
+                {
+                    tasks[count] = new Task(disposeAction, document);
+                    tasks[count].Start();
+
+                    count++;
+                }
+            }
+
+            Task.WaitAll(tasks);
+
+            // When ArrayPool gets corrupted, the Rent method might pull an already rented array, which is incorrect.
+            // So we will pull as many arrays as calls to JsonElement.Dispose and check they are unique.
+            HashSet<IntPtr> uniqueAddresses = new HashSet<IntPtr>();
+            while (count > 0)
+            {
+                byte[] arr = ArrayPool<byte>.Shared.Rent(4);
+                GCHandle pinned = GCHandle.Alloc(arr, GCHandleType.Pinned);
+                IntPtr address = pinned.AddrOfPinnedObject();
+
+                Assert.True(uniqueAddresses.Add(address));
+                count--;
+            }
+        }
     }
 
     public class ThrowOnReadStream : MemoryStream

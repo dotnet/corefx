@@ -61,17 +61,24 @@ namespace System.Text.Json
                 return;
             }
 
-            int length = _utf8Json.Length;
-            _utf8Json = ReadOnlyMemory<byte>.Empty;
             _parsedData.Dispose();
 
-            // When "extra rented bytes exist" they contain the document,
-            // and thus need to be cleared before being returned.
-            if (_extraRentedBytes != null)
+            int length = _utf8Json.Length;
+            if (length > 0)
             {
-                _extraRentedBytes.AsSpan(0, length).Clear();
-                ArrayPool<byte>.Shared.Return(_extraRentedBytes);
-                _extraRentedBytes = null;
+                _utf8Json = ReadOnlyMemory<byte>.Empty;
+
+                // When "extra rented bytes exist" they contain the document,
+                // and thus need to be cleared before being returned.
+                byte[] extraRentedBytes = Threading.Interlocked.Exchange(ref _extraRentedBytes, null);
+
+                if (extraRentedBytes != null)
+                {
+                    extraRentedBytes.AsSpan(0, length).Clear();
+                    ArrayPool<byte>.Shared.Return(extraRentedBytes);
+
+                    _extraRentedBytes = null;
+                }
             }
         }
 
