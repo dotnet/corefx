@@ -911,8 +911,7 @@ namespace System.Net.Security
         --*/
         internal SecurityStatusPal Encrypt(ReadOnlyMemory<byte> buffer, ref byte[] output, out int resultSize)
         {
-            bool logEnabled = NetEventSource.IsEnabled;
-            if (logEnabled)
+            if (NetEventSource.IsEnabled)
             {
                 NetEventSource.Enter(this, buffer, buffer.Length);
                 NetEventSource.DumpBuffer(this, buffer);
@@ -930,18 +929,14 @@ namespace System.Net.Security
 
             if (secStatus.ErrorCode != SecurityStatusPalErrorCode.OK)
             {
-                if (logEnabled)
-                {
+                if (NetEventSource.IsEnabled)
                     NetEventSource.Exit(this, $"ERROR {secStatus}");
-                }
             }
             else
             {
                 output = writeBuffer;
-                if (logEnabled)
-                {
+                if (NetEventSource.IsEnabled)
                     NetEventSource.Exit(this, $"OK data size:{resultSize}");
-                }
             }
 
             return secStatus;
