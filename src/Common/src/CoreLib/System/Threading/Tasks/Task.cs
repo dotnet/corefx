@@ -1168,7 +1168,8 @@ namespace System.Threading.Tasks
         /// </summary>
         internal static int NewId()
         {
-            int newId = 0;
+            int newId;
+
             // We need to repeat if Interlocked.Increment wraps around and returns 0.
             // Otherwise next time this task's Id is queried it will get a new value
             do
@@ -4882,11 +4883,11 @@ namespace System.Threading.Tasks
         // A ManualResetEventSlim that will get Set after Invoke is called count times.
         // This allows us to replace this logic:
         //      var mres = new ManualResetEventSlim(tasks.Count);
-        //      Action<Task> completionAction = delegate { if(Interlocked.Decrement(ref count) == 0) mres.Set(); };
-        //      foreach(var task in tasks) task.AddCompletionAction(completionAction);
+        //      Action<Task> completionAction = delegate { if (Interlocked.Decrement(ref count) == 0) mres.Set(); };
+        //      foreach (var task in tasks) task.AddCompletionAction(completionAction);
         // with this logic:
         //      var mres = new SetOnCountdownMres(tasks.Count);
-        //      foreach(var task in tasks) task.AddCompletionAction(mres);
+        //      foreach (var task in tasks) task.AddCompletionAction(mres);
         // which saves a couple of allocations.
         //
         // Used in WaitAllBlockingCore (above).
@@ -6287,7 +6288,7 @@ namespace System.Threading.Tasks
     // Proxy class for better debugging experience
     internal class SystemThreadingTasks_TaskDebugView
     {
-        private Task m_task;
+        private readonly Task m_task;
 
         public SystemThreadingTasks_TaskDebugView(Task task)
         {
@@ -6659,10 +6660,9 @@ namespace System.Threading.Tasks
                 case TaskStatus.Faulted:
                     var edis = task.GetExceptionDispatchInfos();
                     ExceptionDispatchInfo oceEdi;
-                    OperationCanceledException? oce;
                     if (lookForOce && edis.Count > 0 &&
                         (oceEdi = edis[0]) != null &&
-                        (oce = oceEdi.SourceException as OperationCanceledException) != null)
+                        oceEdi.SourceException is OperationCanceledException oce)
                     {
                         result = TrySetCanceled(oce.CancellationToken, oceEdi);
                     }
@@ -6673,15 +6673,13 @@ namespace System.Threading.Tasks
                     break;
 
                 case TaskStatus.RanToCompletion:
-                    var taskTResult = task as Task<TResult>;
-
                     if (AsyncCausalityTracer.LoggingOn)
                         AsyncCausalityTracer.TraceOperationCompletion(this, AsyncCausalityStatus.Completed);
 
                     if (Task.s_asyncDebuggingEnabled)
                         RemoveFromActiveTasks(this);
 
-                    result = TrySetResult(taskTResult != null ? taskTResult.Result : default);
+                    result = TrySetResult(task is Task<TResult> taskTResult ? taskTResult.Result : default);
                     break;
             }
             return result;

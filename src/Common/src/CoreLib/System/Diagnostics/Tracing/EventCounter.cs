@@ -116,7 +116,7 @@ namespace System.Diagnostics.Tracing
 
         internal void ResetStatistics()
         {
-            lock(this)
+            lock (this)
             {
                 _count = 0;
                 _sum = 0;
@@ -190,7 +190,7 @@ namespace System.Diagnostics.Tracing
     /// This is the payload that is sent in the with EventSource.Write
     /// </summary>
     [EventData]
-    class CounterPayloadType
+    internal class CounterPayloadType
     {
         public CounterPayloadType(CounterPayload payload) { Payload = payload; }
         public CounterPayload Payload { get; set; }

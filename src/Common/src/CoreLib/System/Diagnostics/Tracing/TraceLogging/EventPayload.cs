@@ -46,7 +46,7 @@ namespace System.Diagnostics.Tracing
                     throw new System.ArgumentNullException(nameof(key));
 
                 int position = 0;
-                foreach(var name in m_names)
+                foreach (var name in m_names)
                 {
                     if (name == key)
                     {
@@ -150,8 +150,8 @@ namespace System.Diagnostics.Tracing
         }
 
         #region private
-        private List<string> m_names;
-        private List<object?> m_values;
+        private readonly List<string> m_names;
+        private readonly List<object?> m_values;
         #endregion
     }
 }

@@ -42,7 +42,7 @@ namespace System.Text
         // This array has a size of 128.
         private bool[] _directEncode = null!;
 
-        private bool _allowOptionals;
+        private readonly bool _allowOptionals;
 
         private const int UTF7_CODEPAGE = 65000;
 
@@ -873,8 +873,7 @@ namespace System.Text
 
             public override bool Equals(object? value)
             {
-                DecoderUTF7Fallback? that = value as DecoderUTF7Fallback;
-                if (that != null)
+                if (value is DecoderUTF7Fallback)
                 {
                     return true;
                 }

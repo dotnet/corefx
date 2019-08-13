@@ -47,7 +47,7 @@ namespace System.Diagnostics.Tracing
         public TimeSpan DisplayRateTimeScale { get; set; }
         private double _increment;
         private double _prevIncrement;
-        private Func<double> _totalValueProvider;
+        private readonly Func<double> _totalValueProvider;
 
         /// <summary>
         /// Calls "_totalValueProvider" to enqueue the counter value to the queue.
@@ -93,7 +93,7 @@ namespace System.Diagnostics.Tracing
     /// This is the payload that is sent in the with EventSource.Write
     /// </summary>
     [EventData]
-    class IncrementingPollingCounterPayloadType
+    internal class IncrementingPollingCounterPayloadType
     {
         public IncrementingPollingCounterPayloadType(IncrementingCounterPayload payload) { Payload = payload; }
         public IncrementingCounterPayload Payload { get; set; }

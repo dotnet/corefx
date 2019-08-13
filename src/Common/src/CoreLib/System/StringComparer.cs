@@ -69,23 +69,16 @@ namespace System
         // Convert a StringComparison to a StringComparer
         public static StringComparer FromComparison(StringComparison comparisonType)
         {
-            switch (comparisonType)
+            return comparisonType switch
             {
-                case StringComparison.CurrentCulture:
-                    return CurrentCulture;
-                case StringComparison.CurrentCultureIgnoreCase:
-                    return CurrentCultureIgnoreCase;
-                case StringComparison.InvariantCulture:
-                    return InvariantCulture;
-                case StringComparison.InvariantCultureIgnoreCase:
-                    return InvariantCultureIgnoreCase;
-                case StringComparison.Ordinal:
-                    return Ordinal;
-                case StringComparison.OrdinalIgnoreCase:
-                    return OrdinalIgnoreCase;
-                default:
-                    throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType));
-            }
+                StringComparison.CurrentCulture => CurrentCulture,
+                StringComparison.CurrentCultureIgnoreCase => CurrentCultureIgnoreCase,
+                StringComparison.InvariantCulture => InvariantCulture,
+                StringComparison.InvariantCultureIgnoreCase => InvariantCultureIgnoreCase,
+                StringComparison.Ordinal => Ordinal,
+                StringComparison.OrdinalIgnoreCase => OrdinalIgnoreCase,
+                _ => throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType)),
+            };
         }
 
         public static StringComparer Create(CultureInfo culture, bool ignoreCase)
@@ -173,7 +166,7 @@ namespace System
         private const CompareOptions ValidCompareMaskOffFlags = ~(CompareOptions.IgnoreCase | CompareOptions.IgnoreSymbols | CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreWidth | CompareOptions.IgnoreKanaType | CompareOptions.StringSort);
 
         private readonly CompareInfo _compareInfo; // Do not rename (binary serialization)
-        private CompareOptions _options;
+        private readonly CompareOptions _options;
 
         internal CultureAwareComparer(CultureInfo culture, CompareOptions options) : this(culture.CompareInfo, options) { }
 

@@ -387,7 +387,7 @@ namespace System.Xml.Linq
             }
         }
 
-        async Task WriteStartElementAsync(XElement e, CancellationToken cancellationToken)
+        private async Task WriteStartElementAsync(XElement e, CancellationToken cancellationToken)
         {
             PushElement(e);
             XNamespace ns = e.Name.Namespace;
@@ -409,7 +409,7 @@ namespace System.Xml.Linq
 
     internal struct NamespaceResolver
     {
-        class NamespaceDeclaration
+        private class NamespaceDeclaration
         {
             public string prefix;
             public XNamespace ns;
@@ -683,7 +683,7 @@ namespace System.Xml.Linq
     /// <summary>
     /// Specifies a set of options for Load().
     /// </summary>
-    [Flags()]
+    [Flags]
     public enum LoadOptions
     {
         /// <summary>Default options.</summary>
@@ -703,7 +703,7 @@ namespace System.Xml.Linq
     /// <summary>
     /// Specifies a set of options for Save().
     /// </summary>
-    [Flags()]
+    [Flags]
     public enum SaveOptions
     {
         /// <summary>Default options.</summary>
@@ -719,7 +719,7 @@ namespace System.Xml.Linq
     /// <summary>
     /// Specifies a set of options for CreateReader().
     /// </summary>
-    [Flags()]
+    [Flags]
     public enum ReaderOptions
     {
         /// <summary>Default options.</summary>

@@ -407,11 +407,11 @@ namespace System.Threading
         internal bool loggingEnabled;
         internal readonly ConcurrentQueue<object> workItems = new ConcurrentQueue<object>(); // SOS's ThreadPool command depends on this name
 
-        private Internal.PaddingFor32 pad1;
+        private readonly Internal.PaddingFor32 pad1;
 
         private volatile int numOutstandingThreadRequests = 0;
 
-        private Internal.PaddingFor32 pad2;
+        private readonly Internal.PaddingFor32 pad2;
 
         public ThreadPoolWorkQueue()
         {
@@ -582,7 +582,6 @@ namespace System.Threading
             // false later, but only if we're absolutely certain that the queue is empty.
             //
             bool needAnotherThread = true;
-            object? outerWorkItem = null;
             try
             {
                 //
@@ -604,7 +603,7 @@ namespace System.Threading
                 {
                     bool missedSteal = false;
                     // Use operate on workItem local to try block so it can be enregistered
-                    object? workItem = outerWorkItem = workQueue.Dequeue(tl, ref missedSteal);
+                    object? workItem = workQueue.Dequeue(tl, ref missedSteal);
 
                     if (workItem == null)
                     {
@@ -673,7 +672,7 @@ namespace System.Threading
                     currentThread.ResetThreadPoolThread();
 
                     // Release refs
-                    outerWorkItem = workItem = null;
+                    workItem = null;
 
                     // Return to clean ExecutionContext and SynchronizationContext
                     ExecutionContext.ResetThreadPoolThread(currentThread);
@@ -911,9 +910,9 @@ namespace System.Threading
 
     internal sealed class _ThreadPoolWaitOrTimerCallback
     {
-        private WaitOrTimerCallback _waitOrTimerCallback;
-        private ExecutionContext? _executionContext;
-        private object? _state;
+        private readonly WaitOrTimerCallback _waitOrTimerCallback;
+        private readonly ExecutionContext? _executionContext;
+        private readonly object? _state;
         private static readonly ContextCallback _ccbt = new ContextCallback(WaitOrTimerCallback_Context_t);
         private static readonly ContextCallback _ccbf = new ContextCallback(WaitOrTimerCallback_Context_f);
 

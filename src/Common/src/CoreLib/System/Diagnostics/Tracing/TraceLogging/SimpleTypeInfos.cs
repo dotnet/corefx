@@ -48,10 +48,10 @@ namespace System.Diagnostics.Tracing
     /// <summary>
     /// Type handler for simple scalar types.
     /// </summary>
-    sealed class ScalarTypeInfo : TraceLoggingTypeInfo
+    internal sealed class ScalarTypeInfo : TraceLoggingTypeInfo
     {
-        Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc;
-        TraceLoggingDataType nativeFormat;
+        private readonly Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc;
+        private readonly TraceLoggingDataType nativeFormat;
 
         private ScalarTypeInfo(
             Type type,
@@ -96,9 +96,9 @@ namespace System.Diagnostics.Tracing
     /// </summary>
     internal sealed class ScalarArrayTypeInfo : TraceLoggingTypeInfo
     {
-        Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc;
-        TraceLoggingDataType nativeFormat;
-        int elementSize;
+        private readonly Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc;
+        private readonly TraceLoggingDataType nativeFormat;
+        private readonly int elementSize;
 
         private ScalarArrayTypeInfo(
             Type type,

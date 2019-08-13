@@ -429,7 +429,7 @@ namespace System.Xml.Linq
             XDocument d = InitLoad(reader, options);
             d.ReadContentFrom(reader, options);
 
-            if( !reader.EOF) throw new InvalidOperationException(SR.InvalidOperation_ExpectedEndOfFile);
+            if ( !reader.EOF) throw new InvalidOperationException(SR.InvalidOperation_ExpectedEndOfFile);
             if (d.Root == null) throw new InvalidOperationException(SR.InvalidOperation_MissingRoot);
             return d;
         }
@@ -479,7 +479,7 @@ namespace System.Xml.Linq
         /// <summary>
         /// Performs shared initialization between Load and LoadAsync.
         /// </summary>
-        static XDocument InitLoad(XmlReader reader, LoadOptions options)
+        private static XDocument InitLoad(XmlReader reader, LoadOptions options)
         {
             XDocument d = new XDocument();
             if ((options & LoadOptions.SetBaseUri) != 0)

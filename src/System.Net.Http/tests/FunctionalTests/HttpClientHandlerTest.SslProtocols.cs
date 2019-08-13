@@ -133,6 +133,15 @@ namespace System.Net.Http.Functional.Tests
                 {
                     handler.SslProtocols = acceptedProtocol;
                 }
+                else
+                {
+                    // Explicitly setting protocols clears implementation default
+                    // restrictions on minimum TLS/SSL version
+                    // We currently know that some platforms like Debian 10 OpenSSL
+                    // will by default block < TLS 1.2
+                    handler.SslProtocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13;
+                }
+
                 var options = new LoopbackServer.Options { UseSsl = true, SslProtocols = acceptedProtocol };
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {

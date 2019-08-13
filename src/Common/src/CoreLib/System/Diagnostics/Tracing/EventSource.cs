@@ -243,7 +243,7 @@ namespace System.Diagnostics.Tracing
 #if FEATURE_EVENTSOURCE_XPLAT
 #pragma warning disable CA1823 // field is used to keep listener alive
         private static readonly EventListener? persistent_Xplat_Listener = XplatEventLogger.InitializePersistentListener();
-#pragma warning restore SA1617
+#pragma warning restore CA1823
 #endif //FEATURE_EVENTSOURCE_XPLAT
 
         /// <summary>
@@ -672,9 +672,7 @@ namespace System.Diagnostics.Tracing
             Guid eventSourceGuid;
             string? eventSourceName;
 
-            EventMetadata[]? eventDescriptors;
-            byte[]? manifest;
-            GetMetadata(out eventSourceGuid, out eventSourceName, out eventDescriptors, out manifest);
+            GetMetadata(out eventSourceGuid, out eventSourceName, out _, out _);
 
             if (eventSourceGuid.Equals(Guid.Empty) || eventSourceName == null)
             {
@@ -693,7 +691,7 @@ namespace System.Diagnostics.Tracing
         {
             // If the EventSource is set to emit all events as TraceLogging events, skip this initialization.
             // Events will be defined when they are emitted for the first time.
-            if(SelfDescribingEvents)
+            if (SelfDescribingEvents)
             {
                 return;
             }
@@ -1876,7 +1874,7 @@ namespace System.Diagnostics.Tracing
                     // ETW strings are NULL-terminated, so marshal everything up to the first
                     // null in the string.
                     //return System.Runtime.InteropServices.Marshal.PtrToStringUni(dataPointer);
-                    if(dataPointer == IntPtr.Zero)
+                    if (dataPointer == IntPtr.Zero)
                     {
                         return null;
                     }
@@ -2151,10 +2149,10 @@ namespace System.Diagnostics.Tracing
             eventCallbackArgs.Message = m_eventData[eventId].Message;
             eventCallbackArgs.Payload = new ReadOnlyCollection<object?>(args);
 
-            DispatchToAllListeners(eventId, childActivityID, eventCallbackArgs);
+            DispatchToAllListeners(eventId, eventCallbackArgs);
         }
 
-        private unsafe void DispatchToAllListeners(int eventId, Guid* childActivityID, EventWrittenEventArgs eventCallbackArgs)
+        private unsafe void DispatchToAllListeners(int eventId, EventWrittenEventArgs eventCallbackArgs)
         {
             Exception? lastThrownException = null;
             for (EventDispatcher? dispatcher = m_Dispatchers; dispatcher != null; dispatcher = dispatcher.m_Next)
@@ -2431,8 +2429,8 @@ namespace System.Diagnostics.Tracing
                 m_eventSource.SendCommand(listener, m_eventProviderType, perEventSourceSessionId, etwSessionId,
                                           (EventCommand)command, IsEnabled(), Level, MatchAnyKeyword, arguments);
             }
-            private EventSource m_eventSource;
-            private EventProviderType m_eventProviderType;
+            private readonly EventSource m_eventSource;
+            private readonly EventProviderType m_eventProviderType;
         }
 #endif
 
@@ -2526,7 +2524,7 @@ namespace System.Diagnostics.Tracing
         private int GetParameterCount(EventMetadata eventData)
         {
             int paramCount;
-            if(eventData.Parameters == null)
+            if (eventData.Parameters == null)
             {
                 paramCount = eventData.ParameterTypes.Length;
             }
@@ -2541,7 +2539,7 @@ namespace System.Diagnostics.Tracing
         private Type GetDataType(EventMetadata eventData, int parameterId)
         {
             Type dataType;
-            if(eventData.Parameters == null)
+            if (eventData.Parameters == null)
             {
                 dataType = EventTypeToType(eventData.ParameterTypes[parameterId]);
             }
@@ -2784,9 +2782,7 @@ namespace System.Diagnostics.Tracing
                     }
 
                     this.OnEventCommand(commandArgs);
-                    var eventCommandCallback = this.m_eventCommandExecuted;
-                    if (eventCommandCallback != null)
-                        eventCommandCallback(this, commandArgs);
+                    this.m_eventCommandExecuted?.Invoke(this, commandArgs);
 
                     if (!commandArgs.enable)
                     {
@@ -2837,9 +2833,7 @@ namespace System.Diagnostics.Tracing
                     // Debug.Assert(matchAnyKeyword == EventKeywords.None);
 
                     this.OnEventCommand(commandArgs);
-                    var eventCommandCallback = m_eventCommandExecuted;
-                    if (eventCommandCallback != null)
-                        eventCommandCallback(this, commandArgs);
+                    m_eventCommandExecuted?.Invoke(this, commandArgs);
                 }
             }
             catch (Exception e)
@@ -3913,7 +3907,7 @@ namespace System.Diagnostics.Tracing
 
         private EventHandler<EventCommandEventArgs>? m_eventCommandExecuted;
 
-        private EventSourceSettings m_config;      // configuration information
+        private readonly EventSourceSettings m_config;      // configuration information
 
         private bool m_eventSourceDisposed;              // has Dispose been called.
 
@@ -3950,7 +3944,7 @@ namespace System.Diagnostics.Tracing
 
         // We use a single instance of ActivityTracker for all EventSources instances to allow correlation between multiple event providers.
         // We have m_activityTracker field simply because instance field is more efficient than static field fetch.
-        ActivityTracker m_activityTracker = null!;
+        private ActivityTracker m_activityTracker = null!;
         internal const string s_ActivityStartSuffix = "Start";
         internal const string s_ActivityStopSuffix = "Stop";
 
@@ -4257,11 +4251,7 @@ namespace System.Diagnostics.Tracing
         /// <param name="eventData"></param>
         protected internal virtual void OnEventWritten(EventWrittenEventArgs eventData)
         {
-            EventHandler<EventWrittenEventArgs>? callBack = this.EventWritten;
-            if (callBack != null)
-            {
-                callBack(this, eventData);
-            }
+            this.EventWritten?.Invoke(this, eventData);
         }
 
 
@@ -4962,7 +4952,7 @@ namespace System.Diagnostics.Tracing
         }
         private string? m_message;
         private string? m_eventName;
-        private EventSource m_eventSource;
+        private readonly EventSource m_eventSource;
         private ReadOnlyCollection<string>? m_payloadNames;
         private Guid m_activityId;
         private long? m_osThreadId;
@@ -5083,7 +5073,7 @@ namespace System.Diagnostics.Tracing
         public EventActivityOptions ActivityOptions { get; set; }
 
 #region private
-        EventOpcode m_opcode;
+        private EventOpcode m_opcode;
         private bool m_opcodeSet;
 #endregion
     }
@@ -5121,6 +5111,8 @@ namespace System.Diagnostics.Tracing
     [AttributeUsage(AttributeTargets.Field)]
 #if FEATURE_ADVANCED_MANAGED_ETW_CHANNELS
     public
+#else
+    internal
 #endif
     class EventChannelAttribute : Attribute
     {
@@ -5161,6 +5153,8 @@ namespace System.Diagnostics.Tracing
     /// </summary>
 #if FEATURE_ADVANCED_MANAGED_ETW_CHANNELS
     public
+#else
+    internal
 #endif
     enum EventChannelType
     {
@@ -5895,7 +5889,7 @@ namespace System.Diagnostics.Tracing
             List<CultureInfo>? cultures = null;
             if (resources != null && (flags & EventManifestOptions.AllCultures) != 0)
             {
-                cultures = GetSupportedCultures(resources);
+                cultures = GetSupportedCultures();
             }
             else
             {
@@ -5982,9 +5976,8 @@ namespace System.Diagnostics.Tracing
         /// we enumerate through all the "known" cultures and attempt to load a corresponding satellite
         /// assembly
         /// </summary>
-        /// <param name="resources"></param>
         /// <returns></returns>
-        private static List<CultureInfo> GetSupportedCultures(ResourceManager resources)
+        private static List<CultureInfo> GetSupportedCultures()
         {
             var cultures = new List<CultureInfo>();
 
@@ -6268,7 +6261,7 @@ namespace System.Diagnostics.Tracing
         }
 
 #if FEATURE_MANAGED_ETW_CHANNELS
-        class ChannelInfo
+        private class ChannelInfo
         {
             public string? Name;
             public ulong Keywords;
@@ -6276,15 +6269,14 @@ namespace System.Diagnostics.Tracing
         }
 #endif
 
-        Dictionary<int, string> opcodeTab;
-        Dictionary<int, string>? taskTab;
+        private readonly Dictionary<int, string> opcodeTab;
+        private Dictionary<int, string>? taskTab;
 #if FEATURE_MANAGED_ETW_CHANNELS
-        Dictionary<int, ChannelInfo>? channelTab;
+        private Dictionary<int, ChannelInfo>? channelTab;
 #endif
-        Dictionary<ulong, string>? keywordTab;
-        Dictionary<string, Type>? mapsTab;
-
-        Dictionary<string, string> stringTab;       // Maps unlocalized strings to localized ones
+        private Dictionary<ulong, string>? keywordTab;
+        private Dictionary<string, Type>? mapsTab;
+        private readonly Dictionary<string, string> stringTab;       // Maps unlocalized strings to localized ones
 
 #if FEATURE_MANAGED_ETW_CHANNELS
         // WCF used EventSource to mimic a existing ETW manifest.   To support this
@@ -6293,26 +6285,26 @@ namespace System.Diagnostics.Tracing
         // this set of channel keywords that we allow to be explicitly set.  You
         // can ignore these bits otherwise.
         internal const ulong ValidPredefinedChannelKeywords = 0xF000000000000000;
-        ulong nextChannelKeywordBit = 0x8000000000000000;   // available Keyword bit to be used for next channel definition, grows down
-        const int MaxCountChannels = 8; // a manifest can defined at most 8 ETW channels
+        private ulong nextChannelKeywordBit = 0x8000000000000000;   // available Keyword bit to be used for next channel definition, grows down
+        private const int MaxCountChannels = 8; // a manifest can defined at most 8 ETW channels
 #endif
 
-        StringBuilder sb;               // Holds the provider information.
-        StringBuilder events;           // Holds the events.
-        StringBuilder templates;
+        private readonly StringBuilder sb;               // Holds the provider information.
+        private readonly StringBuilder events;           // Holds the events.
+        private readonly StringBuilder templates;
 
 #if FEATURE_MANAGED_ETW_CHANNELS
-        string providerName;
+        private readonly string providerName;
 #endif
-        ResourceManager? resources;      // Look up localized strings here.
-        EventManifestOptions flags;
-        IList<string> errors;           // list of currently encountered errors
-        Dictionary<string, List<int>> perEventByteArrayArgIndices;  // "event_name" -> List_of_Indices_of_Byte[]_Arg
+        private readonly ResourceManager? resources;      // Look up localized strings here.
+        private readonly EventManifestOptions flags;
+        private readonly IList<string> errors;           // list of currently encountered errors
+        private readonly Dictionary<string, List<int>> perEventByteArrayArgIndices;  // "event_name" -> List_of_Indices_of_Byte[]_Arg
 
         // State we track between StartEvent and EndEvent.
-        string? eventName;               // Name of the event currently being processed.
-        int numParams;                  // keeps track of the number of args the event has.
-        List<int>? byteArrArgIndices;   // keeps track of the index of each byte[] argument
+        private string? eventName;               // Name of the event currently being processed.
+        private int numParams;                  // keeps track of the number of args the event has.
+        private List<int>? byteArrArgIndices;   // keeps track of the index of each byte[] argument
 #endregion
     }
 

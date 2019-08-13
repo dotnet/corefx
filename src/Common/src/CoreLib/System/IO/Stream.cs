@@ -387,7 +387,7 @@ namespace System.IO
                 byte[] sharedBuffer = ArrayPool<byte>.Shared.Rent(buffer.Length);
                 return FinishReadAsync(ReadAsync(sharedBuffer, 0, buffer.Length, cancellationToken), sharedBuffer, buffer);
 
-                async ValueTask<int> FinishReadAsync(Task<int> readTask, byte[] localBuffer, Memory<byte> localDestination)
+                static async ValueTask<int> FinishReadAsync(Task<int> readTask, byte[] localBuffer, Memory<byte> localDestination)
                 {
                     try
                     {
@@ -829,10 +829,7 @@ namespace System.IO
                 asyncResult = new SynchronousAsyncResult(ex, state, isWrite: false);
             }
 
-            if (callback != null)
-            {
-                callback(asyncResult);
-            }
+            callback?.Invoke(asyncResult);
 
             return asyncResult;
         }
@@ -861,10 +858,7 @@ namespace System.IO
                 asyncResult = new SynchronousAsyncResult(ex, state, isWrite: true);
             }
 
-            if (callback != null)
-            {
-                callback(asyncResult);
-            }
+            callback?.Invoke(asyncResult);
 
             return asyncResult;
         }
@@ -1026,10 +1020,10 @@ namespace System.IO
             private readonly object? _stateObject;
             private readonly bool _isWrite;
             private ManualResetEvent? _waitHandle;
-            private ExceptionDispatchInfo? _exceptionInfo;
+            private readonly ExceptionDispatchInfo? _exceptionInfo;
 
             private bool _endXxxCalled;
-            private int _bytesRead;
+            private readonly int _bytesRead;
 
             internal SynchronousAsyncResult(int bytesRead, object? asyncStateObject)
             {
@@ -1114,7 +1108,7 @@ namespace System.IO
         // a lock for every operation making it thread safe.
         private sealed class SyncStream : Stream, IDisposable
         {
-            private Stream _stream;
+            private readonly Stream _stream;
 
             internal SyncStream(Stream stream)
             {

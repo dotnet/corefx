@@ -12,11 +12,11 @@ namespace System.Resources.Extensions
 {
     internal class UnknownType { }
 
-    partial class PreserializedResourceWriter
+    public partial class PreserializedResourceWriter
     {
         // indicates if the types of resources saved will require the DeserializingResourceReader
         // in order to read them.
-        bool _requiresDeserializingResourceReader = false;
+        private bool _requiresDeserializingResourceReader = false;
 
         // use hard-coded strings rather than typeof so that the version doesn't leak into resources files
         internal const string DeserializingResourceReaderFullyQualifiedName = "System.Resources.Extensions.DeserializingResourceReader, System.Resources.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51";

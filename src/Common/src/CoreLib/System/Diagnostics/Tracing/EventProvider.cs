@@ -94,7 +94,7 @@ namespace System.Diagnostics.Tracing
         }
 
         internal IEventProvider m_eventProvider;         // The interface that implements the specific logging mechanism functions.
-        Interop.Advapi32.EtwEnableCallback? m_etwCallback;     // Trace Callback function
+        private Interop.Advapi32.EtwEnableCallback? m_etwCallback;     // Trace Callback function
         private long m_regHandle;                        // Trace Registration Handle
         private byte m_level;                            // Tracing Level
         private long m_anyKeywordMask;                   // Trace Enable Flags
@@ -134,25 +134,15 @@ namespace System.Diagnostics.Tracing
         // EventSource has special logic to do this, no one else should be calling EventProvider.
         internal EventProvider(EventProviderType providerType)
         {
-            switch (providerType)
+            m_eventProvider = providerType switch
             {
-                case EventProviderType.ETW:
 #if PLATFORM_WINDOWS
-                    m_eventProvider = new EtwEventProvider();
-#else
-                    m_eventProvider = new NoOpEventProvider();
+                EventProviderType.ETW => new EtwEventProvider(),
 #endif
-                    break;
-                case EventProviderType.EventPipe:
 #if FEATURE_PERFTRACING
-                    m_eventProvider = new EventPipeEventProvider();
-#else
-                    m_eventProvider = new NoOpEventProvider();
+                EventProviderType.EventPipe => new EventPipeEventProvider(),
 #endif
-                    break;
-                default:
-                    m_eventProvider = new NoOpEventProvider();
-                    break;
+                _ => new NoOpEventProvider(),
             };
         }
 
@@ -260,7 +250,7 @@ namespace System.Diagnostics.Tracing
         // <UsesUnsafeCode Name="Parameter filterData of type: Void*" />
         // <UsesUnsafeCode Name="Parameter callbackContext of type: Void*" />
         // </SecurityKernel>
-        unsafe void EtwEnableCallBack(
+        private unsafe void EtwEnableCallBack(
                         in System.Guid sourceId,
                         int controlCode,
                         byte setLevel,

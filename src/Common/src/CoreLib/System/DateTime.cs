@@ -1061,15 +1061,12 @@ namespace System
         {
             get
             {
-                switch (InternalKind)
+                return InternalKind switch
                 {
-                    case KindUnspecified:
-                        return DateTimeKind.Unspecified;
-                    case KindUtc:
-                        return DateTimeKind.Utc;
-                    default:
-                        return DateTimeKind.Local;
-                }
+                    KindUnspecified => DateTimeKind.Unspecified,
+                    KindUtc => DateTimeKind.Utc,
+                    _ => DateTimeKind.Local,
+                };
             }
         }
 
@@ -1113,7 +1110,7 @@ namespace System
             get
             {
                 DateTime utc = UtcNow;
-                bool isAmbiguousLocalDst = false;
+                bool isAmbiguousLocalDst;
                 long offset = TimeZoneInfo.GetDateTimeNowUtcOffsetFromUtc(utc, out isAmbiguousLocalDst).Ticks;
                 long tick = utc.Ticks + offset;
                 if (tick > DateTime.MaxTicks)

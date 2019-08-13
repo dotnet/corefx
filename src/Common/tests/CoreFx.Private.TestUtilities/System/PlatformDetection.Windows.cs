@@ -31,6 +31,7 @@ namespace System
         public static bool IsWindowsNanoServer => IsWindows && (IsNotWindowsIoTCore && GetWindowsInstallationType().Equals("Nano Server", StringComparison.OrdinalIgnoreCase));
         public static bool IsWindowsServerCore => IsWindows && GetWindowsInstallationType().Equals("Server Core", StringComparison.OrdinalIgnoreCase);
         public static int WindowsVersion => IsWindows ? (int)GetWindowsVersion() : -1;
+        public static bool IsNotWindows7 => !IsWindows7;
         public static bool IsNotWindows8x => !IsWindows8x;
         public static bool IsNotWindowsNanoServer => !IsWindowsNanoServer;
         public static bool IsNotWindowsServerCore => !IsWindowsServerCore;
@@ -222,6 +223,9 @@ namespace System
                     switch (result)
                     {
                         case 15703: // APPMODEL_ERROR_NO_APPLICATION
+                        case 120:   // ERROR_CALL_NOT_IMPLEMENTED
+                                    // This function is not supported on this system.
+                                    // In example on Windows Nano Server
                             s_isInAppContainer = 0;
                             break;
                         case 0:     // ERROR_SUCCESS

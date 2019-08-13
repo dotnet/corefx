@@ -38,7 +38,7 @@ namespace System.Net.Security
             return negoContext.IsNtlmUsed ? NegotiationInfoClass.NTLM : NegotiationInfoClass.Kerberos;
         }
 
-        static byte[] GssWrap(
+        private static byte[] GssWrap(
             SafeGssContextHandle context,
             bool encrypt,
             byte[] buffer,
@@ -505,7 +505,7 @@ namespace System.Net.Security
                     new SafeFreeNegoCredentials(false, string.Empty, string.Empty, string.Empty) :
                     new SafeFreeNegoCredentials(ntlmOnly, credential.UserName, credential.Password, credential.Domain);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Win32Exception(NTE_FAIL, ex.Message);
             }

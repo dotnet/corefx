@@ -23,12 +23,12 @@ internal class WmiEventSink : IWmiEventSource
     private bool                            isLocal;
 
 
-    static ManagementOperationObserver watcherParameter;
-    static object contextParameter;
-    static ManagementScope scopeParameter;
-    static string pathParameter;
-    static string classNameParameter;
-    static WmiEventSink wmiEventSinkNew;
+    private static ManagementOperationObserver watcherParameter;
+    private static object contextParameter;
+    private static ManagementScope scopeParameter;
+    private static string pathParameter;
+    private static string classNameParameter;
+    private static WmiEventSink wmiEventSinkNew;
 
     internal static WmiEventSink GetWmiEventSink(
         ManagementOperationObserver watcher,
@@ -37,7 +37,7 @@ internal class WmiEventSink : IWmiEventSource
         string path,
         string className)
     {
-        if(MTAHelper.IsNoContextMTA())
+        if (MTAHelper.IsNoContextMTA())
             return new WmiEventSink(watcher, context, scope, path, className);
 
         watcherParameter = watcher;
@@ -55,7 +55,7 @@ internal class WmiEventSink : IWmiEventSource
         return wmiEventSinkNew;
     }
 
-    static void HackToCreateWmiEventSink()
+    private static void HackToCreateWmiEventSink()
     {
         wmiEventSinkNew = new WmiEventSink(watcherParameter, contextParameter, scopeParameter, pathParameter, classNameParameter);
     }
@@ -75,7 +75,7 @@ internal class WmiEventSink : IWmiEventSource
             if (null != path)
             {
                 this.path = new ManagementPath (path);
-                if((0==string.Compare(this.path.Server, ".", StringComparison.OrdinalIgnoreCase)) ||
+                if ((0==string.Compare(this.path.Server, ".", StringComparison.OrdinalIgnoreCase)) ||
                     (0==string.Compare(this.path.Server, System.Environment.MachineName, StringComparison.OrdinalIgnoreCase)))
                 {
                             this.isLocal = true;
@@ -87,7 +87,7 @@ internal class WmiEventSink : IWmiEventSource
                 this.scope = (ManagementScope) scope.Clone ();
                 if (null == path) // use scope to see if sink is local
                 {
-                    if((0==string.Compare(this.scope.Path.Server, ".", StringComparison.OrdinalIgnoreCase)) ||
+                    if ((0==string.Compare(this.scope.Path.Server, ".", StringComparison.OrdinalIgnoreCase)) ||
                         (0==string.Compare(this.scope.Path.Server, System.Environment.MachineName, StringComparison.OrdinalIgnoreCase)))
                     {
                                 this.isLocal = true;
@@ -132,7 +132,7 @@ internal class WmiEventSink : IWmiEventSource
                     IntPtr pErrorObj)
     {
         IWbemClassObjectFreeThreaded errObj = null;
-        if(pErrorObj != IntPtr.Zero)
+        if (pErrorObj != IntPtr.Zero)
         {
             Marshal.AddRef(pErrorObj);
             errObj = new IWbemClassObjectFreeThreaded(pErrorObj);
@@ -222,12 +222,12 @@ internal class WmiGetEventSink : WmiEventSink
 {
     private ManagementObject    managementObject;
 
-    static ManagementOperationObserver watcherParameter;
-    static object contextParameter;
-    static ManagementScope scopeParameter;
-    static ManagementObject managementObjectParameter;
+    private static ManagementOperationObserver watcherParameter;
+    private static object contextParameter;
+    private static ManagementScope scopeParameter;
+    private static ManagementObject managementObjectParameter;
 
-    static WmiGetEventSink wmiGetEventSinkNew;
+    private static WmiGetEventSink wmiGetEventSinkNew;
 
     internal static WmiGetEventSink GetWmiGetEventSink(
         ManagementOperationObserver watcher,
@@ -235,7 +235,7 @@ internal class WmiGetEventSink : WmiEventSink
         ManagementScope scope,
         ManagementObject managementObject)
     {
-        if(MTAHelper.IsNoContextMTA())
+        if (MTAHelper.IsNoContextMTA())
             return new WmiGetEventSink(watcher, context, scope, managementObject);
 
         watcherParameter = watcher;
@@ -252,7 +252,7 @@ internal class WmiGetEventSink : WmiEventSink
         return wmiGetEventSinkNew;
     }
 
-    static void HackToCreateWmiGetEventSink()
+    private static void HackToCreateWmiGetEventSink()
     {
         wmiGetEventSinkNew = new WmiGetEventSink(watcherParameter, contextParameter, scopeParameter, managementObjectParameter);
     }

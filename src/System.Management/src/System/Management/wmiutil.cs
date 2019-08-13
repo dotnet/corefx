@@ -22,7 +22,7 @@ namespace System.Management
     }
 
     //Class for calling GetErrorInfo from managed code
-    class WbemErrorInfo
+    internal class WbemErrorInfo
     {
         public static IWbemClassObjectFreeThreaded GetErrorInfo()
         {
@@ -34,7 +34,7 @@ namespace System.Management
                 Marshal.Release(pErrorInfo);
 
                 // The IWbemClassObjectFreeThreaded instance will own reference count on pIWbemClassObject
-                if(pIWbemClassObject != IntPtr.Zero)
+                if (pIWbemClassObject != IntPtr.Zero)
                     return new IWbemClassObjectFreeThreaded(pIWbemClassObject);
             }
             return null;
