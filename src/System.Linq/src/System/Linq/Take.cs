@@ -9,6 +9,11 @@ namespace System.Linq
 {
     public static partial class Enumerable
     {
+        public static IEnumerable<TSource> Take<TSource>(this IEnumerable<TSource> source, uint count)
+        {
+            Take( source, (int)count );
+        }
+            
         public static IEnumerable<TSource> Take<TSource>(this IEnumerable<TSource> source, int count)
         {
             if (source == null)
@@ -81,6 +86,11 @@ namespace System.Linq
 
                 yield return element;
             }
+        }
+
+        public static IEnumerable<TSource> TakeLast<TSource>(this IEnumerable<TSource> source, uint count)
+        {
+            TakeLast( source, (int)count );
         }
 
         public static IEnumerable<TSource> TakeLast<TSource>(this IEnumerable<TSource> source, int count)
