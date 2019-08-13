@@ -168,7 +168,7 @@ namespace System.Drawing.Tests
         {
             if (PlatformDetection.IsFullFramework)
             {
-                return;
+                throw new SkipTestException();
             }
 
             ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
