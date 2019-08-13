@@ -205,7 +205,6 @@
     <Reference Include="System.Numerics.Vectors" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Text.Encodings.Web" />
-    <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
