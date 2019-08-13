@@ -33,7 +33,6 @@ namespace System.Drawing.Tests
             }
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [Fact]
         public void FromFile_NullFileName_ThrowsArgumentNullException()
         {
@@ -41,7 +40,6 @@ namespace System.Drawing.Tests
             AssertExtensions.Throws<ArgumentNullException>("path", () => Image.FromFile(null, useEmbeddedColorManagement: true));
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [Fact]
         public void FromFile_EmptyFileName_ThrowsArgumentNullException()
         {
@@ -49,7 +47,6 @@ namespace System.Drawing.Tests
             AssertExtensions.Throws<ArgumentException>("path", null, () => Image.FromFile(string.Empty, useEmbeddedColorManagement: true));
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [Fact]
         public void FromFile_LongSegment_ThrowsException()
         {
