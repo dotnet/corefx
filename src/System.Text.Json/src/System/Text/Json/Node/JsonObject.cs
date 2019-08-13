@@ -8,11 +8,11 @@ using System.Collections.Generic;
 namespace System.Text.Json
 {
     /// <summary>
-    ///  Represents a JSON object.
+    ///  Represents a mutable JSON object.
     /// </summary>
     public sealed class JsonObject : JsonNode, IEnumerable<KeyValuePair<string, JsonNode>>
     {
-        private readonly Dictionary<string, JsonNode> _dictionary;
+        internal readonly Dictionary<string, JsonNode> _dictionary;
         private readonly DuplicatePropertyNameHandling _duplicatePropertyNameHandling;
 
         /// <summary>
@@ -22,11 +22,11 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Provided manner of handling duplicates does not exist.
         /// </exception>
-        public JsonObject(DuplicatePropertyNameHandling duplicatePropertyNameHandling = default)
+        public JsonObject(DuplicatePropertyNameHandling duplicatePropertyNameHandling = DuplicatePropertyNameHandling.Replace)
         {
             if(!Enum.IsDefined(typeof(DuplicatePropertyNameHandling), duplicatePropertyNameHandling))
             {
-                throw new ArgumentException(SR.InvalidDuplicatePropertyNameHandling);
+                throw new ArgumentOutOfRangeException(SR.InvalidDuplicatePropertyNameHandling);
             }
 
             _dictionary = new Dictionary<string, JsonNode>();
@@ -41,7 +41,9 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Provided collection contains duplicates if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
-        public JsonObject(IEnumerable<KeyValuePair<string, JsonNode>> jsonProperties, DuplicatePropertyNameHandling duplicatePropertyNameHandling = default)
+        public JsonObject(
+            IEnumerable<KeyValuePair<string, JsonNode>> jsonProperties,
+            DuplicatePropertyNameHandling duplicatePropertyNameHandling = DuplicatePropertyNameHandling.Replace)
             : this(duplicatePropertyNameHandling)
             => AddRange(jsonProperties);
 
@@ -55,7 +57,13 @@ namespace System.Text.Json
         public JsonNode this[string propertyName]
         {
             get => propertyName != null ? GetPropertyValue(propertyName) : throw new ArgumentNullException(nameof(propertyName));
-            set => _dictionary[propertyName] = value ?? throw new ArgumentNullException(nameof(propertyName));
+            set
+            {
+                if (propertyName == null)
+                    throw new ArgumentNullException(nameof(propertyName));
+
+                _dictionary[propertyName] = value;
+            }
         }
 
         /// <summary>
@@ -65,7 +73,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
-        public IEnumerator<KeyValuePair<string, JsonNode>> GetEnumerator() => _dictionary.GetEnumerator();
+        public IEnumerator<KeyValuePair<string, JsonNode>> GetEnumerator() => new JsonObjectEnumerator(this);
 
         /// <summary>
         ///   Adds the specified property to the JSON object.
@@ -92,7 +100,7 @@ namespace System.Text.Json
         /// </remarks>
         public void Add(string propertyName, JsonNode propertyValue)
         {
-            if(propertyName == null)
+            if (propertyName == null)
             {
                 throw new ArgumentNullException(nameof(propertyName));
             }
@@ -104,7 +112,7 @@ namespace System.Text.Json
                     case DuplicatePropertyNameHandling.Ignore:
                         return;
                     case DuplicatePropertyNameHandling.Error:
-                        throw new ArgumentException(SR.JsonObjectDuplicateKey);
+                        throw new ArgumentException(string.Format(SR.JsonObjectDuplicateKey, propertyName));
                 }
             }
 
@@ -346,7 +354,7 @@ namespace System.Text.Json
         ///   Property with specified name is not found in JSON object.
         /// </exception>
         /// <remnark>
-        ///   Does not guarantee keeping the order the same.
+        ///   Does not guarantee keeping the same order.
         /// </remnark>
         public void ModifyPropertyName(string oldName, string newName)
         {
@@ -419,7 +427,7 @@ namespace System.Text.Json
                 return jsonObject;
             }
 
-            throw new InvalidCastException(SR.PropertyTypeMismatch);
+            throw new InvalidCastException(string.Format(SR.PropertyTypeMismatch, propertyName));
         }
 
         /// <summary>
@@ -460,6 +468,6 @@ namespace System.Text.Json
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
         /// <returns>An enumerator structure for the <see cref="JsonObject"/>.</returns>
-        IEnumerator IEnumerable.GetEnumerator() => _dictionary.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => new JsonObjectEnumerator(this);
     }
 }

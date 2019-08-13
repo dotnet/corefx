@@ -367,6 +367,9 @@ namespace System.Text.Json
     public sealed partial class JsonString : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonString>
     {
         public JsonString() { }
+        public JsonString(System.DateTime value) { }
+        public JsonString(System.DateTimeOffset value) { }
+        public JsonString(System.Guid value) { }
         public JsonString(System.ReadOnlySpan<char> value) { }
         public JsonString(string value) { }
         public string Value { get { throw null; } set { } }

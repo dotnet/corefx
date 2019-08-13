@@ -16,6 +16,6 @@
         /// <summary>
         /// Throw an <exception cref="ArgumentException"/> when a duplicate property is encountered.
         /// </summary>
-        Error
+        Error,
     }
 }

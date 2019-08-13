@@ -46,7 +46,7 @@ namespace System.Text.Json.Tests
         private static void TestDuplicates(DuplicatePropertyNameHandling duplicatePropertyNameHandling, ExpectedValue expected = default, bool valueConstructor = true)
         {
             string previousValue = "value1";
-            string newValue = "value1";
+            string newValue = "value2";
 
             JsonObject jsonObject = valueConstructor ? new JsonObject(duplicatePropertyNameHandling) : new JsonObject();
             jsonObject.Add("property", new JsonString(previousValue));
@@ -58,7 +58,6 @@ namespace System.Text.Json.Tests
             Assert.IsType<JsonString>(jsonObject["property"]);
 
             string expectedString = expected == ExpectedValue.Previous ? previousValue : newValue;
-
             Assert.Equal(expectedString, (jsonObject["property"] as JsonString).Value);
 
             // with indexer, property should change no matter which duplicates handling option is chosen:
@@ -142,6 +141,7 @@ namespace System.Text.Json.Tests
             var developer = new JsonObject
             {
                 { "name", "Kasia" },
+                { "n\\u0061me", "Kasia" }, // different property name than above one
                 { "age", 22 },
                 { "is developer", true },
                 { "null property", (JsonNode) null }
@@ -149,6 +149,10 @@ namespace System.Text.Json.Tests
 
             Assert.IsType<JsonString>(developer["name"]);
             var developerNameCasted = developer["name"] as JsonString;
+            Assert.Equal("Kasia", developerNameCasted.Value);
+
+            Assert.IsType<JsonString>(developer["n\\u0061me"]);
+            developerNameCasted = developer["n\\u0061me"] as JsonString;
             Assert.Equal("Kasia", developerNameCasted.Value);
 
             Assert.IsType<JsonNumber>(developer["age"]);
@@ -602,6 +606,14 @@ namespace System.Text.Json.Tests
                 var property = new KeyValuePair<string, JsonNode>(null, new JsonObject());
                 new JsonObject().AddRange(new List<KeyValuePair<string, JsonNode>>() { property });
             });
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                var property1 = new KeyValuePair<string, JsonNode>("regular property", new JsonObject());
+                var property2 = new KeyValuePair<string, JsonNode>("regular property2", new JsonObject());
+                var nullProperty = new KeyValuePair<string, JsonNode>(null, new JsonObject());
+                var propertyList = new List<KeyValuePair<string, JsonNode>>() { property1, nullProperty, property2 };
+                var jsonObject = new JsonObject(propertyList);
+            });
             Assert.Throws<ArgumentNullException>(() => new JsonObject()[null] = new JsonString());
             Assert.Throws<ArgumentNullException>(() =>
             {
@@ -615,7 +627,9 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestDuplicatesEnumOutOfRange()
         {
-            Assert.Throws<ArgumentException>(() => new JsonObject((DuplicatePropertyNameHandling)123));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonObject((DuplicatePropertyNameHandling)123));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonObject((DuplicatePropertyNameHandling)(-1)));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonObject((DuplicatePropertyNameHandling)3));
         }
     }
 }

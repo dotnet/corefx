@@ -430,15 +430,15 @@
     <value>Expected a number, but instead got empty string.</value>
   </data>
   <data name="JsonObjectDuplicateKey" xml:space="preserve">
-    <value>Provided property name already exists.</value>
+    <value>Property with name '{0}' already exists.</value>
   </data>
   <data name="PropertyNotFound" xml:space="preserve">
-    <value>Property with name {0} not found.</value>
+    <value>Property with name '{0}' not found.</value>
   </data>
   <data name="PropertyTypeMismatch" xml:space="preserve">
-    <value>Property with specified name has a different type than expected</value>
+    <value>Property with name '{0}'  has a different type than expected.</value>
   </data>
   <data name="InvalidDuplicatePropertyNameHandling" xml:space="preserve">
-    <value>Provided manner of handling duplicates does not exist.</value>
+    <value>The DuplicatePropertyNameHandling enum must be set to one of the supported values.</value>
   </data>
 </root>
