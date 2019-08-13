@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 
 namespace System.Drawing.Tests
@@ -165,7 +166,7 @@ namespace System.Drawing.Tests
         {
             if (PlatformDetection.IsFullFramework)
             {
-                throw new SkipTestException();
+                throw new SkipTestException("This is a known bug for .NET Framework");
             }
 
             ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
