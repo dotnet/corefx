@@ -463,7 +463,16 @@ namespace HttpStress
         {
             if (actualContent != expectedContent)
             {
-                throw new Exception($"Expected response content \"{expectedContent}\", got \"{actualContent}\". {details}");
+                int divergentIndex = 
+                    Enumerable
+                        .Zip(actualContent, expectedContent)
+                        .Select((x,i) => (x.First, x.Second, i))
+                        .Where(x => x.First != x.Second)
+                        .Select(x => (int?) x.i)
+                        .FirstOrDefault()
+                        .GetValueOrDefault(Math.Min(actualContent.Length, expectedContent.Length));
+
+                throw new Exception($"Expected response content \"{expectedContent}\", got \"{actualContent}\".\n Diverging at index {divergentIndex}. {details}");
             }
         }
 
