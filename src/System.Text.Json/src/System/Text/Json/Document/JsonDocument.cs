@@ -56,29 +56,25 @@ namespace System.Text.Json
         /// <inheritdoc />
         public void Dispose()
         {
-            if (_utf8Json.IsEmpty || !IsDisposable)
+            int length = _utf8Json.Length;
+            if (length == 0 || !IsDisposable)
             {
                 return;
             }
 
             _parsedData.Dispose();
+            _utf8Json = ReadOnlyMemory<byte>.Empty;
 
-            int length = _utf8Json.Length;
-            if (length > 0)
+            // When "extra rented bytes exist" they contain the document,
+            // and thus need to be cleared before being returned.
+            byte[] extraRentedBytes = Threading.Interlocked.Exchange(ref _extraRentedBytes, null);
+
+            if (extraRentedBytes != null)
             {
-                _utf8Json = ReadOnlyMemory<byte>.Empty;
+                extraRentedBytes.AsSpan(0, length).Clear();
+                ArrayPool<byte>.Shared.Return(extraRentedBytes);
 
-                // When "extra rented bytes exist" they contain the document,
-                // and thus need to be cleared before being returned.
-                byte[] extraRentedBytes = Threading.Interlocked.Exchange(ref _extraRentedBytes, null);
-
-                if (extraRentedBytes != null)
-                {
-                    extraRentedBytes.AsSpan(0, length).Clear();
-                    ArrayPool<byte>.Shared.Return(extraRentedBytes);
-
-                    _extraRentedBytes = null;
-                }
+                _extraRentedBytes = null;
             }
         }
 
