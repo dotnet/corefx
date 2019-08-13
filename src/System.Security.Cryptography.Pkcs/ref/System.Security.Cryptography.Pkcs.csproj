@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Security.Cryptography.Pkcs.cs" />
-    <Compile Include="System.Security.Cryptography.Pkcs.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap' OR '$(TargetsNetStandard)' == 'true'" />
+    <Compile Include="System.Security.Cryptography.Pkcs.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true' OR '$(TargetGroup)' == 'uap' OR '$(TargetsNetStandard)' == 'true'" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
@@ -20,5 +20,13 @@
     <ProjectReference Include="..\..\System.Security.Cryptography.Encoding\ref\System.Security.Cryptography.Encoding.csproj" />
     <ProjectReference Include="..\..\System.Security.Cryptography.Primitives\ref\System.Security.Cryptography.Primitives.csproj" />
     <ProjectReference Include="..\..\System.Security.Cryptography.X509Certificates\ref\System.Security.Cryptography.X509Certificates.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp3.0'">
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Security.Cryptography.Algorithms" />
+    <Reference Include="System.Security.Cryptography.Csp" />
+    <Reference Include="System.Security.Cryptography.Encoding" />
+    <Reference Include="System.Security.Cryptography.Primitives" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
   </ItemGroup>
 </Project>
