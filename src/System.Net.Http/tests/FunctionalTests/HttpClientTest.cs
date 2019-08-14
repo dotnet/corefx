@@ -391,7 +391,11 @@ namespace System.Net.Http.Functional.Tests
             {
                 client.Timeout = TimeSpan.FromMilliseconds(1);
                 Task<HttpResponseMessage>[] tasks = Enumerable.Range(0, 3).Select(_ => client.GetAsync(CreateFakeUri(), completionOption)).ToArray();
-                Assert.All(tasks, task => Assert.Throws<TimeoutException>(() => task.GetAwaiter().GetResult()));
+                Assert.All(tasks, task =>
+                {
+                    var ex = Assert.Throws<HttpRequestException>(() => task.GetAwaiter().GetResult());
+                    Assert.IsType<TimeoutException>(ex.InnerException);
+                });
             }
         }
 

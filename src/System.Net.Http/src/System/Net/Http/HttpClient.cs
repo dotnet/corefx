@@ -544,7 +544,7 @@ namespace System.Net.Http
             catch (OperationCanceledException e) when (isTimeout(e))
             {
                 HandleFinishSendAsyncError(e, cts);
-                throw new TimeoutException(SR.net_http_timeout, e);
+                throw CreateTimeoutException(e);
             }
             catch (Exception e)
             {
@@ -575,7 +575,7 @@ namespace System.Net.Http
             catch (OperationCanceledException e) when (isTimeout(e))
             {
                 HandleFinishSendAsyncError(e, cts);
-                throw new TimeoutException(SR.net_http_timeout, e);
+                throw CreateTimeoutException(e);
             }
             catch (Exception e)
             {
@@ -768,6 +768,15 @@ namespace System.Net.Http
 
         private HttpRequestMessage CreateRequestMessage(HttpMethod method, Uri uri) =>
             new HttpRequestMessage(method, uri) { Version = _defaultRequestVersion };
+
+        private Exception CreateTimeoutException(Exception innerException)
+        {
+            return new HttpRequestException(
+                SR.net_http_timeout,
+                new TimeoutException(SR.net_http_timeout, innerException),
+                true);
+        }
+
         #endregion Private Helpers
     }
 }
