@@ -66,7 +66,9 @@ namespace System.Text.Json
             {
                 _currentPosition = jsonData.Start;
                 _nextPosition = _currentPosition;
-                if (_buffer.Length == 0)
+
+                bool firstSegmentIsEmpty = _buffer.Length == 0;
+                if (firstSegmentIsEmpty)
                 {
                     // Once we find a non-empty segment, we need to set current position to it.
                     // Therefore, track the next position in a copy before it gets advanced to the next segment.
@@ -82,15 +84,14 @@ namespace System.Text.Json
                         }
                         previousNextPosition = _nextPosition;
                     }
+                }
 
-                    // Only check if we have reached the last segment. Do not advance _nextPosition, otherwise, we would end up skipping a segment.
-                    _isLastSegment = !jsonData.TryGet(ref _nextPosition, out _, advance: false) && isFinalBlock; // Don't re-order to avoid short-circuiting
-                }
-                else
-                {
-                    // Make sure to advance _nextPosition in this case so that it is no longer the same as _currentPosition
-                    _isLastSegment = !jsonData.TryGet(ref _nextPosition, out _, advance: true) && isFinalBlock; // Don't re-order to avoid short-circuiting
-                }
+                // If firstSegmentIsEmpty is true,
+                //    only check if we have reached the last segment but do not advance _nextPosition. The while loop above already advanced it.
+                //    Otherwise, we would end up skipping a segment (i.e. advance = false).
+                // If firstSegmentIsEmpty is false,
+                //    make sure to advance _nextPosition so that it is no longer the same as _currentPosition (i.e. advance = true).
+                _isLastSegment = !jsonData.TryGet(ref _nextPosition, out _, advance: !firstSegmentIsEmpty) && isFinalBlock; // Don't re-order to avoid short-circuiting
 
                 Debug.Assert(!_nextPosition.Equals(_currentPosition));
 

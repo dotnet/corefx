@@ -161,6 +161,7 @@ namespace System.Text.Json
         public static ReadOnlySequence<byte> CreateSegments(byte[] data, int splitLocation)
         {
             Debug.Assert(splitLocation <= data.Length);
+
             ReadOnlyMemory<byte> dataMemory = data;
 
             var firstSegment = new BufferSegment<byte>(dataMemory.Slice(0, splitLocation));
@@ -172,9 +173,7 @@ namespace System.Text.Json
 
         public static ReadOnlySequence<byte> CreateSegments(byte[] data, int firstSplit, int secondSplit)
         {
-            Debug.Assert(firstSplit <= data.Length);
-            Debug.Assert(secondSplit <= data.Length);
-            Debug.Assert(firstSplit <= secondSplit);
+            Debug.Assert(firstSplit <= data.Length && secondSplit <= data.Length && firstSplit <= secondSplit);
 
             ReadOnlyMemory<byte> dataMemory = data;
 

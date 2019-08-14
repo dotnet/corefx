@@ -65,7 +65,7 @@ namespace System.Text.Json.Tests
                 Assert.False(json.CurrentState.Options.AllowTrailingCommas);
                 Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
 
-                json.Read();
+                json.Read(); // this should throw
             });
         }
 
@@ -98,7 +98,7 @@ namespace System.Text.Json.Tests
         [InlineData("{\"foo\": 0.1}", 0.1)]
         [InlineData("{\"foo\": -0}", 0)]
         [InlineData("{\"foo\": -0.1}", -0.1)]
-        public static void ReadDoubleVariousSegmentSizes(string input, double expectedValue)
+        public static void ReadJsonWithNumberVariousSegmentSizes(string input, double expectedValue)
         {
             byte[] utf8 = Encoding.UTF8.GetBytes(input);
 
