@@ -8,6 +8,7 @@ using System.Buffers.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace System.Text.Json
 {
@@ -67,7 +68,7 @@ namespace System.Text.Json
 
             // When "extra rented bytes exist" they contain the document,
             // and thus need to be cleared before being returned.
-            byte[] extraRentedBytes = Threading.Interlocked.Exchange(ref _extraRentedBytes, null);
+            byte[] extraRentedBytes = Interlocked.Exchange(ref _extraRentedBytes, null);
 
             if (extraRentedBytes != null)
             {

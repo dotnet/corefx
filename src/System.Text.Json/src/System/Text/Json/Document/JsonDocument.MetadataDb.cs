@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace System.Text.Json
 {
@@ -148,7 +149,7 @@ namespace System.Text.Json
 
             public void Dispose()
             {
-                byte[] data = Threading.Interlocked.Exchange(ref _data, null);
+                byte[] data = Interlocked.Exchange(ref _data, null);
                 if (data == null)
                 {
                     return;
