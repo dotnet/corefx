@@ -3652,7 +3652,7 @@ namespace System.IO.Packaging.Tests
                 {
                     ForEachPartWithFileName(package, (part, fileName) =>
                     {
-                        using (StreamWriter writer = new StreamWriter(part.GetStream(FileMode.Create), Encoding.ASCII))
+                        using (StreamWriter writer = new StreamWriter(part.GetStream(), Encoding.ASCII))
                         {
                             // just write the filename as content
                             writer.Write(fileName);
