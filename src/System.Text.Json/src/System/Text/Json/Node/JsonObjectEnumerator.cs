@@ -6,7 +6,7 @@ namespace System.Text.Json
     /// <summary>
     ///   Supports an iteration over a JSON object.
     /// </summary>
-    public class JsonObjectEnumerator : IEnumerator<KeyValuePair<string, JsonNode>>
+    public struct JsonObjectEnumerator : IEnumerator<KeyValuePair<string, JsonNode>>
     {
         private readonly IEnumerator<KeyValuePair<string, JsonNode>> _enumerator;
 

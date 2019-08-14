@@ -306,9 +306,10 @@ namespace System.Text.Json
         public bool TryGetJsonObjectPropertyValue(string propertyName, out System.Text.Json.JsonObject jsonObject) { throw null; }
         public bool TryGetPropertyValue(string propertyName, out System.Text.Json.JsonNode jsonNode) { throw null; }
     }
-    public partial class JsonObjectEnumerator : System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>>, System.Collections.IEnumerator, System.IDisposable
+    public partial struct JsonObjectEnumerator : System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>>, System.Collections.IEnumerator, System.IDisposable
     {
-        public JsonObjectEnumerator(System.Text.Json.JsonObject jsonObject) { }
+        private object _dummy;
+        public JsonObjectEnumerator(System.Text.Json.JsonObject jsonObject) { throw null; }
         public System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode> Current { get { throw null; } }
         object System.Collections.IEnumerator.Current { get { throw null; } }
         public void Dispose() { }

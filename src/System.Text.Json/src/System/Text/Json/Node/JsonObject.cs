@@ -25,7 +25,7 @@ namespace System.Text.Json
         /// </exception>
         public JsonObject(DuplicatePropertyNameHandling duplicatePropertyNameHandling = DuplicatePropertyNameHandling.Replace)
         {
-            if (!Enum.IsDefined(typeof(DuplicatePropertyNameHandling), duplicatePropertyNameHandling))
+            if ((uint)duplicatePropertyNameHandling > (uint)DuplicatePropertyNameHandling.Error)
             {
                 throw new ArgumentOutOfRangeException(SR.InvalidDuplicatePropertyNameHandling);
             }
@@ -113,7 +113,7 @@ namespace System.Text.Json
                     case DuplicatePropertyNameHandling.Ignore:
                         return;
                     case DuplicatePropertyNameHandling.Error:
-                        throw new ArgumentException(string.Format(SR.JsonObjectDuplicateKey, propertyName));
+                        throw new ArgumentException(SR.Format(SR.JsonObjectDuplicateKey, propertyName));
                 }
 
                 Debug.Assert(_duplicatePropertyNameHandling == DuplicatePropertyNameHandling.Replace);
@@ -409,7 +409,7 @@ namespace System.Text.Json
         {
             if (!TryGetPropertyValue(propertyName, out JsonNode jsonNode))
             {
-                throw new KeyNotFoundException(string.Format(SR.PropertyNotFound, propertyName));
+                throw new KeyNotFoundException(SR.Format(SR.PropertyNotFound, propertyName));
             }
 
             return jsonNode;
@@ -448,7 +448,7 @@ namespace System.Text.Json
                 return jsonObject;
             }
 
-            throw new InvalidCastException(string.Format(SR.PropertyTypeMismatch, propertyName));
+            throw new InvalidCastException(SR.Format(SR.PropertyTypeMismatch, propertyName));
         }
 
         /// <summary>

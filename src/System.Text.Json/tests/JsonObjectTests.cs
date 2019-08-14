@@ -32,26 +32,16 @@ namespace System.Text.Json.Tests
             Assert.True(((JsonBoolean)jsonObject["boolean"]).Value);
         }
 
-        public enum ExpectedValue
+        private static void TestDuplicates(DuplicatePropertyNameHandling duplicatePropertyNameHandling, string previousValue, string newValue, string expectedValue, bool useDefaultCtor = false)
         {
-            Previous,
-            New
-        }
-
-        private static void TestDuplicates(DuplicatePropertyNameHandling duplicatePropertyNameHandling, ExpectedValue expected = default, bool valueConstructor = true)
-        {
-            string previousValue = "value1";
-            string newValue = "value2";
-
-            JsonObject jsonObject = valueConstructor ? new JsonObject(duplicatePropertyNameHandling) : new JsonObject();
+            JsonObject jsonObject = useDefaultCtor ? new JsonObject() : new JsonObject(duplicatePropertyNameHandling);
             jsonObject.Add("property", new JsonString(previousValue));
 
             Assert.Equal(previousValue, ((JsonString)jsonObject["property"]).Value);
 
             jsonObject.Add("property", new JsonString(newValue));
 
-            string expectedString = expected == ExpectedValue.Previous ? previousValue : newValue;
-            Assert.Equal(expectedString, ((JsonString) jsonObject["property"]).Value);
+            Assert.Equal(expectedValue, ((JsonString) jsonObject["property"]).Value);
 
             // with indexer, property should change no matter which duplicates handling option is chosen:
             jsonObject["property"] = (JsonString)"indexer value";
@@ -60,18 +50,18 @@ namespace System.Text.Json.Tests
 
 
         [Theory]
-        [InlineData(DuplicatePropertyNameHandling.Replace, ExpectedValue.New)]
-        [InlineData(DuplicatePropertyNameHandling.Replace, ExpectedValue.New, false)]
-        [InlineData(DuplicatePropertyNameHandling.Ignore, ExpectedValue.Previous)]
-        public static void TestDuplicatesReplaceAndIgnore(DuplicatePropertyNameHandling duplicatePropertyNameHandling, ExpectedValue expected = default, bool valueConstructor = true)
+        [InlineData(DuplicatePropertyNameHandling.Replace, "value1", "value2", "value2")]
+        [InlineData(DuplicatePropertyNameHandling.Replace, "value1", "value2", "value2", true)]
+        [InlineData(DuplicatePropertyNameHandling.Ignore, "value1", "value2", "value1")]
+        public static void TestDuplicatesReplaceAndIgnore(DuplicatePropertyNameHandling duplicatePropertyNameHandling, string previousValue, string newValue, string expectedValue, bool useDefaultCtor = false)
         {
-            TestDuplicates(duplicatePropertyNameHandling, expected, valueConstructor);
+            TestDuplicates(duplicatePropertyNameHandling, previousValue, newValue, expectedValue, useDefaultCtor);
         }
 
         [Fact]
         public static void TestDuplicatesError()
         {
-            Assert.Throws<ArgumentException>(() => TestDuplicates(DuplicatePropertyNameHandling.Error));
+            Assert.Throws<ArgumentException>(() => TestDuplicates(DuplicatePropertyNameHandling.Error, "", "", ""));
 
             JsonObject jsonObject = new JsonObject(DuplicatePropertyNameHandling.Error) { { "property", "" } };
             jsonObject["property"] = (JsonString) "indexer value";
@@ -144,7 +134,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestDateTime()
         {
-            DateTime dateTime = DateTime.Now;
+            DateTime dateTime = new DateTime(DateTime.MinValue.Ticks);
             var jsonObject = new JsonObject { { "dateTime", dateTime } };
             Assert.Equal(dateTime.ToString(), (JsonString)jsonObject["dateTime"]);
         }
@@ -152,7 +142,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestDateTimeOffset()
         {
-            DateTimeOffset dateTimeOffset = DateTimeOffset.Now;
+            DateTimeOffset dateTimeOffset = new DateTime(DateTime.MinValue.Ticks);
             var jsonObject = new JsonObject { { "dateTimeOffset", dateTimeOffset } };
             Assert.Equal(dateTimeOffset.ToString(), (JsonString)jsonObject["dateTimeOffset"]);
         }
