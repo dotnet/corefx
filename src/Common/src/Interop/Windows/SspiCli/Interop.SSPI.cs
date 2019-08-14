@@ -29,9 +29,7 @@ internal static partial class Interop
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    // Ternary operator returning true/false prevents redundant asm generation:
-                    // https://github.com/dotnet/coreclr/issues/914
-                    return dwLower == IntPtr.Zero && dwUpper == IntPtr.Zero ? true : false;
+                    return dwLower == IntPtr.Zero && dwUpper == IntPtr.Zero;
                 }
             }
 

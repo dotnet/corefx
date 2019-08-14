@@ -143,9 +143,7 @@ namespace System.Net.Security
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                // Ternary operator returning true/false prevents redundant asm generation:
-                // https://github.com/dotnet/coreclr/issues/914
-                return (_securityContext == null || _securityContext.IsInvalid) ? false : true;
+                return !(_securityContext == null || _securityContext.IsInvalid);
             }
         }
 
