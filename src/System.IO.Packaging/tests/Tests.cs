@@ -3892,7 +3892,7 @@ namespace System.IO.Packaging.Tests
         }
 
         [Fact]
-        void CreatePackUriWithFragment()
+        public void CreatePackUriWithFragment()
         {
             Uri partUri = new Uri("/idontexist.xml", UriKind.Relative);
             Uri packageUri = new Uri("application://");
@@ -3905,6 +3905,56 @@ namespace System.IO.Packaging.Tests
                 PackUriHelper.Create(packageUri, partUri, badFragment);
             });
 
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop doesn't support Package.Open with FileAccess.Write")]
+        public void ZipPackage_CreateWithFileAccessWrite()
+        {
+            string packageName = "test.zip";
+            string[] fileNames = new[] { "file1.txt", "file2.txt", "file3.txt" };
+            const string RelationshipType = "http://schemas.microsoft.com/relationships/contains";
+            const string PartRelationshipType = "http://schemas.microsoft.com/relationships/self";
+
+            using (Package package = Package.Open(packageName, FileMode.Create, FileAccess.Write))
+            {
+                foreach (string fileName in fileNames)
+                {
+                    Uri partUri = PackUriHelper.CreatePartUri(new Uri(fileName, UriKind.Relative));
+                    PackagePart part = package.CreatePart(partUri, System.Net.Mime.MediaTypeNames.Text.Plain);
+                    using (StreamWriter writer = new StreamWriter(part.GetStream(FileMode.Create), Encoding.ASCII))
+                    {
+                        // just write the filename as content
+                        writer.Write(fileName);
+                    }
+                    part.CreateRelationship(part.Uri, TargetMode.Internal, PartRelationshipType);
+                    package.CreateRelationship(part.Uri, TargetMode.Internal, RelationshipType);
+                }
+            }
+
+            // reopen for read and validate the content
+            using (Package readPackage = Package.Open(packageName))
+            {
+                PackageRelationshipCollection packageRelationships = readPackage.GetRelationships();
+                Assert.All(packageRelationships, relationship => Assert.Equal(RelationshipType, relationship.RelationshipType));
+                foreach (string fileName in fileNames)
+                {
+                    PackagePart part = readPackage.GetPart(PackUriHelper.CreatePartUri(new Uri(fileName, UriKind.Relative)));
+
+                    using (Stream partStream = part.GetStream())
+                    using (StreamReader reader = new StreamReader(partStream, Encoding.ASCII))
+                    {
+                        Assert.Equal(fileName.Length, partStream.Length);
+                        Assert.Equal(fileName, reader.ReadToEnd());
+                    }
+
+                    PackageRelationshipCollection partRelationships = part.GetRelationshipsByType(PartRelationshipType);
+                    Assert.Single(partRelationships);
+                    Assert.All(partRelationships, relationship => Assert.Equal(PartRelationshipType, relationship.RelationshipType));
+
+                    Assert.Single(packageRelationships, relationship => relationship.TargetUri == part.Uri);
+                }
+            }
         }
 
         private const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
