@@ -116,11 +116,11 @@ namespace System.Text.Json.Tests
                 ReadDoubleHelper(ref jsonReader, utf8.Length, expectedValue);
             }
 
-            for (int splitLocation = 0; splitLocation < utf8.Length; splitLocation++)
+            for (int firstSplit = 0; firstSplit < utf8.Length; firstSplit++)
             {
-                for (int j = splitLocation; j < utf8.Length; j++)
+                for (int secondSplit = firstSplit; secondSplit < utf8.Length; secondSplit++)
                 {
-                    sequence = JsonTestHelper.CreateSegments(utf8, splitLocation, j);
+                    sequence = JsonTestHelper.CreateSegments(utf8, firstSplit, secondSplit);
                     jsonReader = new Utf8JsonReader(sequence);
                     ReadDoubleHelper(ref jsonReader, utf8.Length, expectedValue);
                 }

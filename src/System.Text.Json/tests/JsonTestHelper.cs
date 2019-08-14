@@ -167,9 +167,7 @@ namespace System.Text.Json
             ReadOnlyMemory<byte> secondMem = dataMemory.Slice(splitLocation);
             BufferSegment<byte> secondSegment = firstSegment.Append(secondMem);
 
-            var sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, secondMem.Length);
-            Debug.Assert(data.AsSpan().SequenceEqual(sequence.ToArray()));
-            return sequence;
+            return new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, secondMem.Length);
         }
 
         public static ReadOnlySequence<byte> CreateSegments(byte[] data, int firstSplit, int secondSplit)
@@ -187,9 +185,7 @@ namespace System.Text.Json
             ReadOnlyMemory<byte> thirdMem = dataMemory.Slice(secondSplit);
             BufferSegment<byte> thirdSegment = secondSegment.Append(thirdMem);
 
-            var sequence = new ReadOnlySequence<byte>(firstSegment, 0, thirdSegment, thirdMem.Length);
-            Debug.Assert(data.AsSpan().SequenceEqual(sequence.ToArray()));
-            return sequence;
+            return new ReadOnlySequence<byte>(firstSegment, 0, thirdSegment, thirdMem.Length);
         }
 
         public static ReadOnlySequence<byte> GetSequence(byte[] dataUtf8, int segmentSize)
@@ -207,9 +203,7 @@ namespace System.Text.Json
             buffers[numberOfSegments - 1] = new byte[remaining];
             Array.Copy(dataUtf8, dataUtf8.Length - remaining, buffers[numberOfSegments - 1], 0, remaining);
 
-            ReadOnlySequence<byte> sequence = BufferFactory.Create(buffers);
-            Debug.Assert(dataUtf8.AsSpan().SequenceEqual(sequence.ToArray()));
-            return sequence;
+            return BufferFactory.Create(buffers);
         }
 
         public static List<ReadOnlySequence<byte>> GetSequences(ReadOnlyMemory<byte> dataMemory)
