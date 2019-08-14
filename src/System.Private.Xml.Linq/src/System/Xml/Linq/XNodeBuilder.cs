@@ -12,7 +12,7 @@ namespace System.Xml.Linq
         private XContainer _parent;
         private XName _attrName;
         private string _attrValue;
-        private XContainer _root;
+        private readonly XContainer _root;
 
         public XNodeBuilder(XContainer container)
         {
@@ -196,7 +196,7 @@ namespace System.Xml.Linq
 
         public override void WriteValue(DateTimeOffset value)
         {
-            // For compatibility with custom writers, XmlWriter writes DateTimeOffset as DateTime. 
+            // For compatibility with custom writers, XmlWriter writes DateTimeOffset as DateTime.
             // Our internal writers should use the DateTimeOffset-String conversion from XmlConvert.
             WriteString(XmlConvert.ToString(value));
         }

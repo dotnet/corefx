@@ -22,7 +22,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private volatile bool _invokeImportsSatisfied = true;
         private bool _initialCompositionComplete = false;
         private volatile object _cachedInstance;
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
         public ReflectionComposablePart(ReflectionComposablePartDefinition definition)
         {
@@ -62,14 +62,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
             get
             {
                 var value = _importValues;
-                if(value == null)
+                if (value == null)
                 {
-                    lock(_lock)
+                    lock (_lock)
                     {
                         value = _importValues;
-                        if(value == null)
+                        if (value == null)
                         {
-                            value = new Dictionary<ImportDefinition, object>(); 
+                            value = new Dictionary<ImportDefinition, object>();
                             _importValues = value;
                         }
                     }
@@ -77,19 +77,19 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 return value;
             }
         }
-                
+
         private Dictionary<ImportDefinition, ImportingItem> ImportsCache
         {
-            get 
+            get
             {
                 var value = _importsCache;
-                if(value == null)
+                if (value == null)
                 {
-                    lock(_lock)
+                    lock (_lock)
                     {
-                        if(value == null)
+                        if (value == null)
                         {
-                            value = new Dictionary<ImportDefinition, ImportingItem>(); 
+                            value = new Dictionary<ImportDefinition, ImportingItem>();
                             _importsCache = value;
                         }
                     }
@@ -97,7 +97,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 return value;
             }
         }
-        
+
         protected object CachedInstance
         {
             get
@@ -111,10 +111,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public ReflectionComposablePartDefinition Definition
         {
-            get 
+            get
             {
                 RequiresRunning();
-                return _definition; 
+                return _definition;
             }
         }
 
@@ -251,7 +251,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private object GetInstanceActivatingIfNeeded()
         {
             var cachedInstance = _cachedInstance;
-            
+
             if (cachedInstance != null)
             {
                 return cachedInstance;
@@ -345,7 +345,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 return true;
             }
 
-            // If we have any instance exports, then we also 
+            // If we have any instance exports, then we also
             // need activation.
             return ExportDefinitions.Any(definition =>
             {
@@ -358,7 +358,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         // this is called under a lock
         private void EnsureGettable()
         {
-            // If we're already composed then we know that 
+            // If we're already composed then we know that
             // all pre-req imports have been satisfied
             if (_initialCompositionComplete)
             {
@@ -403,7 +403,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     throw new ArgumentException(SR.Argument_ExportsTooMany, nameof(exports));
 
                 default:
-                    if(result != ExportCardinalityCheckResult.Match)
+                    if (result != ExportCardinalityCheckResult.Match)
                     {
                         throw new Exception(SR.Diagnostic_InternalExceptionMessage);
                     }
@@ -412,7 +412,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         }
 
         private object CreateInstance(ConstructorInfo constructor, object[] arguments)
-        { 
+        {
             Exception exception = null;
             object instance = null;
 
@@ -420,15 +420,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
             {
                 instance = constructor.SafeInvoke(arguments);
             }
-            catch (TypeInitializationException ex) 
-            { 
-                exception = ex; 
+            catch (TypeInitializationException ex)
+            {
+                exception = ex;
             }
             catch (TargetInvocationException ex)
             {
                 exception = ex.InnerException;
             }
-            
+
             if (exception != null)
             {
                 throw new ComposablePartException(
@@ -568,10 +568,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
 
             int exportIndex = reflectionExport.GetIndex();
-            if(_exportsCache == null)
+            if (_exportsCache == null)
             {
                 _exportsCache = new Dictionary<int, ExportingMember>();
-            }            
+            }
             if (!_exportsCache.TryGetValue(exportIndex, out result))
             {
                 result = GetExportingMember(definition);

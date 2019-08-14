@@ -68,12 +68,12 @@ namespace System.Data
         private readonly System.Comparison<DataRow> _comparison;
 
         private readonly DataViewRowState _recordStates;
-        private WeakReference _rowFilter;
+        private readonly WeakReference _rowFilter;
         private IndexTree _records;
         private int _recordCount;
         private int _refCount;
 
-        private Listeners<DataViewListener> _listeners;
+        private readonly Listeners<DataViewListener> _listeners;
 
         private bool _suspendEvents;
 
@@ -124,7 +124,6 @@ namespace System.Data
             _recordStates = recordStates;
             _comparison = comparison;
 
-            DataColumnCollection columns = table.Columns;
             _isSharable = (rowFilter == null) && (comparison == null); // a filter or comparison make an index unsharable
             if (null != rowFilter)
             {
@@ -483,7 +482,7 @@ namespace System.Data
                 {
                     _table._recordManager.VerifyRecord(a, row);
                 }
-#endif      
+#endif
             }
             return index;
         }
@@ -621,7 +620,7 @@ namespace System.Data
             }
             return x;
         }
-        
+
         internal delegate int ComparisonBySelector<TKey,TRow>(TKey key, TRow row) where TRow:DataRow;
 
         /// <summary>This method exists for LinqDataView to keep a level of abstraction away from the RBTree</summary>

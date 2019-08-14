@@ -480,7 +480,7 @@ namespace System.Net.Http.Functional.Tests
         private static Frame MakeSimpleContinuationFrame(int streamId, bool endHeaders = false)
         {
             Memory<byte> headerBlock = new byte[Frame.MaxFrameLength];
-            int bytesGenerated = Http2LoopbackConnection.EncodeHeader(new HttpHeaderData("foo", "bar"), headerBlock.Span);
+            int bytesGenerated = HPackEncoder.EncodeHeader("foo", "bar", HPackFlags.None, headerBlock.Span);
 
             return new ContinuationFrame(headerBlock.Slice(0, bytesGenerated),
                 (endHeaders ? FrameFlags.EndHeaders : FrameFlags.None),
@@ -1897,8 +1897,13 @@ namespace System.Net.Http.Functional.Tests
 
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
+                using (var handler = new SocketsHttpHandler())
                 using (HttpClient client = CreateHttpClient())
                 {
+                    handler.SslOptions.RemoteCertificateValidationCallback = delegate { return true; };
+                    // Increase default Expect: 100-continue timeout to ensure that we don't accidentally fire the timer and send the request body.
+                    handler.Expect100ContinueTimeout = TimeSpan.FromSeconds(300);
+
                     var request = new HttpRequestMessage(HttpMethod.Post, url);
                     request.Version = new Version(2,0);
                     request.Content = new StringContent(new string('*', 3000));
@@ -2580,6 +2585,122 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
+        public async Task PostAsyncDuplex_ServerCompletesResponseBodyThenResetsStreamWithNoError_SuccessAndRequestBodyCancelled()
+        {
+            // Per section 8.1 of the RFC:
+            // Receiving RST_STREAM with NO_ERROR after receiving EndStream on the response body is a special case.
+            // We should stop sending the request body, but treat the request as successful and
+            // return the completed response body to the user.
+
+            byte[] contentBytes = Encoding.UTF8.GetBytes("Hello world");
+
+            using (var server = Http2LoopbackServer.CreateServer())
+            {
+                Http2LoopbackConnection connection;
+                using (HttpClient client = CreateHttpClient())
+                {
+                    var duplexContent = new DuplexContent();
+
+                    var request = new HttpRequestMessage(HttpMethod.Post, server.Address);
+                    request.Version = new Version(2, 0);
+                    request.Content = duplexContent;
+                    Task<HttpResponseMessage> responseTask = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+                    connection = await server.EstablishConnectionAsync();
+
+                    // Client should have sent the request headers, and the request stream should now be available
+                    Stream requestStream = await duplexContent.WaitForStreamAsync();
+
+                    // Flush the content stream. Otherwise, the request headers are not guaranteed to be sent.
+                    await requestStream.FlushAsync();
+
+                    (int streamId, _) = await connection.ReadAndParseRequestHeaderAsync(readBody: false);
+
+                    // Send data to the server, even before we've received response headers.
+                    await SendAndReceiveRequestDataAsync(contentBytes, requestStream, connection, streamId);
+
+                    // Send response headers
+                    await connection.SendResponseHeadersAsync(streamId, endStream: false);
+                    HttpResponseMessage response = await responseTask;
+                    Stream responseStream = await response.Content.ReadAsStreamAsync();
+
+                    // Send response body and complete response
+                    await connection.SendResponseDataAsync(streamId, contentBytes, endStream: true);
+
+                    // Send RST_STREAM to client with error = NO_ERROR.
+                    await connection.WriteFrameAsync(new RstStreamFrame(FrameFlags.None, (int)ProtocolErrors.NO_ERROR, streamId));
+
+                    // Ensure client has processed the RST_STREAM.
+                    await connection.PingPong();
+
+                    // Attempting to write on the request body should now fail with OperationCanceledException.
+                    Exception e = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => { await SendAndReceiveRequestDataAsync(contentBytes, requestStream, connection, streamId); });
+
+                    // Propagate the exception to the request stream serialization task.
+                    // This allows the request processing to complete.
+                    duplexContent.Fail(e);
+
+                    // We should receive the response body and EOF.
+                    byte[] readBuffer = new byte[contentBytes.Length];
+                    int bytesRead = await responseStream.ReadAsync(readBuffer);
+                    Assert.True(contentBytes.SequenceEqual(readBuffer));
+                    bytesRead = await responseStream.ReadAsync(readBuffer);
+                    Assert.Equal(0, bytesRead);
+                }
+
+                // On handler dispose, client should shutdown the connection without sending additional frames.
+                await connection.WaitForClientDisconnectAsync();
+            }
+        }
+
+        [Fact]
+        public async Task PostAsyncNonDuplex_ServerCompletesResponseBodyThenResetsStreamWithNoError_SuccessAndRequestBodyCancelled()
+        {
+            // Per section 8.1 of the RFC:
+            // Receiving RST_STREAM with NO_ERROR after receiving EndStream on the response body is a special case.
+            // We should stop sending the request body, but treat the request as successful and
+            // return the completed response body to the user.
+
+            byte[] contentBytes = Encoding.UTF8.GetBytes("Hello world");
+
+            using (var server = Http2LoopbackServer.CreateServer())
+            {
+                Http2LoopbackConnection connection;
+                using (HttpClient client = CreateHttpClient())
+                {
+                    // We want non-duplex content, so use ByteArrayContent,
+                    // but make it large enough to ensure that the content can't be fully sent because of flow control limitations.
+                    // This allows us to validate that the content is actually canceled, not just fully sent and completed.
+                    const int ContentSize = 100_000;
+                    var requestContent = new ByteArrayContent(TestHelper.GenerateRandomContent(ContentSize));
+
+                    var request = new HttpRequestMessage(HttpMethod.Post, server.Address);
+                    request.Version = new Version(2, 0);
+                    request.Content = requestContent;
+                    Task<HttpResponseMessage> responseTask = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+                    connection = await server.EstablishConnectionAsync();
+
+                    (int streamId, _) = await connection.ReadAndParseRequestHeaderAsync(readBody: false);
+
+                    // Send full response
+                    await connection.SendResponseHeadersAsync(streamId, endStream: false);
+                    await connection.SendResponseDataAsync(streamId, contentBytes, endStream: true);
+
+                    // Send RST_STREAM to client with error = NO_ERROR.
+                    await connection.WriteFrameAsync(new RstStreamFrame(FrameFlags.None, (int)ProtocolErrors.NO_ERROR, streamId));
+
+                    // Response should now complete successfully
+                    HttpResponseMessage response = await responseTask;
+                    Assert.Equal("Hello world", await response.Content.ReadAsStringAsync());
+                }
+
+                // On handler dispose, client should shutdown the connection. Ignore any request stream frames already sent.
+                await connection.WaitForClientDisconnectAsync(ignoreUnexpectedFrames: true);
+            }
+        }
+
         [Theory]
         [InlineData(true, HttpStatusCode.Forbidden)]
         [InlineData(false, HttpStatusCode.Forbidden)]
@@ -3001,6 +3122,39 @@ namespace System.Net.Http.Functional.Tests
                     // A small malicious/corrupt payload that expands into two 1GB strings. We don't want HPackDecoder to allocate buffers when they exceed MaxResponseHeadersLength.
                     byte[] headerData = new byte[] { 0x88, 0x00, 0x7F, 0x81, 0xFF, 0xFF, 0xFF, 0x03, 0x70, 0x6C, 0x61, 0x69, 0x6E, 0x2D, 0x74, 0x65, 0x78, 0x74, 0x7F, 0x81, 0xFF, 0xFF, 0xFF, 0x03, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61 };
                     HeadersFrame frame = new HeadersFrame(headerData, FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId);
+
+                    await con.WriteFrameAsync(frame);
+                    await con.ShutdownIgnoringErrorsAsync(streamId);
+                });
+        }
+
+        [Fact]
+        public async Task DynamicTableSizeUpdate_Exceeds_Settings_Throws()
+        {
+            await Http2LoopbackServer.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    using HttpClient client = CreateHttpClient();
+                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(uri));
+                },
+                async server =>
+                {
+                    (Http2LoopbackConnection con, SettingsFrame settings) = await server.EstablishConnectionGetSettingsAsync();
+                    int streamId = await con.ReadRequestHeaderAsync();
+
+                    int headerTableSize = 4096; // Default per HTTP2 spec.
+
+                    foreach (SettingsEntry setting in settings.Entries)
+                    {
+                        if (setting.SettingId == SettingId.HeaderTableSize)
+                        {
+                            headerTableSize = (int)setting.Value;
+                        }
+                    }
+
+                    byte[] headerData = new byte[16];
+                    int headersLen = HPackEncoder.EncodeDynamicTableSizeUpdate(headerTableSize + 1, headerData);
+                    HeadersFrame frame = new HeadersFrame(headerData.AsMemory(0, headersLen), FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId);
 
                     await con.WriteFrameAsync(frame);
                     await con.ShutdownIgnoringErrorsAsync(streamId);

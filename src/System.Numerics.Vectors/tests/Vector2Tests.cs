@@ -27,7 +27,7 @@ namespace System.Numerics.Tests
 
             Assert.Throws<NullReferenceException>(() => v1.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, -1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, a.Length));            
+            Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, a.Length));
             AssertExtensions.Throws<ArgumentException>(null, () => v1.CopyTo(a, 2));
 
             v1.CopyTo(a, 1);
@@ -774,8 +774,8 @@ namespace System.Numerics.Tests
         public void Vector2ConstructorTest2()
         {
             Vector2 target = new Vector2();
-            Assert.Equal(target.X, 0.0f);
-            Assert.Equal(target.Y, 0.0f);
+            Assert.Equal(0.0f, target.X);
+            Assert.Equal(0.0f, target.Y);
         }
 
         // A test for Vector2f (float, float)

@@ -101,7 +101,7 @@ namespace System.Linq.Parallel
         // The enumerator type responsible for executing the reverse operation.
         //
 
-        class ReverseQueryOperatorEnumerator<TKey> : QueryOperatorEnumerator<TSource, TKey>
+        private class ReverseQueryOperatorEnumerator<TKey> : QueryOperatorEnumerator<TSource, TKey>
         {
             private readonly QueryOperatorEnumerator<TSource, TKey> _source; // The data source to reverse.
             private readonly CancellationToken _cancellationToken;
@@ -167,9 +167,9 @@ namespace System.Linq.Parallel
         // results were indexable.
         //
 
-        class ReverseQueryOperatorResults : UnaryQueryOperatorResults
+        private class ReverseQueryOperatorResults : UnaryQueryOperatorResults
         {
-            private int _count; // The number of elements in child results
+            private readonly int _count; // The number of elements in child results
 
             public static QueryResults<TSource> NewResults(
                 QueryResults<TSource> childQueryResults, ReverseQueryOperator<TSource> op,

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -36,7 +36,7 @@ namespace System.Text.Json.Tests
     }
 
     public class JsonSerializerTests
-    { 
+    {
         [Fact]
         public void DeserializeBoolean_Null()
         {
@@ -69,22 +69,22 @@ namespace System.Text.Json.Tests
         public void IncompleteContainers()
         {
             JsonException e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IList<object>>("[1,"));
-            Assert.Equal(e.Message, "Expected start of a property name or value, but instead reached end of data. Path: $[1] | LineNumber: 0 | BytePositionInLine: 2.");
-            
+            Assert.Equal("Expected start of a property name or value, but instead reached end of data. Path: $[1] | LineNumber: 0 | BytePositionInLine: 2.", e.Message);
+
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IList<int>>("[1,"));
-            Assert.Equal(e.Message, "Expected start of a property name or value, but instead reached end of data. Path: $[1] | LineNumber: 0 | BytePositionInLine: 2.");
+            Assert.Equal("Expected start of a property name or value, but instead reached end of data. Path: $[1] | LineNumber: 0 | BytePositionInLine: 2.", e.Message);
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IList<int>>("[1"));
-            Assert.Equal(e.Message, "'1' is an invalid end of a number. Expected a delimiter. Path: $[0] | LineNumber: 0 | BytePositionInLine: 2.");
+            Assert.Equal("'1' is an invalid end of a number. Expected a delimiter. Path: $[0] | LineNumber: 0 | BytePositionInLine: 2.", e.Message);
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IDictionary<string, int>>("{\"key\":1,"));
-            Assert.Equal(e.Message, "Expected start of a property name or value, but instead reached end of data. Path: $.key | LineNumber: 0 | BytePositionInLine: 8.");
+            Assert.Equal("Expected start of a property name or value, but instead reached end of data. Path: $.key | LineNumber: 0 | BytePositionInLine: 8.", e.Message);
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IDictionary<string, int>>("{\"key\":1"));
-            Assert.Equal(e.Message, "'1' is an invalid end of a number. Expected a delimiter. Path: $.key | LineNumber: 0 | BytePositionInLine: 8.");
+            Assert.Equal("'1' is an invalid end of a number. Expected a delimiter. Path: $.key | LineNumber: 0 | BytePositionInLine: 8.", e.Message);
 
             e = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IncompleteTestClass>("{\"key\":1,"));
-            Assert.Equal(e.Message, "Expected start of a property name or value, but instead reached end of data. Path: $ | LineNumber: 0 | BytePositionInLine: 8.");
+            Assert.Equal("Expected start of a property name or value, but instead reached end of data. Path: $ | LineNumber: 0 | BytePositionInLine: 8.", e.Message);
         }
 
         [Fact]

@@ -348,12 +348,12 @@ namespace System.ComponentModel.Composition
         {
             Dictionary<string, Type> requiredMetadata = new Dictionary<string, Type>();
             Assert.Equal(metadataKeys.Length, metadataTypes.Length);
-            for(int i=0; i< metadataKeys.Length; i++)
+            for (int i=0; i< metadataKeys.Length; i++)
             {
                 requiredMetadata[metadataKeys[i]] = metadataTypes[i];
             }
             return new ContractBasedImportDefinition(contractName, typeIdentity, requiredMetadata, ImportCardinality.ZeroOrMore, false, false, CreationPolicy.Any);
-            
+
         }
 
         private class NoOverridesContractBasedImportDefinition : ContractBasedImportDefinition
@@ -391,4 +391,3 @@ namespace System.ComponentModel.Composition
         }
     }
 }
-

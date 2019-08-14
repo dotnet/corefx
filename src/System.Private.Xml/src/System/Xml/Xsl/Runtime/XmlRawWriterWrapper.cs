@@ -13,9 +13,9 @@ namespace System.Xml.Xsl.Runtime
     /// <summary>
     /// This internal class implements the XmlRawWriter interface by passing all calls to a wrapped XmlWriter implementation.
     /// </summary>
-    sealed internal class XmlRawWriterWrapper : XmlRawWriter
+    internal sealed class XmlRawWriterWrapper : XmlRawWriter
     {
-        private XmlWriter _wrapped;
+        private readonly XmlWriter _wrapped;
 
         public XmlRawWriterWrapper(XmlWriter writer)
         {

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -67,7 +67,6 @@ namespace System.Net.Tests
 
         [Theory]
         [InlineData(AuthenticationSchemes.Basic)]
-        [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.None)]
         [InlineData(AuthenticationSchemes.Basic | AuthenticationSchemes.Anonymous)]
         public async Task BasicAuthentication_ValidUsernameAndPassword_Success(AuthenticationSchemes authScheme)
         {
@@ -331,7 +330,7 @@ namespace System.Net.Tests
                 AssertExtensions.Throws<ArgumentException>("value", "CustomChannelBinding", () => listener.ExtendedProtectionPolicy = protectionPolicy);
             }
         }
-        
+
         [Fact]
         public void UnsafeConnectionNtlmAuthentication_SetGet_ReturnsExpected()
         {
@@ -439,7 +438,7 @@ namespace System.Net.Tests
             Assert.Equal(errorCode, clientTask.Result.StatusCode);
             return clientTask.Result;
         }
-        
+
         private async Task ValidateNullUser()
         {
             Task<HttpListenerContext> serverContextTask = _listener.GetContextAsync();

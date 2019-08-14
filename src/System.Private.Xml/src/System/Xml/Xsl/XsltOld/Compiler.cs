@@ -75,7 +75,7 @@ namespace System.Xml.Xsl.XsltOld
         // Current import stack
         private Stack _stylesheets;
 
-        private HybridDictionary _documentURIs = new HybridDictionary();
+        private readonly HybridDictionary _documentURIs = new HybridDictionary();
 
         // import/include documents, who is here has its URI in this.documentURIs
         private NavigatorInput _input;
@@ -90,7 +90,7 @@ namespace System.Xml.Xsl.XsltOld
         internal Stylesheet rootStylesheet;
         private RootAction _rootAction;
         private List<TheQuery> _queryStore;
-        private QueryBuilder _queryBuilder = new QueryBuilder();
+        private readonly QueryBuilder _queryBuilder = new QueryBuilder();
         private int _rtfCount = 0;
 
         // Used to load Built In templates
@@ -767,18 +767,7 @@ namespace System.Xml.Xsl.XsltOld
         //
         // Script support
         //
-        private Hashtable[] _typeDeclsByLang = new Hashtable[] { new Hashtable(), new Hashtable(), new Hashtable() };
-        private ArrayList _scriptFiles = new ArrayList();
-        // Namespaces we always import when compiling
-        private static string[] s_defaultNamespaces = new string[] {
-            "System",
-            "System.Collections",
-            "System.Text",
-            "System.Text.RegularExpressions",
-            "System.Xml",
-            "System.Xml.Xsl",
-            "System.Xml.XPath",
-        };
+        private readonly Hashtable[] _typeDeclsByLang = new Hashtable[] { new Hashtable(), new Hashtable(), new Hashtable() };
 
         internal void AddScript(string source, ScriptingLanguage lang, string ns, string fileName, int lineNumber)
         {
@@ -1190,8 +1179,8 @@ namespace System.Xml.Xsl.XsltOld
 
         internal class ErrorXPathExpression : CompiledXpathExpr
         {
-            private string _baseUri;
-            private int _lineNumber, _linePosition;
+            private readonly string _baseUri;
+            private readonly int _lineNumber, _linePosition;
             public ErrorXPathExpression(string expression, string baseUri, int lineNumber, int linePosition)
                 : base(null, expression, false)
             {

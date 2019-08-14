@@ -22,7 +22,7 @@ namespace System.ComponentModel.Composition.AttributedModel
         public AttributedExportDefinition(AttributedPartCreationInfo partCreationInfo, MemberInfo member, ExportAttribute exportAttribute, Type typeIdentityType, string contractName)
             : base(contractName, (IDictionary<string, object>)null)
         {
-            if(partCreationInfo == null)
+            if (partCreationInfo == null)
             {
                 throw new ArgumentNullException(nameof(partCreationInfo));
             }
@@ -52,8 +52,8 @@ namespace System.ComponentModel.Composition.AttributedModel
                     IDictionary<string, object> metadata;
                     _member.TryExportMetadataForMember(out metadata);
 
-                    string typeIdentity = _exportAttribute.IsContractNameSameAsTypeIdentity() ? 
-                        ContractName : 
+                    string typeIdentity = _exportAttribute.IsContractNameSameAsTypeIdentity() ?
+                        ContractName :
                         _member.GetTypeIdentityFromExport(_typeIdentityType);
 
                     metadata.Add(CompositionConstants.ExportTypeIdentityMetadataName, typeIdentity);
@@ -75,5 +75,5 @@ namespace System.ComponentModel.Composition.AttributedModel
             }
         }
     }
-    
+
 }

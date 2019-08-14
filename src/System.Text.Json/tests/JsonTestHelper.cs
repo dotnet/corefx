@@ -25,6 +25,12 @@ namespace System.Text.Json
         public const string SingleFormatString = "G9";
 #endif
 
+        private const string CompiledNewline = @"
+";
+
+        private static readonly bool s_replaceNewlines =
+            !StringComparer.Ordinal.Equals(CompiledNewline, Environment.NewLine);
+
         public static string NewtonsoftReturnStringHelper(TextReader reader)
         {
             var sb = new StringBuilder();
@@ -673,6 +679,42 @@ namespace System.Text.Json
             }
         }
 
+        public static void AssertContents(string expectedValue, ArrayBufferWriter<byte> buffer)
+        {
+            string value = Encoding.UTF8.GetString(
+                    buffer.WrittenSpan
+#if netfx
+                        .ToArray()
+#endif
+                    );
+
+            // Temporary hack until we can use the same escape algorithm on both sides and make sure we want uppercase hex.
+            // Todo: create new AssertContentsAgainJsonNet to avoid calling NormalizeToJsonNetFormat when not necessary.
+            Assert.Equal(expectedValue.NormalizeToJsonNetFormat(), value.NormalizeToJsonNetFormat());
+        }
+
+        public static void AssertContents(string expectedValue, MemoryStream stream)
+        {
+            string value = Encoding.UTF8.GetString(stream.ToArray());
+
+            // Temporary hack until we can use the same escape algorithm on both sides and make sure we want uppercase hex.
+            Assert.Equal(expectedValue.NormalizeToJsonNetFormat(), value.NormalizeToJsonNetFormat());
+        }
+
+        public static void AssertContentsNotEqual(string expectedValue, ArrayBufferWriter<byte> buffer)
+        {
+            string value = Encoding.UTF8.GetString(
+                    buffer.WrittenSpan
+#if netfx
+                        .ToArray()
+#endif
+                    );
+
+            // Temporary hack until we can use the same escape algorithm on both sides and make sure we want uppercase hex.
+            // Todo: create new AssertContentsNotEqualAgainJsonNet to avoid calling NormalizeToJsonNetFormat when not necessary.
+            Assert.NotEqual(expectedValue.NormalizeToJsonNetFormat(), value.NormalizeToJsonNetFormat());
+        }
+
         public delegate void AssertThrowsActionUtf8JsonReader(Utf8JsonReader json);
 
         // Cannot use standard Assert.Throws() when testing Utf8JsonReader - ref structs and closures don't get along.
@@ -735,5 +777,12 @@ namespace System.Text.Json
 
         public static string StripWhitespace(this string value)
             => s_stripWhitespace.Replace(value, string.Empty);
+
+        // Should be called only on compile-time strings
+        // This is needed due to the fact that git might normalize line endings when checking-out files
+        public static string NormalizeLineEndings(this string value)
+            => s_replaceNewlines ?
+            value.Replace(CompiledNewline, Environment.NewLine) :
+            value;
     }
 }

@@ -349,7 +349,7 @@ namespace System.ServiceModel.Syndication
             else if (reader.IsStartElement(Atom10Constants.SourceFeedTag, Atom10Constants.Atom10Namespace))
             {
                 reader.ReadStartElement();
-                result.SourceFeed = ReadFeedFrom(reader, new SyndicationFeed(), true); //  isSourceFeed 
+                result.SourceFeed = ReadFeedFrom(reader, new SyndicationFeed(), true); //  isSourceFeed
                 reader.ReadEndElement();
             }
             else if (reader.IsStartElement(Atom10Constants.SummaryTag, Atom10Constants.Atom10Namespace))
@@ -778,7 +778,7 @@ namespace System.ServiceModel.Syndication
                             {
                                 feedItems = feedItems ?? new NullNotAllowedCollection<SyndicationItem>();
                                 IEnumerable<SyndicationItem> items = ReadItems(reader, result, out areAllItemsRead);
-                                foreach(SyndicationItem item in items)
+                                foreach (SyndicationItem item in items)
                                 {
                                     feedItems.Add(item);
                                 }

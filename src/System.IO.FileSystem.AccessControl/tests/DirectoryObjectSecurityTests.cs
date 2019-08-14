@@ -37,7 +37,7 @@ namespace System.Security.AccessControl
             Assert.Equal(1, rules.Count);
             CustomAccessRule rule = (CustomAccessRule)rules[0];
             // Should be users group
-            Assert.Equal(rule.IdentityReference.Value, "S-1-5-32-545");
+            Assert.Equal("S-1-5-32-545", rule.IdentityReference.Value);
             Assert.Equal(AccessControlType.Allow, rule.AccessControlType);
             Assert.Equal(InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, rule.InheritanceFlags);
             Assert.Equal(0x1200a9, rule.AccessMaskValue);
@@ -330,7 +330,7 @@ namespace System.Security.AccessControl
             var descriptor = new CommonSecurityDescriptor(true, true, string.Empty);
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
             var objectTypeGuid = Guid.NewGuid();
-            
+
             var customAccessRuleReadWrite = new CustomAccessRule(
                 Helpers.s_LocalSystemNTAccount, ReadWriteAccessMask, true, InheritanceFlags.None,
                 PropagationFlags.None, objectTypeGuid, Guid.NewGuid(), AccessControlType.Allow
@@ -401,7 +401,7 @@ namespace System.Security.AccessControl
             var descriptor = new CommonSecurityDescriptor(true, true, string.Empty);
             var customObjectSecurity = new CustomDirectoryObjectSecurity(descriptor);
             var objectTypeGuid = Guid.NewGuid();
-            
+
             var customAccessRuleReadWrite = new CustomAccessRule(
                 Helpers.s_LocalSystemNTAccount, ReadWriteAccessMask, true, InheritanceFlags.None,
                 PropagationFlags.None, objectTypeGuid, Guid.NewGuid(), AccessControlType.Allow
@@ -479,7 +479,7 @@ namespace System.Security.AccessControl
             Assert.False(existingRules.Contains(customAccessRuleSynchronize));
         }
 
-        [Fact]        
+        [Fact]
         public void RemoveAccessRuleAll_AccessControlType_Deny_ThrowException()
         {
             var descriptor = new CommonSecurityDescriptor(true, true, string.Empty);

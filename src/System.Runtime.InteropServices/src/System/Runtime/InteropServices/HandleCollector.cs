@@ -8,12 +8,12 @@ namespace System.Runtime.InteropServices
 {
     public sealed class HandleCollector
     {
-        // Used for increasing the threshold. 
+        // Used for increasing the threshold.
         private const int DeltaPercent = 10;
         private int _threshold;
         private int _handleCount;
 
-        private int[] _gcCounts = new int[3];
+        private readonly int[] _gcCounts = new int[3];
         private int _gcGeneration = 0;
 
         public HandleCollector(string? name, int initialThreshold) :
@@ -81,7 +81,7 @@ namespace System.Runtime.InteropServices
                 Thread.Sleep(10 * collectionGeneration);
             }
 
-            // Don't bother with gen0. 
+            // Don't bother with gen0.
             for (int i = 1; i < 3; i++)
             {
                 _gcCounts[i] = GC.CollectionCount(i);

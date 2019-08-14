@@ -5,10 +5,10 @@
 //
 // Author:
 //  original:
-//	Sebastien Pouliot <sebastien@ximian.com>
-//	Aleksey Sanin (aleksey@aleksey.com)
+//  Sebastien Pouliot <sebastien@ximian.com>
+//  Aleksey Sanin (aleksey@aleksey.com)
 //  this file:
-//	Gert Driesen <drieseng@users.sourceforge.net>
+//  Gert Driesen <drieseng@users.sourceforge.net>
 //
 // (C) 2003 Aleksey Sanin (aleksey@aleksey.com)
 // (C) 2004 Novell (http://www.novell.com)
@@ -159,7 +159,7 @@ namespace System.Security.Cryptography.Xml.Tests
         {
             AssertExtensions.Throws<ArgumentException>("type", () => transform.GetOutput(typeof(string)));
         }
-		
+
         [Fact]
         public static void ItDecryptsLicense()
         {
@@ -308,7 +308,7 @@ namespace System.Security.Cryptography.Xml.Tests
             nsMgr.AddNamespace("r", LicenseTransformNsUrl);
 
             XmlElement currentIssuerContext = context.SelectSingleNode("ancestor-or-self::r:issuer[1]", nsMgr) as XmlElement;
-            Assert.NotEqual(currentIssuerContext, null);
+            Assert.NotNull(currentIssuerContext);
 
             XmlElement signatureNode = currentIssuerContext.SelectSingleNode("descendant-or-self::dsig:Signature[1]", nsMgr) as XmlElement;
             if (signatureNode != null)
@@ -317,7 +317,7 @@ namespace System.Security.Cryptography.Xml.Tests
             }
 
             XmlElement currentLicenseContext = currentIssuerContext.SelectSingleNode("ancestor-or-self::r:license[1]", nsMgr) as XmlElement;
-            Assert.NotEqual(currentLicenseContext, null);
+            Assert.NotNull(currentLicenseContext);
 
             XmlNodeList issuerList = currentLicenseContext.SelectNodes("descendant-or-self::r:license[1]/r:issuer", nsMgr);
             for (int i = 0; i < issuerList.Count; i++)
@@ -344,4 +344,3 @@ namespace System.Security.Cryptography.Xml.Tests
         }
     }
 }
-

@@ -9,7 +9,7 @@ using System.Linq;
 using System.Globalization;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions; 
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XmlDiff;
@@ -3420,9 +3420,9 @@ namespace CoreXml.Test.XLinq
                         // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
                         // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
                         // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
-                        Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("]]>") + @"[\p{Pf}\p{Po}]"));
-                        Assert.True(Regex.IsMatch(exception.Message, @"\b" + "XML" + @"\b"));
-                        Assert.True(Regex.IsMatch(exception.Message, @"\b" + "CDATA" + @"\b"));
+                        Assert.Matches(@"[\p{Pi}\p{Po}]" + Regex.Escape("]]>") + @"[\p{Pf}\p{Po}]", exception.Message);
+                        Assert.Matches(@"\b" + "XML" + @"\b", exception.Message);
+                        Assert.Matches(@"\b" + "CDATA" + @"\b", exception.Message);
                     }
                 }
 
@@ -3616,9 +3616,9 @@ namespace CoreXml.Test.XLinq
                         // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
                         // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
                         // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
-                        Assert.True(Regex.IsMatch(exception.Message, @"\b" + "XML" + @"\b"));
-                        Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("--") + @"[\p{Pf}\p{Po}]"));
-                        Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("-") + @"[\p{Pf}\p{Po}]"));
+                        Assert.Matches(@"\b" + "XML" + @"\b", exception.Message);
+                        Assert.Matches(@"[\p{Pi}\p{Po}]" + Regex.Escape("--") + @"[\p{Pf}\p{Po}]", exception.Message);
+                        Assert.Matches(@"[\p{Pi}\p{Po}]" + Regex.Escape("-") + @"[\p{Pf}\p{Po}]", exception.Message);
                     }
                 }
             }
@@ -4221,8 +4221,8 @@ namespace CoreXml.Test.XLinq
                         // \p{Pi} any kind of opening quote https://www.compart.com/en/unicode/category/Pi
                         // \p{Pf} any kind of closing quote https://www.compart.com/en/unicode/category/Pf
                         // \p{Po} any kind of punctuation character that is not a dash, bracket, quote or connector https://www.compart.com/en/unicode/category/Po
-                        Assert.True(Regex.IsMatch(exception.Message, @"[\p{Pi}\p{Po}]" + Regex.Escape("?>") + @"[\p{Pf}\p{Po}]"));
-                        Assert.True(Regex.IsMatch(exception.Message, @"\b" + "XML" + @"\b"));
+                        Assert.Matches(@"[\p{Pi}\p{Po}]" + Regex.Escape("?>") + @"[\p{Pf}\p{Po}]", exception.Message);
+                        Assert.Matches(@"\b" + "XML" + @"\b", exception.Message);
                     }
                 }
 
@@ -5230,7 +5230,7 @@ namespace CoreXml.Test.XLinq
                     throw new TestException(TestResult.Failed, "");
                 }
 
-                //[Variation(Id = 2, Desc = "LookupPrefix with String.Empty should if(!String.Empty", Priority = 1)]
+                //[Variation(Id = 2, Desc = "LookupPrefix with String.Empty should if (!String.Empty", Priority = 1)]
                 public void lookupPrefix_2()
                 {
                     XDocument doc = new XDocument();

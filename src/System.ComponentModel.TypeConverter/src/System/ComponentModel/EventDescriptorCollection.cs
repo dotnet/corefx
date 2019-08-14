@@ -17,7 +17,7 @@ namespace System.ComponentModel
     public class EventDescriptorCollection : ICollection, IList
     {
         private EventDescriptor[] _events;
-        private string[] _namedSort;
+        private readonly string[] _namedSort;
         private readonly IComparer _comparer;
         private bool _eventsOwned;
         private bool _needSort;
@@ -264,7 +264,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        /// Sorts the members of this EventDescriptorCollection, using the default sort for this collection, 
+        /// Sorts the members of this EventDescriptorCollection, using the default sort for this collection,
         /// which is usually alphabetical.
         /// </summary>
         public virtual EventDescriptorCollection Sort()
@@ -273,7 +273,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        /// Sorts the members of this EventDescriptorCollection. Any specified NamedSort arguments will 
+        /// Sorts the members of this EventDescriptorCollection. Any specified NamedSort arguments will
         /// be applied first, followed by sort using the specified IComparer.
         /// </summary>
         public virtual EventDescriptorCollection Sort(string[] names)
@@ -282,7 +282,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        /// Sorts the members of this EventDescriptorCollection. Any specified NamedSort arguments will 
+        /// Sorts the members of this EventDescriptorCollection. Any specified NamedSort arguments will
         /// be applied first, followed by sort using the specified IComparer.
         /// </summary>
         public virtual EventDescriptorCollection Sort(string[] names, IComparer comparer)
@@ -291,7 +291,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        /// Sorts the members of this EventDescriptorCollection, using the specified IComparer to compare, 
+        /// Sorts the members of this EventDescriptorCollection, using the specified IComparer to compare,
         /// the EventDescriptors contained in the collection.
         /// </summary>
         public virtual EventDescriptorCollection Sort(IComparer comparer)
@@ -300,7 +300,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        /// Sorts the members of this EventDescriptorCollection. Any specified NamedSort arguments will 
+        /// Sorts the members of this EventDescriptorCollection. Any specified NamedSort arguments will
         /// be applied first, followed by sort using the specified IComparer.
         /// </summary>
         protected void InternalSort(string[] names)

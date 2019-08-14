@@ -13,7 +13,7 @@ namespace System.DirectoryServices.AccountManagement
     //
     internal class QbeFilterDescription
     {
-        private ArrayList _filtersToApply = new ArrayList();
+        private readonly ArrayList _filtersToApply = new ArrayList();
 
         public QbeFilterDescription()
         {
@@ -37,7 +37,7 @@ namespace System.DirectoryServices.AccountManagement
         // Put a private constructor because this class should only be used as static methods
         private FilterFactory() { }
 
-        private static Hashtable s_subclasses = new Hashtable();
+        private static readonly Hashtable s_subclasses = new Hashtable();
 
         static FilterFactory()
         {
@@ -84,7 +84,7 @@ namespace System.DirectoryServices.AccountManagement
 
         // Given a property name, constructs and returns the appropriate individual property
         // filter
-        static public object CreateFilter(string propertyName)
+        public static object CreateFilter(string propertyName)
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "QbeFilterDescription", "FilterFactory.CreateFilter: name=" + propertyName);
 

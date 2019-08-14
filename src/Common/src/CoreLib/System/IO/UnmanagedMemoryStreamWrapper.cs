@@ -4,8 +4,8 @@
 
 /*============================================================
 **
-** 
-** 
+**
+**
 **
 ** Purpose: Create a Memorystream over an UnmanagedMemoryStream
 **
@@ -17,11 +17,11 @@ using System.Threading.Tasks;
 namespace System.IO
 {
     // Needed for backwards compatibility with V1.x usages of the
-    // ResourceManager, where a MemoryStream is now returned as an 
+    // ResourceManager, where a MemoryStream is now returned as an
     // UnmanagedMemoryStream from ResourceReader.
     internal sealed class UnmanagedMemoryStreamWrapper : MemoryStream
     {
-        private UnmanagedMemoryStream _unmanagedStream;
+        private readonly UnmanagedMemoryStream _unmanagedStream;
 
         internal UnmanagedMemoryStreamWrapper(UnmanagedMemoryStream stream)
         {
@@ -124,7 +124,7 @@ namespace System.IO
             return _unmanagedStream.Seek(offset, loc);
         }
 
-        public unsafe override byte[] ToArray()
+        public override unsafe byte[] ToArray()
         {
             byte[] buffer = new byte[_unmanagedStream.Length];
             _unmanagedStream.Read(buffer, 0, (int)_unmanagedStream.Length);
@@ -147,7 +147,7 @@ namespace System.IO
         }
 
         // Writes this MemoryStream to another stream.
-        public unsafe override void WriteTo(Stream stream)
+        public override unsafe void WriteTo(Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream), SR.ArgumentNull_Stream);
@@ -220,4 +220,3 @@ namespace System.IO
         }
     }  // class UnmanagedMemoryStreamWrapper
 }  // namespace
-

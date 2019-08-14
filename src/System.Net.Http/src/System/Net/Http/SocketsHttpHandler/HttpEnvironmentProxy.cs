@@ -91,19 +91,15 @@ namespace System.Net.Http
     internal sealed partial class HttpEnvironmentProxy : IWebProxy
     {
         private const string EnvAllProxyUC = "ALL_PROXY";
-        private const string EnvAllProxyLC = "all_proxy";
-        private const string EnvHttpProxyLC = "http_proxy";
         private const string EnvHttpProxyUC = "HTTP_PROXY";
-        private const string EnvHttpsProxyLC = "https_proxy";
         private const string EnvHttpsProxyUC = "HTTPS_PROXY";
-        private const string EnvNoProxyLC = "no_proxy";
         private const string EnvNoProxyUC = "NO_PROXY";
         private const string EnvCGI = "GATEWAY_INTERFACE"; // Running in a CGI environment.
 
-        private Uri _httpProxyUri;      // String URI for HTTP requests
-        private Uri _httpsProxyUri;     // String URI for HTTPS requests
-        private string[] _bypass = null;// list of domains not to proxy
-        private ICredentials _credentials;
+        private readonly Uri _httpProxyUri;      // String URI for HTTP requests
+        private readonly Uri _httpsProxyUri;     // String URI for HTTPS requests
+        private readonly string[] _bypass = null;// list of domains not to proxy
+        private readonly ICredentials _credentials;
 
         private HttpEnvironmentProxy(Uri httpProxy, Uri httpsProxy, string bypassList)
         {

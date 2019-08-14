@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <!-- excluded from offline portion of source build -->
-  <ItemGroup Condition="'$(OfflineBuild)' != 'true'">
+  <ItemGroup Condition="'$(DotNetBuildOffline)' != 'true'">
     <!-- arcade -->
     <PackageReference Include="Microsoft.DotNet.GenAPI" Version="$(MicrosoftDotNetGenApiPackageVersion)" />
   </ItemGroup>
@@ -27,7 +27,7 @@
   <!-- excluded from source build -->
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
     <PackageReference Include="Microsoft.DotNet.ApiCompat" Version="$(MicrosoftDotNetApiCompatPackageVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Build.Tasks.Feed" Version="$(MicrosoftDotNetBuildTasksFeedPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Build.Tasks.Feed" Version="$(MicrosoftDotNetBuildTasksFeedVersion)" />
     <PackageReference Include="Microsoft.DotNet.VersionTools.Tasks" Version="$(MicrosoftDotNetVersionToolsTasksPackageVersion)" />
 
     <!-- SourceLink -->

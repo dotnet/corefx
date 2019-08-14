@@ -11,7 +11,7 @@ namespace System.Composition.Hosting.Core
     /// <summary>
     /// Represents an export descriptor that an available part can provide.
     /// </summary>
-    /// <remarks>This type is central to the cycle-checking, adaptation and 
+    /// <remarks>This type is central to the cycle-checking, adaptation and
     /// compilation features of the container.</remarks>
     public class ExportDescriptorPromise
     {
@@ -83,7 +83,7 @@ namespace System.Composition.Hosting.Core
             try
             {
                 ExportDescriptor relay = _descriptor.Value;
-                if(relay == null)
+                if (relay == null)
                 {
                     throw new ArgumentNullException("descriptor");
                 }

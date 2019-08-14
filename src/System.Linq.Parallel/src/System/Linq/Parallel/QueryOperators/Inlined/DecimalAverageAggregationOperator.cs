@@ -15,7 +15,7 @@ using System.Threading;
 namespace System.Linq.Parallel
 {
     /// <summary>
-    /// An inlined average aggregation operator and its enumerator, for decimals. 
+    /// An inlined average aggregation operator and its enumerator, for decimals.
     /// </summary>
     internal sealed class DecimalAverageAggregationOperator : InlinedAggregationOperator<decimal, Pair<decimal, long>, decimal>
     {
@@ -37,7 +37,7 @@ namespace System.Linq.Parallel
 
         protected override decimal InternalAggregate(ref Exception singularExceptionToThrow)
         {
-            // Because the final reduction is typically much cheaper than the intermediate 
+            // Because the final reduction is typically much cheaper than the intermediate
             // reductions over the individual partitions, and because each parallel partition
             // will do a lot of work to produce a single output element, we prefer to turn off
             // pipelining, and process the final reductions serially.
@@ -84,7 +84,7 @@ namespace System.Linq.Parallel
 
         private class DecimalAverageAggregationOperatorEnumerator<TKey> : InlinedAggregationOperatorEnumerator<Pair<decimal, long>>
         {
-            private QueryOperatorEnumerator<decimal, TKey> _source; // The source data.
+            private readonly QueryOperatorEnumerator<decimal, TKey> _source; // The source data.
 
             //---------------------------------------------------------------------------------------
             // Instantiates a new aggregation operator.

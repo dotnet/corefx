@@ -17,11 +17,11 @@ namespace System.Xml.Serialization
         internal const XmlSchemaForm elementFormDefault = XmlSchemaForm.Qualified;
         internal const XmlSchemaForm attributeFormDefault = XmlSchemaForm.Unqualified;
 
-        private XmlSchemas _schemas;
-        private Hashtable _elements = new Hashtable();   // ElementAccessor -> XmlSchemaElement
-        private Hashtable _attributes = new Hashtable();   // AttributeAccessor -> XmlSchemaElement
-        private Hashtable _types = new Hashtable();      // StructMapping/EnumMapping -> XmlSchemaComplexType/XmlSchemaSimpleType
-        private Hashtable _references = new Hashtable();   // TypeMappings to keep track of circular references via anonymous types
+        private readonly XmlSchemas _schemas;
+        private readonly Hashtable _elements = new Hashtable();   // ElementAccessor -> XmlSchemaElement
+        private readonly Hashtable _attributes = new Hashtable();   // AttributeAccessor -> XmlSchemaElement
+        private readonly Hashtable _types = new Hashtable();      // StructMapping/EnumMapping -> XmlSchemaComplexType/XmlSchemaSimpleType
+        private readonly Hashtable _references = new Hashtable();   // TypeMappings to keep track of circular references via anonymous types
         private bool _needToExportRoot;
         private TypeScope _scope;
 
@@ -178,7 +178,7 @@ namespace System.Xml.Serialization
                     // special case of the single top-level XmlNode --> map it to node array to match the "mixed" any type for backward compatibility
                     isUnbounded = true;
 
-                // generate type name, make sure that it is backward compatible 
+                // generate type name, make sure that it is backward compatible
                 string baseName = isMixed ? "any" : isUnbounded ? "anyElements" : "anyElement";
                 string name = baseName;
                 int i = 0;

@@ -63,8 +63,10 @@ int32_t AppleCryptoNative_X509ChainEvaluate(SecTrustRef chain,
     }
 
     SecTrustResultType trustResult;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     *pOSStatus = SecTrustEvaluate(chain, &trustResult);
-
+#pragma clang diagnostic pop
     // If any error is reported from the function or the trust result value indicates that
     // otherwise was a failed chain build (vs an untrusted chain, etc) return failure and
     // we'll throw in the managed layer.  (but if we hit the "or" the message is "No error")
@@ -171,6 +173,8 @@ static void MergeStatusCodes(CFTypeRef key, CFTypeRef value, void* context)
         *pStatus |= PAL_X509ChainRevocationStatusUnknown;
     else if (CFEqual(keyString, CFSTR("MissingIntermediate")))
         *pStatus |= PAL_X509ChainPartialChain;
+    else if (CFEqual(keyString, CFSTR("UnparseableExtension")))
+        *pStatus |= PAL_X509ChainInvalidExtension;
     else if (CFEqual(keyString, CFSTR("WeakLeaf")) || CFEqual(keyString, CFSTR("WeakIntermediates")) ||
              CFEqual(keyString, CFSTR("WeakRoot")) || CFEqual(keyString, CFSTR("WeakKeySize")))
     {

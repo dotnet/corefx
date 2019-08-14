@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Microsoft.VisualBasic.Tests
 {
@@ -723,7 +724,15 @@ namespace Microsoft.VisualBasic.Tests
             {
                 ex = e;
             }
-            Assert.NotNull(ex?.GetType() == typeof(TException));
+            if (ex == null)
+            {
+                throw new ThrowsException(typeof(TException));
+            }
+
+            if (ex.GetType() != typeof(TException))
+            {
+                throw new ThrowsException(typeof(TException), ex);
+            }
         }
     }
 }

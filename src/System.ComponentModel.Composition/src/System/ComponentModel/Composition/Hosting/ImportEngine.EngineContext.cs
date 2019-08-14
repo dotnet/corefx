@@ -7,7 +7,7 @@ using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    public partial class ImportEngine 
+    public partial class ImportEngine
     {
         /// <summary>
         ///     Used to wrap the start and stop of enforcing export changes don't
@@ -15,10 +15,10 @@ namespace System.ComponentModel.Composition.Hosting
         /// </summary>
         private class EngineContext
         {
-            private ImportEngine _importEngine;
-            private List<PartManager> _addedPartManagers = new List<PartManager>();
-            private List<PartManager> _removedPartManagers = new List<PartManager>();
-            private EngineContext _parentEngineContext;
+            private readonly ImportEngine _importEngine;
+            private readonly List<PartManager> _addedPartManagers = new List<PartManager>();
+            private readonly List<PartManager> _removedPartManagers = new List<PartManager>();
+            private readonly EngineContext _parentEngineContext;
 
             public EngineContext(ImportEngine importEngine, EngineContext parentEngineContext)
             {

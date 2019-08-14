@@ -26,6 +26,7 @@ namespace System
         public static bool IsDebian => IsDistroAndVersion("debian");
         public static bool IsAlpine => IsDistroAndVersion("alpine");
         public static bool IsDebian8 => IsDistroAndVersion("debian", 8);
+        public static bool IsDebian10 => IsDistroAndVersion("debian", 10);
         public static bool IsUbuntu1404 => IsDistroAndVersion("ubuntu", 14, 4);
         public static bool IsUbuntu1604 => IsDistroAndVersion("ubuntu", 16, 4);
         public static bool IsUbuntu1704 => IsDistroAndVersion("ubuntu", 17, 4);
@@ -35,7 +36,7 @@ namespace System
         public static bool IsUbuntu1810OrHigher => IsDistroAndVersionOrHigher("ubuntu", 18, 10);
         public static bool IsTizen => IsDistroAndVersion("tizen");
         public static bool IsFedora => IsDistroAndVersion("fedora");
-        
+
         // OSX family
         public static bool IsOSX => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
         public static bool IsNotOSX => !IsOSX;
@@ -46,7 +47,8 @@ namespace System
         public static bool IsMacOsHighSierraOrHigher => IsOSX && (m_osxProductVersion.Value.Major > 10 || (m_osxProductVersion.Value.Major == 10 && m_osxProductVersion.Value.Minor >= 13));
         public static bool IsNotMacOsHighSierraOrHigher => !IsMacOsHighSierraOrHigher;
         public static bool IsMacOsMojaveOrHigher => IsOSX && (m_osxProductVersion.Value.Major > 10 || (m_osxProductVersion.Value.Major == 10 && m_osxProductVersion.Value.Minor >= 14));
-        
+        public static bool IsMacOsCatalinaOrHigher => IsOSX && (m_osxProductVersion.Value.Major > 10 || (m_osxProductVersion.Value.Major == 10 && m_osxProductVersion.Value.Minor >= 15));
+
         // RedHat family covers RedHat and CentOS
         public static bool IsRedHatFamily => IsRedHatFamilyAndVersion();
         public static bool IsNotRedHatFamily => !IsRedHatFamily;
@@ -54,6 +56,7 @@ namespace System
         public static bool IsNotRedHatFamily6 => !IsRedHatFamily6;
         public static bool IsRedHatFamily7 => IsRedHatFamilyAndVersion(7);
         public static bool IsNotFedoraOrRedHatFamily => !IsFedora && !IsRedHatFamily;
+        public static bool IsNotDebian10 => !IsDebian10;
 
         private static Lazy<Version> m_icuVersion = new Lazy<Version>(GetICUVersion);
         public static Version ICUVersion => m_icuVersion.Value;
@@ -174,7 +177,7 @@ namespace System
                 catch
                 {
                 }
-            }            
+            }
 
             // In case of exception, couldn't get the version or non osx
             return new Version(0, 0, 0);

@@ -218,8 +218,7 @@ namespace System.Collections.Concurrent
                 // IsEmpty == !TryPeek. We use a "resultUsed:false" peek in order to avoid marking
                 // segments as preserved for observation, making IsEmpty a cheaper way than either
                 // TryPeek(out T) or Count == 0 to check whether any elements are in the queue.
-                T ignoredResult;
-                return !TryPeek(out ignoredResult, resultUsed: false);
+                return !TryPeek(out _, resultUsed: false);
             }
         }
 
@@ -484,7 +483,7 @@ namespace System.Collections.Concurrent
         /// cref="ConcurrentQueue{T}"/>.</returns>
         /// <remarks>
         /// The enumeration represents a moment-in-time snapshot of the contents
-        /// of the queue.  It does not reflect any updates to the collection after 
+        /// of the queue.  It does not reflect any updates to the collection after
         /// <see cref="GetEnumerator"/> was called.  The enumerator is safe to use
         /// concurrently with reads from and writes to the queue.
         /// </remarks>

@@ -142,7 +142,7 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //  "Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //  "Transitivity failure"
 
             Assert.True(string.CompareOrdinal(rel.ToString(), 0, "./", 0, 2) == 0, "Cannot have colon in first segment, must append ./");
         }
@@ -156,7 +156,7 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //"Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //"Transitivity failure"
         }
 
         [Fact]
@@ -168,12 +168,12 @@ namespace System.PrivateUri.Tests
 
             Assert.False(rel.IsAbsoluteUri, "Result should be relative");
 
-            Assert.Equal<String>("d:/hi:there/", rel.ToString());
+            Assert.Equal("d:/hi:there/", rel.ToString());
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //  "Transitivity failure"
-            Assert.Equal<String>(test.ToString(), result.ToString()); //  "Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //  "Transitivity failure"
+            Assert.Equal(test.ToString(), result.ToString()); //  "Transitivity failure"
         }
 
         [Fact]
@@ -185,9 +185,9 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            // This is a known oddity when mix and matching Unc & dos paths in this order. 
+            // This is a known oddity when mix and matching Unc & dos paths in this order.
             // The other way works as expected.
-            Assert.Equal<string>("file:///u:/unc/hi:there/", result.ToString());
+            Assert.Equal("file:///u:/unc/hi:there/", result.ToString());
         }
 
         [Fact]
@@ -199,7 +199,7 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath);  // "Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath);  // "Transitivity failure"
         }
 
         [Fact]
@@ -211,7 +211,7 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //"Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //"Transitivity failure"
         }
 
         [Fact]
@@ -223,7 +223,7 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //"Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //"Transitivity failure"
         }
 
         [Fact]
@@ -235,7 +235,7 @@ namespace System.PrivateUri.Tests
 
             Uri result = new Uri(baseUri, rel);
 
-            Assert.Equal<String>(test.LocalPath, result.LocalPath); //"Transitivity failure"
+            Assert.Equal(test.LocalPath, result.LocalPath); //"Transitivity failure"
         }
 
         [Fact]
@@ -314,7 +314,7 @@ namespace System.PrivateUri.Tests
 
             new object[] { "http://www.contos o.com", false },
             new object[] { "http://www.contos \u00E4.com", false },
-            
+
 
             // Test Path
             new object[] { "http://www.contoso.com/path???/file name", false },
@@ -373,7 +373,7 @@ namespace System.PrivateUri.Tests
 
             new object[] { "http://www.contoso.com/path? name ", false },
             new object[] { "http://www.contoso.com/path? \u00E4 ", false },
-            
+
             new object[] { "http://www.contoso.com/path?p=", true },
             new object[] { "http://www.contoso.com/path?\u00E4=", true },
 
@@ -382,7 +382,7 @@ namespace System.PrivateUri.Tests
 
             new object[] { "http://www.contoso.com/path?p= val", false },
             new object[] { "http://www.contoso.com/path?\u00E4= \u00E4", false },
-            
+
             new object[] { "http://www.contoso.com/path?par=value& par=value", false },
             new object[] { "http://www.contoso.com/path?\u00E4=\u00E4& \u00E4=\u00E4", false },
 
@@ -409,7 +409,7 @@ namespace System.PrivateUri.Tests
 
             new object[] { "http://www.contoso.com/a?val", true },
             new object[] { "http://www.contoso.com/\u00E4?\u00E4", true },
-            
+
             new object[] { "http://www.contoso.com/path /path?par=val", false },
             new object[] { "http://www.contoso.com/\u00E4 /\u00E4?\u00E4=\u00E4", false },
 
@@ -450,7 +450,7 @@ namespace System.PrivateUri.Tests
             new object[] { "http://www.contoso.com/path?a# a ", false },
             new object[] { "http://www.contoso.com/path?\u00E4# \u00E4 ", false },
 
-            
+
             new object[] { "http://www.contoso.com/path?a#a?a", true },
             new object[] { "http://www.contoso.com/\u00E4?\u00E4#u00E4?\u00E4", true },
 
@@ -473,7 +473,7 @@ namespace System.PrivateUri.Tests
             // escaped
             new object[] { "https://www.contoso.com/?a=%7B%7C%7D&b=%E2%80%99", true },
             new object[] { "https://www.contoso.com/?a=%7B%7C%7D%E2%80%99", true },
-            
+
             // unescaped
             new object[] { "https://www.contoso.com/?a=}", false },
             new object[] { "https://www.contoso.com/?a=|", false },

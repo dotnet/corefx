@@ -10,19 +10,19 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     /// <summary>
     /// Enables test app to run in dual mode: regular and repro. Typical usage pattern is:
-    /// 
+    ///
     /// RandomizerPool pool = new RandomizerPool(ReproFile); // for repro
     /// RandomizerPool pool = new RandomizerPool(seed); // for deterministic generation with constant seed (useful for unit tests or perf tests)
     /// RandomizerPool pool = new RandomizerPool(); // for generation with random seeds (for stress tests)
-    /// 
+    ///
     /// try
     /// {
-    ///     for(outer test loop counter)
+    ///     for (outer test loop counter)
     ///     {
     ///         using (Scope rootScope = pool.RootScope())
     ///         {
     ///             GlobalSetup(rootScope.Current);
-    ///             
+    ///
     ///             if pool.ReproMode, set loop counter to 1
     ///             foreach (inner test loop counter)
     ///             {
@@ -42,7 +42,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     ///         }
     ///     }
     /// }
-    /// catch(Exception)
+    /// catch (Exception)
     /// {
     ///     string tempFile = Path.GetRandomFileName() + ".repro"; // or any other place to place repro files
     ///     // dumps the latest scope created on the current thread to the file
@@ -271,7 +271,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             Randomizer IScope.Current { get { return Current; } }
 
             /// <summary>
-            /// Disposes the scope and reverts the current thread scope to previous one. 
+            /// Disposes the scope and reverts the current thread scope to previous one.
             /// Note that the "last created scope" is not changed on Dispose, thus the scope instance
             /// itself can still be used to collect repro states.
             /// </summary>

@@ -6,12 +6,12 @@
 **
 **
 **
-** Purpose: 
+** Purpose:
 ** This class represents the current system timezone.  It is
-** the only meaningful implementation of the TimeZone class 
+** the only meaningful implementation of the TimeZone class
 ** available in this version.
 **
-** The only TimeZone that we support in version 1 is the 
+** The only TimeZone that we support in version 1 is the
 ** CurrentTimeZone as determined by the system timezone.
 **
 **
@@ -29,9 +29,9 @@ namespace System
         // no daylight saving is in used.
         // E.g. the offset for PST (Pacific Standard time) should be -8 * 60 * 60 * 1000 * 10000.
         // (1 millisecond = 10000 ticks)
-        private long m_ticksOffset;
-        private string m_standardName;
-        private string m_daylightName;
+        private readonly long m_ticksOffset;
+        private readonly string m_standardName;
+        private readonly string m_daylightName;
 
         internal CurrentSystemTimeZone()
         {
@@ -70,7 +70,7 @@ namespace System
                 return offset.Ticks;
             }
 
-            // The start and end times represent the range of universal times that are in DST for that year.                
+            // The start and end times represent the range of universal times that are in DST for that year.
             // Within that there is an ambiguous hour, usually right at the end, but at the beginning in
             // the unusual case of a negative daylight savings delta.
             DateTime startTime = daylightTime.Start - offset;
@@ -89,7 +89,7 @@ namespace System
                 ambiguousEnd = startTime - daylightTime.Delta;
             }
 
-            bool isDst = false;
+            bool isDst;
             if (startTime > endTime)
             {
                 // In southern hemisphere, the daylight saving time starts later in the year, and ends in the beginning of next year.

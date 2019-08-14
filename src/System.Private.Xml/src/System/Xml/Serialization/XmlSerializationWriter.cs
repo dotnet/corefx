@@ -33,7 +33,7 @@ namespace System.Xml.Serialization
         private Hashtable _typeEntries;
         private ArrayList _referencesToWrite;
         private Hashtable _objectsInUse;
-        private string _aliasBase = "q";
+        private readonly string _aliasBase = "q";
         private bool _soap12;
         private bool _escapeName = true;
 
@@ -1432,10 +1432,9 @@ namespace System.Xml.Serialization
 
     internal static class DynamicAssemblies
     {
-        private static ArrayList s_assembliesInConfig = new ArrayList();
-        private static volatile Hashtable s_nameToAssemblyMap = new Hashtable();
-        private static volatile Hashtable s_assemblyToNameMap = new Hashtable();
-        private static Hashtable s_tableIsTypeDynamic = Hashtable.Synchronized(new Hashtable());
+        private static readonly Hashtable s_nameToAssemblyMap = new Hashtable();
+        private static readonly Hashtable s_assemblyToNameMap = new Hashtable();
+        private static readonly Hashtable s_tableIsTypeDynamic = Hashtable.Synchronized(new Hashtable());
 
         // SxS: This method does not take any resource name and does not expose any resources to the caller.
         // It's OK to suppress the SxS warning.
@@ -1548,7 +1547,7 @@ namespace System.Xml.Serialization
         // ----------------------------------------------------------------------------------
         private Hashtable _reflectionVariables = null;
         private int _nextReflectionVariableNumber = 0;
-        private IndentedWriter _writer;
+        private readonly IndentedWriter _writer;
         internal ReflectionAwareCodeGen(IndentedWriter writer)
         {
             _writer = writer;
@@ -1628,10 +1627,9 @@ namespace System.Xml.Serialization
             if (_reflectionVariables == null)
             {
                 _reflectionVariables = new Hashtable();
-                _writer.Write(string.Format(CultureInfo.InvariantCulture, s_helperClassesForUseReflection,
+                _writer.Write(string.Format(CultureInfo.InvariantCulture, HelperClassesForUseReflection,
                     "object", "string", typeof(Type).FullName,
-                    typeof(FieldInfo).FullName, typeof(PropertyInfo).FullName,
-                    typeof(MemberInfo).FullName /*, typeof(MemberTypes).FullName*/));
+                    typeof(FieldInfo).FullName, typeof(PropertyInfo).FullName));
 
                 WriteDefaultIndexerInit(typeof(IList), typeof(Array).FullName, false, false);
             }
@@ -1882,12 +1880,12 @@ namespace System.Xml.Serialization
                 string memberInfoName = GetReflectionVariable(typeFullName, memberName);
                 if (memberInfoName != null)
                     return memberInfoName + "[" + obj + "]";
-                // member may be part of the basetype 
+                // member may be part of the basetype
                 typeDesc = typeDesc.BaseTypeDesc;
                 if (typeDesc != null && !typeDesc.UseReflection)
                     return "((" + typeDesc.CSharpName + ")" + obj + ").@" + memberName;
             }
-            //throw GetReflectionVariableException(saveTypeDesc.CSharpName,memberName); 
+            //throw GetReflectionVariableException(saveTypeDesc.CSharpName,memberName);
             // NOTE, sowmys:Must never happen. If it does let the code
             // gen continue to help debugging what's gone wrong.
             // Eventually the compilation will fail.
@@ -1896,12 +1894,12 @@ namespace System.Xml.Serialization
         /*
         Exception GetReflectionVariableException(string typeFullName, string memberName){
             string key;
-            if(memberName == null)
+            if (memberName == null)
                 key = typeFullName;
             else
                 key = memberName+":"+typeFullName;
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            foreach(object varAvail in reflectionVariables.Keys){
+            foreach (object varAvail in reflectionVariables.Keys){
                 sb.Append(varAvail.ToString());
                 sb.Append("\n");
             }
@@ -2133,7 +2131,7 @@ namespace System.Xml.Serialization
             WriteQuotedCSharpString(_writer, value);
         }
 
-        private static string s_helperClassesForUseReflection = @"
+        private const string HelperClassesForUseReflection = @"
     sealed class XSFieldInfo {{
        {3} fieldInfo;
         public XSFieldInfo({2} t, {1} memberName){{
@@ -2179,7 +2177,7 @@ namespace System.Xml.Serialization
     }}
 ";
     }
-    
+
     internal class XmlSerializationWriterCodeGen : XmlSerializationCodeGen
     {
         internal XmlSerializationWriterCodeGen(IndentedWriter writer, TypeScope[] scopes, string access, string className) : base(writer, scopes, access, className)
@@ -2550,7 +2548,7 @@ namespace System.Xml.Serialization
                 Writer.WriteLine("TopLevelElement();");
             }
 
-            // in the top-level method add check for the parameters length, 
+            // in the top-level method add check for the parameters length,
             // because visual basic does not have a concept of an <out> parameter it uses <ByRef> instead
             // so sometime we think that we have more parameters then supplied
             Writer.WriteLine("int pLength = p.Length;");
@@ -3206,7 +3204,7 @@ namespace System.Xml.Serialization
         private bool CanOptimizeWriteListSequence(TypeDesc listElementTypeDesc)
         {
             // check to see if we can write values of the attribute sequentially
-            // currently we have only one data type (XmlQualifiedName) that we can not write "inline", 
+            // currently we have only one data type (XmlQualifiedName) that we can not write "inline",
             // because we need to output xmlns:qx="..." for each of the qnames
 
             return (listElementTypeDesc != null && listElementTypeDesc != QnameTypeDesc);
@@ -4139,7 +4137,7 @@ namespace System.Xml.Serialization
                 Writer.Write(source);
                 Writer.Write(".Length != 0)");
             }
-            else if(value is double || value is float)
+            else if (value is double || value is float)
             {
                 Writer.Write("!");
                 Writer.Write(source);
@@ -4212,24 +4210,24 @@ namespace System.Xml.Serialization
                     Writer.Write('\'');
                 }
                 else if (type == typeof(int))
-                    Writer.Write(((Int32)value).ToString(null, NumberFormatInfo.InvariantInfo));
+                    Writer.Write(((int)value).ToString(null, NumberFormatInfo.InvariantInfo));
                 else if (type == typeof(double))
                 {
                     if (double.IsNaN((double)value))
                     {
                         Writer.Write("System.Double.NaN");
                     }
-                    else if(double.IsPositiveInfinity((double)value))
+                    else if (double.IsPositiveInfinity((double)value))
                     {
                         Writer.Write("System.Double.PositiveInfinity");
                     }
-                    else if(double.IsNegativeInfinity((double)value))
+                    else if (double.IsNegativeInfinity((double)value))
                     {
                         Writer.Write("System.Double.NegativeInfinity");
                     }
                     else
                     {
-                        Writer.Write(((Double)value).ToString("R", NumberFormatInfo.InvariantInfo));
+                        Writer.Write(((double)value).ToString("R", NumberFormatInfo.InvariantInfo));
                     }
                 }
                 else if (type == typeof(bool))
@@ -4249,7 +4247,7 @@ namespace System.Xml.Serialization
                     {
                         Writer.Write("System.Single.NaN");
                     }
-                    else if(float.IsPositiveInfinity((float)value))
+                    else if (float.IsPositiveInfinity((float)value))
                     {
                         Writer.Write("System.Single.PositiveInfinity");
                     }
@@ -4259,13 +4257,13 @@ namespace System.Xml.Serialization
                     }
                     else
                     {
-                        Writer.Write(((Single)value).ToString("R", NumberFormatInfo.InvariantInfo));
+                        Writer.Write(((float)value).ToString("R", NumberFormatInfo.InvariantInfo));
                         Writer.Write("f");
                     }
                 }
                 else if (type == typeof(decimal))
                 {
-                    Writer.Write(((Decimal)value).ToString(null, NumberFormatInfo.InvariantInfo));
+                    Writer.Write(((decimal)value).ToString(null, NumberFormatInfo.InvariantInfo));
                     Writer.Write("m");
                 }
                 else if (type == typeof(DateTime))

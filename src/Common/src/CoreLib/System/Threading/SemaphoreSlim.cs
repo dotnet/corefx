@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -33,7 +33,7 @@ namespace System.Threading
         // Its value must be between the maximum semaphore value and zero
         private volatile int m_currentCount;
 
-        // The maximum semaphore value, it is initialized to Int.MaxValue if the client didn't specify it. it is used 
+        // The maximum semaphore value, it is initialized to Int.MaxValue if the client didn't specify it. it is used
         // to check if the count excceeded the maxi value or not.
         private readonly int m_maxCount;
 
@@ -66,7 +66,7 @@ namespace System.Threading
         private static readonly Task<bool> s_trueTask =
             new Task<bool>(false, true, (TaskCreationOptions)InternalTaskOptions.DoNotDispose, default);
         // A pre-completed task with Result==false
-        private readonly static Task<bool> s_falseTask =
+        private static readonly Task<bool> s_falseTask =
             new Task<bool>(false, false, (TaskCreationOptions)InternalTaskOptions.DoNotDispose, default);
 
         // No maximum constant
@@ -92,9 +92,9 @@ namespace System.Threading
         }
 
         /// <summary>
-        /// Returns a <see cref="T:System.Threading.WaitHandle"/> that can be used to wait on the semaphore.
+        /// Returns a <see cref="System.Threading.WaitHandle"/> that can be used to wait on the semaphore.
         /// </summary>
-        /// <value>A <see cref="T:System.Threading.WaitHandle"/> that can be used to wait on the
+        /// <value>A <see cref="System.Threading.WaitHandle"/> that can be used to wait on the
         /// semaphore.</value>
         /// <remarks>
         /// A successful wait on the <see cref="AvailableWaitHandle"/> does not imply a successful wait on
@@ -102,7 +102,7 @@ namespace System.Threading
         /// count. <see cref="AvailableWaitHandle"/> exists to allow a thread to block waiting on multiple
         /// semaphores, but such a wait should be followed by a true wait on the target semaphore.
         /// </remarks>
-        /// <exception cref="T:System.ObjectDisposedException">The <see
+        /// <exception cref="System.ObjectDisposedException">The <see
         /// cref="SemaphoreSlim"/> has been disposed.</exception>
         public WaitHandle AvailableWaitHandle
         {
@@ -137,7 +137,7 @@ namespace System.Threading
         /// </summary>
         /// <param name="initialCount">The initial number of requests for the semaphore that can be granted
         /// concurrently.</param>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="initialCount"/>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="initialCount"/>
         /// is less than 0.</exception>
         public SemaphoreSlim(int initialCount)
             : this(initialCount, NO_MAXIMUM)
@@ -152,7 +152,7 @@ namespace System.Threading
         /// concurrently.</param>
         /// <param name="maxCount">The maximum number of requests for the semaphore that can be granted
         /// concurrently.</param>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"> <paramref name="initialCount"/>
+        /// <exception cref="System.ArgumentOutOfRangeException"> <paramref name="initialCount"/>
         /// is less than 0. -or-
         /// <paramref name="initialCount"/> is greater than <paramref name="maxCount"/>. -or-
         /// <paramref name="maxCount"/> is less than 0.</exception>
@@ -181,7 +181,7 @@ namespace System.Threading
         /// <summary>
         /// Blocks the current thread until it can enter the <see cref="SemaphoreSlim"/>.
         /// </summary>
-        /// <exception cref="T:System.ObjectDisposedException">The current instance has already been
+        /// <exception cref="System.ObjectDisposedException">The current instance has already been
         /// disposed.</exception>
         public void Wait()
         {
@@ -191,13 +191,13 @@ namespace System.Threading
 
         /// <summary>
         /// Blocks the current thread until it can enter the <see cref="SemaphoreSlim"/>, while observing a
-        /// <see cref="T:System.Threading.CancellationToken"/>.
+        /// <see cref="System.Threading.CancellationToken"/>.
         /// </summary>
-        /// <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> token to
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to
         /// observe.</param>
-        /// <exception cref="T:System.OperationCanceledException"><paramref name="cancellationToken"/> was
+        /// <exception cref="System.OperationCanceledException"><paramref name="cancellationToken"/> was
         /// canceled.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The current instance has already been
+        /// <exception cref="System.ObjectDisposedException">The current instance has already been
         /// disposed.</exception>
         public void Wait(CancellationToken cancellationToken)
         {
@@ -207,16 +207,16 @@ namespace System.Threading
 
         /// <summary>
         /// Blocks the current thread until it can enter the <see cref="SemaphoreSlim"/>, using a <see
-        /// cref="T:System.TimeSpan"/> to measure the time interval.
+        /// cref="System.TimeSpan"/> to measure the time interval.
         /// </summary>
         /// <param name="timeout">A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
         /// </param>
         /// <returns>true if the current thread successfully entered the <see cref="SemaphoreSlim"/>;
         /// otherwise, false.</returns>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative
         /// number other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater
-        /// than <see cref="System.Int32.MaxValue"/>.</exception>
+        /// than <see cref="int.MaxValue"/>.</exception>
         public bool Wait(TimeSpan timeout)
         {
             // Validate the timeout
@@ -233,19 +233,19 @@ namespace System.Threading
 
         /// <summary>
         /// Blocks the current thread until it can enter the <see cref="SemaphoreSlim"/>, using a <see
-        /// cref="T:System.TimeSpan"/> to measure the time interval, while observing a <see
-        /// cref="T:System.Threading.CancellationToken"/>.
+        /// cref="System.TimeSpan"/> to measure the time interval, while observing a <see
+        /// cref="System.Threading.CancellationToken"/>.
         /// </summary>
         /// <param name="timeout">A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
         /// </param>
-        /// <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> to
         /// observe.</param>
         /// <returns>true if the current thread successfully entered the <see cref="SemaphoreSlim"/>;
         /// otherwise, false.</returns>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative
         /// number other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater
-        /// than <see cref="System.Int32.MaxValue"/>.</exception>
+        /// than <see cref="int.MaxValue"/>.</exception>
         /// <exception cref="System.OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
         public bool Wait(TimeSpan timeout, CancellationToken cancellationToken)
         {
@@ -279,12 +279,12 @@ namespace System.Threading
 
         /// <summary>
         /// Blocks the current thread until it can enter the <see cref="SemaphoreSlim"/>,
-        /// using a 32-bit signed integer to measure the time interval, 
-        /// while observing a <see cref="T:System.Threading.CancellationToken"/>.
+        /// using a 32-bit signed integer to measure the time interval,
+        /// while observing a <see cref="System.Threading.CancellationToken"/>.
         /// </summary>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see cref="Timeout.Infinite"/>(-1) to
         /// wait indefinitely.</param>
-        /// <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to observe.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> to observe.</param>
         /// <returns>true if the current thread successfully entered the <see cref="SemaphoreSlim"/>; otherwise, false.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a negative number other than -1,
         /// which represents an infinite time-out.</exception>
@@ -359,7 +359,7 @@ namespace System.Threading
                 }
 
                 // If there are any async waiters, for fairness we'll get in line behind
-                // then by translating our synchronous wait into an asynchronous one that we 
+                // then by translating our synchronous wait into an asynchronous one that we
                 // then block on (once we've released the lock).
                 if (m_asyncHead != null)
                 {
@@ -497,13 +497,13 @@ namespace System.Threading
 
         /// <summary>
         /// Asynchronously waits to enter the <see cref="SemaphoreSlim"/>, while observing a
-        /// <see cref="T:System.Threading.CancellationToken"/>.
+        /// <see cref="System.Threading.CancellationToken"/>.
         /// </summary>
         /// <returns>A task that will complete when the semaphore has been entered.</returns>
         /// <param name="cancellationToken">
-        /// The <see cref="T:System.Threading.CancellationToken"/> token to observe.
+        /// The <see cref="System.Threading.CancellationToken"/> token to observe.
         /// </param>
-        /// <exception cref="T:System.ObjectDisposedException">
+        /// <exception cref="System.ObjectDisposedException">
         /// The current instance has already been disposed.
         /// </exception>
         public Task WaitAsync(CancellationToken cancellationToken)
@@ -519,10 +519,10 @@ namespace System.Threading
         /// The number of milliseconds to wait, or <see cref="Timeout.Infinite"/>(-1) to wait indefinitely.
         /// </param>
         /// <returns>
-        /// A task that will complete with a result of true if the current thread successfully entered 
+        /// A task that will complete with a result of true if the current thread successfully entered
         /// the <see cref="SemaphoreSlim"/>, otherwise with a result of false.
         /// </returns>
-        /// <exception cref="T:System.ObjectDisposedException">The current instance has already been
+        /// <exception cref="System.ObjectDisposedException">The current instance has already been
         /// disposed.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a negative number other than -1,
         /// which represents an infinite time-out.
@@ -534,23 +534,23 @@ namespace System.Threading
 
         /// <summary>
         /// Asynchronously waits to enter the <see cref="SemaphoreSlim"/>, using a <see
-        /// cref="T:System.TimeSpan"/> to measure the time interval, while observing a
-        /// <see cref="T:System.Threading.CancellationToken"/>.
+        /// cref="System.TimeSpan"/> to measure the time interval, while observing a
+        /// <see cref="System.Threading.CancellationToken"/>.
         /// </summary>
         /// <param name="timeout">
         /// A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
         /// </param>
         /// <returns>
-        /// A task that will complete with a result of true if the current thread successfully entered 
+        /// A task that will complete with a result of true if the current thread successfully entered
         /// the <see cref="SemaphoreSlim"/>, otherwise with a result of false.
         /// </returns>
-        /// <exception cref="T:System.ObjectDisposedException">
+        /// <exception cref="System.ObjectDisposedException">
         /// The current instance has already been disposed.
         /// </exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">
-        /// <paramref name="timeout"/> is a negative number other than -1 milliseconds, which represents 
-        /// an infinite time-out -or- timeout is greater than <see cref="System.Int32.MaxValue"/>.
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <paramref name="timeout"/> is a negative number other than -1 milliseconds, which represents
+        /// an infinite time-out -or- timeout is greater than <see cref="int.MaxValue"/>.
         /// </exception>
         public Task<bool> WaitAsync(TimeSpan timeout)
         {
@@ -559,22 +559,22 @@ namespace System.Threading
 
         /// <summary>
         /// Asynchronously waits to enter the <see cref="SemaphoreSlim"/>, using a <see
-        /// cref="T:System.TimeSpan"/> to measure the time interval.
+        /// cref="System.TimeSpan"/> to measure the time interval.
         /// </summary>
         /// <param name="timeout">
         /// A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
         /// </param>
         /// <param name="cancellationToken">
-        /// The <see cref="T:System.Threading.CancellationToken"/> token to observe.
+        /// The <see cref="System.Threading.CancellationToken"/> token to observe.
         /// </param>
         /// <returns>
-        /// A task that will complete with a result of true if the current thread successfully entered 
+        /// A task that will complete with a result of true if the current thread successfully entered
         /// the <see cref="SemaphoreSlim"/>, otherwise with a result of false.
         /// </returns>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">
-        /// <paramref name="timeout"/> is a negative number other than -1 milliseconds, which represents 
-        /// an infinite time-out -or- timeout is greater than <see cref="System.Int32.MaxValue"/>.
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <paramref name="timeout"/> is a negative number other than -1 milliseconds, which represents
+        /// an infinite time-out -or- timeout is greater than <see cref="int.MaxValue"/>.
         /// </exception>
         public Task<bool> WaitAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
@@ -592,18 +592,18 @@ namespace System.Threading
 
         /// <summary>
         /// Asynchronously waits to enter the <see cref="SemaphoreSlim"/>,
-        /// using a 32-bit signed integer to measure the time interval, 
-        /// while observing a <see cref="T:System.Threading.CancellationToken"/>.
+        /// using a 32-bit signed integer to measure the time interval,
+        /// while observing a <see cref="System.Threading.CancellationToken"/>.
         /// </summary>
         /// <param name="millisecondsTimeout">
         /// The number of milliseconds to wait, or <see cref="Timeout.Infinite"/>(-1) to wait indefinitely.
         /// </param>
-        /// <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to observe.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> to observe.</param>
         /// <returns>
-        /// A task that will complete with a result of true if the current thread successfully entered 
+        /// A task that will complete with a result of true if the current thread successfully entered
         /// the <see cref="SemaphoreSlim"/>, otherwise with a result of false.
         /// </returns>
-        /// <exception cref="T:System.ObjectDisposedException">The current instance has already been
+        /// <exception cref="System.ObjectDisposedException">The current instance has already been
         /// disposed.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a negative number other than -1,
         /// which represents an infinite time-out.
@@ -767,7 +767,7 @@ namespace System.Threading
         /// Exits the <see cref="SemaphoreSlim"/> once.
         /// </summary>
         /// <returns>The previous count of the <see cref="SemaphoreSlim"/>.</returns>
-        /// <exception cref="T:System.ObjectDisposedException">The current instance has already been
+        /// <exception cref="System.ObjectDisposedException">The current instance has already been
         /// disposed.</exception>
         public int Release()
         {
@@ -779,11 +779,11 @@ namespace System.Threading
         /// </summary>
         /// <param name="releaseCount">The number of times to exit the semaphore.</param>
         /// <returns>The previous count of the <see cref="SemaphoreSlim"/>.</returns>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="releaseCount"/> is less
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="releaseCount"/> is less
         /// than 1.</exception>
-        /// <exception cref="T:System.Threading.SemaphoreFullException">The <see cref="SemaphoreSlim"/> has
+        /// <exception cref="System.Threading.SemaphoreFullException">The <see cref="SemaphoreSlim"/> has
         /// already reached its maximum size.</exception>
-        /// <exception cref="T:System.ObjectDisposedException">The current instance has already been
+        /// <exception cref="System.ObjectDisposedException">The current instance has already been
         /// disposed.</exception>
         public int Release(int releaseCount)
         {
@@ -884,8 +884,8 @@ namespace System.Threading
         }
 
         /// <summary>
-        /// When overridden in a derived class, releases the unmanaged resources used by the 
-        /// <see cref="T:System.Threading.ManualResetEventSlim"/>, and optionally releases the managed resources.
+        /// When overridden in a derived class, releases the unmanaged resources used by the
+        /// <see cref="System.Threading.ManualResetEventSlim"/>, and optionally releases the managed resources.
         /// </summary>
         /// <param name="disposing">true to release both managed and unmanaged resources;
         /// false to release only unmanaged resources.</param>

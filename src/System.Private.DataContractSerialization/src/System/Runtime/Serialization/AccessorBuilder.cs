@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -20,9 +20,9 @@ namespace System.Runtime.Serialization
         private delegate void StructSetDelegate<T, TArg>(ref T obj, TArg value);
         private delegate TResult StructGetDelegate<T, out TResult>(ref T obj);
 
-        private static MethodInfo s_createGetterInternal = typeof(FastInvokerBuilder).GetMethod(nameof(CreateGetterInternal), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-        private static MethodInfo s_createSetterInternal = typeof(FastInvokerBuilder).GetMethod(nameof(CreateSetterInternal), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-        private static MethodInfo s_make = typeof(FastInvokerBuilder).GetMethod(nameof(Make), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+        private static readonly MethodInfo s_createGetterInternal = typeof(FastInvokerBuilder).GetMethod(nameof(CreateGetterInternal), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+        private static readonly MethodInfo s_createSetterInternal = typeof(FastInvokerBuilder).GetMethod(nameof(CreateSetterInternal), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+        private static readonly MethodInfo s_make = typeof(FastInvokerBuilder).GetMethod(nameof(Make), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
 
         public static Func<object> GetMakeNewInstanceFunc(Type type)
         {
@@ -51,7 +51,7 @@ namespace System.Runtime.Serialization
             else
             {
                 throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(SR.Format(SR.InvalidMember, DataContract.GetClrTypeFullName(memberInfo.DeclaringType), memberInfo.Name)));
-            }        
+            }
         }
 
         public static Setter CreateSetter(MemberInfo memberInfo)
@@ -133,9 +133,9 @@ namespace System.Runtime.Serialization
 
         private static Setter CreateSetterInternal<DeclaringType, PropertyType>(PropertyInfo propInfo)
         {
-            if(typeof(DeclaringType).IsGenericType && typeof(DeclaringType).GetGenericTypeDefinition() == typeof(KeyValue<,>))
+            if (typeof(DeclaringType).IsGenericType && typeof(DeclaringType).GetGenericTypeDefinition() == typeof(KeyValue<,>))
             {
-                if(propInfo.Name == "Key")
+                if (propInfo.Name == "Key")
                 {
                     return (ref object obj, object val) =>
                     {
@@ -183,7 +183,7 @@ namespace System.Runtime.Serialization
             {
                 return method.CreateDelegate(typeof(T)) as T;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw new InvalidOperationException(SR.Format(SR.FailedToCreateMethodDelegate, method.Name, method.DeclaringType.FullName), e);
             }

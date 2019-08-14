@@ -9,11 +9,11 @@ using System.Threading;
 
 namespace System.Net.Sockets
 {
-    partial class SafeSocketHandle
+    public partial class SafeSocketHandle
     {
         private ThreadPoolBoundHandle _iocpBoundHandle;
         private bool _skipCompletionPortOnSuccess;
-        private object _iocpBindingLock = new object();
+        private readonly object _iocpBindingLock = new object();
 
         internal void SetExposed() { /* nop */ }
 

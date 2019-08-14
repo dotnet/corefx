@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -54,7 +54,7 @@ namespace System.Net.Http
 
             if (TryGetAuthenticationChallenge(response, isProxyAuth, authUri, credentials, out AuthenticationChallenge challenge))
             {
-                if (challenge.AuthenticationType == AuthenticationType.Negotiate || 
+                if (challenge.AuthenticationType == AuthenticationType.Negotiate ||
                     challenge.AuthenticationType == AuthenticationType.Ntlm)
                 {
                     bool isNewConnection = false;
@@ -83,8 +83,10 @@ namespace System.Net.Http
 
                         // Calculate SPN (Service Principal Name) using the host name of the request.
                         // Use the request's 'Host' header if available. Otherwise, use the request uri.
+                        // Ignore the 'Host' header if this is proxy authentication since we need to use
+                        // the host name of the proxy itself for SPN calculation.
                         string hostName;
-                        if (request.HasHeaders && request.Headers.Host != null)
+                        if (!isProxyAuth && request.HasHeaders && request.Headers.Host != null)
                         {
                             // Use the host name without any normalization.
                             hostName = request.Headers.Host;
@@ -176,4 +178,3 @@ namespace System.Net.Http
         }
     }
 }
-

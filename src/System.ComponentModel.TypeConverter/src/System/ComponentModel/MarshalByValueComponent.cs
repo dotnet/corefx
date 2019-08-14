@@ -68,18 +68,18 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        /// 
+        ///
         /// Disposes all the resources associated with this component.
         /// If disposing is false then you must never touch any other
         /// managed objects, as they may already be finalized. When
         /// in this state you should dispose any native resources
         /// that you have a reference to.
-        /// 
-        /// 
+        ///
+        ///
         /// When disposing is true then you should dispose all data
         /// and objects you have references to. The normal implementation
         /// of this method would look something like:
-        /// 
+        ///
         /// <code>
         /// public void Dispose() {
         /// Dispose(true);
@@ -103,11 +103,11 @@ namespace System.ComponentModel
         /// Dispose(false);
         /// }
         /// </code>
-        /// 
+        ///
         /// For base classes, you should never override the Finalizer (~Class in C#)
         /// or the Dispose method that takes no arguments, rather you should
-        /// always override the Dispose method that takes a bool. 
-        /// 
+        /// always override the Dispose method that takes a bool.
+        ///
         /// <code>
         /// protected override void Dispose(bool disposing) {
         /// if (disposing) {
@@ -154,7 +154,7 @@ namespace System.ComponentModel
         public virtual bool DesignMode => _site?.DesignMode ?? false;
 
         /// <summary>
-        /// Returns a <see cref='System.String'/> containing the name of the <see cref='System.ComponentModel.Component'/> , if any. This method should not be
+        /// Returns a <see cref='string'/> containing the name of the <see cref='System.ComponentModel.Component'/> , if any. This method should not be
         /// overridden. For
         /// internal use only.
         /// </summary>

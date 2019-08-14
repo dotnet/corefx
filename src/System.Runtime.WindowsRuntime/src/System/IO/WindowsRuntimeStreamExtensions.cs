@@ -25,10 +25,10 @@ namespace System.IO
 
         private const int DefaultBufferSize = 16384;  // = 0x4000 = 16 KBytes.
 
-        private static ConditionalWeakTable<object, Stream> s_winRtToNetFxAdapterMap
+        private static readonly ConditionalWeakTable<object, Stream> s_winRtToNetFxAdapterMap
                  = new ConditionalWeakTable<object, Stream>();
 
-        private static ConditionalWeakTable<Stream, NetFxToWinRtStreamAdapter> s_netFxToWinRtAdapterMap
+        private static readonly ConditionalWeakTable<Stream, NetFxToWinRtStreamAdapter> s_netFxToWinRtAdapterMap
                  = new ConditionalWeakTable<Stream, NetFxToWinRtStreamAdapter>();
 
         #endregion Constants and static Fields
@@ -53,12 +53,12 @@ namespace System.IO
             if (valueMayBeWrappedInBufferedStream)
             {
                 BufferedStream bufferedValueInMap = valueInMap as BufferedStream;
-                Debug.Assert(Object.ReferenceEquals(value, valueInMap)
-                                || (bufferedValueInMap != null && Object.ReferenceEquals(value, bufferedValueInMap.UnderlyingStream)));
+                Debug.Assert(object.ReferenceEquals(value, valueInMap)
+                                || (bufferedValueInMap != null && object.ReferenceEquals(value, bufferedValueInMap.UnderlyingStream)));
             }
             else
             {
-                Debug.Assert(Object.ReferenceEquals(value, valueInMap));
+                Debug.Assert(object.ReferenceEquals(value, valueInMap));
             }
         }
 #endif  // DEBUG
@@ -301,7 +301,7 @@ namespace System.IO
             // In that case we do not need to put the wrapper into the map.
             if (sAdptr != null)
             {
-                object wrappedWinRtStream = sAdptr.GetWindowsRuntimeStream<Object>();
+                object wrappedWinRtStream = sAdptr.GetWindowsRuntimeStream<object>();
                 if (wrappedWinRtStream == null)
                     throw new ObjectDisposedException(nameof(stream), SR.ObjectDisposed_CannotPerformOperation);
 

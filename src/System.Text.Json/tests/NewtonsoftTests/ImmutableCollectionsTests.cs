@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -34,7 +34,7 @@ namespace System.Text.Json.Tests
 {
     public class ImmutableCollectionsTests
     {
-        private static readonly JsonSerializerOptions s_indentedOption = new JsonSerializerOptions { WriteIndented = true }; 
+        private static readonly JsonSerializerOptions s_indentedOption = new JsonSerializerOptions { WriteIndented = true };
 
         #region List
         [Fact]
@@ -130,7 +130,7 @@ namespace System.Text.Json.Tests
         {
             InvalidOperationException e = Assert.Throws<InvalidOperationException>(
                 () => JsonSerializer.Serialize(default(ImmutableArray<int>), s_indentedOption));
-            Assert.Equal(e.Message, "This operation cannot be performed on a default instance of ImmutableArray<T>.  Consider initializing the array, or checking the ImmutableArray<T>.IsDefault property.");
+            Assert.Equal("This operation cannot be performed on a default instance of ImmutableArray<T>.  Consider initializing the array, or checking the ImmutableArray<T>.IsDefault property.", e.Message);
         }
         #endregion
 

@@ -52,8 +52,8 @@ namespace System.Data.SqlClient
         private bool _hasRows;
         private ALTROWSTATUS _altRowStatus;
         private int _recordsAffected = -1;
-        private long _defaultTimeoutMilliseconds;
-        private SqlConnectionString.TypeSystem _typeSystem;
+        private readonly long _defaultTimeoutMilliseconds;
+        private readonly SqlConnectionString.TypeSystem _typeSystem;
 
         // SQLStatistics support
         private SqlStatistics _statistics;
@@ -78,12 +78,12 @@ namespace System.Data.SqlClient
         private long _columnDataBytesRead;       // last byte read by user
         private long _columnDataCharsRead;       // last char read by user
         private char[] _columnDataChars;
-        private int _columnDataCharsIndex;      // Column index that is currently loaded in _columnDataChars 
+        private int _columnDataCharsIndex;      // Column index that is currently loaded in _columnDataChars
 
         private Task _currentTask;
         private Snapshot _snapshot;
-        private CancellationTokenSource _cancelAsyncOnCloseTokenSource;
-        private CancellationToken _cancelAsyncOnCloseToken;
+        private readonly CancellationTokenSource _cancelAsyncOnCloseTokenSource;
+        private readonly CancellationToken _cancelAsyncOnCloseToken;
 
         // Used for checking if the Type parameter provided to GetValue<T> is an INullable
         internal static readonly Type _typeofINullable = typeof(INullable);
@@ -699,8 +699,8 @@ namespace System.Data.SqlClient
         {
             AssertReaderState(requireData: true, permitAsync: true);
 
-            // VSTS DEVDIV2 380446: It is possible that read attempt we are cleaning after ended with partially 
-            // processed header (if it falls between network packets). In this case the first thing to do is to 
+            // VSTS DEVDIV2 380446: It is possible that read attempt we are cleaning after ended with partially
+            // processed header (if it falls between network packets). In this case the first thing to do is to
             // finish reading the header, otherwise code will start treating unread header as TDS payload.
             if (_stateObj._partialHeaderBytesRead > 0)
             {
@@ -756,7 +756,7 @@ namespace System.Data.SqlClient
 
                 Debug.Assert(TdsParser.IsValidTdsToken(token), $"Invalid token after performing CleanPartialRead: {token,-2:X2}");
             }
-#endif            
+#endif
             _sharedState._dataReady = false;
 
             return true;
@@ -840,7 +840,7 @@ namespace System.Data.SqlClient
                             if (_snapshot != null)
                             {
 #if DEBUG
-                                // The stack trace for replays will differ since they weren't captured during close                                
+                                // The stack trace for replays will differ since they weren't captured during close
                                 stateObj._permitReplayStackTraceToDiffer = true;
 #endif
                                 PrepareForAsyncContinuation();
@@ -848,7 +848,7 @@ namespace System.Data.SqlClient
 
                             SetTimeout(_defaultTimeoutMilliseconds);
 
-                            // Close can be called from async methods in error cases, 
+                            // Close can be called from async methods in error cases,
                             // in which case we need to switch to syncOverAsync
                             stateObj._syncOverAsync = true;
 
@@ -1063,7 +1063,7 @@ namespace System.Data.SqlClient
             {
                 if (_parser.State == TdsParserState.Broken || _parser.State == TdsParserState.Closed)
                 {
-                    // Happened for DEVDIV2:180509	(SqlDataReader.ConsumeMetaData Hangs In 100% CPU Loop Forever When TdsParser._state == TdsParserState.Broken)
+                    // Happened for DEVDIV2:180509    (SqlDataReader.ConsumeMetaData Hangs In 100% CPU Loop Forever When TdsParser._state == TdsParserState.Broken)
                     // during request for DTC address.
                     // NOTE: We doom connection for TdsParserState.Closed since it indicates that it is in some abnormal and unstable state, probably as a result of
                     // closing from another thread. In general, TdsParserState.Closed does not necessitate dooming the connection.
@@ -1409,7 +1409,7 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
-                    // Grab already read data    
+                    // Grab already read data
                     return _data[i].SqlXml.CreateReader();
                 }
             }
@@ -1447,7 +1447,7 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
-                    // Grab already read data    
+                    // Grab already read data
                     data = _data[i].SqlBinary.Value;
                 }
 
@@ -1833,7 +1833,7 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
-                    // Grab already read data    
+                    // Grab already read data
                     data = _data[i].SqlString.Value;
                 }
 
@@ -2023,7 +2023,7 @@ namespace System.Data.SqlClient
                 throw ADP.NonSeqByteAccess(dataIndex, _columnDataCharsRead, nameof(GetChars));
             }
 
-            // If we start reading the new column, either dataIndex is 0 or 
+            // If we start reading the new column, either dataIndex is 0 or
             // _columnDataCharsRead is 0 and dataIndex > _columnDataCharsRead is true below.
             // In both cases we will clean decoder
             if (dataIndex == 0)
@@ -2054,7 +2054,7 @@ namespace System.Data.SqlClient
                 // Skip chars
 
                 // Clean decoder state: we do not reset it, but destroy to ensure
-                // that we do not start decoding the column with decoder from the old one                                                       
+                // that we do not start decoding the column with decoder from the old one
                 _stateObj._plpdecoder = null;
                 cch = dataIndex - _columnDataCharsRead;
                 cch = isUnicode ? (cch << 1) : cch;
@@ -3419,7 +3419,6 @@ namespace System.Data.SqlClient
                         ((i + 1 < _sharedState._nextColumnDataToRead) && (IsCommandBehavior(CommandBehavior.SequentialAccess))) ||   // Or we're in sequential mode and we've read way past the column (i.e. it was not the last column we read)
                         (!_data[i].IsEmpty || _data[i].IsNull) ||                                                       // Or we should have data stored for the column (unless the column was null)
                         (_metaData[i].type == SqlDbType.Timestamp),                                                     // Or SqlClient: IsDBNull always returns false for timestamp datatype
-
                         "Gone past column, be we have no data stored for it");
                     return true;
                 }
@@ -4032,7 +4031,7 @@ namespace System.Data.SqlClient
                 bool more;
                 if (TryNextResult(out more))
                 {
-                    // completed 
+                    // completed
                     return more ? ADP.TrueTask : ADP.FalseTask;
                 }
 
@@ -4391,7 +4390,7 @@ namespace System.Data.SqlClient
                     // If there are no more rows, or this is Sequential Access, then we are done
                     if (!more || (_commandBehavior & CommandBehavior.SequentialAccess) == CommandBehavior.SequentialAccess)
                     {
-                        // completed 
+                        // completed
                         return more ? ADP.TrueTask : ADP.FalseTask;
                     }
                     else
@@ -4407,7 +4406,7 @@ namespace System.Data.SqlClient
                         // if non-sequentialaccess then read entire row before returning
                         if (TryReadColumn(_metaData.Length - 1, true))
                         {
-                            // completed 
+                            // completed
                             return ADP.TrueTask;
                         }
                     }
@@ -4910,7 +4909,7 @@ namespace System.Data.SqlClient
         }
 
         // This function is called directly if calling function already closed the reader, so _stateObj is null,
-        // in other cases parameterless version should be called 
+        // in other cases parameterless version should be called
         private void CleanupAfterAsyncInvocationInternal(TdsParserStateObject stateObj, bool resetNetworkPacketTaskSource = true)
         {
             if (resetNetworkPacketTaskSource)
@@ -5004,7 +5003,7 @@ namespace System.Data.SqlClient
             {
                 _SqlMetaData col = md[i];
                 SqlDbColumn dbColumn = new SqlDbColumn(md[i]);
-                
+
                 if (_typeSystem <= SqlConnectionString.TypeSystem.SQLServer2005 && col.IsNewKatmaiDateTimeType)
                 {
                     dbColumn.SqlNumericScale = MetaType.MetaNVarChar.Scale;

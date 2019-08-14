@@ -75,10 +75,61 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Equal(expected, sa.ToString());
         }
 
-        [ActiveIssue(37997, TestPlatforms.AnyUnix)]
-        [Theory] // recombine into ToString_Expected_Success when #37997 is fixed
-        [InlineData((AddressFamily)12345, -1, false, "12345:32:{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}")]
-        public static void ToString_UnknownFamily_Success(AddressFamily family, int size, bool fillBytes, string expected) =>
-            ToString_Expected_Success(family, size, fillBytes, expected);
+        [Theory]
+        [InlineData((AddressFamily)65539, -1)]
+        [InlineData((AddressFamily)65539, 16)]
+        [InlineData((AddressFamily)1_000_000, -1)]
+        public static void ToString_UnknownFamily_Throws(AddressFamily family, int size)
+        {
+            // Values above last known value should throw.
+            Assert.Throws<PlatformNotSupportedException>(() => size >= 0 ? new SocketAddress(family, size) : new SocketAddress(family));
+        }
+
+        [Theory]
+        [InlineData((AddressFamily)125)]
+        [InlineData((AddressFamily)65535)]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void ToString_LegacyUnknownFamily_Success(AddressFamily family)
+        {
+            // For legacy reasons, unknown values in ushort range don't throw on Windows.
+            var sa = new SocketAddress(family);
+            Assert.NotNull(sa.ToString());
+        }
+
+        [Theory]
+        [InlineData(AddressFamily.Packet)]
+        [InlineData(AddressFamily.ControllerAreaNetwork)]
+        [PlatformSpecific(~TestPlatforms.Linux)]
+        public static void ToString_UnsupportedFamily_Throws(AddressFamily family)
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => new SocketAddress(family));
+        }
+
+        [Theory]
+        [InlineData(AddressFamily.Packet)]
+        [InlineData(AddressFamily.ControllerAreaNetwork)]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        public static void ToString_LinuxSpecificFamily_Success(AddressFamily family)
+        {
+            SocketAddress sa = new SocketAddress(family);
+            Assert.Equal(family, sa.Family);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void ToString_AllFamilies_Success()
+        {
+            foreach (AddressFamily family in Enum.GetValues(typeof(AddressFamily)))
+            {
+                if (family == AddressFamily.Packet || family == AddressFamily.ControllerAreaNetwork)
+                {
+                    // Skip Linux specific protocols.
+                    continue;
+                }
+
+                var sa = new SocketAddress(family);
+                Assert.NotNull(sa.ToString());
+            }
+        }
     }
 }

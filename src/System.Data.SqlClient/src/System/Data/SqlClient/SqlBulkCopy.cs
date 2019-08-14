@@ -29,7 +29,7 @@ namespace System.Data.SqlClient
 
     internal sealed class Row
     {
-        private object[] _dataFields;
+        private readonly object[] _dataFields;
 
         internal Row(int rowCount)
         {
@@ -174,8 +174,8 @@ namespace System.Data.SqlClient
 
         private bool _enableStreaming = false;
         private int _batchSize;
-        private bool _ownConnection;
-        private SqlBulkCopyOptions _copyOptions;
+        private readonly bool _ownConnection;
+        private readonly SqlBulkCopyOptions _copyOptions;
         private int _timeout = DefaultCommandTimeout;
         private string _destinationTableName;
         private int _rowsCopied;
@@ -193,7 +193,7 @@ namespace System.Data.SqlClient
 
         private SqlConnection _connection;
         private SqlTransaction _internalTransaction;
-        private SqlTransaction _externalTransaction;
+        private readonly SqlTransaction _externalTransaction;
 
         private ValueSourceType _rowSourceType = ValueSourceType.Unspecified;
         private DataRow _currentRow;
@@ -220,13 +220,13 @@ namespace System.Data.SqlClient
         internal static bool _setAlwaysTaskOnWrite = false; //when set and in DEBUG mode, TdsParser::WriteBulkCopyValue will always return a task
         internal static bool SetAlwaysTaskOnWrite
         {
-            set
-            {
-                _setAlwaysTaskOnWrite = value;
-            }
             get
             {
                 return _setAlwaysTaskOnWrite;
+            }
+            set
+            {
+                _setAlwaysTaskOnWrite = value;
             }
         }
 #endif
@@ -891,10 +891,10 @@ namespace System.Data.SqlClient
                                     value = _SqlDataReaderRowSource.GetSqlDecimal(sourceOrdinal);
                                     break;
                                 case ValueMethod.SqlTypeSqlDouble:
-                                    value = new SqlDecimal(_SqlDataReaderRowSource.GetSqlDouble(sourceOrdinal).Value);
+                                    value = (SqlDecimal)_SqlDataReaderRowSource.GetSqlDouble(sourceOrdinal); // use cast to handle IsNull correctly because no public constructor allows it
                                     break;
                                 case ValueMethod.SqlTypeSqlSingle:
-                                    value = new SqlDecimal(_SqlDataReaderRowSource.GetSqlSingle(sourceOrdinal).Value);
+                                    value = (SqlDecimal)_SqlDataReaderRowSource.GetSqlSingle(sourceOrdinal); // use cast to handle IsNull correctly because no public constructor allows it
                                     break;
                                 default:
                                     Debug.Fail($"Current column is marked as being a SqlType, but no SqlType compatible method was provided. Method: {_currentRowMetadata[destRowIndex].Method}");
@@ -2392,8 +2392,8 @@ namespace System.Data.SqlClient
                             source = new TaskCompletionSource<object>();
                         }
 
-                        AsyncHelper.ContinueTask(commandTask, source, 
-                            () => 
+                        AsyncHelper.ContinueTask(commandTask, source,
+                            () =>
                             {
                                 Task continuedTask = CopyBatchesAsyncContinued(internalResults, updateBulkCommandText, cts, source);
                                 if (continuedTask == null)
@@ -2450,7 +2450,7 @@ namespace System.Data.SqlClient
                     {   // First time only
                         source = new TaskCompletionSource<object>();
                     }
-                    AsyncHelper.ContinueTask(task, source, 
+                    AsyncHelper.ContinueTask(task, source,
                         onSuccess: () =>
                         {
                             Task continuedTask = CopyBatchesAsyncContinuedOnSuccess(internalResults, updateBulkCommandText, cts, source);
@@ -2459,8 +2459,8 @@ namespace System.Data.SqlClient
                                 // Continuation finished sync, recall into CopyBatchesAsync to continue
                                 CopyBatchesAsync(internalResults, updateBulkCommandText, cts, source);
                             }
-                        }, 
-                        onFailure: (_) => CopyBatchesAsyncContinuedOnError(cleanupParser: false), 
+                        },
+                        onFailure: (_) => CopyBatchesAsyncContinuedOnError(cleanupParser: false),
                         onCancellation: () => CopyBatchesAsyncContinuedOnError(cleanupParser: true)
                     );
 
@@ -2509,7 +2509,7 @@ namespace System.Data.SqlClient
                         source = new TaskCompletionSource<object>();
                     }
 
-                    AsyncHelper.ContinueTask(writeTask, source, 
+                    AsyncHelper.ContinueTask(writeTask, source,
                         onSuccess: () =>
                         {
                             try
@@ -2525,7 +2525,7 @@ namespace System.Data.SqlClient
 
                             // Always call back into CopyBatchesAsync
                             CopyBatchesAsync(internalResults, updateBulkCommandText, cts, source);
-                        }, 
+                        },
                         onFailure: (_) => CopyBatchesAsyncContinuedOnError(cleanupParser: false)
                     );
                     return source.Task;
@@ -2646,7 +2646,7 @@ namespace System.Data.SqlClient
                     {
                         source = new TaskCompletionSource<object>();
                     }
-                    AsyncHelper.ContinueTask(task, source, 
+                    AsyncHelper.ContinueTask(task, source,
                         () =>
                         {
                             // Bulk copy task is completed at this moment.
@@ -2779,7 +2779,7 @@ namespace System.Data.SqlClient
                         {
                             regReconnectCancel = cts.Register(s => ((TaskCompletionSource<object>)s).TrySetCanceled(), cancellableReconnectTS);
                         }
-                        AsyncHelper.ContinueTaskWithState(reconnectTask, cancellableReconnectTS, 
+                        AsyncHelper.ContinueTaskWithState(reconnectTask, cancellableReconnectTS,
                             state: cancellableReconnectTS,
                             onSuccess: (state) => { ((TaskCompletionSource<object>)state).SetResult(null); }
                         );
@@ -2920,7 +2920,7 @@ namespace System.Data.SqlClient
                 else
                 {
                     Debug.Assert(_isAsyncBulkCopy, "Read must not return a Task in the Sync mode");
-                    AsyncHelper.ContinueTask(readTask, source, 
+                    AsyncHelper.ContinueTask(readTask, source,
                         () =>
                         {
                             if (!_hasMoreRowToCopy)

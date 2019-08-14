@@ -6,7 +6,7 @@ namespace System.Transactions
 {
     public class TransactionInformation
     {
-        private InternalTransaction _internalTransaction;
+        private readonly InternalTransaction _internalTransaction;
 
         internal TransactionInformation(InternalTransaction internalTransaction)
         {
@@ -22,7 +22,7 @@ namespace System.Transactions
                 {
                     etwLog.MethodEnter(TraceSourceType.TraceSourceLtm, this);
                 }
- 
+
                 try
                 {
                     return _internalTransaction.TransactionTraceId.TransactionIdentifier;
@@ -96,4 +96,3 @@ namespace System.Transactions
         }
     }
 }
-

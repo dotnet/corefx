@@ -17,7 +17,7 @@ namespace System.DirectoryServices.AccountManagement
         // To stop the compiler from autogenerating a constructor for this class
         private SAMUtils() { }
 
-        static internal bool IsOfObjectClass(DirectoryEntry de, string classToCompare)
+        internal static bool IsOfObjectClass(DirectoryEntry de, string classToCompare)
         {
             return string.Equals(de.SchemaClassName, classToCompare, StringComparison.OrdinalIgnoreCase);
         }
@@ -92,7 +92,7 @@ namespace System.DirectoryServices.AccountManagement
             return true;
         }
 
-        static internal Principal DirectoryEntryAsPrincipal(DirectoryEntry de, StoreCtx storeCtx)
+        internal static Principal DirectoryEntryAsPrincipal(DirectoryEntry de, StoreCtx storeCtx)
         {
             string className = de.SchemaClassName;
 
@@ -138,7 +138,7 @@ namespace System.DirectoryServices.AccountManagement
         //
         //
 
-        static internal string PAPIQueryToRegexString(string papiString)
+        internal static string PAPIQueryToRegexString(string papiString)
         {
             StringBuilder sb = new StringBuilder(papiString.Length);
 
@@ -203,8 +203,8 @@ namespace System.DirectoryServices.AccountManagement
                 }
             }
 
-            // There was a '\\' but no character after it because we were at the 
-            // end of the string.  
+            // There was a '\\' but no character after it because we were at the
+            // end of the string.
             // Append '\\\\' to match the '\\'.
             if (escapeMode)
             {

@@ -71,18 +71,14 @@ namespace System.Data.Common
 
         private static readonly Regex ConnectionStringRegex = new Regex(ConnectionStringPattern, RegexOptions.ExplicitCapture | RegexOptions.Compiled);
         private static readonly Regex ConnectionStringRegexOdbc = new Regex(ConnectionStringPatternOdbc, RegexOptions.ExplicitCapture | RegexOptions.Compiled);
+        private static readonly Regex ConnectionStringValidValueRegex = new Regex("^[^\u0000]*$", RegexOptions.Compiled); // value not allowed to contain embedded null
 #endif
-        private const string ConnectionStringValidKeyPattern = "^(?![;\\s])[^\\p{Cc}]+(?<!\\s)$"; // key not allowed to start with semi-colon or space or contain non-visible characters or end with space
-        private const string ConnectionStringValidValuePattern = "^[^\u0000]*$";                    // value not allowed to contain embedded null
-        private const string ConnectionStringQuoteValuePattern = "^[^\"'=;\\s\\p{Cc}]*$";           // generally do not quote the value if it matches the pattern
-        private const string ConnectionStringQuoteOdbcValuePattern = "^\\{([^\\}\u0000]|\\}\\})*\\}$"; // do not quote odbc value if it matches this pattern
+        private static readonly Regex ConnectionStringValidKeyRegex = new Regex("^(?![;\\s])[^\\p{Cc}]+(?<!\\s)$", RegexOptions.Compiled);// key not allowed to start with semi-colon or space or contain non-visible characters or end with space
+
         internal const string DataDirectory = "|datadirectory|";
 
-        private static readonly Regex ConnectionStringValidKeyRegex = new Regex(ConnectionStringValidKeyPattern, RegexOptions.Compiled);
-        private static readonly Regex ConnectionStringValidValueRegex = new Regex(ConnectionStringValidValuePattern, RegexOptions.Compiled);
-
-        private static readonly Regex ConnectionStringQuoteValueRegex = new Regex(ConnectionStringQuoteValuePattern, RegexOptions.Compiled);
-        private static readonly Regex ConnectionStringQuoteOdbcValueRegex = new Regex(ConnectionStringQuoteOdbcValuePattern, RegexOptions.ExplicitCapture | RegexOptions.Compiled);
+        private static readonly Regex ConnectionStringQuoteValueRegex = new Regex("^[^\"'=;\\s\\p{Cc}]*$", RegexOptions.Compiled); // generally do not quote the value if it matches the pattern
+        private static readonly Regex ConnectionStringQuoteOdbcValueRegex = new Regex("^\\{([^\\}\u0000]|\\}\\})*\\}$", RegexOptions.ExplicitCapture | RegexOptions.Compiled); // do not quote odbc value if it matches this pattern
 
         // connection string common keywords
         private static class KEY
@@ -215,7 +211,7 @@ namespace System.Data.Common
                 if (useOdbcRules)
                 {
                     if ((0 < keyValue.Length) &&
-                        (('{' == keyValue[0]) || (0 <= keyValue.IndexOf(';')) || (0 == String.Compare(DbConnectionStringKeywords.Driver, keyName, StringComparison.OrdinalIgnoreCase))) &&
+                        (('{' == keyValue[0]) || (0 <= keyValue.IndexOf(';')) || (0 == string.Compare(DbConnectionStringKeywords.Driver, keyName, StringComparison.OrdinalIgnoreCase))) &&
                         !ConnectionStringQuoteOdbcValueRegex.IsMatch(keyValue))
                     {
                         // always quote Driver value (required for ODBC Version 2.65 and earlier)
@@ -298,7 +294,7 @@ namespace System.Data.Common
         {
             try
             {
-                return System.Int32.Parse(stringValue, System.Globalization.NumberStyles.Integer, CultureInfo.InvariantCulture);
+                return int.Parse(stringValue, System.Globalization.NumberStyles.Integer, CultureInfo.InvariantCulture);
             }
             catch (FormatException e)
             {
@@ -316,7 +312,7 @@ namespace System.Data.Common
             return ((null != value) ? value : defaultValue);
         }
 
-        static private bool CompareInsensitiveInvariant(string strvalue, string strconst)
+        private static bool CompareInsensitiveInvariant(string strvalue, string strconst)
         {
             return (0 == StringComparer.OrdinalIgnoreCase.Compare(strvalue, strconst));
         }
@@ -502,27 +498,27 @@ namespace System.Data.Common
             }
         }
 
-        static private string GetKeyName(StringBuilder buffer)
+        private static string GetKeyName(StringBuilder buffer)
         {
             int count = buffer.Length;
-            while ((0 < count) && Char.IsWhiteSpace(buffer[count - 1]))
+            while ((0 < count) && char.IsWhiteSpace(buffer[count - 1]))
             {
                 count--; // trailing whitespace
             }
             return buffer.ToString(0, count).ToLower(CultureInfo.InvariantCulture);
         }
 
-        static private string GetKeyValue(StringBuilder buffer, bool trimWhitespace)
+        private static string GetKeyValue(StringBuilder buffer, bool trimWhitespace)
         {
             int count = buffer.Length;
             int index = 0;
             if (trimWhitespace)
             {
-                while ((index < count) && Char.IsWhiteSpace(buffer[index]))
+                while ((index < count) && char.IsWhiteSpace(buffer[index]))
                 {
                     index++; // leading whitespace
                 }
-                while ((0 < count) && Char.IsWhiteSpace(buffer[count - 1]))
+                while ((0 < count) && char.IsWhiteSpace(buffer[count - 1]))
                 {
                     count--; // trailing whitespace
                 }
@@ -548,7 +544,7 @@ namespace System.Data.Common
             NullTermination,
         };
 
-        static internal int GetKeyValuePair(string connectionString, int currentPosition, StringBuilder buffer, bool useOdbcRules, out string keyname, out string keyvalue)
+        internal static int GetKeyValuePair(string connectionString, int currentPosition, StringBuilder buffer, bool useOdbcRules, out string keyname, out string keyvalue)
         {
             int startposition = currentPosition;
 
@@ -567,13 +563,13 @@ namespace System.Data.Common
                 switch (parserState)
                 {
                     case ParserState.NothingYet: // [\\s;]*
-                        if ((';' == currentChar) || Char.IsWhiteSpace(currentChar))
+                        if ((';' == currentChar) || char.IsWhiteSpace(currentChar))
                         {
                             continue;
                         }
                         if ('\0' == currentChar)
                         { parserState = ParserState.NullTermination; continue; }
-                        if (Char.IsControl(currentChar))
+                        if (char.IsControl(currentChar))
                         { throw ADP.ConnectionStringSyntax(startposition); }
                         startposition = currentPosition;
                         if ('=' != currentChar)
@@ -590,9 +586,9 @@ namespace System.Data.Common
                     case ParserState.Key: // (?<key>([^=\\s\\p{Cc}]|\\s+[^=\\s\\p{Cc}]|\\s+==|==)+)
                         if ('=' == currentChar)
                         { parserState = ParserState.KeyEqual; continue; }
-                        if (Char.IsWhiteSpace(currentChar))
+                        if (char.IsWhiteSpace(currentChar))
                         { break; }
-                        if (Char.IsControl(currentChar))
+                        if (char.IsControl(currentChar))
                         { throw ADP.ConnectionStringSyntax(startposition); }
                         break;
 
@@ -607,7 +603,7 @@ namespace System.Data.Common
                         goto case ParserState.KeyEnd;
 
                     case ParserState.KeyEnd:
-                        if (Char.IsWhiteSpace(currentChar))
+                        if (char.IsWhiteSpace(currentChar))
                         { continue; }
                         if (useOdbcRules)
                         {
@@ -625,15 +621,15 @@ namespace System.Data.Common
                         { goto ParserExit; }
                         if ('\0' == currentChar)
                         { goto ParserExit; }
-                        if (Char.IsControl(currentChar))
+                        if (char.IsControl(currentChar))
                         { throw ADP.ConnectionStringSyntax(startposition); }
                         parserState = ParserState.UnquotedValue;
                         break;
 
                     case ParserState.UnquotedValue: // "((?![\"'\\s])" + "([^;\\s\\p{Cc}]|\\s+[^;\\s\\p{Cc}])*" + "(?<![\"']))"
-                        if (Char.IsWhiteSpace(currentChar))
+                        if (char.IsWhiteSpace(currentChar))
                         { break; }
-                        if (Char.IsControl(currentChar) || ';' == currentChar)
+                        if (char.IsControl(currentChar) || ';' == currentChar)
                         { goto ParserExit; }
                         break;
 
@@ -680,7 +676,7 @@ namespace System.Data.Common
                         goto case ParserState.QuotedValueEnd;
 
                     case ParserState.QuotedValueEnd:
-                        if (Char.IsWhiteSpace(currentChar))
+                        if (char.IsWhiteSpace(currentChar))
                         { continue; }
                         if (';' == currentChar)
                         { goto ParserExit; }
@@ -691,7 +687,7 @@ namespace System.Data.Common
                     case ParserState.NullTermination: // [\\s;\u0000]*
                         if ('\0' == currentChar)
                         { continue; }
-                        if (Char.IsWhiteSpace(currentChar))
+                        if (char.IsWhiteSpace(currentChar))
                         { continue; }
                         throw ADP.ConnectionStringSyntax(currentPosition);
 
@@ -752,7 +748,7 @@ namespace System.Data.Common
             return currentPosition;
         }
 
-        static private bool IsValueValidInternal(string keyvalue)
+        private static bool IsValueValidInternal(string keyvalue)
         {
             if (null != keyvalue)
             {
@@ -765,15 +761,15 @@ namespace System.Data.Common
             return true;
         }
 
-        static private bool IsKeyNameValid(string keyname)
+        private static bool IsKeyNameValid(string keyname)
         {
             if (null != keyname)
             {
 #if DEBUG
                 bool compValue = ConnectionStringValidKeyRegex.IsMatch(keyname);
-                Debug.Assert(((0 < keyname.Length) && (';' != keyname[0]) && !Char.IsWhiteSpace(keyname[0]) && (-1 == keyname.IndexOf('\u0000'))) == compValue, "IsValueValid mismatch with regex");
+                Debug.Assert(((0 < keyname.Length) && (';' != keyname[0]) && !char.IsWhiteSpace(keyname[0]) && (-1 == keyname.IndexOf('\u0000'))) == compValue, "IsValueValid mismatch with regex");
 #endif
-                return ((0 < keyname.Length) && (';' != keyname[0]) && !Char.IsWhiteSpace(keyname[0]) && (-1 == keyname.IndexOf('\u0000')));
+                return ((0 < keyname.Length) && (';' != keyname[0]) && !char.IsWhiteSpace(keyname[0]) && (-1 == keyname.IndexOf('\u0000')));
             }
             return false;
         }
@@ -865,7 +861,7 @@ namespace System.Data.Common
                     bool isEquivalent = (msg1 == msg2);
                     if (!isEquivalent)
                     {
-                        // we also accept cases were Regex parser (debug only) reports "wrong format" and 
+                        // we also accept cases were Regex parser (debug only) reports "wrong format" and
                         // retail parsing code reports format exception in different location or "keyword not supported"
                         if (msg2.StartsWith(WrongFormatMessagePrefix, StringComparison.Ordinal))
                         {

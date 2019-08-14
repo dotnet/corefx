@@ -265,9 +265,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 DateTime local = utcTime.ToLocalTime();
                 DateTime unspecified = new DateTime(local.Ticks);
 
-                testCases.Add(new object[] { utcTime, true, utcTime.Kind });
-                testCases.Add(new object[] { local, true, local.Kind });
-                testCases.Add(new object[] { unspecified, true, unspecified.Kind });
+                testCases.Add(new object[] { utcTime, true });
+                testCases.Add(new object[] { local, true });
+                testCases.Add(new object[] { unspecified, true });
             }
 
             foreach (DateTime utcTime in invalidTimes)
@@ -275,9 +275,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 DateTime local = utcTime.ToLocalTime();
                 DateTime unspecified = new DateTime(local.Ticks);
 
-                testCases.Add(new object[] { utcTime, false, utcTime.Kind });
-                testCases.Add(new object[] { local, false, local.Kind });
-                testCases.Add(new object[] { unspecified, false, unspecified.Kind });
+                testCases.Add(new object[] { utcTime, false });
+                testCases.Add(new object[] { local, false });
+                testCases.Add(new object[] { unspecified, false });
             }
 
             return testCases;
@@ -285,7 +285,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         [Theory]
         [MemberData(nameof(VerifyExpressionData))]
-        public static void VerifyExpiration_LocalTime(DateTime verificationTime, bool shouldBeValid, DateTimeKind kind)
+        public static void VerifyExpiration_LocalTime(DateTime verificationTime, bool shouldBeValid)
         {
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
             using (var microsoftDotComIssuer = new X509Certificate2(TestData.MicrosoftDotComIssuerBytes))
@@ -463,10 +463,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [OuterLoop(/* Modifies user certificate store */)]
         public static void BuildChain_MicrosoftDotCom_WithRootCertInUserAndSystemRootCertStores()
         {
-            // Verifies that when the same root cert is placed in both a user and machine root certificate store, 
+            // Verifies that when the same root cert is placed in both a user and machine root certificate store,
             // any certs chain building to that root cert will build correctly
-            // 
-            // We use a copy of the microsoft.com SSL certs and root certs to validate that the chain can build 
+            //
+            // We use a copy of the microsoft.com SSL certs and root certs to validate that the chain can build
             // successfully
 
             bool shouldInstallCertToUserStore = true;
@@ -494,9 +494,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     Assert.True(foundCert, string.Format("Did not find expected certificate with thumbprint '{0}' in the machine root store", microsoftDotComRoot.Thumbprint));
                 }
 
-                // Concievably at this point there could still be something wrong and we still don't chain build correctly - if that's 
-                // the case, then there's likely something wrong with the machine. Validating that happy path is out of scope 
-                // of this particular test. 
+                // Concievably at this point there could still be something wrong and we still don't chain build correctly - if that's
+                // the case, then there's likely something wrong with the machine. Validating that happy path is out of scope
+                // of this particular test.
 
                 // Check that microsoft.com's root certificate is NOT installed on in the user cert store as a sanity step
                 // We won't try to install the microsoft.com root cert into the user root store if it's already there
@@ -648,7 +648,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // The root CA is not expected to be installed on everyone's machines,
                 // so allow for it to report UntrustedRoot, but nothing else..
                 X509ChainStatus[] rootElementStatus = onlineChain.ChainElements[2].ChainElementStatus;
-                
+
                 if (rootElementStatus.Length != 0)
                 {
                     Assert.Equal(1, rootElementStatus.Length);

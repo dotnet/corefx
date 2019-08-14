@@ -50,7 +50,9 @@ namespace System.Threading
     {
         internal static class WorkStealingQueueList
         {
+#pragma warning disable CA1825 // avoid the extra generic instantation for Array.Empty<T>(); this is the only place we'll ever create this array
             private static volatile WorkStealingQueue[] _queues = new WorkStealingQueue[0];
+#pragma warning restore CA1825
 
             public static WorkStealingQueue[] Queues => _queues;
 
@@ -152,7 +154,7 @@ namespace System.Threading
                             // if head is currently < tail, it remains that way.  This happens to just fall out from
                             // the bit-masking, because we only do this if tail == int.MaxValue, meaning that all
                             // bits are set, so all of the bits we're keeping will also be set.  Thus it's impossible
-                            // for the head to end up > than the tail, since you can't set any more bits than all of 
+                            // for the head to end up > than the tail, since you can't set any more bits than all of
                             // them.
                             //
                             m_headIndex = m_headIndex & m_mask;
@@ -405,11 +407,11 @@ namespace System.Threading
         internal bool loggingEnabled;
         internal readonly ConcurrentQueue<object> workItems = new ConcurrentQueue<object>(); // SOS's ThreadPool command depends on this name
 
-        private Internal.PaddingFor32 pad1;
+        private readonly Internal.PaddingFor32 pad1;
 
         private volatile int numOutstandingThreadRequests = 0;
 
-        private Internal.PaddingFor32 pad2;
+        private readonly Internal.PaddingFor32 pad2;
 
         public ThreadPoolWorkQueue()
         {
@@ -494,7 +496,7 @@ namespace System.Threading
 
         internal bool LocalFindAndPop(object callback)
         {
-            ThreadPoolWorkQueueThreadLocals tl = ThreadPoolWorkQueueThreadLocals.threadLocals;
+            ThreadPoolWorkQueueThreadLocals? tl = ThreadPoolWorkQueueThreadLocals.threadLocals;
             return tl != null && tl.workStealingQueue.LocalFindAndPop(callback);
         }
 
@@ -576,17 +578,16 @@ namespace System.Threading
             outerWorkQueue.loggingEnabled = FrameworkEventSource.Log.IsEnabled(EventLevel.Verbose, FrameworkEventSource.Keywords.ThreadPool | FrameworkEventSource.Keywords.ThreadTransfer);
 
             //
-            // Assume that we're going to need another thread if this one returns to the VM.  We'll set this to 
+            // Assume that we're going to need another thread if this one returns to the VM.  We'll set this to
             // false later, but only if we're absolutely certain that the queue is empty.
             //
             bool needAnotherThread = true;
-            object? outerWorkItem = null;
             try
             {
                 //
                 // Set up our thread-local data
                 //
-                // Use operate on workQueue local to try block so it can be enregistered 
+                // Use operate on workQueue local to try block so it can be enregistered
                 ThreadPoolWorkQueue workQueue = outerWorkQueue;
                 ThreadPoolWorkQueueThreadLocals tl = workQueue.GetOrCreateThreadLocals();
                 Thread currentThread = tl.currentThread;
@@ -601,8 +602,8 @@ namespace System.Threading
                 while (ThreadPool.KeepDispatching(startTickCount))
                 {
                     bool missedSteal = false;
-                    // Use operate on workItem local to try block so it can be enregistered 
-                    object? workItem = outerWorkItem = workQueue.Dequeue(tl, ref missedSteal);
+                    // Use operate on workItem local to try block so it can be enregistered
+                    object? workItem = workQueue.Dequeue(tl, ref missedSteal);
 
                     if (workItem == null)
                     {
@@ -610,7 +611,7 @@ namespace System.Threading
                         // No work.
                         // If we missed a steal, though, there may be more work in the queue.
                         // Instead of looping around and trying again, we'll just request another thread.  Hopefully the thread
-                        // that owns the contended work-stealing queue will pick up its own workitems in the meantime, 
+                        // that owns the contended work-stealing queue will pick up its own workitems in the meantime,
                         // which will be more efficient than this thread doing it anyway.
                         //
                         needAnotherThread = missedSteal;
@@ -671,12 +672,12 @@ namespace System.Threading
                     currentThread.ResetThreadPoolThread();
 
                     // Release refs
-                    outerWorkItem = workItem = null;
+                    workItem = null;
 
                     // Return to clean ExecutionContext and SynchronizationContext
                     ExecutionContext.ResetThreadPoolThread(currentThread);
 
-                    // 
+                    //
                     // Notify the VM that we executed this workitem.  This is also our opportunity to ask whether Hill Climbing wants
                     // us to return the thread to the pool or not.
                     //
@@ -728,7 +729,7 @@ namespace System.Threading
     internal sealed class ThreadPoolWorkQueueThreadLocals
     {
         [ThreadStatic]
-        public static ThreadPoolWorkQueueThreadLocals threadLocals;
+        public static ThreadPoolWorkQueueThreadLocals? threadLocals;
 
         public readonly ThreadPoolWorkQueue workQueue;
         public readonly ThreadPoolWorkQueue.WorkStealingQueue workStealingQueue;
@@ -909,9 +910,9 @@ namespace System.Threading
 
     internal sealed class _ThreadPoolWaitOrTimerCallback
     {
-        private WaitOrTimerCallback _waitOrTimerCallback;
-        private ExecutionContext? _executionContext;
-        private object? _state;
+        private readonly WaitOrTimerCallback _waitOrTimerCallback;
+        private readonly ExecutionContext? _executionContext;
+        private readonly object? _state;
         private static readonly ContextCallback _ccbt = new ContextCallback(WaitOrTimerCallback_Context_t);
         private static readonly ContextCallback _ccbf = new ContextCallback(WaitOrTimerCallback_Context_f);
 
@@ -1126,7 +1127,7 @@ namespace System.Threading
             }
 
             // If the callback is the runtime-provided invocation of an IAsyncStateMachineBox,
-            // then we can queue the Task state directly to the ThreadPool instead of 
+            // then we can queue the Task state directly to the ThreadPool instead of
             // wrapping it in a QueueUserWorkItemCallback.
             //
             // This occurs when user code queues its provided continuation to the ThreadPool;
@@ -1231,7 +1232,7 @@ namespace System.Threading
 
         internal static IEnumerable<object> GetLocallyQueuedWorkItems()
         {
-            ThreadPoolWorkQueue.WorkStealingQueue wsq = ThreadPoolWorkQueueThreadLocals.threadLocals.workStealingQueue;
+            ThreadPoolWorkQueue.WorkStealingQueue? wsq = ThreadPoolWorkQueueThreadLocals.threadLocals?.workStealingQueue;
             if (wsq != null && wsq.m_array != null)
             {
                 object?[] items = wsq.m_array;

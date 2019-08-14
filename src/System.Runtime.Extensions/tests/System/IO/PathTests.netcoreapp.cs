@@ -63,7 +63,6 @@ namespace System.IO.Tests
         }
 
         [Theory,
-            InlineData(@" C:\dir/baz", @" C:\dir"),
             InlineData(@" C:\dir/baz", @" C:\dir")]
         public void GetDirectoryName_SkipSpaces(string path, string expected)
         {
@@ -157,7 +156,7 @@ namespace System.IO.Tests
                 }
                 else
                 {
-                    Assert.True(Path.GetFullPath(bad).EndsWith(bad));
+                    Assert.EndsWith(bad, Path.GetFullPath(bad));
                 }
                 Assert.Equal(string.Empty, Path.GetPathRoot(bad));
                 Assert.False(Path.IsPathRooted(bad));

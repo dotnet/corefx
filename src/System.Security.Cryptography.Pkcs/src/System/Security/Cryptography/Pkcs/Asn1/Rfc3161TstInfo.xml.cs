@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#pragma warning disable SA1028 // ignore whitespace warnings for generated code
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -13,7 +14,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct Rfc3161TstInfo
     {
-        private static byte[] s_defaultOrdering = { 0x01, 0x01, 0x00 };
+        private static readonly byte[] s_defaultOrdering = { 0x01, 0x01, 0x00 };
   
         internal int Version;
         internal Oid Policy;
@@ -26,7 +27,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
         internal System.Security.Cryptography.Asn1.GeneralNameAsn? Tsa;
         internal System.Security.Cryptography.Asn1.X509ExtensionAsn[] Extensions;
       
-#if DEBUG  
+#if DEBUG
         static Rfc3161TstInfo()
         {
             Rfc3161TstInfo decoded = default;

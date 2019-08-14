@@ -22,14 +22,14 @@ namespace System.Reflection.Emit.Tests
             yield return new object[] { "PropertyName", PropertyAttributes.None, typeof(DateTime), new Type[] { typeof(int) }, "PropertyName", PropertyAttributes.None };
             yield return new object[] { "PropertyName", PropertyAttributes.None, typeof(EmptyGenericStruct<int>), new Type[] { typeof(int) }, "PropertyName", PropertyAttributes.None };
             yield return new object[] { "PropertyName", PropertyAttributes.None, typeof(EmptyGenericStruct<int>).GetGenericArguments()[0], new Type[] { typeof(int) }, "PropertyName", PropertyAttributes.None };
-        
+
             // Invalid unicode
             yield return new object[] { "\uDC00", (PropertyAttributes)0x8000, typeof(EmptyGenericStruct<string>), new Type[] { typeof(EmptyGenericClass<string>) }, "\uFFFD", PropertyAttributes.None };
-			yield return new object[] { "\uD800", PropertyAttributes.None, typeof(int).MakeByRefType(), new Type[] { typeof(int).MakeByRefType() }, "\uFFFD", PropertyAttributes.None };
-			yield return new object[] { "1A\0\t\v\r\n\n\uDC81\uDC91", PropertyAttributes.None, typeof(int).MakePointerType(), new Type[] { typeof(int).MakePointerType() }, "1A", PropertyAttributes.None };
-		}
+            yield return new object[] { "\uD800", PropertyAttributes.None, typeof(int).MakeByRefType(), new Type[] { typeof(int).MakeByRefType() }, "\uFFFD", PropertyAttributes.None };
+            yield return new object[] { "1A\0\t\v\r\n\n\uDC81\uDC91", PropertyAttributes.None, typeof(int).MakePointerType(), new Type[] { typeof(int).MakePointerType() }, "1A", PropertyAttributes.None };
+        }
 
-		[Theory]
+        [Theory]
         [MemberData(nameof(TestData))]
         public void DefineProperty(string name, PropertyAttributes attributes, Type returnType, Type[] parameterTypes, string expectedName, PropertyAttributes expectedPropertyAttributes)
         {
@@ -232,7 +232,7 @@ namespace System.Reflection.Emit.Tests
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
             Assert.Throws<NotSupportedException>(() => type.AsType().GetProperties());
         }
-        
+
         public class DefinePropertyClass
         {
             public int Property { get { return 10; } }

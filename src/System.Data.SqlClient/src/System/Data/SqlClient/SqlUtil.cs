@@ -272,7 +272,7 @@ namespace System.Data.SqlClient
         internal static Exception ParsingErrorLibraryType(ParsingErrorState state, int libraryType)
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_ParsingErrorAuthLibraryType, ((int)state).ToString(CultureInfo.InvariantCulture), libraryType));
-        }       
+        }
         internal static Exception InvalidSQLServerVersionUnknown()
         {
             return ADP.DataAdapter(SR.GetString(SR.SQL_InvalidSQLServerVersionUnknown));
@@ -301,7 +301,7 @@ namespace System.Data.SqlClient
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_ChangePasswordRequiresYukon));
         }
-        static internal Exception ChangePasswordUseOfUnallowedKey(string key)
+        internal static Exception ChangePasswordUseOfUnallowedKey(string key)
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_ChangePasswordUseOfUnallowedKey, key));
         }
@@ -492,15 +492,15 @@ namespace System.Data.SqlClient
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_ParsingError));
         }
-        static internal Exception ParsingError(ParsingErrorState state)
+        internal static Exception ParsingError(ParsingErrorState state)
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_ParsingErrorWithState, ((int)state).ToString(CultureInfo.InvariantCulture)));
         }
-        static internal Exception ParsingErrorValue(ParsingErrorState state, int value)
+        internal static Exception ParsingErrorValue(ParsingErrorState state, int value)
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_ParsingErrorValue, ((int)state).ToString(CultureInfo.InvariantCulture), value));
         }
-        static internal Exception ParsingErrorFeatureId(ParsingErrorState state, int featureId)
+        internal static Exception ParsingErrorFeatureId(ParsingErrorState state, int featureId)
         {
             return ADP.InvalidOperation(SR.GetString(SR.SQL_ParsingErrorFeatureId, ((int)state).ToString(CultureInfo.InvariantCulture), featureId));
         }
@@ -798,7 +798,7 @@ namespace System.Data.SqlClient
         //
 
         /// <summary>
-        /// used to block two scenarios if MultiSubnetFailover is true: 
+        /// used to block two scenarios if MultiSubnetFailover is true:
         /// * server-provided failover partner - raising SqlException in this case
         /// * connection string with failover partner and MultiSubnetFailover=true - raising argument one in this case with the same message
         /// </summary>
@@ -1031,7 +1031,7 @@ namespace System.Data.SqlClient
         internal const string SqlNotificationStoredProcedureDefault = "SqlQueryNotificationStoredProcedure";
     }
 
-    sealed internal class SQLMessage
+    internal sealed class SQLMessage
     {
         private SQLMessage() { /* prevent utility class from being instantiated*/ }
 
@@ -1206,7 +1206,7 @@ namespace System.Data.SqlClient
 
         /// <summary>
         /// Escape a string as a TSQL literal, wrapping it around with single quotes.
-        /// Use this method to escape input strings to prevent SQL injection 
+        /// Use this method to escape input strings to prevent SQL injection
         /// and to get correct behavior for embedded quotes.
         /// </summary>
         /// <param name="input">unescaped string</param>
@@ -1227,7 +1227,7 @@ namespace System.Data.SqlClient
     /// <summary>
     /// This class holds methods invoked on System.Transactions through reflection for Global Transactions
     /// </summary>
-    static internal class SysTxForGlobalTransactions
+    internal static class SysTxForGlobalTransactions
     {
         private static readonly Lazy<MethodInfo> _enlistPromotableSinglePhase = new Lazy<MethodInfo>(() =>
             typeof(Transaction).GetMethod("EnlistPromotableSinglePhase", new Type[] { typeof(IPromotableSinglePhaseNotification), typeof(Guid) }));

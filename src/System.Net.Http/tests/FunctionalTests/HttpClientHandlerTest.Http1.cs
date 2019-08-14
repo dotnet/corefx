@@ -35,10 +35,9 @@ namespace System.Net.Http.Functional.Tests
                     string[] headers = (await server.AcceptConnectionSendResponseAndCloseAsync()).ToArray();
                     await sendTask;
 
-                    Assert.True(headers[1].StartsWith("Host"));
+                    Assert.StartsWith("Host", headers[1]);
                 }
             });
         }
     }
 }
-

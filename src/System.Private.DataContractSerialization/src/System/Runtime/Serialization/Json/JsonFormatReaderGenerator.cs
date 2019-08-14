@@ -21,7 +21,7 @@ namespace System.Runtime.Serialization.Json
 
     internal sealed class JsonFormatReaderGenerator
     {
-        private CriticalHelper _helper;
+        private readonly CriticalHelper _helper;
 
         public JsonFormatReaderGenerator()
         {
@@ -101,7 +101,7 @@ namespace System.Runtime.Serialization.Json
                         _ilg.Call(XmlFormatGeneratorStatics.GetDateTimeOffsetMethod);
                         _ilg.ConvertValue(Globals.TypeOfDateTimeOffset, _ilg.CurrentMethod.ReturnType);
                     }
-                    //Copy the KeyValuePairAdapter<K,T> to a KeyValuePair<K,T>. 
+                    //Copy the KeyValuePairAdapter<K,T> to a KeyValuePair<K,T>.
                     else if (classContract.IsKeyValuePairAdapter)
                     {
                         _ilg.Call(classContract.GetKeyValuePairMethodInfo);
@@ -248,7 +248,7 @@ namespace System.Runtime.Serialization.Json
                 }
             }
 
-            bool HasFactoryMethod(ClassDataContract classContract)
+            private bool HasFactoryMethod(ClassDataContract classContract)
             {
                 return Globals.TypeOfIObjectReference.IsAssignableFrom(classContract.UnderlyingType);
             }

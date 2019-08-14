@@ -48,15 +48,15 @@ namespace System.Diagnostics.Tracing
     /// <summary>
     /// Type handler for simple scalar types.
     /// </summary>
-    sealed class ScalarTypeInfo : TraceLoggingTypeInfo
+    internal sealed class ScalarTypeInfo : TraceLoggingTypeInfo
     {
-        Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc;
-        TraceLoggingDataType nativeFormat;
+        private readonly Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc;
+        private readonly TraceLoggingDataType nativeFormat;
 
         private ScalarTypeInfo(
             Type type,
             Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc,
-            TraceLoggingDataType nativeFormat) 
+            TraceLoggingDataType nativeFormat)
             : base(type)
         {
             this.formatFunc = formatFunc;
@@ -96,15 +96,15 @@ namespace System.Diagnostics.Tracing
     /// </summary>
     internal sealed class ScalarArrayTypeInfo : TraceLoggingTypeInfo
     {
-        Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc;
-        TraceLoggingDataType nativeFormat;
-        int elementSize;
+        private readonly Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc;
+        private readonly TraceLoggingDataType nativeFormat;
+        private readonly int elementSize;
 
         private ScalarArrayTypeInfo(
             Type type,
             Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc,
             TraceLoggingDataType nativeFormat,
-            int elementSize) 
+            int elementSize)
             : base(type)
         {
             this.formatFunc = formatFunc;
@@ -158,14 +158,14 @@ namespace System.Diagnostics.Tracing
         {
             collector.AddNullTerminatedString((string?)value.ReferenceValue);
         }
-        
+
         public override object GetData(object? value)
         {
             if (value == null)
             {
                 return "";
             }
-            
+
             return value;
         }
     }

@@ -16,7 +16,7 @@ namespace System.Linq.Parallel
     /// <summary>
     /// The base class from which all binary query operators derive, that is, those that
     /// have two child operators. This introduces some convenience methods for those
-    /// classes, as well as any state common to all subclasses. 
+    /// classes, as well as any state common to all subclasses.
     /// </summary>
     /// <typeparam name="TLeftInput"></typeparam>
     /// <typeparam name="TRightInput"></typeparam>
@@ -78,16 +78,16 @@ namespace System.Linq.Parallel
 
         //---------------------------------------------------------------------------------------
         // Implementation of QueryResults for a binary operator. The results will not be indexable
-        // unless a derived class provides that functionality.        
+        // unless a derived class provides that functionality.
         //
 
         internal class BinaryQueryOperatorResults : QueryResults<TOutput>
         {
             protected QueryResults<TLeftInput> _leftChildQueryResults; // Results of the left child query
             protected QueryResults<TRightInput> _rightChildQueryResults; // Results of the right child query
-            private BinaryQueryOperator<TLeftInput, TRightInput, TOutput> _op; // Operator that generated these results
+            private readonly BinaryQueryOperator<TLeftInput, TRightInput, TOutput> _op; // Operator that generated these results
             private QuerySettings _settings; // Settings collected from the query
-            private bool _preferStriping; // If the results are indexable, should we use striping when partitioning them
+            private readonly bool _preferStriping; // If the results are indexable, should we use striping when partitioning them
 
             internal BinaryQueryOperatorResults(
                 QueryResults<TLeftInput> leftChildQueryResults, QueryResults<TRightInput> rightChildQueryResults,
@@ -134,9 +134,9 @@ namespace System.Linq.Parallel
 
             private class LeftChildResultsRecipient : IPartitionedStreamRecipient<TLeftInput>
             {
-                private IPartitionedStreamRecipient<TOutput> _outputRecipient;
-                private BinaryQueryOperatorResults _results;
-                private bool _preferStriping;
+                private readonly IPartitionedStreamRecipient<TOutput> _outputRecipient;
+                private readonly BinaryQueryOperatorResults _results;
+                private readonly bool _preferStriping;
                 private QuerySettings _settings;
 
                 internal LeftChildResultsRecipient(IPartitionedStreamRecipient<TOutput> outputRecipient, BinaryQueryOperatorResults results,
@@ -167,10 +167,10 @@ namespace System.Linq.Parallel
 
             private class RightChildResultsRecipient<TLeftKey> : IPartitionedStreamRecipient<TRightInput>
             {
-                private IPartitionedStreamRecipient<TOutput> _outputRecipient;
-                private PartitionedStream<TLeftInput, TLeftKey> _leftPartitionedStream;
-                private BinaryQueryOperator<TLeftInput, TRightInput, TOutput> _op;
-                private bool _preferStriping;
+                private readonly IPartitionedStreamRecipient<TOutput> _outputRecipient;
+                private readonly PartitionedStream<TLeftInput, TLeftKey> _leftPartitionedStream;
+                private readonly BinaryQueryOperator<TLeftInput, TRightInput, TOutput> _op;
+                private readonly bool _preferStriping;
                 private QuerySettings _settings;
 
                 internal RightChildResultsRecipient(

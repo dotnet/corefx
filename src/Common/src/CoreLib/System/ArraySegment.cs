@@ -21,16 +21,18 @@ namespace System
 {
     // Note: users should make sure they copy the fields out of an ArraySegment onto their stack
     // then validate that the fields describe valid bounds within the array.  This must be done
-    // because assignments to value types are not atomic, and also because one thread reading 
+    // because assignments to value types are not atomic, and also because one thread reading
     // three fields from an ArraySegment may not see the same ArraySegment from one call to another
-    // (ie, users could assign a new value to the old location).  
+    // (ie, users could assign a new value to the old location).
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public readonly struct ArraySegment<T> : IList<T>, IReadOnlyList<T>
     {
         // Do not replace the array allocation with Array.Empty. We don't want to have the overhead of
         // instantiating another generic type in addition to ArraySegment<T> for new type parameters.
+#pragma warning disable CA1825
         public static ArraySegment<T> Empty { get; } = new ArraySegment<T>(new T[0]);
+#pragma warning restore CA1825
 
         private readonly T[]? _array; // Do not rename (binary serialization)
         private readonly int _offset; // Do not rename (binary serialization)
@@ -147,7 +149,7 @@ namespace System
         public ArraySegment<T> Slice(int index)
         {
             ThrowInvalidOperationIfDefault();
-            
+
             if ((uint)index > (uint)_count)
             {
                 ThrowHelper.ThrowArgumentOutOfRange_IndexException();

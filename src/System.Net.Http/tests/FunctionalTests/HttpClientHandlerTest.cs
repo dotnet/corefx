@@ -465,9 +465,9 @@ namespace System.Net.Http.Functional.Tests
                     }
                     try
                     {
-                        await client.GetAsync(addressUri); 
+                        await client.GetAsync(addressUri);
                     }
-                    catch 
+                    catch
                     {
                     }
                 }
@@ -592,7 +592,7 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
-                    Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.Unauthorized);
+                    Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.Unauthorized, additionalHeaders: authHeaders);
 
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
                     using (HttpResponseMessage response = await getResponseTask)
@@ -1167,7 +1167,7 @@ namespace System.Net.Http.Functional.Tests
                 }
             });
         }
-        
+
         [Fact]
         public async Task GetAsync_InvalidChunkTerminator_ThrowsHttpRequestException()
         {
@@ -1638,7 +1638,7 @@ namespace System.Net.Http.Functional.Tests
             using (HttpClient client = CreateHttpClient())
             {
                 // international version of the Starbucks website
-                // punycode: xn--oy2b35ckwhba574atvuzkc.com                
+                // punycode: xn--oy2b35ckwhba574atvuzkc.com
                 string server = "http://\uc2a4\ud0c0\ubc85\uc2a4\ucf54\ub9ac\uc544.com";
                 using (HttpResponseMessage response = await client.GetAsync(server))
                 {
@@ -2458,7 +2458,7 @@ namespace System.Net.Http.Functional.Tests
                 {
                     if (method == "TRACE" && (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || UseSocketsHttpHandler))
                     {
-                        // .NET Framework also allows the HttpWebRequest and HttpClient APIs to send a request using 'TRACE' 
+                        // .NET Framework also allows the HttpWebRequest and HttpClient APIs to send a request using 'TRACE'
                         // verb and a request body. The usual response from a server is "400 Bad Request".
                         // See here for more info: https://github.com/dotnet/corefx/issues/9023
                         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -2468,7 +2468,7 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                         TestHelper.VerifyRequestMethod(response, method);
                         string responseContent = await response.Content.ReadAsStringAsync();
-                        Assert.False(responseContent.Contains(ExpectedContent));
+                        Assert.DoesNotContain(ExpectedContent, responseContent);
                     }
                 }
             }

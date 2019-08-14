@@ -11,7 +11,7 @@ namespace System.Net
     {
         private readonly ThreadPoolBoundHandle _boundHandle;
         internal NativeOverlapped* _pOverlapped;
-        private Interop.HttpApi.HTTP_DATA_CHUNK[] _dataChunks;
+        private readonly Interop.HttpApi.HTTP_DATA_CHUNK[] _dataChunks;
         internal bool _sentHeaders;
 
         private static readonly IOCompletionCallback s_IOCallback = new IOCompletionCallback(Callback);
@@ -111,7 +111,6 @@ namespace System.Net
             return Header;
         }
 
-        private const string CRLF = "\r\n";
         private static readonly byte[] s_CRLFArray = new byte[] { (byte)'\r', (byte)'\n' };
 
         internal HttpResponseStreamAsyncResult(object asyncObject, object userState, AsyncCallback callback, byte[] buffer, int offset, int size, bool chunked, bool sentHeaders, ThreadPoolBoundHandle boundHandle) : base(asyncObject, userState, callback)

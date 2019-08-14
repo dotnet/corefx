@@ -16,7 +16,7 @@ namespace System.ComponentModel.Composition.Hosting
         public static ImportDefinition RemoveImportSource(this ImportDefinition definition)
         {
             var contractBasedDefinition = definition as ContractBasedImportDefinition;
-            if(contractBasedDefinition == null)
+            if (contractBasedDefinition == null)
             {
                 return definition;
             }
@@ -28,7 +28,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         internal class NonImportSourceImportDefinition : ContractBasedImportDefinition
         {
-            private ContractBasedImportDefinition _sourceDefinition;
+            private readonly ContractBasedImportDefinition _sourceDefinition;
             private IDictionary<string, object> _metadata;
 
             public NonImportSourceImportDefinition(ContractBasedImportDefinition sourceDefinition)
@@ -51,7 +51,7 @@ namespace System.ComponentModel.Composition.Hosting
                 get
                 {
                     var reply = _metadata;
-                    if(reply == null)
+                    if (reply == null)
                     {
                         reply = new Dictionary<string, object> (_sourceDefinition.Metadata);
                         reply.Remove(CompositionConstants.ImportSourceMetadataName);

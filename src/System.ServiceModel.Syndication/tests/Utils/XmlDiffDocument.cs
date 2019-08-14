@@ -211,7 +211,7 @@ namespace System.ServiceModel.Syndication.Tests
             {
                 XmlDiffAttribute current1 = elem1.FirstAttribute;
                 XmlDiffAttribute current2 = elem2.FirstAttribute;
-                //			NodePosition result = 0;
+                //            NodePosition result = 0;
                 int nCompare = 0;
                 while (current1 != null && current2 != null && nCompare == 0)
                 {
@@ -467,7 +467,7 @@ namespace System.ServiceModel.Syndication.Tests
             if (!bEmptyElement)
             {
                 //            bool rtn = reader.Read();
-                //			rtn = reader.Read();
+                //            rtn = reader.Read();
                 reader.Read(); //move to child
                 ReadChildNodes(elem, reader, pInfo);
             }
@@ -910,7 +910,7 @@ namespace System.ServiceModel.Syndication.Tests
             }
             return false;
         }
-        
+
         public new bool MoveToNextNamespace()
         {
             if (CurrentNode is XmlDiffAttribute)
@@ -939,7 +939,7 @@ namespace System.ServiceModel.Syndication.Tests
         {
             return MoveToNextNamespace();
         }
-    
+
         public override bool MoveToParent()
         {
             if (!(CurrentNode is XmlDiffDocument))

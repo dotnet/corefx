@@ -15,6 +15,8 @@ namespace System.Net.NetworkInformation
 {
     public partial class Ping
     {
+        private const int MaxUdpPacket = 0xFFFF + 256; // Marshal.SizeOf(typeof(Icmp6EchoReply)) * 2 + ip header info;
+
         private static readonly SafeWaitHandle s_nullSafeWaitHandle = new SafeWaitHandle(IntPtr.Zero, true);
         private static readonly object s_socketInitializationLock = new object();
         private static bool s_socketInitialized;
@@ -396,7 +398,7 @@ namespace System.Net.NetworkInformation
                 {
                     if (!s_socketInitialized)
                     {
-                        // Ensure that WSAStartup has been called once per process.  
+                        // Ensure that WSAStartup has been called once per process.
                         // The System.Net.NameResolution contract is responsible with the initialization.
                         Dns.GetHostName();
 

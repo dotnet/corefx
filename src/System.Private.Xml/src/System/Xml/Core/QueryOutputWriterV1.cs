@@ -10,10 +10,10 @@ using System.Collections.Generic;
 namespace System.Xml
 {
     /// <summary>
-    /// This writer wraps an XmlWriter that was not build using the XmlRawWriter architecture (such as XmlTextWriter or a custom XmlWriter) 
-    /// for use in the XslCompilerTransform. Depending on the Xsl stylesheet output settings (which gets transfered to this writer via the 
+    /// This writer wraps an XmlWriter that was not build using the XmlRawWriter architecture (such as XmlTextWriter or a custom XmlWriter)
+    /// for use in the XslCompilerTransform. Depending on the Xsl stylesheet output settings (which gets transfered to this writer via the
     /// internal properties of XmlWriterSettings) this writer will inserts additional lexical information into the resulting Xml 1.0 document:
-    /// 
+    ///
     ///   1. CData sections
     ///   2. DocType declaration
     ///   3. Standalone attribute
@@ -23,13 +23,13 @@ namespace System.Xml
     /// </summary>
     internal class QueryOutputWriterV1 : XmlWriter
     {
-        private XmlWriter _wrapped;
+        private readonly XmlWriter _wrapped;
         private bool _inCDataSection;
-        private Dictionary<XmlQualifiedName, XmlQualifiedName> _lookupCDataElems;
-        private BitStack _bitsCData;
-        private XmlQualifiedName _qnameCData;
+        private readonly Dictionary<XmlQualifiedName, XmlQualifiedName> _lookupCDataElems;
+        private readonly BitStack _bitsCData;
+        private readonly XmlQualifiedName _qnameCData;
         private bool _outputDocType, _inAttr;
-        private string _systemId, _publicId;
+        private readonly string _systemId, _publicId;
 
         public QueryOutputWriterV1(XmlWriter writer, XmlWriterSettings settings)
         {
@@ -323,4 +323,3 @@ namespace System.Xml
         }
     }
 }
-

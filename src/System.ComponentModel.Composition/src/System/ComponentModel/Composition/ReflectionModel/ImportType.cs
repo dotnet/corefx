@@ -14,13 +14,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private static readonly Type LazyOfTType = typeof(Lazy<>);
         private static readonly Type LazyOfTMType = typeof(Lazy<,>);
         private static readonly Type ExportFactoryOfTType = typeof(ExportFactory<>);
-        private static readonly Type ExportFactoryOfTMType = typeof(ExportFactory<,>);
 
         private readonly Type _type;
         private readonly bool _isAssignableCollectionType;
         private Type _contractType;
         private Func<Export, object> _castSingleValue;
-        private bool _isOpenGeneric = false;
+        private readonly bool _isOpenGeneric = false;
 
         [ThreadStatic]
         internal static Dictionary<Type, Func<Export, object>> _castSingleValueCache;

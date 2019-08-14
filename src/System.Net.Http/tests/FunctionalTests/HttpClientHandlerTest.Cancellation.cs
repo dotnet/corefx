@@ -79,8 +79,8 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [MemberData(nameof(TwoBoolsAndCancellationMode))]
-        public async Task GetAsync_CancelDuringResponseHeadersReceived_TaskCanceledQuickly(bool chunkedTransfer, bool connectionClose, CancellationMode mode)
+        [MemberData(nameof(OneBoolAndCancellationMode))]
+        public async Task GetAsync_CancelDuringResponseHeadersReceived_TaskCanceledQuickly(bool connectionClose, CancellationMode mode)
         {
             using (HttpClient client = CreateHttpClient())
             {
@@ -226,8 +226,8 @@ namespace System.Net.Http.Functional.Tests
 
         [Theory]
         [InlineData(CancellationMode.CancelPendingRequests, false)]
-        [InlineData(CancellationMode.DisposeHttpClient, true)]
-        [InlineData(CancellationMode.CancelPendingRequests, false)]
+        [InlineData(CancellationMode.DisposeHttpClient, false)]
+        [InlineData(CancellationMode.CancelPendingRequests, true)]
         [InlineData(CancellationMode.DisposeHttpClient, true)]
         public async Task GetAsync_CancelPendingRequests_DoesntCancelReadAsyncOnResponseStream(CancellationMode mode, bool copyToAsync)
         {
@@ -383,7 +383,7 @@ namespace System.Net.Http.Functional.Tests
                         {
                             await client.GetAsync(uri, cts.Token);
                         }
-                        catch(OperationCanceledException e)
+                        catch (OperationCanceledException e)
                         {
                             ex = e;
                         }
@@ -582,6 +582,11 @@ namespace System.Net.Http.Functional.Tests
         }
 
         private static readonly bool[] s_bools = new[] { true, false };
+
+        public static IEnumerable<object[]> OneBoolAndCancellationMode() =>
+            from first in s_bools
+            from mode in new[] { CancellationMode.Token, CancellationMode.CancelPendingRequests, CancellationMode.DisposeHttpClient, CancellationMode.Token | CancellationMode.CancelPendingRequests }
+            select new object[] { first, mode };
 
         public static IEnumerable<object[]> TwoBoolsAndCancellationMode() =>
             from first in s_bools

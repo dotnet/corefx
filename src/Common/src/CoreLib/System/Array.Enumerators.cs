@@ -10,11 +10,11 @@ namespace System
 {
     internal sealed class ArrayEnumerator : IEnumerator, ICloneable
     {
-        private Array array;
+        private readonly Array array;
         private int index;
-        private int endIndex;
-        private int startIndex;    // Save for Reset.
-        private int[] _indices;    // The current position in a multidim array
+        private readonly int endIndex;
+        private readonly int startIndex;    // Save for Reset.
+        private readonly int[] _indices;    // The current position in a multidim array
         private bool _complete;
 
         internal ArrayEnumerator(Array array, int index, int count)
@@ -41,9 +41,9 @@ namespace System
             // handling all the multiple dimension & bounds correctly.
             // Think of it like an odometer in your car - we start with
             // the last digit, increment it, and check for rollover.  If
-            // it rolls over, we set all digits to the right and including 
+            // it rolls over, we set all digits to the right and including
             // the current to the appropriate lower bound.  Do these overflow
-            // checks for each dimension, and if the most significant digit 
+            // checks for each dimension, and if the most significant digit
             // has rolled over it's upper bound, we're done.
             //
             int rank = array.Rank;
@@ -110,7 +110,7 @@ namespace System
     {
         private readonly Array _array;
         private int _index;
-        private int _endIndex; // Cache Array.Length, since it's a little slow.
+        private readonly int _endIndex; // Cache Array.Length, since it's a little slow.
 
         internal SZArrayEnumerator(Array array)
         {
@@ -152,7 +152,7 @@ namespace System
         {
             _index = -1;
         }
-    }    
+    }
 
     internal sealed class SZGenericArrayEnumerator<T> : IEnumerator<T>
     {
@@ -161,7 +161,9 @@ namespace System
 
         // Array.Empty is intentionally omitted here, since we don't want to pay for generic instantiations that
         // wouldn't have otherwise been used.
+#pragma warning disable CA1825
         internal static readonly SZGenericArrayEnumerator<T> Empty = new SZGenericArrayEnumerator<T>(new T[0]);
+#pragma warning restore CA1825
 
         internal SZGenericArrayEnumerator(T[] array)
         {

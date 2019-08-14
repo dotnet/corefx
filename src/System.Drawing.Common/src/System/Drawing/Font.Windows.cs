@@ -258,7 +258,7 @@ namespace System.Drawing
 
         internal static Font FromLogFontInternal(ref SafeNativeMethods.LOGFONT logFont, IntPtr hdc)
         {
-            int status = Gdip.GdipCreateFontFromLogfontW(new HandleRef(null, hdc), ref logFont, out IntPtr font);
+            int status = Gdip.GdipCreateFontFromLogfontW(hdc, ref logFont, out IntPtr font);
 
             // Special case this incredibly common error message to give more information
             if (status == Gdip.NotTrueTypeFont)
@@ -286,7 +286,7 @@ namespace System.Drawing
         /// <param name="lf">A boxed LOGFONT.</param>
         /// <param name="hdc">Handle to a device context (HDC).</param>
         /// <returns>The newly created <see cref="Font"/>.</returns>
-        public unsafe static Font FromLogFont(object lf, IntPtr hdc)
+        public static unsafe Font FromLogFont(object lf, IntPtr hdc)
         {
             if (lf == null)
             {
@@ -333,7 +333,7 @@ namespace System.Drawing
         public static Font FromHdc(IntPtr hdc)
         {
             IntPtr font = IntPtr.Zero;
-            int status = Gdip.GdipCreateFontFromDC(new HandleRef(null, hdc), ref font);
+            int status = Gdip.GdipCreateFontFromDC(hdc, ref font);
 
             // Special case this incredibly common error message to give more information
             if (status == Gdip.NotTrueTypeFont)

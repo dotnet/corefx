@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 //
 // (C) 2004 Ximian, Inc.  http://www.ximian.com
@@ -11,10 +11,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -151,7 +151,7 @@ namespace System.Drawing.Tests
                 }
             }
         }
-        
+
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_NullStream_ThrowsArgumentNullException()
         {
@@ -271,7 +271,6 @@ namespace System.Drawing.Tests
         [InlineData(PixelFormat.Undefined - 1)]
         [InlineData(PixelFormat.Undefined)]
         [InlineData(PixelFormat.Gdi - 1)]
-        [InlineData(PixelFormat.DontCare)]
         [InlineData(PixelFormat.Max)]
         [InlineData(PixelFormat.Indexed)]
         [InlineData(PixelFormat.Gdi)]
@@ -479,7 +478,6 @@ namespace System.Drawing.Tests
         [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0, 0, 4, 1)]
         [InlineData(0, 0, 1, 4)]
-        [InlineData(0, 0, 1, 4)]
         [InlineData(1, 0, 3, 1)]
         [InlineData(0, 1, 1, 3)]
         [InlineData(4, 1, 1, 1)]
@@ -546,6 +544,7 @@ namespace System.Drawing.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => bitmap.Clone(new RectangleF(0, 0, 1, 1), PixelFormat.Format32bppArgb));
         }
 
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GetFrameCount_NewBitmap_ReturnsZero()
         {
@@ -1059,7 +1058,7 @@ namespace System.Drawing.Tests
                 bitmap.SetResolution(xDpi, yDpi);
             }
         }
-        
+
         [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1)]
         [InlineData(0)]
@@ -1150,7 +1149,8 @@ namespace System.Drawing.Tests
             yield return new object[] { new Bitmap(184, 184, PixelFormat.Format1bppIndexed), new Rectangle(0, 0, 184, 184), ImageLockMode.WriteOnly, PixelFormat.Format1bppIndexed, 24, 2 };
         }
 
-        [ConditionalTheory(Helpers.IsDrawingSupported)]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
+        [ActiveIssue(40224, TestPlatforms.Windows)]
         [MemberData(nameof(LockBits_TestData))]
         public void LockBits_Invoke_Success(Bitmap bitmap, Rectangle rectangle, ImageLockMode lockMode, PixelFormat pixelFormat, int expectedStride, int expectedReserved)
         {
@@ -1334,7 +1334,7 @@ namespace System.Drawing.Tests
                 bitmap.UnlockBits(data);
             }
         }
-        
+
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void UnlockBits_Scan0Zero_Nop()
         {
@@ -1605,7 +1605,7 @@ namespace System.Drawing.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => bitmap.Size);
         }
 
-        [ConditionalFact(Helpers.IsDrawingSupported)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void LockBits_Marshalling_Success()
         {
             Color red = Color.FromArgb(Color.Red.ToArgb());

@@ -17,7 +17,7 @@ namespace System.Xml
         //
         // Member fields
         //
-        private XmlValidatingReaderImpl _impl;
+        private readonly XmlValidatingReaderImpl _impl;
         //
         // Constructors
         //
@@ -281,7 +281,7 @@ namespace System.Xml
         }
 
         //
-        // XmlValidatingReader 
+        // XmlValidatingReader
         //
         public event ValidationEventHandler ValidationEventHandler
         {

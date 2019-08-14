@@ -476,7 +476,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(true)]
         public async Task DisposeTargetStream_ThrowsObjectDisposedException(bool knownLength)
         {
-            var tcs = new TaskCompletionSource<int>(TaskContinuationOptions.RunContinuationsAsynchronously);
+            var tcs = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
             await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
             {
                 try
@@ -1367,7 +1367,7 @@ namespace System.Net.Http.Functional.Tests
                         {
                             if (line.StartsWith("Host:",StringComparison.InvariantCultureIgnoreCase))
                             {
-                                Assert.Equal(line, "Host: foo.com:345");
+                                Assert.Equal("Host: foo.com:345", line);
                                 break;
                             }
                         }

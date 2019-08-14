@@ -60,7 +60,7 @@ namespace System.Xml
         // Creation of validating readers is hidden behind a delegate which is only initialized if the ValidationType
         // property is set. This is for AOT builds where the tree shaker can reduce the validating readers away
         // if nobody calls the ValidationType setter. Might also help with non-AOT build when ILLinker is used.
-        delegate XmlReader AddValidationFunc(XmlReader reader, XmlResolver resolver, bool addConformanceWrapper);
+        private delegate XmlReader AddValidationFunc(XmlReader reader, XmlResolver resolver, bool addConformanceWrapper);
         private AddValidationFunc _addValidationFunc;
 
         //
@@ -691,7 +691,7 @@ namespace System.Xml
                     }
                 }
 
-                // assume the V1 readers already do all conformance checking; 
+                // assume the V1 readers already do all conformance checking;
                 // wrap only if IgnoreWhitespace, IgnoreComments, IgnoreProcessingInstructions or ProhibitDtd is true;
                 if (_ignoreWhitespace)
                 {

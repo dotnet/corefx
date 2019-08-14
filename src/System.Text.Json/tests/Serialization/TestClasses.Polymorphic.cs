@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
 {
-    public class Person : ITestClass
+    public abstract class Person : ITestClass
     {
         public string Name { get; set; }
         public Address Address { get; set; }
@@ -75,7 +75,7 @@ namespace System.Text.Json.Serialization.Tests
             base.Verify();
         }
 
-        new public void VerifyNonVirtual()
+        public new void VerifyNonVirtual()
         {
             Assert.Equal(500, CreditLimit);
         }

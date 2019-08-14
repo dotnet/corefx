@@ -1,13 +1,13 @@
 // Licensed to the .NET Foundation under one or more agreements.
-// See the LICENSE file in the project root for more information. 
+// See the LICENSE file in the project root for more information.
 
 //
 // System.ComponentModel.LicenseManagerTests test cases
 //
 // Authors:
-//	Ivan Hamilton (ivan@chimerical.com.au)
-//	Gonzalo Paniagua Javier (gonzalo@ximian.com)
-//	Martin Willemoes Hansen (mwh@sysrq.dk)
+//  Ivan Hamilton (ivan@chimerical.com.au)
+//  Gonzalo Paniagua Javier (gonzalo@ximian.com)
+//  Martin Willemoes Hansen (mwh@sysrq.dk)
 //
 // (c) 2002 Ximian, Inc. (http://www.ximian.com)
 // (c) 2003 Martin Willemoes Hansen
@@ -266,7 +266,7 @@ namespace System.ComponentModel.Tests
             }
             //Check the exception was thrown
             Assert.True(exceptionThrown);
-            //Test we can create DesignTime with A new DesignTimeContext 
+            //Test we can create DesignTime with A new DesignTimeContext
             cwc = null;
             cwc = LicenseManager.CreateWithContext(typeof(DesigntimeLicensedObject),
                 new DesigntimeLicenseContext());

@@ -24,7 +24,7 @@ namespace System.ServiceModel.Syndication
         private const string Rfc822OutputLocalDateTimeFormat = "ddd, dd MMM yyyy HH:mm:ss zzz";
         private const string Rfc822OutputUtcDateTimeFormat = "ddd, dd MMM yyyy HH:mm:ss Z";
 
-        private Atom10FeedFormatter _atomSerializer;
+        private readonly Atom10FeedFormatter _atomSerializer;
         private readonly int _maxExtensionSize;
 
         public Rss20FeedFormatter() : this(typeof(SyndicationFeed))
@@ -204,7 +204,7 @@ namespace System.ServiceModel.Syndication
                 WriteItem(writer, item, feedBaseUri);
             }
         }
-        
+
         private string AsString(DateTimeOffset dateTime)
         {
             if (dateTime.Offset == TimeSpan.Zero)
@@ -744,11 +744,11 @@ namespace System.ServiceModel.Syndication
                         {
                             feedItems = feedItems ?? new NullNotAllowedCollection<SyndicationItem>();
                             IEnumerable<SyndicationItem> items = ReadItems(reader, result, out areAllItemsRead);
-                            foreach(SyndicationItem item in items)
+                            foreach (SyndicationItem item in items)
                             {
                                 feedItems.Add(item);
                             }
-                            
+
                             // if the derived class is reading the items lazily, then stop reading from the stream
                             if (!areAllItemsRead)
                             {
@@ -789,7 +789,7 @@ namespace System.ServiceModel.Syndication
                 }
                 if (areAllItemsRead)
                 {
-                    reader.ReadEndElement(); // channel   
+                    reader.ReadEndElement(); // channel
                     reader.ReadEndElement(); // rss
                 }
             }

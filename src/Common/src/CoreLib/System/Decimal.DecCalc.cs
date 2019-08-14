@@ -690,7 +690,7 @@ PosRem:
                         }
 
                         break;
-                    } // for(;;)
+                    } // for (;;)
                 }
                 return scale;
 
@@ -1052,7 +1052,7 @@ ThrowOverflow:
                             goto NoCarry;
 
                         // Carry the subtraction into the higher bits.
-                        // 
+                        //
                         uint* number = (uint*)&bufNum;
                         uint cur = 3;
                         do
@@ -2223,7 +2223,7 @@ ThrowOverflow:
                 if ((cmp ^ (int)(d1.uflags & SignMask)) < 0)
                     return;
 
-                // The divisor is smaller than the dividend and both are non-zero. Calculate the integer remainder using the larger scaling factor. 
+                // The divisor is smaller than the dividend and both are non-zero. Calculate the integer remainder using the larger scaling factor.
 
                 int scale = (sbyte)(d1.uflags - d2.uflags >> ScaleShift);
                 if (scale > 0)
@@ -2300,8 +2300,8 @@ ThrowOverflow:
             {
                 // Divisor has bits set in the upper 64 bits.
                 //
-                // Divisor must be fully normalized (shifted so bit 31 of the most significant uint is 1). 
-                // Locate the MSB so we know how much to normalize by. 
+                // Divisor must be fully normalized (shifted so bit 31 of the most significant uint is 1).
+                // Locate the MSB so we know how much to normalize by.
                 // The dividend will be shifted by the same amount so the quotient is not changed.
                 //
                 uint tmp = d2.High;
@@ -2525,7 +2525,7 @@ done:
                 return (uint)num - div * TenToPowerNine;
             }
 
-            struct PowerOvfl
+            private struct PowerOvfl
             {
                 public readonly uint Hi;
                 public readonly ulong MidLo;
@@ -2537,7 +2537,7 @@ done:
                 }
             }
 
-            static readonly PowerOvfl[] PowerOvflValues = new[]
+            private static readonly PowerOvfl[] PowerOvflValues = new[]
             {
                 // This is a table of the largest values that can be in the upper two
                 // uints of a 96-bit number that will not overflow when multiplied

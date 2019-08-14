@@ -17,7 +17,7 @@ namespace System.Collections
 {
     public class CaseInsensitiveComparer : IComparer
     {
-        private CompareInfo _compareInfo;
+        private readonly CompareInfo _compareInfo;
         private static volatile CaseInsensitiveComparer s_InvariantCaseInsensitiveComparer;
 
         public CaseInsensitiveComparer()
@@ -60,7 +60,7 @@ namespace System.Collections
         // If a implements IComparable, a.CompareTo(b) is returned.
         // If a doesn't implement IComparable and b does, -(b.CompareTo(a)) is returned.
         // Otherwise an exception is thrown.
-        // 
+        //
         public int Compare(object a, object b)
         {
             string sa = a as string;

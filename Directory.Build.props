@@ -87,7 +87,7 @@
   </PropertyGroup>
 
   <Import Sdk="Microsoft.DotNet.Build.Tasks.Configuration" Project="Sdk.props" />
-  <Import Sdk="Microsoft.DotNet.CoreFxTesting" Project="Sdk.props" />
+  <Import Sdk="Microsoft.DotNet.CoreFxTesting" Project="Sdk.props" Condition="'$(DotNetBuildFromSource)' != 'true' and '$(BuildAllConfigurations)' != 'true'" />
 
   <PropertyGroup>    
     <EnableProjectRestore Condition="'$(IsTestProject)' == 'true'">true</EnableProjectRestore>
@@ -104,20 +104,6 @@
 
     <!-- Use msbuild path functions as that property is used in bash scripts. -->
     <SourceDir>$([MSBuild]::NormalizeDirectory('$(RepoRoot)', 'src'))</SourceDir>
-  </PropertyGroup>
-
-  <!-- list of nuget package sources passed to nuget restore -->
-  <!-- Example to consume local CoreCLR package:
-       /p:OverridePackageSource=C:\coreclr\bin\Product\Windows_NT.x64.Debug\.nuget\pkg
-       -->
-  <PropertyGroup>
-    <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
-      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
-      https://dotnetfeed.blob.core.windows.net/dotnet-coreclr/index.json;
-      https://api.nuget.org/v3/index.json;
-      $(OverridePackageSource);
-      $(RestoreSources)
-    </RestoreSources>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -246,7 +232,8 @@
     <NoStdLib>true</NoStdLib>
     <NoExplicitReferenceToStdLib>true</NoExplicitReferenceToStdLib>
     <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
-    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <!-- Enable the target framework attribute on test assemblies as vstest relies on that property. -->
+    <GenerateTargetFrameworkAttribute Condition="'$(IsTestProject)' != 'true'">false</GenerateTargetFrameworkAttribute>
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <!-- Don't reference implicit framework packages, all projects in this repo must be explicit -->
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
@@ -307,7 +294,7 @@
     <TestArchiveRuntimeRoot>$(TestArchiveRoot)runtime/</TestArchiveRuntimeRoot>
 
     <!-- project file to use when resolving ReferenceFromRuntime items -->
-    <RuntimeProjectFile Condition="'$(RuntimeProjectFile)' == ''">$(RepoRoot)\external\runtime\runtime.depproj</RuntimeProjectFile>
+    <RuntimeProjectFile Condition="'$(RuntimeProjectFile)' == ''">$(RepositoryEngineeringDir)restore\runtime\runtime.depproj</RuntimeProjectFile>
 
     <!-- Paths to binplace package content -->
     <NETCoreAppPackageRefPath>$(ArtifactsBinDir)pkg\netcoreapp\ref</NETCoreAppPackageRefPath>
@@ -388,4 +375,7 @@
     <ILLinkClearInitLocals Condition="'$(IsSourceProject)' == 'true' and '$(Language)' != 'VB'">true</ILLinkClearInitLocals>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IsShipping Condition="$(MSBuildProjectName.Contains('Private')) or $(MSBuildProjectName.Contains('Experimental'))">false</IsShipping>
+  </PropertyGroup>
 </Project>

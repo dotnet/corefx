@@ -22,8 +22,9 @@ namespace System.Reflection.Tests
         [InlineData(typeof(int))]
         [InlineData(typeof(List<>))]
         [InlineData(typeof(ModuleTest))]
-        public void Assembly(TypeInfo typeInfo)
+        public void Assembly(Type type)
         {
+            TypeInfo typeInfo = type.GetTypeInfo();
             Module module = typeInfo.Module;
             Assert.Equal(typeInfo.Assembly, module.Assembly);
         }
@@ -33,7 +34,7 @@ namespace System.Reflection.Tests
         [InlineData(typeof(Int32Attr), 77, "Int32AttrSimple")]
         [InlineData(typeof(Int64Attr), (long)77, "Int64AttrSimple")]
         [InlineData(typeof(StringAttr), "hello", "StringAttrSimple")]
-        [InlineData(typeof(EnumAttr), PublicEnum.Case1, "EnumAttrSimple")]  
+        [InlineData(typeof(EnumAttr), PublicEnum.Case1, "EnumAttrSimple")]
         public void CustomAttributes<CtorArg, NamedArg>(Type attrType, CtorArg expectedCtorValue, NamedArg expectedNamedValue)
         {
             Module module = typeof(ModuleTest).GetTypeInfo().Module;
@@ -41,7 +42,7 @@ namespace System.Reflection.Tests
             CustomAttributeData attribute = module.CustomAttributes.Single(a => a.AttributeType.Equals(attrType));
             Assert.Equal(1, attribute.ConstructorArguments.Count);
             Assert.Equal(1, attribute.NamedArguments.Count);
-                        
+
             Assert.Equal(typeof(CtorArg), attribute.ConstructorArguments[0].ArgumentType);
 
             object actualCtorValue = attribute.ConstructorArguments[0].Value;
@@ -59,7 +60,7 @@ namespace System.Reflection.Tests
             Assert.Equal(expectedNamedValue, attribute.NamedArguments[0].TypedValue.Value);
         }
 
-        [Theory]        
+        [Theory]
         [InlineData("System.Nullable`1[System.Int32]", typeof(int?))]
         [InlineData("System.Int32*", typeof(int*))]
         [InlineData("System.Int32**", typeof(int**))]
@@ -67,14 +68,14 @@ namespace System.Reflection.Tests
         [InlineData("OutsideModuleTest`1+InsideModuleTest`1", typeof(OutsideModuleTest<>.InsideModuleTest<>))]
         [InlineData("OutsideModuleTest[]", typeof(OutsideModuleTest[]))]
         [InlineData("OutsideModuleTest[,,]", typeof(OutsideModuleTest[,,]))]
-        [InlineData("OutsideModuleTest[][]", typeof(OutsideModuleTest[][]))]        
+        [InlineData("OutsideModuleTest[][]", typeof(OutsideModuleTest[][]))]
         public void GetType(string className, Type expectedType)
         {
             Module module = expectedType.GetTypeInfo().Module;
 
             Assert.Equal(expectedType, module.GetType(className, true, false));
             Assert.Equal(expectedType, module.GetType(className.ToLower(), false, true));
-            
+
             Assert.Null(module.GetType(className.ToLower(), false, false));
             Assert.Throws<TypeLoadException>(() => module.GetType(className.ToLower(), true, false));
         }

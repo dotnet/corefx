@@ -8257,7 +8257,7 @@ namespace System.Linq.Expressions.Tests
             {
                 expected = (byte)value;
             }
-            catch(OverflowException)
+            catch (OverflowException)
             {
                 Assert.Throws<OverflowException>(() => f());
                 return;
@@ -9279,7 +9279,7 @@ namespace System.Linq.Expressions.Tests
             {
                 expected = (decimal)value;
             }
-            catch(OverflowException)
+            catch (OverflowException)
             {
                 Assert.Throws<OverflowException>(() => f());
                 return;
@@ -16640,8 +16640,8 @@ namespace System.Linq.Expressions.Tests
             Assert.Null(f(null));
         }
 
-        [Theory, ClassData(typeof(CompilationTypes))]
-        public static void ImplicitHalfLiftedReverseConversion(bool useInterpreter)
+        [Fact]
+        public static void ImplicitHalfLiftedReverseConversion()
         {
             // In the case where there is a conversion from? -> to, then if
             // we want to do from? -> to? we should do two conversions;

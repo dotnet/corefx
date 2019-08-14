@@ -41,7 +41,7 @@ using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 namespace System.Drawing.Printing
 {
     /// <summary>
-    /// This class is designed to cache the values retrieved by the 
+    /// This class is designed to cache the values retrieved by the
     /// native printing services, as opposed to GlobalPrintingServices, which
     /// doesn't cache any values.
     /// </summary>
@@ -49,21 +49,10 @@ namespace System.Drawing.Printing
     {
         #region Private Fields
 
-        private static Hashtable doc_info = new Hashtable();
-        private static bool cups_installed;
-
-        private static Hashtable installed_printers;
+        private static readonly Hashtable doc_info = new Hashtable();
+        private static readonly bool cups_installed = CheckCupsInstalled();
+        private static readonly Hashtable installed_printers = new Hashtable();
         private static string default_printer = string.Empty;
-
-        #endregion
-
-        #region Constructor
-
-        static PrintingServices()
-        {
-            installed_printers = new Hashtable();
-            CheckCupsInstalled();
-        }
 
         #endregion
 
@@ -101,7 +90,7 @@ namespace System.Drawing.Printing
         /// <summary>
         /// Do a cups call to check if it is installed
         /// </summary>
-        private static void CheckCupsInstalled()
+        private static bool CheckCupsInstalled()
         {
             try
             {
@@ -114,11 +103,10 @@ namespace System.Drawing.Printing
 #else
                 Console.WriteLine("libcups not found. To have printing support, you need cups installed");
 #endif
-                cups_installed = false;
-                return;
+                return false;
             }
 
-            cups_installed = true;
+            return true;
         }
 
         /// <summary>
@@ -349,7 +337,7 @@ namespace System.Drawing.Printing
         }
 
         /// <summary>
-        /// Loads the global options of a printer. 
+        /// Loads the global options of a printer.
         /// </summary>
         /// <param name="options">The options field of a printer's CUPS_DESTS structure</param>
         /// <param name="numOptions">The number of options of the printer</param>
@@ -809,7 +797,7 @@ namespace System.Drawing.Printing
 
         #region Print job methods
 
-        static string tmpfile;
+        private static string tmpfile;
 
         /// <summary>
         /// Gets a pointer to an options list parsed from the printer's current settings, to use when setting up the printing job
