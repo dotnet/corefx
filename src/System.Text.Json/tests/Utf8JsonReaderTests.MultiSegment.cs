@@ -38,7 +38,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void EmptySequenceSegments()
+        public static void EmptyJsonMultiSegmentIsInvalid()
         {
             ReadOnlyMemory<byte> dataMemory = Array.Empty<byte>();
 

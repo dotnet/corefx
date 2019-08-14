@@ -88,8 +88,11 @@ namespace System.Text.Json
                 }
                 else
                 {
+                    // Make sure to advance _nextPosition in this case so that it is no longer the same as _currentPosition
                     _isLastSegment = !jsonData.TryGet(ref _nextPosition, out _, advance: true) && isFinalBlock; // Don't re-order to avoid short-circuiting
                 }
+
+                Debug.Assert(!_nextPosition.Equals(_currentPosition));
 
                 _isMultiSegment = true;
             }
