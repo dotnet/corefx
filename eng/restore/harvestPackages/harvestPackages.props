@@ -131,7 +131,7 @@
   <Version>4.5.2</Version>
 </PackageReference>
 <PackageReference Include="System.Runtime.WindowsRuntime">
-  <Version>4.3.0</Version>
+  <Version>4.6.0-preview8.19405.3</Version>
 </PackageReference>
 <PackageReference Include="System.Runtime.WindowsRuntime.UI.Xaml">
   <Version>4.3.0</Version>
