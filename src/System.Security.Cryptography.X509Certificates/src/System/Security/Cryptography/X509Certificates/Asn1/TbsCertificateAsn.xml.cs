@@ -13,7 +13,7 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct TbsCertificateAsn
     {
-        private static byte[] s_defaultVersion = { 0x02, 0x01, 0x00 };
+        private static readonly byte[] s_defaultVersion = { 0x02, 0x01, 0x00 };
 
         internal int Version;
         internal ReadOnlyMemory<byte> SerialNumber;

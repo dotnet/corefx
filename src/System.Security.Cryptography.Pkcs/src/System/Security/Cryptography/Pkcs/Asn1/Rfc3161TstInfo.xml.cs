@@ -13,7 +13,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct Rfc3161TstInfo
     {
-        private static byte[] s_defaultOrdering = { 0x01, 0x01, 0x00 };
+        private static readonly byte[] s_defaultOrdering = { 0x01, 0x01, 0x00 };
 
         internal int Version;
         internal Oid Policy;

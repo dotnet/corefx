@@ -12,7 +12,7 @@ namespace System.Security.Cryptography.Pkcs.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct MacData
     {
-        private static byte[] s_defaultIterationCount = { 0x02, 0x01, 0x01 };
+        private static readonly byte[] s_defaultIterationCount = { 0x02, 0x01, 0x01 };
 
         internal System.Security.Cryptography.Pkcs.Asn1.DigestInfoAsn Mac;
         internal ReadOnlyMemory<byte> MacSalt;
