@@ -325,7 +325,9 @@ namespace System.Data.ProviderBase
                             {
                                 _readerDataValues[i] = _xmlMap[i] switch
                                 {
-                                    SqlXml => System.Data.SqlTypes.SqlXml.Null, // map strongly typed SqlString.Null to SqlXml.Null
+                                    // map strongly typed SqlString.Null to SqlXml.Null
+                                    SqlXml => System.Data.SqlTypes.SqlXml.Null,
+
                                     _ => DBNull.Value,
                                 };
                             }

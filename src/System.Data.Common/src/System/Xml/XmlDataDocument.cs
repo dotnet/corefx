@@ -1060,6 +1060,7 @@ namespace System.Xml
                 XmlNodeType.Comment => CreateComment(dp.Value),
                 XmlNodeType.Whitespace => CreateWhitespace(dp.Value),
                 XmlNodeType.SignificantWhitespace => CreateSignificantWhitespace(dp.Value),
+
                 //for the nodes that don't have values, but might have children -- only clone the node and leave the children untouched
                 XmlNodeType.Element => CreateElement(dp.Prefix, dp.LocalName, dp.NamespaceURI),
                 XmlNodeType.Attribute => CreateAttribute(dp.Prefix, dp.LocalName, dp.NamespaceURI),

@@ -703,6 +703,7 @@ namespace System.Xml
                     (xntChildInt == (int)XPathNodeType.Element ||
                      xntChildInt == (int)XPathNodeType.Comment ||
                      xntChildInt == (int)XPathNodeType.ProcessingInstruction),
+
                 (int)XPathNodeType.Element =>
                     (xntChildInt == (int)XPathNodeType.Element ||
                      xntChildInt == (int)XPathNodeType.Text ||
@@ -710,6 +711,7 @@ namespace System.Xml
                      xntChildInt == (int)XPathNodeType.Whitespace ||
                      xntChildInt == (int)XPathNodeType.SignificantWhitespace ||
                      xntChildInt == (int)XPathNodeType.ProcessingInstruction),
+
                 _ => false,
             };
         }
