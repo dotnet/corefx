@@ -24,7 +24,7 @@ namespace XPathTests.FunctionalTests
         {
             var xml = "Surrogates_1.xml";
             var testExpression =
-                @"//Row[Data/text()=""𠀋"" or Data/text()=""𠂢"" or Data/text()=""𠂤"" or Data/text()=""𪀚"" or Data/text()=""𪂂"" or Data/text()=""𪃹"" or Data/text()=""𥇍""] ";
+                "//Row[Data/text()=\"\uD840\uDC0B\" or Data/text()=\"\uD840\uDCA2\" or Data/text()=\"\uD840\uDCA4\" or Data/text()=\"\uD868\uDC1A\" or Data/text()=\"\uD868\uDC82\" or Data/text()=\"\uD868\uDCF9\" or Data/text()=\"\uD854\uDDCD\"] ";
             var expected = new XPathResult(0,
                 new XPathResultToken
                 {
@@ -33,7 +33,7 @@ namespace XPathTests.FunctionalTests
                     LocalName = "Row",
                     Name = "Row",
                     HasNameTable = true,
-                    Value = "\n    𠀋\n    2000B\n    D840\n    DC0B\n    \n    \n    \n   "
+                    Value = "\n    \uD840\uDC0B\n    2000B\n    D840\n    DC0B\n    \n    \n    \n   "
                 },
                 new XPathResultToken
                 {
@@ -42,7 +42,7 @@ namespace XPathTests.FunctionalTests
                     LocalName = "Row",
                     Name = "Row",
                     HasNameTable = true,
-                    Value = "\n    \n    𠂢\n    200A2\n    D840\n    DCA2\n    \n    \n    \n   "
+                    Value = "\n    \n    \uD840\uDCA2\n    200A2\n    D840\n    DCA2\n    \n    \n    \n   "
                 },
                 new XPathResultToken
                 {
@@ -51,7 +51,7 @@ namespace XPathTests.FunctionalTests
                     LocalName = "Row",
                     Name = "Row",
                     HasNameTable = true,
-                    Value = "\n    \n    𠂤\n    200A4\n    D840\n    DCA4\n    \n    \n    \n   "
+                    Value = "\n    \n    \uD840\uDCA4\n    200A4\n    D840\n    DCA4\n    \n    \n    \n   "
                 },
                 new XPathResultToken
                 {
@@ -60,7 +60,7 @@ namespace XPathTests.FunctionalTests
                     LocalName = "Row",
                     Name = "Row",
                     HasNameTable = true,
-                    Value = "\n    \n    𥇍\n    251CD\n    D854\n    DDCD\n    \n    \n    \n   "
+                    Value = "\n    \n    \uD854\uDDCD\n    251CD\n    D854\n    DDCD\n    \n    \n    \n   "
                 },
                 new XPathResultToken
                 {
@@ -69,7 +69,7 @@ namespace XPathTests.FunctionalTests
                     LocalName = "Row",
                     Name = "Row",
                     HasNameTable = true,
-                    Value = "\n    \n    𪀚\n    2A01A\n    D868\n    DC1A\n    \n    \n    \n   "
+                    Value = "\n    \n    \uD868\uDC1A\n    2A01A\n    D868\n    DC1A\n    \n    \n    \n   "
                 },
                 new XPathResultToken
                 {
@@ -78,7 +78,7 @@ namespace XPathTests.FunctionalTests
                     LocalName = "Row",
                     Name = "Row",
                     HasNameTable = true,
-                    Value = "\n    \n    𪂂\n    2A082\n    D868\n    DC82\n    \n    \n    \n   "
+                    Value = "\n    \n    \uD868\uDC82\n    2A082\n    D868\n    DC82\n    \n    \n    \n   "
                 },
                 new XPathResultToken
                 {
@@ -87,7 +87,7 @@ namespace XPathTests.FunctionalTests
                     LocalName = "Row",
                     Name = "Row",
                     HasNameTable = true,
-                    Value = "\n    \n    𪃹\n    2A0F9\n    D868\n    DCF9\n    \n \n   "
+                    Value = "\n    \n    \uD868\uDCF9\n    2A0F9\n    D868\n    DCF9\n    \n \n   "
                 });
             ;
 
