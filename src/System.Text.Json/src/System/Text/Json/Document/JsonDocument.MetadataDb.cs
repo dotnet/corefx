@@ -162,7 +162,6 @@ namespace System.Text.Json
                 // lengths of tokens in a document, but no content; so it does not
                 // need to be cleared.
                 ArrayPool<byte>.Shared.Return(data);
-                _data = null;
                 Length = 0;
             }
 

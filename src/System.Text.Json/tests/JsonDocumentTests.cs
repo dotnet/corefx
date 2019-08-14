@@ -3737,6 +3737,7 @@ namespace System.Text.Json.Tests
 
             // When ArrayPool gets corrupted, the Rent method might return an already rented array, which is incorrect.
             // So we will rent as many arrays as calls to JsonElement.Dispose and check they are unique.
+            // The minimum length that we ask for is a mirror of the size of the string passed to JsonDocument.Parse.
             HashSet<byte[]> uniqueAddresses = new HashSet<byte[]>();
             while (count > 0)
             {

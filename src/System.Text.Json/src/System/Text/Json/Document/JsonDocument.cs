@@ -73,8 +73,6 @@ namespace System.Text.Json
             {
                 extraRentedBytes.AsSpan(0, length).Clear();
                 ArrayPool<byte>.Shared.Return(extraRentedBytes);
-
-                _extraRentedBytes = null;
             }
         }
 
