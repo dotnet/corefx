@@ -3,12 +3,12 @@
     <PackageConfigurations>
       netcoreapp3.0-Windows_NT;
       netcoreapp3.0-Unix;
+      uap;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
       netcoreapp-Windows_NT;
       netcoreapp-Unix;
-      uap;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

@@ -20,7 +20,7 @@
     <ProjectReference Include="..\..\System.Security.Claims\ref\System.Security.Claims.csproj" />
     <ProjectReference Include="..\..\System.Security.Principal\ref\System.Security.Principal.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp3.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <Reference Include="System.Runtime" />
     <Reference Include="System.Security.Claims" />
     <Reference Include="System.Security.Principal" />

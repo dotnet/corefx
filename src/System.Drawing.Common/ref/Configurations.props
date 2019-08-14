@@ -2,11 +2,11 @@
   <PropertyGroup>
     <PackageConfigurations>
       netcoreapp3.0;
+      uap;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
       netcoreapp;
-      uap;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
