@@ -3644,8 +3644,6 @@ namespace System.IO.Packaging.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop doesn't support Package.Open with FileAccess.Write")]
         public void CreateWithFileAccessWrite()
         {
-            string[] fileNames = new [] { "file1.txt", "file2.txt", "file3.txt" };
-
             using (Stream stream = new MemoryStream())
             {
                 using (Package package = Package.Open(stream, FileMode.Create, FileAccess.Write))
