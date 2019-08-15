@@ -53,6 +53,7 @@ namespace System.Data.ProviderBase
                 DueTime = dueTime;
                 Owner = owner;
                 Completion = completion;
+                UserOptions = userOptions;
             }
             public long DueTime { get; private set; }
             public DbConnection Owner { get; private set; }
