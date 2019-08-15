@@ -74,7 +74,7 @@ namespace System.Collections.Generic
         private int _count;
         private int _lastIndex;
         private int _freeList;
-        private IEqualityComparer<T>? _comparer = default!;
+        private IEqualityComparer<T>? _comparer;
         private int _version;
 
         private SerializationInfo? _siInfo; // temporary variable needed during deserialization
