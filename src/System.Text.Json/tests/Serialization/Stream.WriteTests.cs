@@ -396,16 +396,12 @@ namespace System.Text.Json.Serialization.Tests
         public static async void FlushThresholdTest(int bufferSize)
         {
             int thresholdSize = (int)(bufferSize * 0.9 - 2);
-            FlushThresholdTestClass serialaizeObject = new FlushThresholdTestClass(PopulateObjectWhichProduceJsonWithGivenSize(bufferSize));
+            FlushThresholdTestClass serializeObject = new FlushThresholdTestClass(GenerateListOfSize(bufferSize));
             List<object> list = new List<object>();
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < thresholdSize; i++)
-            {
-                builder.Append("a");
-            }
-            list.Add(builder.ToString());
-            serialaizeObject.StringProperty = builder.ToString();
-            list.Add(serialaizeObject);
+            string stringOfThresholdSize = new string('a', thresholdSize);
+            list.Add(stringOfThresholdSize);
+            serializeObject.StringProperty = stringOfThresholdSize;
+            list.Add(serializeObject);
             JsonSerializerOptions options = new JsonSerializerOptions();
             options.DefaultBufferSize = bufferSize;
 
@@ -418,10 +414,10 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(json, jsonSerialized);
 
                 List<object> deserializedList = JsonSerializer.Deserialize<List<object>>(json, options);
-                Assert.Equal(builder.ToString(), ((JsonElement)deserializedList[0]).GetString());
+                Assert.Equal(stringOfThresholdSize, ((JsonElement)deserializedList[0]).GetString());
                 JsonElement.ObjectEnumerator obj = ((JsonElement)deserializedList[1]).EnumerateObject();
                 obj.MoveNext();               
-                Assert.Equal(builder.ToString(), obj.Current.Value.GetString());
+                Assert.Equal(stringOfThresholdSize, obj.Current.Value.GetString());
             }
         }
 
@@ -434,7 +430,7 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
-        private static List<int> PopulateObjectWhichProduceJsonWithGivenSize(int size)
+        private static List<int> GenerateListOfSize(int size)
         {
             List<int> list = new List<int>();
             for (int i = 0; i < size; i++)
@@ -558,24 +554,24 @@ namespace System.Text.Json.Serialization.Tests
                                 {
                                     new Entry
                                     {
-                                        Url = new Uri("http://test.com/link/entries/entry/1"),
+                                        Url = new Uri("http://dotnet.test/link/entries/entry/1"),
                                         Alts = new List<Alt>(),
                                         HttpStatus = HttpStatusCode.OK
                                     },
                                     new Entry
                                     {
-                                        Url = new Uri("http://test.com/link/entries/entry/2"),
+                                        Url = new Uri("http://dotnet.test/link/entries/entry/2"),
                                         Alts = new List<Alt>
                                         {
                                             new Alt
                                             {
                                                 Type = 3,
-                                                Url = new Uri("http://test.com/link/entries/alts/1")
+                                                Url = new Uri("http://dotnet.test/link/entries/alts/1")
                                             },
                                             new Alt
                                             {
                                                 Type = 2,
-                                                Url = new Uri("http://test.com/link/entries/alts/2")
+                                                Url = new Uri("http://dotnet.test/link/entries/alts/2")
                                             }
                                         },
                                         HttpStatus = HttpStatusCode.Accepted
@@ -661,7 +657,7 @@ namespace System.Text.Json.Serialization.Tests
                                                 Type = 3,
                                                 Start = 35,
                                                 End = 42,
-                                                Href = new Uri("http://test.uri.com/markup"),
+                                                Href = new Uri("http://dotnet.test/markup"),
                                                 Title = string.Empty,
                                                 Rel = string.Empty,
                                                 AnchorType = 0
@@ -683,11 +679,11 @@ namespace System.Text.Json.Serialization.Tests
                         },
                         License = i,
                         InResponseToMediaResourceId = string.Empty,
-                        CanonicalUrl = new Uri("http://test.uri.com/CanonicalUrl"),
+                        CanonicalUrl = new Uri("http://dotnet.test/CanonicalUrl"),
                         ApprovedHomeCollectionId = string.Empty,
                         NewsletterId = string.Empty + i,
-                        WebCanonicalUrl = new Uri("http://test.uri.com/WebCanonicalUrl"),
-                        MediumUrl = new Uri("http://test.uri.com/MediumUrl"),
+                        WebCanonicalUrl = new Uri("http://dotnet.test/WebCanonicalUrl"),
+                        MediumUrl = new Uri("http://dotnet.test/MediumUrl"),
                         MigrationId = string.Empty,
                         NotifyFollowers = true,
                         NotifyFacebook = false,
@@ -860,7 +856,7 @@ namespace System.Text.Json.Serialization.Tests
                             {
                                 Type = j,
                                 AnchorType = a,
-                                Href = new Uri($"http://github.com/JohnDoe{i}{j}"),
+                                Href = new Uri($"http://github.test/JohnDoe{i}{j}"),
                                 Rel = "nofollow noopener",
                                 Start = i,
                                 End = i + j
