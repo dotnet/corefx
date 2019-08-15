@@ -354,7 +354,7 @@ namespace System.IO.Pipelines
 
                 if (returnSegment.Length > 0)
                 {
-#if netcoreapp
+#if netcoreapp || netcoreapp30
                     InnerStream.Write(returnSegment.Memory.Span);
 #else
                     InnerStream.Write(returnSegment.Memory);
