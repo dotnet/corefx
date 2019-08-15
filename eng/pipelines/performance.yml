@@ -1,0 +1,42 @@
+parameters:
+  targetOS: ''
+  architecture: 'x64'
+  framework: 'netcoreapp'
+  isOfficialBuild: false
+  pool: ''
+  container: ''
+
+jobs:
+- template: ../common/templates/job/performance.yml
+  parameters:
+    variables:
+    - name: _commonArguments
+      value: -configuration Release -ci -arch ${{ parameters.architecture }} -framework ${{ parameters.framework }}
+
+    # Windows variables
+    - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
+      - name: _buildScript
+        value: build.cmd
+
+    # Non-Windows variables
+    - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
+      - name: _buildScript
+        value: ./build.sh
+
+    jobName: ${{ format('performance_{0}_{1}', parameters.targetOS, parameters.architecture) }}
+    pool: ${{ parameters.pool }}
+    container: ${{ parameters.container }}
+
+    ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
+      extraSetupParameters: -CoreRootDirectory $(Build.SourcesDirectory)\artifacts\bin\runtime\${{ parameters.framework }}-${{ parameters.targetOS }}-Release-${{ parameters.architecture }} -Architecture ${{ parameters.architecture }} -Framework netcoreapp5.0
+    ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
+      extraSetupParameters: --corerootdirectory $(Build.SourcesDirectory)/artifacts/bin/runtime/${{ parameters.framework }}-${{ parameters.targetOS }}-Release-${{ parameters.architecture }} --architecture ${{ parameters.architecture }} -Framework netcoreapp5.0
+
+    steps:
+      - script: $(_buildScript) -restore $(_commonArguments)
+        displayName: Restore Build Tools
+
+      - script: $(_buildScript)
+              -build
+              $(_commonArguments)
+        displayName: Build Sources and Tests
