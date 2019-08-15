@@ -833,11 +833,10 @@ namespace System.Text.Json
                     {
                         long prevLineNumber = _lineNumber;
 
-                        _bytePositionInLine += idx + 1; // Add 1 for the first quote
+                        _bytePositionInLine += leftOver + idx;
                         _stringHasEscaping = true;
 
                         bool nextCharEscaped = false;
-                        bool sawNewLine = false;
                         while (true)
                         {
                         StartOfLoop:
@@ -876,7 +875,6 @@ namespace System.Text.Json
                                         // Escaped new line character
                                         _bytePositionInLine = -1; // Should be 0, but we increment _bytePositionInLine below already
                                         _lineNumber++;
-                                        sawNewLine = true;
                                     }
                                     else if (currentByte == 'u')
                                     {
@@ -965,7 +963,7 @@ namespace System.Text.Json
                         }
 
                     Done:
-                        _bytePositionInLine += sawNewLine ? leftOver + idx : leftOver + idx + 1;  // Add 1 for the end quote of the string.
+                        _bytePositionInLine++;  // Add 1 for the end quote of the string.
                         _consumed = idx + 1;    // Add 1 for the end quote of the string.
                         _totalConsumed += leftOver;
                         end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + idx);
@@ -993,10 +991,9 @@ namespace System.Text.Json
             Debug.Assert(data[idx] == JsonConstants.BackSlash || data[idx] < JsonConstants.Space);
 
             SequencePosition startPosition = _currentPosition;
-            SequencePosition end = default;
+            SequencePosition end;
             int startConsumed = _consumed + 1;
             HasValueSequence = false;
-            int leftOver = _buffer.Length - idx;
             int leftOverFromConsumed = _buffer.Length - _consumed;
 
             long prevLineBytePosition = _bytePositionInLine;
@@ -1142,7 +1139,7 @@ namespace System.Text.Json
         Done:
             if (HasValueSequence)
             {
-                _bytePositionInLine += leftOver + idx + 1;  // Add 1 for the end quote of the string.
+                _bytePositionInLine++;  // Add 1 for the end quote of the string.
                 _consumed = idx + 1;    // Add 1 for the end quote of the string.
                 _totalConsumed += leftOverFromConsumed;
                 end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + idx);
