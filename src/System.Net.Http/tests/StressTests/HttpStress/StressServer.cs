@@ -171,7 +171,7 @@ namespace HttpStress
                     // just add variations of already echoed headers as trailers
                     foreach ((string name, StringValues values) in headersToEcho)
                     {
-                        context.Response.AppendTrailer(name + "-Trailer", values);
+                        context.Response.AppendTrailer(name + "-trailer", values);
                     }
                 }
 

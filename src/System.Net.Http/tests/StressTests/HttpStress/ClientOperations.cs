@@ -133,12 +133,13 @@ namespace HttpStress
 
         public void PopulateWithRandomHeaders(HttpRequestHeaders headers)
         {
-            int numHeaders = _random.Next(100);
+            int numHeaders = _random.Next(50);
 
             for (int i = 0; i < numHeaders; i++)
             {
                 string name = $"header-{i}";
-                IEnumerable<string> values = Enumerable.Range(0, _random.Next(0, 5)).Select(_ => HttpUtility.UrlEncode(GetRandomString(0, 30, alphaNumericOnly: false)));
+                string CreateHeaderValue() => HttpUtility.UrlEncode(GetRandomString(1, 30, alphaNumericOnly: false));
+                IEnumerable<string> values = Enumerable.Range(0, _random.Next(1, 6)).Select(_ => CreateHeaderValue());
                 headers.Add(name, values);
             }
         }
@@ -206,20 +207,36 @@ namespace HttpStress
                     await res.Content.ReadAsStringAsync();
 
                     bool isValidChecksum = ValidateServerChecksum(res.Headers, expectedChecksum);
+                    string GetFailureDetails() => isValidChecksum ? "server checksum matches client checksum" : "server checksum mismatch";
 
                     // Validate that request headers are being echoed
                     foreach (KeyValuePair<string, IEnumerable<string>> reqHeader in req.Headers)
                     {
-                        string GetFailureDetails() => isValidChecksum ? "server checksum matches client checksum" : "server checksum mismatch";
-
                         if (!res.Headers.TryGetValues(reqHeader.Key, out IEnumerable<string> values))
                         {
-                            throw new Exception($"Expected response header name {reqHeader.Key} missing. ${GetFailureDetails()}");
+                            throw new Exception($"Expected response header name {reqHeader.Key} missing. {GetFailureDetails()}");
                         }
                         else if (!reqHeader.Value.SequenceEqual(values))
                         {
                             string FmtValues(IEnumerable<string> values) => string.Join(", ", values.Select(x => $"\"{x}\""));
-                            throw new Exception($"Unexpected values for header {reqHeader.Key}. Expected {FmtValues(reqHeader.Value)} but got {FmtValues(values)}. ${GetFailureDetails()}");
+                            throw new Exception($"Unexpected values for header {reqHeader.Key}. Expected {FmtValues(reqHeader.Value)} but got {FmtValues(values)}. {GetFailureDetails()}");
+                        }
+                    }
+
+                    // Validate trailing headers are being echoed
+                    if (res.TrailingHeaders.Count() > 0)
+                    {
+                        foreach (KeyValuePair<string, IEnumerable<string>> reqHeader in req.Headers)
+                        {
+                            if (!res.TrailingHeaders.TryGetValues(reqHeader.Key + "-trailer", out IEnumerable<string> values))
+                            {
+                                throw new Exception($"Expected trailing header name {reqHeader.Key}-trailer missing. {GetFailureDetails()}");
+                            }
+                            else if (!reqHeader.Value.SequenceEqual(values))
+                            {
+                                string FmtValues(IEnumerable<string> values) => string.Join(", ", values.Select(x => $"\"{x}\""));
+                                throw new Exception($"Unexpected values for trailing header {reqHeader.Key}-trailer. Expected {FmtValues(reqHeader.Value)} but got {FmtValues(values)}. {GetFailureDetails()}");
+                            }
                         }
                     }
 
