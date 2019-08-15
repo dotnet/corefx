@@ -50,6 +50,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)] // Not supported since OSX 10.15 Issue: https://github.com/dotnet/corefx/issues/40034
         public void File_Move_From_Unwatched_To_Watched()
         {
             FileMove_FromUnwatchedToWatched(WatcherChangeTypes.Created);
