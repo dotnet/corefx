@@ -157,7 +157,7 @@ namespace System.Diagnostics
 
         internal unsafe class ShellExecuteHelper
         {
-            private Interop.Shell32.SHELLEXECUTEINFO* _executeInfo;
+            private readonly Interop.Shell32.SHELLEXECUTEINFO* _executeInfo;
             private bool _succeeded;
             private bool _notpresent;
 
@@ -381,7 +381,7 @@ namespace System.Diagnostics
 
         private IEnumerable<Exception> KillTree()
         {
-            // The process's structures will be preserved as long as a handle is held pointing to them, even if the process exits or 
+            // The process's structures will be preserved as long as a handle is held pointing to them, even if the process exits or
             // is terminated. A handle is held here to ensure a stable reference to the process during execution.
             using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_LIMITED_INFORMATION, throwIfExited: false))
             {
@@ -439,7 +439,7 @@ namespace System.Diagnostics
                 .Where(p => !p.Handle.IsInvalid && predicate(p.Process))
                 .ToList();
 
-            SafeProcessHandle SafeGetHandle(Process process)
+            static SafeProcessHandle SafeGetHandle(Process process)
             {
                 try
                 {

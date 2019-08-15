@@ -321,7 +321,7 @@ namespace System.Data.Common
         {
             return Argument(SR.GetString(SR.MDF_InvalidXmlInvalidValue, collectionName, columnName));
         }
-        
+
         internal static Exception CollectionNameIsNotUnique(string collectionName)
         {
             return Argument(SR.GetString(SR.MDF_CollectionNameISNotUnique, collectionName));
@@ -580,9 +580,6 @@ namespace System.Data.Common
 
         internal const int DefaultCommandTimeout = 30;
         internal const float FailoverTimeoutStep = 0.08F;    // fraction of timeout to use for fast failover connections
-
-        // security issue, don't rely upon public static readonly values
-        internal static readonly string StrEmpty = ""; // String.Empty
 
         internal const int CharSize = sizeof(char);
 
@@ -914,11 +911,11 @@ namespace System.Data.Common
         {
             return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfAccessTokenAndIntegratedSecurity));
         }
-        static internal InvalidOperationException InvalidMixedUsageOfAccessTokenAndUserIDPassword()
+        internal static InvalidOperationException InvalidMixedUsageOfAccessTokenAndUserIDPassword()
         {
             return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfAccessTokenAndUserIDPassword));
         }
-        static internal Exception InvalidMixedUsageOfCredentialAndAccessToken()
+        internal static Exception InvalidMixedUsageOfCredentialAndAccessToken()
         {
             return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfCredentialAndAccessToken));
         }

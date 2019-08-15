@@ -13,7 +13,7 @@ using System.Transactions;
 
 namespace System.Data.SqlClient
 {
-    sealed internal partial class SqlDelegatedTransaction : IPromotableSinglePhaseNotification
+    internal sealed partial class SqlDelegatedTransaction : IPromotableSinglePhaseNotification
     {
         private static int _objectTypeCount;
         private readonly int _objectID = Interlocked.Increment(ref _objectTypeCount);
@@ -33,10 +33,10 @@ namespace System.Data.SqlClient
         //  may be initiated here AFTER the connection lock is released, but should NOT fall under this class's locking strategy.
 
         private SqlInternalConnection _connection;            // the internal connection that is the root of the transaction
-        private IsolationLevel _isolationLevel;        // the IsolationLevel of the transaction we delegated to the server
+        private readonly IsolationLevel _isolationLevel;        // the IsolationLevel of the transaction we delegated to the server
         private SqlInternalTransaction _internalTransaction;   // the SQL Server transaction we're delegating to
 
-        private Transaction _atomicTransaction;
+        private readonly Transaction _atomicTransaction;
 
         private bool _active;                // Is the transaction active?
 
@@ -251,15 +251,15 @@ namespace System.Data.SqlClient
                         // VSTS 144562: doom the connection while having the lock on it to prevent race condition with "Transaction Ended" Event
                         connection.DoomThisConnection();
 
-                        // Unlike SinglePhaseCommit, a rollback is a rollback, regardless 
+                        // Unlike SinglePhaseCommit, a rollback is a rollback, regardless
                         // of how it happens, so SysTx won't throw an exception, and we
-                        // don't want to throw an exception either, because SysTx isn't 
+                        // don't want to throw an exception either, because SysTx isn't
                         // handling it and it may create a fail fast scenario. In the end,
                         // there is no way for us to communicate to the consumer that this
                         // failed for more serious reasons than usual.
-                        // 
+                        //
                         // This is a bit like "should you throw if Close fails", however,
-                        // it only matters when you really need to know.  In that case, 
+                        // it only matters when you really need to know.  In that case,
                         // we have the tracing that we're doing to fallback on for the
                         // investigation.
                     }
@@ -369,7 +369,7 @@ namespace System.Data.SqlClient
                         }
 
                         // We eat the exception.  This is called on the SysTx
-                        // thread, not the applications thread.  If we don't 
+                        // thread, not the applications thread.  If we don't
                         // eat the exception an UnhandledException will occur,
                         // causing the process to FailFast.
                     }

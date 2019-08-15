@@ -160,19 +160,12 @@ namespace System.ComponentModel.TypeConverterTests
         [Fact]
         public void CreateInstance_CaseSensitive()
         {
-            // NET Framework throws NullReferenceException but we want it to be friendly on Core so it 
-            // correctly throws an ArgumentException
-            Type expectedExceptionType =
-                PlatformDetection.IsFullFramework ? typeof(NullReferenceException) : typeof(ArgumentException);
-
-            Assert.Throws(expectedExceptionType, () =>
+            var propertyValues = new Dictionary<string, object>
             {
-                Converter.CreateInstance(null, new Dictionary<string, object>
-                {
-                    ["width"] = 1,
-                    ["Height"] = 1,
-                });
-            });
+                ["width"] = 1,
+                ["Height"] = 1,
+            };
+            Assert.Throws<ArgumentException>(() => Converter.CreateInstance(null, propertyValues));
         }
 
         [Fact]
@@ -193,13 +186,13 @@ namespace System.ComponentModel.TypeConverterTests
             Assert.Equal(3, props.Count);
             Assert.Equal(1f, props["Width"].GetValue(pt));
             Assert.Equal(1f, props["Height"].GetValue(pt));
-            Assert.Equal(false, props["IsEmpty"].GetValue(pt));
+            Assert.Equal((object)false, props["IsEmpty"].GetValue(pt));
 
             props = Converter.GetProperties(null, new SizeF(1, 1), new Attribute[0]);
             Assert.Equal(3, props.Count);
             Assert.Equal(1f, props["Width"].GetValue(pt));
             Assert.Equal(1f, props["Height"].GetValue(pt));
-            Assert.Equal(false, props["IsEmpty"].GetValue(pt));
+            Assert.Equal((object)false, props["IsEmpty"].GetValue(pt));
 
             // Pick an attibute that cannot be applied to properties to make sure everything gets filtered
             props = Converter.GetProperties(null, new SizeF(1, 1), new Attribute[] { new System.Reflection.AssemblyCopyrightAttribute("")});

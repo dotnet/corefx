@@ -9,7 +9,7 @@ namespace System.Text
     public sealed class DecoderReplacementFallback : DecoderFallback
     {
         // Our variables
-        private string _strDefault;
+        private readonly string _strDefault;
 
         // Construction.  Default replacement fallback uses no best fit and ? replacement string
         public DecoderReplacementFallback() : this("?")
@@ -102,7 +102,7 @@ namespace System.Text
     public sealed class DecoderReplacementFallbackBuffer : DecoderFallbackBuffer
     {
         // Store our default string
-        private string _strDefault;
+        private readonly string _strDefault;
         private int _fallbackCount = -1;
         private int _fallbackIndex = -1;
 
@@ -191,7 +191,7 @@ namespace System.Text
         }
 
         // This version just counts the fallback and doesn't actually copy anything.
-        internal unsafe override int InternalFallback(byte[] bytes, byte* pBytes)
+        internal override unsafe int InternalFallback(byte[] bytes, byte* pBytes)
         // Right now this has both bytes and bytes[], since we might have extra bytes, hence the
         // array, and we might need the index, hence the byte*
         {
@@ -200,4 +200,3 @@ namespace System.Text
         }
     }
 }
-

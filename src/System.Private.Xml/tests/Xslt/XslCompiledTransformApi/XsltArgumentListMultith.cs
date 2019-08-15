@@ -14,10 +14,10 @@ namespace System.Xml.Tests
     public class CSameInstanceXsltArgTestCase2 : XsltApiTestCaseBase2
     {
         // Variables from init string
-        protected string _strPath;				// Path of the data files
+        protected string _strPath;                // Path of the data files
 
         // Other global variables
-        public XsltArgumentList xsltArg1;					// Shared XsltArgumentList for same instance testing
+        public XsltArgumentList xsltArg1;                    // Shared XsltArgumentList for same instance testing
 
         private ITestOutputHelper _output;
         public CSameInstanceXsltArgTestCase2(ITestOutputHelper output) : base(output)
@@ -103,8 +103,7 @@ namespace System.Xml.Tests
         }
 
         //[Variation("Multiple GetParam for same parameter name")]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void proc1()
         {
             CThreads rThreads = new CThreads(_output);
@@ -122,8 +121,7 @@ namespace System.Xml.Tests
         }
 
         //[Variation("Multiple GetParam for different parameter name")]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void proc2()
         {
             CThreads rThreads = new CThreads(_output);
@@ -189,8 +187,7 @@ namespace System.Xml.Tests
         }
 
         //[Variation("Multiple GetExtensionObject for same namespace System.Xml.Tests")]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void proc1()
         {
             CThreads rThreads = new CThreads(_output);
@@ -208,8 +205,7 @@ namespace System.Xml.Tests
         }
 
         //[Variation("Multiple GetExtensionObject for different namespace System.Xml.Tests")]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void proc2()
         {
             CThreads rThreads = new CThreads(_output);
@@ -276,8 +272,7 @@ namespace System.Xml.Tests
         // Multiple Transform() using shared ArgumentList
         ////////////////////////////////////////////////////////////////
         //[Variation("Multiple transforms using shared ArgumentList")]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void proc1()
         {
             CThreads rThreads = new CThreads(_output);

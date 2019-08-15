@@ -801,7 +801,7 @@ namespace System.Xml.Serialization
             return References.Contains(parent);
         }
 
-        internal const string xmlSchema = @"<?xml version='1.0' encoding='UTF-8' ?> 
+        internal const string xmlSchema = @"<?xml version='1.0' encoding='UTF-8' ?>
 <xs:schema targetNamespace='http://www.w3.org/XML/1998/namespace' xmlns:xs='http://www.w3.org/2001/XMLSchema' xml:lang='en'>
  <xs:attribute name='lang' type='xs:language'/>
  <xs:attribute name='space'>
@@ -824,8 +824,9 @@ namespace System.Xml.Serialization
 
     public class XmlSchemaEnumerator : IEnumerator<XmlSchema>, System.Collections.IEnumerator
     {
-        private XmlSchemas _list;
-        private int _idx, _end;
+        private readonly XmlSchemas _list;
+        private int _idx;
+        private readonly int _end;
 
         public XmlSchemaEnumerator(XmlSchemas list)
         {

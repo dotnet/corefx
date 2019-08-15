@@ -20,8 +20,8 @@ namespace System.Net
     // to have several pending IOs differentiated by their state object.  We don't want that pattern to break the cache.
     internal class CallbackClosure
     {
-        private AsyncCallback _savedCallback;
-        private ExecutionContext _savedContext;
+        private readonly AsyncCallback _savedCallback;
+        private readonly ExecutionContext _savedContext;
 
         internal CallbackClosure(ExecutionContext context, AsyncCallback callback)
         {
@@ -378,7 +378,7 @@ namespace System.Net
 
             // If the context is being abandoned or wasn't captured (SuppressFlow, null AsyncCallback), just
             // complete regularly, as long as CaptureOrComplete() has finished.
-            // 
+            //
             if (userToken != IntPtr.Zero || context == null)
             {
                 base.Complete(userToken);

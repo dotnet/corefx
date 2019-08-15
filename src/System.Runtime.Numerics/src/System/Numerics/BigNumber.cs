@@ -136,7 +136,7 @@
 // user-defined format strings. The following table describes the formatting
 // characters that are supported in user defined format strings.
 //
-// 
+//
 // 0 - Digit placeholder. If the value being
 // formatted has a digit in the position where the '0' appears in the format
 // string, then that digit is copied to the output string. Otherwise, a '0' is
@@ -761,8 +761,8 @@ namespace System.Numerics
             if (value._sign < 0)
             {
                 string negativeSign = info.NegativeSign;
-                for (int i = info.NegativeSign.Length - 1; i > -1; i--)
-                    rgch[--ichDst] = info.NegativeSign[i];
+                for (int i = negativeSign.Length - 1; i > -1; i--)
+                    rgch[--ichDst] = negativeSign[i];
             }
 
             int resultLength = cchMax - ichDst;

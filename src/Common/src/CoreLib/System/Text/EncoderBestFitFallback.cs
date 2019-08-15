@@ -57,7 +57,7 @@ namespace System.Text
     {
         // Our variables
         private char _cBestFit = '\0';
-        private InternalEncoderBestFitFallback _oFallback;
+        private readonly InternalEncoderBestFitFallback _oFallback;
         private int _iCount = -1;
         private int _iSize;
 
@@ -72,7 +72,7 @@ namespace System.Text
                     object o = new object();
                     Interlocked.CompareExchange<object?>(ref s_InternalSyncObject, o, null);
                 }
-                return s_InternalSyncObject!; // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
+                return s_InternalSyncObject;
             }
         }
 
@@ -239,4 +239,3 @@ namespace System.Text
         }
     }
 }
-

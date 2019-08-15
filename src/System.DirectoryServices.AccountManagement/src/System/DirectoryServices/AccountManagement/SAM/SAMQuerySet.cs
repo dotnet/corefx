@@ -123,7 +123,7 @@ namespace System.DirectoryServices.AccountManagement
                 if (IsOfCorrectType(this.ctxBase) && this.matcher.Matches(this.ctxBase))
                 {
                     GlobalDebug.WriteLineIf(GlobalDebug.Info, "SAMQuerySet", "MoveNext: found a match on root {0}", this.ctxBase);
-                
+
                     this.current = this.ctxBase;
                     this.resultsReturned++;
                     f = true;
@@ -176,16 +176,16 @@ namespace System.DirectoryServices.AccountManagement
         // Private fields
         //
 
-        private SAMStoreCtx _storeCtx;
-        private DirectoryEntry _ctxBase;
-        private DirectoryEntries _entries;
-        private IEnumerator _enumerator = null;  // the enumerator for "entries"
+        private readonly SAMStoreCtx _storeCtx;
+        private readonly DirectoryEntry _ctxBase;
+        private readonly DirectoryEntries _entries;
+        private readonly IEnumerator _enumerator = null;  // the enumerator for "entries"
         private DirectoryEntry _current = null;  // the DirectoryEntry that we're currently positioned at
 
         // Filter parameters
-        private int _sizeLimit;  // -1 == no limit
-        private List<string> _schemaTypes;
-        private SAMMatcher _matcher;
+        private readonly int _sizeLimit;  // -1 == no limit
+        private readonly List<string> _schemaTypes;
+        private readonly SAMMatcher _matcher;
 
         // Count of number of results returned so far
         private int _resultsReturned = 0;
@@ -205,7 +205,7 @@ namespace System.DirectoryServices.AccountManagement
 
     internal class QbeMatcher : SAMMatcher
     {
-        private QbeFilterDescription _propertiesToMatch;
+        private readonly QbeFilterDescription _propertiesToMatch;
 
         internal QbeMatcher(QbeFilterDescription propertiesToMatch)
         {
@@ -283,7 +283,7 @@ namespace System.DirectoryServices.AccountManagement
 
         // We only list properties we support filtering on in this table.  At run-time, if we detect they set a
         // property that's not listed here, we throw an exception.
-        private static object[,] s_filterPropertiesTableRaw =
+        private static readonly object[,] s_filterPropertiesTableRaw =
         {
             // QbeType                                          WinNT Property          Matcher
             {typeof(DescriptionFilter),                         "Description",              new MatcherDelegate(StringMatcher)},
@@ -311,7 +311,7 @@ namespace System.DirectoryServices.AccountManagement
             {typeof(BadLogonCountFilter),                           "BadPasswordAttempts",                new MatcherDelegate(IntMatcher)},
         };
 
-        private static Hashtable s_filterPropertiesTable = null;
+        private static readonly Hashtable s_filterPropertiesTable = null;
 
         private class FilterPropertyTableEntry
         {
@@ -560,7 +560,7 @@ namespace System.DirectoryServices.AccountManagement
                 case AuthPrincEnabledFilter.PropertyNameStatic:
                     // UF_ACCOUNTDISABLE
                     // Note that the logic is inverted on this one.  We expose "Enabled",
-                    // but SAM stores it as "Disabled".                    
+                    // but SAM stores it as "Disabled".
                     return (((value & 0x0002) != 0) ^ valueToMatch);
 
                 case SmartcardLogonRequiredFilter.PropertyNameStatic:
@@ -704,9 +704,9 @@ namespace System.DirectoryServices.AccountManagement
             AccountExpirationTime
         }
 
-        private DateProperty _propertyToMatch;
-        private MatchType _matchType;
-        private DateTime _valueToMatch;
+        private readonly DateProperty _propertyToMatch;
+        private readonly MatchType _matchType;
+        private readonly DateTime _valueToMatch;
 
         internal FindByDateMatcher(DateProperty property, MatchType matchType, DateTime value)
         {
@@ -835,7 +835,7 @@ namespace System.DirectoryServices.AccountManagement
 
     internal class GroupMemberMatcher : SAMMatcher
     {
-        private byte[] _memberSidToMatch;
+        private readonly byte[] _memberSidToMatch;
 
         internal GroupMemberMatcher(byte[] memberSidToMatch)
         {

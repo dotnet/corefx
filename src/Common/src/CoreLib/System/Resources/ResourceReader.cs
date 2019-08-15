@@ -869,7 +869,7 @@ namespace System.Resources
                     // Skip over the array of nameHashes.
                     _ums.Seek(seekPos, SeekOrigin.Current);
                     // get the position pointer once more to check that the whole table is within the stream
-                    byte* junk = _ums.PositionPointer;
+                    _ = _ums.PositionPointer;
                 }
             }
 
@@ -901,7 +901,7 @@ namespace System.Resources
                     // Skip over the array of namePositions.
                     _ums.Seek(seekPos, SeekOrigin.Current);
                     // get the position pointer once more to check that the whole table is within the stream
-                    byte* junk = _ums.PositionPointer;
+                    _ = _ums.PositionPointer;
                 }
             }
 
@@ -993,7 +993,7 @@ namespace System.Resources
             private const int ENUM_DONE = int.MinValue;
             private const int ENUM_NOT_STARTED = -1;
 
-            private ResourceReader _reader;
+            private readonly ResourceReader _reader;
             private bool _currentIsValid;
             private int _currentName;
             private int _dataPosition; // cached for case-insensitive table

@@ -319,8 +319,7 @@ namespace System.Tests
         [InlineData(10000)]
         public void IsLeapYear_InvalidYear_ThrowsArgumentOutOfRangeException(int year)
         {
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("year", () => DateTime.IsLeapYear(0));
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("year", () => DateTime.IsLeapYear(10000));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("year", () => DateTime.IsLeapYear(year));
         }
 
         public static IEnumerable<object[]> IsDaylightSavingTime_TestData()
@@ -873,7 +872,6 @@ namespace System.Tests
         [InlineData(3155378976000000000)]
         [InlineData(long.MaxValue)]
         [InlineData(3155378976000000000 | ((long)DateTimeKind.Utc << 62))]
-        [InlineData(long.MaxValue | ((long)DateTimeKind.Utc << 62))]
         public void FromBinary_OutOfRangeTicks_ThrowsArgumentException(long dateData)
         {
             AssertExtensions.Throws<ArgumentException>("dateData", () => DateTime.FromBinary(dateData));

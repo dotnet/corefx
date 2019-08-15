@@ -33,7 +33,6 @@ namespace System.DirectoryServices.ActiveDirectory
         internal const int DS_REPSYNC_ALL_SOURCES = 0x00000010;
         internal const int DS_REPSYNCALL_ID_SERVERS_BY_DN = 0x00000004;
         internal const int DS_REPL_NOTSUPPORTED = 50;
-        private const int DS_REPL_INFO_FLAG_IMPROVE_LINKED_ATTRS = 0x00000001;
         private ReplicationConnectionCollection _inbound = null;
         private ReplicationConnectionCollection _outbound = null;
 
@@ -50,13 +49,13 @@ namespace System.DirectoryServices.ActiveDirectory
         {
             Dispose(true);
 
-            // Take yourself off of the Finalization queue 
+            // Take yourself off of the Finalization queue
             // to prevent finalization code for this object
             // from executing a second time.
             GC.SuppressFinalize(this);
         }
 
-        // private Dispose method		
+        // private Dispose method
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -94,14 +93,14 @@ namespace System.DirectoryServices.ActiveDirectory
                 throw new ArgumentException(SR.EmptyStringParameter, nameof(siteName));
             }
 
-            // the dc is really being moved to a different site 
+            // the dc is really being moved to a different site
             if (Utils.Compare(SiteName, siteName) != 0)
             {
                 DirectoryEntry newParentEntry = null;
                 try
                 {
                     // Bind to the target site's server container
-                    // Get the distinguished name for the site 
+                    // Get the distinguished name for the site
                     string parentDN = "CN=Servers,CN=" + siteName + "," + directoryEntryMgr.ExpandWellKnownDN(WellKnownDN.SitesContainer);
                     newParentEntry = DirectoryEntryManager.GetDirectoryEntry(context, parentDN);
 
@@ -375,7 +374,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         }
                         catch (COMException e)
                         {
-                            if (e.ErrorCode == unchecked((int)0x80072020) |          // dir_error on server side                                            
+                            if (e.ErrorCode == unchecked((int)0x80072020) |          // dir_error on server side
                                    e.ErrorCode == unchecked((int)0x80072030))           // object not exists
                                 throw new ArgumentException(SR.DSNoObject, "objectPath");
                             else if (e.ErrorCode == unchecked((int)0x80005000) |          // bad path name
@@ -435,7 +434,7 @@ namespace System.DirectoryServices.ActiveDirectory
                         FreeReplicaInfo(DS_REPL_INFO_TYPE.DS_REPL_INFO_CURSORS_3_FOR_NC, info, libHandle);
                     }
 
-                    // get the next batch of results		            
+                    // get the next batch of results
                     info = GetReplicationInfoHelper(dsHandle, (int)DS_REPL_INFO_TYPE.DS_REPL_INFO_CURSORS_3_FOR_NC, (int)DS_REPL_INFO_TYPE.DS_REPL_INFO_CURSORS_FOR_NC, partition, ref advanced, context, libHandle);
                 }
             }
@@ -610,7 +609,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
                 if (temp != (IntPtr)0)
                 {
-                    // error information is available		            
+                    // error information is available
                     exception = ExceptionHelper.CreateSyncAllException(temp, true);
                     if (exception == null)
                     {
@@ -775,7 +774,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 _inbound = new ReplicationConnectionCollection();
                 DirectoryContext newContext = Utils.GetNewDirectoryContext(Name, DirectoryContextType.DirectoryServer, context);
 
-                // this is the first time that user tries to retrieve this property, so get it from the directory   
+                // this is the first time that user tries to retrieve this property, so get it from the directory
                 string serverName = (this is DomainController) ? ((DomainController)this).ServerObjectName : ((AdamInstance)this).ServerObjectName;
                 string srchDN = "CN=NTDS Settings," + serverName;
                 DirectoryEntry de = DirectoryEntryManager.GetDirectoryEntry(Utils.GetNewDirectoryContext(Name, DirectoryContextType.DirectoryServer, context), srchDN);

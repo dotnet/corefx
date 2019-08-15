@@ -113,7 +113,7 @@ namespace Microsoft.Test.ModuleCore
         ITestItems Children { get; }
 
         // Execution
-        //		Control Flow:	Init->Execute->(recurse into children)->Terminate
+        //        Control Flow:    Init->Execute->(recurse into children)->Terminate
         TestResult Init();
         TestResult Execute();
         TestResult Terminate();
@@ -181,7 +181,7 @@ namespace Microsoft.Test.ModuleCore
         // Extensible Meta-data about the item
         ITestProperties Metadata { get; }
 
-        //Execution 
+        //Execution
         void Init();
         ITestItem CreateTest( string assembly, string test);
         void Terminate();

@@ -15,7 +15,7 @@ namespace System.IO
     {
         private static volatile UnicodeEncoding? s_encoding = null;
 
-        private StringBuilder _sb;
+        private readonly StringBuilder _sb;
         private bool _isOpen;
 
         // Constructs a new StringWriter. A new StringBuilder is automatically
@@ -31,7 +31,7 @@ namespace System.IO
         }
 
         // Constructs a new StringWriter that writes to the given StringBuilder.
-        // 
+        //
         public StringWriter(StringBuilder sb) : this(sb, CultureInfo.CurrentCulture)
         {
         }
@@ -216,7 +216,7 @@ namespace System.IO
         }
 
         #region Task based Async APIs
-        
+
         public override Task WriteAsync(char value)
         {
             Write(value);
@@ -247,7 +247,7 @@ namespace System.IO
         }
 
         public override Task WriteAsync(StringBuilder? value, CancellationToken cancellationToken = default)
-        {            
+        {
             if (GetType() != typeof(StringWriter))
             {
                 // This overload was added after the WriteAsync(char[], ...) overload, and so in case
@@ -264,11 +264,11 @@ namespace System.IO
             {
                 throw new ObjectDisposedException(null, SR.ObjectDisposed_WriterClosed);
             }
-            
+
             _sb.Append(value);
             return Task.CompletedTask;
         }
-        
+
         public override Task WriteLineAsync(char value)
         {
             WriteLine(value);
@@ -287,7 +287,7 @@ namespace System.IO
             {
                 // This overload was added after the WriteLineAsync(char[], ...) overload, and so in case
                 // a derived type may have overridden it, we need to delegate to it, which the base does.
-                return base.WriteLineAsync(value, cancellationToken);                
+                return base.WriteLineAsync(value, cancellationToken);
             }
 
             if (cancellationToken.IsCancellationRequested)

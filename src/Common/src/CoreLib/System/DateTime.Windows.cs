@@ -31,13 +31,12 @@ namespace System
             DateTime dt = new DateTime(year, month, day);
             FullSystemTime time = new FullSystemTime(year, month, dt.DayOfWeek, day, hour, minute, second);
 
-            switch (kind)
+            return kind switch
             {
-                case DateTimeKind.Local: return ValidateSystemTime(&time.systemTime, localTime: true);
-                case DateTimeKind.Utc:   return ValidateSystemTime(&time.systemTime, localTime: false);
-                default:
-                    return ValidateSystemTime(&time.systemTime, localTime: true) || ValidateSystemTime(&time.systemTime, localTime: false);
-            }
+                DateTimeKind.Local => ValidateSystemTime(&time.systemTime, localTime: true),
+                DateTimeKind.Utc => ValidateSystemTime(&time.systemTime, localTime: false),
+                _ => ValidateSystemTime(&time.systemTime, localTime: true) || ValidateSystemTime(&time.systemTime, localTime: false),
+            };
         }
 
         private static unsafe DateTime FromFileTimeLeapSecondsAware(long fileTime)
@@ -71,7 +70,7 @@ namespace System
             ticks += TimeToTicks(time.systemTime.Hour, time.systemTime.Minute, time.systemTime.Second);
             ticks += time.systemTime.Milliseconds * TicksPerMillisecond;
             ticks += time.hundredNanoSecond;
-            return new DateTime( ((UInt64)(ticks)) | KindUtc);
+            return new DateTime( ((ulong)(ticks)) | KindUtc);
         }
 
         // FullSystemTime struct is the SYSTEMTIME struct with extra hundredNanoSecond field to store more precise time.

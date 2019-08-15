@@ -145,7 +145,7 @@ namespace System.Globalization
         // user-defined format strings. The following table describes the formatting
         // characters that are supported in user defined format strings.
         //
-        // 
+        //
         // 0 - Digit placeholder. If the value being
         // formatted has a digit in the position where the '0' appears in the format
         // string, then that digit is copied to the output string. Otherwise, a '0' is
@@ -279,7 +279,7 @@ namespace System.Globalization
         // specified. Note, however, that the Parse methods do not accept
         // NaNs or Infinities.
         //
-        // This class contains only static members and does not need to be serializable 
+        // This class contains only static members and does not need to be serializable
 
         private partial class Number
         {
@@ -289,8 +289,6 @@ namespace System.Globalization
             private const int NumberMaxDigits = 32;
 
             internal const int DECIMAL_PRECISION = 29; // Decimal.DecCalc also uses this value
-
-            private const int MIN_SB_BUFFER_SIZE = 105;
 
             private static bool IsWhite(char ch)
             {
@@ -395,7 +393,7 @@ namespace System.Globalization
                         else if (currSymbol != null && (next = MatchChars(p, strEnd, currSymbol)) != null)
                         {
                             state |= StateCurrency;
-                            currSymbol = null;  
+                            currSymbol = null;
 
                             // We already found the currency symbol. There should not be more currency symbols. Set
                             // currSymbol to NULL so that we won't search it again in the later code path.
@@ -599,12 +597,12 @@ namespace System.Globalization
             // better unify it with the code above.
             //
 
-            private static string[] s_posCurrencyFormats =
+            private static readonly string[] s_posCurrencyFormats =
             {
                 "$#", "#$", "$ #", "# $"
             };
 
-            private static string[] s_negCurrencyFormats =
+            private static readonly string[] s_negCurrencyFormats =
             {
                 "($#)", "-$#", "$-#", "$#-",
                 "(#$)", "-#$", "#-$", "#$-",
@@ -612,12 +610,12 @@ namespace System.Globalization
                 "$ -#", "#- $", "($ #)", "(# $)"
             };
 
-            private static string[] s_posPercentFormats =
+            private static readonly string[] s_posPercentFormats =
             {
                 "# %", "#%", "%#", "% #"
             };
 
-            private static string[] s_negPercentFormats =
+            private static readonly string[] s_negPercentFormats =
             {
                 "-# %", "-#%", "-%#",
                 "%-#", "%#-",
@@ -626,12 +624,12 @@ namespace System.Globalization
                 "% -#", "#- %"
             };
 
-            private static string[] s_negNumberFormats =
+            private static readonly string[] s_negNumberFormats =
             {
                 "(#)", "-#", "- #", "#-", "# -",
             };
 
-            private static string s_posNumberFormat = "#";
+            private const string PosNumberFormat = "#";
 
             internal static unsafe void Int32ToDecChars(char* buffer, ref int index, uint value, int digits)
             {
@@ -704,7 +702,7 @@ namespace System.Globalization
                 // Default empty format to be "G"; custom format is signified with '\0'.
                 digits = -1;
                 return format.Length == 0 || c == '\0' ? // For compat, treat '\0' as the end of the specifier, even if the specifier extends beyond it.
-                    'G' : 
+                    'G' :
                     '\0';
             }
 
@@ -1027,7 +1025,7 @@ namespace System.Globalization
             {
                 string fmt = number.sign ?
                     s_negNumberFormats[info.NumberNegativePattern] :
-                    s_posNumberFormat;
+                    PosNumberFormat;
 
                 foreach (char ch in fmt)
                 {

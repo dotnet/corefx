@@ -38,7 +38,7 @@ namespace System.Drawing.Imaging
         ///
         /// We need to marshal the EncoderParameters info from/to native GDI+ ourselves since the definition of the managed/unmanaged classes
         /// are different and the native class is a bit weird. The native EncoderParameters class is defined in GDI+ as follows:
-        /// 
+        ///
         /// class EncoderParameters {
         ///     UINT Count;                      // Number of parameters in this structure
         ///     EncoderParameter Parameter[1];   // Parameter values
@@ -87,7 +87,7 @@ namespace System.Drawing.Imaging
                 throw Gdip.StatusException(Gdip.InvalidParameter);
             }
 
-            int count = Marshal.ReadIntPtr(memory).ToInt32();
+            int count = Marshal.ReadInt32(memory);
 
             EncoderParameters p = new EncoderParameters(count);
             int size = Marshal.SizeOf(typeof(EncoderParameter));

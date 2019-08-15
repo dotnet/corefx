@@ -37,7 +37,7 @@ namespace System
             }
 
             // T[] implements IList<T>.
-            return new ReadOnlyCollection<T>(array!); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return new ReadOnlyCollection<T>(array);
         }
 
         public static void Resize<T>([NotNull] ref T[]? array, int newSize)
@@ -66,7 +66,7 @@ namespace System
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.lengths);
             }
-            if (lengths!.Length == 0) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (lengths.Length == 0)
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_NeedAtLeast1Rank);
 
             int[] intLengths = new int[lengths.Length];
@@ -150,7 +150,7 @@ namespace System
         {
             if (indices == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.indices);
-            if (Rank != indices!.Length) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (Rank != indices.Length)
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_RankIndices);
 
             int[] intIndices = new int[indices.Length];
@@ -210,7 +210,7 @@ namespace System
         {
             if (indices == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.indices);
-            if (Rank != indices!.Length) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (Rank != indices.Length)
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_RankIndices);
 
             int[] intIndices = new int[indices.Length];
@@ -244,7 +244,7 @@ namespace System
         // Number of elements in the Array.
         int ICollection.Count { get { return Length; } }
 
-        // Returns an object appropriate for synchronizing access to this 
+        // Returns an object appropriate for synchronizing access to this
         // Array.
         public object SyncRoot { get { return this; } }
 
@@ -254,8 +254,8 @@ namespace System
         public bool IsFixedSize { get { return true; } }
 
         // Is this Array synchronized (i.e., thread-safe)?  If you want a synchronized
-        // collection, you can use SyncRoot as an object to synchronize your 
-        // collection with.  You could also call GetSynchronized() 
+        // collection, you can use SyncRoot as an object to synchronize your
+        // collection with.  You could also call GetSynchronized()
         // to get a synchronized wrapper around the Array.
         public bool IsSynchronized { get { return false; } }
 
@@ -302,7 +302,7 @@ namespace System
         }
 
         // Make a new array which is a shallow copy of the original array.
-        // 
+        //
         public object Clone()
         {
             return MemberwiseClone();
@@ -325,7 +325,7 @@ namespace System
             int i = 0;
             int c = 0;
 
-            while (i < o!.Length && c == 0) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            while (i < o.Length && c == 0)
             {
                 object? left = GetValue(i);
                 object? right = o.GetValue(i);
@@ -384,7 +384,7 @@ namespace System
 
             for (int i = (this.Length >= 8 ? this.Length - 8 : 0); i < this.Length; i++)
             {
-                ret = CombineHashCodes(ret, comparer!.GetHashCode(GetValue(i)!)); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                ret = CombineHashCodes(ret, comparer.GetHashCode(GetValue(i)!));
             }
 
             return ret;
@@ -402,12 +402,12 @@ namespace System
         // integer. The bitwise complement operator (~) can be applied to a
         // negative result to produce the index of the first element (if any) that
         // is larger than the given search value.
-        // 
+        //
         public static int BinarySearch(Array array, object? value)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            return BinarySearch(array!, array!.GetLowerBound(0), array.Length, value, null); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return BinarySearch(array, array.GetLowerBound(0), array.Length, value, null);
         }
 
         // Searches a section of an array for a given element using a binary search
@@ -422,7 +422,7 @@ namespace System
         // integer. The bitwise complement operator (~) can be applied to a
         // negative result to produce the index of the first element (if any) that
         // is larger than the given search value.
-        // 
+        //
         public static int BinarySearch(Array array, int index, int length, object? value)
         {
             return BinarySearch(array, index, length, value, null);
@@ -435,18 +435,18 @@ namespace System
         // interface, which in that case must be implemented by all elements of the
         // array and the given search value. This method assumes that the array is
         // already sorted; if this is not the case, the result will be incorrect.
-        // 
+        //
         // The method returns the index of the given value in the array. If the
         // array does not contain the given value, the method returns a negative
         // integer. The bitwise complement operator (~) can be applied to a
         // negative result to produce the index of the first element (if any) that
         // is larger than the given search value.
-        // 
+        //
         public static int BinarySearch(Array array, object? value, IComparer? comparer)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            return BinarySearch(array!, array!.GetLowerBound(0), array.Length, value, comparer); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return BinarySearch(array, array.GetLowerBound(0), array.Length, value, comparer);
         }
 
         // Searches a section of an array for a given element using a binary search
@@ -457,18 +457,18 @@ namespace System
         // all elements of the array and the given search value. This method
         // assumes that the array is already sorted; if this is not the case, the
         // result will be incorrect.
-        // 
+        //
         // The method returns the index of the given value in the array. If the
         // array does not contain the given value, the method returns a negative
         // integer. The bitwise complement operator (~) can be applied to a
         // negative result to produce the index of the first element (if any) that
         // is larger than the given search value.
-        // 
+        //
         public static int BinarySearch(Array array, int index, int length, object? value, IComparer? comparer)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            int lb = array!.GetLowerBound(0); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            int lb = array.GetLowerBound(0);
             if (index < lb)
                 ThrowHelper.ThrowIndexArgumentOutOfRange_NeedNonNegNumException();
             if (length < 0)
@@ -495,7 +495,7 @@ namespace System
             {
                 while (lo <= hi)
                 {
-                    // i might overflow if lo and hi are both large positive numbers. 
+                    // i might overflow if lo and hi are both large positive numbers.
                     int i = GetMedian(lo, hi);
 
                     int c;
@@ -553,14 +553,14 @@ namespace System
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            return BinarySearch<T>(array!, 0, array!.Length, value, null); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return BinarySearch<T>(array, 0, array.Length, value, null);
         }
 
         public static int BinarySearch<T>(T[] array, T value, System.Collections.Generic.IComparer<T>? comparer)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            return BinarySearch<T>(array!, 0, array!.Length, value, comparer); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return BinarySearch<T>(array, 0, array.Length, value, comparer);
         }
 
         public static int BinarySearch<T>(T[] array, int index, int length, T value)
@@ -577,7 +577,7 @@ namespace System
             if (length < 0)
                 ThrowHelper.ThrowLengthArgumentOutOfRange_ArgumentOutOfRange_NeedNonNegNum();
 
-            if (array!.Length - index < length) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (array.Length - index < length)
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
 
             return ArraySortHelper<T>.Default.BinarySearch(array, index, length, value, comparer);
@@ -595,27 +595,27 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.converter);
             }
 
-            TOutput[] newArray = new TOutput[array!.Length]; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            TOutput[] newArray = new TOutput[array.Length];
             for (int i = 0; i < array.Length; i++)
             {
-                newArray[i] = converter!(array[i]); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                newArray[i] = converter(array[i]);
             }
             return newArray;
         }
 
         // CopyTo copies a collection into an Array, starting at a particular
         // index into the array.
-        // 
+        //
         // This method is to support the ICollection interface, and calls
         // Array.Copy internally.  If you aren't using ICollection explicitly,
         // call Array.Copy to avoid an extra indirection.
-        // 
+        //
         public void CopyTo(Array array, int index)
         {
             if (array != null && array.Rank != 1)
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_RankMultiDimNotSupported);
             // Note: Array.Copy throws a RankException and we want a consistent ArgumentException for all the IList CopyTo methods.
-            Array.Copy(this, GetLowerBound(0), array!, index, Length); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            Array.Copy(this, GetLowerBound(0), array!, index, Length);
         }
 
         public void CopyTo(Array array, long index)
@@ -629,7 +629,9 @@ namespace System
 
         private static class EmptyArray<T>
         {
+#pragma warning disable CA1825 // this is the implementation of Array.Empty<T>()
             internal static readonly T[] Value = new T[0];
+#pragma warning restore CA1825
         }
 
         public static T[] Empty<T>()
@@ -649,7 +651,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            for (int i = 0; i < array!.Length; i++) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            for (int i = 0; i < array.Length; i++)
             {
                 array[i] = value;
             }
@@ -662,19 +664,19 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            if (startIndex < 0 || startIndex > array!.Length) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (startIndex < 0 || startIndex > array.Length)
             {
                 ThrowHelper.ThrowStartIndexArgumentOutOfRange_ArgumentOutOfRange_Index();
             }
 
-            if (count < 0 || startIndex > array!.Length - count) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (count < 0 || startIndex > array.Length - count)
             {
                 ThrowHelper.ThrowCountArgumentOutOfRange_ArgumentOutOfRange_Count();
             }
 
             for (int i = startIndex; i < startIndex + count; i++)
             {
-                array![i] = value; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                array[i] = value;
             }
         }
 
@@ -691,9 +693,9 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
             }
 
-            for (int i = 0; i < array!.Length; i++) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            for (int i = 0; i < array.Length; i++)
             {
-                if (match!(array[i])) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                if (match(array[i]))
                 {
                     return array[i];
                 }
@@ -714,9 +716,9 @@ namespace System
             }
 
             List<T> list = new List<T>();
-            for (int i = 0; i < array!.Length; i++) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            for (int i = 0; i < array.Length; i++)
             {
-                if (match!(array[i])) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                if (match(array[i]))
                 {
                     list.Add(array[i]);
                 }
@@ -731,7 +733,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            return FindIndex(array!, 0, array!.Length, match); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return FindIndex(array, 0, array.Length, match);
         }
 
         public static int FindIndex<T>(T[] array, int startIndex, Predicate<T> match)
@@ -741,7 +743,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            return FindIndex(array!, startIndex, array!.Length - startIndex, match); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return FindIndex(array, startIndex, array.Length - startIndex, match);
         }
 
         public static int FindIndex<T>(T[] array, int startIndex, int count, Predicate<T> match)
@@ -751,12 +753,12 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            if (startIndex < 0 || startIndex > array!.Length) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (startIndex < 0 || startIndex > array.Length)
             {
                 ThrowHelper.ThrowStartIndexArgumentOutOfRange_ArgumentOutOfRange_Index();
             }
 
-            if (count < 0 || startIndex > array!.Length - count) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (count < 0 || startIndex > array.Length - count)
             {
                 ThrowHelper.ThrowCountArgumentOutOfRange_ArgumentOutOfRange_Count();
             }
@@ -769,7 +771,7 @@ namespace System
             int endIndex = startIndex + count;
             for (int i = startIndex; i < endIndex; i++)
             {
-                if (match!(array![i])) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                if (match!(array[i]))
                     return i;
             }
             return -1;
@@ -788,9 +790,9 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
             }
 
-            for (int i = array!.Length - 1; i >= 0; i--) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            for (int i = array.Length - 1; i >= 0; i--)
             {
-                if (match!(array[i])) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                if (match(array[i]))
                 {
                     return array[i];
                 }
@@ -805,7 +807,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            return FindLastIndex(array!, array!.Length - 1, array.Length, match); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return FindLastIndex(array, array.Length - 1, array.Length, match);
         }
 
         public static int FindLastIndex<T>(T[] array, int startIndex, Predicate<T> match)
@@ -815,7 +817,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            return FindLastIndex(array!, startIndex, startIndex + 1, match); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return FindLastIndex(array, startIndex, startIndex + 1, match);
         }
 
         public static int FindLastIndex<T>(T[] array, int startIndex, int count, Predicate<T> match)
@@ -830,7 +832,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
             }
 
-            if (array!.Length == 0) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (array.Length == 0)
             {
                 // Special case for 0 length List
                 if (startIndex != -1)
@@ -840,7 +842,7 @@ namespace System
             }
             else
             {
-                // Make sure we're not out of range            
+                // Make sure we're not out of range
                 if (startIndex < 0 || startIndex >= array.Length)
                 {
                     ThrowHelper.ThrowStartIndexArgumentOutOfRange_ArgumentOutOfRange_Index();
@@ -856,7 +858,7 @@ namespace System
             int endIndex = startIndex - count;
             for (int i = startIndex; i > endIndex; i--)
             {
-                if (match!(array[i])) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                if (match(array[i]))
                 {
                     return i;
                 }
@@ -876,21 +878,21 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.action);
             }
 
-            for (int i = 0; i < array!.Length; i++) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            for (int i = 0; i < array.Length; i++)
             {
-                action!(array[i]); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                action(array[i]);
             }
         }
 
         // Returns the index of the first occurrence of a given value in an array.
         // The array is searched forwards, and the elements of the array are
         // compared to the given value using the Object.Equals method.
-        // 
+        //
         public static int IndexOf(Array array, object? value)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            return IndexOf(array!, value, array!.GetLowerBound(0), array.Length); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return IndexOf(array, value, array.GetLowerBound(0), array.Length);
         }
 
         // Returns the index of the first occurrence of a given value in a range of
@@ -898,12 +900,12 @@ namespace System
         // startIndex and ending at the last element of the array. The
         // elements of the array are compared to the given value using the
         // Object.Equals method.
-        // 
+        //
         public static int IndexOf(Array array, object? value, int startIndex)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            int lb = array!.GetLowerBound(0); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            int lb = array.GetLowerBound(0);
             return IndexOf(array, value, startIndex, array.Length - startIndex + lb);
         }
 
@@ -912,12 +914,12 @@ namespace System
         // startIndex and upto count elements. The
         // elements of the array are compared to the given value using the
         // Object.Equals method.
-        // 
+        //
         public static int IndexOf(Array array, object? value, int startIndex, int count)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            if (array!.Rank != 1) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (array.Rank != 1)
                 ThrowHelper.ThrowRankException(ExceptionResource.Rank_MultiDimNotSupported);
 
             int lb = array.GetLowerBound(0);
@@ -934,9 +936,8 @@ namespace System
                 return retVal;
 #endif
 
-            object[]? objArray = array as object[];
             int endIndex = startIndex + count;
-            if (objArray != null)
+            if (array is object[] objArray)
             {
                 if (value == null)
                 {
@@ -987,7 +988,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            return IndexOf(array!, value, 0, array!.Length); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return IndexOf(array, value, 0, array.Length);
         }
 
         public static int IndexOf<T>(T[] array, T value, int startIndex)
@@ -997,7 +998,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            return IndexOf(array!, value, startIndex, array!.Length - startIndex); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return IndexOf(array, value, startIndex, array.Length - startIndex);
         }
 
         public static int IndexOf<T>(T[] array, T value, int startIndex, int count)
@@ -1007,7 +1008,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            if ((uint)startIndex > (uint)array!.Length) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if ((uint)startIndex > (uint)array.Length)
             {
                 ThrowHelper.ThrowStartIndexArgumentOutOfRange_ArgumentOutOfRange_Index();
             }
@@ -1017,8 +1018,6 @@ namespace System
                 ThrowHelper.ThrowCountArgumentOutOfRange_ArgumentOutOfRange_Count();
             }
 
-            // Hits a code generation bug on ProjectN
-#if !PROJECTN
             if (RuntimeHelpers.IsBitwiseEquatable<T>())
             {
                 if (Unsafe.SizeOf<T>() == sizeof(byte))
@@ -1054,7 +1053,6 @@ namespace System
                     return (result >= 0 ? startIndex : 0) + result;
                 }
             }
-#endif
 
 #if CORECLR
             return EqualityComparer<T>.Default.IndexOf(array, value, startIndex, count);
@@ -1066,12 +1064,12 @@ namespace System
         // Returns the index of the last occurrence of a given value in an array.
         // The array is searched backwards, and the elements of the array are
         // compared to the given value using the Object.Equals method.
-        // 
+        //
         public static int LastIndexOf(Array array, object? value)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            int lb = array!.GetLowerBound(0); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            int lb = array.GetLowerBound(0);
             return LastIndexOf(array, value, array.Length - 1 + lb, array.Length);
         }
 
@@ -1079,12 +1077,12 @@ namespace System
         // an array. The array is searched backwards, starting at index
         // startIndex and ending at index 0. The elements of the array are
         // compared to the given value using the Object.Equals method.
-        // 
+        //
         public static int LastIndexOf(Array array, object? value, int startIndex)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            int lb = array!.GetLowerBound(0); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            int lb = array.GetLowerBound(0);
             return LastIndexOf(array, value, startIndex, startIndex + 1 - lb);
         }
 
@@ -1093,12 +1091,12 @@ namespace System
         // startIndex and counting uptocount elements. The elements of
         // the array are compared to the given value using the Object.Equals
         // method.
-        // 
+        //
         public static int LastIndexOf(Array array, object? value, int startIndex, int count)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            int lb = array!.GetLowerBound(0); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            int lb = array.GetLowerBound(0);
             if (array.Length == 0)
             {
                 return lb - 1;
@@ -1121,9 +1119,8 @@ namespace System
                 return retVal;
 #endif
 
-            object[]? objArray = array as object[];
             int endIndex = startIndex - count + 1;
-            if (objArray != null)
+            if (array is object[] objArray)
             {
                 if (value == null)
                 {
@@ -1170,7 +1167,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            return LastIndexOf(array!, value, array!.Length - 1, array.Length); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return LastIndexOf(array, value, array.Length - 1, array.Length);
         }
 
         public static int LastIndexOf<T>(T[] array, T value, int startIndex)
@@ -1180,7 +1177,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
             // if array is empty and startIndex is 0, we need to pass 0 as count
-            return LastIndexOf(array!, value, startIndex, (array!.Length == 0) ? 0 : (startIndex + 1)); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return LastIndexOf(array, value, startIndex, (array.Length == 0) ? 0 : (startIndex + 1));
         }
 
         public static int LastIndexOf<T>(T[] array, T value, int startIndex, int count)
@@ -1190,7 +1187,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
             }
 
-            if (array!.Length == 0) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (array.Length == 0)
             {
                 //
                 // Special case for 0 length List
@@ -1209,7 +1206,7 @@ namespace System
                 return -1;
             }
 
-            // Make sure we're not out of range            
+            // Make sure we're not out of range
             if ((uint)startIndex >= (uint)array.Length)
             {
                 ThrowHelper.ThrowStartIndexArgumentOutOfRange_ArgumentOutOfRange_Index();
@@ -1221,8 +1218,6 @@ namespace System
                 ThrowHelper.ThrowCountArgumentOutOfRange_ArgumentOutOfRange_Count();
             }
 
-            // Hits a code generation bug on ProjectN
-#if !PROJECTN
             if (RuntimeHelpers.IsBitwiseEquatable<T>())
             {
                 if (Unsafe.SizeOf<T>() == sizeof(byte))
@@ -1266,8 +1261,6 @@ namespace System
                     return (result >= 0 ? endIndex : 0) + result;
                 }
             }
-            
-#endif
 
 #if CORECLR
             return EqualityComparer<T>.Default.LastIndexOf(array, value, startIndex, count);
@@ -1280,12 +1273,12 @@ namespace System
         // method, an element previously located at index i will now be
         // located at index length - i - 1, where length is the
         // length of the array.
-        // 
+        //
         public static void Reverse(Array array)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            Reverse(array!, array!.GetLowerBound(0), array.Length); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            Reverse(array, array.GetLowerBound(0), array.Length);
         }
 
         // Reverses the elements in a range of an array. Following a call to this
@@ -1293,12 +1286,12 @@ namespace System
         // which was previously located at index i will now be located at
         // index index + (index + count - i - 1).
         // Reliability note: This may fail because it may have to box objects.
-        // 
+        //
         public static void Reverse(Array array, int index, int length)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            int lowerBound = array!.GetLowerBound(0); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            int lowerBound = array.GetLowerBound(0);
             if (index < lowerBound)
                 ThrowHelper.ThrowIndexArgumentOutOfRange_NeedNonNegNumException();
             if (length < 0)
@@ -1341,7 +1334,7 @@ namespace System
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            Reverse(array!, 0, array!.Length); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            Reverse(array, 0, array.Length);
         }
 
         public static void Reverse<T>(T[] array, int index, int length)
@@ -1352,7 +1345,7 @@ namespace System
                 ThrowHelper.ThrowIndexArgumentOutOfRange_NeedNonNegNumException();
             if (length < 0)
                 ThrowHelper.ThrowLengthArgumentOutOfRange_ArgumentOutOfRange_NeedNonNegNum();
-            if (array!.Length - index < length) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (array.Length - index < length)
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
 
             if (length <= 1)
@@ -1373,12 +1366,12 @@ namespace System
         // Sorts the elements of an array. The sort compares the elements to each
         // other using the IComparable interface, which must be implemented
         // by all elements of the array.
-        // 
+        //
         public static void Sort(Array array)
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            Sort(array!, null, array!.GetLowerBound(0), array.Length, null); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            Sort(array, null, array.GetLowerBound(0), array.Length, null);
         }
 
         // Sorts the elements of two arrays based on the keys in the first array.
@@ -1386,18 +1379,18 @@ namespace System
         // corresponding elements in the items array. The sort compares the
         // keys to each other using the IComparable interface, which must be
         // implemented by all elements of the keys array.
-        // 
+        //
         public static void Sort(Array keys, Array? items)
         {
             if (keys == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keys);
-            Sort(keys!, items, keys!.GetLowerBound(0), keys.Length, null); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            Sort(keys, items, keys.GetLowerBound(0), keys.Length, null);
         }
 
         // Sorts the elements in a section of an array. The sort compares the
         // elements to each other using the IComparable interface, which
         // must be implemented by all elements in the given section of the array.
-        // 
+        //
         public static void Sort(Array array, int index, int length)
         {
             Sort(array, null, index, length, null);
@@ -1408,7 +1401,7 @@ namespace System
         // corresponding elements in the items array. The sort compares the
         // keys to each other using the IComparable interface, which must be
         // implemented by all elements of the keys array.
-        // 
+        //
         public static void Sort(Array keys, Array? items, int index, int length)
         {
             Sort(keys, items, index, length, null);
@@ -1419,7 +1412,7 @@ namespace System
         // null, the elements are compared to each other using the
         // IComparable interface, which in that case must be implemented by
         // all elements of the array.
-        // 
+        //
         public static void Sort(Array array, IComparer? comparer)
         {
             if (array == null)
@@ -1434,12 +1427,12 @@ namespace System
         // comparer is null, the elements are compared to each other using
         // the IComparable interface, which in that case must be implemented
         // by all elements of the keys array.
-        // 
+        //
         public static void Sort(Array keys, Array? items, IComparer? comparer)
         {
             if (keys == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keys);
-            Sort(keys!, items, keys!.GetLowerBound(0), keys.Length, comparer); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            Sort(keys, items, keys.GetLowerBound(0), keys.Length, comparer);
         }
 
         // Sorts the elements in a section of an array. The sort compares the
@@ -1447,7 +1440,7 @@ namespace System
         // comparer is null, the elements are compared to each other using
         // the IComparable interface, which in that case must be implemented
         // by all elements in the given section of the array.
-        // 
+        //
         public static void Sort(Array array, int index, int length, IComparer? comparer)
         {
             Sort(array, null, index, length, comparer);
@@ -1460,12 +1453,12 @@ namespace System
         // comparer is null, the elements are compared to each other using
         // the IComparable interface, which in that case must be implemented
         // by all elements of the given section of the keys array.
-        // 
+        //
         public static void Sort(Array keys, Array? items, int index, int length, IComparer? comparer)
         {
             if (keys == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keys);
-            if (keys!.Rank != 1 || (items != null && items.Rank != 1)) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (keys.Rank != 1 || (items != null && items.Rank != 1))
                 ThrowHelper.ThrowRankException(ExceptionResource.Rank_MultiDimNotSupported);
             int keysLowerBound = keys.GetLowerBound(0);
             if (items != null && keysLowerBound != items.GetLowerBound(0))
@@ -1488,14 +1481,14 @@ namespace System
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            Sort<T>(array!, 0, array!.Length, null); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            Sort<T>(array, 0, array.Length, null);
         }
 
         public static void Sort<TKey, TValue>(TKey[] keys, TValue[]? items)
         {
             if (keys == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keys);
-            Sort<TKey, TValue>(keys!, items, 0, keys!.Length, null); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            Sort<TKey, TValue>(keys, items, 0, keys.Length, null);
         }
 
         public static void Sort<T>(T[] array, int index, int length)
@@ -1512,14 +1505,14 @@ namespace System
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            Sort<T>(array!, 0, array!.Length, comparer); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            Sort<T>(array, 0, array.Length, comparer);
         }
 
         public static void Sort<TKey, TValue>(TKey[] keys, TValue[]? items, System.Collections.Generic.IComparer<TKey>? comparer)
         {
             if (keys == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keys);
-            Sort<TKey, TValue>(keys!, items, 0, keys!.Length, comparer); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            Sort<TKey, TValue>(keys, items, 0, keys.Length, comparer);
         }
 
         public static void Sort<T>(T[] array, int index, int length, System.Collections.Generic.IComparer<T>? comparer)
@@ -1530,7 +1523,7 @@ namespace System
                 ThrowHelper.ThrowIndexArgumentOutOfRange_NeedNonNegNumException();
             if (length < 0)
                 ThrowHelper.ThrowLengthArgumentOutOfRange_ArgumentOutOfRange_NeedNonNegNum();
-            if (array!.Length - index < length) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (array.Length - index < length)
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
 
             if (length > 1)
@@ -1557,7 +1550,7 @@ namespace System
                 ThrowHelper.ThrowIndexArgumentOutOfRange_NeedNonNegNumException();
             if (length < 0)
                 ThrowHelper.ThrowLengthArgumentOutOfRange_ArgumentOutOfRange_NeedNonNegNum();
-            if (keys!.Length - index < length || (items != null && index > items.Length - length)) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (keys.Length - index < length || (items != null && index > items.Length - length))
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
 
             if (length > 1)
@@ -1594,7 +1587,7 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.comparison);
             }
 
-            ArraySortHelper<T>.Sort(array!, 0, array!.Length, comparison!); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            ArraySortHelper<T>.Sort(array, 0, array.Length, comparison!);
         }
 
         public static bool TrueForAll<T>(T[] array, Predicate<T> match)
@@ -1609,9 +1602,9 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.match);
             }
 
-            for (int i = 0; i < array!.Length; i++) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            for (int i = 0; i < array.Length; i++)
             {
-                if (!match!(array[i])) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                if (!match(array[i]))
                 {
                     return false;
                 }

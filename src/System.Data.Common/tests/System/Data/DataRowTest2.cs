@@ -2,7 +2,7 @@
 // See the LICENSE file in the project root for more information.
 
 // Copyright (c) 2004 Mainsoft Co.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -10,10 +10,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -53,7 +53,7 @@ namespace System.Data.Tests
             myTable.Rows.Add(myRow);
 
             // DataRow AcceptChanges
-            // DataRowState.Added -> DataRowState.Unchanged 
+            // DataRowState.Added -> DataRowState.Unchanged
             myTable.AcceptChanges();
             Assert.Equal(DataRowState.Unchanged, myRow.RowState);
         }
@@ -75,7 +75,7 @@ namespace System.Data.Tests
             myRow.CancelEdit();
 
             // DataRow CancelEdit
-            Assert.Equal(true, (int)myRow[0] == 1);
+            Assert.True((int)myRow[0] == 1);
         }
 
         [Fact]
@@ -86,11 +86,11 @@ namespace System.Data.Tests
             dr.RowError = "err";
 
             // DataRow ClearErrors
-            Assert.Equal(true, dr.HasErrors);
+            Assert.True(dr.HasErrors);
 
             // DataRow ClearErrors
             dr.ClearErrors();
-            Assert.Equal(false, dr.HasErrors);
+            Assert.False(dr.HasErrors);
         }
 
         [Fact]
@@ -149,11 +149,11 @@ namespace System.Data.Tests
             dr2 = myTable.NewRow();
 
             // not equals
-            Assert.Equal(false, dr1.Equals(dr2));
+            Assert.False(dr1.Equals(dr2));
 
             dr1 = dr2;
             // equals
-            Assert.Equal(true, dr1.Equals(dr2));
+            Assert.True(dr1.Equals(dr2));
         }
 
         [Fact]
@@ -679,12 +679,12 @@ namespace System.Data.Tests
             drTemp[1]["String1"] = "NewValue"; //row now has versions: Proposed,Current,Original,Default
 
             // Check DataRowVersion.Current
-            //Check DataRowVersion.Current 
+            //Check DataRowVersion.Current
             drArrExcepted = dtParent.Select("ParentId=" + drParent["ParentId"], "", DataViewRowState.CurrentRows);
             drArrResult = drChild.GetParentRows("Parent-Child", DataRowVersion.Current);
             Assert.Equal(drArrExcepted, drArrResult);
 
-            //Check DataRowVersion.Current 
+            //Check DataRowVersion.Current
             // Teting: DataRow.GetParentRows_D_D ,DataRowVersion.Original
             drArrExcepted = dtParent.Select("ParentId=" + drParent["ParentId"], "", DataViewRowState.OriginalRows);
             drArrResult = drChild.GetParentRows("Parent-Child", DataRowVersion.Original);
@@ -734,12 +734,12 @@ namespace System.Data.Tests
             DataRow dr = dt.NewRow();
 
             // HasErrors (default)
-            Assert.Equal(false, dr.HasErrors);
+            Assert.False(dr.HasErrors);
 
             dr.RowError = "Err";
 
             // HasErrors (set/get)
-            Assert.Equal(true, dr.HasErrors);
+            Assert.True(dr.HasErrors);
         }
 
         [Fact]
@@ -749,13 +749,13 @@ namespace System.Data.Tests
             DataRow dr = dt.NewRow();
 
             // HasErrors (default)
-            Assert.Equal(false, dr.HasErrors);
+            Assert.False(dr.HasErrors);
 
             dr.RowError = null;
 
             // HasErrors (set/get)
             Assert.Equal(string.Empty, dr.RowError);
-            Assert.Equal(false, dr.HasErrors);
+            Assert.False(dr.HasErrors);
         }
 
         [Fact]
@@ -771,134 +771,134 @@ namespace System.Data.Tests
             DataRow r = t.NewRow();
 
             // HasVersion Test #10
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Current));
+            Assert.False(r.HasVersion(DataRowVersion.Current));
 
             // HasVersion Test #11
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Original));
+            Assert.False(r.HasVersion(DataRowVersion.Original));
 
             // HasVersion Test #12
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Default));
+            Assert.True(r.HasVersion(DataRowVersion.Default));
 
             // HasVersion Test #13
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Proposed));
+            Assert.True(r.HasVersion(DataRowVersion.Proposed));
 
             r[0] = 4;
             r[1] = "four";
 
             // HasVersion Test #20
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Current));
+            Assert.False(r.HasVersion(DataRowVersion.Current));
 
             // HasVersion Test #21
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Original));
+            Assert.False(r.HasVersion(DataRowVersion.Original));
 
             // HasVersion Test #22
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Default));
+            Assert.True(r.HasVersion(DataRowVersion.Default));
 
             // HasVersion Test #23
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Proposed));
+            Assert.True(r.HasVersion(DataRowVersion.Proposed));
 
             t.Rows.Add(r);
             // now it is "added"
 
             // HasVersion Test #30
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Current));
+            Assert.True(r.HasVersion(DataRowVersion.Current));
 
             // HasVersion Test #31
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Original));
+            Assert.False(r.HasVersion(DataRowVersion.Original));
 
             // HasVersion Test #32
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Default));
+            Assert.True(r.HasVersion(DataRowVersion.Default));
 
             // HasVersion Test #33
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Proposed));
+            Assert.False(r.HasVersion(DataRowVersion.Proposed));
 
             t.AcceptChanges();
             // now it is "unchanged"
 
             // HasVersion Test #40
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Current));
+            Assert.True(r.HasVersion(DataRowVersion.Current));
 
             // HasVersion Test #41
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Original));
+            Assert.True(r.HasVersion(DataRowVersion.Original));
 
             // HasVersion Test #42
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Default));
+            Assert.True(r.HasVersion(DataRowVersion.Default));
 
             // HasVersion Test #43
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Proposed));
+            Assert.False(r.HasVersion(DataRowVersion.Proposed));
 
             r.BeginEdit();
             r[1] = "newvalue";
 
             // HasVersion Test #50
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Current));
+            Assert.True(r.HasVersion(DataRowVersion.Current));
 
             // HasVersion Test #51
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Original));
+            Assert.True(r.HasVersion(DataRowVersion.Original));
 
             // HasVersion Test #52
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Default));
+            Assert.True(r.HasVersion(DataRowVersion.Default));
 
             // HasVersion Test #53
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Proposed));
+            Assert.True(r.HasVersion(DataRowVersion.Proposed));
 
             r.EndEdit();
             // now it is "modified"
             // HasVersion Test #60
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Current));
+            Assert.True(r.HasVersion(DataRowVersion.Current));
 
             // HasVersion Test #61
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Original));
+            Assert.True(r.HasVersion(DataRowVersion.Original));
 
             // HasVersion Test #62
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Default));
+            Assert.True(r.HasVersion(DataRowVersion.Default));
 
             // HasVersion Test #63
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Proposed));
+            Assert.False(r.HasVersion(DataRowVersion.Proposed));
 
             // this or t.AcceptChanges
             r.AcceptChanges();
             // now it is "unchanged" again
             // HasVersion Test #70
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Current));
+            Assert.True(r.HasVersion(DataRowVersion.Current));
 
             // HasVersion Test #71
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Original));
+            Assert.True(r.HasVersion(DataRowVersion.Original));
 
             // HasVersion Test #72
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Default));
+            Assert.True(r.HasVersion(DataRowVersion.Default));
 
             // HasVersion Test #73
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Proposed));
+            Assert.False(r.HasVersion(DataRowVersion.Proposed));
 
             r.Delete();
             // now it is "deleted"
 
             // HasVersion Test #80
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Current));
+            Assert.False(r.HasVersion(DataRowVersion.Current));
 
             // HasVersion Test #81
-            Assert.Equal(true, r.HasVersion(DataRowVersion.Original));
+            Assert.True(r.HasVersion(DataRowVersion.Original));
 
             // HasVersion Test #82
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Default));
+            Assert.False(r.HasVersion(DataRowVersion.Default));
 
             // HasVersion Test #83
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Proposed));
+            Assert.False(r.HasVersion(DataRowVersion.Proposed));
 
             r.AcceptChanges();
             // back to detached
             // HasVersion Test #90
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Current));
+            Assert.False(r.HasVersion(DataRowVersion.Current));
 
             // HasVersion Test #91
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Original));
+            Assert.False(r.HasVersion(DataRowVersion.Original));
 
             // HasVersion Test #92
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Default));
+            Assert.False(r.HasVersion(DataRowVersion.Default));
 
             // HasVersion Test #93
-            Assert.Equal(false, r.HasVersion(DataRowVersion.Proposed));
+            Assert.False(r.HasVersion(DataRowVersion.Proposed));
         }
 
         [Fact] // Object this [DataColumn]
@@ -2027,10 +2027,10 @@ namespace System.Data.Tests
             DataRow dr = dt.Rows[0];
 
             // IsNull_I 2
-            Assert.Equal(false, dr.IsNull(dc0));
+            Assert.False(dr.IsNull(dc0));
 
             // IsNull_I 2
-            Assert.Equal(true, dr.IsNull(dc1));
+            Assert.True(dr.IsNull(dc1));
         }
 
         [Fact]
@@ -2045,29 +2045,29 @@ namespace System.Data.Tests
             DataRow dr = dt.Rows[0];
 
             // IsNull - col0 Current
-            Assert.Equal(false, dr.IsNull(dc0, DataRowVersion.Current));
+            Assert.False(dr.IsNull(dc0, DataRowVersion.Current));
 
             // IsNull - col1 Current
-            Assert.Equal(true, dr.IsNull(dc1, DataRowVersion.Current));
+            Assert.True(dr.IsNull(dc1, DataRowVersion.Current));
 
             // IsNull - col0 Default
-            Assert.Equal(false, dr.IsNull(dc0, DataRowVersion.Default));
+            Assert.False(dr.IsNull(dc0, DataRowVersion.Default));
             // IsNull - col1 Default
-            Assert.Equal(true, dr.IsNull(dc1, DataRowVersion.Default));
+            Assert.True(dr.IsNull(dc1, DataRowVersion.Default));
 
             dr.BeginEdit();
             dr[0] = 9; //Change value, Create RowVersion Proposed
 
             // IsNull - col0 Proposed
-            Assert.Equal(false, dr.IsNull(dc0, DataRowVersion.Proposed));
+            Assert.False(dr.IsNull(dc0, DataRowVersion.Proposed));
             // IsNull - col1 Proposed
-            Assert.Equal(true, dr.IsNull(dc1, DataRowVersion.Proposed));
+            Assert.True(dr.IsNull(dc1, DataRowVersion.Proposed));
 
             dr.AcceptChanges();
             dr.Delete();
 
             // IsNull - col0 Original
-            Assert.Equal(false, dr.IsNull(dc0, DataRowVersion.Original));
+            Assert.False(dr.IsNull(dc0, DataRowVersion.Original));
         }
 
         [Fact]
@@ -2082,10 +2082,10 @@ namespace System.Data.Tests
             DataRow dr = dt.Rows[0];
 
             // IsNull_I 2
-            Assert.Equal(false, dr.IsNull(0));
+            Assert.False(dr.IsNull(0));
 
             // IsNull_I 2
-            Assert.Equal(true, dr.IsNull(1));
+            Assert.True(dr.IsNull(1));
         }
 
         [Fact]
@@ -2101,10 +2101,10 @@ namespace System.Data.Tests
 
             #region --- assignment  ----
             // IsNull_S 1
-            Assert.Equal(false, dr.IsNull("Col0"));
+            Assert.False(dr.IsNull("Col0"));
 
             // IsNull_S 2
-            Assert.Equal(true, dr.IsNull("Col1"));
+            Assert.True(dr.IsNull("Col1"));
             #endregion
 
             // IsNull_S 1
@@ -2228,17 +2228,17 @@ namespace System.Data.Tests
             // Item - columnn,Current
             Assert.Equal(1, (int)myRow[dc, DataRowVersion.Current]);
 
-            //	testMore();
+            //  testMore();
         }
 
         /*public void testMore()
-		{
-			DataTable dt = DataProvider.CreateParentDataTable();
-			dt.Rows[0].BeginEdit();
-			dt.Rows[0][0] = 10;
-			dt.Rows[0].EndEdit();
-			dt.AcceptChanges();
-		}*/
+        {
+            DataTable dt = DataProvider.CreateParentDataTable();
+            dt.Rows[0].BeginEdit();
+            dt.Rows[0][0] = 10;
+            dt.Rows[0].EndEdit();
+            dt.AcceptChanges();
+        }*/
 
         [Fact]
         public void RejectChanges()
@@ -2471,7 +2471,7 @@ namespace System.Data.Tests
             dr = dtParent.Rows[0];
 
             // ToString
-            Assert.Equal(true, dr.ToString().ToLower().StartsWith("system.data.datarow"));
+            Assert.StartsWith("system.data.datarow", dr.ToString().ToLower());
         }
 
         [Fact]
@@ -2483,7 +2483,7 @@ namespace System.Data.Tests
             Assert.Equal(dr.RowError, string.Empty);
 
             dr.RowError = "Err";
-            Assert.Equal(dr.RowError, "Err");
+            Assert.Equal("Err", dr.RowError);
         }
 
         [Fact]
@@ -2569,11 +2569,11 @@ namespace System.Data.Tests
 
             DataRow myRow = myTable.Rows[0];
 
-            Assert.Throws<ConstraintException>(() => myRow[0] = 2); //row[0] now conflict with row[1] 
+            Assert.Throws<ConstraintException>(() => myRow[0] = 2); //row[0] now conflict with row[1]
 
             //Will NOT! throw exception
             myRow.BeginEdit();
-            myRow[0] = 2; //row[0] now conflict with row[1] 
+            myRow[0] = 2; //row[0] now conflict with row[1]
 
             DataTable dt = DataProvider.CreateParentDataTable();
             DataRow dr = dt.Rows[0];
@@ -2746,8 +2746,8 @@ namespace System.Data.Tests
                 dt1.EndLoadData();
             });
             Assert.Equal(2, dt1.GetErrors().Length);
-            Assert.Equal(true, dt1.GetErrors()[0].RowError.Length > 10);
-            Assert.Equal(true, dt1.GetErrors()[1].RowError.Length > 10);
+            Assert.True(dt1.GetErrors()[0].RowError.Length > 10);
+            Assert.True(dt1.GetErrors()[1].RowError.Length > 10);
 
             DataSet ds = DataProvider.CreateForeignConstraint();
             Assert.Throws<ConstraintException>(() =>
@@ -2760,7 +2760,7 @@ namespace System.Data.Tests
             Assert.Equal(3, ds.Tables[1].GetErrors().Length);
             for (int index = 0; index < 3; index++)
             {
-                Assert.Equal(true, ds.Tables[1].GetErrors()[index].RowError.Length > 10);
+                Assert.True(ds.Tables[1].GetErrors()[index].RowError.Length > 10);
             }
         }
 
@@ -2924,11 +2924,11 @@ namespace System.Data.Tests
             table.AcceptChanges();
 
             row.SetModified();
-            Assert.Equal(row.RowState, DataRowState.Modified);
+            Assert.Equal(DataRowState.Modified, row.RowState);
             Assert.Equal(1, row[0, DataRowVersion.Current]);
             Assert.Equal(1, row[0, DataRowVersion.Original]);
             table.RejectChanges();
-            Assert.Equal(row.RowState, DataRowState.Unchanged);
+            Assert.Equal(DataRowState.Unchanged, row.RowState);
         }
         [Fact]
         public void DataRowExpressionDefaultValueTest()

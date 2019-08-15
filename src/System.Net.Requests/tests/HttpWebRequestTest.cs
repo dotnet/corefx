@@ -156,9 +156,9 @@ namespace System.Net.Tests
             Assert.Equal(0, request.Headers.Count);
             Assert.Equal(HttpVersion.Version11, request.ProtocolVersion);
             Assert.Equal("GET", request.Method);
-            Assert.Equal(HttpWebRequest.DefaultMaximumResponseHeadersLength, 64);
+            Assert.Equal(64, HttpWebRequest.DefaultMaximumResponseHeadersLength);
             Assert.NotNull(HttpWebRequest.DefaultCachePolicy);
-            Assert.Equal(HttpWebRequest.DefaultCachePolicy.Level, RequestCacheLevel.BypassCache);
+            Assert.Equal(RequestCacheLevel.BypassCache, HttpWebRequest.DefaultCachePolicy.Level);
             Assert.Equal(0, HttpWebRequest.DefaultMaximumErrorResponseLength);
             Assert.NotNull(request.Proxy);
             Assert.Equal(remoteServer, request.RequestUri);
@@ -431,8 +431,8 @@ namespace System.Net.Tests
 
                 Assert.InRange(sw.ElapsedMilliseconds, 1, 15 * 1000);
                 Assert.Equal(WebExceptionStatus.Timeout, exception.Status);
-                Assert.Equal(null, exception.InnerException);
-                Assert.Equal(null, exception.Response);
+                Assert.Null(exception.InnerException);
+                Assert.Null(exception.Response);
 
                 return Task.FromResult<object>(null);
             });
@@ -537,7 +537,7 @@ namespace System.Net.Tests
             request.TransferEncoding = TransferEncoding;
             Assert.Equal(TransferEncoding, request.TransferEncoding);
             request.TransferEncoding = null;
-            Assert.Equal(null, request.TransferEncoding);
+            Assert.Null(request.TransferEncoding);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -667,7 +667,7 @@ namespace System.Net.Tests
             request.Connection = Connection;
             Assert.Equal(Connection, request.Connection);
             request.Connection = null;
-            Assert.Equal(null, request.Connection);
+            Assert.Null(request.Connection);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -686,7 +686,7 @@ namespace System.Net.Tests
             request.Expect = Expect;
             Assert.Equal(Expect, request.Expect);
             request.Expect = null;
-            Assert.Equal(null, request.Expect);
+            Assert.Null(request.Expect);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1027,7 +1027,7 @@ namespace System.Net.Tests
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
             request.Credentials = _explicitCredential;
             request.UseDefaultCredentials = false;
-            Assert.Equal(null, request.Credentials);
+            Assert.Null(request.Credentials);
         }
 
         [OuterLoop]
@@ -1185,7 +1185,7 @@ namespace System.Net.Tests
         [InlineData(false)]
         public async Task GetResponseAsync_GetResponseStream_ContainsHost(bool useSsl)
         {
-            var options = new LoopbackServer.Options { UseSsl = useSsl }; 
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
 
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
@@ -1197,7 +1197,7 @@ namespace System.Net.Tests
                 {
                     Assert.Equal(uri.Host + ":" + uri.Port, response.Headers["Host"]);
                 }
-            }, async server => 
+            }, async server =>
             {
                 string host = server.Uri.Host + ":" + server.Uri.Port;
                 HttpRequestData requestData = await server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Host", host) });
@@ -1216,7 +1216,7 @@ namespace System.Net.Tests
             request.CookieContainer.Add(remoteServer, new Cookie("1", "cookie1"));
             request.CookieContainer.Add(remoteServer, new Cookie("2", "cookie2"));
             Assert.True(request.SupportsCookieContainer);
-            Assert.Equal(request.CookieContainer.GetCookies(remoteServer).Count, 2);
+            Assert.Equal(2, request.CookieContainer.GetCookies(remoteServer).Count);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1224,7 +1224,7 @@ namespace System.Net.Tests
         {
             HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
             request.AddRange(1, 5);
-            Assert.Equal(request.Headers["Range"], "bytes=1-5");
+            Assert.Equal("bytes=1-5", request.Headers["Range"]);
         }
 
         [Theory]

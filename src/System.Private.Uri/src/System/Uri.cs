@@ -93,7 +93,7 @@ namespace System
 
             UserDrivenParsing = 0x01000000,
             CanonicalDnsHost = 0x02000000,
-            ErrorOrParsingRecursion = 0x04000000,   // Used to signal a default parser error and also to confirm Port 
+            ErrorOrParsingRecursion = 0x04000000,   // Used to signal a default parser error and also to confirm Port
                                                     // and Host values in case of a custom user Parser
             DosPath = 0x08000000,
             UncPath = 0x10000000,
@@ -126,7 +126,7 @@ namespace System
             public string? String;
             public Offset Offset;
             public string? DnsSafeHost;    // stores dns safe host when idn is on and we have unicode or idn host
-            public MoreInfo? MoreInfo;       // Multi-threading: This field must be always accessed through a _local_ 
+            public MoreInfo? MoreInfo;       // Multi-threading: This field must be always accessed through a _local_
                                             // stack copy of m_Info.
         };
 
@@ -206,7 +206,7 @@ namespace System
         //
         internal static bool IriParsingStatic(UriParser? syntax)
         {
-            return (s_IriParsing && (((syntax != null) && syntax.InFact(UriSyntaxFlags.AllowIriParsing)) ||
+            return (IriParsing && (((syntax != null) && syntax.InFact(UriSyntaxFlags.AllowIriParsing)) ||
                    (syntax == null)));
         }
 
@@ -218,7 +218,7 @@ namespace System
             get
             {
                 return ((_syntax != null) && ((_syntax.Flags & UriSyntaxFlags.AllowIdn) != 0) &&
-                          ((s_IdnScope == UriIdnScope.All) || ((s_IdnScope == UriIdnScope.AllExceptIntranet)
+                          ((IdnScope == UriIdnScope.All) || ((IdnScope == UriIdnScope.AllExceptIntranet)
                                                                               && NotAny(Flags.IntranetUri))));
             }
         }
@@ -229,7 +229,7 @@ namespace System
         private bool AllowIdnStatic(UriParser syntax, Flags flags)
         {
             return ((syntax != null) && ((syntax.Flags & UriSyntaxFlags.AllowIdn) != 0) &&
-                   ((s_IdnScope == UriIdnScope.All) || ((s_IdnScope == UriIdnScope.AllExceptIntranet)
+                   ((IdnScope == UriIdnScope.All) || ((IdnScope == UriIdnScope.AllExceptIntranet)
                                                                             && StaticNotAny(flags, Flags.IntranetUri))));
         }
 
@@ -918,11 +918,13 @@ namespace System
 
         // Value from config Uri section
         // The use of this IDN mechanic is discouraged on Win8+ due to native platform improvements.
-        private static volatile UriIdnScope s_IdnScope = UriIdnScope.None;   // IDN is disabled in .NET Native and CoreCLR.
+#pragma warning disable CA1802 // TODO: https://github.com/dotnet/corefx/issues/40297
+        private static readonly UriIdnScope IdnScope = UriIdnScope.None;   // IDN is disabled in .NET Native and CoreCLR.
+#pragma warning restore CA1802
 
         // Value from config Uri section
         // On by default in .NET 4.5+ and cannot be disabled by config.
-        private static volatile bool s_IriParsing = true; // IRI Parsing is always enabled in .NET Native and CoreCLR
+        private const bool IriParsing = true; // IRI Parsing is always enabled in .NET Native and CoreCLR
 
         private string GetLocalPath()
         {
@@ -1905,21 +1907,21 @@ namespace System
 
         //
         // http://www.ietf.org/rfc/rfc3986.txt
-        // 
+        //
         // 3.3.  Path
-        // In addition, a URI reference (Section 4.1) may be a relative-path reference, in which case the  first 
+        // In addition, a URI reference (Section 4.1) may be a relative-path reference, in which case the  first
         // path segment cannot contain a colon (":") character.
-        // 
+        //
         // 4.2.  Relative Reference
-        // A path segment that contains a colon character (e.g., "this:that") cannot be used as the first segment 
-        // of a relative-path reference, as it would be mistaken for a scheme name.  Such a segment must be   
+        // A path segment that contains a colon character (e.g., "this:that") cannot be used as the first segment
+        // of a relative-path reference, as it would be mistaken for a scheme name.  Such a segment must be
         // preceded by a dot-segment (e.g., "./this:that") to make a relative-path reference.
-        // 
-        // 5.4.2. Abnormal Examples 
+        //
+        // 5.4.2. Abnormal Examples
         // http:(relativeUri) may be considered a valid relative Uri.
-        // 
+        //
         // Returns true if a colon is found in the first path segment, false otherwise
-        // 
+        //
 
         // Check for anything that may terminate the first regular path segment
         // or an illegal colon
@@ -2217,7 +2219,7 @@ namespace System
                 // is not created/canonicalized at this point.
             }
 
-            if ((s_IdnScope != UriIdnScope.None) || _iriParsing)
+            if ((IdnScope != UriIdnScope.None) || _iriParsing)
                 PrivateParseMinimalIri(newHost, idx);
 
             return ParsingError.None;
@@ -2466,7 +2468,7 @@ namespace System
             {
                 lock (_info)
                 {
-                    // ATTN: Avoid possible recursion through 
+                    // ATTN: Avoid possible recursion through
                     // CreateHostString->Syntax.GetComponents->Uri.GetComponentsHelper->CreateHostString
                     if (NotAny(Flags.ErrorOrParsingRecursion))
                     {
@@ -2895,7 +2897,7 @@ namespace System
                                 stemp = DomainNameHelper.UnicodeEquivalent(
                                     hostPtr, 0, stemp.Length, ref allAscii, ref atLeastOneValidIdn)!;
                             }
-                            // The host may be invalid punycode (www.xn--?-pck.com), 
+                            // The host may be invalid punycode (www.xn--?-pck.com),
                             // but we shouldn't throw after the constructor.
                             catch (UriFormatException) { }
                         }
@@ -3618,7 +3620,7 @@ namespace System
 
                     length = (ushort)_string.Length;
                     // we don't need to check _originalUnicodeString == _string because # is last part
-                    GetLengthWithoutTrailingSpaces(_string, ref length, idx);                    
+                    GetLengthWithoutTrailingSpaces(_string, ref length, idx);
                 }
             }
 
@@ -3933,7 +3935,7 @@ namespace System
         //
         private static unsafe ParsingError CheckSchemeSyntax(ReadOnlySpan<char> span, ref UriParser? syntax)
         {
-            char ToLowerCaseAscii(char c) => (uint)(c - 'A') <= 'Z' - 'A' ? (char)(c | 0x20) : c;
+            static char ToLowerCaseAscii(char c) => (uint)(c - 'A') <= 'Z' - 'A' ? (char)(c | 0x20) : c;
 
             if (span.Length == 0)
             {
@@ -4053,7 +4055,7 @@ namespace System
             ushort start = idx;
             newHost = null;
             bool justNormalized = false;
-            bool iriParsing = (s_IriParsing && IriParsingStatic(syntax)); // perf
+            bool iriParsing = (IriParsing && IriParsingStatic(syntax)); // perf
             bool hasUnicode = ((flags & Flags.HasUnicode) != 0); // perf
             bool hostNotUnicodeNormalized = ((flags & Flags.HostUnicodeNormalized) == 0); // perf
             UriSyntaxFlags syntaxFlags = syntax.Flags;
@@ -4104,7 +4106,7 @@ namespace System
                         flags |= Flags.HasUserInfo;
 
                         // Iri'ze userinfo
-                        if (iriParsing || (s_IdnScope != UriIdnScope.None))
+                        if (iriParsing || (IdnScope != UriIdnScope.None))
                         {
                             if (iriParsing && hasUnicode && hostNotUnicodeNormalized)
                             {
@@ -4139,7 +4141,7 @@ namespace System
             {
                 flags |= Flags.IPv6HostType;
 
-                _iriParsing = (s_IriParsing && IriParsingStatic(syntax));
+                _iriParsing = (IriParsing && IriParsingStatic(syntax));
 
                 if (hasUnicode && iriParsing && hostNotUnicodeNormalized)
                 {
@@ -4171,11 +4173,11 @@ namespace System
                     flags |= Flags.CanonicalDnsHost;
                 }
 
-                if ((s_IdnScope != UriIdnScope.None))
+                if ((IdnScope != UriIdnScope.None))
                 {
                     // check if intranet
                     //
-                    if ((s_IdnScope == UriIdnScope.AllExceptIntranet) && IsIntranet(new string(pString, 0, end)))
+                    if ((IdnScope == UriIdnScope.AllExceptIntranet) && IsIntranet(new string(pString, 0, end)))
                     {
                         flags |= Flags.IntranetUri;
                     }
@@ -4400,7 +4402,7 @@ namespace System
 
             // check if intranet
             //
-            if ((s_IdnScope == UriIdnScope.AllExceptIntranet) && IsIntranet(new string(pString, 0, end)))
+            if ((IdnScope == UriIdnScope.AllExceptIntranet) && IsIntranet(new string(pString, 0, end)))
             {
                 flags |= Flags.IntranetUri;
             }
@@ -4689,7 +4691,7 @@ namespace System
 
                     // The check above validates only that we have valid IRI characters, which is not enough to
                     // conclude that we have a valid canonical IRI.
-                    // If we have an IRI with Flags.HasUnicode, we need to set Check.NotIriCanonical so that the 
+                    // If we have an IRI with Flags.HasUnicode, we need to set Check.NotIriCanonical so that the
                     // path, query, and fragment will be validated.
                     if ((_flags & Flags.HasUnicode) != 0 && _iriParsing)
                     {
@@ -4767,7 +4769,7 @@ namespace System
                     _string.CopyTo(_info.Offset.Path, dest, end, _info.Offset.Query - _info.Offset.Path);
                     end += (_info.Offset.Query - _info.Offset.Path);
 
-                    // If the path was found as needed compression and contains escaped characters, unescape only 
+                    // If the path was found as needed compression and contains escaped characters, unescape only
                     // interesting characters (safe)
 
                     if (_syntax.InFact(UriSyntaxFlags.UnEscapeDotsAndSlashes) && InFact(Flags.PathNotCanonical)
@@ -4818,7 +4820,7 @@ namespace System
 
                 if (InFact(Flags.ShouldBeCompressed))
                 {
-                    // If the path was found as needed compression and contains escaped characters, 
+                    // If the path was found as needed compression and contains escaped characters,
                     // unescape only interesting characters (safe)
 
                     if (_syntax.InFact(UriSyntaxFlags.UnEscapeDotsAndSlashes) && InFact(Flags.PathNotCanonical)
@@ -5039,7 +5041,7 @@ namespace System
 
                         //
                         // Cases:
-                        // /./                  = remove this segment 
+                        // /./                  = remove this segment
                         // /../                 = remove this segment, mark next for removal
                         // /....x               = DO NOT TOUCH, leave as is
                         // x.../                = DO NOT TOUCH, leave as is, except for V2 legacy mode

@@ -24,8 +24,8 @@ namespace System.Linq.Parallel
     {
         private Task _rootTask; // The task under which all query tasks root.
         private int _alreadyEnded; // Whether the tasks have been waited on already.
-        private CancellationState _cancellationState; // The cancellation state.
-        private int _queryId; // Id of this query execution.
+        private readonly CancellationState _cancellationState; // The cancellation state.
+        private readonly int _queryId; // Id of this query execution.
 
 
         //-----------------------------------------------------------------------------------
@@ -141,11 +141,11 @@ namespace System.Linq.Parallel
 
                 if (_cancellationState.MergedCancellationToken.IsCancellationRequested)
                 {
-                    // cancellation has occurred but no user-delegate exceptions were detected 
+                    // cancellation has occurred but no user-delegate exceptions were detected
 
                     // NOTE: it is important that we see other state variables correctly here, and that
-                    // read-reordering hasn't played havoc. 
-                    // This is OK because 
+                    // read-reordering hasn't played havoc.
+                    // This is OK because
                     //   1. all the state writes (e,g. in the Initiate* methods) are volatile writes (standard .NET MM)
                     //   2. tokenCancellationRequested is backed by a volatile field, hence the reads below
                     //   won't get reordered about the read of token.IsCancellationRequested.

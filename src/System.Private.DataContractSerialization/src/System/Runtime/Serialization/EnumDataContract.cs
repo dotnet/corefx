@@ -18,7 +18,7 @@ namespace System.Runtime.Serialization
 {
     internal sealed class EnumDataContract : DataContract
     {
-        private EnumDataContractCriticalHelper _helper;
+        private readonly EnumDataContractCriticalHelper _helper;
 
         public EnumDataContract() : base(new EnumDataContractCriticalHelper())
         {
@@ -73,20 +73,18 @@ namespace System.Runtime.Serialization
 
         private class EnumDataContractCriticalHelper : DataContract.DataContractCriticalHelper
         {
-            private static Dictionary<Type, XmlQualifiedName> s_typeToName;
-            private static Dictionary<XmlQualifiedName, Type> s_nameToType;
+            private static readonly Dictionary<Type, XmlQualifiedName> s_typeToName = new Dictionary<Type, XmlQualifiedName>();
+            private static readonly Dictionary<XmlQualifiedName, Type> s_nameToType = new Dictionary<XmlQualifiedName, Type>();
 
             private List<DataMember> _members;
             private List<long> _values;
             private bool _isULong;
             private bool _isFlags;
-            private bool _hasDataContract;
+            private readonly bool _hasDataContract;
             private XmlDictionaryString[] _childElementNames;
 
             static EnumDataContractCriticalHelper()
             {
-                s_typeToName = new Dictionary<Type, XmlQualifiedName>();
-                s_nameToType = new Dictionary<XmlQualifiedName, Type>();
                 Add(typeof(sbyte), "byte");
                 Add(typeof(byte), "unsignedByte");
                 Add(typeof(short), "short");

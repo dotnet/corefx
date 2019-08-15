@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -369,7 +369,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnReader berReader = new AsnReader(inputData, AsnEncodingRules.BER);
 
             Assert.Throws<CryptographicException>(() => berReader.ReadGeneralizedTime(disallowFractions: true));
-            
+
             // Legit if the fraction is allowed
             berReader.ReadGeneralizedTime();
             Assert.False(berReader.HasData, "berReader.HasData");
@@ -442,6 +442,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("yyyyMMddHHmmss.secondFrac-HH:mm", "181932303136313130363031323334352E393939392D30313A3138")]
         public static void GetGeneralizedTime_Throws(string description, string inputHex)
         {
+            _ = description;
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, AsnEncodingRules.BER);
 

@@ -11,10 +11,10 @@ internal partial class Interop
     internal partial class mincore
     {
         [DllImport(Libraries.Memory_L1_3, CharSet = CharSet.Unicode, SetLastError = true)]
-        internal extern static IntPtr VirtualAllocFromApp(
-            SafeHandle BaseAddress, 
-            UIntPtr Size, 
-            int AllocationType, 
+        internal static extern IntPtr VirtualAllocFromApp(
+            SafeHandle BaseAddress,
+            UIntPtr Size,
+            int AllocationType,
             int Protection);
     }
 }

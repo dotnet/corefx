@@ -7,7 +7,7 @@ namespace System.Reflection
     [AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
     public sealed class AssemblyFlagsAttribute : Attribute
     {
-        private AssemblyNameFlags _flags;
+        private readonly AssemblyNameFlags _flags;
 
         [Obsolete("This constructor has been deprecated. Please use AssemblyFlagsAttribute(AssemblyNameFlags) instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         [CLSCompliant(false)]
@@ -40,4 +40,3 @@ namespace System.Reflection
         }
     }
 }
-

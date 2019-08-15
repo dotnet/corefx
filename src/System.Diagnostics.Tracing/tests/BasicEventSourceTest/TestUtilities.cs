@@ -21,7 +21,7 @@ namespace BasicEventSourceTests
         internal static bool IsProcessElevated => s_isElevated.Value;
 
         /// <summary>
-        /// Confirms that there are no EventSources running.  
+        /// Confirms that there are no EventSources running.
         /// </summary>
         /// <param name="message">Will be printed as part of the Assert</param>
         public static void CheckNoEventSourcesRunning(string message = "")
@@ -38,7 +38,7 @@ namespace BasicEventSourceTests
                     eventSource.Name != "System.Threading.SynchronizationEventSource" &&
                     eventSource.Name != "System.Runtime.InteropServices.InteropEventProvider" &&
                     eventSource.Name != "System.Reflection.Runtime.Tracing" &&
-                    eventSource.Name != "Microsoft-Windows-DotNETRuntime" && 
+                    eventSource.Name != "Microsoft-Windows-DotNETRuntime" &&
                     eventSource.Name != "System.Runtime"
                     )
                 {
@@ -72,7 +72,7 @@ namespace BasicEventSourceTests
             // EventListener will return the boxed value of the nullable, which will either be a value or null object reference
             else if (wrappedValue != null)
             {
-                Assert.IsType(typeof(T), wrappedValue);
+                Assert.IsType<T>(wrappedValue);
                 return (T?)wrappedValue;
             }
 

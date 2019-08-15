@@ -155,10 +155,10 @@ namespace System.Linq.Parallel
         // The enumerator type responsible for concatenating two data sources.
         //
 
-        sealed class ConcatQueryOperatorEnumerator<TLeftKey, TRightKey> : QueryOperatorEnumerator<TSource, ConcatKey<TLeftKey, TRightKey>>
+        private sealed class ConcatQueryOperatorEnumerator<TLeftKey, TRightKey> : QueryOperatorEnumerator<TSource, ConcatKey<TLeftKey, TRightKey>>
         {
-            private QueryOperatorEnumerator<TSource, TLeftKey> _firstSource; // The first data source to enumerate.
-            private QueryOperatorEnumerator<TSource, TRightKey> _secondSource; // The second data source to enumerate.
+            private readonly QueryOperatorEnumerator<TSource, TLeftKey> _firstSource; // The first data source to enumerate.
+            private readonly QueryOperatorEnumerator<TSource, TRightKey> _secondSource; // The second data source to enumerate.
             private bool _begunSecond; // Whether this partition has begun enumerating the second source yet.
 
             //---------------------------------------------------------------------------------------
@@ -226,10 +226,10 @@ namespace System.Linq.Parallel
         // results were indexable.
         //
 
-        class ConcatQueryOperatorResults : BinaryQueryOperatorResults
+        private class ConcatQueryOperatorResults : BinaryQueryOperatorResults
         {
-            private int _leftChildCount; // The number of elements in the left child result set
-            private int _rightChildCount; // The number of elements in the right child result set
+            private readonly int _leftChildCount; // The number of elements in the left child result set
+            private readonly int _rightChildCount; // The number of elements in the right child result set
 
             public static QueryResults<TSource> NewResults(
                 QueryResults<TSource> leftChildQueryResults, QueryResults<TSource> rightChildQueryResults,
@@ -331,8 +331,8 @@ namespace System.Linq.Parallel
 
         private class ConcatKeyComparer : IComparer<ConcatKey<TLeftKey, TRightKey>>
         {
-            private IComparer<TLeftKey> _leftComparer;
-            private IComparer<TRightKey> _rightComparer;
+            private readonly IComparer<TLeftKey> _leftComparer;
+            private readonly IComparer<TRightKey> _rightComparer;
 
             internal ConcatKeyComparer(IComparer<TLeftKey> leftComparer, IComparer<TRightKey> rightComparer)
             {

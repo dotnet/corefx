@@ -179,7 +179,7 @@ namespace System.Data
             HResult = HResults.DataMissingPrimaryKey;
         }
     }
-    
+
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class NoNullAllowedException : DataException
@@ -203,7 +203,7 @@ namespace System.Data
             HResult = HResults.DataNoNullAllowed;
         }
     }
-    
+
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ReadOnlyException : DataException
@@ -227,7 +227,7 @@ namespace System.Data
             HResult = HResults.DataReadOnly;
         }
     }
-    
+
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class RowNotInTableException : DataException
@@ -251,7 +251,7 @@ namespace System.Data
             HResult = HResults.DataRowNotInTable;
         }
     }
-    
+
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class VersionNotFoundException : DataException
@@ -673,7 +673,6 @@ namespace System.Data
         public static Exception CircularComplexType(string name) => _Data(SR.Format(SR.Xml_CircularComplexType, name));
         public static Exception CannotInstantiateAbstract(string name) => _Data(SR.Format(SR.Xml_CannotInstantiateAbstract, name));
         public static Exception InvalidKey(string name) => _Data(SR.Format(SR.Xml_InvalidKey, name));
-        public static Exception DiffgramMissingTable(string name) => _Data(SR.Format(SR.Xml_MissingTable, name));
         public static Exception DiffgramMissingSQL() => _Data(SR.Xml_MissingSQL);
         public static Exception DuplicateConstraintRead(string str) => _Data(SR.Format(SR.Xml_DuplicateConstraint, str));
         public static Exception ColumnTypeConflict(string name) => _Data(SR.Format(SR.Xml_ColumnConflict, name));

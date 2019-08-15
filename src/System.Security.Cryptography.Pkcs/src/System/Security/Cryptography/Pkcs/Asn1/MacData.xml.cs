@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#pragma warning disable SA1028 // ignore whitespace warnings for generated code
 using System;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -12,13 +13,13 @@ namespace System.Security.Cryptography.Pkcs.Asn1
     [StructLayout(LayoutKind.Sequential)]
     internal partial struct MacData
     {
-        private static byte[] s_defaultIterationCount = { 0x02, 0x01, 0x01 };
+        private static readonly byte[] s_defaultIterationCount = { 0x02, 0x01, 0x01 };
   
         internal System.Security.Cryptography.Pkcs.Asn1.DigestInfoAsn Mac;
         internal ReadOnlyMemory<byte> MacSalt;
         internal int IterationCount;
       
-#if DEBUG  
+#if DEBUG
         static MacData()
         {
             MacData decoded = default;

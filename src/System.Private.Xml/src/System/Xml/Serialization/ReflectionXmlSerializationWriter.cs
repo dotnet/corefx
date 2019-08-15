@@ -17,7 +17,7 @@ namespace System.Xml.Serialization
 {
     internal class ReflectionXmlSerializationWriter : XmlSerializationWriter
     {
-        private XmlMapping _mapping;
+        private readonly XmlMapping _mapping;
 
         internal static TypeDesc StringTypeDesc { get; private set; } = (new TypeScope()).GetTypeDesc(typeof(string));
         internal static TypeDesc QnameTypeDesc { get; private set; } = (new TypeScope()).GetTypeDesc(typeof(XmlQualifiedName));
@@ -88,7 +88,7 @@ namespace System.Xml.Serialization
             {
                 string ns = (element.Form == XmlSchemaForm.Qualified ? element.Namespace : string.Empty);
                 if (element.IsNullable)
-                {                    
+                {
                     if (mapping.IsSoap)
                     {
                         WriteNullTagEncoded(element.Name, ns);

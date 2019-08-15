@@ -100,7 +100,7 @@ namespace System.Collections.Concurrent
 
             // Initialize the segment and add all of the data to it.
             _tail = _head = new ConcurrentQueueSegment<T>(length);
-            foreach (T item in collection!) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            foreach (T item in collection)
             {
                 Enqueue(item);
             }
@@ -147,7 +147,7 @@ namespace System.Collections.Concurrent
 
             // Otherwise, fall back to the slower path that first copies the contents
             // to an array, and then uses that array's non-generic CopyTo to do the copy.
-            ToArray().CopyTo(array!, index); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            ToArray().CopyTo(array, index);
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace System.Collections.Concurrent
         /// cref="ICollection"/>. This property is not supported.
         /// </summary>
         /// <exception cref="NotSupportedException">The SyncRoot property is not supported.</exception>
-        object ICollection.SyncRoot { get { ThrowHelper.ThrowNotSupportedException(ExceptionResource.ConcurrentCollection_SyncRoot_NotSupported); return default!; } } // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+        object ICollection.SyncRoot { get { ThrowHelper.ThrowNotSupportedException(ExceptionResource.ConcurrentCollection_SyncRoot_NotSupported); return default; } }
 
         /// <summary>Returns an enumerator that iterates through a collection.</summary>
         /// <returns>An <see cref="IEnumerator"/> that can be used to iterate through the collection.</returns>
@@ -218,8 +218,7 @@ namespace System.Collections.Concurrent
                 // IsEmpty == !TryPeek. We use a "resultUsed:false" peek in order to avoid marking
                 // segments as preserved for observation, making IsEmpty a cheaper way than either
                 // TryPeek(out T) or Count == 0 to check whether any elements are in the queue.
-                T ignoredResult;
-                return !TryPeek(out ignoredResult, resultUsed: false);
+                return !TryPeek(out _, resultUsed: false);
             }
         }
 
@@ -462,7 +461,7 @@ namespace System.Collections.Concurrent
 
             // Get the number of items to be enumerated
             long count = GetCount(head, headHead, tail, tailTail);
-            if (index > array!.Length - count) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            if (index > array.Length - count)
             {
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
             }
@@ -484,7 +483,7 @@ namespace System.Collections.Concurrent
         /// cref="ConcurrentQueue{T}"/>.</returns>
         /// <remarks>
         /// The enumeration represents a moment-in-time snapshot of the contents
-        /// of the queue.  It does not reflect any updates to the collection after 
+        /// of the queue.  It does not reflect any updates to the collection after
         /// <see cref="GetEnumerator"/> was called.  The enumerator is safe to use
         /// concurrently with reads from and writes to the queue.
         /// </remarks>

@@ -41,11 +41,11 @@ namespace System.Xml.Xsl
         {
             long bits;
 
-            if (Double.IsNaN(x))
+            if (double.IsNaN(x))
             {
                 return x;
             }
-            if (Double.IsNaN(y))
+            if (double.IsNaN(y))
             {
                 return y;
             }
@@ -78,12 +78,12 @@ namespace System.Xml.Xsl
 
         public static double Succ(double x)
         {
-            return NextAfter(x, Double.PositiveInfinity);
+            return NextAfter(x, double.PositiveInfinity);
         }
 
         public static double Pred(double x)
         {
-            return NextAfter(x, Double.NegativeInfinity);
+            return NextAfter(x, double.NegativeInfinity);
         }
 #endif
 
@@ -2323,7 +2323,7 @@ namespace System.Xml.Xsl
             private int _exponent;             // Base-10 scaling factor (0 means decimal point immediately precedes first digit)
             private int _sign;                 // Sign is -1 or 1, depending on sign of number
             private int _mantissaSize;         // Size of mantissa
-            private byte[] _mantissa = new byte[MaxDigits];    // Array of base-10 digits
+            private readonly byte[] _mantissa = new byte[MaxDigits];    // Array of base-10 digits
 
             public int Exponent { get { return _exponent; } set { _exponent = value; } }
             public int Sign { get { return _sign; } set { _sign = value; } }
@@ -2526,7 +2526,7 @@ namespace System.Xml.Xsl
                 }
                 else
                 {
-                    dblLowPrec = Double.NaN;
+                    dblLowPrec = double.NaN;
                 }
 #else
                     goto LDone;
@@ -2576,7 +2576,7 @@ namespace System.Xml.Xsl
 #if DEBUG
                     Debug.Assert(dbl == (double)num);
                     dblLo = dec.AdjustDbl(dbl);
-                    Debug.Assert(dbl == dblLo || Double.IsNaN(dblLo));
+                    Debug.Assert(dbl == dblLo || double.IsNaN(dblLo));
 #endif
                     goto LDone;
                 }

@@ -392,10 +392,10 @@ namespace System.Runtime.Serialization
 
         private static readonly Dictionary<string, string[]> s_knownSerializableTypeInfos = new Dictionary<string, string[]> {
             { "System.Collections.Generic.KeyValuePair`2", Array.Empty<string>() },
-            { "System.Collections.Generic.Queue`1", new [] { "_syncRoot" } },
-            { "System.Collections.Generic.Stack`1", new [] {"_syncRoot" } },
-            { "System.Collections.ObjectModel.ReadOnlyCollection`1", new [] {"_syncRoot" } },
-            { "System.Collections.ObjectModel.ReadOnlyDictionary`2", new [] {"_syncRoot", "_keys","_values" } },
+            { "System.Collections.Generic.Queue`1", new[] { "_syncRoot" } },
+            { "System.Collections.Generic.Stack`1", new[] {"_syncRoot" } },
+            { "System.Collections.ObjectModel.ReadOnlyCollection`1", new[] {"_syncRoot" } },
+            { "System.Collections.ObjectModel.ReadOnlyDictionary`2", new[] {"_syncRoot", "_keys","_values" } },
             { "System.Tuple`1", Array.Empty<string>() },
             { "System.Tuple`2", Array.Empty<string>() },
             { "System.Tuple`3", Array.Empty<string>() },
@@ -404,8 +404,8 @@ namespace System.Runtime.Serialization
             { "System.Tuple`6", Array.Empty<string>() },
             { "System.Tuple`7", Array.Empty<string>() },
             { "System.Tuple`8", Array.Empty<string>() },
-            { "System.Collections.Queue", new [] {"_syncRoot" } },
-            { "System.Collections.Stack", new [] {"_syncRoot" } },
+            { "System.Collections.Queue", new[] {"_syncRoot" } },
+            { "System.Collections.Stack", new[] {"_syncRoot" } },
             { "System.Globalization.CultureInfo", Array.Empty<string>() },
             { "System.Version", Array.Empty<string>() },
         };
@@ -697,7 +697,7 @@ namespace System.Runtime.Serialization
             /// </SecurityNote>
             private bool _hasDataContract;
             private bool _hasExtensionData;
-            private bool _isScriptObject;
+            private readonly bool _isScriptObject;
 
             private XmlDictionaryString[] _childElementNamespaces;
             private XmlFormatClassReaderDelegate _xmlFormatReaderDelegate;
@@ -744,11 +744,11 @@ namespace System.Runtime.Serialization
                     // while a pre-generated DataContract is incomplete.
                     //
                     // At this point in code, we're in the midlle of creating a new DataContract at runtime, so we need to make
-                    // sure that we create our own base type DataContract when the base type could potentially have SG generated 
-                    // DataContract. 
+                    // sure that we create our own base type DataContract when the base type could potentially have SG generated
+                    // DataContract.
                     //
                     // We wanted to enable the fix for the issue described above only when SG generated DataContracts are available.
-                    // Currently we don't have a good way of detecting usage of SG (either globally or per data contract). 
+                    // Currently we don't have a good way of detecting usage of SG (either globally or per data contract).
 
                     DataContract baseContract = DataContract.GetDataContract(baseType);
                     if (baseContract is CollectionDataContract)

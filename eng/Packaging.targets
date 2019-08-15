@@ -1,4 +1,11 @@
 <Project>
+  <!-- Add validation for netcoreapp5.0 to package build and testing -->
+  <ItemGroup>
+    <DefaultValidateFramework Include="netcoreapp5.0">
+      <RuntimeIDs>@(NETCoreApp30RIDs)</RuntimeIDs>
+    </DefaultValidateFramework>
+  </ItemGroup>
+
   <!--     There are some packages where we require only one ref for a specific framework to be present. In order to avoid problems with this package when targetting 
            dektop with RAR we will make sure there are no exclude=compile references in the package.
     For more info, please check issues:
@@ -13,7 +20,11 @@
     </ItemGroup>    
   </Target>
 
-  <Target Name="ValidateExcludeCompileDesktop" AfterTargets="GetPackageDependencies" Inputs="%(Dependency.Identity);%(Dependency.TargetFramework)" Outputs="unused">
+  <Target Name="ValidateExcludeCompileDesktop"
+          AfterTargets="GetPackageDependencies"
+          Inputs="%(Dependency.Identity);%(Dependency.TargetFramework)" 
+          Outputs="unused"
+          Condition="'$(SkipValidatePackage)' != 'true'">
     <PropertyGroup>
       <_excludeCompile Condition="@(Dependency->WithMetadataValue('Exclude', 'Compile')->Count()) == @(Dependency->Count())">true</_excludeCompile>
     </PropertyGroup>

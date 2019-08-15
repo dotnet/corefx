@@ -16,15 +16,15 @@ using System.Xml;
 
 namespace System.Data.SqlClient
 {
-    sealed internal class SqlStream : Stream
+    internal sealed class SqlStream : Stream
     {
         private SqlDataReader _reader; // reader we will stream off
-        private int _columnOrdinal;
+        private readonly int _columnOrdinal;
         private long _bytesCol;
         private int _bom;
         private byte[] _bufferedData;
-        private bool _processAllRows;
-        private bool _advanceReader;
+        private readonly bool _processAllRows;
+        private readonly bool _advanceReader;
         private bool _readFirstRow = false;
         private bool _endOfColumn = false;
 
@@ -129,7 +129,7 @@ namespace System.Data.SqlClient
                 throw ADP.ArgumentOutOfRange(nameof(count));
             }
 
-            // Need to find out if we should add byte order mark or not. 
+            // Need to find out if we should add byte order mark or not.
             // We need to add this if we are getting ntext xml, not if we are getting binary xml
             // Binary Xml always begins with the bytes 0xDF and 0xFF
             // If we aren't getting these, then we are getting unicode xml
@@ -312,9 +312,9 @@ namespace System.Data.SqlClient
 
     // XmlTextReader does not read all the bytes off the network buffers, so we have to cache it here in the random access
     // case. This causes double buffering and is a perf hit, but this is not the high perf way for accessing this type of data.
-    // In the case of sequential access, we do not have to do any buffering since the XmlTextReader we return can become 
+    // In the case of sequential access, we do not have to do any buffering since the XmlTextReader we return can become
     // invalid as soon as we move off the current column.
-    sealed internal class SqlCachedStream : Stream
+    internal sealed class SqlCachedStream : Stream
     {
         private int _currentPosition;   // Position within the current array byte
         private int _currentArrayIndex; // Index into the _cachedBytes List
@@ -548,9 +548,9 @@ namespace System.Data.SqlClient
         }
     }
 
-    sealed internal class SqlStreamingXml
+    internal sealed class SqlStreamingXml
     {
-        private int _columnOrdinal;
+        private readonly int _columnOrdinal;
         private SqlDataReader _reader;
         private XmlReader _xmlReader;
         private XmlWriter _xmlWriter;
@@ -660,7 +660,7 @@ namespace System.Data.SqlClient
             return (long)cnt;
         }
 
-        // This method duplicates the work of XmlWriter.WriteNode except that it reads one element at a time 
+        // This method duplicates the work of XmlWriter.WriteNode except that it reads one element at a time
         // instead of reading the entire node like XmlWriter.
         private void WriteXmlElement()
         {

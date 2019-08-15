@@ -10,7 +10,7 @@ namespace System.Text.Json.Serialization.Tests
     public static partial class CustomConverterTests
     {
         // A custom long[] converter as comma-delimited string "1,2,3".
-        private class LongArrayConverter : JsonConverter<long[]>
+        internal class LongArrayConverter : JsonConverter<long[]>
         {
             public LongArrayConverter() { }
 
@@ -37,7 +37,7 @@ namespace System.Text.Json.Serialization.Tests
             {
                 var builder = new StringBuilder();
 
-                for(int i = 0; i < value.Length; i++)
+                for (int i = 0; i < value.Length; i++)
                 {
                     builder.Append(value[i].ToString());
 

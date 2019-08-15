@@ -18,13 +18,13 @@ namespace System.Xml
         private DataColumn _column;
         private bool _fOnValue;
         internal XmlBoundElement _parentOfNS;
-        internal static readonly int[] s_xmlNodeType_To_XpathNodeType_Map;
+        internal static readonly int[] s_xmlNodeType_To_XpathNodeType_Map = CreateXmlNodeTypeToXpathNodeTypeMap();
         internal const string StrReservedXmlns = "http://www.w3.org/2000/xmlns/";
         internal const string StrReservedXml = "http://www.w3.org/XML/1998/namespace";
         internal const string StrXmlNS = "xmlns";
         private bool _bNeedFoliate;
 
-        static XPathNodePointer()
+        private static int[] CreateXmlNodeTypeToXpathNodeTypeMap()
         {
 #if DEBUG
             int max = 0, tempVal = 0;
@@ -36,27 +36,28 @@ namespace System.Xml
                     max = tempVal;
             }
             Debug.Assert(max == (int)XmlNodeType.XmlDeclaration);
-#endif        
-            s_xmlNodeType_To_XpathNodeType_Map = new int[20];
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.None)] = -1;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.Element)] = (int)XPathNodeType.Element;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.Attribute)] = (int)XPathNodeType.Attribute;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.Text)] = (int)XPathNodeType.Text;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.CDATA)] = (int)XPathNodeType.Text;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.EntityReference)] = -1;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.Entity)] = -1;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.ProcessingInstruction)] = (int)XPathNodeType.ProcessingInstruction;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.Comment)] = (int)XPathNodeType.Comment;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.Document)] = (int)XPathNodeType.Root;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.DocumentType)] = -1;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.DocumentFragment)] = (int)XPathNodeType.Root;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.Notation)] = -1;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.Whitespace)] = (int)XPathNodeType.Whitespace;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.SignificantWhitespace)] = (int)XPathNodeType.SignificantWhitespace;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.EndElement)] = -1;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.EndEntity)] = -1;
-            s_xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.XmlDeclaration)] = -1;
-            // xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.All)] = -1;      
+#endif
+            var map = new int[20];
+            map[(int)XmlNodeType.None] = -1;
+            map[(int)XmlNodeType.Element] = (int)XPathNodeType.Element;
+            map[(int)XmlNodeType.Attribute] = (int)XPathNodeType.Attribute;
+            map[(int)XmlNodeType.Text] = (int)XPathNodeType.Text;
+            map[(int)XmlNodeType.CDATA] = (int)XPathNodeType.Text;
+            map[(int)XmlNodeType.EntityReference] = -1;
+            map[(int)XmlNodeType.Entity] = -1;
+            map[(int)XmlNodeType.ProcessingInstruction] = (int)XPathNodeType.ProcessingInstruction;
+            map[(int)XmlNodeType.Comment] = (int)XPathNodeType.Comment;
+            map[(int)XmlNodeType.Document] = (int)XPathNodeType.Root;
+            map[(int)XmlNodeType.DocumentType] = -1;
+            map[(int)XmlNodeType.DocumentFragment] = (int)XPathNodeType.Root;
+            map[(int)XmlNodeType.Notation] = -1;
+            map[(int)XmlNodeType.Whitespace] = (int)XPathNodeType.Whitespace;
+            map[(int)XmlNodeType.SignificantWhitespace] = (int)XPathNodeType.SignificantWhitespace;
+            map[(int)XmlNodeType.EndElement] = -1;
+            map[(int)XmlNodeType.EndEntity] = -1;
+            map[(int)XmlNodeType.XmlDeclaration] = -1;
+            // xmlNodeType_To_XpathNodeType_Map[(int)(XmlNodeType.All)] = -1;
+            return map;
         }
 
         private XPathNodeType DecideXPNodeTypeForTextNodes(XmlNode node)
@@ -185,7 +186,7 @@ namespace System.Xml
             }
         }
 
-        //LDAI: From CodeReview: Perf: We should have another array similar w/ 
+        //LDAI: From CodeReview: Perf: We should have another array similar w/
         //  xmlNodeType_To_XpathNodeType_Map that will return String.Empty for everything but the element and
         //  attribute case.
         internal string LocalName
@@ -576,7 +577,6 @@ namespace System.Xml
             DataTable table = row.Table;
             DataColumnCollection columns = table.Columns;
             int iColumn = (col != null) ? col.Ordinal - 1 : columns.Count - 1;
-            int cColumns = columns.Count;
             DataRowVersion rowVersion = (row.RowState == DataRowState.Detached) ? DataRowVersion.Proposed : DataRowVersion.Current;
 
             for (; iColumn >= 0; iColumn--)
@@ -1070,7 +1070,7 @@ namespace System.Xml
             XPathNodePointer xp2 = other.Clone((DataDocumentXPathNavigator)(other._owner.Target));
             while (xp1.MoveToNextNamespace(XPathNamespaceScope.All))
             {
-                if (xp1.IsSamePosition(other))
+                if (xp1.IsSamePosition(xp2))
                     return XmlNodeOrder.Before;
             }
             return XmlNodeOrder.After;
@@ -1084,7 +1084,7 @@ namespace System.Xml
             for (; parent != null; depth++)
             {
                 curNode = parent;
-                parent = curNode.ParentNode; // no need to check for attribute since navigator can't be built on its children or navigate to its children 
+                parent = curNode.ParentNode; // no need to check for attribute since navigator can't be built on its children or navigate to its children
             }
             return curNode;
         }
@@ -1093,7 +1093,7 @@ namespace System.Xml
         {
             RealFoliate();
             other.RealFoliate();
-            Debug.Assert(other != null);
+
             if (IsSamePosition(other))
                 return XmlNodeOrder.Same;
             XmlNode curNode1 = null, curNode2 = null;
@@ -1313,7 +1313,7 @@ namespace System.Xml
             if (n == null)
                 throw new InvalidOperationException(SR.DataDom_Foliation);
 
-            // Cannot use MoveTo( n ); b/c the initial state for MoveTo is invalid (region is foliated but this is not)            
+            // Cannot use MoveTo( n ); b/c the initial state for MoveTo is invalid (region is foliated but this is not)
             _node = n;
             _column = null;
             _fOnValue = false;
@@ -1338,7 +1338,7 @@ namespace System.Xml
                     return null;
             }
             else
-            { //defoliated so that we need to search through its column 
+            { //defoliated so that we need to search through its column
                 DataRow curRow = be.Row;
                 if (curRow == null)
                     return null;
@@ -1408,7 +1408,6 @@ namespace System.Xml
                 attrName = "xmlns";
             RealFoliate();
             XmlNode node = _node;
-            XmlNodeType nt = node.NodeType;
             XmlAttribute attr = null;
             XmlBoundElement be = null;
             while (node != null)
@@ -1427,7 +1426,7 @@ namespace System.Xml
                         }
                     }
                     else
-                    {//defoliated so that we need to search through its column 
+                    {//defoliated so that we need to search through its column
                         DataRow curRow = be.Row;
                         if (curRow == null)
                             return false;
@@ -1488,7 +1487,7 @@ namespace System.Xml
                     }
                 }
                 else
-                {//defoliated so that we need to search through its column 
+                {//defoliated so that we need to search through its column
                     DataRow curRow = be.Row;
                     if (curRow == null)
                         return false;

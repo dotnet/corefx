@@ -330,12 +330,12 @@ namespace System.Composition.UnitTests
             }
             catch (Exception ex)
             {
-                Assert.True(ex.Message.Contains("The component (unknown) cannot be created outside the Boundary sharing boundary"));
+                Assert.Contains("The component (unknown) cannot be created outside the Boundary sharing boundary", ex.Message);
             }
         }
 
         /// <summary>
-        /// Need a partcreationpolicy currently. 
+        /// Need a partcreationpolicy currently.
         /// Needs to be fixed so that specifying boundary would automatically create the shared
         /// </summary>
         [Fact]
@@ -368,10 +368,10 @@ namespace System.Composition.UnitTests
             var cInstance = cc.GetExport<CirA>();
             cInstance.SharedState = 1;
             var bInstance1 = cInstance.CreateInstance();
-            Assert.Equal(bInstance1.DepC.DepA.SharedState, 1);
+            Assert.Equal(1, bInstance1.DepC.DepA.SharedState);
             bInstance1.DepC.DepA.SharedState = 10;
             cInstance.CreateInstance();
-            Assert.Equal(bInstance1.DepC.DepA.SharedState, 10);
+            Assert.Equal(10, bInstance1.DepC.DepA.SharedState);
         }
 
         /// <summary>
@@ -451,8 +451,8 @@ namespace System.Composition.UnitTests
         }
 
         /// <summary>
-        /// ExportFactory class is itself shared and 
-        /// will still respect the CreationPolicyAttribute on a part.  If the export factory 
+        /// ExportFactory class is itself shared and
+        /// will still respect the CreationPolicyAttribute on a part.  If the export factory
         /// is creating a part which is shared, it will return back the same instance of the part.
         /// </summary>
         [Fact]
@@ -469,7 +469,7 @@ namespace System.Composition.UnitTests
         }
 
         /// <summary>
-        /// Class which is nonShared has an exportFactory in it for a shared part. 
+        /// Class which is nonShared has an exportFactory in it for a shared part.
         /// Two instances of the root class are created , the part created using export factory should not be shared
         /// </summary>
         [Fact]

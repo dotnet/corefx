@@ -10,6 +10,7 @@ using System.Runtime.Intrinsics.X86;
 
 using Internal.Runtime.CompilerServices;
 
+#pragma warning disable SA1121 // explicitly using type aliases instead of built-in types
 #if BIT64
 using nuint = System.UInt64;
 #else
@@ -1448,12 +1449,7 @@ namespace System
                         // So the bit position in 'matches' corresponds to the element offset.
 
                         // 16 elements in Vector128<byte> so we compare to ushort.MaxValue to check if everything matched
-                        if (matches == ushort.MaxValue)
-                        {
-                            // All matched
-                            offset += Vector128<byte>.Count;
-                        }
-                        else
+                        if (matches != ushort.MaxValue)
                         {
                             goto Difference;
                         }

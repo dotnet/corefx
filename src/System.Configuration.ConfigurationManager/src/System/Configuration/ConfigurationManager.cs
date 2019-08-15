@@ -13,15 +13,9 @@ namespace System.Configuration
         private static volatile IInternalConfigSystem s_configSystem;
 
         // Initialization state
-        private static volatile InitState s_initState;
-        private static readonly object s_initLock;
+        private static volatile InitState s_initState = InitState.NotStarted;
+        private static readonly object s_initLock = new object();
         private static volatile Exception s_initError;
-
-        static ConfigurationManager()
-        {
-            s_initState = InitState.NotStarted;
-            s_initLock = new object();
-        }
 
         // to be used by System.Diagnostics to avoid false config results during config init
         internal static bool SetConfigurationSystemInProgress
@@ -44,7 +38,7 @@ namespace System.Configuration
                 object section = GetSection("appSettings");
                 if (!(section is NameValueCollection))
                 {
-                    // If config is null or not the type we expect, the declaration was changed. 
+                    // If config is null or not the type we expect, the declaration was changed.
                     // Treat it as a configuration error.
                     throw new ConfigurationErrorsException(SR.Config_appsettings_declaration_invalid);
                 }
@@ -59,10 +53,10 @@ namespace System.Configuration
             {
                 object section = GetSection("connectionStrings");
 
-                // Verify type, and return the collection 
+                // Verify type, and return the collection
                 if ((section == null) || (section.GetType() != typeof(ConnectionStringsSection)))
                 {
-                    // If config is null or not the type we expect, the declaration was changed. 
+                    // If config is null or not the type we expect, the declaration was changed.
                     // Treat it as a configuration error.
                     throw new ConfigurationErrorsException(SR.Config_connectionstrings_declaration_invalid);
                 }
@@ -88,7 +82,7 @@ namespace System.Configuration
 
         private static void EnsureConfigurationSystem()
         {
-            // If a configuration system has not yet been set, 
+            // If a configuration system has not yet been set,
             // create the DefaultConfigurationSystem for exe's.
             lock (s_initLock)
             {

@@ -505,7 +505,7 @@ namespace System.DirectoryServices.AccountManagement
                                 // membership.  So save it off for later processing.
                                 _foreignMembersCurrentGroup.Add(memberDE);
                                 _usersVisited.Add(memberDE.Properties["distinguishedName"][0].ToString(), true);
-                                disposeMemberDE = false; //We store the FPO DirectoryEntry objects for further processing. So do NOT dispose it. 
+                                disposeMemberDE = false; //We store the FPO DirectoryEntry objects for further processing. So do NOT dispose it.
                             }
 
                             // and go on to the next member....
@@ -569,9 +569,9 @@ namespace System.DirectoryServices.AccountManagement
                             _storeCtx.InitializeNewDirectoryOptions(groupDE);
 
                             // set up for the next round of enumeration
-                            //Here a new DirectoryEntry object is created and passed 
-                            //to RangeRetriever object. Hence, configure 
-                            //RangeRetriever to dispose the DirEntry on its dispose. 
+                            //Here a new DirectoryEntry object is created and passed
+                            //to RangeRetriever object. Hence, configure
+                            //RangeRetriever to dispose the DirEntry on its dispose.
                             _membersQueue.Enqueue(new RangeRetriever(groupDE, "member", true));
 
                             // and go on to the first member of this new group....
@@ -591,7 +591,7 @@ namespace System.DirectoryServices.AccountManagement
 
             List<byte[]> sidList = new List<byte[]>(_foreignMembersCurrentGroup.Count);
 
-            // Foreach foreign principal retrive the sid. 
+            // Foreach foreign principal retrive the sid.
             // If the SID is for a fake object we have to track it separately.  If we were attempt to translate it
             // it would fail and not be returned and we would lose it.
             // Once we have a list of sids then translate them against the target store in one call.
@@ -611,7 +611,7 @@ namespace System.DirectoryServices.AccountManagement
                 if (sidType == SidType.FakeObject)
                 {
                     //Add the foreign member DirectoryEntry to fakePrincipalMembers list for further translation
-                    //This de will be disposed after completing the translation by another code block. 
+                    //This de will be disposed after completing the translation by another code block.
                     _fakePrincipalMembers.Add(de);
 
                     // It's a FPO for something like NT AUTHORITY\NETWORK SERVICE.
@@ -745,7 +745,7 @@ namespace System.DirectoryServices.AccountManagement
                     {
                         outerNeedToRetry = true;
 
-                        // Determine the domainFunctionalityMode of the foreign domain.  If they are W2k or not a global group then we can't use ASQ.                    
+                        // Determine the domainFunctionalityMode of the foreign domain.  If they are W2k or not a global group then we can't use ASQ.
                         if (_foreignGroups[0].Context.ServerInformation.OsVersion == DomainControllerMode.Win2k ||
                             _foreignGroups[0].GroupScope != GroupScope.Global)
                         {
@@ -845,7 +845,7 @@ namespace System.DirectoryServices.AccountManagement
             _storeCtx = (ADStoreCtx)foreignGroup.Context.QueryCtx;
 
             //Here the foreignGroup object is removed from the foreignGroups collection.
-            //and not used anymore. Hence, configure RangeRetriever to dispose the DirEntry on its dispose. 
+            //and not used anymore. Hence, configure RangeRetriever to dispose the DirEntry on its dispose.
             _membersQueue.Enqueue(new RangeRetriever((DirectoryEntry)foreignGroup.UnderlyingObject, "member", true));
 
             string groupDN = (string)((DirectoryEntry)foreignGroup.UnderlyingObject).Properties["distinguishedName"].Value;
@@ -1296,7 +1296,7 @@ namespace System.DirectoryServices.AccountManagement
         //
 
         private UnsafeNativeMethods.IADsPathname _pathCracker = null;
-        private object _pathLock = new object();
+        private readonly object _pathLock = new object();
         private Dictionary<string, bool> _usersVisited = new Dictionary<string, bool>();
 
         // The 0th entry in this list is always the DN of the original group/user whose membership we're querying
@@ -1307,25 +1307,25 @@ namespace System.DirectoryServices.AccountManagement
         protected object current = null; // current member of the group (or current group of the user)
 
         private bool _returnedPrimaryGroup = false;
-        private string _primaryGroupDN;                      // the DN of the user's PrimaryGroup (not included in this.members/originalMembers)
+        private readonly string _primaryGroupDN;                      // the DN of the user's PrimaryGroup (not included in this.members/originalMembers)
 
-        private bool _recursive;
+        private readonly bool _recursive;
 
-        private Queue<IEnumerable> _membersQueue = new Queue<IEnumerable>();
+        private readonly Queue<IEnumerable> _membersQueue = new Queue<IEnumerable>();
         private IEnumerable _members;            // the membership we're currently enumerating over
-        private Queue<IEnumerable> _originalMembers = new Queue<IEnumerable>();    // the membership we started off with (before recursing)
+        private readonly Queue<IEnumerable> _originalMembers = new Queue<IEnumerable>();    // the membership we started off with (before recursing)
 
         private IEnumerator _membersEnum = null;
 
         private ADStoreCtx _storeCtx;
-        private ADStoreCtx _originalStoreCtx;
+        private readonly ADStoreCtx _originalStoreCtx;
 
         private bool _atBeginning = true;
 
         private bool _disposed = false;
 
         // foreign
-        // This contains a list of employees built while enumerating the current group.  These are FSP objects in the current domain and need to 
+        // This contains a list of employees built while enumerating the current group.  These are FSP objects in the current domain and need to
         // be translated to find out the domain that holds the actual object.
         private List<DirectoryEntry> _foreignMembersCurrentGroup = new List<DirectoryEntry>();
         // List of objects from the group tha are actual fake group objects.
@@ -1339,20 +1339,20 @@ namespace System.DirectoryServices.AccountManagement
         private List<GroupPrincipal> _foreignGroups = new List<GroupPrincipal>();
 
         // members based on a query (used for users who are group members by virtue of their primaryGroupId pointing to the group)
-        private DirectorySearcher _primaryGroupMembersSearcher;
+        private readonly DirectorySearcher _primaryGroupMembersSearcher;
         private SearchResultCollection _queryMembersResults = null;
         private IEnumerator _queryMembersResultEnumerator = null;
 
         private DirectorySearcher _currentMembersSearcher = null;
 
-        private Queue<DirectorySearcher> _memberSearchersQueue = new Queue<DirectorySearcher>();
-        private Queue<DirectorySearcher> _memberSearchersQueueOriginal = new Queue<DirectorySearcher>();
+        private readonly Queue<DirectorySearcher> _memberSearchersQueue = new Queue<DirectorySearcher>();
+        private readonly Queue<DirectorySearcher> _memberSearchersQueueOriginal = new Queue<DirectorySearcher>();
 
         private SearchResultCollection _memberSearchResults = null;
         private IEnumerator _memberSearchResultsEnumerator = null;
 
         private ExpansionMode _expansionMode;
-        private ExpansionMode _originalExpansionMode;
+        private readonly ExpansionMode _originalExpansionMode;
 
         private string BuildPathFromDN(string dn)
         {

@@ -19,7 +19,7 @@ namespace System.Diagnostics
     {
         internal byte[] dataBuf;
         internal int bufOffset;
-        private EventLogInternal owner;
+        private readonly EventLogInternal owner;
         private string category;
         private string message;
 
@@ -474,6 +474,5 @@ namespace System.Diagnostics
         }
 
         private static readonly DateTime beginningOfTime = new DateTime(1970, 1, 1, 0, 0, 0);
-        private const int OFFSETFIXUP = 4 + 4 + 4 + 4 + 4 + 4 + 2 + 2 + 2 + 2 + 4 + 4 + 4 + 4 + 4 + 4;
     }
 }

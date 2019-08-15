@@ -20,15 +20,15 @@ namespace System.Xml
         // No special formatting is done (this is the default).
         None,
 
-        //This option causes child elements to be indented using the Indentation and IndentChar properties.  
+        //This option causes child elements to be indented using the Indentation and IndentChar properties.
         // It only indents Element Content (http://www.w3.org/TR/1998/REC-xml-19980210#sec-element-content)
         // and not Mixed Content (http://www.w3.org/TR/1998/REC-xml-19980210#sec-mixed-content)
         // according to the XML 1.0 definitions of these terms.
         Indented,
     };
 
-    // Represents a writer that provides fast non-cached forward-only way of generating XML streams 
-    // containing XML documents that conform to the W3CExtensible Markup Language (XML) 1.0 specification 
+    // Represents a writer that provides fast non-cached forward-only way of generating XML streams
+    // containing XML documents that conform to the W3CExtensible Markup Language (XML) 1.0 specification
     // and the Namespaces in XML specification.
 
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -131,16 +131,16 @@ namespace System.Xml
         // Fields
         //
         // output
-        private TextWriter _textWriter;
-        private XmlTextEncoder _xmlEncoder;
-        private Encoding _encoding;
+        private readonly TextWriter _textWriter;
+        private readonly XmlTextEncoder _xmlEncoder;
+        private readonly Encoding _encoding;
 
         // formatting
         private Formatting _formatting;
         private bool _indented; // perf - faster to check a boolean.
         private int _indentation;
         private char[] _indentChars;
-        private static char[] s_defaultIndentChars = CreateDefaultIndentChars();
+        private static readonly char[] s_defaultIndentChars = CreateDefaultIndentChars();
 
         // This method is needed as the native code compiler fails when this initialization is inline
         private static char[] CreateDefaultIndentChars()
@@ -189,7 +189,7 @@ namespace System.Xml
         private const int MaxNamespacesWalkCount = 16;
 #endif
 
-        private static string[] s_stateName = {
+        private static readonly string[] s_stateName = {
             "Start",
             "Prolog",
             "PostDTD",
@@ -202,7 +202,7 @@ namespace System.Xml
             "Closed",
         };
 
-        private static string[] s_tokenName = {
+        private static readonly string[] s_tokenName = {
             "PI",
             "Doctype",
             "Comment",
@@ -822,7 +822,7 @@ namespace System.Xml
             }
         }
 
-        // Writes out the given whitespace. 
+        // Writes out the given whitespace.
         public override void WriteWhitespace(string ws)
         {
             try
@@ -1022,7 +1022,7 @@ namespace System.Xml
             _textWriter.Flush();
         }
 
-        // Writes out the specified name, ensuring it is a valid Name according to the XML specification 
+        // Writes out the specified name, ensuring it is a valid Name according to the XML specification
         // (http://www.w3.org/TR/1998/REC-xml-19980210#NT-Name
         public override void WriteName(string name)
         {
@@ -1093,7 +1093,7 @@ namespace System.Xml
             return s;
         }
 
-        // Gets an XmlSpace representing the current xml:space scope. 
+        // Gets an XmlSpace representing the current xml:space scope.
         public override XmlSpace XmlSpace
         {
             get
@@ -1426,13 +1426,13 @@ namespace System.Xml
             {
                 _textWriter.WriteLine();
                 int i = (beforeEndElement ? _top - 1 : _top) * _indentation;
-                if(i <= _indentChars.Length)
+                if (i <= _indentChars.Length)
                 {
                     _textWriter.Write(_indentChars, 0, i);
                 }
                 else
                 {
-                    while(i > 0)
+                    while (i > 0)
                     {
                         _textWriter.Write(_indentChars, 0, Math.Min(i, _indentChars.Length));
                         i -= _indentChars.Length;
@@ -1457,7 +1457,7 @@ namespace System.Xml
                     case NamespaceState.DeclaredButNotWrittenOut:
                         Debug.Assert(declared == true, "Unexpected situation!!");
                         // the first namespace that the user gave us is what we
-                        // like to keep. 
+                        // like to keep.
                         break;
                     case NamespaceState.Uninitialized:
                     case NamespaceState.NotDeclaredButInScope:
@@ -1650,7 +1650,7 @@ namespace System.Xml
             _textWriter.Write(name);
         }
 
-        // This method is used for validation of the DOCTYPE, processing instruction and entity names plus names 
+        // This method is used for validation of the DOCTYPE, processing instruction and entity names plus names
         // written out by the user via WriteName and WriteQualifiedName.
         // Unfortunatelly the names of elements and attributes are not validated by the XmlTextWriter.
         // Also this method does not check wheather the character after ':' is a valid start name character. It accepts

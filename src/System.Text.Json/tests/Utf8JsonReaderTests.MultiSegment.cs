@@ -208,6 +208,8 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(SmallTestCases))]
         public static void TestPartialJsonReaderMultiSegment(bool compactData, TestCaseType type, string jsonString)
         {
+            _ = type;
+
             // Remove all formatting/indendation
             if (compactData)
             {
@@ -247,6 +249,8 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(SmallTestCases))]
         public static void TestPartialJsonReaderSlicesMultiSegment(bool compactData, TestCaseType type, string jsonString)
         {
+            _ = type;
+
             // Remove all formatting/indendation
             if (compactData)
             {
@@ -327,7 +331,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(JsonTokenType.None, json.TokenType);
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(0, json.BytesConsumed);
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -338,7 +342,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(previous, current);
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(0, json.BytesConsumed);
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -354,7 +358,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(lastToken, json.TokenType);
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -365,7 +369,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(lastToken, json.TokenType);
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(false, json.HasValueSequence);
+            Assert.False(json.HasValueSequence);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -1122,29 +1126,6 @@ namespace System.Text.Json.Tests
 
             Assert.False(json.Read());
             Assert.Equal(0, json.BytesConsumed);
-        }
-
-        [Theory]
-        [InlineData("//", "", 1)]
-        [InlineData("//", "", 2)]
-        [InlineData("//", "", 3)]
-        [InlineData("//", "", 100)]
-        [InlineData("//a", "a", 1)]
-        [InlineData("//a", "a", 2)]
-        [InlineData("//a", "a", 3)]
-        [InlineData("//a", "a", 100)]
-        [InlineData("//abc", "abc", 1)]
-        [InlineData("//abc", "abc", 2)]
-        [InlineData("//abc", "abc", 3)]
-        [InlineData("//abc", "abc", 100)]
-        public static void JsonWithSingleLineCommentWithNoLineEndingsNonFinalBlockMultiSegment(string jsonString, string expectedComment, int segmentSize)
-        {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
-            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, segmentSize);
-            var json = new Utf8JsonReader(sequence, isFinalBlock: false, state);
-
-            Assert.False(json.Read());
         }
 
         [Theory]

@@ -79,7 +79,7 @@ namespace System.Text
         {
             bytesUnknown = bytesUnknown ?? Array.Empty<byte>();
 
-            // Create a string representation of our bytes.            
+            // Create a string representation of our bytes.
             StringBuilder strBytes = new StringBuilder(bytesUnknown.Length * 3);
 
             int i;
@@ -106,8 +106,8 @@ namespace System.Text
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class DecoderFallbackException : ArgumentException
     {
-        private byte[]? _bytesUnknown = null;
-        private int _index = 0;
+        private readonly byte[]? _bytesUnknown = null;
+        private readonly int _index = 0;
 
         public DecoderFallbackException()
             : base(SR.Arg_ArgumentException)

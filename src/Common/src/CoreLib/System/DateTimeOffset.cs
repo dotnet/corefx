@@ -176,7 +176,7 @@ namespace System
         {
             get
             {
-                return new DateTimeOffset(DateTime.Now);
+                return ToLocalTime(DateTime.UtcNow, true);
             }
         }
 
@@ -559,7 +559,7 @@ namespace System
         //
         public static DateTimeOffset FromFileTime(long fileTime)
         {
-            return new DateTimeOffset(DateTime.FromFileTime(fileTime));
+            return ToLocalTime(DateTime.FromFileTimeUtc(fileTime), true);
         }
 
         public static DateTimeOffset FromUnixTimeSeconds(long seconds)
@@ -658,7 +658,7 @@ namespace System
         public static DateTimeOffset Parse(string input, IFormatProvider? formatProvider)
         {
             if (input == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.input);
-            return Parse(input!, formatProvider, DateTimeStyles.None); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return Parse(input, formatProvider, DateTimeStyles.None);
         }
 
         public static DateTimeOffset Parse(string input, IFormatProvider? formatProvider, DateTimeStyles styles)
@@ -689,7 +689,7 @@ namespace System
         {
             if (input == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.input);
             if (format == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.format);
-            return ParseExact(input!, format!, formatProvider, DateTimeStyles.None); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            return ParseExact(input, format, formatProvider, DateTimeStyles.None);
         }
 
         // Constructs a DateTimeOffset from a string. The string must specify a
@@ -792,7 +792,22 @@ namespace System
 
         internal DateTimeOffset ToLocalTime(bool throwOnOverflow)
         {
-            return new DateTimeOffset(UtcDateTime.ToLocalTime(throwOnOverflow));
+            return ToLocalTime(UtcDateTime, throwOnOverflow);
+        }
+
+        private static DateTimeOffset ToLocalTime(DateTime utcDateTime, bool throwOnOverflow)
+        {
+            TimeSpan offset = TimeZoneInfo.GetLocalUtcOffset(utcDateTime, TimeZoneInfoOptions.NoThrowOnInvalidTime);
+            long localTicks = utcDateTime.Ticks + offset.Ticks;
+            if (localTicks < DateTime.MinTicks || localTicks > DateTime.MaxTicks)
+            {
+                if (throwOnOverflow)
+                    throw new ArgumentException(SR.Arg_ArgumentOutOfRangeException);
+
+                localTicks = localTicks < DateTime.MinTicks ? DateTime.MinTicks : DateTime.MaxTicks;
+            }
+
+            return new DateTimeOffset(localTicks, offset);
         }
 
         public override string ToString()

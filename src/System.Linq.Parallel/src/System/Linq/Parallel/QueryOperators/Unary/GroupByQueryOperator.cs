@@ -169,7 +169,7 @@ namespace System.Linq.Parallel
         }
 
         //-----------------------------------------------------------------------------------
-        // Override of the query operator base class's Open method. 
+        // Override of the query operator base class's Open method.
         //
         internal override QueryResults<IGrouping<TGroupKey, TElement>> Open(QuerySettings settings, bool preferStriping)
         {
@@ -226,7 +226,7 @@ namespace System.Linq.Parallel
         protected readonly CancellationToken _cancellationToken;
         private Mutables _mutables; // All of the mutable state.
 
-        class Mutables
+        private class Mutables
         {
             internal HashLookup<Wrapper<TGroupKey>, ListChunk<TElement>> _hashLookup; // The lookup with key-value mappings.
             internal int _hashLookupIndex; // The current index within the lookup.
@@ -429,7 +429,7 @@ namespace System.Linq.Parallel
         protected readonly CancellationToken _cancellationToken;
         private Mutables _mutables; // All the mutable state.
 
-        class Mutables
+        private class Mutables
         {
             internal HashLookup<Wrapper<TGroupKey>, GroupKeyData> _hashLookup; // The lookup with key-value mappings.
             internal int _hashLookupIndex; // The current index within the lookup.
@@ -678,7 +678,7 @@ namespace System.Linq.Parallel
 
     internal class GroupByGrouping<TGroupKey, TElement> : IGrouping<TGroupKey, TElement>
     {
-        private KeyValuePair<Wrapper<TGroupKey>, ListChunk<TElement>> _keyValues; // A key value pair.
+        private readonly KeyValuePair<Wrapper<TGroupKey>, ListChunk<TElement>> _keyValues; // A key value pair.
 
         //---------------------------------------------------------------------------------------
         // Constructs a new grouping out of the key value pair.
@@ -703,7 +703,7 @@ namespace System.Linq.Parallel
         }
 
         //---------------------------------------------------------------------------------------
-        // Access to value enumerators. 
+        // Access to value enumerators.
         //
 
         IEnumerator<TElement> IEnumerable<TElement>.GetEnumerator()
@@ -724,12 +724,12 @@ namespace System.Linq.Parallel
     /// </summary>
     internal class OrderedGroupByGrouping<TGroupKey, TOrderKey, TElement> : IGrouping<TGroupKey, TElement>
     {
-        const int INITIAL_CHUNK_SIZE = 2;
+        private const int INITIAL_CHUNK_SIZE = 2;
 
-        private TGroupKey _groupKey; // The group key for this grouping
+        private readonly TGroupKey _groupKey; // The group key for this grouping
         private ListChunk<Pair<TOrderKey, TElement>> _values; // Values in this group
         private TElement[] _sortedValues; // Sorted values (allocated in DoneAdding)
-        private IComparer<TOrderKey> _orderComparer; // Comparer for order keys
+        private readonly IComparer<TOrderKey> _orderComparer; // Comparer for order keys
 
         /// <summary>
         /// Constructs a new grouping

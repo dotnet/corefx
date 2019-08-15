@@ -1224,7 +1224,7 @@ namespace System.Collections.Immutable.Tests
 
             Assert.Equal(expected, array.Remove(item, comparer));
             Assert.Equal(expected, ((IImmutableList<T>)array).Remove(item, comparer));
-            
+
             if (comparer == null || comparer == EqualityComparer<T>.Default)
             {
                 Assert.Equal(expected, array.Remove(item));
@@ -1406,7 +1406,7 @@ namespace System.Collections.Immutable.Tests
         {
             // Validates that a fixed bug in the inappropriate adding of the Empty
             // singleton enumerator to the reusable instances bag does not regress.
-            
+
             IEnumerable<int> oneElementBoxed = s_oneElement;
             IEnumerable<int> emptyBoxed = s_empty;
             IEnumerable<int> emptyDefaultBoxed = s_emptyDefault;
@@ -1670,6 +1670,7 @@ namespace System.Collections.Immutable.Tests
         [MemberData(nameof(IsDefaultOrEmptyData))]
         public void IsDefault(IEnumerable<int> source, bool isDefault, bool isEmpty)
         {
+            _ = isEmpty;
             var array = source.ToImmutableArray();
 
             Assert.Equal(isDefault, array.IsDefault);
@@ -1696,7 +1697,7 @@ namespace System.Collections.Immutable.Tests
         public void GetIndexer(IEnumerable<int> source)
         {
             var array = source.ToImmutableArray();
-            
+
             for (int i = 0; i < array.Length; i++)
             {
                 int expected = source.ElementAt(i);
@@ -2049,6 +2050,26 @@ namespace System.Collections.Immutable.Tests
             });
         }
 
+        public static IEnumerable<object[]> IStructuralComparableCompareToDefaultAndNonImmutableArrayInvalidData()
+        {
+            yield return new object[] { new int[0] };
+            yield return new object[] { new int[1] };
+            yield return new object[] { new string[0] };
+            yield return new object[] { new string[1] };
+        }
+
+        [Theory]
+        [MemberData(nameof(IStructuralComparableCompareToDefaultAndNonImmutableArrayInvalidData))]
+        public void IStructuralComparableCompareToDefaultAndNonImmutableArrayInvalid(object other)
+        {
+            var comparers = SharedComparers<int>().OfType<IComparer>().Except(new IComparer[] { null });
+
+            Assert.All(comparers, comparer =>
+            {
+                AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)s_emptyDefault).CompareTo(other, comparer));
+            });
+        }
+
         [Theory]
         [MemberData(nameof(IStructuralComparableCompareToNullComparerArgumentInvalidData))]
         public void IStructuralComparableCompareToNullComparerArgumentInvalid(IEnumerable<int> source, object other)
@@ -2192,11 +2213,10 @@ namespace System.Collections.Immutable.Tests
             yield return new object[] { new[] { 1, 2, 3, 4 }, 4 };
         }
 
-        [Theory]
-        [MemberData(nameof(BinarySearchData))]
-        public void BinarySearchDefaultInvalid(IEnumerable<int> source, int value)
+        [Fact]
+        public void BinarySearchDefaultInvalid()
         {
-            AssertExtensions.Throws<ArgumentNullException>("array", () => ImmutableArray.BinarySearch(s_emptyDefault, value));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => ImmutableArray.BinarySearch(s_emptyDefault, 42));
         }
 
         [Fact]
@@ -2214,7 +2234,7 @@ namespace System.Collections.Immutable.Tests
             // Note the point of this thread-safety test is *not* to test the thread-safety of the test itself.
             // This test has a known issue where the two threads will stomp on each others updates, but that's not the point.
             // The point is that ImmutableArray`1.Add should *never* throw. But if it reads its own T[] field more than once,
-            // it *can* throw because the field can be replaced with an array of another length. 
+            // it *can* throw because the field can be replaced with an array of another length.
             // In fact, much worse can happen where we corrupt data if we are for example copying data out of the array
             // in (for example) a CopyTo method and we read from the field more than once.
             // Also noteworthy: this method only tests the thread-safety of the Add method.
@@ -2340,7 +2360,7 @@ namespace System.Collections.Immutable.Tests
             // due to the prohibition on internal framework Reflection.
             //
             // This alternate method is despicable but ImmutableArray`1 has a documented contract of being exactly one reference-type field in size
-            // (for example, ImmutableInterlocked depends on it.) 
+            // (for example, ImmutableInterlocked depends on it.)
             //
             // That leaves precious few candidates for which field is the "array" field...
             //

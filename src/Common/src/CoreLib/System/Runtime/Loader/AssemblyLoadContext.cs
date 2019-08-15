@@ -38,11 +38,11 @@ namespace System.Runtime.Loader
         // synchronization primitive to protect against usage of this instance while unloading
         private readonly object _unloadLock;
 
-        private event Func<Assembly, string, IntPtr> _resolvingUnmanagedDll = null!;
+        private event Func<Assembly, string, IntPtr>? _resolvingUnmanagedDll;
 
-        private event Func<AssemblyLoadContext, AssemblyName, Assembly> _resolving = null!;
+        private event Func<AssemblyLoadContext, AssemblyName, Assembly>? _resolving;
 
-        private event Action<AssemblyLoadContext> _unloading = null!;
+        private event Action<AssemblyLoadContext>? _unloading;
 
         private readonly string? _name;
 
@@ -168,7 +168,7 @@ namespace System.Runtime.Loader
         //
         // Inputs: Invoking assembly, and library name to resolve
         // Returns: A handle to the loaded native library
-        public event Func<Assembly, string, IntPtr> ResolvingUnmanagedDll
+        public event Func<Assembly, string, IntPtr>? ResolvingUnmanagedDll
         {
             add
             {
@@ -186,7 +186,7 @@ namespace System.Runtime.Loader
         //
         // Inputs: The AssemblyLoadContext and AssemblyName to be loaded
         // Returns: The Loaded assembly object.
-        public event Func<AssemblyLoadContext, AssemblyName, Assembly?> Resolving
+        public event Func<AssemblyLoadContext, AssemblyName, Assembly?>? Resolving
         {
             add
             {
@@ -198,7 +198,7 @@ namespace System.Runtime.Loader
             }
         }
 
-        public event Action<AssemblyLoadContext> Unloading
+        public event Action<AssemblyLoadContext>? Unloading
         {
             add
             {
@@ -212,17 +212,17 @@ namespace System.Runtime.Loader
 
 #region AppDomainEvents
         // Occurs when an Assembly is loaded
-        internal static event AssemblyLoadEventHandler AssemblyLoad;
+        internal static event AssemblyLoadEventHandler? AssemblyLoad;
 
         // Occurs when resolution of type fails
-        internal static event ResolveEventHandler TypeResolve;
+        internal static event ResolveEventHandler? TypeResolve;
 
         // Occurs when resolution of resource fails
-        internal static event ResolveEventHandler ResourceResolve;
+        internal static event ResolveEventHandler? ResourceResolve;
 
         // Occurs when resolution of assembly fails
         // This event is fired after resolve events of AssemblyLoadContext fails
-        internal static event ResolveEventHandler AssemblyResolve;
+        internal static event ResolveEventHandler? AssemblyResolve;
 #endregion
 
         public static AssemblyLoadContext Default => DefaultAssemblyLoadContext.s_loadContext;
@@ -553,6 +553,111 @@ namespace System.Runtime.Loader
                     AssemblyLoadContext.SetCurrentContextualReflectionContext(_predecessor);
                 }
             }
+        }
+
+        // This method is invoked by the VM when using the host-provided assembly load context
+        // implementation.
+        private static Assembly? Resolve(IntPtr gchManagedAssemblyLoadContext, AssemblyName assemblyName)
+        {
+            AssemblyLoadContext context = (AssemblyLoadContext)(GCHandle.FromIntPtr(gchManagedAssemblyLoadContext).Target)!;
+
+            return context.ResolveUsingLoad(assemblyName);
+        }
+
+        // This method is invoked by the VM to resolve an assembly reference using the Resolving event
+        // after trying assembly resolution via Load override and TPA load context without success.
+        private static Assembly? ResolveUsingResolvingEvent(IntPtr gchManagedAssemblyLoadContext, AssemblyName assemblyName)
+        {
+            AssemblyLoadContext context = (AssemblyLoadContext)(GCHandle.FromIntPtr(gchManagedAssemblyLoadContext).Target)!;
+
+            // Invoke the AssemblyResolve event callbacks if wired up
+            return context.ResolveUsingEvent(assemblyName);
+        }
+
+        // This method is invoked by the VM to resolve a satellite assembly reference
+        // after trying assembly resolution via Load override without success.
+        private static Assembly? ResolveSatelliteAssembly(IntPtr gchManagedAssemblyLoadContext, AssemblyName assemblyName)
+        {
+            AssemblyLoadContext context = (AssemblyLoadContext)(GCHandle.FromIntPtr(gchManagedAssemblyLoadContext).Target)!;
+
+            // Invoke the ResolveSatelliteAssembly method
+            return context.ResolveSatelliteAssembly(assemblyName);
+        }
+
+        private Assembly? GetFirstResolvedAssembly(AssemblyName assemblyName)
+        {
+            Assembly? resolvedAssembly = null;
+
+            Func<AssemblyLoadContext, AssemblyName, Assembly>? assemblyResolveHandler = _resolving;
+
+            if (assemblyResolveHandler != null)
+            {
+                // Loop through the event subscribers and return the first non-null Assembly instance
+                foreach (Func<AssemblyLoadContext, AssemblyName, Assembly> handler in assemblyResolveHandler.GetInvocationList())
+                {
+                    resolvedAssembly = handler(this, assemblyName);
+                    if (resolvedAssembly != null)
+                    {
+                        return resolvedAssembly;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private Assembly ValidateAssemblyNameWithSimpleName(Assembly assembly, string? requestedSimpleName)
+        {
+            // Get the name of the loaded assembly
+            string? loadedSimpleName = null;
+
+            // Derived type's Load implementation is expected to use one of the LoadFrom* methods to get the assembly
+            // which is a RuntimeAssembly instance. However, since Assembly type can be used build any other artifact (e.g. AssemblyBuilder),
+            // we need to check for RuntimeAssembly.
+            RuntimeAssembly? rtLoadedAssembly = assembly as RuntimeAssembly;
+            if (rtLoadedAssembly != null)
+            {
+                loadedSimpleName = rtLoadedAssembly.GetSimpleName();
+            }
+
+            // The simple names should match at the very least
+            if (string.IsNullOrEmpty(requestedSimpleName))
+            {
+                throw new ArgumentException(SR.ArgumentNull_AssemblyNameName);
+            }
+            if (string.IsNullOrEmpty(loadedSimpleName) || !requestedSimpleName.Equals(loadedSimpleName, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new InvalidOperationException(SR.Argument_CustomAssemblyLoadContextRequestedNameMismatch);
+            }
+
+            return assembly;
+        }
+
+        private Assembly? ResolveUsingLoad(AssemblyName assemblyName)
+        {
+            string? simpleName = assemblyName.Name;
+            Assembly? assembly = Load(assemblyName);
+
+            if (assembly != null)
+            {
+                assembly = ValidateAssemblyNameWithSimpleName(assembly, simpleName);
+            }
+
+            return assembly;
+        }
+
+        private Assembly? ResolveUsingEvent(AssemblyName assemblyName)
+        {
+            string? simpleName = assemblyName.Name;
+
+            // Invoke the AssemblyResolve event callbacks if wired up
+            Assembly? assembly = GetFirstResolvedAssembly(assemblyName);
+            if (assembly != null)
+            {
+                assembly = ValidateAssemblyNameWithSimpleName(assembly, simpleName);
+            }
+
+            return assembly;
         }
 
         private Assembly? ResolveSatelliteAssembly(AssemblyName assemblyName)

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -54,7 +54,7 @@ namespace System.Data.Odbc.Tests
             command.ExecuteNonQuery();
 
             command.CommandText =
-                @"SELECT 
+                @"SELECT
                     SomeByte,
                     SomeBoolean,
                     SomeDate,
@@ -71,7 +71,7 @@ namespace System.Data.Odbc.Tests
             {
                 reader.Read();
                 Assert.Equal((byte)7, reader.GetByte(0));
-                Assert.Equal(true, reader.GetBoolean(1));
+                Assert.True(reader.GetBoolean(1));
                 Assert.Equal(new DateTime(2010, 12, 13), reader.GetDate(2));
                 Assert.Equal(new DateTime(2016, 2, 29, 22, 33, 44), reader.GetDateTime(3));
                 Assert.Equal(12345.12002m, reader.GetDecimal(4));

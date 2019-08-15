@@ -39,7 +39,7 @@ namespace System.Drawing.Imaging
     {
 #if FINALIZATION_WATCH
         private string allocationSite = Graphics.GetAllocationStack();
-#endif                                                         
+#endif
 
         internal IntPtr nativeImageAttributes;
 
@@ -96,7 +96,7 @@ namespace System.Drawing.Imaging
                     Gdip.GdipDisposeImageAttributes(new HandleRef(this, nativeImageAttributes));
 #if DEBUG
                     Debug.Assert(status == Gdip.Ok, "GDI+ returned an error status: " + status.ToString(CultureInfo.InvariantCulture));
-#endif        
+#endif
                 }
                 catch (Exception ex)
                 {
@@ -457,17 +457,12 @@ namespace System.Drawing.Imaging
                     Marshal.StructureToPtr(map[index].NewColor.ToArgb(), (IntPtr)((long)memory + index * size * 2 + size), false);
                 }
 
-                int status = Gdip.GdipSetImageAttributesRemapTable(
+                Gdip.CheckStatus(Gdip.GdipSetImageAttributesRemapTable(
                     new HandleRef(this, nativeImageAttributes),
                     type,
                     true,
                     mapSize,
-                    new HandleRef(null, memory));
-
-                if (status != Gdip.Ok)
-                {
-                    throw Gdip.StatusException(status);
-                }
+                    memory));
             }
             finally
             {
@@ -482,15 +477,12 @@ namespace System.Drawing.Imaging
 
         public void ClearRemapTable(ColorAdjustType type)
         {
-            int status = Gdip.GdipSetImageAttributesRemapTable(
-                            new HandleRef(this, nativeImageAttributes),
-                            type,
-                            false,
-                            0,
-                            NativeMethods.NullHandleRef);
-
-            if (status != Gdip.Ok)
-                throw Gdip.StatusException(status);
+            Gdip.CheckStatus(Gdip.GdipSetImageAttributesRemapTable(
+                new HandleRef(this, nativeImageAttributes),
+                type,
+                false,
+                0,
+                IntPtr.Zero));
         }
 
         public void SetBrushRemapTable(ColorMap[] map)
@@ -531,13 +523,10 @@ namespace System.Drawing.Imaging
             IntPtr memory = palette.ConvertToMemory();
             try
             {
-                int status = Gdip.GdipGetImageAttributesAdjustedPalette(
-                                    new HandleRef(this, nativeImageAttributes), new HandleRef(null, memory), type);
-
-                if (status != Gdip.Ok)
-                {
-                    throw Gdip.StatusException(status);
-                }
+                Gdip.CheckStatus(Gdip.GdipGetImageAttributesAdjustedPalette(
+                    new HandleRef(this, nativeImageAttributes),
+                    memory,
+                    type));
                 palette.ConvertFromMemory(memory);
             }
             finally

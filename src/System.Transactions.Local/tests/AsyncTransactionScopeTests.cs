@@ -151,7 +151,7 @@ namespace System.Transactions.Tests
                                         break;
                                     }
 
-                                // The following test has Task under TransactionScope and has few variations.  
+                                // The following test has Task under TransactionScope and has few variations.
                                 case 8:
                                     {
                                         DoTaskUnderAsyncTS(false, null);
@@ -178,7 +178,7 @@ namespace System.Transactions.Tests
                                         break;
                                     }
 
-                                // Simple Sync TS test  
+                                // Simple Sync TS test
                                 case 13:
                                     {
                                         DoSyncTxWork(false, null);
@@ -190,7 +190,7 @@ namespace System.Transactions.Tests
                                         break;
                                     }
 
-                                // Simple Async TS test. "await" points explicitly switches threads across continuations.  
+                                // Simple Async TS test. "await" points explicitly switches threads across continuations.
                                 case 15:
                                     {
                                         AssertTransactionNullAndWaitTask(DoAsyncTxWorkAsync(false, null));
@@ -244,7 +244,7 @@ namespace System.Transactions.Tests
                                         break;
                                     }
 
-                                // 2 level deep nested TS test. Parent is Aync TS, child TS can be sync or async. 
+                                // 2 level deep nested TS test. Parent is Aync TS, child TS can be sync or async.
                                 case 25:
                                     {
                                         AssertTransactionNullAndWaitTask(DoAsyncTSL2NestedTxWorkAsync(false, false, false, false, false, null));
@@ -309,7 +309,7 @@ namespace System.Transactions.Tests
                                         break;
                                     }
 
-                                // 3 level deep nested TS test. 
+                                // 3 level deep nested TS test.
                                 case 37:
                                     {
                                         SyncTSL3AsyncTSL2NestedTxWork(false, false, true, false, false, true, null);
@@ -373,7 +373,7 @@ namespace System.Transactions.Tests
                                         break;
                                     }
 
-                                // Have bunch of parallel tasks running various nested TS test cases. There parallel tasks are wrapped by a TransactionScope. 
+                                // Have bunch of parallel tasks running various nested TS test cases. There parallel tasks are wrapped by a TransactionScope.
                                 case 49:
                                     {
                                         AssertTransactionNullAndWaitTask(DoTaskWorkAsync(false, false, null));
@@ -831,7 +831,7 @@ namespace System.Transactions.Tests
         [InlineData(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Suppress, TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled)]
         [InlineData(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Suppress, TransactionScopeOption.RequiresNew, TransactionScopeAsyncFlowOption.Enabled)]
         [InlineData(TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Suppress, TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Enabled)]
-        // Sync TS nested inside Async TS. 
+        // Sync TS nested inside Async TS.
         [InlineData(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Suppress)]
         [InlineData(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.RequiresNew, TransactionScopeAsyncFlowOption.Suppress)]
         [InlineData(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled, TransactionScopeOption.Suppress, TransactionScopeAsyncFlowOption.Suppress)]
@@ -959,7 +959,7 @@ namespace System.Transactions.Tests
                 Assert.NotEqual(txId1, txId2);
                 if (child1ScopeOption == TransactionScopeOption.Suppress)
                 {
-                    Assert.Equal(null, txId2);
+                    Assert.Null(txId2);
                 }
             }
 
@@ -972,7 +972,7 @@ namespace System.Transactions.Tests
                 Assert.NotEqual(txId1, txId4);
                 if (child2ScopeOption == TransactionScopeOption.Suppress)
                 {
-                    Assert.Equal(null, txId4);
+                    Assert.Null(txId4);
                 }
             }
         }
@@ -1063,7 +1063,7 @@ namespace System.Transactions.Tests
 
                 if (scopeOption == TransactionScopeOption.Suppress)
                 {
-                    Assert.Equal(null, txId1);
+                    Assert.Null(txId1);
                     Assert.Equal(txId1, txId2);
                     Assert.Equal(txId2, txId3);
                 }
@@ -1672,12 +1672,12 @@ namespace System.Transactions.Tests
         }
         private static void AssertTransactionNull()
         {
-            Assert.Equal(null, Transaction.Current);
+            Assert.Null(Transaction.Current);
         }
 
         private static void AssertTransactionNotNull()
         {
-            Assert.NotEqual(null, Transaction.Current);
+            Assert.NotNull(Transaction.Current);
         }
 
         private static string AssertAndGetCurrentTransactionId()
@@ -1742,7 +1742,7 @@ namespace System.Transactions.Tests
             }
 
             AssertTransactionNull();
-            Assert.Equal<bool>(hasException, true);
+            Assert.True(hasException);
             ResetExceptionInjection();
         }
     }

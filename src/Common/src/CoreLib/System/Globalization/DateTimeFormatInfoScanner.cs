@@ -115,9 +115,9 @@ namespace System.Globalization
         // The collection fo date words & postfix.
         internal List<string> m_dateWords = new List<string>();
         // Hashtable for the known words.
-        private static volatile Dictionary<string, string> s_knownWords;
+        private static volatile Dictionary<string, string>? s_knownWords;
 
-        static Dictionary<string, string> KnownWords
+        private static Dictionary<string, string> KnownWords
         {
             get
             {
@@ -147,7 +147,7 @@ namespace System.Globalization
 
                     s_knownWords = temp;
                 }
-                return (s_knownWords);
+                return s_knownWords;
             }
         }
 

@@ -6,7 +6,7 @@ namespace System.Drawing.Imaging
 {
     /// <summary>
     /// Specifies the methods available in a metafile to read and write graphic commands.
-    /// </summary>    
+    /// </summary>
     public enum EmfPlusRecordType
     {
         WmfRecordBase = 0x00010000,
@@ -264,7 +264,6 @@ namespace System.Drawing.Imaging
         Save,
         Restore,
         BeginContainer,
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
         BeginContainerNoParams,
         EndContainer,
         SetWorldTransform,

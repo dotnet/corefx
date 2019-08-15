@@ -13,8 +13,8 @@ namespace System.Xml.Schema
     using System.Runtime.Versioning;
 
     /*
-     * The XdrBuilder class parses the XDR Schema and 
-     * builds internal validation information 
+     * The XdrBuilder class parses the XDR Schema and
+     * builds internal validation information
      */
     internal sealed class XdrBuilder : SchemaBuilder
     {
@@ -153,7 +153,7 @@ namespace System.Xml.Schema
             internal uint _MaxLength;                 // dt:maxLength
             internal uint _MinLength;                 // dt:minLength
 
-            // used for datatype 
+            // used for datatype
             internal bool _EnumerationRequired;       // when we have dt:value then we must have dt:type="enumeration"
             internal bool _HasDataType;
 
@@ -203,7 +203,7 @@ namespace System.Xml.Schema
             internal XdrInitFunction _InitFunc;           // "init" functions in XdrBuilder
             internal XdrBeginChildFunction _BeginChildFunc;     // "begin" functions in XdrBuilder for BeginChildren
             internal XdrEndChildFunction _EndChildFunc;       // "end" functions in XdrBuilder for EndChildren
-            internal bool _AllowText;          // whether text content is allowed  
+            internal bool _AllowText;          // whether text content is allowed
 
             internal XdrEntry(SchemaNames.Token n,
                               int[] states,
@@ -357,35 +357,35 @@ namespace System.Xml.Schema
                           true)
         };
 
-        private SchemaInfo _SchemaInfo;
+        private readonly SchemaInfo _SchemaInfo;
         private string _TargetNamespace;
-        private XmlReader _reader;
-        private PositionInfo _positionInfo;
+        private readonly XmlReader _reader;
+        private readonly PositionInfo _positionInfo;
         private ParticleContentValidator _contentValidator;
 
         private XdrEntry _CurState;
         private XdrEntry _NextState;
 
-        private HWStack _StateHistory;
-        private HWStack _GroupStack;
+        private readonly HWStack _StateHistory;
+        private readonly HWStack _GroupStack;
         private string _XdrName;
         private string _XdrPrefix;
 
-        private ElementContent _ElementDef;
+        private readonly ElementContent _ElementDef;
         private GroupContent _GroupDef;
-        private AttributeContent _AttributeDef;
+        private readonly AttributeContent _AttributeDef;
 
         private DeclBaseInfo _UndefinedAttributeTypes;
         private DeclBaseInfo _BaseDecl;
 
-        private XmlNameTable _NameTable;
-        private SchemaNames _SchemaNames;
+        private readonly XmlNameTable _NameTable;
+        private readonly SchemaNames _SchemaNames;
 
-        private XmlNamespaceManager _CurNsMgr;
+        private readonly XmlNamespaceManager _CurNsMgr;
         private string _Text;
 
-        private ValidationEventHandler _validationEventHandler;
-        private Hashtable _UndeclaredElements = new Hashtable();
+        private readonly ValidationEventHandler _validationEventHandler;
+        private readonly Hashtable _UndeclaredElements = new Hashtable();
 
         private const string x_schema = "x-schema:";
 
@@ -459,7 +459,7 @@ namespace System.Xml.Schema
                         if (prefixValue.Length != 0)
                         {
                             if (a._Attribute != SchemaNames.Token.SchemaType)
-                            {    // <attribute type= || <element type= 
+                            {    // <attribute type= || <element type=
                                 throw new XmlException(SR.Xml_UnexpectedToken, "NAME");
                             }
                         }
@@ -667,7 +667,7 @@ namespace System.Xml.Schema
         {
             //
             // check undefined attribute types
-            // We already checked local attribute types, so only need to check global attribute types here 
+            // We already checked local attribute types, so only need to check global attribute types here
             //
             while (builder._UndefinedAttributeTypes != null)
             {
@@ -1002,7 +1002,7 @@ namespace System.Xml.Schema
 
         //
         // XDR AttributeType
-        // 
+        //
 
         private static void XDR_InitAttributeType(XdrBuilder builder, object obj)
         {
@@ -1140,7 +1140,7 @@ namespace System.Xml.Schema
             builder._AttributeDef._AttDef.MinLength = builder._AttributeDef._MinLength;
 
             //
-            // checkAttributeType 
+            // checkAttributeType
             //
             if (builder._AttributeDef._Default != null)
             {

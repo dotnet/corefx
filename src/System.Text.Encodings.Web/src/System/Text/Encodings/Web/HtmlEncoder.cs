@@ -38,7 +38,7 @@ namespace System.Text.Encodings.Web
         /// </summary>
         /// <param name="allowedRanges">Set of characters that the encoder is allowed to not encode.</param>
         /// <returns>A new instance of the <see cref="HtmlEncoder"/></returns>
-        /// <remarks>Some characters in <paramref name="allowedRanges"/> might still get encoded, i.e. this parameter is just telling the encoder what ranges it is allowed to not encode, not what characters it must not encode.</remarks> 
+        /// <remarks>Some characters in <paramref name="allowedRanges"/> might still get encoded, i.e. this parameter is just telling the encoder what ranges it is allowed to not encode, not what characters it must not encode.</remarks>
         public static HtmlEncoder Create(params UnicodeRange[] allowedRanges)
         {
             return new DefaultHtmlEncoder(allowedRanges);
@@ -47,7 +47,7 @@ namespace System.Text.Encodings.Web
 
     internal sealed class DefaultHtmlEncoder : HtmlEncoder
     {
-        private AllowedCharactersBitmap _allowedCharacters;
+        private readonly AllowedCharactersBitmap _allowedCharacters;
         internal static readonly DefaultHtmlEncoder Singleton = new DefaultHtmlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
 
         public DefaultHtmlEncoder(TextEncoderSettings settings)
@@ -97,10 +97,10 @@ namespace System.Text.Encodings.Web
             get { return 10; } // "&#x10FFFF;" is the longest encoded form
         }
 
-        static readonly char[] s_quote = "&quot;".ToCharArray();
-        static readonly char[] s_ampersand = "&amp;".ToCharArray();
-        static readonly char[] s_lessthan = "&lt;".ToCharArray();
-        static readonly char[] s_greaterthan = "&gt;".ToCharArray();
+        private static readonly char[] s_quote = "&quot;".ToCharArray();
+        private static readonly char[] s_ampersand = "&amp;".ToCharArray();
+        private static readonly char[] s_lessthan = "&lt;".ToCharArray();
+        private static readonly char[] s_greaterthan = "&gt;".ToCharArray();
 
         public unsafe override bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
         {

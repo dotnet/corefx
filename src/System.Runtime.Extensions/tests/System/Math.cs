@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -6,11 +6,13 @@ using Xunit;
 using Xunit.Sdk;
 using System.Collections.Generic;
 
+#pragma warning disable xUnit1025 // reporting duplicate test cases due to not distinguishing 0.0 from -0.0
+
 namespace System.Tests
 {
     public static partial class MathTests
     {
-        // binary64 (double) has a machine epsilon of 2^-52 (approx. 2.22e-16). However, this 
+        // binary64 (double) has a machine epsilon of 2^-52 (approx. 2.22e-16). However, this
         // is slightly too accurate when writing tests meant to run against libm implementations
         // for various platforms. 2^-50 (approx. 8.88e-16) seems to be as accurate as we can get.
         //
@@ -43,7 +45,7 @@ namespace System.Tests
         /// <param name="actual">The value to be compared against</param>
         /// <param name="allowedVariance">The total variance allowed between the expected and actual results.</param>
         /// <exception cref="EqualException">Thrown when the values are not equal</exception>
-        public static void AssertEqual(double expected, double actual, double variance)
+        private static void AssertEqual(double expected, double actual, double variance)
         {
             if (double.IsNaN(expected))
             {
@@ -99,7 +101,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly -0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -110,7 +112,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly -0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -127,7 +129,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly +0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -138,7 +140,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly +0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -212,7 +214,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly -0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -223,7 +225,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly -0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -240,7 +242,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly +0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -251,7 +253,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly +0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -264,28 +266,28 @@ namespace System.Tests
             }
         }
 
-        private unsafe static bool IsNegativeZero(double value)
+        private static unsafe bool IsNegativeZero(double value)
         {
             return (*(ulong*)(&value)) == 0x8000000000000000;
         }
 
-        private unsafe static bool IsNegativeZero(float value)
+        private static unsafe bool IsNegativeZero(float value)
         {
             return (*(uint*)(&value)) == 0x80000000;
         }
 
-        private unsafe static bool IsPositiveZero(double value)
+        private static unsafe bool IsPositiveZero(double value)
         {
             return (*(ulong*)(&value)) == 0x0000000000000000;
         }
 
-        private unsafe static bool IsPositiveZero(float value)
+        private static unsafe bool IsPositiveZero(float value)
         {
             return (*(uint*)(&value)) == 0x00000000;
         }
 
-        // We have a custom ToString here to ensure that edge cases (specifically ±0.0,
-        // but also NaN and ±∞) are correctly and consistently represented.
+        // We have a custom ToString here to ensure that edge cases (specifically +-0.0,
+        // but also NaN and +-infinity) are correctly and consistently represented.
         private static string ToStringPadded(double value)
         {
             if (double.IsNaN(value))
@@ -294,11 +296,11 @@ namespace System.Tests
             }
             else if (double.IsPositiveInfinity(value))
             {
-                return "+∞".PadLeft(20);
+                return "+\u221E".PadLeft(20);
             }
             else if (double.IsNegativeInfinity(value))
             {
-                return "-∞".PadLeft(20);
+                return "-\u221E".PadLeft(20);
             }
             else if (IsNegativeZero(value))
             {
@@ -314,8 +316,8 @@ namespace System.Tests
             }
         }
 
-        // We have a custom ToString here to ensure that edge cases (specifically ±0.0,
-        // but also NaN and ±∞) are correctly and consistently represented.
+        // We have a custom ToString here to ensure that edge cases (specifically +-0.0,
+        // but also NaN and +-infinity) are correctly and consistently represented.
         private static string ToStringPadded(float value)
         {
             if (double.IsNaN(value))
@@ -324,11 +326,11 @@ namespace System.Tests
             }
             else if (double.IsPositiveInfinity(value))
             {
-                return "+∞".PadLeft(10);
+                return "+\u221E".PadLeft(10);
             }
             else if (double.IsNegativeInfinity(value))
             {
-                return "-∞".PadLeft(10);
+                return "-\u221E".PadLeft(10);
             }
             else if (IsNegativeZero(value))
             {

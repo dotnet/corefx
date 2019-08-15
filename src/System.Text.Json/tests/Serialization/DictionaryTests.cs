@@ -350,8 +350,8 @@ namespace System.Text.Json.Serialization.Tests
         public static void PocoWithDictionaryObject()
         {
             PocoDictionary dict = JsonSerializer.Deserialize<PocoDictionary>("{\n\t\"key\" : {\"a\" : \"b\", \"c\" : \"d\"}}");
-            Assert.Equal(dict.key["a"], "b");
-            Assert.Equal(dict.key["c"], "d");
+            Assert.Equal("b", dict.key["a"]);
+            Assert.Equal("d", dict.key["c"]);
         }
 
         public class PocoDictionary
@@ -800,8 +800,8 @@ namespace System.Text.Json.Serialization.Tests
         public static void UnicodePropertyNames()
         {
             {
-                Dictionary<string, int> obj = JsonSerializer.Deserialize<Dictionary<string, int>>(@"{""Aѧ"":1}");
-                Assert.Equal(1, obj["Aѧ"]);
+                Dictionary<string, int> obj = JsonSerializer.Deserialize<Dictionary<string, int>>(@"{""A\u0467"":1}");
+                Assert.Equal(1, obj["A\u0467"]);
 
                 // Verify the name is escaped after serialize.
                 string json = JsonSerializer.Serialize(obj);
@@ -812,7 +812,7 @@ namespace System.Text.Json.Serialization.Tests
                 // We want to go over StackallocThreshold=256 to force a pooled allocation, so this property is 200 chars and 400 bytes.
                 const int charsInProperty = 200;
 
-                string longPropertyName = new string('ѧ', charsInProperty);
+                string longPropertyName = new string('\u0467', charsInProperty);
 
                 Dictionary<string, int> obj = JsonSerializer.Deserialize<Dictionary<string, int>>($"{{\"{longPropertyName}\":1}}");
                 Assert.Equal(1, obj[longPropertyName]);
@@ -1158,6 +1158,36 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Null(dictionaryLast.Dict);
         }
 
+        [Fact]
+        public static void NullDictionaryValuesShouldDeserializeAsNull()
+        {
+            const string json =
+                    @"{" +
+                        @"""StringVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ObjectVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""StringDictVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ObjectDictVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ClassVals"":{" +
+                            @"""key"":null" +
+                        @"}" +
+                    @"}";
+
+            SimpleClassWithDictionaries obj = JsonSerializer.Deserialize<SimpleClassWithDictionaries>(json);
+            Assert.Null(obj.StringVals["key"]);
+            Assert.Null(obj.ObjectVals["key"]);
+            Assert.Null(obj.StringDictVals["key"]);
+            Assert.Null(obj.ObjectDictVals["key"]);
+            Assert.Null(obj.ClassVals["key"]);
+        }
+
         public class ClassWithNotSupportedDictionary
         {
             public Dictionary<int, int> MyDictionary { get; set; }
@@ -1211,6 +1241,15 @@ namespace System.Text.Json.Serialization.Tests
         {
             public Dictionary<string, string> Dict { get; set; }
             public string Test { get; set; }
+        }
+
+        public class SimpleClassWithDictionaries
+        {
+            public Dictionary<string, string> StringVals { get; set; }
+            public Dictionary<string, object> ObjectVals { get; set; }
+            public Dictionary<string, Dictionary<string, string>> StringDictVals { get; set; }
+            public Dictionary<string, Dictionary<string, object>> ObjectDictVals { get; set; }
+            public Dictionary<string, SimpleClassWithDictionaries> ClassVals { get; set; }
         }
     }
 }

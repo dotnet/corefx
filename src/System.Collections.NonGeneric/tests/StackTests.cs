@@ -175,7 +175,7 @@ namespace System.Collections.Tests
                 stack2.Push(null);
                 Assert.True(stack2.Contains(null));
 
-                Assert.False(stack2.Contains(-1)); // We have a null item in the list, so the algorithm may use a different branch 
+                Assert.False(stack2.Contains(-1)); // We have a null item in the list, so the algorithm may use a different branch
             });
         }
 
@@ -444,9 +444,9 @@ namespace System.Collections.Tests
                 stack2.Push(-1);
                 stack2.Push(null);
 
-                Assert.Equal(null, stack2.Pop());
+                Assert.Null(stack2.Pop());
                 Assert.Equal(-1, stack2.Pop());
-                Assert.Equal(null, stack2.Pop());
+                Assert.Null(stack2.Pop());
             });
         }
 
@@ -533,7 +533,7 @@ namespace System.Collections.Tests
             {
                 IntValue = intValue;
             }
-            
+
             public int IntValue { get; set; }
         }
     }

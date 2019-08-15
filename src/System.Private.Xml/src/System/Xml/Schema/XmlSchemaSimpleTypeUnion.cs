@@ -8,7 +8,7 @@ namespace System.Xml.Schema
 
     public class XmlSchemaSimpleTypeUnion : XmlSchemaSimpleTypeContent
     {
-        private XmlSchemaObjectCollection _baseTypes = new XmlSchemaObjectCollection();
+        private readonly XmlSchemaObjectCollection _baseTypes = new XmlSchemaObjectCollection();
         private XmlQualifiedName[] _memberTypes;
         private XmlSchemaSimpleType[] _baseMemberTypes; // Compiled
 
@@ -55,4 +55,3 @@ namespace System.Xml.Schema
         }
     }
 }
-

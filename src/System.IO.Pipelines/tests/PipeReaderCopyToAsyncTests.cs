@@ -54,7 +54,7 @@ namespace System.IO.Pipelines.Tests
             }
             pipe.Writer.Complete();
             await task;
-            
+
             Assert.Equal(messages.SelectMany(msg => msg).ToArray(), stream.ToArray());
         }
 
@@ -127,9 +127,9 @@ namespace System.IO.Pipelines.Tests
                     await pipe.Reader.CopyToAsync(stream);
                     Assert.True(false, $"CopyToAsync should have failed, wrote {stream.Writes} times.");
                 }
-                catch(InvalidOperationException)
+                catch (InvalidOperationException)
                 {
-                    
+
                 }
 
                 Assert.Equal(2, stream.Writes);

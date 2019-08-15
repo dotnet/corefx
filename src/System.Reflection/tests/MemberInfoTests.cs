@@ -169,7 +169,7 @@ namespace System.Reflection.Tests
         {
             MemberInfo[] m = typeof(MemberInfoTests).GetMember("SampleClass");
             Assert.Equal(1, m.Count());
-            foreach(CustomAttributeData cad in m[0].GetCustomAttributesData())
+            foreach (CustomAttributeData cad in m[0].GetCustomAttributesData())
             {
                 if (cad.AttributeType == typeof(ComVisibleAttribute))
                 {
@@ -219,7 +219,7 @@ namespace System.Reflection.Tests
             return type.GetTypeInfo().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Select(m => m.HasMetadataToken() ? m.MetadataToken : 0);
         }
 
-        private MemberInfo[] GetOrderedMembers(Type type) => GetMembers(type).OrderBy(member => member.Name).ToArray();        
+        private MemberInfo[] GetOrderedMembers(Type type) => GetMembers(type).OrderBy(member => member.Name).ToArray();
 
         private class Base
         {

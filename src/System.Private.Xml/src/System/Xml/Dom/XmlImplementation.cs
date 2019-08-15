@@ -8,7 +8,7 @@ namespace System.Xml
     // particular instance of the document object model.
     public class XmlImplementation
     {
-        private XmlNameTable _nameTable;
+        private readonly XmlNameTable _nameTable;
 
         // Initializes a new instance of the XmlImplementation class.
         public XmlImplementation() : this(new NameTable())
@@ -31,7 +31,7 @@ namespace System.Xml
             return false;
         }
 
-        // Creates a new XmlDocument. All documents created from the same 
+        // Creates a new XmlDocument. All documents created from the same
         // XmlImplementation object share the same name table.
         public virtual XmlDocument CreateDocument()
         {

@@ -15,7 +15,7 @@ namespace System.Collections.Generic
     // of the internal array. As elements are added to a List, the capacity
     // of the List is automatically increased as required by reallocating the
     // internal array.
-    // 
+    //
     [DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
@@ -28,7 +28,9 @@ namespace System.Collections.Generic
         private int _size; // Do not rename (binary serialization)
         private int _version; // Do not rename (binary serialization)
 
+#pragma warning disable CA1825 // avoid the extra generic instantiation for Array.Empty<T>()
         private static readonly T[] s_emptyArray = new T[0];
+#pragma warning restore CA1825
 
         // Constructs a List. The list is initially empty and has a capacity
         // of zero. Upon adding the first element to the list the capacity is
@@ -42,7 +44,7 @@ namespace System.Collections.Generic
         // Constructs a List with a given initial capacity. The list is
         // initially empty, but will have room for the given number of elements
         // before any reallocations are required.
-        // 
+        //
         public List(int capacity)
         {
             if (capacity < 0)
@@ -57,7 +59,7 @@ namespace System.Collections.Generic
         // Constructs a List, copying the contents of the given collection. The
         // size and capacity of the new list will both be equal to the size of the
         // given collection.
-        // 
+        //
         public List(IEnumerable<T> collection)
         {
             if (collection == null)
@@ -92,9 +94,9 @@ namespace System.Collections.Generic
         }
 
         // Gets and sets the capacity of this list.  The capacity is the size of
-        // the internal array used to hold items.  When set, the internal 
+        // the internal array used to hold items.  When set, the internal
         // array of the list is reallocated to the given capacity.
-        // 
+        //
         public int Capacity
         {
             get
@@ -170,7 +172,7 @@ namespace System.Collections.Generic
         private static bool IsCompatibleObject(object? value)
         {
             // Non-null values are fine.  Only accept nulls if T is a class or Nullable<U>.
-            // Note that default(T) is not equal to null for value types except when T is Nullable<U>. 
+            // Note that default(T) is not equal to null for value types except when T is Nullable<U>.
             return ((value is T) || (value == null && default(T)! == null)); // default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
         }
 
@@ -268,10 +270,10 @@ namespace System.Collections.Generic
         // is larger than the given search value. This is also the index at which
         // the search value should be inserted into the list in order for the list
         // to remain sorted.
-        // 
+        //
         // The method uses the Array.BinarySearch method to perform the
         // search.
-        // 
+        //
         public int BinarySearch(int index, int count, T item, IComparer<T>? comparer)
         {
             if (index < 0)
@@ -346,19 +348,19 @@ namespace System.Collections.Generic
             List<TOutput> list = new List<TOutput>(_size);
             for (int i = 0; i < _size; i++)
             {
-                list._items[i] = converter!(_items[i]); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                list._items[i] = converter(_items[i]);
             }
             list._size = _size;
             return list;
         }
 
-        // Copies this List into array, which must be of a 
-        // compatible array type.  
+        // Copies this List into array, which must be of a
+        // compatible array type.
         public void CopyTo(T[] array)
             => CopyTo(array, 0);
 
-        // Copies this List into array, which must be of a 
-        // compatible array type.  
+        // Copies this List into array, which must be of a
+        // compatible array type.
         void ICollection.CopyTo(Array array, int arrayIndex)
         {
             if ((array != null) && (array.Rank != 1))
@@ -378,9 +380,9 @@ namespace System.Collections.Generic
         }
 
         // Copies a section of this list to the given array at the given index.
-        // 
+        //
         // The method uses the Array.Copy method to copy the elements.
-        // 
+        //
         public void CopyTo(int index, T[] array, int arrayIndex, int count)
         {
             if (_size - index < count)
@@ -447,7 +449,7 @@ namespace System.Collections.Generic
             List<T> list = new List<T>();
             for (int i = 0; i < _size; i++)
             {
-                if (match!(_items[i])) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                if (match(_items[i]))
                 {
                     list.Add(_items[i]);
                 }
@@ -543,7 +545,7 @@ namespace System.Collections.Generic
             int endIndex = startIndex - count;
             for (int i = startIndex; i > endIndex; i--)
             {
-                if (match!(_items[i])) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                if (match(_items[i]))
                 {
                     return i;
                 }
@@ -574,8 +576,8 @@ namespace System.Collections.Generic
         }
 
         // Returns an enumerator for this list with the given
-        // permission for removal of elements. If modifications made to the list 
-        // while an enumeration is in progress, the MoveNext and 
+        // permission for removal of elements. If modifications made to the list
+        // while an enumeration is in progress, the MoveNext and
         // GetObject methods of the enumerator will throw an exception.
         //
         public Enumerator GetEnumerator()
@@ -615,10 +617,10 @@ namespace System.Collections.Generic
         // this list. The list is searched forwards from beginning to end.
         // The elements of the list are compared to the given value using the
         // Object.Equals method.
-        // 
+        //
         // This method uses the Array.IndexOf method to perform the
         // search.
-        // 
+        //
         public int IndexOf(T item)
             => Array.IndexOf(_items, item, 0, _size);
 
@@ -636,10 +638,10 @@ namespace System.Collections.Generic
         // index and ending at count number of elements. The
         // elements of the list are compared to the given value using the
         // Object.Equals method.
-        // 
+        //
         // This method uses the Array.IndexOf method to perform the
         // search.
-        // 
+        //
         public int IndexOf(T item, int index)
         {
             if (index > _size)
@@ -652,10 +654,10 @@ namespace System.Collections.Generic
         // index and upto count number of elements. The
         // elements of the list are compared to the given value using the
         // Object.Equals method.
-        // 
+        //
         // This method uses the Array.IndexOf method to perform the
         // search.
-        // 
+        //
         public int IndexOf(T item, int index, int count)
         {
             if (index > _size)
@@ -670,7 +672,7 @@ namespace System.Collections.Generic
         // Inserts an element into this list at a given index. The size of the list
         // is increased by one. If required, the capacity of the list is doubled
         // before inserting the new element.
-        // 
+        //
         public void Insert(int index, T item)
         {
             // Note that insertions at the end are legal.
@@ -747,7 +749,7 @@ namespace System.Collections.Generic
             }
             else
             {
-                using (IEnumerator<T> en = collection!.GetEnumerator()) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                using (IEnumerator<T> en = collection.GetEnumerator())
                 {
                     while (en.MoveNext())
                     {
@@ -759,13 +761,13 @@ namespace System.Collections.Generic
         }
 
         // Returns the index of the last occurrence of a given value in a range of
-        // this list. The list is searched backwards, starting at the end 
-        // and ending at the first element in the list. The elements of the list 
+        // this list. The list is searched backwards, starting at the end
+        // and ending at the first element in the list. The elements of the list
         // are compared to the given value using the Object.Equals method.
-        // 
+        //
         // This method uses the Array.LastIndexOf method to perform the
         // search.
-        // 
+        //
         public int LastIndexOf(T item)
         {
             if (_size == 0)
@@ -780,13 +782,13 @@ namespace System.Collections.Generic
 
         // Returns the index of the last occurrence of a given value in a range of
         // this list. The list is searched backwards, starting at index
-        // index and ending at the first element in the list. The 
-        // elements of the list are compared to the given value using the 
+        // index and ending at the first element in the list. The
+        // elements of the list are compared to the given value using the
         // Object.Equals method.
-        // 
+        //
         // This method uses the Array.LastIndexOf method to perform the
         // search.
-        // 
+        //
         public int LastIndexOf(T item, int index)
         {
             if (index >= _size)
@@ -799,10 +801,10 @@ namespace System.Collections.Generic
         // index and upto count elements. The elements of
         // the list are compared to the given value using the Object.Equals
         // method.
-        // 
+        //
         // This method uses the Array.LastIndexOf method to perform the
         // search.
-        // 
+        //
         public int LastIndexOf(T item, int index, int count)
         {
             if ((Count != 0) && (index < 0))
@@ -867,7 +869,7 @@ namespace System.Collections.Generic
             int freeIndex = 0;   // the first free slot in items array
 
             // Find the first item which needs to be removed.
-            while (freeIndex < _size && !match!(_items[freeIndex])) freeIndex++; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+            while (freeIndex < _size && !match(_items[freeIndex])) freeIndex++;
             if (freeIndex >= _size) return 0;
 
             int current = freeIndex + 1;
@@ -977,7 +979,7 @@ namespace System.Collections.Generic
             _version++;
         }
 
-        // Sorts the elements in this list.  Uses the default comparer and 
+        // Sorts the elements in this list.  Uses the default comparer and
         // Array.Sort.
         public void Sort()
             => Sort(0, Count, null);
@@ -992,9 +994,9 @@ namespace System.Collections.Generic
         // comparer is null, the elements are compared to each other using
         // the IComparable interface, which in that case must be implemented by all
         // elements of the list.
-        // 
+        //
         // This method uses the Array.Sort method to sort the elements.
-        // 
+        //
         public void Sort(int index, int count, IComparer<T>? comparer)
         {
             if (index < 0)
@@ -1026,7 +1028,7 @@ namespace System.Collections.Generic
 
             if (_size > 1)
             {
-                ArraySortHelper<T>.Sort(_items, 0, _size, comparison!); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
+                ArraySortHelper<T>.Sort(_items, 0, _size, comparison);
             }
             _version++;
         }
@@ -1050,10 +1052,10 @@ namespace System.Collections.Generic
         // new elements will be added to the list. To completely clear a list and
         // release all memory referenced by the list, execute the following
         // statements:
-        // 
+        //
         // list.Clear();
         // list.TrimExcess();
-        // 
+        //
         public void TrimExcess()
         {
             int threshold = (int)(((double)_items.Length) * 0.9);

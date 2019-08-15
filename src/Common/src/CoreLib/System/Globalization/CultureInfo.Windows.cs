@@ -13,7 +13,7 @@ namespace System.Globalization
     {
 #if FEATURE_APPX
         // When running under AppX, we use this to get some information about the language list
-        private static volatile WindowsRuntimeResourceManagerBase s_WindowsRuntimeResourceManager;
+        private static volatile WindowsRuntimeResourceManagerBase? s_WindowsRuntimeResourceManager;
 
         [ThreadStatic]
         private static bool ts_IsDoingAppXCultureInfoLookup;
@@ -39,7 +39,7 @@ namespace System.Globalization
             return GetCultureByName(strDefault);
         }
 
-        private unsafe static CultureInfo GetUserDefaultUICulture()
+        private static unsafe CultureInfo GetUserDefaultUICulture()
         {
 #if !ENABLE_WINRT
             if (GlobalizationMode.Invariant)

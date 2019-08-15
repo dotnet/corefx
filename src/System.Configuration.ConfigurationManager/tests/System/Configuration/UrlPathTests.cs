@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -15,7 +15,7 @@ namespace System.ConfigurationTests
         public void GetDirectoryOrRootName_Null()
         {
             string test = UrlPath.GetDirectoryOrRootName(null);
-            Assert.Equal(null, null);
+            Assert.Null(null);
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace System.ConfigurationTests
         {
             string exePath = AppDomain.CurrentDomain.BaseDirectory;
             // Remove the trailing slash.  Different OS's use a different slash.
-            // This is to make the test pass without worrying about adding a slash 
+            // This is to make the test pass without worrying about adding a slash
             // and which kind of slash.
             string exePathWithoutTrailingSlash = exePath.Substring(0, exePath.Length - 1);
             string pathToNonexistentFile = exePath + "TestFileForUrlPathTests.txt";
@@ -53,14 +53,14 @@ namespace System.ConfigurationTests
         public void IsEqualOrSubDirectory_NullDir()
         {
             bool test = UrlPath.IsEqualOrSubdirectory(null, "Hello");
-            Assert.Equal(true, test);
+            Assert.True(test);
         }
 
         [Fact]
         public void IsEqualOrSubDirectory_NullSubDir()
         {
             bool test = UrlPath.IsEqualOrSubdirectory("Hello", null);
-            Assert.Equal(false, test);
+            Assert.False(test);
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace System.ConfigurationTests
             new object[] { "/dir/sub", "/dir", false },     // no slash
             new object[] { "/dir", "/dir/sub", true },      // no slash
             new object[] { "/dir/", "/dir/sub/", true },    // both slash
-            new object[] { "/dir/", "/dir/sub", true },     // dir slash 
+            new object[] { "/dir/", "/dir/sub", true },     // dir slash
             new object[] { "/dir", "/dir/sub/", true },     // subdir slash
             new object[] { "/dir", "/dir", true },          // no slashes
             new object[] { "/var/", "/var/", true },        // both slashes

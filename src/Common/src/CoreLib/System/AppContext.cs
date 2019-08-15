@@ -21,7 +21,7 @@ namespace System
         {
             get
             {
-                // The value of APP_CONTEXT_BASE_DIRECTORY key has to be a string and it is not allowed to be any other type. 
+                // The value of APP_CONTEXT_BASE_DIRECTORY key has to be a string and it is not allowed to be any other type.
                 // Otherwise the caller will get invalid cast exception
                 return (string?)GetData("APP_CONTEXT_BASE_DIRECTORY") ??
                     s_defaultBaseDirectory ?? (s_defaultBaseDirectory = GetBaseDirectoryCore());
@@ -63,12 +63,12 @@ namespace System
         }
 
 #pragma warning disable CS0067 // events raised by the VM
-        public static event UnhandledExceptionEventHandler UnhandledException;
+        public static event UnhandledExceptionEventHandler? UnhandledException;
 
-        public static event System.EventHandler<FirstChanceExceptionEventArgs> FirstChanceException;
+        public static event System.EventHandler<FirstChanceExceptionEventArgs>? FirstChanceException;
 #pragma warning restore CS0067
 
-        public static event System.EventHandler ProcessExit;
+        public static event System.EventHandler? ProcessExit;
 
         internal static void OnProcessExit()
         {
@@ -126,7 +126,7 @@ namespace System
                 Interlocked.CompareExchange(ref s_switches, new Dictionary<string, bool>(), null);
             }
 
-            lock (s_switches!) // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
+            lock (s_switches)
             {
                 s_switches[switchName] = isEnabled;
             }

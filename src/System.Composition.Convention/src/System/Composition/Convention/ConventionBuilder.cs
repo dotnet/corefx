@@ -14,8 +14,6 @@ namespace System.Composition.Convention
     /// </summary>
     public class ConventionBuilder : AttributedModelProvider
     {
-        private static readonly List<object> s_emptyList = new List<object>();
-
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         private readonly List<PartConventionBuilder> _conventions = new List<PartConventionBuilder>();
 
@@ -128,7 +126,6 @@ namespace System.Composition.Convention
 
         private IEnumerable<Tuple<object, List<Attribute>>> EvaluateThisTypeInfoAgainstTheConvention(TypeInfo typeInfo)
         {
-            List<Tuple<object, List<Attribute>>> results = new List<Tuple<object, List<Attribute>>>();
             List<Attribute> attributes = new List<Attribute>();
             var configuredMembers = new List<Tuple<object, List<Attribute>>>();
             bool specifiedConstructor = false;

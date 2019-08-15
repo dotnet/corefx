@@ -47,6 +47,7 @@ namespace System.Net.Sockets
     public partial struct IPPacketInformation
     {
         private object _dummy;
+        private int _dummyPrimitive;
         public System.Net.IPAddress Address { get { throw null; } }
         public int Interface { get { throw null; } }
         public override bool Equals(object comparand) { throw null; }
@@ -156,9 +157,8 @@ namespace System.Net.Sockets
         Irda = 26,
         NetworkDesigners = 28,
         Max = 29,
-        Netlink = 30,
-        Packet = 31,
-        ControllerAreaNetwork = 32,
+        Packet = 65536,
+        ControllerAreaNetwork = 65537,
     }
     public enum ProtocolType
     {
@@ -420,6 +420,7 @@ namespace System.Net.Sockets
     public partial struct SocketInformation
     {
         private object _dummy;
+        private int _dummyPrimitive;
         public System.Net.Sockets.SocketInformationOptions Options { get { throw null; } set { } }
         public byte[] ProtocolInformation { get { throw null; } set { } }
     }

@@ -50,7 +50,7 @@ namespace System.Text.Tests
         {
             Decoder decoder = Encoding.Unicode.GetDecoder();
             int expected = 6;
-            // Unicode string: 这个一个测试
+            // Unicode string: \u8FD9\u4E2A\u4E00\u4E2A\u6D4B\u8BD5
             byte[] bytes = new byte[] {
                 217,
                 143,
@@ -113,7 +113,7 @@ namespace System.Text.Tests
         public void PosTest7()
         {
             Decoder decoder = Encoding.Unicode.GetDecoder();
-            // Unicode string: 这个一个测试
+            // Unicode string: \u8FD9\u4E2A\u4E00\u4E2A\u6D4B\u8BD5
             byte[] bytes = new byte[] {
                 217,
                 143,
@@ -154,7 +154,7 @@ namespace System.Text.Tests
         }
         #endregion
 
-        
+
         private void VerificationHelper(Decoder decoder, byte[] bytes, int index, int count, int expected, string errorno)
         {
             int ret = decoder.GetCharCount(bytes, index, count);

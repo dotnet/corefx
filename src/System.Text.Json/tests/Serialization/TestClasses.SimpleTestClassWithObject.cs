@@ -63,7 +63,7 @@ namespace System.Text.Json.Serialization.Tests
         public object MyStringImmutablQueueT { get; set; }
         public object MyStringImmutableSortedSetT { get; set; }
 
-        public new static readonly string s_json =
+        public static new readonly string s_json =
                 @"{" +
                 @"""MyInt16"" : 1," +
                 @"""MyInt32"" : 2," +
@@ -133,7 +133,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyStringImmutableSortedSetT"" : [""Hello""]" +
                 @"}";
 
-        public new static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
+        public static new readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
 
         public override void Initialize()
         {
@@ -215,8 +215,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal('a', ((char[])MyCharArray)[0]);
             Assert.Equal("Hello", ((string[])MyStringArray)[0]);
             Assert.Equal(3.3m, ((decimal[])MyDecimalArray)[0]);
-            Assert.Equal(false, ((bool[])MyBooleanFalseArray)[0]);
-            Assert.Equal(true, ((bool[])MyBooleanTrueArray)[0]);
+            Assert.False(((bool[])MyBooleanFalseArray)[0]);
+            Assert.True(((bool[])MyBooleanTrueArray)[0]);
             Assert.Equal(1.1f, ((float[])MySingleArray)[0]);
             Assert.Equal(2.2d, ((double[])MyDoubleArray)[0]);
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), ((DateTime[])MyDateTimeArray)[0]);

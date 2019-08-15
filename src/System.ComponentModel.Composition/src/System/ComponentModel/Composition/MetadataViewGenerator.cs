@@ -22,14 +22,14 @@ namespace System.ComponentModel.Composition
     // // The class to be generated will look approximately like:
     // public class __Foo__MedataViewProxy : TMetadataView
     // {
-    //     public static object Create(IDictionary<string, object> metadata) 
+    //     public static object Create(IDictionary<string, object> metadata)
     //     {
     //        return new __Foo__MedataViewProxy(metadata);
     //     }
-    // 
+    //
     //     public __Foo__MedataViewProxy (IDictionary<string, object> metadata)
     //     {
-    //         if(metadata == null)
+    //         if (metadata == null)
     //         {
     //             throw InvalidArgumentException("metadata");
     //         }
@@ -40,11 +40,11 @@ namespace System.ComponentModel.Composition
     //              Record3 = (typeRecord1)Record3;
     //              Record4 = (typeRecord1)Record4;
     //          }
-    //          catch(InvalidCastException ice)
+    //          catch (InvalidCastException ice)
     //          {
     //              //Annotate exception .Data with diagnostic info
     //          }
-    //          catch(NulLReferenceException ice)
+    //          catch (NulLReferenceException ice)
     //          {
     //              //Annotate exception .Data with diagnostic info
     //          }
@@ -66,13 +66,13 @@ namespace System.ComponentModel.Composition
         public const string MetadataItemValue      = "MetadataItemValue";
         public const string MetadataViewFactoryName= "Create";
 
-        private static Lock _lock = new Lock();
-        private static Dictionary<Type, MetadataViewFactory> _metadataViewFactories = new Dictionary<Type, MetadataViewFactory>();
-        private static AssemblyName ProxyAssemblyName = new AssemblyName(string.Format(CultureInfo.InvariantCulture, "MetadataViewProxies_{0}", Guid.NewGuid()));
+        private static readonly Lock _lock = new Lock();
+        private static readonly Dictionary<Type, MetadataViewFactory> _metadataViewFactories = new Dictionary<Type, MetadataViewFactory>();
+        private static readonly AssemblyName ProxyAssemblyName = new AssemblyName(string.Format(CultureInfo.InvariantCulture, "MetadataViewProxies_{0}", Guid.NewGuid()));
         private static ModuleBuilder    transparentProxyModuleBuilder;
 
-        private static Type[] CtorArgumentTypes = new Type[] { typeof(IDictionary<string, object>) };
-        private static MethodInfo _mdvDictionaryTryGet = CtorArgumentTypes[0].GetMethod("TryGetValue");
+        private static readonly Type[] CtorArgumentTypes = new Type[] { typeof(IDictionary<string, object>) };
+        private static readonly MethodInfo _mdvDictionaryTryGet = CtorArgumentTypes[0].GetMethod("TryGetValue");
         private static readonly MethodInfo ObjectGetType = typeof(object).GetMethod("GetType", Type.EmptyTypes);
         private static readonly ConstructorInfo ObjectCtor = typeof(object).GetConstructor(Type.EmptyTypes);
 
@@ -91,12 +91,12 @@ namespace System.ComponentModel.Composition
 
         public static MetadataViewFactory GetMetadataViewFactory(Type viewType)
         {
-            if(viewType == null)
+            if (viewType == null)
             {
                 throw new ArgumentNullException(nameof(viewType));
             }
 
-            if(!viewType.IsInterface)
+            if (!viewType.IsInterface)
             {
                 throw new Exception(SR.Diagnostic_InternalExceptionMessage);
             }
@@ -110,18 +110,18 @@ namespace System.ComponentModel.Composition
             }
 
             // No factory exists
-            if(!foundMetadataViewFactory)
+            if (!foundMetadataViewFactory)
             {
                 // Try again under a write lock if still none generate the proxy
                 Type generatedProxyType = GenerateInterfaceViewProxyType(viewType);
-                if(generatedProxyType == null)
+                if (generatedProxyType == null)
                 {
                     throw new Exception(SR.Diagnostic_InternalExceptionMessage);
                 }
 
                 MetadataViewFactory generatedMetadataViewFactory = (MetadataViewFactory)Delegate.CreateDelegate(
                     typeof(MetadataViewFactory), generatedProxyType.GetMethod(MetadataViewGenerator.MetadataViewFactoryName, BindingFlags.Public | BindingFlags.Static));
-                if(generatedMetadataViewFactory == null)
+                if (generatedMetadataViewFactory == null)
                 {
                     throw new Exception(SR.Diagnostic_InternalExceptionMessage);
                 }
@@ -140,7 +140,7 @@ namespace System.ComponentModel.Composition
 
         public static TMetadataView CreateMetadataView<TMetadataView>(MetadataViewFactory metadataViewFactory, IDictionary<string, object> metadata)
         {
-            if(metadataViewFactory == null)
+            if (metadataViewFactory == null)
             {
                 throw new ArgumentNullException(nameof(metadataViewFactory));
             }
@@ -149,7 +149,7 @@ namespace System.ComponentModel.Composition
             {
                 return (TMetadataView)metadataViewFactory.Invoke(metadata);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw new TargetInvocationException(e);
             }
@@ -196,7 +196,7 @@ namespace System.ComponentModel.Composition
             proxyTypeBuilder = proxyModuleBuilder.DefineType(
                 string.Format(CultureInfo.InvariantCulture, "_proxy_{0}_{1}", viewType.FullName, Guid.NewGuid()),
                 TypeAttributes.Public,
-                typeof(object), 
+                typeof(object),
                 interfaces);
             // Implement Constructor
             ConstructorBuilder proxyCtor = proxyTypeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, CtorArgumentTypes);
@@ -223,7 +223,7 @@ namespace System.ComponentModel.Composition
                 Type[] propertyTypeArguments = new Type[] { propertyInfo.PropertyType };
                 Type[] optionalModifiers = null;
                 Type[] requiredModifiers = null;
-                
+
                 // PropertyInfo does not support GetOptionalCustomModifiers and GetRequiredCustomModifiers on Silverlight
                 optionalModifiers = propertyInfo.GetOptionalCustomModifiers();
                 requiredModifiers = propertyInfo.GetRequiredCustomModifiers();
@@ -248,7 +248,7 @@ namespace System.ComponentModel.Composition
                 Label innerTryCastValue;
 
                 DefaultValueAttribute[] attrs = propertyInfo.GetAttributes<DefaultValueAttribute>(false);
-                if(attrs.Length > 0)
+                if (attrs.Length > 0)
                 {
                     innerTryCastValue = proxyCtorIL.BeginExceptionBlock();
                 }

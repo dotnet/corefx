@@ -43,14 +43,14 @@ namespace System.Net.Http.Tests
         [Fact]
         public void TryParse_SetOfInvalidValueStrings_ReturnsFalse()
         {
-            CheckInvalidParsedValue("teäxt", 0);
-            CheckInvalidParsedValue("text会", 0);
-            CheckInvalidParsedValue("会", 0);
-            CheckInvalidParsedValue("t;q=会", 0);
+            CheckInvalidParsedValue("te\u00E4xt", 0);
+            CheckInvalidParsedValue("text\u4F1A", 0);
+            CheckInvalidParsedValue("\u4F1A", 0);
+            CheckInvalidParsedValue("t;q=\u4F1A", 0);
             CheckInvalidParsedValue("t;q=", 0);
             CheckInvalidParsedValue("t;q", 0);
-            CheckInvalidParsedValue("t;会=1", 0);
-            CheckInvalidParsedValue("t;q会=1", 0);
+            CheckInvalidParsedValue("t;\u4F1A=1", 0);
+            CheckInvalidParsedValue("t;q\u4F1A=1", 0);
             CheckInvalidParsedValue("t y", 0);
             CheckInvalidParsedValue("t;q=1 y", 0);
         }
@@ -75,7 +75,7 @@ namespace System.Net.Http.Tests
             int newIndex = startIndex;
             Assert.False(parser.TryParseValue(input, null, ref newIndex, out result),
                 string.Format("TryParse returned true: {0}", input));
-            Assert.Equal(null, result);
+            Assert.Null(result);
             Assert.Equal(startIndex, newIndex);
         }
         #endregion

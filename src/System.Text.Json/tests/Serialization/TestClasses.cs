@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -95,7 +95,7 @@ namespace System.Text.Json.Serialization.Tests
         public int One { get; set; }
         public double Two { get; set; }
     }
-    
+
     public struct SimpleStructWithSimpleClass: ITestClass
     {
         public short MyInt32 { get; set; }
@@ -137,7 +137,7 @@ namespace System.Text.Json.Serialization.Tests
 
         public void Verify()
         {
-            Assert.Equal(MyString, null);
+            Assert.Null(MyString);
         }
     }
 
@@ -147,12 +147,45 @@ namespace System.Text.Json.Serialization.Tests
         public int? MyInt { get; set; } = 1;
         public int[] MyIntArray { get; set; } = new int[] { 1 };
         public List<int> MyIntList { get; set; } = new List<int> { 1 };
+        public List<object> MyObjectList { get; set; } = new List<object> { 1 };
+        public List<List<object>> MyListList { get; set; } = new List<List<object>> { new List<object> { 1 } };
+        public List<Dictionary<string, string>> MyDictionaryList { get; set; } = new List<Dictionary<string, string>> {
+            new Dictionary<string, string> { ["key"] = "value" }
+        };
+        public Dictionary<string, string> MyStringDictionary { get; set; } = new Dictionary<string, string> { ["key"] = "value" };
+        public Dictionary<string, object> MyObjectDictionary { get; set; } = new Dictionary<string, object> { ["key"] = "value" };
+        public Dictionary<string, Dictionary<string, string>> MyStringDictionaryDictionary { get; set; } = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["key"] = new Dictionary<string, string>
+            {
+                ["key"] = "value"
+            }
+        };
+        public Dictionary<string, List<object>> MyListDictionary { get; set; } = new Dictionary<string, List<object>> {
+            ["key"] = new List<object> { "value" }
+        };
+        public Dictionary<string, Dictionary<string, object>> MyObjectDictionaryDictionary { get; set; } = new Dictionary<string, Dictionary<string, object>>
+        {
+            ["key"] = new Dictionary<string, object>
+            {
+                ["key"] = "value"
+            }
+        };
+
         public static readonly string s_null_json =
                 @"{" +
-                @"""MyString"" : null," +
-                @"""MyInt"" : null," +
-                @"""MyIntArray"" : null," +
-                @"""MyIntList"" : null" +
+                    @"""MyString"" : null," +
+                    @"""MyInt"" : null," +
+                    @"""MyIntArray"" : null," +
+                    @"""MyIntList"" : null," +
+                    @"""MyObjectList"" : [null]," +
+                    @"""MyListList"" : [[null]]," +
+                    @"""MyDictionaryList"" : [{""key"" : null}]," +
+                    @"""MyStringDictionary"" : {""key"" : null}," +
+                    @"""MyObjectDictionary"" : {""key"" : null}," +
+                    @"""MyStringDictionaryDictionary"" : {""key"" : {""key"" : null}}," +
+                    @"""MyListDictionary"" : {""key"" : [null]}," +
+                    @"""MyObjectDictionaryDictionary"" : {""key"" : {""key"" : null}}" +
                 @"}";
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_null_json);
@@ -1173,8 +1206,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, MyInt32Dict["key2"]);
             Assert.Equal(2, MyInt32Dict.Count);
 
-            Assert.Equal(true, MyBooleanDict["key1"]);
-            Assert.Equal(false, MyBooleanDict["key2"]);
+            Assert.True(MyBooleanDict["key1"]);
+            Assert.False(MyBooleanDict["key2"]);
             Assert.Equal(2, MyBooleanDict.Count);
 
             Assert.Equal(1.1f, MySingleDict["key1"]);
@@ -1193,8 +1226,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, MyInt32IDict["key2"]);
             Assert.Equal(2, MyInt32IDict.Count);
 
-            Assert.Equal(true, MyBooleanIDict["key1"]);
-            Assert.Equal(false, MyBooleanIDict["key2"]);
+            Assert.True(MyBooleanIDict["key1"]);
+            Assert.False(MyBooleanIDict["key2"]);
             Assert.Equal(2, MyBooleanIDict.Count);
 
             Assert.Equal(1.1f, MySingleIDict["key1"]);
@@ -1213,8 +1246,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, MyInt32IReadOnlyDict["key2"]);
             Assert.Equal(2, MyInt32IReadOnlyDict.Count);
 
-            Assert.Equal(true, MyBooleanIReadOnlyDict["key1"]);
-            Assert.Equal(false, MyBooleanIReadOnlyDict["key2"]);
+            Assert.True(MyBooleanIReadOnlyDict["key1"]);
+            Assert.False(MyBooleanIReadOnlyDict["key2"]);
             Assert.Equal(2, MyBooleanIReadOnlyDict.Count);
 
             Assert.Equal(1.1f, MySingleIReadOnlyDict["key1"]);
@@ -1751,10 +1784,10 @@ namespace System.Text.Json.Serialization.Tests
 
     public class ClassWithUnicodeProperty
     {
-        public int Aѧ { get; set; }
+        public int A\u0467 { get; set; }
 
         // A 400 character property name with a unicode character making it 401 bytes.
-        public int Aѧ34567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890 { get; set; }
+        public int A\u046734567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890 { get; set; }
     }
 
     public class ClassWithExtensionProperty

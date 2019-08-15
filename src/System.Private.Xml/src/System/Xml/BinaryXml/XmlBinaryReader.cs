@@ -20,7 +20,7 @@ namespace System.Xml
 
         private static volatile Type[] s_tokenTypeMap = null;
 
-        private static byte[] s_xsdKatmaiTimeScaleToValueLengthMap = new byte[8] {
+        private static readonly byte[] s_xsdKatmaiTimeScaleToValueLengthMap = new byte[8] {
         // length scale
             3, // 0
             3, // 1
@@ -45,7 +45,7 @@ namespace System.Xml
             Closed = 8
         }
 
-        private static ReadState[] s_scanState2ReadState = {
+        private static readonly ReadState[] s_scanState2ReadState = {
             ReadState.Interactive,
             ReadState.Interactive,
             ReadState.Interactive,
@@ -279,14 +279,14 @@ namespace System.Xml
         // symbol and qname tables
         private SymbolTables _symbolTables;
 
-        private XmlNameTable _xnt;
-        private bool _xntFromSettings;
-        private string _xml;
-        private string _xmlns;
-        private string _nsxmlns;
+        private readonly XmlNameTable _xnt;
+        private readonly bool _xntFromSettings;
+        private readonly string _xml;
+        private readonly string _xmlns;
+        private readonly string _nsxmlns;
 
         // base uri...
-        private string _baseUri;
+        private readonly string _baseUri;
 
         // current parse state
         private ScanState _state;
@@ -317,24 +317,24 @@ namespace System.Xml
         // if it is a simple string value, we cache it
         private string _stringValue;
         // hashtable of current namespaces
-        private Dictionary<string, NamespaceDecl> _namespaces;
+        private readonly Dictionary<string, NamespaceDecl> _namespaces;
         //Hashtable namespaces;
         // linked list of pushed nametables (to support nested binary-xml documents)
         private NestedBinXml _prevNameInfo;
         // XmlTextReader to handle embeded text blocks
         private XmlReader _textXmlReader;
         // close input flag
-        private bool _closeInput;
+        private readonly bool _closeInput;
 
-        private bool _checkCharacters;
-        private bool _ignoreWhitespace;
-        private bool _ignorePIs;
-        private bool _ignoreComments;
-        private DtdProcessing _dtdProcessing;
+        private readonly bool _checkCharacters;
+        private readonly bool _ignoreWhitespace;
+        private readonly bool _ignorePIs;
+        private readonly bool _ignoreComments;
+        private readonly DtdProcessing _dtdProcessing;
 
-        private SecureStringHasher _hasher;
+        private readonly SecureStringHasher _hasher;
         private XmlCharType _xmlCharType;
-        private Encoding _unicode;
+        private readonly Encoding _unicode;
 
         // current version of the protocol
         private byte _version;
@@ -1833,7 +1833,7 @@ namespace System.Xml
                 {
                     foreach (NamespaceDecl nsdecl in _namespaces.Values)
                     {
-                        // don't add predefined decls unless scope == all, then only add 'xml'                       
+                        // don't add predefined decls unless scope == all, then only add 'xml'
                         if (nsdecl.scope != -1 || (XmlNamespaceScope.All == scope && "xml" == nsdecl.prefix))
                         {
                             // xmlns="" only ever reported via scope==local
@@ -2045,7 +2045,7 @@ namespace System.Xml
             return (cbRead > 0);
         }
 
-        // require must be < 1/8 buffer, or else Fill might not actually 
+        // require must be < 1/8 buffer, or else Fill might not actually
         // grab that much data
         private void Fill_(int require)
         {
@@ -2106,7 +2106,7 @@ namespace System.Xml
                     if (b > 127)
                     {
                         b = ReadByte();
-                        // bottom 4 bits are all that are needed, 
+                        // bottom 4 bits are all that are needed,
                         // but we are mapping to 'int', which only
                         // actually has space for 3 more bits.
                         t = (uint)b & (uint)0x07;
@@ -2157,7 +2157,7 @@ namespace System.Xml
             return (int)u;
         }
 
-        // we don't actually support MB64, since we use int for 
+        // we don't actually support MB64, since we use int for
         // all our math anyway...
         private int ParseMB64()
         {
@@ -2489,7 +2489,7 @@ namespace System.Xml
                 else
                     _namespaces[decl.prefix] = decl.prevLink;
                 NamespaceDecl next = decl.scopeLink;
-                // unlink chains for better gc behaviour 
+                // unlink chains for better gc behaviour
                 decl.prevLink = null;
                 decl.scopeLink = null;
                 decl = next;
@@ -3076,7 +3076,7 @@ namespace System.Xml
                     _mark = _pos;
                 // skip over token byte
                 _pos++;
-                // is this a zero-length string?  if yes, skip it.  
+                // is this a zero-length string?  if yes, skip it.
                 // (It just indicates that this is _not_ an empty element)
                 // Also make sure that the following token is an EndElem
                 if (0 == ReadByte())

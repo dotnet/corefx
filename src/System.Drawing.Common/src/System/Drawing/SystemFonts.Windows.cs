@@ -10,7 +10,7 @@ namespace System.Drawing
 {
     public static partial class SystemFonts
     {
-        private unsafe static bool GetNonClientMetrics(out NativeMethods.NONCLIENTMETRICS metrics)
+        private static unsafe bool GetNonClientMetrics(out NativeMethods.NONCLIENTMETRICS metrics)
         {
             metrics = new NativeMethods.NONCLIENTMETRICS { cbSize = (uint)sizeof(NativeMethods.NONCLIENTMETRICS) };
             fixed (void* m = &metrics)
@@ -143,7 +143,7 @@ namespace System.Drawing
                     }
                     catch (Exception ex) when (!IsCriticalFontException(ex)) { }
                 }
-    
+
                 // First try DEFAULT_GUI.
                 if (defaultFont == null)
                 {

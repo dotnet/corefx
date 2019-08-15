@@ -27,7 +27,12 @@ namespace System.IO.Packaging
         {
             if (_zipArchiveEntry != null)
             {
-                if (streamFileMode == FileMode.Create)
+                // Reset the stream when FileMode.Create is specified.  Since ZipArchiveEntry only
+                // ever supports opening once when the backing archive is in Create mode, we'll avoid
+                // calling SetLength since the stream returned won't be seekable. You could still open
+                // an archive in Update mode then call part.GetStream(FileMode.Create), in which case
+                // we'll want this call to SetLength.
+                if (streamFileMode == FileMode.Create && _zipArchiveEntry.Archive.Mode != ZipArchiveMode.Create)
                 {
                     using (var tempStream = _zipStreamManager.Open(_zipArchiveEntry, streamFileMode, streamFileAccess))
                     {
@@ -42,13 +47,13 @@ namespace System.IO.Packaging
         }
 
         #endregion Public Methods
-        
+
         #region Internal Constructors
 
         /// <summary>
         /// Constructs a ZipPackagePart for an atomic (i.e. non-interleaved) part.
         /// This is called from the ZipPackage class as a result of GetPartCore,
-        /// GetPartsCore or CreatePartCore methods     
+        /// GetPartsCore or CreatePartCore methods
         /// </summary>
         /// <param name="zipPackage"></param>
         /// <param name="zipArchive"></param>
@@ -88,13 +93,13 @@ namespace System.IO.Packaging
         }
 
         #endregion Internal Properties
-        
+
         #region Private Variables
 
-        private ZipPackage _zipPackage;
-        private ZipArchiveEntry _zipArchiveEntry;
-        private ZipArchive _zipArchive;
-        private ZipStreamManager _zipStreamManager;
+        private readonly ZipPackage _zipPackage;
+        private readonly ZipArchiveEntry _zipArchiveEntry;
+        private readonly ZipArchive _zipArchive;
+        private readonly ZipStreamManager _zipStreamManager;
 
         #endregion Private Variables
     }

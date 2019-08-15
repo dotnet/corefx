@@ -29,7 +29,7 @@ namespace System.Net
 
     public class HttpListenerPrefixCollection : ICollection<string>
     {
-        private HttpListener _httpListener;
+        private readonly HttpListener _httpListener;
 
         internal HttpListenerPrefixCollection(HttpListener listener)
         {
@@ -102,4 +102,3 @@ namespace System.Net
         public void Clear() => _httpListener.RemoveAll(true);
     }
 }
-

@@ -17,10 +17,10 @@ namespace System.Security.Cryptography
         private byte[] _baseValue;
         private byte[] _extra;
         private byte[] _salt;
-        private byte[] _password;
+        private readonly byte[] _password;
         private string _hashName;
         private HashAlgorithm _hash;
-        private CspParameters _cspParams;
+        private readonly CspParameters _cspParams;
 
         public PasswordDeriveBytes(string strPassword, byte[] rgbSalt) : this(strPassword, rgbSalt, new CspParameters()) { }
 
@@ -189,7 +189,7 @@ namespace System.Security.Cryptography
                 _hash.TransformBlock(_salt, 0, _salt.Length, _salt, 0);
             }
 
-            _hash.TransformFinalBlock(Array.Empty<Byte>(), 0, 0);
+            _hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
             _baseValue = _hash.Hash;
             _hash.Initialize();
 

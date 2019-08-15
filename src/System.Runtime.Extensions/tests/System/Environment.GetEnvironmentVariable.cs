@@ -183,6 +183,7 @@ namespace System.Tests
             }
         }
 
+        [Fact]
         public void EnvironmentVariablesAreHashtable()
         {
             // On NetFX, the type returned was always Hashtable
@@ -219,6 +220,13 @@ namespace System.Tests
         public void EnumerateEnvironmentVariables(EnvironmentVariableTarget target)
         {
             bool lookForSetValue = (target == EnvironmentVariableTarget.Process) || PlatformDetection.IsWindowsAndElevated;
+            
+            // [ActiveIssue(40226)]
+            if (PlatformDetection.IsWindowsNanoServer && target == EnvironmentVariableTarget.User)
+            {
+                lookForSetValue = false;
+            }
+
             string key = $"EnumerateEnvironmentVariables ({target})";
             string value = Path.GetRandomFileName();
 
@@ -236,7 +244,7 @@ namespace System.Tests
                 IDictionaryEnumerator enumerator = results.GetEnumerator();
                 while (enumerator.MoveNext())
                 {
-                    Assert.NotNull(enumerator.Entry);
+                    Assert.NotNull(enumerator.Entry.Key);
                 }
 
                 if (lookForSetValue)

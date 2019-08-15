@@ -49,7 +49,6 @@ namespace System.Net.Mail.Tests
         [Theory]
         [InlineData(SmtpDeliveryMethod.SpecifiedPickupDirectory)]
         [InlineData(SmtpDeliveryMethod.PickupDirectoryFromIis)]
-        [InlineData(SmtpDeliveryMethod.PickupDirectoryFromIis)]
         public void DeliveryMethodTest(SmtpDeliveryMethod method)
         {
             Smtp.DeliveryMethod = method;
@@ -379,7 +378,7 @@ namespace System.Net.Mail.Tests
             server.SupportSmtpUTF8 = useSmtpUTF8;
 
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
-            
+
             if (useSevenBit)
             {
                 // Subject will be encoded by Base64.
@@ -401,7 +400,7 @@ namespace System.Net.Mail.Tests
 
                 if (useAsyncSend)
                 {
-                    client.SendMailAsync(msg).Wait(); 
+                    client.SendMailAsync(msg).Wait();
                 }
                 else
                 {

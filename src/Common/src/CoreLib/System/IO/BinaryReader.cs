@@ -4,8 +4,8 @@
 
 /*============================================================
 **
-** 
-** 
+**
+**
 **
 **
 ** Purpose: Wraps a stream and provides convenient read functionality
@@ -31,12 +31,12 @@ namespace System.IO
         private readonly Decoder _decoder;
         private byte[]? _charBytes;
         private char[]? _charBuffer;
-        private int _maxCharsSize;  // From MaxCharBytesSize & Encoding
+        private readonly int _maxCharsSize;  // From MaxCharBytesSize & Encoding
 
-        // Performance optimization for Read() w/ Unicode.  Speeds us up by ~40% 
-        private bool _2BytesPerChar;
-        private bool _isMemoryStream; // "do we sit on MemoryStream?" for Read/ReadInt32 perf
-        private bool _leaveOpen;
+        // Performance optimization for Read() w/ Unicode.  Speeds us up by ~40%
+        private readonly bool _2BytesPerChar;
+        private readonly bool _isMemoryStream; // "do we sit on MemoryStream?" for Read/ReadInt32 perf
+        private readonly bool _leaveOpen;
         private bool _disposed;
 
         public BinaryReader(Stream input) : this(input, Encoding.UTF8, false)
@@ -74,7 +74,7 @@ namespace System.IO
             _buffer = new byte[minBufferSize];
             // _charBuffer and _charBytes will be left null.
 
-            // For Encodings that always use 2 bytes per char (or more), 
+            // For Encodings that always use 2 bytes per char (or more),
             // special case them here to make Read() & Peek() faster.
             _2BytesPerChar = encoding is UnicodeEncoding;
             // check if BinaryReader is based on MemoryStream, and keep this for it's life
@@ -156,7 +156,7 @@ namespace System.IO
 
             if (_charBytes == null)
             {
-                _charBytes = new byte[MaxCharBytesSize]; //REVIEW: We need at most 2 bytes/char here? 
+                _charBytes = new byte[MaxCharBytesSize]; //REVIEW: We need at most 2 bytes/char here?
             }
 
             Span<char> singleChar = stackalloc char[1];
@@ -198,7 +198,7 @@ namespace System.IO
                 }
                 catch
                 {
-                    // Handle surrogate char 
+                    // Handle surrogate char
 
                     if (_stream.CanSeek)
                     {
@@ -445,7 +445,7 @@ namespace System.IO
             // this should never fail
             Debug.Assert(charsRemaining >= 0, "We read too many characters.");
 
-            // we may have read fewer than the number of characters requested if end of stream reached 
+            // we may have read fewer than the number of characters requested if end of stream reached
             // or if the encoding makes the char count too big for the buffer (e.g. fallback sequence)
             return (buffer.Length - charsRemaining);
         }

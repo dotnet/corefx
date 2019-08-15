@@ -11,7 +11,7 @@ namespace System.Net
 {
     internal class NetworkStreamWrapper : Stream
     {
-        private TcpClient _client;
+        private readonly TcpClient _client;
         private NetworkStream _networkStream;
 
         internal NetworkStreamWrapper(TcpClient client)
@@ -227,5 +227,3 @@ namespace System.Net
         }
     }
 } // System.Net
-
-

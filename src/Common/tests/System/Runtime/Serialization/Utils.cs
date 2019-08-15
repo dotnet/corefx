@@ -85,7 +85,7 @@ internal static class Utils
                 int from = Max(currentIndex - 10, 0);
                 int errPosition = currentIndex - from;
                 int to = Min(currentIndex + 20, commonLength);
-                string message = string.Format("strings differ at index {0}\n{3}↓\n[expected]:{1}\n[actual  ]:{2}\n{3}↑\n[Expected (with length={4})]:\n{5}\n[Actual (with length={6})]:\n{7}",
+                string message = string.Format("strings differ at index {0}\n{3}\u2193\n[expected]:{1}\n[actual  ]:{2}\n{3}\u2191\n[Expected (with length={4})]:\n{5}\n[Actual (with length={6})]:\n{7}",
                     currentIndex,
                     expected.Substring(from, to - from),
                     actual.Substring(from, to - from),
@@ -153,7 +153,7 @@ internal static class Utils
         if (!baselineXElement.Name.Equals(actualXElement.Name))
         {
             // Two nodes could be same even if their localName is not the same.
-            // For example- 
+            // For example-
 
             // Desktop
             //<GenericBase2OfSimpleBaseDerivedSimpleBaseDerived2zbP0weY4 xmlns:i="http://www.w3.org/2001/XMLSchema-instance" z:Id="i1" xmlns:z="http://schemas.microsoft.com/2003/10/Serialization/" xmlns="http://schemas.datacontract.org/2004/07/SerializationTypes">
@@ -283,7 +283,7 @@ internal static class Utils
         XElement[] deskChildElems = baselineXElement.Descendants().OrderBy(m => m.Name.NamespaceName).ToArray();
         XElement[] coreCLRChildElems = actualXElement.Descendants().OrderBy(m => m.Name.NamespaceName).ToArray();
 
-        if(deskChildElems.Length != coreCLRChildElems.Length)
+        if (deskChildElems.Length != coreCLRChildElems.Length)
         {
             return false;
         }
@@ -302,7 +302,7 @@ internal static class Utils
     {
         if (deskElemValue.Equals(coreCLRElemValue)) return true;
 
-        // For text of the form 
+        // For text of the form
         // <z:QName xmlns:z="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:a="def">a:abc</z:QName>
 
         // In the above XML text the XElement.Value is a:abc which in CoreCLR could be something like d1p1:abc

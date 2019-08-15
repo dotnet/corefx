@@ -14,7 +14,7 @@ namespace System.Xml.Serialization
     using System.Xml.Extensions;
     using System.Xml.Schema;
 
-    // These classes provide a higher level view on reflection specific to 
+    // These classes provide a higher level view on reflection specific to
     // Xml serialization, for example:
     // - allowing one to talk about types w/o having them compiled yet
     // - abstracting collections & arrays
@@ -65,19 +65,19 @@ namespace System.Xml.Serialization
 
     internal class TypeDesc
     {
-        private string _name;
-        private string _fullName;
+        private readonly string _name;
+        private readonly string _fullName;
         private string _cSharpName;
         private TypeDesc _arrayElementTypeDesc;
         private TypeDesc _arrayTypeDesc;
         private TypeDesc _nullableTypeDesc;
-        private TypeKind _kind;
-        private XmlSchemaType _dataType;
+        private readonly TypeKind _kind;
+        private readonly XmlSchemaType _dataType;
         private Type _type;
         private TypeDesc _baseTypeDesc;
         private TypeFlags _flags;
-        private string _formatterName;
-        private bool _isXsdType;
+        private readonly string _formatterName;
+        private readonly bool _isXsdType;
         private bool _isMixed;
         private int _weight;
         private Exception _exception;
@@ -459,15 +459,15 @@ namespace System.Xml.Serialization
 
     internal class TypeScope
     {
-        private Hashtable _typeDescs = new Hashtable();
-        private Hashtable _arrayTypeDescs = new Hashtable();
-        private ArrayList _typeMappings = new ArrayList();
+        private readonly Hashtable _typeDescs = new Hashtable();
+        private readonly Hashtable _arrayTypeDescs = new Hashtable();
+        private readonly ArrayList _typeMappings = new ArrayList();
 
-        private static Hashtable s_primitiveTypes = new Hashtable();
-        private static Hashtable s_primitiveDataTypes = new Hashtable();
-        private static NameTable s_primitiveNames = new NameTable();
+        private static readonly Hashtable s_primitiveTypes = new Hashtable();
+        private static readonly Hashtable s_primitiveDataTypes = new Hashtable();
+        private static readonly NameTable s_primitiveNames = new NameTable();
 
-        private static string[] s_unsupportedTypes = new string[] {
+        private static readonly string[] s_unsupportedTypes = new string[] {
             "anyURI",
             "duration",
             "ENTITY",
@@ -533,7 +533,7 @@ namespace System.Xml.Serialization
 
             AddSoapEncodedTypes(Soap.Encoding);
 
-            // Unsuppoted types that we map to string, if in the future we decide 
+            // Unsuppoted types that we map to string, if in the future we decide
             // to add support for them we would need to create custom formatters for them
             // normalizedString is the only one unsupported type that suppose to preserve whitesapce
             AddPrimitive(typeof(string), "normalizedString", "String", TypeFlags.AmbiguousDataType | TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.CanBeTextValue | TypeFlags.Reference | TypeFlags.HasDefaultConstructor);
@@ -915,7 +915,7 @@ namespace System.Xml.Serialization
                     arrayElementType = GetEnumeratorElementType(type, ref flags);
                     kind = TypeKind.Enumerable;
 
-                    // GetEnumeratorElementType checks for the security attributes on the GetEnumerator(), Add() methods and Current property, 
+                    // GetEnumeratorElementType checks for the security attributes on the GetEnumerator(), Add() methods and Current property,
                     // we need to check the MoveNext() and ctor methods for the security attribues
                     flags |= GetConstructorFlags(type, ref exception);
                 }
@@ -1379,7 +1379,7 @@ namespace System.Xml.Serialization
             name = type.Substring(nsLen + 1, nameLen - nsLen - 1);
             dims = type.Substring(nameLen);
 
-            // parent is not null only in the case when we used XmlSchema.Read(), 
+            // parent is not null only in the case when we used XmlSchema.Read(),
             // in which case we need to fixup the wsdl:arayType attribute value
             while (parent != null)
             {
@@ -1444,4 +1444,3 @@ namespace System.Xml.Serialization
         internal const string Namespace = "http://microsoft.com/wsdl/types/";
     }
 }
-

@@ -9,8 +9,8 @@ namespace System.Runtime.InteropServices
     public static partial class RuntimeInformation
     {
         private static string s_osDescription = null;
-        private static object s_osLock = new object();
-        private static object s_processLock = new object();
+        private static readonly object s_osLock = new object();
+        private static readonly object s_processLock = new object();
         private static Architecture? s_osArch = null;
         private static Architecture? s_processArch = null;
 
@@ -82,7 +82,7 @@ namespace System.Runtime.InteropServices
                         Interop.Kernel32.SYSTEM_INFO sysInfo;
                         Interop.Kernel32.GetSystemInfo(out sysInfo);
 
-                        switch((Interop.Kernel32.ProcessorArchitecture)sysInfo.wProcessorArchitecture)
+                        switch ((Interop.Kernel32.ProcessorArchitecture)sysInfo.wProcessorArchitecture)
                         {
                             case Interop.Kernel32.ProcessorArchitecture.Processor_Architecture_ARM64:
                                 s_processArch = Architecture.Arm64;

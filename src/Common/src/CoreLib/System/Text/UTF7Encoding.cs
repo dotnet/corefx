@@ -42,7 +42,7 @@ namespace System.Text
         // This array has a size of 128.
         private bool[] _directEncode = null!;
 
-        private bool _allowOptionals;
+        private readonly bool _allowOptionals;
 
         private const int UTF7_CODEPAGE = 65000;
 
@@ -351,7 +351,7 @@ namespace System.Text
         // EncodingNLS, UTF7Encoding, UTF8Encoding, UTF32Encoding, ASCIIEncoding, UnicodeEncoding
 
         [CLSCompliant(false)]
-        public unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
+        public override unsafe int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
         {
             // Validate Parameters
             if (bytes == null || chars == null)
@@ -873,8 +873,7 @@ namespace System.Text
 
             public override bool Equals(object? value)
             {
-                DecoderUTF7Fallback? that = value as DecoderUTF7Fallback;
-                if (that != null)
+                if (value is DecoderUTF7Fallback)
                 {
                     return true;
                 }
@@ -957,7 +956,7 @@ namespace System.Text
             }
 
             // This version just counts the fallback and doesn't actually copy anything.
-            internal unsafe override int InternalFallback(byte[] bytes, byte* pBytes)
+            internal override unsafe int InternalFallback(byte[] bytes, byte* pBytes)
             // Right now this has both bytes and bytes[], since we might have extra bytes, hence the
             // array, and we might need the index, hence the byte*
             {

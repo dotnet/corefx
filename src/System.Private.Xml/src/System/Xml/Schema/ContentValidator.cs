@@ -18,8 +18,8 @@ namespace System.Xml.Schema
     /// </summary>
     internal class UpaException : Exception
     {
-        private object _particle1;
-        private object _particle2;
+        private readonly object _particle1;
+        private readonly object _particle2;
         public UpaException(object particle1, object particle2)
         {
             _particle1 = particle1;
@@ -33,15 +33,15 @@ namespace System.Xml.Schema
     /// SymbolsDictionary is a map between names that ContextValidator recognizes and symbols - int symbol[XmlQualifiedName name].
     /// There are two types of name - full names and wildcards (namespace is specified, local name is anything).
     /// Wildcard excludes all full names that would match by the namespace part.
-    /// SymbolsDictionary always recognizes all the symbols - the last one is a true wildcard - 
+    /// SymbolsDictionary always recognizes all the symbols - the last one is a true wildcard -
     ///      both name and namespace can be anything that none of the other symbols matched.
     /// </summary>
     internal class SymbolsDictionary
     {
         private int _last = 0;
-        private Hashtable _names;
+        private readonly Hashtable _names;
         private Hashtable _wildcards = null;
-        private ArrayList _particles;
+        private readonly ArrayList _particles;
         private object _particleLast = null;
         private bool _isUpaEnforced = true;
 
@@ -245,7 +245,7 @@ namespace System.Xml.Schema
 
     internal class Positions
     {
-        private ArrayList _positions = new ArrayList();
+        private readonly ArrayList _positions = new ArrayList();
 
         public int Add(int symbol, object particle)
         {
@@ -278,8 +278,8 @@ namespace System.Xml.Schema
         /// <summary>
         /// From a regular expression to a DFA
         /// Compilers by Aho, Sethi, Ullman.
-        /// ISBN 0-201-10088-6, p135 
-        /// Construct firstpos, lastpos and calculate followpos 
+        /// ISBN 0-201-10088-6, p135
+        /// Construct firstpos, lastpos and calculate followpos
         /// </summary>
         public abstract void ConstructPos(BitSet firstpos, BitSet lastpos, BitSet[] followpos);
 
@@ -794,7 +794,7 @@ namespace System.Xml.Schema
     sealed class RangeNode : InteriorNode {
         int min;
         int max;
-        
+
         public RangeNode(int min, int max) {
             this.min = min;
             this.max = max;
@@ -879,7 +879,7 @@ namespace System.Xml.Schema
             qmark.LeftChild = leftChild;
             return qmark;
         }
-        
+
         public override void ConstructPos(BitSet firstpos, BitSet lastpos, BitSet[] followpos) {
             throw new InvalidOperationException();
         }
@@ -903,7 +903,7 @@ namespace System.Xml.Schema
     internal sealed class LeafRangeNode : LeafNode
     {
         private decimal _min;
-        private decimal _max;
+        private readonly decimal _max;
         private BitSet _nextIteration;
 
         public LeafRangeNode(decimal min, decimal max) : this(-1, min, max) { }
@@ -964,9 +964,9 @@ namespace System.Xml.Schema
     /// </summary>
     internal class ContentValidator
     {
-        private XmlSchemaContentType _contentType;
+        private readonly XmlSchemaContentType _contentType;
         private bool _isOpen;  //For XDR Content Models or ANY
-        private bool _isEmptiable;
+        private readonly bool _isEmptiable;
 
         public static readonly ContentValidator Empty = new ContentValidator(XmlSchemaContentType.Empty);
         public static readonly ContentValidator TextOnly = new ContentValidator(XmlSchemaContentType.TextOnly, false, false);
@@ -1054,7 +1054,7 @@ namespace System.Xml.Schema
             {
                 particles.Add(p);
             }
-            //Only then it can be head of substitutionGrp, if it is, add its members 
+            //Only then it can be head of substitutionGrp, if it is, add its members
             XmlSchemaElement elem = p as XmlSchemaElement;
             if (elem != null && (global || !elem.RefName.IsEmpty))
             {
@@ -1084,7 +1084,7 @@ namespace System.Xml.Schema
         private SyntaxTreeNode _contentNode;         // content model points to syntax tree
         private bool _isPartial;                     // whether the closure applies to partial or the whole node that is on top of the stack
         private int _minMaxNodesCount;
-        private bool _enableUpaCheck;
+        private readonly bool _enableUpaCheck;
 
         public ParticleContentValidator(XmlSchemaContentType contentType) : this(contentType, true)
         {
@@ -1457,7 +1457,7 @@ namespace System.Xml.Schema
         {
             if (curpos.Intersects(posWithRangeTerminals))
             {
-                BitSet newSet = new BitSet(_positions.Count); //Doing work again 
+                BitSet newSet = new BitSet(_positions.Count); //Doing work again
                 newSet.Or(curpos);
                 newSet.And(posWithRangeTerminals);
                 curpos = curpos.Clone();
@@ -1505,7 +1505,7 @@ namespace System.Xml.Schema
         /// </summary>
         private int[][] BuildTransitionTable(BitSet firstpos, BitSet[] followpos, int endMarkerPos)
         {
-            const int TimeConstant = 8192; //(MaxStates * MaxPositions should be a constant) 
+            const int TimeConstant = 8192; //(MaxStates * MaxPositions should be a constant)
             int positionsCount = _positions.Count;
             int MaxStatesCount = TimeConstant / positionsCount;
             int symbolsCount = _symbols.Count;
@@ -1522,7 +1522,7 @@ namespace System.Xml.Schema
             // lists unmarked states
             Queue unmarked = new Queue();
 
-            // initially, the only unmarked state in Dstates is firstpo(root) 
+            // initially, the only unmarked state in Dstates is firstpo(root)
             int state = 0;
             unmarked.Enqueue(firstpos);
             stateTable.Add(firstpos, 0);
@@ -1531,7 +1531,7 @@ namespace System.Xml.Schema
             // while there is an umnarked state T in Dstates do begin
             while (unmarked.Count > 0)
             {
-                BitSet statePosSet = (BitSet)unmarked.Dequeue(); // all positions that constitute DFA state 
+                BitSet statePosSet = (BitSet)unmarked.Dequeue(); // all positions that constitute DFA state
                 Debug.Assert(state == (int)stateTable[statePosSet]); // just make sure that statePosSet is for correct state
                 int[] transition = (int[])transitionTable[state];
                 if (statePosSet[endMarkerPos])
@@ -1626,12 +1626,12 @@ namespace System.Xml.Schema
     /// <summary>
     /// Deterministic Finite Automata
     /// Compilers by Aho, Sethi, Ullman.
-    /// ISBN 0-201-10088-6, pp. 115, 116, 140 
+    /// ISBN 0-201-10088-6, pp. 115, 116, 140
     /// </summary>
     internal sealed class DfaContentValidator : ContentValidator
     {
-        private int[][] _transitionTable;
-        private SymbolsDictionary _symbols;
+        private readonly int[][] _transitionTable;
+        private readonly SymbolsDictionary _symbols;
 
         /// <summary>
         /// Algorithm 3.5 Construction of a DFA from a regular expression
@@ -1746,15 +1746,15 @@ namespace System.Xml.Schema
     /// <summary>
     /// Nondeterministic Finite Automata
     /// Compilers by Aho, Sethi, Ullman.
-    /// ISBN 0-201-10088-6, pp. 126,140 
+    /// ISBN 0-201-10088-6, pp. 126,140
     /// </summary>
     internal sealed class NfaContentValidator : ContentValidator
     {
-        private BitSet _firstpos;
-        private BitSet[] _followpos;
-        private SymbolsDictionary _symbols;
-        private Positions _positions;
-        private int _endMarkerPos;
+        private readonly BitSet _firstpos;
+        private readonly BitSet[] _followpos;
+        private readonly SymbolsDictionary _symbols;
+        private readonly Positions _positions;
+        private readonly int _endMarkerPos;
 
         internal NfaContentValidator(
             BitSet firstpos, BitSet[] followpos, SymbolsDictionary symbols, Positions positions, int endMarkerPos,
@@ -1813,7 +1813,7 @@ namespace System.Xml.Schema
 
 #if FINDUPA_PARTICLE
         private bool FindUPAParticle(ref object originalParticle, object newParticle) {
-            if (originalParticle == null) { 
+            if (originalParticle == null) {
                 originalParticle = newParticle;
                 if (originalParticle is XmlSchemaElement) { //if the first particle is element, then break, otherwise try to find an element
                     return true;
@@ -1897,13 +1897,13 @@ namespace System.Xml.Schema
 
     internal sealed class RangeContentValidator : ContentValidator
     {
-        private BitSet _firstpos;
-        private BitSet[] _followpos;
-        private BitSet _positionsWithRangeTerminals;
-        private SymbolsDictionary _symbols;
-        private Positions _positions;
-        private int _minMaxNodesCount;
-        private int _endMarkerPos;
+        private readonly BitSet _firstpos;
+        private readonly BitSet[] _followpos;
+        private readonly BitSet _positionsWithRangeTerminals;
+        private readonly SymbolsDictionary _symbols;
+        private readonly Positions _positions;
+        private readonly int _minMaxNodesCount;
+        private readonly int _endMarkerPos;
 
         internal RangeContentValidator(
             BitSet firstpos, BitSet[] followpos, SymbolsDictionary symbols, Positions positions, int endMarkerPos, XmlSchemaContentType contentType, bool isEmptiable, BitSet positionsWithRangeTerminals, int minmaxNodesCount) : base(contentType, false, isEmptiable)
@@ -2050,7 +2050,7 @@ namespace System.Xml.Schema
                     hasSeenFinalPosition = hasSeenFinalPosition || currentRunningPosition.Get(_endMarkerPos); //Accepting position reached if the current position BitSet contains the endPosition
                     while (matchCount < 10000 && currentRunningPosition.Intersects(_positionsWithRangeTerminals))
                     {
-                        //Now might add 2 more positions to followpos 
+                        //Now might add 2 more positions to followpos
                         //1. nextIteration of the rangeNode, which is firstpos of its parent's leftChild
                         //2. Followpos of the range node
 
@@ -2126,8 +2126,8 @@ namespace System.Xml.Schema
             while (counter < length) {
                 BitSet curpos = runningPositions[counter].curpos;
                 SequenceNode.WriteBitSet(curpos);
-                for(int rcnt = 0; rcnt < runningPositions[counter].rangeCounters.Length; rcnt++) {
-                    Debug.WriteIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "RangeCounter[" + rcnt + "]" + runningPositions[counter].rangeCounters[rcnt] + " ");                    
+                for (int rcnt = 0; rcnt < runningPositions[counter].rangeCounters.Length; rcnt++) {
+                    Debug.WriteIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "RangeCounter[" + rcnt + "]" + runningPositions[counter].rangeCounters[rcnt] + " ");
                 }
                 Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "");
                 Debug.WriteLineIf(DiagnosticsSwitches.XmlSchemaContentModel.Enabled, "");
@@ -2218,9 +2218,9 @@ namespace System.Xml.Schema
 
     internal sealed class AllElementsContentValidator : ContentValidator
     {
-        private Hashtable _elements;     // unique terminal names to positions in Bitset mapping
-        private object[] _particles;
-        private BitSet _isRequired;      // required flags
+        private readonly Hashtable _elements;     // unique terminal names to positions in Bitset mapping
+        private readonly object[] _particles;
+        private readonly BitSet _isRequired;      // required flags
         private int _countRequired = 0;
 
         public AllElementsContentValidator(XmlSchemaContentType contentType, int size, bool isEmptiable) : base(contentType, false, isEmptiable)

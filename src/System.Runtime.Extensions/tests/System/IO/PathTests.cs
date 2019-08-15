@@ -51,7 +51,7 @@ namespace System.IO.Tests
             string curDir = Directory.GetCurrentDirectory();
             Assert.Equal(curDir, Path.GetDirectoryName(Path.Combine(curDir, "baz")));
 
-            Assert.Equal(null, Path.GetDirectoryName(Path.GetPathRoot(curDir)));
+            Assert.Null(Path.GetDirectoryName(Path.GetPathRoot(curDir)));
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace System.IO.Tests
             {
                 string s = Path.GetRandomFileName();
                 Assert.Equal(s.Length, 8 + 1 + 3);
-                Assert.Equal(s[8], '.');
+                Assert.Equal('.', s[8]);
                 Assert.Equal(-1, s.IndexOfAny(invalidChars));
                 Assert.True(fileNames.Add(s));
             }

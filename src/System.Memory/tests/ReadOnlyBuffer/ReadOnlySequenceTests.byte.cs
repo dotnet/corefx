@@ -101,10 +101,10 @@ namespace System.Memory.Tests
             ReadOnlySequence<byte> buffer = Factory.CreateOfSize(100);
 
             SequencePosition position = buffer.GetPosition(65);
-            Assert.Equal(buffer.Slice(position).Length, 35);
+            Assert.Equal(35, buffer.Slice(position).Length);
 
             position = buffer.GetPosition(65, buffer.Start);
-            Assert.Equal(buffer.Slice(position).Length, 35);
+            Assert.Equal(35, buffer.Slice(position).Length);
         }
 
         [Fact]
@@ -203,7 +203,7 @@ namespace System.Memory.Tests
 
         public static TheoryData<Action<ReadOnlySequence<byte>>> OutOfRangeSliceCases => new TheoryData<Action<ReadOnlySequence<byte>>>
         {
-            // negative start	
+            // negative start
             b => b.Slice(-1), // no length
             b => b.Slice(-1, -1), // negative length
             b => b.Slice(-1, 0), // zero length

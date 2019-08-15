@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -1225,7 +1225,7 @@ namespace System.ServiceModel.Syndication.Tests
                 Assert.Equal("contributor_email", thirdContributor.Email);
                 Assert.Equal("contributor_name", thirdContributor.Name);
                 Assert.Equal("contributor_uri", thirdContributor.Uri);
-                
+
                 Assert.Equal(4, item.Copyright.AttributeExtensions.Count);
                 Assert.Equal("", item.Copyright.AttributeExtensions[new XmlQualifiedName("copyright_name1")]);
                 Assert.Equal("", item.Copyright.AttributeExtensions[new XmlQualifiedName("copyright_name2", "copyright_namespace")]);
@@ -1411,9 +1411,9 @@ namespace System.ServiceModel.Syndication.Tests
         }
 
         [Theory]
-        [InlineData(true, true)]
-        [InlineData(false, false)]
-        public void ReadFrom_EmptySource_ReturnsExpected(bool preserveAttributeExtensions, bool preserveElementExtensions)
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ReadFrom_EmptySource_ReturnsExpected(bool preserveElementExtensions)
         {
             VerifyRead(@"<item><source></source></item>", preserveElementExtensions, preserveElementExtensions, item =>
             {
@@ -1435,9 +1435,9 @@ namespace System.ServiceModel.Syndication.Tests
         }
 
         [Theory]
-        [InlineData(true, true)]
-        [InlineData(false, false)]
-        public void ReadFrom_EmptyItem_ReturnsExpected(bool preserveAttributeExtensions, bool preserveElementExtensions)
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ReadFrom_EmptyItem_ReturnsExpected(bool preserveElementExtensions)
         {
             VerifyRead(@"<item></item>", preserveElementExtensions, preserveElementExtensions, item =>
             {

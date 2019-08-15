@@ -2,12 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.IO;
-using System.Xml;
-using System.Xml.Schema;
 using System.Diagnostics;
-using MS.Internal.Xml;
 
 namespace System.Xml.Xsl.Runtime
 {
@@ -15,11 +10,10 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal class WhitespaceRuleReader : XmlWrappingReader
     {
-        private WhitespaceRuleLookup _wsRules;
-        private BitStack _stkStrip;
+        private readonly WhitespaceRuleLookup _wsRules;
+        private readonly BitStack _stkStrip;
         private bool _shouldStrip, _preserveAdjacent;
         private string _val;
-        private XmlCharType _xmlCharType = XmlCharType.Instance;
 
         public static XmlReader CreateReader(XmlReader baseReader, WhitespaceRuleLookup wsRules)
         {

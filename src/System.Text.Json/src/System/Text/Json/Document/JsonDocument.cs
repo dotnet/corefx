@@ -8,6 +8,7 @@ using System.Buffers.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace System.Text.Json
 {
@@ -56,22 +57,23 @@ namespace System.Text.Json
         /// <inheritdoc />
         public void Dispose()
         {
-            if (_utf8Json.IsEmpty || !IsDisposable)
+            int length = _utf8Json.Length;
+            if (length == 0 || !IsDisposable)
             {
                 return;
             }
 
-            int length = _utf8Json.Length;
-            _utf8Json = ReadOnlyMemory<byte>.Empty;
             _parsedData.Dispose();
+            _utf8Json = ReadOnlyMemory<byte>.Empty;
 
             // When "extra rented bytes exist" they contain the document,
             // and thus need to be cleared before being returned.
-            if (_extraRentedBytes != null)
+            byte[] extraRentedBytes = Interlocked.Exchange(ref _extraRentedBytes, null);
+
+            if (extraRentedBytes != null)
             {
-                _extraRentedBytes.AsSpan(0, length).Clear();
-                ArrayPool<byte>.Shared.Return(_extraRentedBytes);
-                _extraRentedBytes = null;
+                extraRentedBytes.AsSpan(0, length).Clear();
+                ArrayPool<byte>.Shared.Return(extraRentedBytes);
             }
         }
 
@@ -964,7 +966,7 @@ namespace System.Text.Json
 
         private static void Parse(
             ReadOnlySpan<byte> utf8JsonSpan,
-            Utf8JsonReader reader,
+            JsonReaderOptions readerOptions,
             ref MetadataDb database,
             ref StackRowStack stack)
         {
@@ -973,11 +975,16 @@ namespace System.Text.Json
             int numberOfRowsForMembers = 0;
             int numberOfRowsForValues = 0;
 
+            Utf8JsonReader reader = new Utf8JsonReader(
+                utf8JsonSpan,
+                isFinalBlock: true,
+                new JsonReaderState(options: readerOptions));
+
             while (reader.Read())
             {
                 JsonTokenType tokenType = reader.TokenType;
 
-                // Since the input payload is contained within a Span, 
+                // Since the input payload is contained within a Span,
                 // token start index can never be larger than int.MaxValue (i.e. utf8JsonSpan.Length).
                 Debug.Assert(reader.TokenStartIndex <= int.MaxValue);
                 int tokenStart = (int)reader.TokenStartIndex;

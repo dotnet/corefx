@@ -21,7 +21,7 @@ namespace System.DirectoryServices.AccountManagement
         public const DebugLevel DefaultDebugLevel = DebugLevel.None;
 #endif
 
-        static public DebugLevel DebugLevel
+        public static DebugLevel DebugLevel
         {
             get
             {
@@ -32,7 +32,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        static public string DebugLogFile
+        public static string DebugLogFile
         {
             get
             {
@@ -43,6 +43,6 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        private static ConfigSettings s_configSettings;
+        private static readonly ConfigSettings s_configSettings;
     }
 }

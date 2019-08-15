@@ -52,7 +52,7 @@ namespace System.Net.Http.Tests
             CheckInvalidParsedValue("HTTP/1.1 host =", 0);
             CheckInvalidParsedValue("1.1 host invalid", 0);
             CheckInvalidParsedValue("1.1 host =", 0);
-            CheckInvalidParsedValue("会", 0);
+            CheckInvalidParsedValue("\u4F1A", 0);
             CheckInvalidParsedValue("HTTP/test [::1]:80\r(comment)", 0);
             CheckInvalidParsedValue("HTTP/test [::1]:80\n(comment)", 0);
         }
@@ -77,7 +77,7 @@ namespace System.Net.Http.Tests
             int newIndex = startIndex;
             Assert.False(parser.TryParseValue(input, null, ref newIndex, out result),
                 string.Format("TryParse returned true: {0}", input));
-            Assert.Equal(null, result);
+            Assert.Null(result);
             Assert.Equal(startIndex, newIndex);
         }
         #endregion

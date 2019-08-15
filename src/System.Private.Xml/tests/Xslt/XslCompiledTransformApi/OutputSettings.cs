@@ -49,8 +49,7 @@ namespace System.Xml.Tests
         }
 
         //[Variation(id = 1, Desc = "Verify the default value of the OutputSettings, expected null", Pri = 0)]
-        [InlineData()]
-        [Theory]
+        [Fact]
         public void OS1()
         {
             XslCompiledTransform xslt = new XslCompiledTransform();
@@ -84,35 +83,35 @@ namespace System.Xml.Tests
             switch ((int)param2)
             {
                 case 2:
-                    Assert.Equal(os.OutputMethod, XmlOutputMethod.AutoDetect);
+                    Assert.Equal(XmlOutputMethod.AutoDetect, os.OutputMethod);
                     break;
 
                 case 3:
-                    Assert.Equal(os.OutputMethod, XmlOutputMethod.Xml);
+                    Assert.Equal(XmlOutputMethod.Xml, os.OutputMethod);
                     break;
 
                 case 4:
-                    Assert.Equal(os.OutputMethod, XmlOutputMethod.Html);
+                    Assert.Equal(XmlOutputMethod.Html, os.OutputMethod);
                     break;
 
                 case 5:
-                    Assert.Equal(os.OutputMethod, XmlOutputMethod.Text);
+                    Assert.Equal(XmlOutputMethod.Text, os.OutputMethod);
                     break;
 
                 case 6:
-                    Assert.Equal(os.OutputMethod, XmlOutputMethod.AutoDetect);
+                    Assert.Equal(XmlOutputMethod.AutoDetect, os.OutputMethod);
                     break;
 
                 case 7:
-                    Assert.Equal(os.OutputMethod, XmlOutputMethod.Text);
+                    Assert.Equal(XmlOutputMethod.Text, os.OutputMethod);
                     break;
 
                 case 8:
-                    Assert.Equal(os.OutputMethod, XmlOutputMethod.Xml);
+                    Assert.Equal(XmlOutputMethod.Xml, os.OutputMethod);
                     break;
 
                 case 9:
-                    Assert.Equal(os.OutputMethod, XmlOutputMethod.Html);
+                    Assert.Equal(XmlOutputMethod.Html, os.OutputMethod);
                     break;
             }
 
@@ -120,13 +119,13 @@ namespace System.Xml.Tests
         }
 
         //[Variation(id = 10, Desc = "Verify OmitXmlDeclaration when omit-xml-declared is omitted in XSLT, expected false", Pri = 0, Params = new object[] { "books.xml", "OmitXmlDecl_Default.xsl", false, "Default value for OmitXmlDeclaration is 'no'" })]
-        [InlineData("books.xml", "OmitXmlDecl_Default.xsl", false, "Default value for OmitXmlDeclaration is 'no'")]
+        [InlineData("books.xml", "OmitXmlDecl_Default.xsl", false)]
         //[Variation(id = 11, Desc = "Verify OmitXmlDeclaration when omit-xml-declared is yes in XSLT, expected true", Pri = 0, Params = new object[] { "books.xml", "OmitXmlDecl_Yes.xsl", true, "OmitXmlDeclaration must be 'yes'" })]
-        [InlineData("books.xml", "OmitXmlDecl_Yes.xsl", true, "OmitXmlDeclaration must be 'yes'")]
+        [InlineData("books.xml", "OmitXmlDecl_Yes.xsl", true)]
         //[Variation(id = 12, Desc = "Verify OmitXmlDeclaration when omit-xml-declared is no in XSLT, expected false", Pri = 1, Params = new object[] { "books.xml", "OmitXmlDecl_No.xsl", false, "OmitXmlDeclaration must be 'no'" })]
-        [InlineData("books.xml", "OmitXmlDecl_No.xsl", false, "OmitXmlDeclaration must be 'no'")]
+        [InlineData("books.xml", "OmitXmlDecl_No.xsl", false)]
         [Theory]
-        public void OS3(object param0, object param1, object param2, object param3)
+        public void OS3(object param0, object param1, object param2)
         {
             Init(param0.ToString(), param1.ToString());
             _xsl.Load(_xslFile);
@@ -150,7 +149,7 @@ namespace System.Xml.Tests
             {
                 _output.WriteLine(e.ToString());
                 XmlWriterSettings os = _xsl.OutputSettings;
-                Assert.Equal(os, null);
+                Assert.Null(os);
             }
 
             return;
@@ -171,31 +170,31 @@ namespace System.Xml.Tests
             {
                 _output.WriteLine(e.ToString());
                 XmlWriterSettings os = _xsl.OutputSettings;
-                Assert.Equal(os, null);
+                Assert.Null(os);
             }
 
             return;
         }
 
         //[Variation(id = 18, Desc = "Verify Encoding set to windows-1252 explicitly, expected windows-1252", Pri = 1, Params = new object[] { "books.xml", "Encoding4.xsl", "windows-1252", "Encoding must be windows-1252" })]
-        [InlineData("books.xml", "Encoding4.xsl", "windows-1252", "Encoding must be windows-1252")]
+        [InlineData("books.xml", "Encoding4.xsl", "windows-1252")]
         [Theory]
-        public void OS6_Windows1252Encoding(object param0, object param1, object param2, object param3)
+        public void OS6_Windows1252Encoding(object param0, object param1, object param2)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            OS6(param0, param1, param2, param3);
+            OS6(param0, param1, param2);
         }
 
         //[Variation(id = 15, Desc = "Verify default Encoding, expected UTF-8", Pri = 1, Params = new object[] { "books.xml", "Encoding1.xsl", "utf-8", "Default Encoding must be utf-8" })]
-        [InlineData("books.xml", "Encoding1.xsl", "utf-8", "Default Encoding must be utf-8")]
+        [InlineData("books.xml", "Encoding1.xsl", "utf-8")]
         //[Variation(id = 16, Desc = "Verify Encoding set to UTF-8 explicitly, expected UTF-8", Pri = 1, Params = new object[] { "books.xml", "Encoding2.xsl", "utf-8", "Encoding must be utf-8" })]
-        [InlineData("books.xml", "Encoding2.xsl", "utf-8", "Encoding must be utf-8")]
+        [InlineData("books.xml", "Encoding2.xsl", "utf-8")]
         //[Variation(id = 17, Desc = "Verify Encoding set to UTF-16 explicitly, expected UTF-16", Pri = 1, Params = new object[] { "books.xml", "Encoding3.xsl", "utf-16", "Encoding must be utf-16" })]
-        [InlineData("books.xml", "Encoding3.xsl", "utf-16", "Encoding must be utf-16")]
+        [InlineData("books.xml", "Encoding3.xsl", "utf-16")]
         //[Variation(id = 19, Desc = "Verify Encoding when multiple xsl:output tags are present, expected the last set (iso-8859-1)", Pri = 1, Params = new object[] { "books.xml", "Encoding5.xsl", "iso-8859-1", "Encoding must be iso-8859-1" })]
-        [InlineData("books.xml", "Encoding5.xsl", "iso-8859-1", "Encoding must be iso-8859-1")]
+        [InlineData("books.xml", "Encoding5.xsl", "iso-8859-1")]
         [Theory]
-        public void OS6(object param0, object param1, object param2, object param3)
+        public void OS6(object param0, object param1, object param2)
         {
             Init(param0.ToString(), param1.ToString());
             _xsl.Load(_xslFile);
@@ -206,13 +205,13 @@ namespace System.Xml.Tests
         }
 
         //[Variation(id = 20, Desc = "Verify Indent when indent is omitted in XSLT, expected false", Pri = 0, Params = new object[] { "books.xml", "Indent_Default.xsl", false, "Default value for Indent is 'no'" })]
-        [InlineData("books.xml", "Indent_Default.xsl", false, "Default value for Indent is 'no'")]
+        [InlineData("books.xml", "Indent_Default.xsl", false)]
         //[Variation(id = 21, Desc = "Verify Indent when indent is yes in XSLT, expected true", Pri = 0, Params = new object[] { "books.xml", "Indent_Yes.xsl", true, "Indent must be 'yes'" })]
-        [InlineData("books.xml", "Indent_Yes.xsl", true, "Indent must be 'yes'")]
+        [InlineData("books.xml", "Indent_Yes.xsl", true)]
         //[Variation(id = 22, Desc = "Verify Indent when indent is no in XSLT, expected false", Pri = 1, Params = new object[] { "books.xml", "Indent_No.xsl", false, "Indent must be 'no'" })]
-        [InlineData("books.xml", "Indent_No.xsl", false, "Indent must be 'no'")]
+        [InlineData("books.xml", "Indent_No.xsl", false)]
         [Theory]
-        public void OS7(object param0, object param1, object param2, object param3)
+        public void OS7(object param0, object param1, object param2)
         {
             Init(param0.ToString(), param1.ToString());
             _xsl.Load(_xslFile);
@@ -236,7 +235,7 @@ namespace System.Xml.Tests
             {
                 _output.WriteLine(e.ToString());
                 XmlWriterSettings os = _xsl.OutputSettings;
-                Assert.Equal(os, null);
+                Assert.Null(os);
             }
 
             return;
@@ -257,7 +256,7 @@ namespace System.Xml.Tests
             {
                 _output.WriteLine(e.ToString());
                 XmlWriterSettings os = _xsl.OutputSettings;
-                Assert.Equal(os, null);
+                Assert.Null(os);
             }
 
             return;
@@ -272,11 +271,11 @@ namespace System.Xml.Tests
             _xsl.Load(_xslFile);
             XmlWriterSettings os = _xsl.OutputSettings;
             _output.WriteLine("OmitXmlDeclaration : {0}", os.OmitXmlDeclaration);
-            Assert.Equal(os.OmitXmlDeclaration, true);
+            Assert.True(os.OmitXmlDeclaration);
             _output.WriteLine("Indent : {0}", os.Indent);
-            Assert.Equal(os.Indent, true);
+            Assert.True(os.Indent);
             _output.WriteLine("OutputMethod : {0}", os.OutputMethod);
-            Assert.Equal(os.OutputMethod, XmlOutputMethod.Xml);
+            Assert.Equal(XmlOutputMethod.Xml, os.OutputMethod);
             _output.WriteLine("Encoding : {0}", os.Encoding.ToString());
             Assert.Equal(os.Encoding, System.Text.Encoding.GetEncoding("utf-8"));
 
@@ -303,7 +302,7 @@ namespace System.Xml.Tests
             XmlWriter xw = XmlWriter.Create(stm2, os);
 
             //Transform to XmlWriter
-            _output.WriteLine("Transforming to XmlWriter over Stream2 with XSLT	OutputSettings - 'out2.xml'");
+            _output.WriteLine("Transforming to XmlWriter over Stream2 with XSLT    OutputSettings - 'out2.xml'");
             _xsl.Transform(_xmlFile, null, xw);
 
             //Close the streams

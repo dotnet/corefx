@@ -1621,7 +1621,7 @@ namespace System.Net.Sockets.Tests
                 int received = serverSocket.EndReceiveFrom(async, ref receivedFrom);
 
                 Assert.Equal(1, received);
-                Assert.Equal<Type>(receivedFrom.GetType(), typeof(IPEndPoint));
+                Assert.Equal<Type>(typeof(IPEndPoint), receivedFrom.GetType());
 
                 IPEndPoint remoteEndPoint = receivedFrom as IPEndPoint;
                 Assert.Equal(AddressFamily.InterNetworkV6, remoteEndPoint.AddressFamily);
@@ -1767,7 +1767,7 @@ namespace System.Net.Sockets.Tests
                 }
 
                 Assert.Equal(1, args.BytesTransferred);
-                Assert.Equal<Type>(args.RemoteEndPoint.GetType(), typeof(IPEndPoint));
+                Assert.Equal<Type>(typeof(IPEndPoint), args.RemoteEndPoint.GetType());
                 IPEndPoint remoteEndPoint = args.RemoteEndPoint as IPEndPoint;
                 Assert.Equal(AddressFamily.InterNetworkV6, remoteEndPoint.AddressFamily);
                 Assert.Equal(connectTo.MapToIPv6(), remoteEndPoint.Address);
@@ -1994,14 +1994,13 @@ namespace System.Net.Sockets.Tests
                 received = serverSocket.ReceiveMessageFrom(new byte[1], 0, 1, ref socketFlags, ref receivedFrom, out ipPacketInformation);
 
                 Assert.Equal(1, received);
-                Assert.Equal<Type>(receivedFrom.GetType(), typeof(IPEndPoint));
+                Assert.Equal<Type>(typeof(IPEndPoint), receivedFrom.GetType());
 
                 IPEndPoint remoteEndPoint = receivedFrom as IPEndPoint;
                 Assert.Equal(AddressFamily.InterNetworkV6, remoteEndPoint.AddressFamily);
                 Assert.Equal(connectTo.MapToIPv6(), remoteEndPoint.Address);
 
                 Assert.Equal(SocketFlags.None, socketFlags);
-                Assert.NotNull(ipPacketInformation);
 
                 Assert.Equal(connectTo, ipPacketInformation.Address);
             }
@@ -2166,14 +2165,13 @@ namespace System.Net.Sockets.Tests
                 int received = serverSocket.EndReceiveMessageFrom(async, ref socketFlags, ref receivedFrom, out IPPacketInformation ipPacketInformation);
 
                 Assert.Equal(1, received);
-                Assert.Equal<Type>(receivedFrom.GetType(), typeof(IPEndPoint));
+                Assert.Equal<Type>(typeof(IPEndPoint), receivedFrom.GetType());
 
                 IPEndPoint remoteEndPoint = receivedFrom as IPEndPoint;
                 Assert.Equal(AddressFamily.InterNetworkV6, remoteEndPoint.AddressFamily);
                 Assert.Equal(connectTo.MapToIPv6(), remoteEndPoint.Address);
 
                 Assert.Equal(SocketFlags.None, socketFlags);
-                Assert.NotNull(ipPacketInformation);
                 Assert.Equal(connectTo, ipPacketInformation.Address);
             }
         }
@@ -2338,14 +2336,13 @@ namespace System.Net.Sockets.Tests
                 }
 
                 Assert.Equal(1, args.BytesTransferred);
-                Assert.Equal<Type>(args.RemoteEndPoint.GetType(), typeof(IPEndPoint));
+                Assert.Equal<Type>(typeof(IPEndPoint), args.RemoteEndPoint.GetType());
 
                 IPEndPoint remoteEndPoint = args.RemoteEndPoint as IPEndPoint;
                 Assert.Equal(AddressFamily.InterNetworkV6, remoteEndPoint.AddressFamily);
                 Assert.Equal(connectTo.MapToIPv6(), remoteEndPoint.Address);
 
                 Assert.Equal(SocketFlags.None, args.SocketFlags);
-                Assert.NotNull(args.ReceiveMessageFromPacketInfo);
                 Assert.Equal(connectTo, args.ReceiveMessageFromPacketInfo.Address);
             }
         }
@@ -2721,7 +2718,7 @@ namespace System.Net.Sockets.Tests
                 int received = serverSocket.ReceiveFrom(new byte[1], ref receivedFrom);
 
                 Assert.Equal(1, received);
-                Assert.Equal<Type>(receivedFrom.GetType(), typeof(IPEndPoint));
+                Assert.Equal<Type>(typeof(IPEndPoint), receivedFrom.GetType());
 
                 IPEndPoint remoteEndPoint = receivedFrom as IPEndPoint;
                 Assert.Equal(AddressFamily.InterNetworkV6, remoteEndPoint.AddressFamily);

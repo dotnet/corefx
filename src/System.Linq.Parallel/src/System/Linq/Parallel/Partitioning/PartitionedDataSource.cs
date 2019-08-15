@@ -60,7 +60,7 @@ namespace System.Linq.Parallel
 
         //---------------------------------------------------------------------------------------
         // This method just creates the individual partitions given a data source.
-        // 
+        //
         // Notes:
         //     We check whether the data source is an IList<T> and, if so, we can partition
         //     "in place" by calculating a set of indexes. Otherwise, we return an enumerator that
@@ -221,7 +221,7 @@ namespace System.Linq.Parallel
             private readonly int _sectionCount; // Precomputed in ctor: the number of sections the range is split into.
             private Mutables _mutables; // Lazily allocated mutable variables.
 
-            class Mutables
+            private class Mutables
             {
                 internal Mutables()
                 {
@@ -399,7 +399,7 @@ namespace System.Linq.Parallel
             private readonly int _sectionCount; // Precomputed in ctor: the number of sections the range is split into.
             private Mutables _mutables; // Lazily allocated mutable variables.
 
-            class Mutables
+            private class Mutables
             {
                 internal Mutables()
                 {
@@ -581,7 +581,7 @@ namespace System.Linq.Parallel
             private readonly Shared<bool> _exceptionTracker;
             private Mutables _mutables; // Any mutable fields on this enumerator. These mutables are local and persistent
 
-            class Mutables
+            private class Mutables
             {
                 internal Mutables()
                 {
@@ -700,7 +700,7 @@ namespace System.Linq.Parallel
                     }
 
                     // Each time we access the data source, we grow the chunk size for the next go-round.
-                    // We grow the chunksize once per 'chunksPerChunkSize'. 
+                    // We grow the chunksize once per 'chunksPerChunkSize'.
                     if (mutables._nextChunkMaxSize < chunkBuffer.Length)
                     {
                         if ((mutables._chunkCounter++ & chunksPerChunkSize) == chunksPerChunkSize)

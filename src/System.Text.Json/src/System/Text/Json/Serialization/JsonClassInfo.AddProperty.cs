@@ -43,8 +43,7 @@ namespace System.Text.Json
             // Convert non-immutable dictionary interfaces to concrete types.
             if (IsNativelySupportedCollection(propertyType) && implementedType.IsInterface && jsonInfo.ClassType == ClassType.Dictionary)
             {
-                JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
-                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(jsonInfo.ElementType, options);
 
                 Type newPropertyType = elementPropertyInfo.GetDictionaryConcreteType();
                 if (implementedType != newPropertyType)
@@ -60,8 +59,7 @@ namespace System.Text.Json
                 !implementedType.IsArray &&
                 ((IsDeserializedByAssigningFromList(implementedType) && IsNativelySupportedCollection(propertyType)) || IsSetInterface(implementedType)))
             {
-                JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
-                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(jsonInfo.ElementType, options);
 
                 // Get a runtime type for the implemented property. e.g. ISet<T> -> HashSet<T>, ICollection -> List<object>
                 // We use the element's JsonPropertyInfo so we can utilize the generic support.
@@ -114,10 +112,23 @@ namespace System.Text.Json
             Type propertyInfoClassType;
             if (runtimePropertyType.IsGenericType && runtimePropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                // For Nullable, use the underlying type.
-                Type underlyingPropertyType = Nullable.GetUnderlyingType(runtimePropertyType);
-                propertyInfoClassType = typeof(JsonPropertyInfoNullable<,>).MakeGenericType(parentClassType, underlyingPropertyType);
-                converter = options.DetermineConverterForProperty(parentClassType, underlyingPropertyType, propertyInfo);
+                // First try to find a converter for the Nullable, then if not found use the underlying type.
+                // This supports custom converters that want to (de)serialize as null when the value is not null.
+                converter = options.DetermineConverterForProperty(parentClassType, runtimePropertyType, propertyInfo);
+                if (converter != null)
+                {
+                    propertyInfoClassType = typeof(JsonPropertyInfoNotNullable<,,,>).MakeGenericType(
+                        parentClassType,
+                        declaredPropertyType,
+                        runtimePropertyType,
+                        runtimePropertyType);
+                }
+                else
+                {
+                    Type typeToConvert = Nullable.GetUnderlyingType(runtimePropertyType);
+                    converter = options.DetermineConverterForProperty(parentClassType, typeToConvert, propertyInfo);
+                    propertyInfoClassType = typeof(JsonPropertyInfoNullable<,>).MakeGenericType(parentClassType, typeToConvert);
+                }
             }
             else
             {
@@ -176,7 +187,7 @@ namespace System.Text.Json
 
         internal JsonPropertyInfo CreatePolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
         {
-            JsonPropertyInfo runtimeProperty = CreateProperty(property.DeclaredPropertyType, runtimePropertyType, property.ImplementedPropertyType, property?.PropertyInfo, Type, options);
+            JsonPropertyInfo runtimeProperty = CreateProperty(property.DeclaredPropertyType, runtimePropertyType, property.ImplementedPropertyType, property.PropertyInfo, Type, options);
             property.CopyRuntimeSettingsTo(runtimeProperty);
 
             return runtimeProperty;

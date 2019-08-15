@@ -102,7 +102,7 @@ namespace System.Data.Common
         }
 
         // IDataParameter.SourceVersion
-        static internal ArgumentOutOfRangeException InvalidDataRowVersion(DataRowVersion value)
+        internal static ArgumentOutOfRangeException InvalidDataRowVersion(DataRowVersion value)
         {
 #if DEBUG
             switch (value)
@@ -569,9 +569,6 @@ namespace System.Data.Common
         internal const int DecimalMaxPrecision = 29;
         internal const int DecimalMaxPrecision28 = 28;  // there are some cases in Odbc where we need that ...
         internal const int DefaultCommandTimeout = 30;
-
-        // security issue, don't rely upon static public readonly values - AS/URT 109635
-        internal static readonly string StrEmpty = ""; // String.Empty
 
         internal static readonly IntPtr PtrZero = new IntPtr(0); // IntPtr.Zero
         internal static readonly int PtrSize = IntPtr.Size;

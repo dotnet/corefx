@@ -15,10 +15,10 @@ namespace System.Runtime.Caching
     // The limit is configurable (see ConfigUtil.cs).
     internal sealed partial class PhysicalMemoryMonitor : MemoryMonitor
     {
-        private const int MIN_TOTAL_MEMORY_TRIM_PERCENT = 10;
-        private static readonly long s_TARGET_TOTAL_MEMORY_TRIM_INTERVAL_TICKS = 5 * TimeSpan.TicksPerMinute;
+        private const int MinTotalMemoryTrimPercent = 10;
+        private const long TargetTotalMemoryTrimIntervalTicks = 5 * TimeSpan.TicksPerMinute;
 
-        // Returns the percentage of physical machine memory that can be consumed by an 
+        // Returns the percentage of physical machine memory that can be consumed by an
         // application before the cache starts forcibly removing items.
         internal long MemoryLimit
         {
@@ -81,14 +81,14 @@ namespace System.Runtime.Caching
             int percent = 0;
             if (IsAboveHighPressure())
             {
-                // choose percent such that we don't repeat this for ~5 (TARGET_TOTAL_MEMORY_TRIM_INTERVAL) minutes, 
+                // choose percent such that we don't repeat this for ~5 (TARGET_TOTAL_MEMORY_TRIM_INTERVAL) minutes,
                 // but keep the percentage between 10 and 50.
                 DateTime utcNow = DateTime.UtcNow;
                 long ticksSinceTrim = utcNow.Subtract(lastTrimTime).Ticks;
                 if (ticksSinceTrim > 0)
                 {
-                    percent = Math.Min(50, (int)((lastTrimPercent * s_TARGET_TOTAL_MEMORY_TRIM_INTERVAL_TICKS) / ticksSinceTrim));
-                    percent = Math.Max(MIN_TOTAL_MEMORY_TRIM_PERCENT, percent);
+                    percent = Math.Min(50, (int)((lastTrimPercent * TargetTotalMemoryTrimIntervalTicks) / ticksSinceTrim));
+                    percent = Math.Max(MinTotalMemoryTrimPercent, percent);
                 }
 
 #if PERF

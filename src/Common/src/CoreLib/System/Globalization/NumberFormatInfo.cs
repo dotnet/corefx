@@ -35,7 +35,7 @@ namespace System.Globalization
     /// </remarks>
     public sealed class NumberFormatInfo : IFormatProvider, ICloneable
     {
-        private static volatile NumberFormatInfo s_invariantInfo;
+        private static volatile NumberFormatInfo? s_invariantInfo;
 
         internal int[] _numberGroupSizes = new int[] { 3 };
         internal int[] _currencyGroupSizes = new int[] { 3 };
@@ -211,7 +211,7 @@ namespace System.Globalization
                 CurrentInfo : // Fast path for a null provider
                 GetProviderNonNull(formatProvider);
 
-            NumberFormatInfo GetProviderNonNull(IFormatProvider provider)
+            static NumberFormatInfo GetProviderNonNull(IFormatProvider provider)
             {
                 // Fast path for a regular CultureInfo
                 if (provider is CultureInfo cultureProvider && !cultureProvider._isInherited)
