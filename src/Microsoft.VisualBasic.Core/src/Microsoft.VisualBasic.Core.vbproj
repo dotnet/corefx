@@ -96,7 +96,9 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Win32.Primitives" />
+    <Reference Include="Microsoft.Win32.Registry" />
     <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.NonGeneric" />
     <Reference Include="System.Collections.Specialized" />
     <Reference Include="System.ComponentModel" />
     <Reference Include="System.ComponentModel.Primitives" />

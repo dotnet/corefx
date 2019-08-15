@@ -4,12 +4,25 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace Microsoft.VisualBasic.Tests
 {
     public class InteractionTests
     {
+        [Fact]
+        public void AppActivate_ProcessId()
+        {
+            InvokeMethod(() => Interaction.AppActivate(42));
+        }
+
+        [Fact]
+        public void AppActivate_Title()
+        {
+            InvokeMethod(() => Interaction.AppActivate("MyProcess"));
+        }
+
         [Theory]
         [MemberData(nameof(CallByName_TestData))]
         public void CallByName(object instance, string methodName, CallType useCallType, object[] args, Func<object, object> getResult, object expected)
@@ -74,7 +87,6 @@ namespace Microsoft.VisualBasic.Tests
             }
         }
 
-
         [Fact]
         public void Choose()
         {
@@ -88,6 +100,15 @@ namespace Microsoft.VisualBasic.Tests
             {
                 Assert.Equal(x[i - 1], Interaction.Choose(i, x));
             }
+        }
+
+        [Fact]
+        public void Command()
+        {
+            var expected = Environment.CommandLine;
+            var actual = Interaction.Command();
+            Assert.False(string.IsNullOrEmpty(actual));
+            Assert.EndsWith(actual, expected);
         }
 
         [Fact]
@@ -113,6 +134,95 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { true, null, 2, null };
             yield return new object[] { false, 3, "str", "str" };
             yield return new object[] { true, 3, "str", 3 };
+        }
+        
+        [Fact]
+        public void DeleteSetting()
+        {
+            Assert.Throws<ArgumentException>(() => Interaction.DeleteSetting(AppName: "", Section: null, Key: null));
+            // Not tested: valid arguments.
+        }
+
+        [Fact]
+        public void Environ_Index()
+        {
+            var pairs = GetEnvironmentVariables();
+            int n = Math.Min(pairs.Length, 255);
+
+            Assert.Throws<ArgumentException>(() => Interaction.Environ(0)).ToString();
+            Assert.Throws<ArgumentException>(() => Interaction.Environ(256)).ToString();
+
+            for (int i = 0; i < n; i++)
+            {
+                var pair = pairs[i];
+                Assert.Equal($"{pair.Item1}={pair.Item2}", Interaction.Environ(i + 1));
+            }
+
+            for (int i = n; i < 255; i++)
+            {
+                Assert.Equal("", Interaction.Environ(i + 1));
+            }
+        }
+        
+        [Fact]
+        public void Environ_Name()
+        {
+            var pairs = GetEnvironmentVariables();
+
+            Assert.Throws<ArgumentException>(() => Interaction.Environ("")).ToString();
+            Assert.Throws<ArgumentException>(() => Interaction.Environ(" ")).ToString();
+
+            foreach (var (key, value) in pairs)
+            {
+                Assert.Equal(value, Interaction.Environ(key));
+            }
+
+            if (pairs.Length > 0)
+            {
+                var (key, value) = pairs[pairs.Length - 1];
+                Assert.Equal(value, Interaction.Environ("  " + key));
+                Assert.Equal(value, Interaction.Environ(key + "  "));
+                Assert.Null(Interaction.Environ(key + "z"));
+            }
+        }
+
+        private static (string, string)[] GetEnvironmentVariables()
+        {
+            var pairs = new List<(string, string)>();
+            var vars = Environment.GetEnvironmentVariables();
+            foreach (var key in vars.Keys) {
+                pairs.Add(((string)key, (string)vars[key]));
+            }
+            return pairs.OrderBy(pair => pair.Item1).ToArray();
+        }
+
+        [Fact]
+        public void GetAllSettings()
+        {
+            Assert.Throws<ArgumentException>(() => Interaction.GetAllSettings(AppName: "", Section: ""));
+            // Not tested: valid arguments.
+        }
+
+        [Fact]
+        public void GetObject()
+        {
+            Assert.Throws<Exception>(() => Interaction.GetObject());
+            Assert.Throws<Exception>(() => Interaction.GetObject("", null));
+            Assert.Throws<Exception>(() => Interaction.GetObject(null, ""));
+            Assert.Throws<Exception>(() => Interaction.GetObject("", ""));
+            // Not tested: valid arguments.
+        }
+
+        [Fact]
+        public void InputBox()
+        {
+            InvokeMethod(() => Interaction.InputBox("Prompt", Title: "", DefaultResponse: "", XPos: -1, YPos: -1));
+        }
+        
+        [Fact]
+        public void MsgBox()
+        {
+            InvokeMethod(() => Interaction.MsgBox("Prompt", Buttons: MsgBoxStyle.ApplicationModal, Title: null));
         }
 
         [Theory]
@@ -160,6 +270,19 @@ namespace Microsoft.VisualBasic.Tests
         {
             Assert.Throws<OverflowException>(() => Interaction.Partition(Number, Start, Stop, Interval));
         }
+                
+        [Fact]
+        public void SaveSetting()
+        {
+            Assert.Throws<ArgumentException>(() => Interaction.SaveSetting(AppName: "", Section: "", Key: "", Setting: ""));
+            // Not tested: valid arguments.
+        }
+
+        [Fact]
+        public void Shell()
+        {
+            InvokeMethod(() => Interaction.Shell("MyPath", Style: AppWinStyle.NormalFocus, Wait: false, Timeout: -1));
+        }
 
         [Theory]
         [InlineData(null, null)] // empty
@@ -177,6 +300,13 @@ namespace Microsoft.VisualBasic.Tests
         public void Switch_Invalid()
         {
             Assert.Throws<ArgumentException>(() => Interaction.Switch(true, "a", false));
+        }
+
+        // Methods that rely on reflection of missing assembly.
+        private static void InvokeMethod(Action action)
+        {
+            var e = Assert.Throws<TypeLoadException>(action);
+            Assert.Equal("Microsoft.VisualBasic._Interaction", e.TypeName);
         }
     }
 }
