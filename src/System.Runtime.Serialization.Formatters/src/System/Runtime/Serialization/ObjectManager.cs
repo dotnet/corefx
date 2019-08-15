@@ -24,18 +24,12 @@ namespace System.Runtime.Serialization
         internal long _fixupCount;
         internal readonly ISurrogateSelector _selector;
         internal readonly StreamingContext _context;
-        private readonly bool _isCrossAppDomain;
 
-        public ObjectManager(ISurrogateSelector selector, StreamingContext context) : this(selector, context, true, false)
-        {
-        }
-
-        internal ObjectManager(ISurrogateSelector selector, StreamingContext context, bool checkSecurity, bool isCrossAppDomain)
+        public ObjectManager(ISurrogateSelector selector, StreamingContext context)
         {
             _objects = new ObjectHolder[DefaultInitialSize];
             _selector = selector;
             _context = context;
-            _isCrossAppDomain = isCrossAppDomain;
         }
 
         private bool CanCallGetType(object obj) => true;
@@ -1420,10 +1414,6 @@ namespace System.Runtime.Serialization
             int newLength = _values.Length * 2;
             if (newLength < 0)
             {
-                if (newLength == int.MaxValue)
-                {
-                    throw new SerializationException(SR.Serialization_TooManyElements);
-                }
                 newLength = int.MaxValue;
             }
 
@@ -1508,10 +1498,6 @@ namespace System.Runtime.Serialization
             int newLength = _values.Length * 2;
             if (newLength < 0)
             {
-                if (newLength == int.MaxValue)
-                {
-                    throw new SerializationException(SR.Serialization_TooManyElements);
-                }
                 newLength = int.MaxValue;
             }
 
@@ -1555,10 +1541,6 @@ namespace System.Runtime.Serialization
             int newLength = _values.Length * 2;
             if (newLength < 0)
             {
-                if (newLength == int.MaxValue)
-                {
-                    throw new SerializationException(SR.Serialization_TooManyElements);
-                }
                 newLength = int.MaxValue;
             }
 
