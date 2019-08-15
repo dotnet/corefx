@@ -174,6 +174,10 @@ static void MergeStatusCodes(CFTypeRef key, CFTypeRef value, void* context)
         *pStatus |= PAL_X509ChainRevocationStatusUnknown;
     else if (CFEqual(keyString, CFSTR("MissingIntermediate")))
         *pStatus |= PAL_X509ChainPartialChain;
+    else if (CFEqual(keyString, CFSTR("UnparseableExtension")))
+    {
+        // 10.15 introduced new status code value which is not reported by Windows. Ignoring for now.
+    }
     else if (CFEqual(keyString, CFSTR("WeakLeaf")) || CFEqual(keyString, CFSTR("WeakIntermediates")) ||
              CFEqual(keyString, CFSTR("WeakRoot")) || CFEqual(keyString, CFSTR("WeakKeySize")))
     {
