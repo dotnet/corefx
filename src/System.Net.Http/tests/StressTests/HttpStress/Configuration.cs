@@ -31,6 +31,8 @@ namespace HttpStress
         public int RandomSeed { get; set; }
         public int MaxContentLength { get; set; }
         public int MaxRequestUriSize { get; set; }
+        public int MaxRequestHeaderCount { get; set; }
+        public int MaxRequestHeaderTotalSize { get; set; }
         public int MaxParameters { get; set; }
         public int[] OpIndices { get; set; }
         public int[] ExcludedOpIndices { get; set; }

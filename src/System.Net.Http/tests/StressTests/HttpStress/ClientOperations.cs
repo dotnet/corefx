@@ -39,6 +39,8 @@ namespace HttpStress
             IsCancellationRequested = false;
             MaxRequestParameters = config.MaxParameters;
             MaxRequestUriSize = config.MaxRequestUriSize;
+            MaxRequestHeaderCount = config.MaxRequestHeaderCount;
+            MaxRequestHeaderTotalSize = config.MaxRequestHeaderTotalSize;
             MaxContentLength = config.MaxContentLength;
         }
 
@@ -47,6 +49,8 @@ namespace HttpStress
         public bool IsCancellationRequested { get; set; }
         public int MaxRequestParameters { get; }
         public int MaxRequestUriSize { get; }
+        public int MaxRequestHeaderCount { get; }
+        public int MaxRequestHeaderTotalSize { get; }
         public int MaxContentLength { get; }
         public Uri BaseAddress => _client.BaseAddress;
 
@@ -133,13 +137,16 @@ namespace HttpStress
 
         public void PopulateWithRandomHeaders(HttpRequestHeaders headers)
         {
-            int numHeaders = _random.Next(50);
+            int headerCount = _random.Next(MaxRequestHeaderCount);
+            int totalSize = 0;
 
-            for (int i = 0; i < numHeaders; i++)
+            for (int i = 0; i < headerCount; i++)
             {
                 string name = $"header-{i}";
                 string CreateHeaderValue() => HttpUtility.UrlEncode(GetRandomString(1, 30, alphaNumericOnly: false));
-                IEnumerable<string> values = Enumerable.Range(0, _random.Next(1, 6)).Select(_ => CreateHeaderValue());
+                string[] values = Enumerable.Range(0, _random.Next(1, 6)).Select(_ => CreateHeaderValue()).ToArray();
+                totalSize += name.Length + values.Select(v => v.Length + 2).Sum();
+                if (totalSize > MaxRequestHeaderTotalSize) break;
                 headers.Add(name, values);
             }
         }

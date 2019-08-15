@@ -36,6 +36,8 @@ public static class Program
         cmd.AddOption(new Option("-runMode", "Stress suite execution mode. Defaults to Both.") { Argument = new Argument<RunMode>("runMode", RunMode.both) });
         cmd.AddOption(new Option("-maxContentLength", "Max content length for request and response bodies.") { Argument = new Argument<int>("numBytes", 5000) });
         cmd.AddOption(new Option("-maxRequestUriSize", "Max query string length support by the server.") { Argument = new Argument<int>("numChars", 5000) });
+        cmd.AddOption(new Option("-maxRequestHeaderCount", "Maximum number of headers to place in request") { Argument = new Argument<int>("numHeaders", 90) });
+        cmd.AddOption(new Option("-maxRequestHeaderTotalSize", "Max request header total size.") { Argument = new Argument<int>("numBytes", 5000) });
         cmd.AddOption(new Option("-http", "HTTP version (1.1 or 2.0)") { Argument = new Argument<Version>("version", HttpVersion.Version20) });
         cmd.AddOption(new Option("-connectionLifetime", "Max connection lifetime length (milliseconds).") { Argument = new Argument<int?>("connectionLifetime", null) });
         cmd.AddOption(new Option("-ops", "Indices of the operations to use") { Argument = new Argument<int[]>("space-delimited indices", null) });
@@ -74,6 +76,8 @@ public static class Program
             RandomSeed = cmdline.ValueForOption<int?>("-seed") ?? new Random().Next(),
             MaxContentLength = cmdline.ValueForOption<int>("-maxContentLength"),
             MaxRequestUriSize = cmdline.ValueForOption<int>("-maxRequestUriSize"),
+            MaxRequestHeaderCount = cmdline.ValueForOption<int>("-maxRequestHeaderCount"),
+            MaxRequestHeaderTotalSize = cmdline.ValueForOption<int>("-maxRequestHeaderTotalSize"),
             OpIndices = cmdline.ValueForOption<int[]>("-ops"),
             ExcludedOpIndices = cmdline.ValueForOption<int[]>("-xops"),
             MaxParameters = cmdline.ValueForOption<int>("-numParameters"),
