@@ -6904,7 +6904,6 @@ namespace System.Text.Json.Tests
             return sb.ToString();
         }
 
-
         private static string GetDatesExpectedString(bool prettyPrint, string keyString, DateTime[] dates, bool escape = false)
         {
             var ms = new MemoryStream();
