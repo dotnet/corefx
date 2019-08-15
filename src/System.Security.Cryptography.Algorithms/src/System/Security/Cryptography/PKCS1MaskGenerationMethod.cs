@@ -24,7 +24,7 @@ namespace System.Security.Cryptography
 
         public override byte[] GenerateMask(byte[] rgbSeed, int cbReturn)
         {
-            using (HashAlgorithm hasher = (HashAlgorithm)CryptoConfig.CreateFromName(_hashNameValue))
+            using (HashAlgorithm hasher = CryptoConfig.CreateFromName(_hashNameValue) as HashAlgorithm)
             {
                 if (hasher is null)
                 {
